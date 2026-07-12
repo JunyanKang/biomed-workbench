@@ -2101,6 +2101,23 @@
       "workflow": "omics"
     },
     {
+      "access": "offline",
+      "description": "Guide and execute HTSlib bgzip decompression of a digest-bound VCF 4.5 BGZF+TBI bundle and verify byte-exact recovery of the coordinate-sorted VCF document for downstream filtering and analysis.",
+      "entrypoint": "scientific-command",
+      "id": "variant-decompress-bgzip",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Decompress indexed BGZF VCF without changing records",
+      "workflow": "omics"
+    },
+    {
       "access": "public_api",
       "description": "Retrieve ClinVar summaries and linked gene and PubMed records with interpretation limits.",
       "entrypoint": "biomed_workbench.capabilities.evidence:variant_evidence",
@@ -2133,6 +2150,60 @@
       "requirements": [],
       "title": "Build an NCBI variant evidence bundle",
       "workflow": "evidence"
+    },
+    {
+      "access": "offline",
+      "description": "Execute a digest-bound project implementation that strictly validates one-sample or sites-only VCF 4.5 records and filters them by FILTER status, QUAL, DP, AF, and optional ANN gene membership while preserving a complete exclusion audit.",
+      "entrypoint": "scientific-command",
+      "id": "variant-filter-vcf",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "genes": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "pattern": "\\*|[A-Za-z0-9_.-]+(?:,[A-Za-z0-9_.-]+)*",
+            "type": "string"
+          },
+          "minimum_allele_fraction": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "minimum_depth": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minimum_quality": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "missing_metric_policy": {
+            "enum": [
+              "error",
+              "exclude"
+            ],
+            "type": "string"
+          },
+          "require_pass": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "minimum_quality",
+          "minimum_depth",
+          "minimum_allele_fraction",
+          "genes",
+          "require_pass",
+          "missing_metric_policy"
+        ],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Filter biallelic VCF records with explicit evidence rules",
+      "workflow": "omics"
     },
     {
       "access": "offline",
@@ -2187,7 +2258,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 57,
+  "entry_count": 59,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

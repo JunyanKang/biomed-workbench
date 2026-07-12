@@ -14,11 +14,11 @@ class ResearchEngineEvidenceTests(unittest.TestCase):
         scenarios = report["scenarios"]
 
         self.assertTrue(report["passed"])
-        self.assertEqual(report["module_count"], 57)
+        self.assertEqual(report["module_count"], 59)
         self.assertGreaterEqual(report["test_count"], 363)
         self.assertEqual(
             set(report["execution_contracts"]),
-            {"scientific_command", "command_companion_sidecar_input", "command_input_binding", "command_derived_sidecar_output", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"},
+            {"scientific_command", "command_companion_sidecar_input", "command_digest_bound_project_implementation", "command_input_binding", "command_derived_sidecar_output", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"},
         )
         self.assertEqual(report["scenario_count"], 4)
         self.assertEqual({item["plan_type"] for item in scenarios}, {"single", "serial", "parallel", "mixed"})

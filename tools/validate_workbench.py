@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 57:
-            errors.append(f"built-in module count must be 57, found {len(modules)}")
+        if len(modules) != 59:
+            errors.append(f"built-in module count must be 59, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -173,10 +173,10 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 372
+                or research_report.get("test_count", 0) < 379
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
-                != {"scientific_command", "command_companion_sidecar_input", "command_input_binding", "command_derived_sidecar_output", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"}
+                != {"scientific_command", "command_companion_sidecar_input", "command_digest_bound_project_implementation", "command_input_binding", "command_derived_sidecar_output", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"}
                 or graph_report != {"node_count": len(graph.nodes), "edge_count": len(graph.edges), "digest": graph.digest}
             ):
                 errors.append("research engine report differs from the discovered registry or capability graph")
@@ -419,9 +419,57 @@ def main() -> int:
                 or not all(vcf_query_report.get("bundle_integrity", {}).values())
                 or summary.get("record_count") != 2
                 or summary.get("samples") != ["SAMPLE_A"]
-                or summary.get("region") != "chr1:90-220"
+                or summary.get("region") != "chr1:90-205"
             ):
                 errors.append("tabix VCF region-query evidence differs from its module, row, VCF/TBI fixture, sample, or regional record checks")
+        vcf_filter_report_path = ROOT / "reports" / "vcf-filter-live-verification.json"
+        try:
+            vcf_filter_report = json.loads(vcf_filter_report_path.read_text(encoding="utf-8"))
+            vcf_filter_manifest = registry.get("variant-filter-vcf")
+            vcf_filter_row = vcf_filter_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("strict VCF filter live verification evidence is missing or invalid")
+        else:
+            summary = vcf_filter_report.get("scientific_summary", {})
+            implementation = vcf_filter_report.get("implementation", {})
+            if (
+                vcf_filter_report.get("passed") is not True
+                or vcf_filter_report.get("module_version") != vcf_filter_manifest.version
+                or vcf_filter_report.get("compatibility_row_id") != vcf_filter_row.id
+                or vcf_filter_report.get("tool_versions") != {"python3": "3.14.3"}
+                or vcf_filter_report.get("dependency_versions") != {"python-stdlib": "3.14.3"}
+                or vcf_filter_report.get("fixture", {}).get("format") != "vcf@4.5"
+                or implementation.get("module") != "biomed_workbench.implementations.vcf_filter"
+                or not re.fullmatch(r"[0-9a-f]{64}", str(implementation.get("sha256", "")))
+                or summary.get("input_record_count") != 7
+                or summary.get("accepted_record_count") != 1
+                or summary.get("excluded_record_count") != 6
+                or summary.get("accepted_record_keys") != ["chr1:100:A:G:v1"]
+                or sum(summary.get("exclusion_counts", {}).values()) != 6
+            ):
+                errors.append("strict VCF filter evidence differs from its module, implementation, row, fixture, parameters, or record accounting")
+        vcf_decompress_report_path = ROOT / "reports" / "vcf-decompress-live-verification.json"
+        try:
+            vcf_decompress_report = json.loads(vcf_decompress_report_path.read_text(encoding="utf-8"))
+            vcf_decompress_manifest = registry.get("variant-decompress-bgzip")
+            vcf_decompress_row = vcf_decompress_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("BGZF VCF decompression live verification evidence is missing or invalid")
+        else:
+            summary = vcf_decompress_report.get("scientific_summary", {})
+            if (
+                vcf_decompress_report.get("passed") is not True
+                or vcf_decompress_report.get("module_version") != vcf_decompress_manifest.version
+                or vcf_decompress_report.get("compatibility_row_id") != vcf_decompress_row.id
+                or vcf_decompress_report.get("tool_versions") != {"bgzip": "1.23"}
+                or vcf_decompress_report.get("dependency_versions") != {"htslib": "1.23"}
+                or vcf_decompress_report.get("fixture", {}).get("format") != "vcf@4.5"
+                or not all(vcf_decompress_report.get("bundle_integrity", {}).values())
+                or summary.get("record_count") != 7
+                or summary.get("samples") != ["SAMPLE_A"]
+                or summary.get("coordinate_sorted") is not True
+            ):
+                errors.append("BGZF VCF decompression evidence differs from its module, row, bundle, byte roundtrip, or VCF document checks")
 
         reconciliation_path = ROOT / "reports" / "source-reconciliation-summary.json"
         assimilation_path = ROOT / "reports" / "source-assimilation-summary.json"
@@ -444,6 +492,8 @@ def main() -> int:
                 or reconciliation.get("reconciled_count", 0) + reconciliation.get("pending_count", 0) != source_file_count
                 or sum(reconciliation.get("status_counts", {}).values()) != source_file_count
                 or reconciliation.get("action_counts") != design.get("action_counts")
+                or reconciliation.get("binding_count") != sum(reconciliation.get("binding_resolution_counts", {}).values())
+                or reconciliation.get("bound_module_count", 0) > len(modules)
                 or current.get("module_count") != len(modules)
                 or current.get("registry_digest") != registry.digest
                 or current.get("skill_sha256") != skill_digest

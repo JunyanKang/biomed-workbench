@@ -1,0 +1,92 @@
+{
+  "bundle_integrity": {
+    "byte_exact_roundtrip": true,
+    "tbi_payload_bound": true,
+    "vcf_payload_bound": true
+  },
+  "compatibility_policy": {
+    "dependencies": {
+      "htslib": [
+        ">=1.23,<1.24"
+      ]
+    },
+    "tools": {
+      "bgzip": [
+        ">=1.23,<1.24"
+      ]
+    }
+  },
+  "compatibility_row_id": "bgzip-1.23-vcf-4.5-bgzf-to-plain",
+  "dependency_versions": {
+    "htslib": "1.23"
+  },
+  "end_to_end_evidence_id": "variant-decompress-bgzip-e2e-v1",
+  "execution": {
+    "command_contract_digest": "464cf9fe7dbc72ec0995d23d16ac1dbe623ca1d2d39f001f1660922664f758ea",
+    "executable_sha256": "596f2ad43c2ea1b4f792ef286b8294010d99bae6f767e9b748237324743f4b74",
+    "inputs": {
+      "index": {
+        "byte_size": 125,
+        "role": "index",
+        "sha256": "f872efccdbc08f50f6617e1d4e0994a9b48b7644f830cb32e2bf0b2006177622"
+      },
+      "vcf": {
+        "byte_size": 570,
+        "role": "variants",
+        "sha256": "9e41bfb54f6f3a9378a46fb29bfd9e38bf25dd4fd0bb48a26f03b6d45685b360"
+      }
+    },
+    "outputs": [
+      {
+        "byte_size": 1026,
+        "media_type": "text/vcf",
+        "object_key": "sha256/97/97f72888cb6cf70bc761e454aa5481d67fd938a4e0cf3a630ea556b4bfb75e56/payload",
+        "role": "variants",
+        "sha256": "97f72888cb6cf70bc761e454aa5481d67fd938a4e0cf3a630ea556b4bfb75e56"
+      }
+    ],
+    "parameters": {}
+  },
+  "fixture": {
+    "compression": "bgzf",
+    "format": "vcf@4.5",
+    "index_sha256": "f872efccdbc08f50f6617e1d4e0994a9b48b7644f830cb32e2bf0b2006177622",
+    "index_type": "tbi",
+    "record_count": 7,
+    "source_sha256": "97f72888cb6cf70bc761e454aa5481d67fd938a4e0cf3a630ea556b4bfb75e56",
+    "vcf_bgzf_sha256": "9e41bfb54f6f3a9378a46fb29bfd9e38bf25dd4fd0bb48a26f03b6d45685b360"
+  },
+  "fixture_digest": "dd43ce8a1668f4ce616b622cff7048843b4a72783a45d951cb69b1a8cadd9691",
+  "html_report_validated": false,
+  "module_id": "variant-decompress-bgzip",
+  "module_version": "1.0.0",
+  "passed": true,
+  "regression_evidence_id": "variant-decompress-bgzip-regression-v1",
+  "schema_version": 1,
+  "scientific_summary": {
+    "contigs": [
+      "chr1",
+      "chr2"
+    ],
+    "coordinate_sorted": true,
+    "coordinate_system": "one-based-inclusive",
+    "fileformat": "VCFv4.5",
+    "record_count": 7,
+    "sample_count": 1,
+    "samples": [
+      "SAMPLE_A"
+    ],
+    "schema_version": 1
+  },
+  "tested_version_baseline": {
+    "dependencies": {
+      "htslib": true
+    },
+    "tools": {
+      "bgzip": true
+    }
+  },
+  "tool_versions": {
+    "bgzip": "1.23"
+  }
+}

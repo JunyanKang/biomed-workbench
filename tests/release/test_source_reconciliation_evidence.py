@@ -32,6 +32,8 @@ class SourceReconciliationEvidenceTests(unittest.TestCase):
         self.assertEqual(sum(report["status_counts"].values()), report["file_count"])
         self.assertEqual(sum(report["action_counts"].values()), report["file_count"])
         self.assertEqual(report["action_counts"], design["action_counts"])
+        self.assertEqual(report["binding_count"], sum(report["binding_resolution_counts"].values()))
+        self.assertLessEqual(report["bound_module_count"], report["current_evidence"]["module_count"])
         self.assertEqual(report["current_evidence"]["module_count"], len(registry.all()))
         self.assertEqual(report["current_evidence"]["registry_digest"], registry.digest)
         self.assertEqual(report["current_evidence"]["skill_sha256"], skill_digest)
@@ -44,6 +46,7 @@ class SourceReconciliationEvidenceTests(unittest.TestCase):
         self.assertGreater(report["pending_count"], 0)
         self.assertEqual(report["pending_count"], report["status_counts"]["pending"])
         self.assertTrue(any("prevent" in limitation for limitation in report["limitations"]))
+        self.assertTrue(any("binding" in limitation for limitation in report["limitations"]))
 
     def test_public_summary_is_path_free_source_neutral_and_secret_free(self):
         serialized = RECONCILIATION.read_text(encoding="utf-8")

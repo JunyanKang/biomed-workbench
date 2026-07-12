@@ -48,7 +48,7 @@ Run these checks from the repository root before pushing or tagging a release:
 ```bash
 python3 tools/validate_workbench.py --release
 python3 -m unittest discover -s tests -v
-python3 tools/reconcile_sources.py --manifest .source-audit/manifest.jsonl --design-ledger .source-audit/rewrite-ledger.jsonl --private-output .source-audit/reconciliation-ledger.jsonl --public-output reports/source-reconciliation-summary.json
+python3 tools/reconcile_sources.py --manifest .source-audit/manifest.jsonl --design-ledger .source-audit/rewrite-ledger.jsonl --capability-bindings .source-audit/capability-bindings.jsonl --private-output .source-audit/reconciliation-ledger.jsonl --public-output reports/source-reconciliation-summary.json
 python3 tools/route_task.py "single-cell analysis and Nature-style result writing"
 python3 tools/search_tools.py --workflow publication reviewer --limit 5
 python3 tools/run_tool.py sequence-inspect --input '{"sequence":"ATGCGC","alphabet":"dna"}'
@@ -107,6 +107,8 @@ External scientific engines remain user-managed dependencies; the plugin guides,
 | `dna-align-bwa-mem-single` | BWA `0.7.19-r1273` | Homebrew arm64 bottle `0.7.19` | single-end FASTQ plus BWA reference bundle | portable unsorted SAM |
 | `alignment-sort-index-samtools` | samtools `1.23` | htslib `1.23` | unsorted `sam@1.6` | coordinate-sorted `bam@1.6` plus CSI |
 | `variant-region-query-tabix` | tabix `1.23` | htslib `1.23` | coordinate-sorted `vcf@4.5` BGZF plus TBI | header-preserving regional `vcf@4.5` |
+| `variant-filter-vcf` | Python `3.14.3` | Python standard library `3.14.3` | one-sample or sites-only biallelic `vcf@4.5` | filtered `vcf@4.5` plus exclusion audit |
+| `variant-decompress-bgzip` | bgzip `1.23` | htslib `1.23` | coordinate-sorted `vcf@4.5` BGZF plus TBI | byte-preserved uncompressed `vcf@4.5` |
 
 Tool-use guidance and routing remain available regardless of the installed version. For scientific execution, versions inside the declared compatibility policy may run and are recorded verbatim; provenance also states whether each version is an exact tested baseline. Missing tools, versions outside the policy, known breaking changes, or invalid output structures prevent the result from entering the evidence ledger until the environment is corrected or a validated alternative is selected. The `reports/*-live-verification.json` files preserve the concrete versions used for FastQC, fastp, MultiQC, FastQ Screen, samtools, and bedtools regression evidence.
 
@@ -139,6 +141,6 @@ Foundational FASTQ, FASTA, SAM/BAM/CRAM, VCF/BCF, BED, GTF/GFF3, count-matrix, H
 
 This workbench is an independent clean-room implementation informed by inspected biomedical research projects and installed research skills. It does not route through those projects or vendor their source trees.
 
-Every inspected source file has one private content-identified design receipt. The release reconciler rejects missing or duplicate receipts, then classifies each as implemented, superseded, guidance, excluded, provenance, or pending. Executable capability and schema decisions remain pending until they are bound to an independent module, compatibility policy, regression test, and representative execution; therefore reading a source file is never presented as functional implementation.
+Every inspected source file has one private content-identified design receipt. The release reconciler rejects missing or duplicate receipts, then classifies each as implemented, superseded, guidance, excluded, provenance, or pending. Executable capability and schema decisions remain pending until a path-free private receipt binding resolves them to current passing module compatibility, regression, and representative execution evidence; therefore reading a source file is never presented as functional implementation.
 
 The ignored `.source-audit/` ledgers are development evidence and are neither runtime inputs nor published path bridges. The repository publishes only source-neutral aggregate reports and a SHA-256 receipt root. See `NOTICE.md` for attribution and `reports/` for the releasable evidence.

@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from biomed_workbench.quality import VCFReportError, parse_tabix_vcf_query
+from biomed_workbench.quality import VCFReportError, parse_tabix_vcf_query, parse_vcf_document
 
 
 HEADER = """##fileformat=VCFv4.5
@@ -13,6 +13,15 @@ HEADER = """##fileformat=VCFv4.5
 
 
 class VCFQueryReportTests(unittest.TestCase):
+    def test_validates_complete_coordinate_sorted_vcf_document(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "variants.vcf"
+            path.write_text(HEADER + "chr1\t100\tv1\tA\tG\t60\tPASS\t.\tGT\t0/1\n", encoding="utf-8")
+            result = parse_vcf_document(path, expected_samples=("SAMPLE_A",))
+
+        self.assertEqual(result["record_count"], 1)
+        self.assertEqual(result["contigs"], ["chr1"])
+        self.assertTrue(result["coordinate_sorted"])
     def parse(self, records: str, *, region: str = "chr1:90-220"):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "subset.vcf"

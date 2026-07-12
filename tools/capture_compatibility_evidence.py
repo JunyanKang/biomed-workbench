@@ -44,6 +44,8 @@ COMMAND_EVIDENCE = {
     "read-quality-fastqc": ("reports/fastqc-live-verification.json", "tests.unit.quality.test_fastqc"),
     "read-quality-fastp": ("reports/fastp-live-verification.json", "tests.unit.quality.test_fastp"),
     "variant-region-query-tabix": ("reports/vcf-region-query-live-verification.json", "tests.unit.quality.test_vcf"),
+    "variant-filter-vcf": ("reports/vcf-filter-live-verification.json", "tests.unit.quality.test_vcf_filter"),
+    "variant-decompress-bgzip": ("reports/vcf-decompress-live-verification.json", "tests.unit.quality.test_vcf"),
 }
 
 

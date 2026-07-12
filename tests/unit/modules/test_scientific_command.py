@@ -37,6 +37,48 @@ def command(**overrides):
 
 
 class ScientificCommandTests(unittest.TestCase):
+    def test_executes_a_digest_bound_project_implementation_without_path_provenance(self):
+        implemented = command(
+            arguments=("{implementation}", "--input", "{input:reads}", "--output", "{output:report}", "--label", "{parameter:label}"),
+            implementation_module="biomed_workbench.implementations.fixture",
+            executable="python3",
+            tool_name="python3",
+            path_mode="workdir-relative",
+        )
+        implementation_body = """
+import argparse, json
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True)
+parser.add_argument('--output', required=True)
+parser.add_argument('--label', required=True)
+args = parser.parse_args()
+json.dump({'label': args.label, 'input': open(args.input, encoding='utf-8').read().strip()}, open(args.output, 'w', encoding='utf-8'))
+"""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            implementation = root / "fixture.py"
+            implementation.write_text(implementation_body, encoding="utf-8")
+            source = root / "reads.fastq"
+            source.write_text("ACGT\n", encoding="utf-8")
+            store = ProjectArtifactStore(root / "artifacts")
+            payload = store.import_file(source, role="reads", media_type="text/plain")
+            result = execute_scientific_command(
+                implemented,
+                store=store,
+                input_payloads={"reads": payload},
+                parameters={"label": "sample-01"},
+                tool_versions={"python3": "3.14.3"},
+                dependency_versions={"python-stdlib": "3.14.3"},
+                compatibility_row_id="python3-3.14.3-json-1",
+                executable_resolver=lambda _name: Path(__import__("sys").executable),
+                implementation_resolver=lambda _name: implementation,
+            )
+            output = json.loads(store.resolve(result.output_payloads[0]).read_text(encoding="utf-8"))
+        self.assertEqual(output, {"label": "sample-01", "input": "ACGT"})
+        self.assertEqual(result.provenance["implementation"]["module"], "biomed_workbench.implementations.fixture")
+        self.assertRegex(result.provenance["implementation"]["sha256"], r"^[0-9a-f]{64}$")
+        self.assertNotIn(str(implementation), json.dumps(result.to_dict()))
+
     def test_materializes_a_digest_bound_companion_index_without_argv_exposure(self):
         indexed = command(
             inputs=(
@@ -514,6 +556,9 @@ print('completed')
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads.fastq"), CommandInput("index", "reads", "index", "other.tbi", sidecar_for="reads"))),
             lambda: command(working_directory_input="missing"),
             lambda: command(path_mode="host-absolute"),
+            lambda: command(arguments=("{implementation}", "{input:reads}", "{output:report}", "{parameter:label}")),
+            lambda: command(implementation_module="bad", executable="python3"),
+            lambda: command(implementation_module="biomed_workbench.implementations.fixture", executable="tool"),
             lambda: command(outputs=(CommandOutput("report", "report", "report", "nested/report.json", "application/json"),)),
             lambda: command(outputs=(CommandOutput("report", "report", "report", "report.bin", "application/octet-stream", "stdout"),)),
             lambda: command(

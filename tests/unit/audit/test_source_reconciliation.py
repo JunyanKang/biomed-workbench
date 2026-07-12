@@ -1,3 +1,4 @@
+import hashlib
 import json
 import tempfile
 import unittest
@@ -40,6 +41,57 @@ class SourceReconciliationTests(unittest.TestCase):
         self.assertEqual(report["pending_count"], 1)
         self.assertNotIn("tool.py", json.dumps(report))
         self.assertRegex(report["receipt_root_digest"], r"^[0-9a-f]{64}$")
+
+    def test_current_module_evidence_can_resolve_one_pending_receipt(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest, design = self.write_ledgers(root)
+            receipt = hashlib.sha256(f"primary-a\0tool.py\0{'a' * 64}".encode()).hexdigest()
+            bindings = root / "bindings.jsonl"
+            bindings.write_text(
+                json.dumps({"schema_version": 1, "type": "bindings"}) + "\n"
+                + json.dumps({"receipt_id": receipt, "resolution": "implemented", "module_ids": ["variant-filter"]}) + "\n",
+                encoding="utf-8",
+            )
+            report = reconcile_ledgers(
+                manifest,
+                design,
+                module_count=4,
+                registry_digest="c" * 64,
+                skill_sha256="d" * 64,
+                test_count=10,
+                bindings_path=bindings,
+                module_evidence={"variant-filter": ("row-v1", "regression-v1", "e2e-v1")},
+            )
+
+        self.assertEqual(report["status_counts"], {"excluded": 1, "implemented": 1})
+        self.assertEqual(report["pending_count"], 0)
+        self.assertEqual(report["binding_count"], 1)
+        self.assertEqual(report["bound_module_count"], 1)
+
+    def test_unknown_module_or_unknown_receipt_binding_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest, design = self.write_ledgers(root)
+            bindings = root / "bindings.jsonl"
+            for receipt in ("f" * 64, hashlib.sha256(f"primary-a\0tool.py\0{'a' * 64}".encode()).hexdigest()):
+                with self.subTest(receipt=receipt):
+                    bindings.write_text(
+                        json.dumps({"schema_version": 1, "type": "bindings"}) + "\n"
+                        + json.dumps({"receipt_id": receipt, "resolution": "implemented", "module_ids": ["missing"]}) + "\n",
+                        encoding="utf-8",
+                    )
+                    with self.assertRaises(ReconciliationError):
+                        reconcile_ledgers(
+                            manifest,
+                            design,
+                            module_count=4,
+                            registry_digest="c" * 64,
+                            skill_sha256="d" * 64,
+                            test_count=10,
+                            bindings_path=bindings,
+                            module_evidence={},
+                        )
 
     def test_missing_one_to_one_design_record_fails(self):
         with tempfile.TemporaryDirectory() as temporary:

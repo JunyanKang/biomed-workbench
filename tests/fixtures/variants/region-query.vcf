@@ -2,9 +2,15 @@
 ##contig=<ID=chr1,length=1000>
 ##contig=<ID=chr2,length=500>
 ##FILTER=<ID=LowQual,Description="Low quality">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total depth">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele fraction">
+##INFO=<ID=ANN,Number=.,Type=String,Description="Allele|Annotation|Impact|Gene_Name">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE_A
-chr1	100	v1	A	G	60	PASS	.	GT	0/1
-chr1	200	v2	AT	A	50	PASS	.	GT	0/1
-chr1	300	v3	C	T	10	LowQual	.	GT	1/1
-chr2	50	v4	G	A	40	PASS	.	GT	0/1
+chr1	100	v1	A	G	60	PASS	DP=30;AF=0.25;ANN=G|missense_variant|MODERATE|GENE1	GT	0/1
+chr1	200	v2	AT	A	50	PASS	DP=8;AF=0.20;ANN=A|frameshift_variant|HIGH|GENE2	GT	0/1
+chr1	210	v5	C	G	45	PASS	DP=25;AF=0.01;ANN=G|missense_variant|MODERATE|GENE1	GT	0/1
+chr1	215	v6	G	T	45	PASS	DP=25;AF=0.30;ANN=T|missense_variant|MODERATE|GENE3	GT	0/1
+chr1	220	v7	T	C	45	PASS	AF=0.30;ANN=C|missense_variant|MODERATE|GENE1	GT	0/1
+chr1	300	v3	C	T	10	PASS	DP=40;AF=0.40;ANN=T|stop_gained|HIGH|GENE1	GT	1/1
+chr2	50	v4	G	A	40	LowQual	DP=50;AF=0.30;ANN=A|missense_variant|MODERATE|GENE1	GT	0/1

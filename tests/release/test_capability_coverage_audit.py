@@ -9,18 +9,32 @@ from biomed_workbench.catalog import all_capabilities
 ROOT = Path(__file__).resolve().parents[2]
 AUDIT = ROOT / "reports" / "capability-coverage-audit.json"
 ASSIMILATION = ROOT / "reports" / "source-assimilation-summary.json"
+RECONCILIATION = ROOT / "reports" / "source-reconciliation-summary.json"
 
 
 class CapabilityCoverageAuditTests(unittest.TestCase):
     def test_audit_is_bound_to_learned_sources_and_current_registry(self):
         audit = json.loads(AUDIT.read_text(encoding="utf-8"))
         assimilation = json.loads(ASSIMILATION.read_text(encoding="utf-8"))
+        reconciliation = json.loads(RECONCILIATION.read_text(encoding="utf-8"))
         learned = sum(source["file_count"] for source in assimilation["sources"])
         current_ids = sorted(capability.id for capability in all_capabilities())
 
         self.assertEqual(audit["learned_file_count"], learned)
         self.assertEqual(audit["current_capability_count"], len(current_ids))
         self.assertEqual(audit["current_capability_ids"], current_ids)
+        self.assertEqual(
+            audit["source_reconciliation"],
+            {
+                "file_count": reconciliation["file_count"],
+                "reconciled_count": reconciliation["reconciled_count"],
+                "pending_count": reconciliation["pending_count"],
+                "binding_count": reconciliation["binding_count"],
+                "bound_module_count": reconciliation["bound_module_count"],
+                "receipt_root_digest": reconciliation["receipt_root_digest"],
+                "completeness_claim_allowed": False,
+            },
+        )
         self.assertRegex(audit["reassessment_digest"], r"^[0-9a-f]{64}$")
         digest_basis = {
             key: audit[key]

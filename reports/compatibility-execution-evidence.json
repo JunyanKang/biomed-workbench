@@ -1,7 +1,7 @@
 {
-  "compatibility_row_count": 57,
-  "end_to_end_passed": 57,
-  "module_count": 57,
+  "compatibility_row_count": 59,
+  "end_to_end_passed": 59,
+  "module_count": 59,
   "passed": true,
   "records": [
     {
@@ -1831,6 +1831,42 @@
     },
     {
       "dependency_versions": {
+        "htslib": [
+          ">=1.23,<1.24"
+        ]
+      },
+      "end_to_end": {
+        "digest": "0059a4b7a0d310ee8a6806c8d95014085a36227b3feea77a1c14dc8b210099f4",
+        "id": "variant-decompress-bgzip-e2e-v1",
+        "passed": true
+      },
+      "input_formats": {
+        "variants": [
+          "vcf@4.5"
+        ]
+      },
+      "module_id": "variant-decompress-bgzip",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "decompressed_variants": [
+          "vcf@4.5"
+        ]
+      },
+      "regression": {
+        "digest": "fe6914518f59268773c6cc5ddd121543742c0dbd9a502a7fbdf0b848a1d285dd",
+        "id": "variant-decompress-bgzip-regression-v1",
+        "passed": true
+      },
+      "row_id": "bgzip-1.23-vcf-4.5-bgzf-to-plain",
+      "tool_versions": {
+        "bgzip": [
+          ">=1.23,<1.24"
+        ]
+      },
+      "verified_at": "2026-07-13"
+    },
+    {
+      "dependency_versions": {
         "python": [
           ">=3.14,<3.15"
         ]
@@ -1867,12 +1903,51 @@
     },
     {
       "dependency_versions": {
+        "python-stdlib": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "23487f09049158288cce578137389a09dd4eb7f3c910d4bb735021b3c73d6fa7",
+        "id": "variant-filter-vcf-e2e-v1",
+        "passed": true
+      },
+      "input_formats": {
+        "variants": [
+          "vcf@4.5"
+        ]
+      },
+      "module_id": "variant-filter-vcf",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "filter_report": [
+          "biomed-vcf-filter-report@1.0.0"
+        ],
+        "filtered_variants": [
+          "vcf@4.5"
+        ]
+      },
+      "regression": {
+        "digest": "c70bcd42e52c6508d27f523a80ee38b02bfa905ebc1dca236e4275e79f1387e2",
+        "id": "variant-filter-vcf-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14-vcf-4.5-biallelic-filter-v1",
+      "tool_versions": {
+        "python3": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "verified_at": "2026-07-13"
+    },
+    {
+      "dependency_versions": {
         "htslib": [
           ">=1.23,<1.24"
         ]
       },
       "end_to_end": {
-        "digest": "be9c4840d3703ed3d44c661aa4c2c451bc865a6241aa7c75568f955af2df545d",
+        "digest": "acedeac592f8eca8573102a22bfa903f793792bb874f2d5fb49109b9103e098b",
         "id": "variant-region-query-tabix-e2e-v1",
         "passed": true
       },
@@ -1889,7 +1964,7 @@
         ]
       },
       "regression": {
-        "digest": "4f5512d065c42b0305d3f2f7664a5acabd921425b3f7a7d144106b90ff23a5ac",
+        "digest": "2270d77472f6c4a78ffe079d04c5c16c128458d2fcd1e47a5e3d861606f46a84",
         "id": "variant-region-query-tabix-regression-v1",
         "passed": true
       },
@@ -1934,7 +2009,7 @@
       "verified_at": "2026-07-12"
     }
   ],
-  "registry_digest": "cfbd1ab33e95dabd5774fc04af99d093a12f046fb2f8b9e5702906f37a05d308",
-  "regression_passed": 57,
+  "registry_digest": "207fe68c116d33dc03c89e40d39cc32317863e37eabdda5e19fe89ac8e32c0c8",
+  "regression_passed": 59,
   "schema_version": 1
 }

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import math
 import os
 from dataclasses import dataclass
@@ -27,6 +28,8 @@ _TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+._-]*$")
 _PLACEHOLDER_RE = re.compile(r"^\{(input|output|parameter):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\}$")
 _PARAMETER_TEMPLATE_RE = re.compile(r"\{parameter:([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\}")
 _OUTPUT_DIRECTORY_PLACEHOLDER = "{output-directory}"
+_IMPLEMENTATION_PLACEHOLDER = "{implementation}"
+_IMPLEMENTATION_MODULE_RE = re.compile(r"^biomed_workbench\.implementations\.[a-z_][a-z0-9_]*$")
 
 
 class ScientificCommandError(RuntimeError):
@@ -133,6 +136,7 @@ class ScientificCommand:
     max_payload_bytes: int
     working_directory_input: str | None = None
     path_mode: str = "absolute"
+    implementation_module: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "tool_name", validate_identifier(self.tool_name, "command tool name"))
@@ -170,6 +174,13 @@ class ScientificCommand:
                 raise ValueError("command working directory must name one zip-directory input")
         if self.path_mode not in {"absolute", "workdir-relative"}:
             raise ValueError("command path mode is unsupported")
+        if self.implementation_module is not None:
+            if not _IMPLEMENTATION_MODULE_RE.fullmatch(self.implementation_module) or self.executable not in {"python", "python3"}:
+                raise ValueError("command implementation module requires a path-free Python module and interpreter")
+            if not self.arguments or self.arguments[0] != _IMPLEMENTATION_PLACEHOLDER or self.arguments.count(_IMPLEMENTATION_PLACEHOLDER) != 1:
+                raise ValueError("command implementation module must be the first and only implementation placeholder")
+        elif _IMPLEMENTATION_PLACEHOLDER in self.arguments:
+            raise ValueError("command implementation placeholder requires a declared module")
         references = {"input": set(), "output": set(), "parameter": set()}
         output_directory_referenced = False
         arguments = []
@@ -179,6 +190,8 @@ class ScientificCommand:
             match = _PLACEHOLDER_RE.fullmatch(argument)
             if argument == _OUTPUT_DIRECTORY_PLACEHOLDER:
                 output_directory_referenced = True
+            elif argument == _IMPLEMENTATION_PLACEHOLDER:
+                pass
             elif match:
                 references[match.group(1)].add(match.group(2))
             elif "{" in argument or "}" in argument:
@@ -241,6 +254,8 @@ class ScientificCommand:
             payload["working_directory_input"] = self.working_directory_input
         if self.path_mode != "absolute":
             payload["path_mode"] = self.path_mode
+        if self.implementation_module is not None:
+            payload["implementation_module"] = self.implementation_module
         return payload
 
     @classmethod
@@ -256,7 +271,7 @@ class ScientificCommand:
             "max_output_bytes",
             "max_payload_bytes",
         }
-        optional = {"working_directory_input", "path_mode"}
+        optional = {"working_directory_input", "path_mode", "implementation_module"}
         if not isinstance(payload, Mapping) or not expected <= set(payload) or set(payload) - expected - optional:
             raise ValueError("scientific command fields are incomplete or unsupported")
         values = dict(payload)
@@ -274,6 +289,7 @@ class ScientificCommand:
         values["parameter_names"] = tuple(values["parameter_names"])
         values.setdefault("working_directory_input", None)
         values.setdefault("path_mode", "absolute")
+        values.setdefault("implementation_module", None)
         return cls(**values)
 
 
@@ -474,6 +490,7 @@ def execute_scientific_command(
     dependency_versions: Mapping[str, str],
     compatibility_row_id: str,
     executable_resolver: Callable[[str], str | os.PathLike[str] | None] | None = None,
+    implementation_resolver: Callable[[str], str | os.PathLike[str] | None] | None = None,
 ) -> ScientificCommandResult:
     if command.tool_name not in tool_versions or not _TOKEN_RE.fullmatch(str(tool_versions[command.tool_name])):
         raise ScientificCommandError("UNVERIFIED_TOOL_VERSION")
@@ -502,6 +519,35 @@ def execute_scientific_command(
     if not executable_path.is_file() or not os.access(executable_path, os.X_OK):
         raise ScientificCommandError("INVALID_EXECUTABLE")
     executable_sha256 = _digest_file(executable_path)
+    implementation_path = None
+    implementation_sha256 = None
+    if command.implementation_module is not None:
+        if implementation_resolver is not None:
+            implementation = implementation_resolver(command.implementation_module)
+        else:
+            try:
+                specification = importlib.util.find_spec(command.implementation_module)
+            except (ImportError, AttributeError, ValueError):
+                specification = None
+            implementation = specification.origin if specification is not None else None
+        if implementation is None:
+            raise ScientificCommandError("MISSING_IMPLEMENTATION")
+        unresolved_implementation = Path(implementation)
+        if unresolved_implementation.is_symlink():
+            raise ScientificCommandError("INVALID_IMPLEMENTATION")
+        try:
+            implementation_path = unresolved_implementation.resolve(strict=True)
+        except OSError as exc:
+            raise ScientificCommandError("MISSING_IMPLEMENTATION") from exc
+        if implementation_resolver is None:
+            implementation_root = Path(__file__).resolve().parents[1] / "implementations"
+            try:
+                implementation_path.relative_to(implementation_root.resolve(strict=True))
+            except (OSError, ValueError) as exc:
+                raise ScientificCommandError("INVALID_IMPLEMENTATION") from exc
+        if not implementation_path.is_file() or implementation_path.suffix != ".py":
+            raise ScientificCommandError("INVALID_IMPLEMENTATION")
+        implementation_sha256 = _digest_file(implementation_path)
 
     runs_root = store.root / ".runs"
     runs_root.mkdir(exist_ok=True)
@@ -513,6 +559,11 @@ def execute_scientific_command(
         temp_root = workdir / "tmp"
         for directory in (input_root, output_root, home_root, temp_root):
             directory.mkdir()
+        runtime_implementation = None
+        if implementation_path is not None:
+            runtime_implementation = input_root / "implementation.py"
+            shutil.copyfile(implementation_path, runtime_implementation)
+            runtime_implementation.chmod(0o444)
         runtime_inputs = {}
         runtime_input_roots = {}
         materialized_inputs = {}
@@ -550,6 +601,8 @@ def execute_scientific_command(
             match = _PLACEHOLDER_RE.fullmatch(argument)
             if argument == _OUTPUT_DIRECTORY_PLACEHOLDER:
                 argv.append(runtime_argument(output_root))
+            elif argument == _IMPLEMENTATION_PLACEHOLDER:
+                argv.append(runtime_argument(runtime_implementation))
             elif not match:
                 argv.append(_PARAMETER_TEMPLATE_RE.sub(lambda item: normalized_parameters[item.group(1)], argument))
             elif match.group(1) == "input":
@@ -586,6 +639,10 @@ def execute_scientific_command(
                     raise ScientificCommandError("INVALID_OUTPUT") from exc
         if _digest_file(executable_path) != executable_sha256:
             raise ScientificCommandError("EXECUTABLE_DRIFT")
+        if implementation_path is not None and (
+            _digest_file(implementation_path) != implementation_sha256 or _digest_file(runtime_implementation) != implementation_sha256
+        ):
+            raise ScientificCommandError("IMPLEMENTATION_DRIFT")
         for binding in command.inputs:
             if _digest_file(materialized_inputs[binding.name]) != input_payloads[binding.name].sha256:
                 raise ScientificCommandError("INPUT_MUTATION")
@@ -626,4 +683,6 @@ def execute_scientific_command(
         },
         "outputs": [payload.to_dict() for payload in output_payloads],
     }
+    if command.implementation_module is not None:
+        provenance["implementation"] = {"module": command.implementation_module, "sha256": implementation_sha256}
     return ScientificCommandResult(stdout, stderr, tuple(output_payloads), provenance)

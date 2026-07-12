@@ -1,5 +1,5 @@
 {
-  "module_count": 57,
+  "module_count": 59,
   "modules": [
     {
       "access": "offline",
@@ -14991,6 +14991,351 @@
       "version": "1.0.0"
     },
     {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The BGZF payload and TBI are a matched digest-bound bundle and decompression is a representation change that must preserve all VCF content and processing semantics."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "htslib": [
+              ">=1.23,<1.24"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "variant-decompress-bgzip-e2e-v1"
+          ],
+          "id": "bgzip-1.23-vcf-4.5-bgzf-to-plain",
+          "input_formats": {
+            "variants": [
+              "vcf@4.5"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "decompressed_variants": [
+              "vcf@4.5"
+            ]
+          },
+          "platforms": [
+            "macos-arm64"
+          ],
+          "regression_evidence_ids": [
+            "variant-decompress-bgzip-regression-v1"
+          ],
+          "tool_versions": {
+            "bgzip": [
+              ">=1.23,<1.24"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "variant-filter-vcf",
+        "variant-region-query-tabix"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=1.23,<1.24"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "htslib-runtime",
+          "name": "htslib",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Decode BGZF blocks and verify stream integrity for VCF representation conversion.",
+          "required": true,
+          "tested_versions": [
+            "1.23"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "htslib\\) ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "bgzip",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/samtools/htslib/releases/tag/1.23"
+        }
+      ],
+      "description": "Guide and execute HTSlib bgzip decompression of a digest-bound VCF 4.5 BGZF+TBI bundle and verify byte-exact recovery of the coordinate-sorted VCF document for downstream filtering and analysis.",
+      "domains": [
+        "omics"
+      ],
+      "entrypoint": "scientific-command",
+      "evidence_effects": [
+        "preserves_variant_observations_across_compression_representation"
+      ],
+      "execution": {
+        "command": {
+          "arguments": [
+            "-d",
+            "-c",
+            "{input:vcf}"
+          ],
+          "executable": "bgzip",
+          "inputs": [
+            {
+              "filename": "variants.vcf.gz",
+              "name": "vcf",
+              "port": "variants",
+              "role": "variants"
+            },
+            {
+              "filename": "variants.vcf.gz.tbi",
+              "name": "index",
+              "port": "variants",
+              "role": "index",
+              "sidecar_for": "vcf"
+            }
+          ],
+          "max_output_bytes": 2000000,
+          "max_payload_bytes": 100000000,
+          "outputs": [
+            {
+              "capture": "stdout",
+              "filename": "variants.vcf",
+              "media_type": "text/vcf",
+              "name": "vcf",
+              "port": "decompressed_variants",
+              "role": "variants"
+            }
+          ],
+          "parameter_names": [],
+          "path_mode": "workdir-relative",
+          "timeout_seconds": 120,
+          "tool_name": "bgzip"
+        },
+        "kind": "command",
+        "max_output_bytes": 2000000,
+        "timeout_seconds": 120
+      },
+      "id": "variant-decompress-bgzip",
+      "input_artifacts": [
+        {
+          "artifact_type": "variant_bundle",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "bgzf"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "vcf",
+              "orientations": [
+                "sites-by-samples"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [
+                "tbi"
+              ],
+              "versions": [
+                "4.5"
+              ]
+            }
+          ],
+          "name": "variants",
+          "processing_levels": [
+            "raw-calls",
+            "filtered",
+            "normalized",
+            "annotated"
+          ],
+          "required_metadata": [
+            "fileformat",
+            "contig",
+            "sample-id",
+            "sample-manifest-digest",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order",
+            "index-type"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "intents": [
+        "decompress BGZF VCF",
+        "convert vcf.gz to VCF",
+        "prepare compressed variants for filtering",
+        "\u89e3\u538bBGZF\u683c\u5f0fVCF"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The validated row supports VCF 4.5 BGZF+TBI on macOS arm64. It does not repair corruption, convert BCF, create indexes, normalize alleles, filter records, or infer biological meaning."
+      ],
+      "maturity": "validated",
+      "module_type": "transform",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "variant_table",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "vcf",
+              "orientations": [
+                "sites-by-samples"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "4.5"
+              ]
+            }
+          ],
+          "name": "decompressed_variants",
+          "processing_levels": [
+            "raw-calls",
+            "filtered",
+            "normalized",
+            "annotated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "fileformat",
+            "contig",
+            "sample-id",
+            "sample-manifest-digest",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "payload_roles": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "payload_roles"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Input is structurally valid VCF 4.5 in BGZF compression with a matching TBI, declared coordinate sorting, reference identity, and sample manifest."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://github.com/samtools/htslib"
+        ],
+        "license": "MIT"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "BGZF VCF and TBI roles, digests, fileformat, reference identity, samples, coordinates, sorting, and index type must reconcile before decompression.",
+          "id": "vcf-bgzf-input-bundle-integrity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Decompressed bytes, VCF header, contigs, sample order, records, and sorting must exactly match the validated source document.",
+          "id": "vcf-bgzf-roundtrip-integrity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Decompression changes storage representation only and provides no evidence about call validity, filtering, normalization, annotation, association, or clinical significance.",
+          "id": "vcf-bgzf-representation-scope",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "How can an indexed BGZF VCF be converted to an uncompressed VCF without changing its header, contigs, samples, records, coordinates, or processing level?"
+      ],
+      "schema_version": 1,
+      "title": "Decompress indexed BGZF VCF without changing records",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            ">=1.23,<1.24"
+          ],
+          "ecosystem": "system",
+          "identity": "bgzip",
+          "mismatch_policy": "block",
+          "name": "bgzip",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.23"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.23,<1.24"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "The supported line validates -d -c decompression to stdout while leaving the source bundle unchanged.",
+              "id": "bgzip-123-decompress-stdout",
+              "required_action": "Require byte-exact roundtrip identity and independently validate VCF document structure, samples, contigs, sorting, and records.",
+              "source": "https://www.htslib.org/doc/1.23/bgzip.html"
+            }
+          ],
+          "version_pattern": "bgzip \\(htslib\\) ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "bgzip",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/samtools/htslib/releases/tag/1.23"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
       "access": "public_api",
       "alternatives": [],
       "assumptions": [
@@ -15292,6 +15637,460 @@
           "version_probe_kind": "service_contract",
           "version_probe_timeout_seconds": 10,
           "version_source": "https://www.ncbi.nlm.nih.gov/books/NBK25499/"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The input contains sites only or exactly one sample; INFO/DP and INFO/AF or single-sample FORMAT/DP and FORMAT/AD represent the intended record-level depth and allele fraction; ANN follows the allele|annotation|impact|gene convention."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python-stdlib": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "variant-filter-vcf-e2e-v1"
+          ],
+          "id": "python-3.14-vcf-4.5-biallelic-filter-v1",
+          "input_formats": {
+            "variants": [
+              "vcf@4.5"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "filter_report": [
+              "biomed-vcf-filter-report@1.0.0"
+            ],
+            "filtered_variants": [
+              "vcf@4.5"
+            ]
+          },
+          "platforms": [
+            "macos-arm64"
+          ],
+          "regression_evidence_ids": [
+            "variant-filter-vcf-regression-v1"
+          ],
+          "tool_versions": {
+            "python3": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "variant-region-query-tabix",
+        "variant-summary",
+        "variant-evidence",
+        "tumor-mutation-burden"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-standard-library",
+          "name": "python-stdlib",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Provide argparse, JSON, finite-number, path, and collection primitives used by the digest-bound VCF filter implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Execute a digest-bound project implementation that strictly validates one-sample or sites-only VCF 4.5 records and filters them by FILTER status, QUAL, DP, AF, and optional ANN gene membership while preserving a complete exclusion audit.",
+      "domains": [
+        "omics"
+      ],
+      "entrypoint": "scientific-command",
+      "evidence_effects": [
+        "selects_variant_observations_under_declared_quality_rules"
+      ],
+      "execution": {
+        "command": {
+          "arguments": [
+            "{implementation}",
+            "--input",
+            "{input:vcf}",
+            "--output",
+            "{output:filtered}",
+            "--report",
+            "{output:report}",
+            "--minimum-quality",
+            "{parameter:minimum-quality}",
+            "--minimum-depth",
+            "{parameter:minimum-depth}",
+            "--minimum-allele-fraction",
+            "{parameter:minimum-allele-fraction}",
+            "--genes",
+            "{parameter:genes}",
+            "--require-pass",
+            "{parameter:require-pass}",
+            "--missing-metric-policy",
+            "{parameter:missing-metric-policy}"
+          ],
+          "executable": "python3",
+          "implementation_module": "biomed_workbench.implementations.vcf_filter",
+          "inputs": [
+            {
+              "filename": "variants.vcf",
+              "name": "vcf",
+              "port": "variants",
+              "role": "variants"
+            }
+          ],
+          "max_output_bytes": 2000000,
+          "max_payload_bytes": 100000000,
+          "outputs": [
+            {
+              "filename": "filtered.vcf",
+              "media_type": "text/vcf",
+              "name": "filtered",
+              "port": "filtered_variants",
+              "role": "variants"
+            },
+            {
+              "filename": "filter-report.json",
+              "media_type": "application/json",
+              "name": "report",
+              "port": "filter_report",
+              "role": "report"
+            }
+          ],
+          "parameter_names": [
+            "minimum-quality",
+            "minimum-depth",
+            "minimum-allele-fraction",
+            "genes",
+            "require-pass",
+            "missing-metric-policy"
+          ],
+          "path_mode": "workdir-relative",
+          "timeout_seconds": 120,
+          "tool_name": "python3"
+        },
+        "kind": "command",
+        "max_output_bytes": 2000000,
+        "timeout_seconds": 120
+      },
+      "id": "variant-filter-vcf",
+      "input_artifacts": [
+        {
+          "artifact_type": "variant_table",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "vcf",
+              "orientations": [
+                "sites-by-samples"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "4.5"
+              ]
+            }
+          ],
+          "name": "variants",
+          "processing_levels": [
+            "raw-calls",
+            "filtered",
+            "normalized",
+            "annotated"
+          ],
+          "required_metadata": [
+            "fileformat",
+            "contig",
+            "sample-id",
+            "sample-manifest-digest",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "genes": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "pattern": "\\*|[A-Za-z0-9_.-]+(?:,[A-Za-z0-9_.-]+)*",
+            "type": "string"
+          },
+          "minimum_allele_fraction": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "minimum_depth": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minimum_quality": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "missing_metric_policy": {
+            "enum": [
+              "error",
+              "exclude"
+            ],
+            "type": "string"
+          },
+          "require_pass": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "minimum_quality",
+          "minimum_depth",
+          "minimum_allele_fraction",
+          "genes",
+          "require_pass",
+          "missing_metric_policy"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "filter VCF variants",
+        "quality filter variant calls",
+        "filter variants by depth allele fraction and genes",
+        "\u6309\u8d28\u91cf\u6df1\u5ea6\u9891\u7387\u548c\u57fa\u56e0\u8fc7\u6ee4VCF"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The validated row accepts uncompressed VCF 4.5 with sites only or exactly one sample and rejects multiallelic and symbolic records. It does not normalize alleles, verify REF against FASTA, parse arbitrary consequence schemas, model tumor purity or clonality, or interpret clinical significance."
+      ],
+      "maturity": "validated",
+      "module_type": "analysis",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "variant_table",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "vcf",
+              "orientations": [
+                "sites-by-samples"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "4.5"
+              ]
+            }
+          ],
+          "name": "filtered_variants",
+          "processing_levels": [
+            "filtered"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "fileformat",
+            "contig",
+            "sample-id",
+            "sample-manifest-digest",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order",
+            "filter-parameter-digest"
+          ]
+        },
+        {
+          "artifact_type": "quality_report",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "biomed-vcf-filter-report",
+              "orientations": [
+                "record-accounting-by-exclusion-reason"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "filter_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "reference-build",
+            "sample-manifest-digest",
+            "filter-parameter-digest"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "payload_roles": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          }
+        },
+        "required": [
+          "payload_roles"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "VCF 4.5 header, contig dictionary, reference identity, sample identity, coordinate sorting, biallelic representation, and required filtering metrics are validated before a record can contribute evidence."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Independent clean-room implementation of explicit VCF filtering and record-accounting requirements."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "VCF fileformat, fixed columns, contig dictionary, sample count, sort order, allele representation, numeric QUAL/DP/AF bounds, and declared metadata must be internally consistent.",
+          "id": "vcf-filter-input-integrity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Missing QUAL, DP, or AF must follow the explicitly declared error or exclusion policy; missing values are never silently accepted.",
+          "id": "vcf-filter-missing-metric-policy",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Accepted plus reason-stratified excluded records must exactly equal input records, and every output record must independently satisfy all declared rules.",
+          "id": "vcf-filter-output-accounting",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Threshold filtering does not establish variant calling validity, allele normalization, consequence correctness, association, pathogenicity, clonality, or clinical actionability.",
+          "id": "vcf-filter-inference-scope",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Which declared biallelic variants remain after explicit FILTER, quality, depth, allele-fraction, missing-metric, and ANN gene rules, and why was every other record excluded?"
+      ],
+      "schema_version": 1,
+      "title": "Filter biallelic VCF records with explicit evidence rules",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "ecosystem": "system",
+          "identity": "python3",
+          "mismatch_policy": "block",
+          "name": "python3",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.14,<3.15"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "The supported line executes the digest-bound project implementation with Python 3.14 standard-library parsing and strict zip and finite-number semantics.",
+              "id": "python-314-project-implementation",
+              "required_action": "Record the interpreter and implementation hashes and independently validate VCF and report outputs against the declared fixture.",
+              "source": "https://docs.python.org/3.14/"
+            }
+          ],
+          "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
         }
       ],
       "version": "1.0.0"
@@ -15894,6 +16693,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "cfbd1ab33e95dabd5774fc04af99d093a12f046fb2f8b9e5702906f37a05d308",
+  "registry_digest": "207fe68c116d33dc03c89e40d39cc32317863e37eabdda5e19fe89ac8e32c0c8",
   "schema_version": 1
 }
