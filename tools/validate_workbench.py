@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 53:
-            errors.append(f"built-in module count must be 53, found {len(modules)}")
+        if len(modules) != 54:
+            errors.append(f"built-in module count must be 54, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -172,7 +172,7 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 346
+                or research_report.get("test_count", 0) < 349
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
                 != {"scientific_command", "command_input_binding", "command_output_binding", "command_stream_output_capture", "command_zip_directory_input", "bounded_process_result"}
@@ -338,6 +338,27 @@ def main() -> int:
                 or alignment_report.get("scientific_summary", {}).get("counts", {}).get("total") != 4
             ):
                 errors.append("samtools alignment quality evidence differs from its module, row, BAM fixture, or integrity checks")
+        interval_report_path = ROOT / "reports" / "interval-overlap-live-verification.json"
+        try:
+            interval_report = json.loads(interval_report_path.read_text(encoding="utf-8"))
+            interval_manifest = registry.get("interval-overlap-bedtools")
+            interval_row = interval_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("bedtools interval overlap live verification evidence is missing or invalid")
+        else:
+            summary = interval_report.get("scientific_summary", {})
+            if (
+                interval_report.get("passed") is not True
+                or interval_report.get("module_version") != interval_manifest.version
+                or interval_report.get("compatibility_row_id") != interval_row.id
+                or interval_report.get("tool_versions") != {"bedtools": "2.31.1"}
+                or interval_report.get("dependency_versions") != {"xz": "5.8.3"}
+                or interval_report.get("fixture", {}).get("format") != "bed@1.0"
+                or interval_report.get("source_reconciliation_passed") is not True
+                or summary.get("overlap_pair_count") != 3
+                or summary.get("total_pairwise_overlap_bp") != 10
+            ):
+                errors.append("bedtools interval evidence differs from its module, row, BED fixture, or overlap checks")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

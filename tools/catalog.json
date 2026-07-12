@@ -1002,6 +1002,23 @@
       "workflow": "wetlab"
     },
     {
+      "access": "offline",
+      "description": "Execute exact-version bedtools intersect on two content-addressed BED 1.0 artifacts and preserve pairwise overlaps under an explicit zero-based half-open and reference-build contract.",
+      "entrypoint": "scientific-command",
+      "id": "interval-overlap-bedtools",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Intersect declared genomic interval sets",
+      "workflow": "omics"
+    },
+    {
       "access": "public_api",
       "description": "Search PubMed or PMC and return normalized summaries with query provenance.",
       "entrypoint": "biomed_workbench.capabilities.evidence:literature_evidence",
@@ -2088,7 +2105,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 53,
+  "entry_count": 54,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

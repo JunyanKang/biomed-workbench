@@ -1,0 +1,68 @@
+{
+  "compatibility_row_id": "bedtools-2.31.1-xz-5.8.3-bed-1.0-wa-wb",
+  "dependency_versions": {
+    "xz": "5.8.3"
+  },
+  "end_to_end_evidence_id": "interval-overlap-bedtools-e2e-v1",
+  "execution": {
+    "command_contract_digest": "1cd41216a10ebb804d20376a57e3b94d3ea89b288ae2d4ff6b6e87cbc4dd15d2",
+    "executable_sha256": "fc994e1fcfdce8ce8591630d71f21fe67e2275c2a8d967dc0e3dfb4cfa4677a3",
+    "inputs": {
+      "query": {
+        "byte_size": 41,
+        "role": "query",
+        "sha256": "64d098cc9e2530860de442a372210f38d4c8848bc3bc7d36c2f3c9c5a71e9630"
+      },
+      "reference": {
+        "byte_size": 42,
+        "role": "reference",
+        "sha256": "87b06bb82506c188a0893b4e744870fee31aeee9404d2a6465aa20e396a54611"
+      }
+    },
+    "outputs": [
+      {
+        "byte_size": 84,
+        "media_type": "text/tab-separated-values",
+        "object_key": "sha256/9e/9ec8fd31de1f34eb26860d088a8de4cf5aa302402f74082138d56e468dad7a2b/payload",
+        "role": "overlaps",
+        "sha256": "9ec8fd31de1f34eb26860d088a8de4cf5aa302402f74082138d56e468dad7a2b"
+      }
+    ],
+    "parameters": {}
+  },
+  "fixture": {
+    "bed_field_count": 4,
+    "coordinate_system": "zero-based-half-open",
+    "format": "bed@1.0",
+    "query_interval_count": 3,
+    "query_sha256": "64d098cc9e2530860de442a372210f38d4c8848bc3bc7d36c2f3c9c5a71e9630",
+    "reference_build": "synthetic-build-1",
+    "reference_interval_count": 3,
+    "reference_sequence_digest": "e044121659bff3d6fa3f4531a4f6f850ae763c979e1a6d4041d2e6f44e9edf65",
+    "reference_sha256": "87b06bb82506c188a0893b4e744870fee31aeee9404d2a6465aa20e396a54611",
+    "schema_version": 1
+  },
+  "fixture_digest": "df6e152b08fca78bd764233f9bc8c12ef79b05fae601fb3fe9746457151406b4",
+  "html_report_validated": false,
+  "module_id": "interval-overlap-bedtools",
+  "module_version": "1.0.0",
+  "passed": true,
+  "regression_evidence_id": "interval-overlap-bedtools-regression-v1",
+  "schema_version": 1,
+  "scientific_summary": {
+    "bedtools_version": "2.31.1",
+    "coordinate_system": "zero-based-half-open",
+    "downstream_readiness": "technically-ready-pending-build-identity-and-design-review",
+    "empty_result": false,
+    "interpretation_policy": "Pairwise overlap is geometric evidence only; enrichment, assignment, causality, and biological relevance require explicit denominators, null models, reference-build identity, and assay-aware review.",
+    "overlap_pair_count": 3,
+    "overlapping_query_interval_count": 2,
+    "overlapping_reference_interval_count": 2,
+    "schema_version": 1,
+    "total_pairwise_overlap_bp": 10
+  },
+  "source_reconciliation_passed": true,
+  "tool_versions": {
+    "bedtools": "2.31.1"
+  }
+}

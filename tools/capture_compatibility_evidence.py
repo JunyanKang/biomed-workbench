@@ -35,6 +35,7 @@ SERVICE_COVERAGE = {
 
 COMMAND_EVIDENCE = {
     "alignment-quality-samtools": ("reports/alignment-quality-live-verification.json", "tests.unit.quality.test_alignment"),
+    "interval-overlap-bedtools": ("reports/interval-overlap-live-verification.json", "tests.unit.quality.test_intervals"),
     "quality-report-multiqc": ("reports/multiqc-live-verification.json", "tests.unit.quality.test_multiqc"),
     "read-contamination-screen": ("reports/fastq-screen-live-verification.json", "tests.unit.quality.test_fastq_screen"),
     "read-quality-fastqc": ("reports/fastqc-live-verification.json", "tests.unit.quality.test_fastqc"),

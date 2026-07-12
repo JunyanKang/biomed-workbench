@@ -4,6 +4,7 @@ from .alignment import AlignmentQualityReportError, parse_samtools_flagstat_repo
 from .fastqc import FastQCReportError, parse_fastqc_archive
 from .fastp import FastPReportError, parse_fastp_report
 from .fastq_screen import FastQScreenReportError, parse_fastq_screen_report
+from .intervals import IntervalReportError, parse_bedtools_intersect_report
 from .multiqc import MultiQCReportError, parse_multiqc_archive
 
 __all__ = [
@@ -11,10 +12,12 @@ __all__ = [
     "FastPReportError",
     "FastQCReportError",
     "FastQScreenReportError",
+    "IntervalReportError",
     "MultiQCReportError",
     "parse_fastp_report",
     "parse_fastq_screen_report",
     "parse_fastqc_archive",
+    "parse_bedtools_intersect_report",
     "parse_multiqc_archive",
     "parse_samtools_flagstat_report",
 ]

@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 53,
-  "module_count": 53,
+  "compatibility_complete": 54,
+  "module_count": 54,
   "modules": [
     {
       "compatibility_rows": [
@@ -2958,6 +2958,222 @@
         }
       ],
       "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "interval-overlap-bedtools-e2e-v1"
+          ],
+          "id": "bedtools-2.31.1-xz-5.8.3-bed-1.0-wa-wb",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "interval-overlap-bedtools-regression-v1"
+          ],
+          "verified_at": "2026-07-12"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            "==5.8.3"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "xz-runtime",
+          "name": "xz",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Provide the exact liblzma runtime declared by the validated Homebrew bedtools bottle.",
+          "required": true,
+          "tested_versions": [
+            "5.8.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "XZ Utils\\) ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "xz",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/tukaani-project/xz/releases/tag/v5.8.3"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "interval-overlap-bedtools",
+      "input_formats": [
+        {
+          "artifact_type": "genomic_intervals",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "zero-based-half-open"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "bed",
+              "orientations": [
+                "interval-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0"
+              ]
+            }
+          ],
+          "name": "query_intervals",
+          "processing_levels": [
+            "features",
+            "peaks",
+            "regions",
+            "fragments"
+          ],
+          "required_metadata": [
+            "bed-field-count",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order",
+            "sample-manifest-digest"
+          ]
+        },
+        {
+          "artifact_type": "genomic_intervals",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "zero-based-half-open"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "bed",
+              "orientations": [
+                "interval-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0"
+              ]
+            }
+          ],
+          "name": "reference_intervals",
+          "processing_levels": [
+            "features",
+            "peaks",
+            "regions"
+          ],
+          "required_metadata": [
+            "bed-field-count",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order",
+            "source-release"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "interval_overlap_pairs",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "zero-based-half-open"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "bedtools-intersect-tsv",
+              "orientations": [
+                "query-fields-then-reference-fields"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "2.31.1"
+              ]
+            }
+          ],
+          "name": "overlaps",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "query-bed-field-count",
+            "reference-bed-field-count",
+            "reference-build"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            "==2.31.1"
+          ],
+          "ecosystem": "system",
+          "identity": "bedtools",
+          "mismatch_policy": "block",
+          "name": "bedtools",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "2.31.1"
+          ],
+          "verified_at": "2026-07-12",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==2.31.1"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated release emits the tested query-then-reference field layout for intersect -wa -wb.",
+              "id": "bedtools-2311-intersect-wa-wb",
+              "required_action": "Parse only against explicit query and reference BED field counts under the 2.31.1 regression fixture.",
+              "source": "https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html"
+            }
+          ],
+          "version_pattern": "bedtools v([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "bedtools",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/arq5x/bedtools2/releases/tag/v2.31.1"
+        }
+      ],
       "validation_status": "complete"
     },
     {
@@ -6990,6 +7206,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "78b1a5ef8ad275dac1b7ea90ed1d6ecf6847c69b3cefb42c17f4938891f3adc0",
+  "registry_digest": "40d83181188476e1bd258e760a21e8f9f166621392bdda367769406964b43963",
   "schema_version": 1
 }
