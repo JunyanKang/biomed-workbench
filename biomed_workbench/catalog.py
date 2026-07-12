@@ -392,6 +392,64 @@ def _register_builtins() -> None:
             ),
             requirements=(), access="public_api", mutability="read_only",
         ),
+        Capability(
+            id="container-plan",
+            workflow="runtime",
+            kind="python",
+            title="Build a container execution plan",
+            description="Construct a validated Docker or Podman argument vector without starting a container.",
+            entrypoint="biomed_workbench.services.compute:container_plan",
+            input_schema=_object_schema(
+                {
+                    "image": {"type": "string", "minLength": 3},
+                    "command": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+                    "mounts": {"type": "array", "items": {"type": "object"}, "nullable": True},
+                    "gpu": {"type": "boolean"},
+                    "engine": {"type": "string", "enum": ["docker", "podman"]},
+                    "workdir": {"type": "string", "nullable": True},
+                },
+                ("image", "command"),
+            ),
+            requirements=(), access="local_runtime", mutability="read_only",
+        ),
+        Capability(
+            id="slurm-plan",
+            workflow="runtime",
+            kind="python",
+            title="Build a SLURM job plan",
+            description="Construct a validated, quoted batch script and resource record without submitting work.",
+            entrypoint="biomed_workbench.services.compute:slurm_plan",
+            input_schema=_object_schema(
+                {
+                    "command": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+                    "job_name": {"type": "string", "minLength": 1},
+                    "cpus": {"type": "integer", "minimum": 1, "maximum": 4096},
+                    "memory_gb": {"type": "integer", "minimum": 1, "maximum": 1048576},
+                    "time_minutes": {"type": "integer", "minimum": 1, "maximum": 525600},
+                    "gpus": {"type": "integer", "minimum": 0, "maximum": 128},
+                    "partition": {"type": "string", "nullable": True},
+                    "output": {"type": "string", "minLength": 1},
+                },
+                ("command", "job_name", "cpus", "memory_gb", "time_minutes"),
+            ),
+            requirements=(), access="local_runtime", mutability="read_only",
+        ),
+        Capability(
+            id="local-model-plan",
+            workflow="molecular_design",
+            kind="python",
+            title="Build a local scientific model plan",
+            description="Construct a validated command for an allowed local structure, search, design, or docking backend.",
+            entrypoint="biomed_workbench.services.compute:local_model_plan",
+            input_schema=_object_schema(
+                {
+                    "backend": {"type": "string", "enum": ["boltz", "foldseek", "mmseqs", "proteinmpnn", "diffdock"]},
+                    "inputs": {"type": "object"},
+                },
+                ("backend", "inputs"),
+            ),
+            requirements=(), access="local_runtime", mutability="read_only",
+        ),
     )
     for definition in definitions:
         register(definition)
