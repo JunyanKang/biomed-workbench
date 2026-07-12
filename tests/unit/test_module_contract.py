@@ -22,6 +22,9 @@ def format_contract(name="inline-json", versions=None):
         "required_indexes": [],
         "coordinate_systems": [],
         "genome_build_policy": "not_applicable",
+        "genome_builds": [],
+        "annotation_releases": [],
+        "orientations": ["records"],
     }
 
 
@@ -181,6 +184,14 @@ class ModuleContractTests(unittest.TestCase):
         payload["input_artifacts"][0]["formats"][0]["versions"] = []
 
         with self.assertRaisesRegex(ValueError, "format versions"):
+            parse_manifest(payload)
+
+    def test_tested_versions_must_fall_inside_declared_allowed_versions(self):
+        payload = valid_manifest_payload()
+        payload["dependencies"][0]["tested_versions"] = ["3.14.3"]
+        payload["dependencies"][0]["allowed_versions"] = [">=3.10,<3.14"]
+
+        with self.assertRaisesRegex(ValueError, "outside allowed versions"):
             parse_manifest(payload)
 
     def test_compatibility_rows_must_reference_declared_ports_and_versions(self):

@@ -35,6 +35,9 @@ class FormatContract:
     required_indexes: tuple[str, ...]
     coordinate_systems: tuple[str, ...]
     genome_build_policy: str
+    genome_builds: tuple[str, ...]
+    annotation_releases: tuple[str, ...]
+    orientations: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -213,6 +216,54 @@ def _version_rules(value: Any, location: str) -> tuple[str, ...]:
     return rules
 
 
+def _release_tuple(value: str) -> tuple[int, ...] | None:
+    match = re.fullmatch(r"(\d+(?:\.\d+)*)(?:[-+][0-9A-Za-z.-]+)?", value)
+    return tuple(int(item) for item in match.group(1).split(".")) if match else None
+
+
+def _compare_release(left: tuple[int, ...], right: tuple[int, ...]) -> int:
+    width = max(len(left), len(right))
+    padded_left = left + (0,) * (width - len(left))
+    padded_right = right + (0,) * (width - len(right))
+    return (padded_left > padded_right) - (padded_left < padded_right)
+
+
+def _matches_clause(version: str, clause: str) -> bool:
+    match = re.fullmatch(r"(==|!=|>=|<=|>|<|~=)?(.+)", clause)
+    if not match:
+        return False
+    operator, expected = match.group(1) or "==", match.group(2)
+    if operator in {"==", "!="}:
+        equal = version == expected
+        return equal if operator == "==" else not equal
+    actual_release, expected_release = _release_tuple(version), _release_tuple(expected)
+    if actual_release is None or expected_release is None:
+        return False
+    comparison = _compare_release(actual_release, expected_release)
+    if operator == ">=":
+        return comparison >= 0
+    if operator == "<=":
+        return comparison <= 0
+    if operator == ">":
+        return comparison > 0
+    if operator == "<":
+        return comparison < 0
+    if operator == "~=":
+        prefix = expected_release[:-1] if len(expected_release) > 2 else expected_release[:1]
+        return comparison >= 0 and actual_release[: len(prefix)] == prefix
+    return False
+
+
+def _version_allowed(version: str, rules: tuple[str, ...]) -> bool:
+    return any(all(_matches_clause(version, clause) for clause in rule.split(",")) for rule in rules)
+
+
+def _validate_tested_versions(tested: tuple[str, ...], allowed: tuple[str, ...], location: str) -> None:
+    outside = [version for version in tested if not _version_allowed(version, allowed)]
+    if outside:
+        raise ValueError(f"{location} tested versions are outside allowed versions: {', '.join(outside)}")
+
+
 def _closed_schema(value: Any, location: str) -> dict[str, object]:
     schema = _object(value, location)
     properties = schema.get("properties")
@@ -242,14 +293,23 @@ def _format(value: Any, location: str) -> FormatContract:
     genome_policy = _text(payload["genome_build_policy"], f"{location}.genome_build_policy")
     if genome_policy not in GENOME_BUILD_POLICIES:
         raise ValueError(f"{location}.genome_build_policy is unsupported")
+    genome_builds = _strings(payload["genome_builds"], f"{location}.genome_builds", allow_empty=True)
+    coordinate_systems = _strings(payload["coordinate_systems"], f"{location}.coordinate_systems", allow_empty=True)
+    if genome_policy == "not_applicable" and genome_builds:
+        raise ValueError(f"{location}.genome_builds must be empty when genome builds are not applicable")
+    if genome_policy != "not_applicable" and (not genome_builds or not coordinate_systems):
+        raise ValueError(f"{location} must declare validated genome builds and coordinate systems")
     return FormatContract(
         name=name,
         versions=versions,
         representations=representations,
         compression=_strings(payload["compression"], f"{location}.compression"),
         required_indexes=_strings(payload["required_indexes"], f"{location}.required_indexes", allow_empty=True),
-        coordinate_systems=_strings(payload["coordinate_systems"], f"{location}.coordinate_systems", allow_empty=True),
+        coordinate_systems=coordinate_systems,
         genome_build_policy=genome_policy,
+        genome_builds=genome_builds,
+        annotation_releases=_strings(payload["annotation_releases"], f"{location}.annotation_releases", allow_empty=True),
+        orientations=_strings(payload["orientations"], f"{location}.orientations"),
     )
 
 
@@ -330,13 +390,15 @@ def _tool(value: Any, location: str) -> ToolRequirement:
     mismatch_policy = _text(payload["mismatch_policy"], f"{location}.mismatch_policy")
     if mismatch_policy not in MISMATCH_POLICIES:
         raise ValueError(f"{location}.mismatch_policy is unsupported")
+    allowed = _version_rules(payload["allowed_versions"], f"{location}.allowed_versions")
+    _validate_tested_versions(tested, allowed, location)
     return ToolRequirement(
         name=_text(payload["name"], f"{location}.name"),
         ecosystem=ecosystem,
         identity=_text(payload["identity"], f"{location}.identity"),
         required=_boolean(payload["required"], f"{location}.required"),
         tested_versions=tested,
-        allowed_versions=_version_rules(payload["allowed_versions"], f"{location}.allowed_versions"),
+        allowed_versions=allowed,
         version_source=source,
         verified_at=_date(payload["verified_at"], f"{location}.verified_at"),
         version_probe=probe,
@@ -356,12 +418,15 @@ def _dependency(value: Any, location: str) -> DependencyRequirement:
     source = _text(payload["version_source"], f"{location}.version_source")
     if not source.startswith("https://"):
         raise ValueError(f"{location}.version_source must be an authoritative HTTPS URL")
+    tested = _strings(payload["tested_versions"], f"{location}.tested_versions")
+    allowed = _version_rules(payload["allowed_versions"], f"{location}.allowed_versions")
+    _validate_tested_versions(tested, allowed, location)
     return DependencyRequirement(
         name=_text(payload["name"], f"{location}.name"),
         ecosystem=ecosystem,
         required=_boolean(payload["required"], f"{location}.required"),
-        tested_versions=_strings(payload["tested_versions"], f"{location}.tested_versions"),
-        allowed_versions=_version_rules(payload["allowed_versions"], f"{location}.allowed_versions"),
+        tested_versions=tested,
+        allowed_versions=allowed,
         version_source=source,
         verified_at=_date(payload["verified_at"], f"{location}.verified_at"),
         purpose=_text(payload["purpose"], f"{location}.purpose", minimum=12),
@@ -526,6 +591,9 @@ def _format_dict(value: FormatContract) -> dict[str, object]:
         "required_indexes": list(value.required_indexes),
         "coordinate_systems": list(value.coordinate_systems),
         "genome_build_policy": value.genome_build_policy,
+        "genome_builds": list(value.genome_builds),
+        "annotation_releases": list(value.annotation_releases),
+        "orientations": list(value.orientations),
     }
 
 

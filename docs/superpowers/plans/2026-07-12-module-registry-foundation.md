@@ -112,6 +112,9 @@ class FormatContract:
     required_indexes: tuple[str, ...]
     coordinate_systems: tuple[str, ...]
     genome_build_policy: str
+    genome_builds: tuple[str, ...]
+    annotation_releases: tuple[str, ...]
+    orientations: tuple[str, ...]
 
 @dataclass(frozen=True)
 class ToolRequirement:
@@ -262,8 +265,9 @@ git commit -m "feat: discover scientific modules dynamically"
 
 **Files:**
 - Create: `biomed_workbench/modules/compatibility.py`
-- Create: `reports/tool-compatibility-matrix.json`
+- Create: `tools/build_tool_compatibility_matrix.py`
 - Test: `tests/unit/test_module_compatibility.py`
+- Test: `tests/unit/test_module_compatibility_report.py`
 - Test: `tests/contract/test_tool_version_compatibility.py`
 
 **Interfaces:**
@@ -272,7 +276,7 @@ git commit -m "feat: discover scientific modules dynamically"
   `CompatibilityFinding`, `CompatibilityDecision`, `detect_environment`, and
   `evaluate_compatibility`.
 
-- [ ] **Step 1: Write failing compatibility-decision tests**
+- [x] **Step 1: Write failing compatibility-decision tests**
 
 ```python
 def test_exact_validated_tool_dependency_and_format_row_allows_execution():
@@ -315,13 +319,13 @@ Add separate failures for missing required dependencies, conflicting packages,
 unsupported format version, absent index, coordinate-system mismatch, genome
 build mismatch, missing metadata, and an explicitly validated alternative.
 
-- [ ] **Step 2: Run and verify missing compatibility module**
+- [x] **Step 2: Run and verify missing compatibility module**
 
 Run: `python3 -m unittest tests.unit.test_module_compatibility tests.contract.test_tool_version_compatibility`
 
 Expected: import failure for `biomed_workbench.modules.compatibility`.
 
-- [ ] **Step 3: Implement strict environment and artifact snapshots**
+- [x] **Step 3: Implement strict environment and artifact snapshots**
 
 Use `importlib.metadata.version` for Python distributions and injected bounded
 probe runners for R, Java, system tools, services, and databases. Parse only
@@ -333,26 +337,28 @@ row matches module version, all required tool and dependency versions, platform,
 and every input artifact contract. It does not infer compatibility from a
 newer-looking version number.
 
-- [ ] **Step 4: Prove runner blocks before entrypoint invocation**
+- [x] **Step 4: Prove runner blocks before entrypoint invocation**
 
 Use an entrypoint fixture that increments a counter. Supply an unvalidated tool
 version, assert `CompatibilityError`, and assert the counter remains zero.
 Then supply the validated row and assert one invocation plus a result provenance
 record containing module, tool, dependency, format, row, and parameter versions.
 
-- [ ] **Step 5: Generate the public compatibility matrix**
+- [x] **Step 5: Implement and verify the public compatibility-matrix generator**
 
-The report contains every built-in module, module version, external tools,
+The generator reports every module in a supplied registry, module version, external tools,
 tested versions, dependencies, artifact formats, compatibility-row IDs, and
 validation status. It must contain no credentials or machine paths. Modules
 implemented only with the Python standard library explicitly state
 `external_tool_required: false` rather than omitting compatibility evidence.
+Test it against the independent fixture registry. The checked report for all
+48 built-ins is generated after migration in Task 4.
 
-- [ ] **Step 6: Run tests and commit**
+- [x] **Step 6: Run tests and commit**
 
 ```bash
-python3 -m unittest tests.unit.test_module_compatibility tests.contract.test_tool_version_compatibility
-git add biomed_workbench/modules/compatibility.py reports/tool-compatibility-matrix.json tests/unit/test_module_compatibility.py tests/contract/test_tool_version_compatibility.py
+python3 -m unittest tests.unit.test_module_compatibility tests.unit.test_module_compatibility_report tests.contract.test_tool_version_compatibility
+git add biomed_workbench/modules/compatibility.py tools/build_tool_compatibility_matrix.py tests/unit/test_module_compatibility.py tests/unit/test_module_compatibility_report.py tests/contract/test_tool_version_compatibility.py
 git commit -m "feat: enforce scientific tool compatibility"
 ```
 
@@ -364,6 +370,7 @@ git commit -m "feat: enforce scientific tool compatibility"
 - Create: `tools/migrate_capabilities_to_modules.py`
 - Create: `biomed_workbench/modules/builtin/<48 module directories>/module.json`
 - Create: `reports/module-registry-migration.json`
+- Create: `reports/tool-compatibility-matrix.json`
 - Test: `tests/release/test_module_migration.py`
 
 **Interfaces:**
@@ -415,12 +422,16 @@ parity count, schema parity count, scientific-field completeness count, and
 tool/dependency/format compatibility completeness count, and explicitly states
 that runtime source paths are absent.
 
+Run `python3 tools/build_tool_compatibility_matrix.py` against the migrated
+built-in registry and require `module_count=48`, `compatibility_complete=48`,
+and no unvalidated external-tool claim.
+
 - [ ] **Step 6: Run parity tests and commit**
 
 Run: `python3 -m unittest tests.release.test_module_migration tests.unit.test_module_registry`
 
 ```bash
-git add tools/migrate_capabilities_to_modules.py biomed_workbench/modules/builtin reports/module-registry-migration.json tests/release/test_module_migration.py
+git add tools/migrate_capabilities_to_modules.py biomed_workbench/modules/builtin reports/module-registry-migration.json reports/tool-compatibility-matrix.json tests/release/test_module_migration.py
 git commit -m "refactor: migrate capabilities to independent modules"
 ```
 

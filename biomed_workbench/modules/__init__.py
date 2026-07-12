@@ -13,17 +13,37 @@ from .contract import (
     manifest_to_dict,
     parse_manifest,
 )
+from .compatibility import (
+    ArtifactSnapshot,
+    CompatibilityDecision,
+    CompatibilityError,
+    CompatibilityFinding,
+    CompatibleInvocation,
+    EnvironmentSnapshot,
+    detect_environment,
+    evaluate_compatibility,
+    invoke_compatible,
+)
 
 __all__ = [
     "ArtifactPort",
+    "ArtifactSnapshot",
+    "CompatibilityDecision",
+    "CompatibilityError",
+    "CompatibilityFinding",
     "CompatibilityRow",
+    "CompatibleInvocation",
     "DependencyRequirement",
     "ExecutionContract",
+    "EnvironmentSnapshot",
     "FormatContract",
     "ModuleManifest",
     "ProvenanceContract",
     "QualityGate",
     "ToolRequirement",
+    "detect_environment",
+    "evaluate_compatibility",
+    "invoke_compatible",
     "manifest_to_dict",
     "parse_manifest",
 ]
