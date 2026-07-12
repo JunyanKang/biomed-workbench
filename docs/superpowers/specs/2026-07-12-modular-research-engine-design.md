@@ -115,6 +115,8 @@ Required identity fields:
 - `intents`: structured intents and multilingual phrases used to build the
   search index automatically;
 - `entrypoint`: project-owned callable;
+- `execution`: Python, command, service, or workflow invocation kind with a
+  bounded timeout and maximum normalized output size;
 - `maturity`: `experimental`, `validated`, or `reference`.
 
 Required scientific fields:

@@ -69,7 +69,7 @@ Delete after parity is proven:
   `parse_manifest(payload)`, and `manifest_to_dict(manifest)`.
 - Consumes: existing `Capability` input-schema and access/mutability invariants from `biomed_workbench.models` only for backward conversion.
 
-- [ ] **Step 1: Write failing identity and scientific-contract tests**
+- [x] **Step 1: Write failing identity and scientific-contract tests**
 
 ```python
 def test_manifest_requires_scientific_contract_and_closed_schemas():
@@ -87,13 +87,13 @@ def test_manifest_rejects_unknown_fields_and_incomplete_scientific_metadata():
         parse_manifest(payload)
 ```
 
-- [ ] **Step 2: Run the test and verify missing-module failure**
+- [x] **Step 2: Run the test and verify missing-module failure**
 
 Run: `python3 -m unittest tests.unit.test_module_contract`
 
 Expected: import failure for `biomed_workbench.modules.contract`.
 
-- [ ] **Step 3: Implement immutable contracts and strict parser**
+- [x] **Step 3: Implement immutable contracts and strict parser**
 
 ```python
 @dataclass(frozen=True)
@@ -188,13 +188,13 @@ closed schemas, credential allowlist, format versions, nonempty tested versions
 for external tools, compatibility-row references, and exact top-level fields.
 Return tuples and copied dictionaries so callers cannot mutate loaded manifests.
 
-- [ ] **Step 4: Run focused and model regression tests**
+- [x] **Step 4: Run focused and model regression tests**
 
 Run: `python3 -m unittest tests.unit.test_module_contract tests.unit.test_models tests.unit.test_catalog`
 
 Expected: all pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add biomed_workbench/modules tests/unit/test_module_contract.py
