@@ -600,19 +600,19 @@ class HypothesisAssessment:
 def assess_hypothesis(hypothesis, evidence, findings) -> HypothesisAssessment: ...
 ```
 
-- [ ] **Step 1: Write failing adjudication tests**
+- [x] **Step 1: Write failing adjudication tests**
 
 Verify refuting evidence overrides support for the same predicted observation, conflicting high-quality evidence yields weakened or inconclusive rather than averaging, support requires the declared orthogonality count, major/fatal findings prevent supported status, absence of evidence is not refutation, and causal claim strength requires an appropriate design.
 
-- [ ] **Step 2: Run and verify interpretation import failure**
+- [x] **Step 2: Run and verify interpretation import failure**
 
 Run: `python3 -m unittest tests.unit.orchestration.test_interpretation tests.contract.test_hypothesis_adjudication`
 
-- [ ] **Step 3: Implement rule-explicit assessment**
+- [x] **Step 3: Implement rule-explicit assessment**
 
 Partition by relation, quality, evidence type, and independent group. Record all IDs used in the assessment. Status transitions are deterministic and auditable; they do not generate biological prose or invoke another model. Codex remains responsible for narrative interpretation grounded in this structured result.
 
-- [ ] **Step 4: Run tests and commit**
+- [x] **Step 4: Run tests and commit**
 
 ```bash
 python3 -m unittest tests.unit.orchestration.test_interpretation tests.contract.test_hypothesis_adjudication
