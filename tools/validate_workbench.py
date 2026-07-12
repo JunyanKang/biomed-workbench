@@ -13,8 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from biomed_workbench.catalog import SPECIFICATION_ROOT, all_capabilities, capability_to_dict, resolve_entrypoint  # noqa: E402
-from biomed_workbench.models import WORKFLOWS  # noqa: E402
+from biomed_workbench.catalog import all_capabilities, capability_to_dict, resolve_entrypoint  # noqa: E402
 from biomed_workbench.modules.index import BUILTIN_ROOT, MODULE_INDEX, build_index  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry, ModuleRegistryError  # noqa: E402
 from biomed_workbench.services.credentials import ALLOWED_CREDENTIALS  # noqa: E402
@@ -26,7 +25,14 @@ SECRET_PATTERNS = [
     re.compile(r"nvapi-[A-Za-z0-9_-]{20,}"), re.compile(r"sk-[A-Za-z0-9_-]{32,}"), re.compile(r"gh[opsu]_[A-Za-z0-9]{30,}"),
 ]
 LOCAL_PATH_PATTERNS = ("/Users/" + "kangjunyan", "/private/" + "var/folders/")
-LEGACY_PATHS = ("scripts", "tools/adapters", "references/source_manifest.json", "references/source_file_audit.json")
+LEGACY_PATHS = (
+    "scripts",
+    "tools/adapters",
+    "tools/add_capability.py",
+    "biomed_workbench/capability_specs",
+    "references/source_manifest.json",
+    "references/source_file_audit.json",
+)
 FORBIDDEN_INFRASTRUCTURE_MARKERS = ("runtime", "container", "slurm", "gpu", "local-model")
 
 
@@ -88,9 +94,6 @@ def main() -> int:
     catalog_path = ROOT / "tools" / "catalog.json"
     catalog = json.loads(catalog_path.read_text()) if catalog_path.is_file() else {}
     capabilities = all_capabilities()
-    specification_names = {path.name for path in SPECIFICATION_ROOT.glob("*.json")}
-    if specification_names != {f"{workflow}.json" for workflow in WORKFLOWS}:
-        errors.append("capability specifications must have exactly one file per workflow")
     expected_rows = [capability_to_dict(item) for item in capabilities]
     if catalog.get("entry_count") != len(capabilities) or catalog.get("entries") != expected_rows:
         errors.append("generated catalog does not exactly match the registry")

@@ -1,65 +1,87 @@
 # Architecture
 
-Biomed Workbench has one Codex entry and a small, source-neutral execution core. Scientific domains extend the core through validated contracts rather than custom routers or additional user-facing skills.
+Biomed Workbench exposes one Codex skill and discovers scientific capabilities from independent, versioned modules. A module owns its scientific contract; the router, runner, catalog projection, and assistant contain no module-specific registration tables.
 
-## Layers
+## Runtime Layers
 
-1. `skills/biomed-workbench/SKILL.md` defines the Codex research lifecycle and is the only user-facing entry.
-2. `biomed_workbench/router.py`, `assistant.py`, `research.py`, and `runner.py` coordinate planning, execution, evidence, and delivery.
-3. `biomed_workbench/capability_specs/` contains one versioned JSON contract per scientific domain.
-4. `biomed_workbench/capabilities/` contains independently implemented scientific functions.
-5. `biomed_workbench/services/` contains bounded public-database clients and the optional credential allowlist.
-6. `tools/catalog.json` is generated from the domain specifications; it is never edited manually.
+1. `skills/biomed-workbench/SKILL.md` is the only user-facing Codex entry.
+2. `biomed_workbench/modules/builtin/<module-id>/module.json` is the source of truth for every built-in capability.
+3. `biomed_workbench/modules/contract.py` validates scientific, execution, version, dependency, format, and provenance contracts.
+4. `biomed_workbench/modules/registry.py` discovers modules recursively and rejects duplicate IDs or unresolved relationships.
+5. `biomed_workbench/router.py` ranks intents, questions, artifact types, and domains read from manifests.
+6. `biomed_workbench/runner.py` validates structured input and invokes resolved entrypoints.
+7. `biomed_workbench/catalog.py` provides the v0.2 compatibility projection; it does not define or load a second capability registry.
+8. `biomed_workbench/modules/index.json` and `tools/catalog.json` are generated release artifacts and are never edited manually.
 
-The central `catalog.py` only loads, validates, resolves, and serializes contracts. It contains no domain capability definitions.
+The plugin does not manage CPUs, GPUs, containers, Slurm, remote compute, or local model infrastructure.
 
-## Add A Capability
+## Module Contract
 
-1. Implement a bounded function in the closest domain module under `biomed_workbench/capabilities/`.
-2. Define an object input schema with explicit types, bounds, required fields, and `additionalProperties: false`.
-3. Add the contract with `tools/add_capability.py`, or edit the matching domain JSON file directly.
-4. Add a scientific unit fixture and a CLI end-to-end case.
-5. Rebuild and verify the generated catalog.
+Every `module.json` is closed and versioned. It declares:
 
-```bash
-python3 tools/add_capability.py CAPABILITY_ID \
-  --workflow omics \
-  --title "Human-readable title" \
-  --description "A bounded description of the scientific operation." \
-  --entrypoint biomed_workbench.capabilities.omics:FUNCTION \
-  --input-schema schema.json
+- identity, semantic module version, scientific domains, intents, questions, maturity, entrypoint, and kernel compatibility;
+- typed input and output artifacts, processing levels, required metadata, and closed JSON input/output schemas;
+- preconditions, assumptions, limitations, evidence effects, alternatives, complements, and blocking quality gates;
+- each upstream tool's exact tested versions, allowed ranges, authoritative version source, verification date, version probe, known version differences, platform scope, and mismatch policy;
+- each Python, R, Java, system, service, database, or runtime dependency's tested versions, allowed ranges, source, purpose, conflicts, and platform scope;
+- input/output format names and versions, representation, compression, required indexes, coordinate systems, genome builds, annotation releases, and orientations;
+- explicit compatibility rows joining one module version to validated tool, dependency, platform, and input/output format combinations;
+- access, mutation, credential, timeout, output-size, license, and clean-room provenance boundaries.
 
-python3 tools/build_catalog.py
-python3 tools/validate_workbench.py
-python3 -m unittest discover -s tests -v
+An undeclared or untested tool, dependency, format, genome build, coordinate system, or compatibility combination blocks execution. A newer version is not assumed compatible until its independent regression and end-to-end evidence is recorded in a new module version.
+
+## Add A Module
+
+Implement an importable, bounded scientific function, then prepare a complete creation request:
+
+```json
+{
+  "manifest": {"schema_version": 1, "id": "new-analysis", "version": "1.0.0"},
+  "tests": [
+    {
+      "name": "representative-case",
+      "input": {},
+      "expected_subset": {}
+    }
+  ]
+}
 ```
 
-## Compatibility Rules
+The abbreviated object above only illustrates the envelope. Use an existing `module.json` as the field-complete template; omitted contract fields are rejected.
 
-- Capability IDs and required input fields are stable within a minor release.
-- New optional fields and new capabilities may be added in a minor release.
-- Removing an ID, changing units, changing output meaning, or making an optional field required needs a major release or an explicit migration.
-- Every capability returns structured data and states limitations; routing diagnostics are never a scientific deliverable.
-- Source attribution belongs in provenance, never in operational IDs, module names, routes, or schemas.
-- The plugin does not own compute infrastructure or another general-purpose reasoning model.
+```bash
+python3 tools/create_module.py request.json --registry-root /path/to/module-registry
+python3 tools/validate_module.py /path/to/module-registry/new-analysis
+```
+
+Creation occurs in a temporary same-filesystem directory. The validator checks package shape, permissions, symbolic links, local path traces, manifest closure, current kernel compatibility, entrypoint resolution, dependency and format evidence, compatibility rows, test schemas, execution timeout, output size, output schema, and expected results. Only a fully valid package is atomically renamed into the registry; failure leaves no partial module.
+
+Adding a module must not require edits to `catalog.py`, `router.py`, `runner.py`, the assistant, or the generated indexes. Built-in development places the validated package under `biomed_workbench/modules/builtin/`, then rebuilds generated projections:
+
+```bash
+python3 tools/build_module_index.py
+python3 tools/build_catalog.py
+python3 tools/validate_workbench.py --release
+python3 -m unittest discover -s tests -p 'test*.py'
+```
+
+## Compatibility Changes
+
+- Adding a tested version requires an authoritative version source, a version probe, exact compatibility-row coverage, input/output regression fixtures, and representative end-to-end validation.
+- Changing required input fields, units, coordinate conventions, output meaning, defaults, or quality interpretation requires a module version update.
+- Removing an ID or breaking the v0.2 compatibility projection requires a documented plugin-level migration.
+- Optional credentials must remain in the project allowlist. `NCBI_API_KEY` is currently the only allowed credential.
+- Generated indexes must exactly match recursive manifest discovery and are checked by digest during release validation.
 
 ## Release Flow
 
-The plugin manifest is the version source. Package metadata and the generated capability catalog read it automatically.
+The plugin manifest is the package version source. Publish only when rebuilding the generated index and catalog produces no diff, all unit/contract/end-to-end/release tests pass, and release validation confirms the single skill, 48 built-in modules, complete compatibility evidence, source-neutral paths, and absence of legacy registration surfaces.
 
-```bash
-python3 tools/build_catalog.py
-python3 tools/validate_workbench.py --release
-python3 -m unittest discover -s tests -v
-```
-
-Publish only when the generated catalog is unchanged after rebuilding, all end-to-end cases pass, and release validation reports no legacy or bridge surfaces.
-
-For local Codex iteration, apply a cachebuster and reinstall from the configured marketplace:
+For local Codex iteration:
 
 ```bash
 python3 tools/prepare_local_update.py
 codex plugin add biomed-workbench@biomed-workbench
 ```
 
-Start a new Codex task after reinstalling so the updated Skill metadata is loaded.
+Start a new Codex task after reinstalling so updated Skill metadata and module indexes are loaded.

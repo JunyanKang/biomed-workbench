@@ -645,28 +645,28 @@ git commit -m "feat: validate and add scientific modules atomically"
 **Interfaces:**
 - Replaces: domain-spec addition workflow with `tools/create_module.py`.
 
-- [ ] **Step 1: Write failing release-surface test**
+- [x] **Step 1: Write failing release-surface test**
 
 Assert no `capability_specs` directory, no `add_capability.py`, no operational
 domain ownership in module paths, and one independent directory per module.
 
-- [ ] **Step 2: Run and verify legacy files trigger failure**
+- [x] **Step 2: Run and verify legacy files trigger failure**
 
 Run: `python3 -m unittest tests.release.test_release_surface`
 
-- [ ] **Step 3: Delete migration surfaces and update tests/docs**
+- [x] **Step 3: Delete migration surfaces and update tests/docs**
 
 Rewrite the old add-capability end-to-end test to create, validate, discover,
 route, and execute a module. Document manifest fields, extension workflow,
 compatibility policy, and generated-index rules.
 
-- [ ] **Step 4: Run complete test suite**
+- [x] **Step 4: Run complete test suite**
 
 Run: `python3 -m unittest discover -s tests -p 'test*.py'`
 
 Expected: all tests pass with 48 built-in modules.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A biomed_workbench/capability_specs tools/add_capability.py tests docs/architecture.md

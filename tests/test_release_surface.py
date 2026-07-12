@@ -32,10 +32,12 @@ class ReleaseSurfaceTests(unittest.TestCase):
         self.assertEqual(plugin["license"], "Apache-2.0")
         self.assertEqual(plugin["version"], catalog["version"])
 
-    def test_domain_specifications_replace_workflow_reference_bridges(self):
-        names = {path.stem for path in (ROOT / "biomed_workbench" / "capability_specs").glob("*.json")}
+    def test_independent_modules_replace_workflow_reference_bridges(self):
+        module_files = sorted((ROOT / "biomed_workbench" / "modules" / "builtin").glob("*/module.json"))
 
-        self.assertEqual(names, {"evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication"})
+        self.assertEqual(len(module_files), 48)
+        self.assertFalse((ROOT / "biomed_workbench" / "capability_specs").exists())
+        self.assertFalse((ROOT / "tools" / "add_capability.py").exists())
         self.assertFalse((ROOT / "references").exists())
 
     def test_readme_documents_verified_install_and_test_commands(self):
