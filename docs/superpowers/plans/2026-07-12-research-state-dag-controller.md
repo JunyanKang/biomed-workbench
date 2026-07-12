@@ -499,19 +499,19 @@ def evaluate_project_quality(state, node, manifest) -> tuple[QualityFinding, ...
 def interpretation_allowed(findings) -> bool: ...
 ```
 
-- [ ] **Step 1: Write failing scientific-gate tests**
+- [x] **Step 1: Write failing scientific-gate tests**
 
 Cover identifier mismatch, genome-build mismatch, coordinate mismatch, unit mismatch, denominator mismatch, processing-level mismatch, duplicated evidence, circular validation, pseudoreplication, complete confounding, outcome-informed threshold change, unsupported causal language, claim-evidence drift, and privacy violation. Verify fatal and major findings block interpretation while warning and info findings remain attached.
 
-- [ ] **Step 2: Run and verify missing quality engine**
+- [x] **Step 2: Run and verify missing quality engine**
 
 Run: `python3 -m unittest tests.unit.orchestration.test_quality tests.contract.test_scientific_inference_gates`
 
-- [ ] **Step 3: Implement deterministic cross-project gates**
+- [x] **Step 3: Implement deterministic cross-project gates**
 
 Use artifact and context metadata only; do not infer missing units, identifiers, builds, or denominators from names. Every finding has stable code, linked subjects, remediation artifact types, and a content-derived ID. A quality waiver is a decision event that narrows scope; it never deletes the finding or changes fatal to pass.
 
-- [ ] **Step 4: Run tests and commit**
+- [x] **Step 4: Run tests and commit**
 
 ```bash
 python3 -m unittest tests.unit.orchestration.test_quality tests.contract.test_scientific_inference_gates
