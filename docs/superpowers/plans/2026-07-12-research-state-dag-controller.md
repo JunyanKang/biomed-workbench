@@ -270,19 +270,19 @@ class EvidenceRecord:
     rationale: str
 ```
 
-- [ ] **Step 1: Write failing falsifiability and anti-confirmation-bias tests**
+- [x] **Step 1: Write failing falsifiability and anti-confirmation-bias tests**
 
 Reject hypotheses without disconfirming observations or alternatives. Reject evidence without an experimental unit, uncertainty, rationale, or linked artifact. Verify weakening and refuting evidence remain separate from support and that two records with the same `independent_group` count as one orthogonal group.
 
-- [ ] **Step 2: Run and verify missing ledger failures**
+- [x] **Step 2: Run and verify missing ledger failures**
 
 Run: `python3 -m unittest tests.unit.kernel.test_hypotheses tests.unit.kernel.test_evidence`
 
-- [ ] **Step 3: Implement immutable ledger operations**
+- [x] **Step 3: Implement immutable ledger operations**
 
 Provide `add_hypothesis`, `revise_hypothesis`, `add_evidence`, and `evidence_partition`. Revisions create a new hypothesis value with incremented revision and parent linkage; they never mutate or remove the prior value. Duplicate evidence IDs or contradictory duplicate relations for the same artifact/hypothesis pair are rejected.
 
-- [ ] **Step 4: Run tests and commit**
+- [x] **Step 4: Run tests and commit**
 
 ```bash
 python3 -m unittest tests.unit.kernel.test_hypotheses tests.unit.kernel.test_evidence
