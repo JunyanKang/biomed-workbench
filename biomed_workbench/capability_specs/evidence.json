@@ -1,0 +1,331 @@
+{
+  "capabilities": [
+    {
+      "access": "public_api",
+      "description": "Resolve gene records and linked protein, ClinVar, and PubMed identifiers in one bounded workflow.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:gene_evidence",
+      "id": "gene-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "gene": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "max_links": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "organism": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "gene"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Build an NCBI gene evidence bundle",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Search PubMed or PMC and return normalized summaries with query provenance.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:literature_evidence",
+      "id": "literature-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "database": {
+            "enum": [
+              "pubmed",
+              "pmc"
+            ],
+            "type": "string"
+          },
+          "max_records": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "query": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve literature evidence",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Fetch database-native records such as XML, MEDLINE, GenBank, or FASTA.",
+      "entrypoint": "biomed_workbench.capabilities.ncbi:fetch",
+      "id": "ncbi-fetch",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "database": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "type": "array"
+          },
+          "retmode": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rettype": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "database",
+          "ids"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Fetch NCBI Entrez records",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Return current Entrez database metadata and searchable fields.",
+      "entrypoint": "biomed_workbench.capabilities.ncbi:info",
+      "id": "ncbi-info",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "database": {
+            "nullable": true,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Inspect NCBI Entrez databases",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Resolve linked identifiers between Entrez databases for evidence chaining.",
+      "entrypoint": "biomed_workbench.capabilities.ncbi:link",
+      "id": "ncbi-link",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "type": "array"
+          },
+          "linkname": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source_database": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "target_database": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_database",
+          "target_database",
+          "ids"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Link NCBI Entrez databases",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Search any valid Entrez database with bounded pagination and optional history state.",
+      "entrypoint": "biomed_workbench.capabilities.ncbi:search",
+      "id": "ncbi-search",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "database": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "idtype": {
+            "nullable": true,
+            "type": "string"
+          },
+          "retmax": {
+            "maximum": 100000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "retstart": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "sort": {
+            "nullable": true,
+            "type": "string"
+          },
+          "term": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "use_history": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "database",
+          "term"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Search NCBI Entrez",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Run a bounded Entrez search and return normalized summaries in one composable action.",
+      "entrypoint": "biomed_workbench.capabilities.ncbi:search_summary",
+      "id": "ncbi-search-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "database": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "retmax": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "term": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "database",
+          "term"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Search and summarize NCBI Entrez",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve normalized document summaries for identifiers in an Entrez database.",
+      "entrypoint": "biomed_workbench.capabilities.ncbi:summary",
+      "id": "ncbi-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "database": {
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "type": "string"
+          },
+          "ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "database",
+          "ids"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize NCBI Entrez records",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve ClinVar summaries and linked gene and PubMed records with interpretation limits.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:variant_evidence",
+      "id": "variant-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "max_links": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "max_records": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "query": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Build an NCBI variant evidence bundle",
+      "workflow": "evidence"
+    }
+  ],
+  "schema_version": 1,
+  "workflow": "evidence"
+}

@@ -1,0 +1,311 @@
+{
+  "capabilities": [
+    {
+      "access": "offline",
+      "description": "Report table shape, inferred column types, missingness, uniqueness, and numeric ranges.",
+      "entrypoint": "biomed_workbench.capabilities.data:profile_table",
+      "id": "data-profile",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "rows": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Profile structured scientific rows",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Calculate feature means, log2 fold changes, Welch tests, and BH-adjusted p-values for two groups.",
+      "entrypoint": "biomed_workbench.capabilities.omics:differential_expression",
+      "id": "differential-expression",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "genes": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "group_a": {
+            "items": {
+              "type": "array"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "group_b": {
+            "items": {
+              "type": "array"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "pseudocount": {
+            "minimum": 1e-09,
+            "type": "number"
+          }
+        },
+        "required": [
+          "genes",
+          "group_a",
+          "group_b"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Run compact differential expression",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Calculate one-sided hypergeometric enrichment and BH correction against an explicit background.",
+      "entrypoint": "biomed_workbench.capabilities.omics:enrichment_analysis",
+      "id": "enrichment-analysis",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "background_genes": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "gene_sets": {
+            "type": "object"
+          },
+          "query_genes": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "query_genes",
+          "gene_sets",
+          "background_genes"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Run gene-set overrepresentation",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Compute library sizes, detected features, sparsity, and zero-library warnings for a numeric matrix.",
+      "entrypoint": "biomed_workbench.capabilities.omics:expression_qc",
+      "id": "expression-qc",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "genes": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "matrix": {
+            "items": {
+              "type": "array"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "samples": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "genes",
+          "samples",
+          "matrix"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Quality-control an expression matrix",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Deduplicate edges and report degrees, hubs, and weakly connected components.",
+      "entrypoint": "biomed_workbench.capabilities.omics:network_summary",
+      "id": "network-analysis",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "directed": {
+            "type": "boolean"
+          },
+          "edges": {
+            "items": {
+              "type": "array"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "edges"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize a biological network",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Validate and summarize DNA, RNA, or protein sequence composition and ambiguity.",
+      "entrypoint": "biomed_workbench.capabilities.data:sequence_inspect",
+      "id": "sequence-inspect",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "alphabet": {
+            "enum": [
+              "dna",
+              "rna",
+              "protein"
+            ],
+            "type": "string"
+          },
+          "sequence": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "sequence"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Inspect a biological sequence",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Compute per-cell counts, detected genes, mitochondrial fraction, and transparent threshold flags.",
+      "entrypoint": "biomed_workbench.capabilities.omics:single_cell_qc",
+      "id": "single-cell-qc",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "cells": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "genes": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "matrix": {
+            "items": {
+              "type": "array"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "max_mito_percent": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "min_counts": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "min_genes": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "mitochondrial_prefixes": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          }
+        },
+        "required": [
+          "genes",
+          "cells",
+          "matrix"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Quality-control single-cell count data",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Count SNVs, indels, MNVs, filters, chromosomes, transitions, transversions, and Ti/Tv ratio.",
+      "entrypoint": "biomed_workbench.capabilities.omics:variant_summary",
+      "id": "variant-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "variants": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "variants"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize structured variants",
+      "workflow": "omics"
+    }
+  ],
+  "schema_version": 1,
+  "workflow": "omics"
+}

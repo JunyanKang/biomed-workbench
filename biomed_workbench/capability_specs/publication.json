@@ -1,0 +1,185 @@
+{
+  "capabilities": [
+    {
+      "access": "offline",
+      "description": "Normalize DOI values, detect duplicates, and report missing citation metadata without asserting validity.",
+      "entrypoint": "biomed_workbench.capabilities.publication:citation_audit",
+      "id": "citation-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "references": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "references"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit reference metadata",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Require a claim, data source, and plot form for every uniquely labeled figure panel.",
+      "entrypoint": "biomed_workbench.capabilities.publication:figure_specification",
+      "id": "figure-specification",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "panels": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "title": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "panels"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Specify a scientific figure",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Check core sections, claim grounding, figures, data availability, and code availability before editorial synthesis.",
+      "entrypoint": "biomed_workbench.capabilities.publication:manuscript_audit",
+      "id": "manuscript-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "claims": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "code_availability": {
+            "type": "boolean"
+          },
+          "data_availability": {
+            "type": "boolean"
+          },
+          "figure_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "sections": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "sections",
+          "claims"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit manuscript readiness",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Check inventive concept, essential features, enablement examples, alternatives, and prior-art evidence.",
+      "entrypoint": "biomed_workbench.capabilities.publication:patent_disclosure_audit",
+      "id": "patent-disclosure-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "alternatives": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "essential_features": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "examples": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "prior_art": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "problem": {
+            "type": "string"
+          },
+          "solution": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "problem",
+          "solution",
+          "essential_features",
+          "examples",
+          "alternatives",
+          "prior_art"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit a research invention disclosure",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Preserve every reviewer comment, response, manuscript action, status, and unresolved item.",
+      "entrypoint": "biomed_workbench.capabilities.publication:response_matrix",
+      "id": "response-matrix",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "comments": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "comments"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Build a reviewer response matrix",
+      "workflow": "publication"
+    }
+  ],
+  "schema_version": 1,
+  "workflow": "publication"
+}

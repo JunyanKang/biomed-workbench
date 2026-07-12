@@ -13,8 +13,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from biomed_workbench.catalog import all_capabilities, capability_to_dict, resolve_entrypoint  # noqa: E402
+from biomed_workbench.catalog import SPECIFICATION_ROOT, all_capabilities, capability_to_dict, resolve_entrypoint  # noqa: E402
+from biomed_workbench.models import WORKFLOWS  # noqa: E402
 from biomed_workbench.services.credentials import ALLOWED_CREDENTIALS  # noqa: E402
+from biomed_workbench.version import VERSION  # noqa: E402
 
 CATALOG_FIELDS = {"id", "workflow", "kind", "title", "description", "entrypoint", "input_schema", "requirements", "access", "mutability"}
 SECRET_PATTERNS = [
@@ -22,6 +24,7 @@ SECRET_PATTERNS = [
 ]
 LOCAL_PATH_PATTERNS = ("/Users/" + "kangjunyan", "/private/" + "var/folders/")
 LEGACY_PATHS = ("scripts", "tools/adapters", "references/source_manifest.json", "references/source_file_audit.json")
+FORBIDDEN_INFRASTRUCTURE_MARKERS = ("runtime", "container", "slurm", "gpu", "local-model")
 
 
 def publishable_files():
@@ -59,11 +62,14 @@ def main() -> int:
     catalog_path = ROOT / "tools" / "catalog.json"
     catalog = json.loads(catalog_path.read_text()) if catalog_path.is_file() else {}
     capabilities = all_capabilities()
+    specification_names = {path.name for path in SPECIFICATION_ROOT.glob("*.json")}
+    if specification_names != {f"{workflow}.json" for workflow in WORKFLOWS}:
+        errors.append("capability specifications must have exactly one file per workflow")
     expected_rows = [capability_to_dict(item) for item in capabilities]
     if catalog.get("entry_count") != len(capabilities) or catalog.get("entries") != expected_rows:
         errors.append("generated catalog does not exactly match the registry")
-    if plugin.get("version") != catalog.get("version"):
-        errors.append("plugin and catalog versions differ")
+    if plugin.get("version") != catalog.get("version") or plugin.get("version") != VERSION:
+        errors.append("plugin, package, and catalog versions differ")
     for capability in capabilities:
         if set(capability_to_dict(capability)) != CATALOG_FIELDS:
             errors.append(f"capability {capability.id} has an invalid operational field set")
@@ -71,6 +77,9 @@ def main() -> int:
             resolve_entrypoint(capability)
         except Exception:
             errors.append(f"capability entrypoint does not resolve: {capability.id}")
+        operational_identity = f"{capability.id} {capability.workflow} {capability.entrypoint}".lower()
+        if any(marker in operational_identity for marker in FORBIDDEN_INFRASTRUCTURE_MARKERS):
+            errors.append(f"capability claims excluded infrastructure ownership: {capability.id}")
 
     tracked = list(publishable_files())
     for path in tracked:

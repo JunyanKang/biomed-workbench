@@ -52,6 +52,17 @@ class Capability:
             raise ValueError("capability title and description must be meaningful")
         if not self.entrypoint.strip() or not isinstance(self.input_schema, dict):
             raise ValueError("capability requires an entrypoint and object input schema")
+        properties = self.input_schema.get("properties")
+        required = self.input_schema.get("required")
+        if (
+            self.input_schema.get("type") != "object"
+            or not isinstance(properties, dict)
+            or not isinstance(required, list)
+            or any(not isinstance(name, str) for name in required)
+            or not set(required) <= set(properties)
+            or self.input_schema.get("additionalProperties") is not False
+        ):
+            raise ValueError("capability input schema must be a closed object contract")
         if not all(isinstance(requirement, str) and requirement.strip() for requirement in self.requirements):
             raise ValueError("capability requirements must be nonempty strings")
 

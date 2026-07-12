@@ -1,0 +1,146 @@
+{
+  "capabilities": [
+    {
+      "access": "offline",
+      "description": "Find SpCas9 NGG guide contexts on both strands and report transparent heuristic checks.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:crispr_guides",
+      "id": "crispr-design",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "guide_length": {
+            "maximum": 25,
+            "minimum": 15,
+            "type": "integer"
+          },
+          "max_guides": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sequence": {
+            "minLength": 18,
+            "type": "string"
+          }
+        },
+        "required": [
+          "sequence"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Discover CRISPR guide candidates",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Rank facing primer pairs with explicit thermodynamic approximations and validation limits.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:design_primers",
+      "id": "primer-design",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "max_length": {
+            "maximum": 40,
+            "minimum": 14,
+            "type": "integer"
+          },
+          "max_pairs": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "min_length": {
+            "maximum": 40,
+            "minimum": 14,
+            "type": "integer"
+          },
+          "target_tm": {
+            "maximum": 100,
+            "minimum": 20,
+            "type": "number"
+          },
+          "template": {
+            "minLength": 28,
+            "type": "string"
+          }
+        },
+        "required": [
+          "template"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Design PCR primer candidates",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Locate selected restriction motifs with explicit one-based coordinates.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:restriction_sites",
+      "id": "restriction-plan",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "enzymes": {
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "sequence": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "sequence"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Map restriction enzyme sites",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Create a deterministic preferred-codon coding sequence with explicit optimization limits.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:back_translate",
+      "id": "sequence-back-translate",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "organism": {
+            "enum": [
+              "human",
+              "ecoli"
+            ],
+            "type": "string"
+          },
+          "protein": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "protein"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Back-translate a protein sequence",
+      "workflow": "molecular_design"
+    }
+  ],
+  "schema_version": 1,
+  "workflow": "molecular_design"
+}

@@ -44,7 +44,7 @@ class RunnerTests(unittest.TestCase):
             title="Fixture write",
             description="A fixture that represents an output-writing capability.",
             entrypoint="fixture:call",
-            input_schema={"type": "object", "properties": {}, "additionalProperties": False},
+            input_schema={"type": "object", "properties": {}, "required": [], "additionalProperties": False},
             requirements=(),
             access="offline",
             mutability="writes_output",

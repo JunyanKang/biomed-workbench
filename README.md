@@ -99,8 +99,11 @@ Inspect the input contract with `tools/search_tools.py --id CAPABILITY_ID` befor
 - `tools/run_tool.py`: generic runner for direct, bounded tools.
 - `tools/validate_workbench.py`: release validation for single-entry skill, catalog consistency, source coverage, and publish-safe paths.
 - `biomed_workbench/capabilities/`: independently rewritten scientific implementations.
+- `biomed_workbench/capability_specs/`: one validated contract file per scientific domain.
 - `biomed_workbench/services/`: bounded public scientific database clients and credential policy.
 - `tests/`: unit, contract, end-to-end, and release checks.
+
+The central registry contains no domain definitions. See `docs/architecture.md` for the extension contract, compatibility rules, and release flow.
 
 ## Sources And License Notes
 

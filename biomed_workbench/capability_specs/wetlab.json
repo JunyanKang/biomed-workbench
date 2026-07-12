@@ -1,0 +1,166 @@
+{
+  "capabilities": [
+    {
+      "access": "offline",
+      "description": "Calculate stepwise concentrations and transfer volumes for a constant-factor dilution series.",
+      "entrypoint": "biomed_workbench.capabilities.experiment:serial_dilution",
+      "id": "dilution-plan",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "dilution_factor": {
+            "minimum": 1.0,
+            "type": "number"
+          },
+          "final_volume_ul": {
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "initial_concentration": {
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "steps": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "initial_concentration",
+          "dilution_factor",
+          "steps",
+          "final_volume_ul"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Plan a serial dilution",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
+      "description": "Check monotonicity and estimate an empirical half-range concentration on a log scale.",
+      "entrypoint": "biomed_workbench.capabilities.experiment:dose_response_summary",
+      "id": "dose-response",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "concentrations": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "direction": {
+            "enum": [
+              "decreasing",
+              "increasing"
+            ],
+            "type": "string"
+          },
+          "responses": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "type": "array"
+          }
+        },
+        "required": [
+          "concentrations",
+          "responses"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize a dose-response series",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
+      "description": "Estimate maximum log-phase growth rate and doubling time from positive measurements.",
+      "entrypoint": "biomed_workbench.capabilities.experiment:growth_curve_summary",
+      "id": "growth-curve",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "times": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "values": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "window": {
+            "minimum": 2,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "times",
+          "values"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize a growth curve",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
+      "description": "Calculate per-reaction and overage-adjusted PCR component volumes with conservation checks.",
+      "entrypoint": "biomed_workbench.capabilities.experiment:pcr_mix",
+      "id": "pcr-plan",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "components": {
+            "type": "object"
+          },
+          "overage_percent": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "reaction_volume_ul": {
+            "minimum": 0.0,
+            "type": "number"
+          },
+          "reactions": {
+            "maximum": 100000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reactions",
+          "reaction_volume_ul",
+          "components"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Calculate a PCR master mix",
+      "workflow": "wetlab"
+    }
+  ],
+  "schema_version": 1,
+  "workflow": "wetlab"
+}

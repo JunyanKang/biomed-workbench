@@ -12,7 +12,7 @@ class ModelTests(unittest.TestCase):
             title="Search NCBI Entrez",
             description="Search a selected Entrez database with a bounded query.",
             entrypoint="biomed_workbench.capabilities.ncbi:search",
-            input_schema={"type": "object"},
+            input_schema={"type": "object", "properties": {}, "required": [], "additionalProperties": False},
             requirements=(),
             access="public_api",
             mutability="read_only",
@@ -29,7 +29,7 @@ class ModelTests(unittest.TestCase):
             title="Valid",
             description="A sufficiently clear capability description.",
             entrypoint="module:function",
-            input_schema={},
+            input_schema={"type": "object", "properties": {}, "required": [], "additionalProperties": False},
             requirements=(),
             access="public_api",
             mutability="read_only",
@@ -38,6 +38,27 @@ class ModelTests(unittest.TestCase):
             values = {**base, field: value}
             with self.subTest(field=field), self.assertRaises(ValueError):
                 Capability(**values)
+
+    def test_capability_rejects_open_or_inconsistent_input_schemas(self):
+        base = dict(
+            id="valid-id",
+            workflow="evidence",
+            kind="service",
+            title="Valid",
+            description="A sufficiently clear capability description.",
+            entrypoint="module:function",
+            requirements=(),
+            access="public_api",
+            mutability="read_only",
+        )
+        invalid = (
+            {"type": "array"},
+            {"type": "object", "properties": {}, "required": []},
+            {"type": "object", "properties": {}, "required": ["missing"], "additionalProperties": False},
+        )
+        for schema in invalid:
+            with self.subTest(schema=schema), self.assertRaises(ValueError):
+                Capability(**base, input_schema=schema)
 
     def test_execution_result_serializes_scientific_outputs(self):
         result = ExecutionResult(

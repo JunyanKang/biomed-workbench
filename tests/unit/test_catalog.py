@@ -37,7 +37,7 @@ class CatalogTests(unittest.TestCase):
             title="Broken",
             description="A deliberately broken resolution fixture.",
             entrypoint="missing.module:call",
-            input_schema={},
+            input_schema={"type": "object", "properties": {}, "required": [], "additionalProperties": False},
             requirements=(),
             access="offline",
             mutability="read_only",
