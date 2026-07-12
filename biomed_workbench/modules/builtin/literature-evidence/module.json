@@ -46,6 +46,7 @@
       ],
       "conflicts": [],
       "ecosystem": "runtime",
+      "identity": "python-runtime",
       "name": "python",
       "platforms": [
         "any"
@@ -56,6 +57,12 @@
         "3.14.3"
       ],
       "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
       "version_source": "https://www.python.org/downloads/release/python-3143/"
     }
   ],
@@ -257,8 +264,28 @@
       ],
       "verified_at": "2026-07-12",
       "version_differences": [
-        "ESummary 2.0 uses database-specific document-summary schemas.",
-        "EFetch output depends on database, rettype, and retmode."
+        {
+          "affected_versions": [
+            "==contract-2026-03-04"
+          ],
+          "category": "field",
+          "compatibility_effect": "requires-parser",
+          "description": "ESummary 2.0 uses database-specific document-summary schemas.",
+          "id": "esummary-database-fields",
+          "required_action": "Validate and parse fields against the selected Entrez database response schema.",
+          "source": "https://www.ncbi.nlm.nih.gov/books/NBK25499/"
+        },
+        {
+          "affected_versions": [
+            "==contract-2026-03-04"
+          ],
+          "category": "output-format",
+          "compatibility_effect": "requires-format",
+          "description": "EFetch output depends on database, return type, and return mode.",
+          "id": "efetch-return-format",
+          "required_action": "Bind database, rettype, and retmode to an explicitly validated output format.",
+          "source": "https://www.ncbi.nlm.nih.gov/books/NBK25499/"
+        }
       ],
       "version_pattern": "(contract-[0-9]{4}-[0-9]{2}-[0-9]{2})",
       "version_probe": [

@@ -44,6 +44,8 @@ Every `module.json` is closed and versioned. It declares:
 
 An undeclared or untested tool, dependency, format, genome build, coordinate system, or compatibility combination blocks execution. A newer version is not assumed compatible until its independent regression and end-to-end evidence is recorded in a new module version.
 
+Tool version behavior is structured rather than free text. Each affected surface declares an ID, exact supported version rules, category (`parameter`, `api`, `field`, `default`, `behavior`, `input-format`, or `output-format`), compatibility effect, required action, and authoritative source. Dependencies declare their own identity, typed bounded version probe, parse pattern, tested and allowed versions, platform scope, and structured conflict records. Python runtime, Python/R packages, Java or system commands, services, and databases therefore enter the compatibility decision through declared evidence rather than implicit package discovery.
+
 ## Add A Module
 
 Implement an importable, bounded scientific function, then prepare a complete creation request:

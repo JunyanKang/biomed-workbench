@@ -78,11 +78,18 @@
     {
       "name": "python",
       "ecosystem": "runtime",
+      "identity": "python-runtime",
       "required": true,
       "tested_versions": ["3.14.3"],
       "allowed_versions": ["==3.14.3"],
       "version_source": "https://www.python.org/downloads/release/python-3143/",
       "verified_at": "2026-07-12",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
       "purpose": "Execute the module entrypoint.",
       "conflicts": [],
       "platforms": ["any"]

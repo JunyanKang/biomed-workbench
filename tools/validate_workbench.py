@@ -154,7 +154,7 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 303
+                or research_report.get("test_count", 0) < 306
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
                 != {"scientific_command", "command_input_binding", "command_output_binding", "bounded_process_result"}

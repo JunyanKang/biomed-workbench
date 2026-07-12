@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import importlib
-import importlib.metadata
 import json
 import platform as platform_module
 import re
@@ -98,15 +97,11 @@ def _run_callable_probe(target: str, timeout: int) -> str:
     return result.strip()
 
 
-def _dependency_version(name: str, ecosystem: str) -> str | None:
-    if ecosystem == "runtime" and name == "python":
-        return platform_module.python_version()
-    if ecosystem == "python":
-        try:
-            return importlib.metadata.version(name)
-        except importlib.metadata.PackageNotFoundError:
-            return None
-    return None
+def probe_python_runtime(*, timeout_seconds: int) -> str:
+    """Return the active Python runtime version for a declared callable probe."""
+    if timeout_seconds <= 0:
+        raise ValueError("timeout_seconds must be positive")
+    return platform_module.python_version()
 
 
 def detect_environment(
@@ -122,7 +117,7 @@ def detect_environment(
     run_probe = probe_runner or _run_probe
     run_callable_probe = callable_probe_runner or _run_callable_probe
     run_service_probe = service_probe_runner or _run_callable_probe
-    provide_dependency = dependency_provider or _dependency_version
+    provide_dependency = dependency_provider
     tools = {}
     for requirement in manifest.tool_requirements:
         timeout = min(manifest.execution.timeout_seconds, requirement.version_probe_timeout_seconds, 30)
@@ -141,11 +136,23 @@ def detect_environment(
     dependencies = {}
     for requirement in manifest.dependencies:
         try:
-            version = provide_dependency(requirement.name, requirement.ecosystem)
-        except (OSError, RuntimeError, ValueError):
-            version = None
-        if version:
-            dependencies[requirement.name] = str(version)
+            if dependency_provider is not None:
+                output = provide_dependency(requirement.name, requirement.ecosystem)
+            else:
+                timeout = min(manifest.execution.timeout_seconds, requirement.version_probe_timeout_seconds, 30)
+                if requirement.version_probe_kind == "command":
+                    output = run_probe(tuple(requirement.version_probe), timeout)
+                elif requirement.version_probe_kind == "python_callable":
+                    output = run_callable_probe(requirement.version_probe[0], timeout)
+                else:
+                    output = run_service_probe(requirement.version_probe[0], timeout)
+            if not output:
+                continue
+            match = re.search(requirement.version_pattern, str(output))
+            if match:
+                dependencies[requirement.name] = match.group(1) if match.groups() else match.group(0)
+        except (ImportError, AttributeError, OSError, RuntimeError, ValueError, subprocess.SubprocessError, TimeoutError):
+            continue
     return EnvironmentSnapshot(tools=tools, dependencies=dependencies, platform=platform_name or _platform_name())
 
 

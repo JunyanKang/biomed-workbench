@@ -54,8 +54,20 @@ def _tool(value: ToolRequirement) -> dict[str, object]:
         "version_probe": list(value.version_probe),
         "version_probe_kind": value.version_probe_kind,
         "version_probe_timeout_seconds": value.version_probe_timeout_seconds,
+        "version_pattern": value.version_pattern,
         "mismatch_policy": value.mismatch_policy,
-        "version_differences": list(value.version_differences),
+        "version_differences": [
+            {
+                "id": item.id,
+                "affected_versions": list(item.affected_versions),
+                "category": item.category,
+                "description": item.description,
+                "compatibility_effect": item.compatibility_effect,
+                "required_action": item.required_action,
+                "source": item.source,
+            }
+            for item in value.version_differences
+        ],
         "platforms": list(value.platforms),
     }
 
@@ -64,13 +76,27 @@ def _dependency(value: DependencyRequirement) -> dict[str, object]:
     return {
         "name": value.name,
         "ecosystem": value.ecosystem,
+        "identity": value.identity,
         "required": value.required,
         "tested_versions": list(value.tested_versions),
         "allowed_versions": list(value.allowed_versions),
         "version_source": value.version_source,
         "verified_at": value.verified_at,
+        "version_probe": list(value.version_probe),
+        "version_probe_kind": value.version_probe_kind,
+        "version_probe_timeout_seconds": value.version_probe_timeout_seconds,
+        "version_pattern": value.version_pattern,
         "purpose": value.purpose,
-        "conflicts": list(value.conflicts),
+        "conflicts": [
+            {
+                "dependency": item.dependency,
+                "versions": list(item.versions),
+                "reason": item.reason,
+                "required_action": item.required_action,
+                "source": item.source,
+            }
+            for item in value.conflicts
+        ],
         "platforms": list(value.platforms),
     }
 

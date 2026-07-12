@@ -145,7 +145,13 @@ def _evidence_flags(manifest: ModuleManifest) -> tuple[bool, bool, bool]:
         for item in manifest.tool_requirements
     )
     dependency_complete = bool(manifest.dependencies) and all(
-        item.tested_versions and item.allowed_versions and item.version_source.startswith("https://") and item.verified_at
+        item.identity
+        and item.tested_versions
+        and item.allowed_versions
+        and item.version_source.startswith("https://")
+        and item.verified_at
+        and item.version_probe
+        and item.version_pattern
         for item in manifest.dependencies
     )
     format_complete = all(

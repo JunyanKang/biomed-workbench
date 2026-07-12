@@ -2,6 +2,9 @@ import json
 import unittest
 from pathlib import Path
 
+from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.registry import ModuleRegistry
+
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = ROOT / "reports" / "module-registry-verification.json"
@@ -43,6 +46,8 @@ class ModuleRegistryEvidenceTests(unittest.TestCase):
             {
                 "tool_requirements": 9,
                 "dependency_requirements": 48,
+                "dependency_probes": 48,
+                "structured_version_differences": 18,
                 "input_format_contracts": 48,
                 "output_format_contracts": 48,
                 "compatibility_rows": 48,
@@ -55,6 +60,17 @@ class ModuleRegistryEvidenceTests(unittest.TestCase):
 
         for marker in ("/Users/", "/private/", "/var/folders/", "nvapi-", "bf339"):
             self.assertNotIn(marker, text)
+
+    def test_every_dependency_has_a_typed_probe_and_tool_differences_are_structured(self):
+        modules = ModuleRegistry.discover(BUILTIN_ROOT).all()
+        dependencies = [item for module in modules for item in module.dependencies]
+        differences = [item for module in modules for tool in module.tool_requirements for item in tool.version_differences]
+
+        self.assertEqual(len(dependencies), 48)
+        self.assertTrue(all(item.identity and item.version_probe and item.version_pattern for item in dependencies))
+        self.assertEqual({item.version_probe_kind for item in dependencies}, {"python_callable"})
+        self.assertEqual(len(differences), 18)
+        self.assertTrue(all(item.category and item.compatibility_effect and item.required_action and item.source.startswith("https://") for item in differences))
 
 
 if __name__ == "__main__":

@@ -83,11 +83,16 @@ def valid_manifest_payload():
             {
                 "name": "python",
                 "ecosystem": "runtime",
+                "identity": "python-runtime",
                 "required": True,
                 "tested_versions": ["3.14.3"],
                 "allowed_versions": ["==3.14.3"],
                 "version_source": "https://www.python.org/downloads/release/python-3143/",
                 "verified_at": "2026-07-12",
+                "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"],
+                "version_probe_kind": "python_callable",
+                "version_probe_timeout_seconds": 5,
+                "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
                 "purpose": "Execute the module entrypoint.",
                 "conflicts": [],
                 "platforms": ["any"],
@@ -209,6 +214,32 @@ class ModuleContractTests(unittest.TestCase):
             mutator(payload)
             with self.subTest(payload=payload), self.assertRaises(ValueError):
                 parse_manifest(payload)
+
+    def test_version_difference_requires_typed_affected_surface_action_and_source(self):
+        payload = command_manifest_payload()
+        payload["tool_requirements"][0]["version_differences"] = [
+            {
+                "id": "fixture-output-field-v2",
+                "affected_versions": ["==2.4.1"],
+                "category": "field",
+                "description": "Version 2.4.1 emits the validated result field names.",
+                "compatibility_effect": "requires-parser",
+                "required_action": "Use the version-specific output parser and regression fixture.",
+                "source": "https://example.org/fixture-tool/releases/2.4.1",
+            }
+        ]
+
+        manifest = parse_manifest(payload)
+
+        self.assertEqual(manifest.tool_requirements[0].version_differences[0].category, "field")
+        invalid = copy.deepcopy(payload)
+        del invalid["tool_requirements"][0]["version_differences"][0]["required_action"]
+        with self.assertRaises(ValueError):
+            parse_manifest(invalid)
+        outside = copy.deepcopy(payload)
+        outside["tool_requirements"][0]["version_differences"][0]["affected_versions"] = ["==9.0.0"]
+        with self.assertRaisesRegex(ValueError, "outside"):
+            parse_manifest(outside)
 
     def test_manifest_rejects_unknown_top_level_and_nested_fields(self):
         for mutator in (

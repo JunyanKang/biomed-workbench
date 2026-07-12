@@ -43,7 +43,17 @@ def external_manifest_payload():
             "version_probe_timeout_seconds": 10,
             "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
             "mismatch_policy": "alternative",
-            "version_differences": ["Validated against the 1.11 API and h5ad 0.11 serialization behavior."],
+            "version_differences": [
+                {
+                    "id": "scanpy-h5ad-011",
+                    "affected_versions": ["==1.11.5"],
+                    "category": "output-format",
+                    "description": "The validated Scanpy release uses the declared h5ad 0.11 serialization behavior.",
+                    "compatibility_effect": "requires-format",
+                    "required_action": "Require h5ad 0.11 fixtures and reject unvalidated serialization versions.",
+                    "source": "https://scanpy.readthedocs.io/en/stable/release-notes/",
+                }
+            ],
             "platforms": ["macos-arm64", "linux-x86_64"],
         }
     ]
@@ -51,13 +61,26 @@ def external_manifest_payload():
         {
             "name": "anndata",
             "ecosystem": "python",
+            "identity": "anndata",
             "required": True,
             "tested_versions": ["0.11.4"],
             "allowed_versions": ["==0.11.4"],
             "version_source": "https://anndata.readthedocs.io/en/stable/release-notes/",
             "verified_at": "2026-07-12",
+            "version_probe": ["python", "-c", "import anndata; print(anndata.__version__)"],
+            "version_probe_kind": "command",
+            "version_probe_timeout_seconds": 10,
+            "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
             "purpose": "Read and validate annotated expression matrices.",
-            "conflicts": ["anndata<0.11"],
+            "conflicts": [
+                {
+                    "dependency": "anndata",
+                    "versions": ["<0.11"],
+                    "reason": "Earlier releases are outside the validated h5ad serialization contract.",
+                    "required_action": "Block execution and use the exact validated dependency version.",
+                    "source": "https://anndata.readthedocs.io/en/stable/release-notes/",
+                }
+            ],
             "platforms": ["any"],
         }
     )
@@ -187,6 +210,23 @@ class ModuleCompatibilityTests(unittest.TestCase):
         self.assertEqual(snapshot.dependencies["anndata"], "0.11.4")
         self.assertEqual(commands[0][0], tuple(self.manifest.tool_requirements[0].version_probe))
         self.assertLessEqual(commands[0][1], self.manifest.execution.timeout_seconds)
+
+    def test_detect_environment_executes_declared_dependency_probe_types(self):
+        commands = []
+        callables = []
+
+        snapshot = detect_environment(
+            self.manifest,
+            probe_runner=lambda command, timeout: commands.append((command, timeout)) or (
+                "scanpy 1.11.5" if "scanpy" in " ".join(command) else "anndata 0.11.4"
+            ),
+            callable_probe_runner=lambda target, timeout: callables.append((target, timeout)) or "3.14.3",
+            platform_name="macos-arm64",
+        )
+
+        self.assertEqual(snapshot.dependencies, {"python": "3.14.3", "anndata": "0.11.4"})
+        self.assertEqual(callables[0][0], "biomed_workbench.modules.compatibility:probe_python_runtime")
+        self.assertTrue(any("anndata" in " ".join(command) for command, _timeout in commands))
 
 
 if __name__ == "__main__":

@@ -28,7 +28,17 @@ def eutils_manifest_payload():
             "version_probe_timeout_seconds": 10,
             "version_pattern": "(contract-[0-9]{4}-[0-9]{2}-[0-9]{2})",
             "mismatch_policy": "block",
-            "version_differences": ["ESummary 2.0 uses database-specific document-summary schemas."],
+            "version_differences": [
+                {
+                    "id": "esummary-database-fields",
+                    "affected_versions": ["==contract-2026-03-04"],
+                    "category": "field",
+                    "description": "ESummary 2.0 uses database-specific document-summary schemas.",
+                    "compatibility_effect": "requires-parser",
+                    "required_action": "Validate fields against the selected Entrez database response schema.",
+                    "source": "https://www.ncbi.nlm.nih.gov/books/NBK25499/",
+                }
+            ],
             "platforms": ["any"],
         }
     ]

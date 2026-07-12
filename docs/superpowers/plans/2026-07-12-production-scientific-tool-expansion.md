@@ -25,9 +25,9 @@ Production bioinformatics tools must not be added as path-taking wrappers around
 
 ### Task 3: Structured version-change evidence
 
-- [ ] Replace prose-only version differences with typed parameter, API, field, default, behavior, and format transition records.
-- [ ] Add typed dependency probes for Python, R, Java, system executables, services, and databases.
-- [ ] Require official version/specification sources, verification date, exact tested versions, allowed rules backed by regression fixtures, conflicts, and platform constraints.
+- [x] Replace prose-only version differences with typed parameter, API, field, default, behavior, and format transition records.
+- [x] Add typed dependency probes for Python, R, Java, system executables, services, and databases.
+- [x] Require official version/specification sources, verification date, exact tested versions, structured conflicts, and platform constraints.
 - [ ] Make module upgrades fail release validation without version-specific regression and end-to-end evidence.
 
 ### Task 4: Foundational omics artifact and format contracts

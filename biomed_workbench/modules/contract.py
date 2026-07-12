@@ -16,7 +16,9 @@ MATURITY_LEVELS = frozenset({"experimental", "validated", "reference"})
 SEVERITIES = frozenset({"info", "warning", "major", "fatal"})
 ECOSYSTEMS = frozenset({"python", "r", "java", "system", "service", "database", "runtime"})
 MISMATCH_POLICIES = frozenset({"block", "alternative"})
-VERSION_PROBE_KINDS = frozenset({"command", "python_callable", "service_contract"})
+VERSION_PROBE_KINDS = frozenset({"command", "python_callable", "service_contract", "database_contract"})
+VERSION_DIFFERENCE_CATEGORIES = frozenset({"parameter", "api", "field", "default", "behavior", "input-format", "output-format"})
+COMPATIBILITY_EFFECTS = frozenset({"informational", "requires-parameter", "requires-parser", "requires-format", "breaking"})
 GENOME_BUILD_POLICIES = frozenset({"not_applicable", "required", "declared", "any_validated"})
 REPRESENTATIONS = frozenset({"structured", "text", "binary", "sparse", "container"})
 ALLOWED_CREDENTIALS = frozenset({"NCBI_API_KEY"})
@@ -68,6 +70,26 @@ class ExecutionContract:
 
 
 @dataclass(frozen=True)
+class VersionDifference:
+    id: str
+    affected_versions: tuple[str, ...]
+    category: str
+    description: str
+    compatibility_effect: str
+    required_action: str
+    source: str
+
+
+@dataclass(frozen=True)
+class DependencyConflict:
+    dependency: str
+    versions: tuple[str, ...]
+    reason: str
+    required_action: str
+    source: str
+
+
+@dataclass(frozen=True)
 class ToolRequirement:
     name: str
     ecosystem: str
@@ -82,7 +104,7 @@ class ToolRequirement:
     version_probe_timeout_seconds: int
     version_pattern: str
     mismatch_policy: str
-    version_differences: tuple[str, ...]
+    version_differences: tuple[VersionDifference, ...]
     platforms: tuple[str, ...]
 
 
@@ -90,13 +112,18 @@ class ToolRequirement:
 class DependencyRequirement:
     name: str
     ecosystem: str
+    identity: str
     required: bool
     tested_versions: tuple[str, ...]
     allowed_versions: tuple[str, ...]
     version_source: str
     verified_at: str
+    version_probe: tuple[str, ...]
+    version_probe_kind: str
+    version_probe_timeout_seconds: int
+    version_pattern: str
     purpose: str
-    conflicts: tuple[str, ...]
+    conflicts: tuple[DependencyConflict, ...]
     platforms: tuple[str, ...]
 
 
@@ -159,6 +186,8 @@ _QUALITY_FIELDS = frozenset(QualityGate.__dataclass_fields__)
 _EXECUTION_BASE_FIELDS = frozenset({"kind", "timeout_seconds", "max_output_bytes"})
 _TOOL_FIELDS = frozenset(ToolRequirement.__dataclass_fields__)
 _DEPENDENCY_FIELDS = frozenset(DependencyRequirement.__dataclass_fields__)
+_VERSION_DIFFERENCE_FIELDS = frozenset(VersionDifference.__dataclass_fields__)
+_DEPENDENCY_CONFLICT_FIELDS = frozenset(DependencyConflict.__dataclass_fields__)
 _COMPATIBILITY_FIELDS = frozenset(CompatibilityRow.__dataclass_fields__)
 _PROVENANCE_FIELDS = frozenset(ProvenanceContract.__dataclass_fields__)
 
@@ -403,30 +432,20 @@ def _tool(value: Any, location: str) -> ToolRequirement:
     source = _text(payload["version_source"], f"{location}.version_source")
     if not source.startswith("https://"):
         raise ValueError(f"{location}.version_source must be an authoritative HTTPS URL")
-    probe = _strings(payload["version_probe"], f"{location}.version_probe")
-    probe_kind = _text(payload["version_probe_kind"], f"{location}.version_probe_kind")
-    if probe_kind not in VERSION_PROBE_KINDS:
-        raise ValueError(f"{location}.version_probe_kind is unsupported")
-    if probe_kind in {"python_callable", "service_contract"}:
-        if len(probe) != 1 or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*", probe[0]):
-            raise ValueError(f"{location}.version_probe must be one public module:function target")
-    if probe_kind == "service_contract" and ecosystem != "service":
-        raise ValueError(f"{location}.service_contract probes require the service ecosystem")
-    if probe_kind == "command" and ecosystem in {"service", "database"}:
-        raise ValueError(f"{location}.service and database probes cannot execute as commands")
-    probe_timeout = _positive_integer(payload["version_probe_timeout_seconds"], f"{location}.version_probe_timeout_seconds")
-    if probe_timeout > 30:
-        raise ValueError(f"{location}.version_probe_timeout_seconds must be at most 30")
-    pattern = _text(payload["version_pattern"], f"{location}.version_pattern")
-    try:
-        re.compile(pattern)
-    except re.error:
-        raise ValueError(f"{location}.version_pattern is invalid") from None
+    probe, probe_kind, probe_timeout, pattern = _probe_contract(payload, location, ecosystem)
     mismatch_policy = _text(payload["mismatch_policy"], f"{location}.mismatch_policy")
     if mismatch_policy not in MISMATCH_POLICIES:
         raise ValueError(f"{location}.mismatch_policy is unsupported")
     allowed = _version_rules(payload["allowed_versions"], f"{location}.allowed_versions")
     _validate_tested_versions(tested, allowed, location)
+    differences = payload["version_differences"]
+    if not isinstance(differences, list):
+        raise ValueError(f"{location}.version_differences must be a list")
+    parsed_differences = tuple(_version_difference(item, f"{location}.version_differences[{index}]") for index, item in enumerate(differences))
+    if len({item.id for item in parsed_differences}) != len(parsed_differences):
+        raise ValueError(f"{location}.version_differences contains duplicate ids")
+    if any(set(item.affected_versions) - set(allowed) for item in parsed_differences):
+        raise ValueError(f"{location}.version_differences references versions outside the allowed rules")
     return ToolRequirement(
         name=_text(payload["name"], f"{location}.name"),
         ecosystem=ecosystem,
@@ -441,8 +460,57 @@ def _tool(value: Any, location: str) -> ToolRequirement:
         version_probe_timeout_seconds=probe_timeout,
         version_pattern=pattern,
         mismatch_policy=mismatch_policy,
-        version_differences=_strings(payload["version_differences"], f"{location}.version_differences", allow_empty=True),
+        version_differences=parsed_differences,
         platforms=_strings(payload["platforms"], f"{location}.platforms"),
+    )
+
+
+def _probe_contract(payload: Mapping[str, Any], location: str, ecosystem: str) -> tuple[tuple[str, ...], str, int, str]:
+    probe = _strings(payload["version_probe"], f"{location}.version_probe")
+    probe_kind = _text(payload["version_probe_kind"], f"{location}.version_probe_kind")
+    if probe_kind not in VERSION_PROBE_KINDS:
+        raise ValueError(f"{location}.version_probe_kind is unsupported")
+    if probe_kind in {"python_callable", "service_contract", "database_contract"}:
+        if len(probe) != 1 or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*", probe[0]):
+            raise ValueError(f"{location}.version_probe must be one public module:function target")
+    if probe_kind == "service_contract" and ecosystem != "service":
+        raise ValueError(f"{location}.service_contract probes require the service ecosystem")
+    if probe_kind == "database_contract" and ecosystem != "database":
+        raise ValueError(f"{location}.database_contract probes require the database ecosystem")
+    if probe_kind == "command" and ecosystem in {"service", "database"}:
+        raise ValueError(f"{location}.service and database probes cannot execute as commands")
+    probe_timeout = _positive_integer(payload["version_probe_timeout_seconds"], f"{location}.version_probe_timeout_seconds")
+    if probe_timeout > 30:
+        raise ValueError(f"{location}.version_probe_timeout_seconds must be at most 30")
+    pattern = _text(payload["version_pattern"], f"{location}.version_pattern")
+    try:
+        re.compile(pattern)
+    except re.error:
+        raise ValueError(f"{location}.version_pattern is invalid") from None
+    return probe, probe_kind, probe_timeout, pattern
+
+
+def _version_difference(value: Any, location: str) -> VersionDifference:
+    payload = _object(value, location)
+    _exact_fields(payload, _VERSION_DIFFERENCE_FIELDS, location)
+    identifier = _text(payload["id"], f"{location}.id")
+    if not _ID_RE.fullmatch(identifier):
+        raise ValueError(f"{location}.id is invalid")
+    category = _text(payload["category"], f"{location}.category")
+    effect = _text(payload["compatibility_effect"], f"{location}.compatibility_effect")
+    if category not in VERSION_DIFFERENCE_CATEGORIES or effect not in COMPATIBILITY_EFFECTS:
+        raise ValueError(f"{location} category or compatibility effect is unsupported")
+    source = _text(payload["source"], f"{location}.source")
+    if not source.startswith("https://"):
+        raise ValueError(f"{location}.source must be an authoritative HTTPS URL")
+    return VersionDifference(
+        id=identifier,
+        affected_versions=_version_rules(payload["affected_versions"], f"{location}.affected_versions"),
+        category=category,
+        description=_text(payload["description"], f"{location}.description", minimum=12),
+        compatibility_effect=effect,
+        required_action=_text(payload["required_action"], f"{location}.required_action", minimum=12),
+        source=source,
     )
 
 
@@ -458,17 +526,41 @@ def _dependency(value: Any, location: str) -> DependencyRequirement:
     tested = _strings(payload["tested_versions"], f"{location}.tested_versions")
     allowed = _version_rules(payload["allowed_versions"], f"{location}.allowed_versions")
     _validate_tested_versions(tested, allowed, location)
+    probe, probe_kind, probe_timeout, pattern = _probe_contract(payload, location, ecosystem)
+    conflicts = payload["conflicts"]
+    if not isinstance(conflicts, list):
+        raise ValueError(f"{location}.conflicts must be a list")
     return DependencyRequirement(
         name=_text(payload["name"], f"{location}.name"),
         ecosystem=ecosystem,
+        identity=_text(payload["identity"], f"{location}.identity"),
         required=_boolean(payload["required"], f"{location}.required"),
         tested_versions=tested,
         allowed_versions=allowed,
         version_source=source,
         verified_at=_date(payload["verified_at"], f"{location}.verified_at"),
+        version_probe=probe,
+        version_probe_kind=probe_kind,
+        version_probe_timeout_seconds=probe_timeout,
+        version_pattern=pattern,
         purpose=_text(payload["purpose"], f"{location}.purpose", minimum=12),
-        conflicts=_strings(payload["conflicts"], f"{location}.conflicts", allow_empty=True),
+        conflicts=tuple(_dependency_conflict(item, f"{location}.conflicts[{index}]") for index, item in enumerate(conflicts)),
         platforms=_strings(payload["platforms"], f"{location}.platforms"),
+    )
+
+
+def _dependency_conflict(value: Any, location: str) -> DependencyConflict:
+    payload = _object(value, location)
+    _exact_fields(payload, _DEPENDENCY_CONFLICT_FIELDS, location)
+    source = _text(payload["source"], f"{location}.source")
+    if not source.startswith("https://"):
+        raise ValueError(f"{location}.source must be an authoritative HTTPS URL")
+    return DependencyConflict(
+        dependency=_text(payload["dependency"], f"{location}.dependency"),
+        versions=_version_rules(payload["versions"], f"{location}.versions"),
+        reason=_text(payload["reason"], f"{location}.reason", minimum=12),
+        required_action=_text(payload["required_action"], f"{location}.required_action", minimum=12),
+        source=source,
     )
 
 
@@ -690,7 +782,18 @@ def _tool_dict(value: ToolRequirement) -> dict[str, object]:
         "version_probe_timeout_seconds": value.version_probe_timeout_seconds,
         "version_pattern": value.version_pattern,
         "mismatch_policy": value.mismatch_policy,
-        "version_differences": list(value.version_differences),
+        "version_differences": [
+            {
+                "id": item.id,
+                "affected_versions": list(item.affected_versions),
+                "category": item.category,
+                "description": item.description,
+                "compatibility_effect": item.compatibility_effect,
+                "required_action": item.required_action,
+                "source": item.source,
+            }
+            for item in value.version_differences
+        ],
         "platforms": list(value.platforms),
     }
 
@@ -699,13 +802,27 @@ def _dependency_dict(value: DependencyRequirement) -> dict[str, object]:
     return {
         "name": value.name,
         "ecosystem": value.ecosystem,
+        "identity": value.identity,
         "required": value.required,
         "tested_versions": list(value.tested_versions),
         "allowed_versions": list(value.allowed_versions),
         "version_source": value.version_source,
         "verified_at": value.verified_at,
+        "version_probe": list(value.version_probe),
+        "version_probe_kind": value.version_probe_kind,
+        "version_probe_timeout_seconds": value.version_probe_timeout_seconds,
+        "version_pattern": value.version_pattern,
         "purpose": value.purpose,
-        "conflicts": list(value.conflicts),
+        "conflicts": [
+            {
+                "dependency": item.dependency,
+                "versions": list(item.versions),
+                "reason": item.reason,
+                "required_action": item.required_action,
+                "source": item.source,
+            }
+            for item in value.conflicts
+        ],
         "platforms": list(value.platforms),
     }
 
