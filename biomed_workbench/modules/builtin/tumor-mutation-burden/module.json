@@ -1,0 +1,283 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Callable territory and eligible somatic variant classes match the assay and intended research definition."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "variants": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "mutation_burden": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "variant-summary",
+    "variant-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Apply declared somatic, filter, effect, and allele-fraction rules before dividing eligible mutations by explicit callable megabases.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.research_quality:calculate_tumor_mutation_burden",
+  "evidence_effects": [
+    "quantifies_molecular_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "tumor-mutation-burden",
+  "input_artifacts": [
+    {
+      "artifact_type": "variant_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "variants",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "callable_megabases": {
+        "minimum": 0,
+        "type": "number"
+      },
+      "include_effects": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "minimum_allele_fraction": {
+        "maximum": 1,
+        "minimum": 0,
+        "type": "number"
+      },
+      "variants": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "allele_fraction": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            "effect": {
+              "type": "string"
+            },
+            "filter": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "somatic": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "effect"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "variants",
+      "callable_megabases"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "tumor mutation burden",
+    "Calculate auditable tumor mutation burden",
+    "\u8ba1\u7b97\u80bf\u7624\u7a81\u53d8\u8d1f\u8377"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This bounded analysis does not replace assay-specific normalization, sample-aware models, sensitivity analysis, and biological validation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "statistical_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "mutation_burden",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "callable_megabases": {
+        "type": "number"
+      },
+      "eligible_variant_count": {
+        "type": "integer"
+      },
+      "eligible_variant_ids": {
+        "type": "array"
+      },
+      "excluded_variants": {
+        "type": "array"
+      },
+      "exclusion_counts": {
+        "type": "object"
+      },
+      "included_effects": {
+        "type": "array"
+      },
+      "input_variant_count": {
+        "type": "integer"
+      },
+      "method": {
+        "type": "string"
+      },
+      "minimum_allele_fraction": {
+        "type": "number"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "tmb_mutations_per_mb": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "callable_megabases",
+      "eligible_variant_count",
+      "eligible_variant_ids",
+      "excluded_variants",
+      "exclusion_counts",
+      "included_effects",
+      "input_variant_count",
+      "method",
+      "minimum_allele_fraction",
+      "quality_gates",
+      "tmb_mutations_per_mb"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid variant table is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Biological denominator, matrix orientation, identifier system, data quality, model assumptions, and multiplicity are reviewed before inference.",
+      "id": "tumor-mutation-burden-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What mutation burden results after explicit somatic, filter, effect, allele-fraction, and callable-territory rules?"
+  ],
+  "schema_version": 1,
+  "title": "Calculate auditable tumor mutation burden",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

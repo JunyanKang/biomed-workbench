@@ -1,0 +1,1772 @@
+{
+  "adverse-event-summary": {
+    "input": {
+      "enrolled_participants": 4,
+      "events": [
+        {
+          "grade": 2,
+          "participant": "p1",
+          "relatedness": "possible",
+          "serious": false,
+          "term": "Nausea"
+        }
+      ]
+    },
+    "output": {
+      "by_grade": {
+        "2": 1
+      },
+      "by_relatedness": {
+        "possible": 1
+      },
+      "by_term": {
+        "Nausea": {
+          "event_count": 1,
+          "maximum_grade": 2,
+          "participant_count": 1,
+          "participant_incidence_percent": 25.0,
+          "serious_event_count": 0
+        }
+      },
+      "enrolled_participants": 4,
+      "event_count": 1,
+      "events": [
+        {
+          "grade": 2,
+          "index": 1,
+          "participant": "p1",
+          "relatedness": "possible",
+          "serious": false,
+          "term": "Nausea"
+        }
+      ],
+      "participant_incidence_percent": 25.0,
+      "participants_with_events": 1,
+      "participants_with_serious_events": 0,
+      "quality_gates": [
+        "Event counts and participant incidence answer different questions and must remain separate.",
+        "Seriousness, severity grade, expectedness, and relatedness are distinct attributes.",
+        "This summary does not determine causality, regulatory reportability, or clinical management."
+      ],
+      "serious_event_count": 0
+    }
+  },
+  "biomarker-performance": {
+    "input": {
+      "labels": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "scores": [
+        0.1,
+        0.4,
+        0.35,
+        0.8
+      ],
+      "threshold": 0.3
+    },
+    "output": {
+      "accuracy": 0.75,
+      "confusion": {
+        "false_negative": 0,
+        "false_positive": 1,
+        "true_negative": 1,
+        "true_positive": 2
+      },
+      "limitations": [
+        "Threshold metrics and AUC require external validation, uncertainty estimates, calibration, and clinically representative prevalence."
+      ],
+      "negative_predictive_value": 1.0,
+      "positive_predictive_value": 0.6666666666666666,
+      "roc_auc": 0.75,
+      "sensitivity": 1.0,
+      "specificity": 0.5,
+      "threshold": 0.3
+    }
+  },
+  "citation-audit": {
+    "input": {
+      "references": [
+        {
+          "authors": "A",
+          "doi": "10.1000/x",
+          "journal": "J",
+          "title": "T",
+          "year": 2020
+        }
+      ]
+    },
+    "output": {
+      "complete_count": 1,
+      "duplicate_dois": [],
+      "limitations": [
+        "Metadata completeness does not prove that a reference exists, supports the claim, or is the intended version; external verification remains required."
+      ],
+      "reference_count": 1,
+      "references": [
+        {
+          "canonical_doi": "10.1000/x",
+          "complete": true,
+          "index": 1,
+          "missing_fields": []
+        }
+      ]
+    }
+  },
+  "clinical-deidentify": {
+    "input": {
+      "record": {
+        "note": "jane@example.org",
+        "patient_name": "Jane"
+      }
+    },
+    "output": {
+      "limitations": [
+        "Rule-based de-identification is not certification of HIPAA, GDPR, or institutional compliance.",
+        "Free-text dates, locations, rare events, quasi-identifiers, images, and linkage risk require expert review."
+      ],
+      "record": {
+        "note": "[REDACTED_EMAIL]",
+        "patient_name": "[REDACTED]"
+      },
+      "redaction_count": 2
+    }
+  },
+  "clinical-report-audit": {
+    "input": {
+      "standard": "CARE",
+      "text": "Title Abstract Case presentation Timeline Diagnosis Treatment Follow-up Consent"
+    },
+    "output": {
+      "completeness_fraction": 0.6666666666666666,
+      "limitations": [
+        "This lexical structure audit is not a substitute for scientific, ethical, statistical, regulatory, or editorial review."
+      ],
+      "missing_sections": [
+        "introduction",
+        "clinical findings",
+        "discussion",
+        "patient perspective"
+      ],
+      "present_sections": [
+        "title",
+        "abstract",
+        "patient information",
+        "timeline",
+        "diagnostic assessment",
+        "therapeutic intervention",
+        "follow-up",
+        "informed consent"
+      ],
+      "standard": "CARE"
+    }
+  },
+  "cohort-summary": {
+    "input": {
+      "categorical": [
+        "sex"
+      ],
+      "continuous": [
+        "age"
+      ],
+      "records": [
+        {
+          "age": 20,
+          "sex": "F"
+        },
+        {
+          "age": 40,
+          "sex": "M"
+        }
+      ]
+    },
+    "output": {
+      "categorical": {
+        "sex": {
+          "counts": {
+            "F": 1,
+            "M": 1
+          },
+          "fractions": {
+            "F": 0.5,
+            "M": 0.5
+          },
+          "missing": 0,
+          "n": 2
+        }
+      },
+      "continuous": {
+        "age": {
+          "maximum": 40.0,
+          "mean": 30.0,
+          "median": 30.0,
+          "minimum": 20.0,
+          "missing": 0,
+          "n": 2,
+          "q1": 25.0,
+          "q3": 35.0,
+          "standard_deviation": 14.142135623730951
+        }
+      },
+      "record_count": 2
+    }
+  },
+  "crispr-design": {
+    "input": {
+      "sequence": "AAAGACTGACTGACTGACTGACTTGGTTT"
+    },
+    "output": {
+      "guides": [
+        {
+          "end": 23,
+          "gc_percent": 50.0,
+          "guide": "GACTGACTGACTGACTGACT",
+          "heuristic_score": 100.0,
+          "max_homopolymer": 1,
+          "pam": "TGG",
+          "start": 4,
+          "strand": "+"
+        }
+      ],
+      "limitations": [
+        "Heuristic ranking is not an activity model.",
+        "Genome-wide off-targets, variant overlap, chromatin accessibility, and delivery constraints require reference-aware validation."
+      ],
+      "nuclease": "SpCas9",
+      "pam_rule": "NGG"
+    }
+  },
+  "data-profile": {
+    "input": {
+      "rows": [
+        {
+          "count": 1,
+          "sample": "A"
+        },
+        {
+          "count": null,
+          "sample": "B"
+        }
+      ]
+    },
+    "output": {
+      "column_count": 2,
+      "column_order": [
+        "sample",
+        "count"
+      ],
+      "columns": {
+        "count": {
+          "inferred_type": "integer",
+          "maximum": 1.0,
+          "mean": 1.0,
+          "minimum": 1.0,
+          "missing_count": 1,
+          "missing_fraction": 0.5,
+          "unique_count": 1
+        },
+        "sample": {
+          "inferred_type": "string",
+          "missing_count": 0,
+          "missing_fraction": 0.0,
+          "unique_count": 2
+        }
+      },
+      "row_count": 2
+    }
+  },
+  "differential-expression": {
+    "input": {
+      "genes": [
+        "G"
+      ],
+      "group_a": [
+        [
+          10,
+          11,
+          12
+        ]
+      ],
+      "group_b": [
+        [
+          1,
+          2,
+          3
+        ]
+      ]
+    },
+    "output": {
+      "limitations": [
+        "This compact method does not model count dispersion, library normalization, pairing, batches, or complex designs."
+      ],
+      "method": "Welch t-test per feature with Benjamini-Hochberg correction",
+      "results": [
+        {
+          "adjusted_p_value": 0.00038506771136654136,
+          "degrees_of_freedom": 4.0,
+          "gene": "G",
+          "log2_fold_change": 2.2016338611696504,
+          "mean_a": 11.0,
+          "mean_b": 2.0,
+          "p_value": 0.00038506771136654136,
+          "t_statistic": 11.022703842524301
+        }
+      ]
+    }
+  },
+  "dilution-plan": {
+    "input": {
+      "dilution_factor": 10,
+      "final_volume_ul": 1000,
+      "initial_concentration": 100,
+      "steps": 2
+    },
+    "output": {
+      "assumption": "Each transfer is made from the immediately preceding dilution.",
+      "dilution_factor": 10.0,
+      "steps": [
+        {
+          "concentration": 10.0,
+          "diluent_ul": 900.0,
+          "final_volume_ul": 1000.0,
+          "step": 1,
+          "transfer_ul": 100.0
+        },
+        {
+          "concentration": 1.0,
+          "diluent_ul": 900.0,
+          "final_volume_ul": 1000.0,
+          "step": 2,
+          "transfer_ul": 100.0
+        }
+      ]
+    }
+  },
+  "dose-response": {
+    "input": {
+      "concentrations": [
+        0.1,
+        1,
+        10,
+        100
+      ],
+      "direction": "decreasing",
+      "responses": [
+        98,
+        80,
+        20,
+        2
+      ]
+    },
+    "output": {
+      "direction": "decreasing",
+      "half_max_concentration": 3.1622776601683795,
+      "half_max_response": 50.0,
+      "limitations": [
+        "This is not a nonlinear four-parameter logistic fit and does not estimate confidence intervals."
+      ],
+      "method": "log-concentration interpolation between observations bracketing the empirical half range",
+      "monotonic": true,
+      "response_max": 98.0,
+      "response_min": 2.0
+    }
+  },
+  "enrichment-analysis": {
+    "input": {
+      "background_genes": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E"
+      ],
+      "gene_sets": {
+        "P": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      "query_genes": [
+        "A",
+        "B"
+      ]
+    },
+    "output": {
+      "background_size": 5,
+      "method": "one-sided hypergeometric overrepresentation with BH correction",
+      "query_size": 2,
+      "results": [
+        {
+          "adjusted_p_value": 0.3,
+          "fold_enrichment": 1.6666666666666667,
+          "overlap_count": 2,
+          "overlap_genes": [
+            "A",
+            "B"
+          ],
+          "p_value": 0.3,
+          "set_size": 3,
+          "term": "P"
+        }
+      ]
+    }
+  },
+  "enzyme-kinetics": {
+    "input": {
+      "observations": [
+        {
+          "substrate": 0.5,
+          "velocity": 1.4285714285714286
+        },
+        {
+          "substrate": 1,
+          "velocity": 2.5
+        },
+        {
+          "substrate": 2,
+          "velocity": 4.0
+        },
+        {
+          "substrate": 5,
+          "velocity": 6.25
+        },
+        {
+          "substrate": 10,
+          "velocity": 7.6923076923076925
+        },
+        {
+          "substrate": 20,
+          "velocity": 8.695652173913043
+        }
+      ]
+    },
+    "output": {
+      "diagnostics": {
+        "aic": -422.6388651513355,
+        "aicc": -418.6388651513355,
+        "converged": true,
+        "iterations": 33,
+        "r_squared": 1.0,
+        "residual_sum_squares": 7.888609052210118e-31,
+        "rmse": 4.440892098500626e-16,
+        "weighted_residual_sum_squares": 7.888609052210118e-31
+      },
+      "model": "michaelis_menten",
+      "observations": [
+        {
+          "fitted_velocity": 1.4285714285714286,
+          "observed_velocity": 1.4285714285714286,
+          "residual": 0.0,
+          "substrate": 0.5,
+          "weight": 1.0
+        },
+        {
+          "fitted_velocity": 2.5,
+          "observed_velocity": 2.5,
+          "residual": 0.0,
+          "substrate": 1.0,
+          "weight": 1.0
+        },
+        {
+          "fitted_velocity": 4.0,
+          "observed_velocity": 4.0,
+          "residual": 0.0,
+          "substrate": 2.0,
+          "weight": 1.0
+        },
+        {
+          "fitted_velocity": 6.25,
+          "observed_velocity": 6.25,
+          "residual": 0.0,
+          "substrate": 5.0,
+          "weight": 1.0
+        },
+        {
+          "fitted_velocity": 7.692307692307692,
+          "observed_velocity": 7.6923076923076925,
+          "residual": 8.881784197001252e-16,
+          "substrate": 10.0,
+          "weight": 1.0
+        },
+        {
+          "fitted_velocity": 8.695652173913043,
+          "observed_velocity": 8.695652173913043,
+          "residual": 0.0,
+          "substrate": 20.0,
+          "weight": 1.0
+        }
+      ],
+      "parameters": {
+        "km": 2.999999999999999,
+        "vmax": 9.999999999999998
+      },
+      "quality_gates": [
+        "Inspect residuals and substrate coverage rather than relying on R-squared alone.",
+        "Compare biologically plausible models using AICc only when all fits use the same observations and weights.",
+        "Replicate-aware uncertainty and confidence intervals require a validated nonlinear statistics workflow."
+      ]
+    }
+  },
+  "expression-qc": {
+    "input": {
+      "genes": [
+        "A",
+        "B"
+      ],
+      "matrix": [
+        [
+          10,
+          0
+        ],
+        [
+          5,
+          5
+        ]
+      ],
+      "samples": [
+        "S1",
+        "S2"
+      ]
+    },
+    "output": {
+      "detected_genes": {
+        "S1": 2,
+        "S2": 1
+      },
+      "gene_count": 2,
+      "library_size_range": [
+        5.0,
+        15.0
+      ],
+      "library_sizes": {
+        "S1": 15.0,
+        "S2": 5.0
+      },
+      "sample_count": 2,
+      "warnings": [],
+      "zero_fraction": 0.25
+    }
+  },
+  "figure-specification": {
+    "input": {
+      "panels": [
+        {
+          "claim": "C",
+          "data_source": "D",
+          "label": "a",
+          "plot": "scatter"
+        }
+      ],
+      "title": "F"
+    },
+    "output": {
+      "panel_findings": [],
+      "panels": [
+        {
+          "claim": "C",
+          "data_source": "D",
+          "label": "a",
+          "plot": "scatter"
+        }
+      ],
+      "quality_gates": [
+        "Panel claim is supported by the stated data source.",
+        "Axes, units, n, statistical test, and uncertainty are explicit.",
+        "Colors remain distinguishable and consistent across figures.",
+        "Raster elements meet final-size resolution requirements."
+      ],
+      "ready": true,
+      "title": "F"
+    }
+  },
+  "flow-cytometry-summary": {
+    "input": {
+      "events": [
+        {
+          "CD3": 5,
+          "FSC": 100
+        },
+        {
+          "CD3": 12,
+          "FSC": 120
+        },
+        {
+          "CD3": 20,
+          "FSC": 10
+        }
+      ],
+      "gates": [
+        {
+          "conditions": {
+            "FSC": {
+              "min": 50
+            }
+          },
+          "name": "cells",
+          "parent": "all"
+        },
+        {
+          "conditions": {
+            "CD3": {
+              "min": 10
+            }
+          },
+          "name": "positive",
+          "parent": "cells"
+        }
+      ]
+    },
+    "output": {
+      "channels": [
+        "CD3",
+        "FSC"
+      ],
+      "gate_order": [
+        "cells",
+        "positive"
+      ],
+      "gates": [
+        {
+          "conditions": {
+            "FSC": {
+              "max": null,
+              "min": 50.0
+            }
+          },
+          "event_count": 2,
+          "event_indices": [
+            0,
+            1
+          ],
+          "name": "cells",
+          "parent": "all",
+          "percent_of_parent": 66.66666666666667,
+          "percent_of_total": 66.66666666666667
+        },
+        {
+          "conditions": {
+            "CD3": {
+              "max": null,
+              "min": 10.0
+            }
+          },
+          "event_count": 1,
+          "event_indices": [
+            1
+          ],
+          "name": "positive",
+          "parent": "cells",
+          "percent_of_parent": 50.0,
+          "percent_of_total": 33.333333333333336
+        }
+      ],
+      "input_event_count": 3,
+      "quality_gates": [
+        "Apply compensation and a declared transformation before threshold gating when required.",
+        "Document acquisition, debris, singlet, viability, and fluorescence-minus-one controls.",
+        "Rectangular gates are descriptive; complex boundaries require validated cytometry software and retained gate provenance."
+      ]
+    }
+  },
+  "glycosylation-scan": {
+    "input": {
+      "context_radius": 2,
+      "protein": "MANVTNPSNAT"
+    },
+    "output": {
+      "coordinate_system": "one-based inclusive",
+      "limitations": [
+        "N-X-S/T sequons are necessary sequence motifs, not evidence of occupancy.",
+        "Serine/threonine-rich windows are descriptive and are not an O-glycosylation predictor.",
+        "Topology, accessibility, expression system, and mass-spectrometry evidence are required for site assignment."
+      ],
+      "n_linked_sequons": [
+        {
+          "asparagine": 3,
+          "context": "MANVTNP",
+          "end": 5,
+          "motif": "NVT",
+          "start": 3
+        },
+        {
+          "asparagine": 9,
+          "context": "PSNAT",
+          "end": 11,
+          "motif": "NAT",
+          "start": 9
+        }
+      ],
+      "proline_blocked_sequons": [
+        {
+          "asparagine": 6,
+          "context": "VTNPSNA",
+          "end": 8,
+          "motif": "NPS",
+          "start": 6
+        }
+      ],
+      "protein_length": 11,
+      "serine_threonine_rich_windows": []
+    }
+  },
+  "golden-gate-plan": {
+    "input": {
+      "fragments": [
+        {
+          "left_overhang": "AATG",
+          "name": "a",
+          "right_overhang": "GGCT",
+          "sequence": "ATGCGCAT"
+        },
+        {
+          "left_overhang": "GGCT",
+          "name": "b",
+          "right_overhang": "CGCT",
+          "sequence": "ATGAAATAG"
+        }
+      ]
+    },
+    "output": {
+      "assembly_ready": true,
+      "circular": false,
+      "enzyme": "BsaI",
+      "fragments": [
+        {
+          "left_overhang": "AATG",
+          "name": "a",
+          "right_overhang": "GGCT",
+          "sequence_length": 8
+        },
+        {
+          "left_overhang": "GGCT",
+          "name": "b",
+          "right_overhang": "CGCT",
+          "sequence_length": 9
+        }
+      ],
+      "internal_site_findings": [],
+      "junctions": [
+        {
+          "compatible": true,
+          "downstream": "b",
+          "downstream_overhang": "GGCT",
+          "overhang": "GGCT",
+          "upstream": "a"
+        }
+      ],
+      "quality_gates": [
+        "Reconstruct the complete assembled sequence and verify reading frames, scars, and regulatory context.",
+        "Use empirical ligation-fidelity data when selecting overhangs for high-complexity assemblies.",
+        "Confirm oligonucleotide orientation, enzyme cut geometry, and final constructs by sequencing."
+      ],
+      "recognition_site": "GGTCTC",
+      "risk_findings": []
+    }
+  },
+  "growth-curve": {
+    "input": {
+      "times": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "values": [
+        0.05,
+        0.10068763537352383,
+        0.20275999834223374,
+        0.40830849562838234
+      ],
+      "window": 3
+    },
+    "output": {
+      "doubling_time": 0.9902102579427791,
+      "log_phase_end_time": 2.0,
+      "log_phase_start_time": 0.0,
+      "max_growth_rate_per_time": 0.7,
+      "method": "maximum sliding-window linear slope of log-transformed positive measurements",
+      "window": 3
+    }
+  },
+  "image-colocalization": {
+    "input": {
+      "channel_a": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ],
+      "channel_b": [
+        [
+          0,
+          2
+        ],
+        [
+          4,
+          6
+        ]
+      ]
+    },
+    "output": {
+      "manders_m1": 1.0,
+      "manders_m2": 1.0,
+      "method": "Pearson intensity correlation and thresholded Manders overlap coefficients",
+      "pearson_r": 1.0,
+      "shape": [
+        2,
+        2
+      ],
+      "threshold_a": 0,
+      "threshold_b": 0
+    }
+  },
+  "image-profile": {
+    "input": {
+      "image": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          3
+        ]
+      ]
+    },
+    "output": {
+      "maximum": 3.0,
+      "mean": 1.5,
+      "minimum": 0.0,
+      "percentiles": {
+        "p01": 0.03,
+        "p50": 1.5,
+        "p99": 2.9699999999999998
+      },
+      "pixel_count": 4,
+      "shape": [
+        2,
+        2
+      ],
+      "standard_deviation": 1.118033988749895,
+      "zero_fraction": 0.25
+    }
+  },
+  "image-segment": {
+    "input": {
+      "connectivity": 4,
+      "image": [
+        [
+          0,
+          5
+        ],
+        [
+          0,
+          5
+        ]
+      ],
+      "threshold": 4
+    },
+    "output": {
+      "component_count": 1,
+      "components": [
+        {
+          "area": 2,
+          "bounding_box": {
+            "max_column": 2,
+            "max_row": 2,
+            "min_column": 2,
+            "min_row": 1
+          },
+          "centroid": {
+            "column": 2.0,
+            "row": 1.5
+          },
+          "circularity": 0.6981317007977318,
+          "label": 1,
+          "mean_intensity": 5.0,
+          "perimeter": 6
+        }
+      ],
+      "connectivity": 4,
+      "coordinate_system": "one-based pixel centers",
+      "labels": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "polarity": "high",
+      "shape": [
+        2,
+        2
+      ],
+      "threshold": 4
+    }
+  },
+  "immunoassay-quantification": {
+    "input": {
+      "standards": [
+        {
+          "concentration": 0,
+          "response": 0.1
+        },
+        {
+          "concentration": 1,
+          "response": 0.5
+        },
+        {
+          "concentration": 2,
+          "response": 0.9
+        },
+        {
+          "concentration": 3,
+          "response": 1.3000000000000003
+        }
+      ],
+      "unknowns": [
+        {
+          "dilution_factor": 2,
+          "response": 0.7,
+          "sample": "u1"
+        }
+      ]
+    },
+    "output": {
+      "calibrated_concentration_range": [
+        0.0,
+        3.0
+      ],
+      "calibrated_response_range": [
+        0.1,
+        1.3000000000000003
+      ],
+      "fit": {
+        "intercept": 0.09999999999999998,
+        "r_squared": 1.0,
+        "residual_sum_squares": 1.3096323621833204e-32,
+        "rmse": 8.092071311423672e-17,
+        "slope": 0.4000000000000001
+      },
+      "model": "linear",
+      "quality_gates": [
+        "Review standard replicate CV and residual pattern before accepting the model.",
+        "Do not report extrapolated unknowns without dilution and repeat measurement.",
+        "Use validated 4PL or 5PL software when the working range is sigmoidal rather than linear."
+      ],
+      "standards": [
+        {
+          "back_calculated_concentration": 6.938893903907227e-17,
+          "concentration": 0.0,
+          "cv_percent": null,
+          "fitted_response": 0.09999999999999998,
+          "mean_response": 0.1,
+          "replicate_count": 1,
+          "residual": 2.7755575615628914e-17,
+          "responses": [
+            0.1
+          ],
+          "sd_response": null
+        },
+        {
+          "back_calculated_concentration": 0.9999999999999999,
+          "concentration": 1.0,
+          "cv_percent": null,
+          "fitted_response": 0.5,
+          "mean_response": 0.5,
+          "replicate_count": 1,
+          "residual": 0.0,
+          "responses": [
+            0.5
+          ],
+          "sd_response": null
+        },
+        {
+          "back_calculated_concentration": 1.9999999999999998,
+          "concentration": 2.0,
+          "cv_percent": null,
+          "fitted_response": 0.9000000000000001,
+          "mean_response": 0.9,
+          "replicate_count": 1,
+          "residual": -1.1102230246251565e-16,
+          "responses": [
+            0.9
+          ],
+          "sd_response": null
+        },
+        {
+          "back_calculated_concentration": 3.0,
+          "concentration": 3.0,
+          "cv_percent": null,
+          "fitted_response": 1.3000000000000003,
+          "mean_response": 1.3000000000000003,
+          "replicate_count": 1,
+          "residual": 0.0,
+          "responses": [
+            1.3000000000000003
+          ],
+          "sd_response": null
+        }
+      ],
+      "unknowns": [
+        {
+          "calculated_concentration": 1.4999999999999996,
+          "dilution_factor": 2.0,
+          "qc_flags": [],
+          "reported_concentration": 2.999999999999999,
+          "response": 0.7,
+          "sample": "u1"
+        }
+      ]
+    }
+  },
+  "manuscript-audit": {
+    "input": {
+      "claims": [
+        {
+          "citation_count": 1,
+          "claim": "C",
+          "evidence": "experiment"
+        }
+      ],
+      "code_availability": true,
+      "data_availability": true,
+      "figure_count": 1,
+      "sections": {
+        "abstract": "A",
+        "discussion": "D",
+        "introduction": "I",
+        "methods": "M",
+        "results": "R"
+      }
+    },
+    "output": {
+      "claim_count": 1,
+      "figure_count": 1,
+      "findings": [],
+      "major_finding_count": 0,
+      "next_gate": "scientific and editorial review",
+      "ready": true,
+      "structure": {
+        "missing": [],
+        "present": [
+          "abstract",
+          "introduction",
+          "results",
+          "discussion",
+          "methods"
+        ],
+        "required": [
+          "abstract",
+          "introduction",
+          "results",
+          "discussion",
+          "methods"
+        ]
+      }
+    }
+  },
+  "network-analysis": {
+    "input": {
+      "edges": [
+        [
+          "A",
+          "B"
+        ],
+        [
+          "B",
+          "C"
+        ]
+      ]
+    },
+    "output": {
+      "component_count": 1,
+      "components": [
+        [
+          "A",
+          "B",
+          "C"
+        ]
+      ],
+      "degree": {
+        "A": 1,
+        "B": 2,
+        "C": 1
+      },
+      "directed": false,
+      "edge_count": 2,
+      "hubs": [
+        {
+          "degree": 2,
+          "node": "B"
+        },
+        {
+          "degree": 1,
+          "node": "A"
+        },
+        {
+          "degree": 1,
+          "node": "C"
+        }
+      ],
+      "node_count": 3
+    }
+  },
+  "patent-disclosure-audit": {
+    "input": {
+      "alternatives": [
+        "A"
+      ],
+      "essential_features": [
+        "E"
+      ],
+      "examples": [
+        "X"
+      ],
+      "prior_art": [
+        "R"
+      ],
+      "problem": "P",
+      "solution": "S"
+    },
+    "output": {
+      "alternative_count": 1,
+      "essential_features": [
+        "E"
+      ],
+      "example_count": 1,
+      "findings": [],
+      "limitations": [
+        "This research disclosure audit is not legal advice, a patentability opinion, freedom-to-operate analysis, or jurisdiction-specific filing guidance."
+      ],
+      "prior_art_count": 1,
+      "problem": "P",
+      "ready_for_claim_drafting": true,
+      "solution": "S"
+    }
+  },
+  "pcr-plan": {
+    "input": {
+      "components": {
+        "forward_primer": 1,
+        "master_mix": 10,
+        "reverse_primer": 1,
+        "template": 2
+      },
+      "overage_percent": 10,
+      "reaction_volume_ul": 20,
+      "reactions": 8
+    },
+    "output": {
+      "master_mix": {
+        "forward_primer": 8.8,
+        "master_mix": 88.0,
+        "reverse_primer": 8.8,
+        "template": 17.6,
+        "water": 52.800000000000004
+      },
+      "per_reaction": {
+        "forward_primer": 1.0,
+        "master_mix": 10.0,
+        "reverse_primer": 1.0,
+        "template": 2.0,
+        "water": 6.0
+      },
+      "prepared_reaction_equivalents": 8.8,
+      "reaction_volume_ul": 20.0,
+      "reactions": 8,
+      "water_per_reaction_ul": 6.0
+    }
+  },
+  "point-tracking": {
+    "input": {
+      "frames": [
+        [
+          [
+            0,
+            0
+          ]
+        ],
+        [
+          [
+            1,
+            0
+          ]
+        ],
+        [
+          [
+            2,
+            0
+          ]
+        ]
+      ],
+      "max_distance": 2
+    },
+    "output": {
+      "limitations": [
+        "Crossings, missed detections, motion models, and gap closing are not resolved."
+      ],
+      "max_distance": 2,
+      "method": "frame-local greedy one-to-one nearest-neighbor linking",
+      "track_count": 1,
+      "tracks": [
+        {
+          "points": [
+            {
+              "frame": 0,
+              "link_distance": null,
+              "x": 0.0,
+              "y": 0.0
+            },
+            {
+              "frame": 1,
+              "link_distance": 1.0,
+              "x": 1.0,
+              "y": 0.0
+            },
+            {
+              "frame": 2,
+              "link_distance": 1.0,
+              "x": 2.0,
+              "y": 0.0
+            }
+          ],
+          "track_id": 1
+        }
+      ]
+    }
+  },
+  "primer-design": {
+    "input": {
+      "max_pairs": 2,
+      "template": "GCGTACGATCGATGCTAGCTAGGCTAACGTTAGCGATCGTACGATCGATGCTAGCATCGATGCGTACGATCG"
+    },
+    "output": {
+      "limitations": [
+        "Genomic uniqueness and off-target amplification are not assessed; verify candidates against the intended reference.",
+        "Secondary structure and salt-adjusted nearest-neighbor thermodynamics require a dedicated downstream check."
+      ],
+      "pairs": [
+        {
+          "amplicon_length": 72,
+          "forward": {
+            "end": 23,
+            "gc_percent": 56.522,
+            "length": 23,
+            "max_homopolymer": 2,
+            "sequence": "GCGTACGATCGATGCTAGCTAGG",
+            "start": 1,
+            "strand": "+",
+            "tm_c": 58.839
+          },
+          "rank_score": 2.322,
+          "reverse": {
+            "end": 72,
+            "gc_percent": 56.522,
+            "length": 23,
+            "max_homopolymer": 1,
+            "sequence": "CGATCGTACGCATCGATGCTAGC",
+            "start": 50,
+            "strand": "-",
+            "tm_c": 58.839
+          },
+          "tm_delta_c": 0.0
+        },
+        {
+          "amplicon_length": 72,
+          "forward": {
+            "end": 23,
+            "gc_percent": 56.522,
+            "length": 23,
+            "max_homopolymer": 2,
+            "sequence": "GCGTACGATCGATGCTAGCTAGG",
+            "start": 1,
+            "strand": "+",
+            "tm_c": 58.839
+          },
+          "rank_score": 2.575,
+          "reverse": {
+            "end": 72,
+            "gc_percent": 54.167,
+            "length": 24,
+            "max_homopolymer": 1,
+            "sequence": "CGATCGTACGCATCGATGCTAGCA",
+            "start": 49,
+            "strand": "-",
+            "tm_c": 59.092
+          },
+          "tm_delta_c": 0.253
+        }
+      ],
+      "template_length": 72,
+      "tm_method": "Wallace below 14 nt; empirical GC formula otherwise"
+    }
+  },
+  "qpcr-relative-expression": {
+    "input": {
+      "calibrator_samples": [
+        "control"
+      ],
+      "measurements": [
+        {
+          "assay": "target",
+          "ct": 20.0,
+          "sample": "control"
+        },
+        {
+          "assay": "target",
+          "ct": 20.2,
+          "sample": "control"
+        },
+        {
+          "assay": "ref",
+          "ct": 16.0,
+          "sample": "control"
+        },
+        {
+          "assay": "ref",
+          "ct": 16.2,
+          "sample": "control"
+        },
+        {
+          "assay": "target",
+          "ct": 18.0,
+          "sample": "treated"
+        },
+        {
+          "assay": "target",
+          "ct": 18.2,
+          "sample": "treated"
+        },
+        {
+          "assay": "ref",
+          "ct": 16.0,
+          "sample": "treated"
+        },
+        {
+          "assay": "ref",
+          "ct": 16.2,
+          "sample": "treated"
+        }
+      ],
+      "reference_assays": [
+        "ref"
+      ],
+      "target_assay": "target"
+    },
+    "output": {
+      "calibrator_mean_ct": {
+        "ref": 16.1,
+        "target": 20.1
+      },
+      "calibrator_samples": [
+        "control"
+      ],
+      "efficiencies": {
+        "ref": 2.0,
+        "target": 2.0
+      },
+      "method": "efficiency-corrected relative quantification with geometric reference normalization",
+      "quality_gates": [
+        "Inspect replicate Ct dispersion before interpreting fold changes.",
+        "Validate amplification efficiency, specificity, no-template controls, and reference stability.",
+        "Use biological replicates for inference; technical replicates only characterize measurement precision."
+      ],
+      "reference_assays": [
+        "ref"
+      ],
+      "replicate_ct_sd_limit": 0.5,
+      "samples": [
+        {
+          "assays": {
+            "ref": {
+              "ct_values": [
+                16.0,
+                16.2
+              ],
+              "mean_ct": 16.1,
+              "n": 2,
+              "sd_ct": 0.141421356237309
+            },
+            "target": {
+              "ct_values": [
+                20.0,
+                20.2
+              ],
+              "mean_ct": 20.1,
+              "n": 2,
+              "sd_ct": 0.141421356237309
+            }
+          },
+          "qc_flags": [],
+          "reference_normalization_factor": 1.0,
+          "relative_expression": 1.0,
+          "sample": "control",
+          "target_factor": 1.0
+        },
+        {
+          "assays": {
+            "ref": {
+              "ct_values": [
+                16.0,
+                16.2
+              ],
+              "mean_ct": 16.1,
+              "n": 2,
+              "sd_ct": 0.141421356237309
+            },
+            "target": {
+              "ct_values": [
+                18.0,
+                18.2
+              ],
+              "mean_ct": 18.1,
+              "n": 2,
+              "sd_ct": 0.141421356237309
+            }
+          },
+          "qc_flags": [],
+          "reference_normalization_factor": 1.0,
+          "relative_expression": 4.0,
+          "sample": "treated",
+          "target_factor": 4.0
+        }
+      ],
+      "target_assay": "target"
+    }
+  },
+  "response-matrix": {
+    "input": {
+      "comments": [
+        {
+          "action": "A",
+          "comment": "C",
+          "response": "R",
+          "reviewer": "1",
+          "status": "completed"
+        }
+      ]
+    },
+    "output": {
+      "comment_count": 1,
+      "quality_gates": [
+        "Every response must identify the manuscript or analysis change.",
+        "Disagreement must be evidence-based and respectful.",
+        "Line and figure references are added after pagination stabilizes."
+      ],
+      "rows": [
+        {
+          "action": "A",
+          "comment": "C",
+          "index": 1,
+          "response": "R",
+          "reviewer": "1",
+          "status": "completed"
+        }
+      ],
+      "status_counts": {
+        "completed": 1
+      },
+      "unresolved_indices": []
+    }
+  },
+  "restriction-plan": {
+    "input": {
+      "enzymes": [
+        "EcoRI"
+      ],
+      "sequence": "AAAAGAATTCTTT"
+    },
+    "output": {
+      "coordinate_system": "one-based inclusive",
+      "sequence_length": 13,
+      "site_count": 1,
+      "sites": [
+        {
+          "end": 10,
+          "enzyme": "EcoRI",
+          "motif": "GAATTC",
+          "start": 5
+        }
+      ]
+    }
+  },
+  "reviewer-assessment": {
+    "input": {
+      "claims": [
+        {
+          "claim": "Marker causally drives fate",
+          "evidence_design": "observational",
+          "id": "c1",
+          "replicated": false
+        }
+      ],
+      "novelty": "high",
+      "review_domains": {
+        "data_available": true,
+        "ethics_resolved": true,
+        "methods_reproducible": false,
+        "statistics_adequate": true
+      }
+    },
+    "output": {
+      "claim_assessments": [
+        {
+          "claim": "Marker causally drives fate",
+          "claim_id": "c1",
+          "evidence_design": "observational",
+          "finding_codes": [
+            "CAUSALITY_OVERCLAIM",
+            "CLAIM_NOT_REPLICATED"
+          ],
+          "replicated": false
+        }
+      ],
+      "finding_counts": {
+        "major": 2,
+        "minor": 1
+      },
+      "findings": [
+        {
+          "code": "CAUSALITY_OVERCLAIM",
+          "location": "c1",
+          "message": "Causal language exceeds the declared evidence design.",
+          "severity": "major"
+        },
+        {
+          "code": "CLAIM_NOT_REPLICATED",
+          "location": "c1",
+          "message": "Independent or orthogonal replication is not declared.",
+          "severity": "minor"
+        },
+        {
+          "code": "METHODS_NOT_REPRODUCIBLE",
+          "location": "methods_reproducible",
+          "message": "Methods do not currently support independent reproduction.",
+          "severity": "major"
+        }
+      ],
+      "novelty": "high",
+      "quality_gates": [
+        "Read the full manuscript, figures, supplements, data, and relevant literature before editorial judgment.",
+        "Separate fatal validity concerns from addressable reporting or presentation issues.",
+        "The recommendation is structured decision support, not an editor decision or substitute for field expertise."
+      ],
+      "recommendation": "major_revision",
+      "review_domains": {
+        "data_available": true,
+        "ethics_resolved": true,
+        "methods_reproducible": false,
+        "statistics_adequate": true
+      }
+    }
+  },
+  "sequence-back-translate": {
+    "input": {
+      "organism": "human",
+      "protein": "MKW"
+    },
+    "output": {
+      "dna": "ATGAAGTGG",
+      "gc_percent": 44.444,
+      "limitations": [
+        "Codon-pair bias, RNA structure, motifs, repeats, and expression context are not optimized."
+      ],
+      "method": "deterministic preferred-codon back translation",
+      "organism": "human",
+      "protein": "MKW"
+    }
+  },
+  "sequence-inspect": {
+    "input": {
+      "alphabet": "dna",
+      "sequence": "ATGCGC"
+    },
+    "output": {
+      "alphabet": "dna",
+      "ambiguous_positions": [],
+      "canonical_length": 6,
+      "composition": {
+        "A": 1,
+        "C": 2,
+        "G": 2,
+        "T": 1
+      },
+      "gc_percent": 66.666667,
+      "length": 6,
+      "normalized_sequence": "ATGCGC",
+      "reverse_complement": "GCGCAT"
+    }
+  },
+  "single-cell-qc": {
+    "input": {
+      "cells": [
+        "c1"
+      ],
+      "genes": [
+        "MT-A",
+        "B"
+      ],
+      "matrix": [
+        [
+          5
+        ],
+        [
+          5
+        ]
+      ],
+      "max_mito_percent": 40,
+      "min_counts": 1,
+      "min_genes": 1
+    },
+    "output": {
+      "cells": [
+        {
+          "cell": "c1",
+          "detected_genes": 2,
+          "flags": [
+            "high_mitochondrial_fraction"
+          ],
+          "mitochondrial_counts": 5.0,
+          "mitochondrial_percent": 50.0,
+          "total_counts": 10.0
+        }
+      ],
+      "flagged_cell_count": 1,
+      "limitations": [
+        "Threshold flags are descriptive and must be adapted to assay chemistry, tissue, depth, and expected biology."
+      ],
+      "thresholds": {
+        "max_mito_percent": 40,
+        "min_counts": 1,
+        "min_genes": 1
+      }
+    }
+  },
+  "survival-analysis": {
+    "input": {
+      "durations": [
+        1,
+        2,
+        2,
+        3
+      ],
+      "events": [
+        1,
+        1,
+        0,
+        1
+      ]
+    },
+    "output": {
+      "curve": [
+        {
+          "at_risk": 4,
+          "censored": 0,
+          "events": 1,
+          "standard_error": 0.21650635094610965,
+          "survival": 0.75,
+          "time": 1.0
+        },
+        {
+          "at_risk": 3,
+          "censored": 1,
+          "events": 1,
+          "standard_error": 0.25,
+          "survival": 0.5,
+          "time": 2.0
+        },
+        {
+          "at_risk": 1,
+          "censored": 0,
+          "events": 1,
+          "standard_error": 0.0,
+          "survival": 0.0,
+          "time": 3.0
+        }
+      ],
+      "events": 3,
+      "median_survival": 2.0,
+      "method": "Kaplan-Meier product-limit estimate with Greenwood standard error",
+      "n": 4
+    }
+  },
+  "tumor-mutation-burden": {
+    "input": {
+      "callable_megabases": 2,
+      "variants": [
+        {
+          "allele_fraction": 0.2,
+          "effect": "missense",
+          "filter": "PASS",
+          "id": "v1",
+          "somatic": true
+        }
+      ]
+    },
+    "output": {
+      "callable_megabases": 2.0,
+      "eligible_variant_count": 1,
+      "eligible_variant_ids": [
+        "v1"
+      ],
+      "excluded_variants": [],
+      "exclusion_counts": {},
+      "included_effects": [
+        "frameshift",
+        "inframe_indel",
+        "missense",
+        "nonsense",
+        "splice",
+        "start_lost",
+        "stop_lost"
+      ],
+      "input_variant_count": 1,
+      "method": "eligible somatic variants divided by declared callable megabases",
+      "minimum_allele_fraction": 0.05,
+      "quality_gates": [
+        "Use an assay- and indication-specific validated definition of variant classes and callable territory.",
+        "Document genome build, germline filtering, sequencing depth, purity, and limit of detection.",
+        "This descriptive value is not a clinical high/low classification or treatment recommendation."
+      ],
+      "tmb_mutations_per_mb": 0.5
+    }
+  },
+  "variant-summary": {
+    "input": {
+      "variants": [
+        {
+          "alt": "G",
+          "chrom": "1",
+          "filter": "PASS",
+          "ref": "A"
+        }
+      ]
+    },
+    "output": {
+      "chromosome_counts": {
+        "1": 1
+      },
+      "filter_counts": {
+        "PASS": 1
+      },
+      "ti_tv_ratio": null,
+      "transition_count": 1,
+      "transversion_count": 0,
+      "type_counts": {
+        "snv": 1
+      },
+      "variant_count": 1
+    }
+  }
+}

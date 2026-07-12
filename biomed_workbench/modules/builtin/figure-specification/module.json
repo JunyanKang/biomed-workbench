@@ -1,0 +1,222 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Each panel is intended to support one declared claim from one identifiable data source."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "panel_requests": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "figure": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Require a claim, data source, and plot form for every uniquely labeled figure panel.",
+  "domains": [
+    "publication"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.publication:figure_specification",
+  "evidence_effects": [
+    "validates_claim_or_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "figure-specification",
+  "input_artifacts": [
+    {
+      "artifact_type": "claim_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "panel_requests",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "panels": {
+        "items": {
+          "type": "object"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "title": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "title",
+      "panels"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "figure specification",
+    "Specify a scientific figure",
+    "\u8bbe\u8ba1\u5e76\u5ba1\u8ba1\u79d1\u5b66\u56fe\u8868\u9762\u677f"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "A structural audit cannot replace full scientific, editorial, statistical, ethical, or legal expert review."
+  ],
+  "maturity": "validated",
+  "module_type": "design",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "figure_specification",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "figure",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "panel_findings": {
+        "type": "array"
+      },
+      "panels": {
+        "type": "array"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "ready": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "panel_findings",
+      "panels",
+      "quality_gates",
+      "ready",
+      "title"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid claim set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Every conclusion is linked to supplied evidence, scope, limitations, figures, and reproducibility information before delivery.",
+      "id": "figure-specification-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Does every figure panel state a unique claim, data source, and plot form?"
+  ],
+  "schema_version": 1,
+  "title": "Specify a scientific figure",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

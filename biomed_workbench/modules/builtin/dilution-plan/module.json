@@ -1,0 +1,222 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Each transfer is made from the immediately preceding well with complete mixing and conserved volume."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "dilution_request": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "dilution_series": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Calculate stepwise concentrations and transfer volumes for a constant-factor dilution series.",
+  "domains": [
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.experiment:serial_dilution",
+  "evidence_effects": [
+    "supports_experimental_execution_or_measurement"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "dilution-plan",
+  "input_artifacts": [
+    {
+      "artifact_type": "assay_plan",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "dilution_request",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "dilution_factor": {
+        "minimum": 1.0,
+        "type": "number"
+      },
+      "final_volume_ul": {
+        "minimum": 0.0,
+        "type": "number"
+      },
+      "initial_concentration": {
+        "minimum": 0.0,
+        "type": "number"
+      },
+      "steps": {
+        "maximum": 100,
+        "minimum": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "initial_concentration",
+      "dilution_factor",
+      "steps",
+      "final_volume_ul"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "dilution plan",
+    "Plan a serial dilution",
+    "\u8bbe\u8ba1\u8fde\u7eed\u7a00\u91ca\u65b9\u6848"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Calculated plans require assay controls, instrument calibration, replicate design, and laboratory validation."
+  ],
+  "maturity": "validated",
+  "module_type": "design",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "protocol",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "dilution_series",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "assumption": {
+        "type": "string"
+      },
+      "dilution_factor": {
+        "type": "number"
+      },
+      "steps": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "assumption",
+      "dilution_factor",
+      "steps"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid assay plan is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Controls, calibration range, replicate structure, units, transfer assumptions, and assay-specific uncertainty are reviewed.",
+      "id": "dilution-plan-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What concentrations and transfer volumes produce the requested serial dilution series?"
+  ],
+  "schema_version": 1,
+  "title": "Plan a serial dilution",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

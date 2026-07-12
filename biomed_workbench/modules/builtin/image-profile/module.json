@@ -1,0 +1,229 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Numeric pixels share one intensity scale and image dimensions preserve the intended field of view."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "image": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "image_statistics": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Report shape, range, mean, variance, percentiles, and zero fraction for a finite image matrix.",
+  "domains": [
+    "imaging"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.imaging:image_profile",
+  "evidence_effects": [
+    "quantifies_image_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "image-profile",
+  "input_artifacts": [
+    {
+      "artifact_type": "image_collection",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "image",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "image": {
+        "items": {
+          "type": "array"
+        },
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "image"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "image profile",
+    "Profile an image array",
+    "\u5206\u6790\u79d1\u7814\u56fe\u50cf\u5f3a\u5ea6\u5206\u5e03"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Numeric image summaries do not replace acquisition calibration, blinded sampling, biological replication, and expert review."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "image_measurements",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "image_statistics",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "maximum": {
+        "type": "number"
+      },
+      "mean": {
+        "type": "number"
+      },
+      "minimum": {
+        "type": "number"
+      },
+      "percentiles": {
+        "type": "object"
+      },
+      "pixel_count": {
+        "type": "integer"
+      },
+      "shape": {
+        "type": "array"
+      },
+      "standard_deviation": {
+        "type": "number"
+      },
+      "zero_fraction": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "maximum",
+      "mean",
+      "minimum",
+      "percentiles",
+      "pixel_count",
+      "shape",
+      "standard_deviation",
+      "zero_fraction"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid image collection is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Acquisition scale, registration, threshold or tracking assumptions, field replication, and measurement uncertainty are reviewed.",
+      "id": "image-profile-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What are the intensity distribution, sparsity, and shape of a numeric scientific image?"
+  ],
+  "schema_version": 1,
+  "title": "Profile an image array",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

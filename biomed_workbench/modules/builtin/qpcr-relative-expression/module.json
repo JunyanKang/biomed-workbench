@@ -1,0 +1,279 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Amplification efficiencies are validated, reference assays are stable, and calibrators define the biological baseline."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "ct_measurements": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "relative_expression": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Aggregate technical replicates, normalize across multiple reference assays, apply assay efficiencies, and report sample-level QC.",
+  "domains": [
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.quantitative_assays:quantify_relative_expression",
+  "evidence_effects": [
+    "supports_experimental_execution_or_measurement"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "qpcr-relative-expression",
+  "input_artifacts": [
+    {
+      "artifact_type": "assay_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "ct_measurements",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "calibrator_samples": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "efficiencies": {
+        "type": "object"
+      },
+      "measurements": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "assay": {
+              "type": "string"
+            },
+            "ct": {
+              "maximum": 50,
+              "minimum": 0,
+              "type": "number"
+            },
+            "sample": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "sample",
+            "assay",
+            "ct"
+          ],
+          "type": "object"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "reference_assays": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "replicate_ct_sd_limit": {
+        "minimum": 0,
+        "type": "number"
+      },
+      "target_assay": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "measurements",
+      "target_assay",
+      "reference_assays",
+      "calibrator_samples"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "qpcr relative expression",
+    "Quantify relative qPCR expression",
+    "\u8ba1\u7b97 qPCR \u76f8\u5bf9\u8868\u8fbe"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Calculated plans require assay controls, instrument calibration, replicate design, and laboratory validation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "statistical_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "relative_expression",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "calibrator_mean_ct": {
+        "type": "object"
+      },
+      "calibrator_samples": {
+        "type": "array"
+      },
+      "efficiencies": {
+        "type": "object"
+      },
+      "method": {
+        "type": "string"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "reference_assays": {
+        "type": "array"
+      },
+      "replicate_ct_sd_limit": {
+        "type": "number"
+      },
+      "samples": {
+        "type": "array"
+      },
+      "target_assay": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "calibrator_mean_ct",
+      "calibrator_samples",
+      "efficiencies",
+      "method",
+      "quality_gates",
+      "reference_assays",
+      "replicate_ct_sd_limit",
+      "samples",
+      "target_assay"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid assay table is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Controls, calibration range, replicate structure, units, transfer assumptions, and assay-specific uncertainty are reviewed.",
+      "id": "qpcr-relative-expression-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What efficiency-corrected relative expression is supported after replicate and multi-reference normalization?"
+  ],
+  "schema_version": 1,
+  "title": "Quantify relative qPCR expression",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

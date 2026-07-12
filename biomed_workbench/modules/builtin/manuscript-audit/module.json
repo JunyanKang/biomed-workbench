@@ -1,0 +1,242 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Section labels, claims, and availability declarations accurately represent the submitted manuscript package."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "manuscript": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "manuscript_quality": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "citation-audit",
+    "figure-specification",
+    "reviewer-assessment"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Check core sections, claim grounding, figures, data availability, and code availability before editorial synthesis.",
+  "domains": [
+    "publication"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.publication:manuscript_audit",
+  "evidence_effects": [
+    "validates_claim_or_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "manuscript-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "manuscript",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "manuscript",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "claims": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "code_availability": {
+        "type": "boolean"
+      },
+      "data_availability": {
+        "type": "boolean"
+      },
+      "figure_count": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "sections": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "sections",
+      "claims"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "manuscript audit",
+    "Audit manuscript readiness",
+    "\u5ba1\u8ba1\u8bba\u6587\u7ed3\u6784\u3001\u4e3b\u5f20\u548c\u53ef\u91cd\u590d\u6027"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "A structural audit cannot replace full scientific, editorial, statistical, ethical, or legal expert review."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "manuscript_quality",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "claim_count": {
+        "type": "integer"
+      },
+      "figure_count": {
+        "type": "integer"
+      },
+      "findings": {
+        "type": "array"
+      },
+      "major_finding_count": {
+        "type": "integer"
+      },
+      "next_gate": {
+        "type": "string"
+      },
+      "ready": {
+        "type": "boolean"
+      },
+      "structure": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "claim_count",
+      "figure_count",
+      "findings",
+      "major_finding_count",
+      "next_gate",
+      "ready",
+      "structure"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid manuscript is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Every conclusion is linked to supplied evidence, scope, limitations, figures, and reproducibility information before delivery.",
+      "id": "manuscript-audit-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Are manuscript structure, claim grounding, figures, data, and code availability ready for expert review?"
+  ],
+  "schema_version": 1,
+  "title": "Audit manuscript readiness",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

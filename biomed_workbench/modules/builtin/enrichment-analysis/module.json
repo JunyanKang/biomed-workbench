@@ -1,0 +1,228 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The query is contained in the explicit background and gene-set membership is appropriate for the organism and identifier namespace."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "gene_sets": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "enrichment": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "differential-expression",
+    "network-analysis"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Calculate one-sided hypergeometric enrichment and BH correction against an explicit background.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.omics:enrichment_analysis",
+  "evidence_effects": [
+    "quantifies_molecular_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "enrichment-analysis",
+  "input_artifacts": [
+    {
+      "artifact_type": "gene_set_collection",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "gene_sets",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "background_genes": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "gene_sets": {
+        "type": "object"
+      },
+      "query_genes": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "query_genes",
+      "gene_sets",
+      "background_genes"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "enrichment analysis",
+    "Run gene-set overrepresentation",
+    "\u8fdb\u884c\u57fa\u56e0\u96c6\u5bcc\u96c6\u5206\u6790"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This bounded analysis does not replace assay-specific normalization, sample-aware models, sensitivity analysis, and biological validation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "enrichment_result",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "enrichment",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "background_size": {
+        "type": "integer"
+      },
+      "method": {
+        "type": "string"
+      },
+      "query_size": {
+        "type": "integer"
+      },
+      "results": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "background_size",
+      "method",
+      "query_size",
+      "results"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid gene set collection is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Biological denominator, matrix orientation, identifier system, data quality, model assumptions, and multiplicity are reviewed before inference.",
+      "id": "enrichment-analysis-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which declared gene sets are overrepresented relative to the explicit background universe?"
+  ],
+  "schema_version": 1,
+  "title": "Run gene-set overrepresentation",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,227 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Edges represent comparable relationships and duplicate or directional semantics are declared correctly."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "network": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "network_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Deduplicate edges and report degrees, hubs, and weakly connected components.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.omics:network_summary",
+  "evidence_effects": [
+    "quantifies_molecular_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "network-analysis",
+  "input_artifacts": [
+    {
+      "artifact_type": "network",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "network",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "directed": {
+        "type": "boolean"
+      },
+      "edges": {
+        "items": {
+          "type": "array"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "edges"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "network analysis",
+    "Summarize a biological network",
+    "\u5206\u6790\u751f\u7269\u7f51\u7edc\u3001\u7ec4\u5206\u548c\u67a2\u7ebd"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This bounded analysis does not replace assay-specific normalization, sample-aware models, sensitivity analysis, and biological validation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "network",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "network_summary",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "component_count": {
+        "type": "integer"
+      },
+      "components": {
+        "type": "array"
+      },
+      "degree": {
+        "type": "object"
+      },
+      "directed": {
+        "type": "boolean"
+      },
+      "edge_count": {
+        "type": "integer"
+      },
+      "hubs": {
+        "type": "array"
+      },
+      "node_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "component_count",
+      "components",
+      "degree",
+      "directed",
+      "edge_count",
+      "hubs",
+      "node_count"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid network is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Biological denominator, matrix orientation, identifier system, data quality, model assumptions, and multiplicity are reviewed before inference.",
+      "id": "network-analysis-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What nodes, edges, components, degrees, and hubs describe the supplied biological network?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize a biological network",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

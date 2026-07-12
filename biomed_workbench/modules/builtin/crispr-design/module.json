@@ -1,0 +1,221 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The supplied sequence is unambiguous DNA and SpCas9 NGG context is the intended nuclease rule."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "target_sequence": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "guides": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Find SpCas9 NGG guide contexts on both strands and report transparent heuristic checks.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:crispr_guides",
+  "evidence_effects": [
+    "proposes_testable_candidate"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "crispr-design",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "target_sequence",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "guide_length": {
+        "maximum": 25,
+        "minimum": 15,
+        "type": "integer"
+      },
+      "max_guides": {
+        "maximum": 500,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "sequence": {
+        "minLength": 18,
+        "type": "string"
+      }
+    },
+    "required": [
+      "sequence"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "crispr design",
+    "Discover CRISPR guide candidates",
+    "\u8bbe\u8ba1 CRISPR sgRNA \u5019\u9009"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Heuristic ranking is not an activity model.",
+    "Genome-wide off-targets, variant overlap, chromatin accessibility, and delivery constraints require reference-aware validation."
+  ],
+  "maturity": "validated",
+  "module_type": "design",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "candidate_design",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "guides",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "guides": {
+        "type": "array"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "nuclease": {
+        "type": "string"
+      },
+      "pam_rule": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "guides",
+      "limitations",
+      "nuclease",
+      "pam_rule"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid sequence set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Sequence identity, coordinate convention, model approximations, off-target scope, and orthogonal validation needs are reviewed.",
+      "id": "crispr-design-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which sequence contexts satisfy the declared SpCas9 guide and PAM rules for downstream validation?"
+  ],
+  "schema_version": 1,
+  "title": "Discover CRISPR guide candidates",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

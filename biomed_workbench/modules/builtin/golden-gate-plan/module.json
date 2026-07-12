@@ -1,0 +1,271 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Fragment sequences and four-base overhang orientations are declared in assembly order."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "fragments": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "assembly_plan": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "restriction-plan",
+    "sequence-inspect"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Check ordered Type IIS fragments for both-strand internal sites, incompatible junctions, repeated overhangs, palindromes, and construct-verification gates.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.biochemical_design:plan_golden_gate",
+  "evidence_effects": [
+    "proposes_testable_candidate"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "golden-gate-plan",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "fragments",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "circular": {
+        "type": "boolean"
+      },
+      "enzyme": {
+        "enum": [
+          "BsaI",
+          "BbsI",
+          "BsmBI"
+        ],
+        "type": "string"
+      },
+      "fragments": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "left_overhang": {
+              "pattern": "[ACGTacgt]{4}",
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "right_overhang": {
+              "pattern": "[ACGTacgt]{4}",
+              "type": "string"
+            },
+            "sequence": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "sequence",
+            "left_overhang",
+            "right_overhang"
+          ],
+          "type": "object"
+        },
+        "minItems": 2,
+        "type": "array"
+      }
+    },
+    "required": [
+      "fragments"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "golden gate plan",
+    "Audit a Golden Gate assembly plan",
+    "\u68c0\u67e5 Golden Gate \u514b\u9686\u7ec4\u88c5"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Candidates require reference-aware off-target, thermodynamic, structural, and experimental validation before use."
+  ],
+  "maturity": "validated",
+  "module_type": "design",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "candidate_design",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "assembly_plan",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "assembly_ready": {
+        "type": "boolean"
+      },
+      "circular": {
+        "type": "boolean"
+      },
+      "enzyme": {
+        "type": "string"
+      },
+      "fragments": {
+        "type": "array"
+      },
+      "internal_site_findings": {
+        "type": "array"
+      },
+      "junctions": {
+        "type": "array"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "recognition_site": {
+        "type": "string"
+      },
+      "risk_findings": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "assembly_ready",
+      "circular",
+      "enzyme",
+      "fragments",
+      "internal_site_findings",
+      "junctions",
+      "quality_gates",
+      "recognition_site",
+      "risk_findings"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid sequence set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Sequence identity, coordinate convention, model approximations, off-target scope, and orthogonal validation needs are reviewed.",
+      "id": "golden-gate-plan-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Is the ordered Type IIS assembly free of internal sites, incompatible junctions, and risky overhang reuse?"
+  ],
+  "schema_version": 1,
+  "title": "Audit a Golden Gate assembly plan",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

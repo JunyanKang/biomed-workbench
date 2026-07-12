@@ -1,0 +1,281 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Claim text, evidence design, replication status, and review-domain flags faithfully represent the manuscript."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "manuscript_facts": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "review": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "manuscript-audit",
+    "response-matrix"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Evaluate claim language against evidence design and combine reproducibility, statistics, data, ethics, and novelty into a structured review.",
+  "domains": [
+    "publication"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.research_quality:assess_manuscript",
+  "evidence_effects": [
+    "validates_claim_or_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "reviewer-assessment",
+  "input_artifacts": [
+    {
+      "artifact_type": "claim_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "manuscript_facts",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "claims": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "claim": {
+              "type": "string"
+            },
+            "evidence_design": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            },
+            "replicated": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "claim",
+            "evidence_design",
+            "replicated"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "novelty": {
+        "enum": [
+          "low",
+          "moderate",
+          "high"
+        ],
+        "type": "string"
+      },
+      "review_domains": {
+        "additionalProperties": false,
+        "properties": {
+          "data_available": {
+            "type": "boolean"
+          },
+          "ethics_resolved": {
+            "type": "boolean"
+          },
+          "methods_reproducible": {
+            "type": "boolean"
+          },
+          "statistics_adequate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "methods_reproducible",
+          "statistics_adequate",
+          "data_available",
+          "ethics_resolved"
+        ],
+        "type": "object"
+      }
+    },
+    "required": [
+      "claims",
+      "review_domains",
+      "novelty"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "reviewer assessment",
+    "Build a claim-linked manuscript assessment",
+    "\u8fdb\u884c\u4e3b\u5f20\u8bc1\u636e\u5173\u8054\u7684\u540c\u884c\u8bc4\u5ba1"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "A structural audit cannot replace full scientific, editorial, statistical, ethical, or legal expert review."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "reviewer_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "review",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "claim_assessments": {
+        "type": "array"
+      },
+      "finding_counts": {
+        "type": "object"
+      },
+      "findings": {
+        "type": "array"
+      },
+      "novelty": {
+        "type": "string"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "recommendation": {
+        "type": "string"
+      },
+      "review_domains": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "claim_assessments",
+      "finding_counts",
+      "findings",
+      "novelty",
+      "quality_gates",
+      "recommendation",
+      "review_domains"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid claim set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Every conclusion is linked to supplied evidence, scope, limitations, figures, and reproducibility information before delivery.",
+      "id": "reviewer-assessment-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which manuscript claims and review domains create major or minor concerns under the supplied evidence design?"
+  ],
+  "schema_version": 1,
+  "title": "Build a claim-linked manuscript assessment",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

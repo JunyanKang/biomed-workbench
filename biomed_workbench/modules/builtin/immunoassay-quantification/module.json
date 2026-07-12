@@ -1,0 +1,269 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The selected calibration range is linear and dilution factors represent the original sample concentration."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "assay": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "quantification": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Aggregate standard replicates, fit and diagnose a calibrated response model, back-calculate diluted unknowns, and flag extrapolation.",
+  "domains": [
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.quantitative_assays:fit_immunoassay_curve",
+  "evidence_effects": [
+    "supports_experimental_execution_or_measurement"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "immunoassay-quantification",
+  "input_artifacts": [
+    {
+      "artifact_type": "assay_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "assay",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "model": {
+        "enum": [
+          "linear"
+        ],
+        "type": "string"
+      },
+      "standards": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "concentration": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "response": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "concentration",
+            "response"
+          ],
+          "type": "object"
+        },
+        "minItems": 3,
+        "type": "array"
+      },
+      "unknowns": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "dilution_factor": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "response": {
+              "type": "number"
+            },
+            "sample": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "sample",
+            "response"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "standards",
+      "unknowns"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "immunoassay quantification",
+    "Quantify an immunoassay calibration curve",
+    "\u62df\u5408\u514d\u75ab\u6d4b\u5b9a\u6807\u51c6\u66f2\u7ebf\u5e76\u5b9a\u91cf\u672a\u77e5\u6837\u672c"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Calculated plans require assay controls, instrument calibration, replicate design, and laboratory validation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "calibration_result",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "quantification",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "calibrated_concentration_range": {
+        "type": "array"
+      },
+      "calibrated_response_range": {
+        "type": "array"
+      },
+      "fit": {
+        "type": "object"
+      },
+      "model": {
+        "type": "string"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "standards": {
+        "type": "array"
+      },
+      "unknowns": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "calibrated_concentration_range",
+      "calibrated_response_range",
+      "fit",
+      "model",
+      "quality_gates",
+      "standards",
+      "unknowns"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid assay table is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Controls, calibration range, replicate structure, units, transfer assumptions, and assay-specific uncertainty are reviewed.",
+      "id": "immunoassay-quantification-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Does the calibration fit support back-calculation of unknown concentrations within the validated response range?"
+  ],
+  "schema_version": 1,
+  "title": "Quantify an immunoassay calibration curve",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

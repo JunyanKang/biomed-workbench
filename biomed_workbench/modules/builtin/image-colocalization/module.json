@@ -1,0 +1,241 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Channels are spatially registered and intensity thresholds are appropriate for the acquisition and background."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "channels": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "colocalization": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "image-profile"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Calculate Pearson intensity correlation and thresholded Manders overlap coefficients.",
+  "domains": [
+    "imaging"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.imaging:colocalization",
+  "evidence_effects": [
+    "quantifies_image_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "image-colocalization",
+  "input_artifacts": [
+    {
+      "artifact_type": "image_collection",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "channels",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "channel_a": {
+        "items": {
+          "type": "array"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "channel_b": {
+        "items": {
+          "type": "array"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "threshold_a": {
+        "type": "number"
+      },
+      "threshold_b": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "channel_a",
+      "channel_b"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "image colocalization",
+    "Measure two-channel colocalization",
+    "\u8ba1\u7b97\u53cc\u901a\u9053\u56fe\u50cf\u5171\u5b9a\u4f4d"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Numeric image summaries do not replace acquisition calibration, blinded sampling, biological replication, and expert review."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "image_measurements",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "colocalization",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "manders_m1": {
+        "type": "number"
+      },
+      "manders_m2": {
+        "type": "number"
+      },
+      "method": {
+        "type": "string"
+      },
+      "pearson_r": {
+        "type": "number"
+      },
+      "shape": {
+        "type": "array"
+      },
+      "threshold_a": {
+        "type": "integer"
+      },
+      "threshold_b": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "manders_m1",
+      "manders_m2",
+      "method",
+      "pearson_r",
+      "shape",
+      "threshold_a",
+      "threshold_b"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid image collection is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Acquisition scale, registration, threshold or tracking assumptions, field replication, and measurement uncertainty are reviewed.",
+      "id": "image-colocalization-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "How strongly do two aligned image channels correlate and overlap above declared thresholds?"
+  ],
+  "schema_version": 1,
+  "title": "Measure two-channel colocalization",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

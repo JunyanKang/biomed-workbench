@@ -1,0 +1,225 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Preferred-codon substitution is sufficient for deterministic screening and is not full expression optimization."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "protein": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "coding_sequence": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Create a deterministic preferred-codon coding sequence with explicit optimization limits.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:back_translate",
+  "evidence_effects": [
+    "proposes_testable_candidate"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "sequence-back-translate",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "protein",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "organism": {
+        "enum": [
+          "human",
+          "ecoli"
+        ],
+        "type": "string"
+      },
+      "protein": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "protein"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "sequence back translate",
+    "Back-translate a protein sequence",
+    "\u5c06\u86cb\u767d\u5e8f\u5217\u53cd\u5411\u7ffb\u8bd1\u4e3a\u7f16\u7801 DNA"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Codon-pair bias, RNA structure, motifs, repeats, and expression context are not optimized."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "coding_sequence",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "dna": {
+        "type": "string"
+      },
+      "gc_percent": {
+        "type": "number"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "method": {
+        "type": "string"
+      },
+      "organism": {
+        "type": "string"
+      },
+      "protein": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "dna",
+      "gc_percent",
+      "limitations",
+      "method",
+      "organism",
+      "protein"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid sequence set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Sequence identity, coordinate convention, model approximations, off-target scope, and orthogonal validation needs are reviewed.",
+      "id": "sequence-back-translate-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What deterministic preferred-codon DNA sequence encodes the supplied protein for the selected organism?"
+  ],
+  "schema_version": 1,
+  "title": "Back-translate a protein sequence",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

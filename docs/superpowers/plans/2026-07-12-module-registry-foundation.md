@@ -377,7 +377,7 @@ git commit -m "feat: enforce scientific tool compatibility"
 - Consumes: the current 48 capability records and new `ModuleManifest` parser.
 - Produces: exactly 48 validated built-in manifests and a migration evidence report.
 
-- [ ] **Step 1: Write failing parity test**
+- [x] **Step 1: Write failing parity test**
 
 ```python
 def test_every_legacy_capability_has_one_behavior_preserving_module():
@@ -393,13 +393,13 @@ def test_every_legacy_capability_has_one_behavior_preserving_module():
         assert module.mutability == row["mutability"]
 ```
 
-- [ ] **Step 2: Run and verify empty built-in registry failure**
+- [x] **Step 2: Run and verify empty built-in registry failure**
 
 Run: `python3 -m unittest tests.release.test_module_migration`
 
 Expected: missing built-in root or zero modules.
 
-- [ ] **Step 3: Implement one-time structured migration tool**
+- [x] **Step 3: Implement one-time structured migration tool**
 
 The migration reads the current domain specs with `json`, maps each capability
 to a scientific module family, and enriches it using a checked-in source-neutral
@@ -409,13 +409,13 @@ It also declares Python/runtime dependencies, external-tool requirements,
 format versions, and at least one compatibility row for every module. It must
 refuse incomplete mappings; no generic placeholder text is allowed.
 
-- [ ] **Step 4: Generate and inspect all manifests**
+- [x] **Step 4: Generate and inspect all manifests**
 
 Run: `python3 tools/migrate_capabilities_to_modules.py`
 
 Expected: `created=48`, `validated=48`, `unmapped=0`, `duplicate=0`.
 
-- [ ] **Step 5: Build migration report**
+- [x] **Step 5: Build migration report**
 
 The report records old and new counts, sorted IDs, registry digest, entrypoint
 parity count, schema parity count, scientific-field completeness count, and
@@ -426,7 +426,7 @@ Run `python3 tools/build_tool_compatibility_matrix.py` against the migrated
 built-in registry and require `module_count=48`, `compatibility_complete=48`,
 and no unvalidated external-tool claim.
 
-- [ ] **Step 6: Run parity tests and commit**
+- [x] **Step 6: Run parity tests and commit**
 
 Run: `python3 -m unittest tests.release.test_module_migration tests.unit.test_module_registry`
 

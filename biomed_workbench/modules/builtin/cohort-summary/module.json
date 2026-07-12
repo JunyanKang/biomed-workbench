@@ -1,0 +1,222 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Continuous and categorical variable roles are declared correctly and records represent the intended cohort denominator."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "cohort": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "cohort_statistics": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Produce continuous and categorical descriptive statistics from explicitly typed variables.",
+  "domains": [
+    "clinical"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.clinical:cohort_summary",
+  "evidence_effects": [
+    "quantifies_clinical_research_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "cohort-summary",
+  "input_artifacts": [
+    {
+      "artifact_type": "clinical_cohort",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "cohort",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "categorical": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "continuous": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "records": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "records",
+      "continuous",
+      "categorical"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "cohort summary",
+    "Summarize a research cohort",
+    "\u6c47\u603b\u4e34\u5e8a\u961f\u5217\u57fa\u7ebf\u7279\u5f81"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This research summary is not a diagnostic, treatment, regulatory, privacy-compliance, or clinical management decision."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "statistical_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "cohort_statistics",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "categorical": {
+        "type": "object"
+      },
+      "continuous": {
+        "type": "object"
+      },
+      "record_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "categorical",
+      "continuous",
+      "record_count"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid clinical cohort is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Cohort denominator, missingness, censoring or outcome definition, privacy, and non-clinical-use limits are reviewed.",
+      "id": "cohort-summary-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What are the sample denominator, missingness, distributions, and category frequencies of a research cohort?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize a research cohort",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

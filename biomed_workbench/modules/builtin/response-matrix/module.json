@@ -1,0 +1,216 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Every supplied reviewer comment requires one traceable response and manuscript action."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "review_comments": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "revision_ledger": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Preserve every reviewer comment, response, manuscript action, status, and unresolved item.",
+  "domains": [
+    "publication"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.publication:response_matrix",
+  "evidence_effects": [
+    "validates_claim_or_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "response-matrix",
+  "input_artifacts": [
+    {
+      "artifact_type": "reviewer_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "review_comments",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "comments": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "comments"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "response matrix",
+    "Build a reviewer response matrix",
+    "\u5efa\u7acb\u5ba1\u7a3f\u610f\u89c1\u56de\u590d\u77e9\u9635"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "A structural audit cannot replace full scientific, editorial, statistical, ethical, or legal expert review."
+  ],
+  "maturity": "validated",
+  "module_type": "design",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "revision_ledger",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "revision_ledger",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "comment_count": {
+        "type": "integer"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "rows": {
+        "type": "array"
+      },
+      "status_counts": {
+        "type": "object"
+      },
+      "unresolved_indices": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "comment_count",
+      "quality_gates",
+      "rows",
+      "status_counts",
+      "unresolved_indices"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid reviewer report is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Every conclusion is linked to supplied evidence, scope, limitations, figures, and reproducibility information before delivery.",
+      "id": "response-matrix-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Has every reviewer comment been linked to a response, manuscript action, and resolution status?"
+  ],
+  "schema_version": 1,
+  "title": "Build a reviewer response matrix",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

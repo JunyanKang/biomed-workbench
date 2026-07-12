@@ -1,0 +1,251 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Genes are rows, cells are columns, counts are non-negative, and thresholds are exploratory rather than universal."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "single_cell_counts": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "cell_quality": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "expression-qc"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Compute per-cell counts, detected genes, mitochondrial fraction, and transparent threshold flags.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.omics:single_cell_qc",
+  "evidence_effects": [
+    "quantifies_molecular_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "single-cell-qc",
+  "input_artifacts": [
+    {
+      "artifact_type": "count_matrix",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "single_cell_counts",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "cells": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "genes": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "matrix": {
+        "items": {
+          "type": "array"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "max_mito_percent": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number"
+      },
+      "min_counts": {
+        "minimum": 0,
+        "type": "number"
+      },
+      "min_genes": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "mitochondrial_prefixes": {
+        "items": {
+          "type": "string"
+        },
+        "nullable": true,
+        "type": "array"
+      }
+    },
+    "required": [
+      "genes",
+      "cells",
+      "matrix"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "single cell qc",
+    "Quality-control single-cell count data",
+    "\u8bc4\u4f30\u5355\u7ec6\u80de\u8868\u8fbe\u6570\u636e\u8d28\u91cf"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Threshold flags are descriptive and must be adapted to assay chemistry, tissue, depth, and expected biology."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "cell_quality",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "cells": {
+        "type": "array"
+      },
+      "flagged_cell_count": {
+        "type": "integer"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "thresholds": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "cells",
+      "flagged_cell_count",
+      "limitations",
+      "thresholds"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid count matrix is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Biological denominator, matrix orientation, identifier system, data quality, model assumptions, and multiplicity are reviewed before inference.",
+      "id": "single-cell-qc-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which cells fail declared count, feature, or mitochondrial-fraction quality thresholds?"
+  ],
+  "schema_version": 1,
+  "title": "Quality-control single-cell count data",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

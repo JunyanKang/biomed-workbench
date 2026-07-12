@@ -1,0 +1,263 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The supplied disclosure is a research record rather than a legal opinion or jurisdiction-specific filing analysis."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "disclosure": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "disclosure_quality": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "literature-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Check inventive concept, essential features, enablement examples, alternatives, and prior-art evidence.",
+  "domains": [
+    "publication"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.publication:patent_disclosure_audit",
+  "evidence_effects": [
+    "validates_claim_or_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "patent-disclosure-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "patent_disclosure",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "disclosure",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "alternatives": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "essential_features": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "examples": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "prior_art": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "problem": {
+        "type": "string"
+      },
+      "solution": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "problem",
+      "solution",
+      "essential_features",
+      "examples",
+      "alternatives",
+      "prior_art"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "patent disclosure audit",
+    "Audit a research invention disclosure",
+    "\u5ba1\u8ba1\u79d1\u7814\u53d1\u660e\u62ab\u9732\u548c\u4e13\u5229\u51c6\u5907\u5ea6"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This research disclosure audit is not legal advice, a patentability opinion, freedom-to-operate analysis, or jurisdiction-specific filing guidance."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "disclosure_quality",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "alternative_count": {
+        "type": "integer"
+      },
+      "essential_features": {
+        "type": "array"
+      },
+      "example_count": {
+        "type": "integer"
+      },
+      "findings": {
+        "type": "array"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "prior_art_count": {
+        "type": "integer"
+      },
+      "problem": {
+        "type": "string"
+      },
+      "ready_for_claim_drafting": {
+        "type": "boolean"
+      },
+      "solution": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "alternative_count",
+      "essential_features",
+      "example_count",
+      "findings",
+      "limitations",
+      "prior_art_count",
+      "problem",
+      "ready_for_claim_drafting",
+      "solution"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid patent disclosure is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Every conclusion is linked to supplied evidence, scope, limitations, figures, and reproducibility information before delivery.",
+      "id": "patent-disclosure-audit-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Does a research disclosure identify the inventive problem, solution, essential features, enablement, alternatives, and prior art?"
+  ],
+  "schema_version": 1,
+  "title": "Audit a research invention disclosure",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

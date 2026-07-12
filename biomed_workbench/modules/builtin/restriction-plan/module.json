@@ -1,0 +1,217 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The enzyme motif library and supplied DNA strand are appropriate for sequence-site mapping."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "sequence": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "restriction_sites": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Locate selected restriction motifs with explicit one-based coordinates.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:restriction_sites",
+  "evidence_effects": [
+    "proposes_testable_candidate"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "restriction-plan",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "sequence",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "enzymes": {
+        "items": {
+          "type": "string"
+        },
+        "nullable": true,
+        "type": "array"
+      },
+      "sequence": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "sequence"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "restriction plan",
+    "Map restriction enzyme sites",
+    "\u5b9a\u4f4d\u9650\u5236\u6027\u5185\u5207\u9176\u4f4d\u70b9"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Candidates require reference-aware off-target, thermodynamic, structural, and experimental validation before use."
+  ],
+  "maturity": "validated",
+  "module_type": "design",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "sequence_annotation",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "restriction_sites",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "coordinate_system": {
+        "type": "string"
+      },
+      "sequence_length": {
+        "type": "integer"
+      },
+      "site_count": {
+        "type": "integer"
+      },
+      "sites": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "coordinate_system",
+      "sequence_length",
+      "site_count",
+      "sites"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid sequence set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Sequence identity, coordinate convention, model approximations, off-target scope, and orthogonal validation needs are reviewed.",
+      "id": "restriction-plan-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Where do the selected restriction motifs occur in the supplied DNA sequence?"
+  ],
+  "schema_version": 1,
+  "title": "Map restriction enzyme sites",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

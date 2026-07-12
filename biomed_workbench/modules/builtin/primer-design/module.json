@@ -1,0 +1,233 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Template ends are intended primer regions and approximate melting-temperature formulas are adequate for candidate screening."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "template": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "primers": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "restriction-plan"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Rank facing primer pairs with explicit thermodynamic approximations and validation limits.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:design_primers",
+  "evidence_effects": [
+    "proposes_testable_candidate"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "primer-design",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "template",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "max_length": {
+        "maximum": 40,
+        "minimum": 14,
+        "type": "integer"
+      },
+      "max_pairs": {
+        "maximum": 100,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "min_length": {
+        "maximum": 40,
+        "minimum": 14,
+        "type": "integer"
+      },
+      "target_tm": {
+        "maximum": 100,
+        "minimum": 20,
+        "type": "number"
+      },
+      "template": {
+        "minLength": 28,
+        "type": "string"
+      }
+    },
+    "required": [
+      "template"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "primer design",
+    "Design PCR primer candidates",
+    "\u8bbe\u8ba1 PCR \u5f15\u7269\u5019\u9009"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Genomic uniqueness and off-target amplification are not assessed; verify candidates against the intended reference.",
+    "Secondary structure and salt-adjusted nearest-neighbor thermodynamics require a dedicated downstream check."
+  ],
+  "maturity": "validated",
+  "module_type": "design",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "candidate_design",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "primers",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "limitations": {
+        "type": "array"
+      },
+      "pairs": {
+        "type": "array"
+      },
+      "template_length": {
+        "type": "integer"
+      },
+      "tm_method": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "limitations",
+      "pairs",
+      "template_length",
+      "tm_method"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid sequence set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Sequence identity, coordinate convention, model approximations, off-target scope, and orthogonal validation needs are reviewed.",
+      "id": "primer-design-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which facing primer pairs best satisfy length, approximate melting temperature, GC, and homopolymer constraints?"
+  ],
+  "schema_version": 1,
+  "title": "Design PCR primer candidates",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

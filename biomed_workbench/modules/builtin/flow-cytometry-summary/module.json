@@ -1,0 +1,241 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Compensation and transformation are complete and sequential rectangular gates are scientifically appropriate."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "events": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "gating_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Apply parent-linked rectangular gates to event measurements and report total and parent-relative yields with retained event indices.",
+  "domains": [
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_flow_cytometry",
+  "evidence_effects": [
+    "supports_experimental_execution_or_measurement"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "flow-cytometry-summary",
+  "input_artifacts": [
+    {
+      "artifact_type": "cytometry_event_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "events",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "events": {
+        "items": {
+          "type": "object"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "gates": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "conditions": {
+              "type": "object"
+            },
+            "name": {
+              "type": "string"
+            },
+            "parent": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "conditions"
+          ],
+          "type": "object"
+        },
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "events",
+      "gates"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "flow cytometry summary",
+    "Apply a sequential flow-cytometry gating plan",
+    "\u6c47\u603b\u6d41\u5f0f\u7ec6\u80de\u672f\u95e8\u63a7\u7ed3\u679c"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Calculated plans require assay controls, instrument calibration, replicate design, and laboratory validation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "statistical_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "gating_summary",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "channels": {
+        "type": "array"
+      },
+      "gate_order": {
+        "type": "array"
+      },
+      "gates": {
+        "type": "array"
+      },
+      "input_event_count": {
+        "type": "integer"
+      },
+      "quality_gates": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "channels",
+      "gate_order",
+      "gates",
+      "input_event_count",
+      "quality_gates"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid cytometry event table is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Controls, calibration range, replicate structure, units, transfer assumptions, and assay-specific uncertainty are reviewed.",
+      "id": "flow-cytometry-summary-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "How many events pass each sequential parent gate and what fraction of parent and total do they represent?"
+  ],
+  "schema_version": 1,
+  "title": "Apply a sequential flow-cytometry gating plan",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

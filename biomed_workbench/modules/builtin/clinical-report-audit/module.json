@@ -1,0 +1,222 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Required sections can be detected from explicit reporting-standard terminology in the supplied text."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "report": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "report_quality": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Check lexical section coverage for CARE, CONSORT, or ICH-E3 while preserving review limitations.",
+  "domains": [
+    "clinical"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.clinical:audit_report",
+  "evidence_effects": [
+    "quantifies_clinical_research_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "clinical-report-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "clinical_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "report",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "standard": {
+        "enum": [
+          "CARE",
+          "CONSORT",
+          "ICH-E3"
+        ],
+        "type": "string"
+      },
+      "text": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "text"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "clinical report audit",
+    "Audit clinical report structure",
+    "\u68c0\u67e5\u4e34\u5e8a\u62a5\u544a\u89c4\u8303\u5b8c\u6574\u6027"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This lexical structure audit is not a substitute for scientific, ethical, statistical, regulatory, or editorial review."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "report_quality",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "completeness_fraction": {
+        "type": "number"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "missing_sections": {
+        "type": "array"
+      },
+      "present_sections": {
+        "type": "array"
+      },
+      "standard": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "completeness_fraction",
+      "limitations",
+      "missing_sections",
+      "present_sections",
+      "standard"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid clinical report is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Cohort denominator, missingness, censoring or outcome definition, privacy, and non-clinical-use limits are reviewed.",
+      "id": "clinical-report-audit-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which required reporting sections are present or absent for the selected clinical reporting standard?"
+  ],
+  "schema_version": 1,
+  "title": "Audit clinical report structure",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

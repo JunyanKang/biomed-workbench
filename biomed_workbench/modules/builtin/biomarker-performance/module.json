@@ -1,0 +1,247 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Labels represent the prespecified binary outcome and scores are evaluated without data-leaked threshold selection."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "observations": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "performance": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "cohort-summary"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Calculate confusion metrics, predictive values, accuracy, and tie-aware rank ROC AUC.",
+  "domains": [
+    "clinical"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.clinical:biomarker_performance",
+  "evidence_effects": [
+    "quantifies_clinical_research_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "biomarker-performance",
+  "input_artifacts": [
+    {
+      "artifact_type": "biomarker_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "observations",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "labels": {
+        "items": {
+          "type": "integer"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "scores": {
+        "items": {
+          "type": "number"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "threshold": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "labels",
+      "scores",
+      "threshold"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "biomarker performance",
+    "Evaluate binary biomarker performance",
+    "\u8bc4\u4f30\u751f\u7269\u6807\u5fd7\u7269\u8bca\u65ad\u6027\u80fd"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Threshold metrics and AUC require external validation, uncertainty estimates, calibration, and clinically representative prevalence."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "diagnostic_performance",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "performance",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "accuracy": {
+        "type": "number"
+      },
+      "confusion": {
+        "type": "object"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "negative_predictive_value": {
+        "type": "number"
+      },
+      "positive_predictive_value": {
+        "type": "number"
+      },
+      "roc_auc": {
+        "type": "number"
+      },
+      "sensitivity": {
+        "type": "number"
+      },
+      "specificity": {
+        "type": "number"
+      },
+      "threshold": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "accuracy",
+      "confusion",
+      "limitations",
+      "negative_predictive_value",
+      "positive_predictive_value",
+      "roc_auc",
+      "sensitivity",
+      "specificity",
+      "threshold"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid biomarker table is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Cohort denominator, missingness, censoring or outcome definition, privacy, and non-clinical-use limits are reviewed.",
+      "id": "biomarker-performance-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "How well does a continuous biomarker discriminate a prespecified binary outcome at the declared threshold?"
+  ],
+  "schema_version": 1,
+  "title": "Evaluate binary biomarker performance",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,244 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Concentrations are positive, ordered on a log scale, and empirical half-range interpolation is scientifically adequate."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "dose_series": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "response_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Check monotonicity and estimate an empirical half-range concentration on a log scale.",
+  "domains": [
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.experiment:dose_response_summary",
+  "evidence_effects": [
+    "supports_experimental_execution_or_measurement"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "dose-response",
+  "input_artifacts": [
+    {
+      "artifact_type": "assay_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "dose_series",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "concentrations": {
+        "items": {
+          "type": "number"
+        },
+        "minItems": 3,
+        "type": "array"
+      },
+      "direction": {
+        "enum": [
+          "decreasing",
+          "increasing"
+        ],
+        "type": "string"
+      },
+      "responses": {
+        "items": {
+          "type": "number"
+        },
+        "minItems": 3,
+        "type": "array"
+      }
+    },
+    "required": [
+      "concentrations",
+      "responses"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "dose response",
+    "Summarize a dose-response series",
+    "\u5206\u6790\u5242\u91cf\u53cd\u5e94\u5173\u7cfb"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This is not a nonlinear four-parameter logistic fit and does not estimate confidence intervals."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "statistical_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "response_summary",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "direction": {
+        "type": "string"
+      },
+      "half_max_concentration": {
+        "type": "number"
+      },
+      "half_max_response": {
+        "type": "number"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "method": {
+        "type": "string"
+      },
+      "monotonic": {
+        "type": "boolean"
+      },
+      "response_max": {
+        "type": "number"
+      },
+      "response_min": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "direction",
+      "half_max_concentration",
+      "half_max_response",
+      "limitations",
+      "method",
+      "monotonic",
+      "response_max",
+      "response_min"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid assay table is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Controls, calibration range, replicate structure, units, transfer assumptions, and assay-specific uncertainty are reviewed.",
+      "id": "dose-response-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Is the observed response monotonic and where does it cross the empirical half range?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize a dose-response series",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

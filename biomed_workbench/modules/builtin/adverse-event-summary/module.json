@@ -1,0 +1,271 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Participant identifiers are stable and severity grade, seriousness, and relatedness are distinct recorded attributes."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "events": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "safety": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Separate event counts from affected-participant incidence while stratifying severity grade, seriousness, relatedness, and event term.",
+  "domains": [
+    "clinical"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.research_quality:summarize_adverse_events",
+  "evidence_effects": [
+    "quantifies_clinical_research_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "adverse-event-summary",
+  "input_artifacts": [
+    {
+      "artifact_type": "adverse_event_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "events",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "enrolled_participants": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "events": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "grade": {
+              "maximum": 5,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "participant": {
+              "type": "string"
+            },
+            "relatedness": {
+              "type": "string"
+            },
+            "serious": {
+              "type": "boolean"
+            },
+            "term": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "participant",
+            "term",
+            "grade",
+            "serious"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "events",
+      "enrolled_participants"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "adverse event summary",
+    "Summarize research adverse events",
+    "\u6c47\u603b\u4e0d\u826f\u4e8b\u4ef6\u3001\u4e25\u91cd\u6027\u4e0e\u53d7\u8bd5\u8005\u53d1\u751f\u7387"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This research summary is not a diagnostic, treatment, regulatory, privacy-compliance, or clinical management decision."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "safety_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "safety",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "by_grade": {
+        "type": "object"
+      },
+      "by_relatedness": {
+        "type": "object"
+      },
+      "by_term": {
+        "type": "object"
+      },
+      "enrolled_participants": {
+        "type": "integer"
+      },
+      "event_count": {
+        "type": "integer"
+      },
+      "events": {
+        "type": "array"
+      },
+      "participant_incidence_percent": {
+        "type": "number"
+      },
+      "participants_with_events": {
+        "type": "integer"
+      },
+      "participants_with_serious_events": {
+        "type": "integer"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "serious_event_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "by_grade",
+      "by_relatedness",
+      "by_term",
+      "enrolled_participants",
+      "event_count",
+      "events",
+      "participant_incidence_percent",
+      "participants_with_events",
+      "participants_with_serious_events",
+      "quality_gates",
+      "serious_event_count"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid adverse event table is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Cohort denominator, missingness, censoring or outcome definition, privacy, and non-clinical-use limits are reviewed.",
+      "id": "adverse-event-summary-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What adverse events occurred, in how many participants, at what grades and seriousness?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize research adverse events",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

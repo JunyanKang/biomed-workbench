@@ -1,0 +1,206 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Direct identifier keys and common email or phone patterns capture only a subset of re-identification risk."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "record": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "deidentified_record": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Redact direct identifier fields plus email and phone patterns while reporting residual privacy limits.",
+  "domains": [
+    "clinical"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.clinical:deidentify_record",
+  "evidence_effects": [
+    "quantifies_clinical_research_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "clinical-deidentify",
+  "input_artifacts": [
+    {
+      "artifact_type": "clinical_record",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "record",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "record": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "record"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "clinical deidentify",
+    "De-identify a structured clinical record",
+    "\u4e34\u5e8a\u7814\u7a76\u8bb0\u5f55\u53bb\u6807\u8bc6\u5316"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Rule-based de-identification is not certification of HIPAA, GDPR, or institutional compliance.",
+    "Free-text dates, locations, rare events, quasi-identifiers, images, and linkage risk require expert review."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "clinical_record",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "deidentified_record",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "limitations": {
+        "type": "array"
+      },
+      "record": {
+        "type": "object"
+      },
+      "redaction_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "limitations",
+      "record",
+      "redaction_count"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid clinical record is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Cohort denominator, missingness, censoring or outcome definition, privacy, and non-clinical-use limits are reviewed.",
+      "id": "clinical-deidentify-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which direct identifiers and common contact patterns can be removed from a structured research record?"
+  ],
+  "schema_version": 1,
+  "title": "De-identify a structured clinical record",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

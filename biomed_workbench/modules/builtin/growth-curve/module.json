@@ -1,0 +1,233 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Positive measurements contain a log-linear phase that can be approximated by a sliding window."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "growth_series": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "growth_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Estimate maximum log-phase growth rate and doubling time from positive measurements.",
+  "domains": [
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.experiment:growth_curve_summary",
+  "evidence_effects": [
+    "supports_experimental_execution_or_measurement"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "growth-curve",
+  "input_artifacts": [
+    {
+      "artifact_type": "assay_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "growth_series",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "times": {
+        "items": {
+          "type": "number"
+        },
+        "minItems": 3,
+        "type": "array"
+      },
+      "values": {
+        "items": {
+          "type": "number"
+        },
+        "minItems": 3,
+        "type": "array"
+      },
+      "window": {
+        "minimum": 2,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "times",
+      "values"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "growth curve",
+    "Summarize a growth curve",
+    "\u5206\u6790\u751f\u957f\u66f2\u7ebf\u548c\u500d\u589e\u65f6\u95f4"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Calculated plans require assay controls, instrument calibration, replicate design, and laboratory validation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "statistical_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "growth_summary",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "doubling_time": {
+        "type": "number"
+      },
+      "log_phase_end_time": {
+        "type": "number"
+      },
+      "log_phase_start_time": {
+        "type": "number"
+      },
+      "max_growth_rate_per_time": {
+        "type": "number"
+      },
+      "method": {
+        "type": "string"
+      },
+      "window": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "doubling_time",
+      "log_phase_end_time",
+      "log_phase_start_time",
+      "max_growth_rate_per_time",
+      "method",
+      "window"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid assay table is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Controls, calibration range, replicate structure, units, transfer assumptions, and assay-specific uncertainty are reviewed.",
+      "id": "growth-curve-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What maximum log-phase growth rate and doubling time are supported by the measured series?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize a growth curve",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

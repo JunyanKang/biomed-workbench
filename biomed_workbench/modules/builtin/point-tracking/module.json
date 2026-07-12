@@ -1,0 +1,222 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Frame coordinates share one scale and nearest-neighbor displacement does not exceed the declared bound."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "detections": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "tracks": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Link point detections with a bounded one-to-one nearest-neighbor rule and explicit tracking limits.",
+  "domains": [
+    "imaging"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.imaging:track_points",
+  "evidence_effects": [
+    "quantifies_image_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "point-tracking",
+  "input_artifacts": [
+    {
+      "artifact_type": "image_measurements",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "detections",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "frames": {
+        "items": {
+          "type": "array"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "max_distance": {
+        "minimum": 1e-09,
+        "type": "number"
+      }
+    },
+    "required": [
+      "frames",
+      "max_distance"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "point tracking",
+    "Track points across frames",
+    "\u8ffd\u8e2a\u65f6\u95f4\u5e8f\u5217\u56fe\u50cf\u4e2d\u7684\u70b9\u76ee\u6807"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Crossings, missed detections, motion models, and gap closing are not resolved."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "trajectory",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "tracks",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "limitations": {
+        "type": "array"
+      },
+      "max_distance": {
+        "type": "integer"
+      },
+      "method": {
+        "type": "string"
+      },
+      "track_count": {
+        "type": "integer"
+      },
+      "tracks": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "limitations",
+      "max_distance",
+      "method",
+      "track_count",
+      "tracks"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid image measurements is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Acquisition scale, registration, threshold or tracking assumptions, field replication, and measurement uncertainty are reviewed.",
+      "id": "point-tracking-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which detections can be linked into bounded nearest-neighbor trajectories across frames?"
+  ],
+  "schema_version": 1,
+  "title": "Track points across frames",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

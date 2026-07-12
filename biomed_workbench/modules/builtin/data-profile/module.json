@@ -1,0 +1,212 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Rows are comparable observations and each column has a consistent scientific meaning."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "records": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "profile": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Report table shape, inferred column types, missingness, uniqueness, and numeric ranges.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.data:profile_table",
+  "evidence_effects": [
+    "quantifies_molecular_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "data-profile",
+  "input_artifacts": [
+    {
+      "artifact_type": "scientific_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "records",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "rows": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "rows"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "data profile",
+    "Profile structured scientific rows",
+    "\u68c0\u67e5\u79d1\u7814\u6570\u636e\u8868\u7ed3\u6784\u548c\u7f3a\u5931\u503c"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This bounded analysis does not replace assay-specific normalization, sample-aware models, sensitivity analysis, and biological validation."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "profile",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "column_count": {
+        "type": "integer"
+      },
+      "column_order": {
+        "type": "array"
+      },
+      "columns": {
+        "type": "object"
+      },
+      "row_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "column_count",
+      "column_order",
+      "columns",
+      "row_count"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid scientific table is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Biological denominator, matrix orientation, identifier system, data quality, model assumptions, and multiplicity are reviewed before inference.",
+      "id": "data-profile-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What are the shape, types, missingness, uniqueness, and numeric ranges of a scientific table?"
+  ],
+  "schema_version": 1,
+  "title": "Profile structured scientific rows",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

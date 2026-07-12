@@ -1,0 +1,233 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Component volumes are per reaction, concentrations are handled upstream, and pipetting overage is appropriate."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "reaction_request": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "pcr_protocol": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Calculate per-reaction and overage-adjusted PCR component volumes with conservation checks.",
+  "domains": [
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.experiment:pcr_mix",
+  "evidence_effects": [
+    "supports_experimental_execution_or_measurement"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "pcr-plan",
+  "input_artifacts": [
+    {
+      "artifact_type": "assay_plan",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "reaction_request",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "components": {
+        "type": "object"
+      },
+      "overage_percent": {
+        "maximum": 100,
+        "minimum": 0,
+        "type": "number"
+      },
+      "reaction_volume_ul": {
+        "minimum": 0.0,
+        "type": "number"
+      },
+      "reactions": {
+        "maximum": 100000,
+        "minimum": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "reactions",
+      "reaction_volume_ul",
+      "components"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "pcr plan",
+    "Calculate a PCR master mix",
+    "\u8ba1\u7b97 PCR \u53cd\u5e94\u548c\u4e3b\u6df7\u5408\u6db2"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Calculated plans require assay controls, instrument calibration, replicate design, and laboratory validation."
+  ],
+  "maturity": "validated",
+  "module_type": "design",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "protocol",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "pcr_protocol",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "master_mix": {
+        "type": "object"
+      },
+      "per_reaction": {
+        "type": "object"
+      },
+      "prepared_reaction_equivalents": {
+        "type": "number"
+      },
+      "reaction_volume_ul": {
+        "type": "number"
+      },
+      "reactions": {
+        "type": "integer"
+      },
+      "water_per_reaction_ul": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "master_mix",
+      "per_reaction",
+      "prepared_reaction_equivalents",
+      "reaction_volume_ul",
+      "reactions",
+      "water_per_reaction_ul"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid assay plan is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Controls, calibration range, replicate structure, units, transfer assumptions, and assay-specific uncertainty are reviewed.",
+      "id": "pcr-plan-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What per-reaction and overage-adjusted master-mix volumes conserve the declared PCR volume?"
+  ],
+  "schema_version": 1,
+  "title": "Calculate a PCR master mix",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

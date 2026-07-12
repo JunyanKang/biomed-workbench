@@ -1,0 +1,224 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Variants use one coordinate and reference system and ref/alt alleles are normalized sufficiently for descriptive counting."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "variants": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "variant_statistics": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Count SNVs, indels, MNVs, filters, chromosomes, transitions, transversions, and Ti/Tv ratio.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.omics:variant_summary",
+  "evidence_effects": [
+    "quantifies_molecular_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "variant-summary",
+  "input_artifacts": [
+    {
+      "artifact_type": "variant_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "variants",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "variants": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "variants"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "variant summary",
+    "Summarize structured variants",
+    "\u6c47\u603b\u53d8\u5f02\u7c7b\u578b\u3001\u8fc7\u6ee4\u548c Ti/Tv"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This bounded analysis does not replace assay-specific normalization, sample-aware models, sensitivity analysis, and biological validation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "statistical_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "variant_statistics",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "chromosome_counts": {
+        "type": "object"
+      },
+      "filter_counts": {
+        "type": "object"
+      },
+      "ti_tv_ratio": {
+        "nullable": true
+      },
+      "transition_count": {
+        "type": "integer"
+      },
+      "transversion_count": {
+        "type": "integer"
+      },
+      "type_counts": {
+        "type": "object"
+      },
+      "variant_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "chromosome_counts",
+      "filter_counts",
+      "ti_tv_ratio",
+      "transition_count",
+      "transversion_count",
+      "type_counts",
+      "variant_count"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid variant table is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Biological denominator, matrix orientation, identifier system, data quality, model assumptions, and multiplicity are reviewed before inference.",
+      "id": "variant-summary-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What variant types, filters, chromosomes, and transition-transversion balance characterize the supplied variants?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize structured variants",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

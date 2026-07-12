@@ -1,0 +1,244 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Initial-rate observations follow the selected steady-state kinetic model and substrate concentrations are accurate."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "kinetic_observations": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "kinetic_model": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Fit Michaelis-Menten, Hill, or substrate-inhibition models and return parameters, observation residuals, convergence, RMSE, and AICc.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.biochemical_design:fit_enzyme_kinetics",
+  "evidence_effects": [
+    "proposes_testable_candidate"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "enzyme-kinetics",
+  "input_artifacts": [
+    {
+      "artifact_type": "assay_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "kinetic_observations",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "model": {
+        "enum": [
+          "michaelis_menten",
+          "hill",
+          "substrate_inhibition"
+        ],
+        "type": "string"
+      },
+      "observations": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "substrate": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "velocity": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "weight": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "substrate",
+            "velocity"
+          ],
+          "type": "object"
+        },
+        "minItems": 4,
+        "type": "array"
+      }
+    },
+    "required": [
+      "observations"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "enzyme kinetics",
+    "Fit steady-state enzyme kinetics",
+    "\u62df\u5408\u9176\u52a8\u529b\u5b66\u6a21\u578b"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Candidates require reference-aware off-target, thermodynamic, structural, and experimental validation before use."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "model_fit",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "kinetic_model",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "diagnostics": {
+        "type": "object"
+      },
+      "model": {
+        "type": "string"
+      },
+      "observations": {
+        "type": "array"
+      },
+      "parameters": {
+        "type": "object"
+      },
+      "quality_gates": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "diagnostics",
+      "model",
+      "observations",
+      "parameters",
+      "quality_gates"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid assay table is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Sequence identity, coordinate convention, model approximations, off-target scope, and orthogonal validation needs are reviewed.",
+      "id": "enzyme-kinetics-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which steady-state kinetic parameters and model diagnostics best describe the supplied observations?"
+  ],
+  "schema_version": 1,
+  "title": "Fit steady-state enzyme kinetics",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

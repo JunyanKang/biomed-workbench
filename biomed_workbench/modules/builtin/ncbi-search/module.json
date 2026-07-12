@@ -1,0 +1,276 @@
+{
+  "access": "public_api",
+  "alternatives": [],
+  "assumptions": [
+    "The Entrez query syntax, database, pagination, and sort choice represent the intended search."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "eutils-contract-2026-03-04-python-3.14.3",
+      "input_formats": {
+        "search_request": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "search_result": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {
+        "ncbi-eutils": [
+          "contract-2026-03-04"
+        ]
+      }
+    }
+  ],
+  "complements": [],
+  "credentials": [
+    "NCBI_API_KEY"
+  ],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Search any valid Entrez database with bounded pagination and optional history state.",
+  "domains": [
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.ncbi:search",
+  "evidence_effects": [
+    "grounds_external_evidence"
+  ],
+  "execution": {
+    "kind": "service",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 60
+  },
+  "id": "ncbi-search",
+  "input_artifacts": [
+    {
+      "artifact_type": "database_query",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "search_request",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "database": {
+        "pattern": "^[a-z][a-z0-9_]*$",
+        "type": "string"
+      },
+      "idtype": {
+        "nullable": true,
+        "type": "string"
+      },
+      "retmax": {
+        "maximum": 100000,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "retstart": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "sort": {
+        "nullable": true,
+        "type": "string"
+      },
+      "term": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "use_history": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "database",
+      "term"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "ncbi search",
+    "Search NCBI Entrez",
+    "\u641c\u7d22 NCBI Entrez \u6570\u636e\u5e93"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Database retrieval is time-dependent and must be reconciled with record version, curation status, and independent evidence."
+  ],
+  "maturity": "validated",
+  "module_type": "data_source",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "database_record_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "search_result",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "count": {
+        "type": "integer"
+      },
+      "database": {
+        "type": "string"
+      },
+      "ids": {
+        "type": "array"
+      },
+      "query_key": {
+        "type": "string"
+      },
+      "query_translation": {
+        "type": "string"
+      },
+      "webenv": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "count",
+      "database",
+      "ids",
+      "query_key",
+      "query_translation",
+      "webenv"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid database query is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Identifiers, query provenance, database scope, record version, and retrieval limits are reviewed before evidence synthesis.",
+      "id": "ncbi-search-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which Entrez identifiers match the bounded database query?"
+  ],
+  "schema_version": 1,
+  "title": "Search NCBI Entrez",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        "==contract-2026-03-04"
+      ],
+      "ecosystem": "service",
+      "identity": "eutils.ncbi.nlm.nih.gov/entrez/eutils",
+      "mismatch_policy": "block",
+      "name": "ncbi-eutils",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "contract-2026-03-04"
+      ],
+      "verified_at": "2026-07-12",
+      "version_differences": [
+        "ESummary 2.0 uses database-specific document-summary schemas.",
+        "EFetch output depends on database, rettype, and retmode."
+      ],
+      "version_pattern": "(contract-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "version_probe": [
+        "einfo-json-contract"
+      ],
+      "version_source": "https://www.ncbi.nlm.nih.gov/books/NBK25499/"
+    }
+  ],
+  "version": "1.0.0"
+}

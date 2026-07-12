@@ -1,0 +1,253 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "A global threshold and declared connectivity are suitable for the objects being quantified."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "image": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "segmentation": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "image-profile"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Threshold a small image and measure connected-component area, centroid, bounds, perimeter, and circularity.",
+  "domains": [
+    "imaging"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.imaging:segment_components",
+  "evidence_effects": [
+    "quantifies_image_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "image-segment",
+  "input_artifacts": [
+    {
+      "artifact_type": "image_collection",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "image",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "connectivity": {
+        "enum": [
+          4,
+          8
+        ],
+        "type": "integer"
+      },
+      "image": {
+        "items": {
+          "type": "array"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "minimum_area": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "polarity": {
+        "enum": [
+          "high",
+          "low"
+        ],
+        "type": "string"
+      },
+      "threshold": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "image",
+      "threshold"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "image segment",
+    "Segment image components",
+    "\u5206\u5272\u56fe\u50cf\u5e76\u91cf\u5316\u8fde\u901a\u533a\u57df"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Numeric image summaries do not replace acquisition calibration, blinded sampling, biological replication, and expert review."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "image_segmentation",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "segmentation",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "component_count": {
+        "type": "integer"
+      },
+      "components": {
+        "type": "array"
+      },
+      "connectivity": {
+        "type": "integer"
+      },
+      "coordinate_system": {
+        "type": "string"
+      },
+      "labels": {
+        "type": "array"
+      },
+      "polarity": {
+        "type": "string"
+      },
+      "shape": {
+        "type": "array"
+      },
+      "threshold": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "component_count",
+      "components",
+      "connectivity",
+      "coordinate_system",
+      "labels",
+      "polarity",
+      "shape",
+      "threshold"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid image collection is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Acquisition scale, registration, threshold or tracking assumptions, field replication, and measurement uncertainty are reviewed.",
+      "id": "image-segment-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which connected components result from the declared threshold, polarity, and connectivity?"
+  ],
+  "schema_version": 1,
+  "title": "Segment image components",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

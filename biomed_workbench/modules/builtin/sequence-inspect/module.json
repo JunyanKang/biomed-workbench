@@ -1,0 +1,234 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The declared alphabet is correct and non-canonical symbols should be retained as ambiguity rather than guessed."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "sequence": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "sequence_profile": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Validate and summarize DNA, RNA, or protein sequence composition and ambiguity.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.data:sequence_inspect",
+  "evidence_effects": [
+    "quantifies_molecular_observation"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "sequence-inspect",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "sequence",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "alphabet": {
+        "enum": [
+          "dna",
+          "rna",
+          "protein"
+        ],
+        "type": "string"
+      },
+      "sequence": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "sequence"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "sequence inspect",
+    "Inspect a biological sequence",
+    "\u68c0\u67e5 DNA\u3001RNA \u6216\u86cb\u767d\u5e8f\u5217"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This bounded analysis does not replace assay-specific normalization, sample-aware models, sensitivity analysis, and biological validation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "sequence_annotation",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "sequence_profile",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "alphabet": {
+        "type": "string"
+      },
+      "ambiguous_positions": {
+        "type": "array"
+      },
+      "canonical_length": {
+        "type": "integer"
+      },
+      "composition": {
+        "type": "object"
+      },
+      "gc_percent": {
+        "type": "number"
+      },
+      "length": {
+        "type": "integer"
+      },
+      "normalized_sequence": {
+        "type": "string"
+      },
+      "reverse_complement": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "alphabet",
+      "ambiguous_positions",
+      "canonical_length",
+      "composition",
+      "gc_percent",
+      "length",
+      "normalized_sequence",
+      "reverse_complement"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid sequence set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Biological denominator, matrix orientation, identifier system, data quality, model assumptions, and multiplicity are reviewed before inference.",
+      "id": "sequence-inspect-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What composition, ambiguity, GC content, and strand representation characterize the supplied sequence?"
+  ],
+  "schema_version": 1,
+  "title": "Inspect a biological sequence",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

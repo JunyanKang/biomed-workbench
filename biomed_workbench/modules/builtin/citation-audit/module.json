@@ -1,0 +1,216 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Reference fields supplied to the audit correspond to the intended cited works."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "references": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "citation_quality": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Normalize DOI values, detect duplicates, and report missing citation metadata without asserting validity.",
+  "domains": [
+    "publication"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.publication:citation_audit",
+  "evidence_effects": [
+    "validates_claim_or_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "citation-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "reference_list",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "references",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "references": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "references"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "citation audit",
+    "Audit reference metadata",
+    "\u5ba1\u8ba1\u53c2\u8003\u6587\u732e\u5b8c\u6574\u6027\u4e0e\u91cd\u590d DOI"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Metadata completeness does not prove that a reference exists, supports the claim, or is the intended version; external verification remains required."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "citation_quality",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "complete_count": {
+        "type": "integer"
+      },
+      "duplicate_dois": {
+        "type": "array"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "reference_count": {
+        "type": "integer"
+      },
+      "references": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "complete_count",
+      "duplicate_dois",
+      "limitations",
+      "reference_count",
+      "references"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid reference list is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Every conclusion is linked to supplied evidence, scope, limitations, figures, and reproducibility information before delivery.",
+      "id": "citation-audit-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which references are incomplete, malformed, or duplicated before external verification?"
+  ],
+  "schema_version": 1,
+  "title": "Audit reference metadata",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

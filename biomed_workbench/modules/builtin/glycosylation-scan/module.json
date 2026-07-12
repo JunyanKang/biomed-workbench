@@ -1,0 +1,227 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Sequence motifs indicate potential contexts but do not establish site occupancy."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          "3.14.3"
+        ]
+      },
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "protein": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "glycosylation_contexts": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "tool_versions": {}
+    }
+  ],
+  "complements": [
+    "sequence-inspect"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        "==3.14.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Report N-linked sequons, proline-blocked sequons, serine/threonine-rich windows, local sequence context, coordinates, and inference limits.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.biochemical_design:scan_glycosylation",
+  "evidence_effects": [
+    "proposes_testable_candidate"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "glycosylation-scan",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "protein",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "context_radius": {
+        "maximum": 50,
+        "minimum": 0,
+        "type": "integer"
+      },
+      "protein": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "protein"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "glycosylation scan",
+    "Scan protein glycosylation contexts",
+    "\u626b\u63cf\u86cb\u767d\u7cd6\u57fa\u5316\u5e8f\u5217\u73af\u5883"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "N-X-S/T sequons are necessary sequence motifs, not evidence of occupancy.",
+    "Serine/threonine-rich windows are descriptive and are not an O-glycosylation predictor.",
+    "Topology, accessibility, expression system, and mass-spectrometry evidence are required for site assignment."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "sequence_annotation",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "glycosylation_contexts",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "coordinate_system": {
+        "type": "string"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "n_linked_sequons": {
+        "type": "array"
+      },
+      "proline_blocked_sequons": {
+        "type": "array"
+      },
+      "protein_length": {
+        "type": "integer"
+      },
+      "serine_threonine_rich_windows": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "coordinate_system",
+      "limitations",
+      "n_linked_sequons",
+      "proline_blocked_sequons",
+      "protein_length",
+      "serine_threonine_rich_windows"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid sequence set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Sequence identity, coordinate convention, model approximations, off-target scope, and orthogonal validation needs are reviewed.",
+      "id": "glycosylation-scan-validity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which protein positions contain N-linked sequons or serine/threonine-rich contexts and what can they support?"
+  ],
+  "schema_version": 1,
+  "title": "Scan protein glycosylation contexts",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}
