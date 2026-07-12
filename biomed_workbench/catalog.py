@@ -526,6 +526,36 @@ def _register_builtins() -> None:
             input_schema=_object_schema({"frames":{"type":"array","items":{"type":"array"},"minItems":1},"max_distance":{"type":"number","minimum":0.000000001}},("frames","max_distance")),
             requirements=(), access="offline", mutability="read_only",
         ),
+        Capability(
+            id="clinical-deidentify", workflow="clinical", kind="python", title="De-identify a structured clinical record",
+            description="Redact direct identifier fields plus email and phone patterns while reporting residual privacy limits.",
+            entrypoint="biomed_workbench.capabilities.clinical:deidentify_record",
+            input_schema=_object_schema({"record":{"type":"object"}},("record",)), requirements=(), access="offline", mutability="read_only",
+        ),
+        Capability(
+            id="cohort-summary", workflow="clinical", kind="python", title="Summarize a research cohort",
+            description="Produce continuous and categorical descriptive statistics from explicitly typed variables.",
+            entrypoint="biomed_workbench.capabilities.clinical:cohort_summary",
+            input_schema=_object_schema({"records":{"type":"array","items":{"type":"object"}},"continuous":{"type":"array","items":{"type":"string"}},"categorical":{"type":"array","items":{"type":"string"}}},("records","continuous","categorical")), requirements=(), access="offline", mutability="read_only",
+        ),
+        Capability(
+            id="biomarker-performance", workflow="clinical", kind="python", title="Evaluate binary biomarker performance",
+            description="Calculate confusion metrics, predictive values, accuracy, and tie-aware rank ROC AUC.",
+            entrypoint="biomed_workbench.capabilities.clinical:biomarker_performance",
+            input_schema=_object_schema({"labels":{"type":"array","items":{"type":"integer"},"minItems":1},"scores":{"type":"array","items":{"type":"number"},"minItems":1},"threshold":{"type":"number"}},("labels","scores","threshold")), requirements=(), access="offline", mutability="read_only",
+        ),
+        Capability(
+            id="survival-analysis", workflow="clinical", kind="python", title="Estimate Kaplan-Meier survival",
+            description="Calculate a product-limit survival curve, censoring counts, Greenwood error, and median survival.",
+            entrypoint="biomed_workbench.capabilities.clinical:kaplan_meier",
+            input_schema=_object_schema({"durations":{"type":"array","items":{"type":"number"},"minItems":1},"events":{"type":"array","items":{"type":"integer"},"minItems":1}},("durations","events")), requirements=(), access="offline", mutability="read_only",
+        ),
+        Capability(
+            id="clinical-report-audit", workflow="clinical", kind="python", title="Audit clinical report structure",
+            description="Check lexical section coverage for CARE, CONSORT, or ICH-E3 while preserving review limitations.",
+            entrypoint="biomed_workbench.capabilities.clinical:audit_report",
+            input_schema=_object_schema({"text":{"type":"string","minLength":1},"standard":{"type":"string","enum":["CARE","CONSORT","ICH-E3"]}},("text",)), requirements=(), access="offline", mutability="read_only",
+        ),
     )
     for definition in definitions:
         register(definition)

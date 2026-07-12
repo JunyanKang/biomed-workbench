@@ -145,6 +145,26 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         output = execute("point-tracking", {"frames": [[[0, 0]], [[1, 0]], [[2, 0]]], "max_distance": 2})
         self.assertEqual(len(output["tracks"][0]["points"]), 3)
 
+    def test_clinical_deidentify(self):
+        output = execute("clinical-deidentify", {"record": {"patient_name": "Jane", "note": "jane@example.org"}})
+        self.assertNotIn("jane@example.org", str(output["record"]))
+
+    def test_cohort_summary(self):
+        output = execute("cohort-summary", {"records": [{"age": 20, "sex": "F"}, {"age": 40, "sex": "M"}], "continuous": ["age"], "categorical": ["sex"]})
+        self.assertEqual(output["continuous"]["age"]["median"], 30.0)
+
+    def test_biomarker_performance(self):
+        output = execute("biomarker-performance", {"labels": [0, 0, 1, 1], "scores": [0.1, 0.4, 0.35, 0.8], "threshold": 0.3})
+        self.assertAlmostEqual(output["roc_auc"], 0.75)
+
+    def test_survival_analysis(self):
+        output = execute("survival-analysis", {"durations": [1, 2, 2, 3], "events": [1, 1, 0, 1]})
+        self.assertEqual(output["median_survival"], 2.0)
+
+    def test_clinical_report_audit(self):
+        output = execute("clinical-report-audit", {"text": "Title Abstract Case presentation Timeline Diagnosis Treatment Follow-up Consent", "standard": "CARE"})
+        self.assertIn("timeline", output["present_sections"])
+
 
 if __name__ == "__main__":
     unittest.main()
