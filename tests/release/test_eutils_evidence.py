@@ -16,6 +16,7 @@ class EUtilitiesEvidenceTests(unittest.TestCase):
         self.assertEqual(payload["credential_mode"], "api_key")
         self.assertGreaterEqual(len(payload["checks"]), 10)
         self.assertTrue({"pubmed", "pmc", "gene", "protein", "nuccore", "clinvar", "sra"} <= databases)
+        self.assertIn("gene_evidence_bundle", databases)
         self.assertTrue(all(check["passed"] for check in payload["checks"]))
 
     def test_live_report_contains_no_secret_or_request_query(self):

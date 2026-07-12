@@ -341,6 +341,57 @@ def _register_builtins() -> None:
             ),
             requirements=(), access="offline", mutability="read_only",
         ),
+        Capability(
+            id="literature-evidence",
+            workflow="evidence",
+            kind="service",
+            title="Retrieve literature evidence",
+            description="Search PubMed or PMC and return normalized summaries with query provenance.",
+            entrypoint="biomed_workbench.capabilities.evidence:literature_evidence",
+            input_schema=_object_schema(
+                {
+                    "query": {"type": "string", "minLength": 1},
+                    "max_records": {"type": "integer", "minimum": 1, "maximum": 100},
+                    "database": {"type": "string", "enum": ["pubmed", "pmc"]},
+                },
+                ("query",),
+            ),
+            requirements=(), access="public_api", mutability="read_only",
+        ),
+        Capability(
+            id="gene-evidence",
+            workflow="evidence",
+            kind="service",
+            title="Build an NCBI gene evidence bundle",
+            description="Resolve gene records and linked protein, ClinVar, and PubMed identifiers in one bounded workflow.",
+            entrypoint="biomed_workbench.capabilities.evidence:gene_evidence",
+            input_schema=_object_schema(
+                {
+                    "gene": {"type": "string", "minLength": 1},
+                    "organism": {"type": "string", "minLength": 1},
+                    "max_links": {"type": "integer", "minimum": 1, "maximum": 500},
+                },
+                ("gene",),
+            ),
+            requirements=(), access="public_api", mutability="read_only",
+        ),
+        Capability(
+            id="variant-evidence",
+            workflow="evidence",
+            kind="service",
+            title="Build an NCBI variant evidence bundle",
+            description="Retrieve ClinVar summaries and linked gene and PubMed records with interpretation limits.",
+            entrypoint="biomed_workbench.capabilities.evidence:variant_evidence",
+            input_schema=_object_schema(
+                {
+                    "query": {"type": "string", "minLength": 1},
+                    "max_records": {"type": "integer", "minimum": 1, "maximum": 100},
+                    "max_links": {"type": "integer", "minimum": 1, "maximum": 500},
+                },
+                ("query",),
+            ),
+            requirements=(), access="public_api", mutability="read_only",
+        ),
     )
     for definition in definitions:
         register(definition)

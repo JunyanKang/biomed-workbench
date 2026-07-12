@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from biomed_workbench.services.eutils import EUtilitiesClient  # noqa: E402
+from biomed_workbench.capabilities.evidence import gene_evidence  # noqa: E402
 
 
 def _check(name: str, database: str, passed: bool, detail: dict[str, int | bool]) -> dict[str, object]:
@@ -37,6 +38,23 @@ def run() -> dict[str, object]:
     checks.append(_check("search", "gene", gene.count == 1 and len(gene.ids) == 1, {"count": gene.count}))
     gene_links = client.link("gene", "protein", gene.ids)
     checks.append(_check("link", "gene_to_protein", len(gene_links.links) > 0, {"links": len(gene_links.links)}))
+    bundle = gene_evidence("TP53", organism="human", max_links=1)
+    checks.append(
+        _check(
+            "composed_workflow",
+            "gene_evidence_bundle",
+            bool(bundle["gene_records"])
+            and bundle["linked"]["protein"]["total"] > 0
+            and bundle["linked"]["clinvar"]["total"] > 0
+            and bundle["linked"]["pubmed"]["total"] > 0,
+            {
+                "gene_records": len(bundle["gene_records"]),
+                "protein_links": bundle["linked"]["protein"]["total"],
+                "clinvar_links": bundle["linked"]["clinvar"]["total"],
+                "pubmed_links": bundle["linked"]["pubmed"]["total"],
+            },
+        )
+    )
 
     protein = client.fetch("protein", ["NP_000537.3"], rettype="fasta", retmode="text")
     checks.append(_check("fetch", "protein", protein.text.startswith(">"), {"nonempty": bool(protein.text)}))
