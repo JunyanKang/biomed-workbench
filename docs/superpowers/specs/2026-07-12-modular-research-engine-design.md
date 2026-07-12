@@ -120,9 +120,11 @@ Required identity fields:
 Required scientific fields:
 
 - `questions`: scientific questions the module can help answer;
-- `input_artifacts`: typed inputs, accepted formats, processing levels, and
-  required metadata;
-- `output_artifacts`: typed outputs and their interpretation scope;
+- `input_artifacts`: typed inputs, accepted format names and versions,
+  compression, indexes, coordinate systems, genome-build policy, processing
+  levels, and required metadata;
+- `output_artifacts`: typed outputs with the same machine-readable format
+  contract and their interpretation scope;
 - `preconditions`: design, data, and evidence conditions that must hold;
 - `assumptions`: model and biological assumptions;
 - `quality_gates`: checks that determine whether output is interpretable;
@@ -130,7 +132,12 @@ Required scientific fields:
 - `evidence_effects`: hypothesis relations the result may support;
 - `alternatives`: modules that answer the same intent by another method;
 - `complements`: modules that provide orthogonal evidence;
-- `dependencies`: software or public services required for execution;
+- `tool_requirements`: upstream tools or public services, exact validated
+  versions, machine-checkable compatibility rules, and bounded version probes;
+- `dependencies`: Python, R, Java, system-program, database, and service
+  dependencies with required or optional status and compatible versions;
+- `compatibility_matrix`: validated combinations of module, upstream tool,
+  dependency, input format, output format, and platform;
 - `access`, `mutability`, and credential requirements.
 
 Required engineering fields:
@@ -142,16 +149,68 @@ Required engineering fields:
 - provenance and license notes for conceptual influences;
 - compatibility range with the plugin kernel.
 
+## Tool, Dependency, and Format Compatibility
+
+Bioinformatics modules must treat software and format versions as scientific
+inputs. A module cannot claim support based only on a package name.
+
+Every upstream tool requirement declares:
+
+- canonical tool name and distribution or executable identity;
+- ecosystem: Python, R, Java, system executable, web service, or database;
+- exact versions exercised by module test fixtures;
+- authoritative version source and the date the compatibility claim was verified;
+- machine-readable allowed versions derived only from validated evidence;
+- a bounded version probe and expected parse rule;
+- version-specific parameter, API, default, field, and behavior differences;
+- whether absence or mismatch blocks execution or activates a named alternative.
+
+Every dependency declares its package or executable identity, ecosystem,
+required or optional status, version rule, tested versions, purpose, and known
+conflicts. Optional dependencies may enable a branch but cannot silently change
+the scientific method or output schema.
+
+Every artifact port declares:
+
+- format name and format or schema version;
+- text, binary, sparse, or container representation;
+- supported compression and required companion indexes;
+- sample and feature orientation;
+- coordinate convention, reference assembly, annotation release, identifier
+  namespace, and processing level where applicable;
+- required metadata fields and output guarantees;
+- compatible upstream and downstream module versions.
+
+Before execution, the compatibility checker compares actual tools,
+dependencies, and artifact metadata with a validated compatibility-matrix row.
+An exact validated row permits execution. A documented range permits execution
+only when the module contains regression evidence for that range. Unknown or
+mismatched versions are blocked or routed to an explicitly validated
+alternative; optimistic version guessing is forbidden.
+
+Every execution result records module version, upstream tool versions,
+dependency versions, selected compatibility row, input format metadata,
+parameters, and output format metadata. Credentials and machine paths remain
+excluded from this record.
+
+Updating a supported tool or format requires a module version change,
+version-specific fixtures, input-output regression, scientific-quality checks,
+and representative end-to-end validation before rebuilding the registry index.
+Compatibility claims must cite official upstream documentation or a released
+format specification; secondary summaries cannot establish support.
+
 ## Adding a Future Tool
 
 Adding a new bioinformatics tool requires only:
 
 1. create one module directory;
 2. declare its scientific and engineering contract in `module.json`;
-3. implement the source-neutral entrypoint or established-tool invocation;
-4. provide unit, contract, and representative end-to-end fixtures;
-5. run `tools/validate_module.py <module-directory>`;
-6. rebuild the generated capability index.
+3. declare exact tested tool, dependency, and input-output format compatibility;
+4. implement the source-neutral entrypoint or established-tool invocation;
+5. provide version-specific unit, contract, format, and representative
+   end-to-end fixtures;
+6. run `tools/validate_module.py <module-directory>`;
+7. rebuild the generated capability index.
 
 The registry discovers the module, validates it, and adds its intents,
 artifacts, preconditions, alternatives, complements, and quality gates to the
@@ -179,6 +238,8 @@ dictionaries. Initial artifact families include:
 Each artifact records a stable ID, artifact type, schema version, producing
 module, source inputs, scientific scope, coordinate or identifier system,
 biological denominator, processing level, quality status, and content digest.
+For bioinformatics formats it also records format version, compression, index
+companions, reference assembly, annotation release, and producer tool version.
 
 ## Dynamic Capability Graph
 
@@ -329,6 +390,10 @@ structured findings and a recoverable state. Unexpected failures disclose the
 module ID and safe error class without secrets or machine paths. Completed
 upstream work is preserved when a downstream branch fails.
 
+Tool execution is also blocked before invocation when no validated
+compatibility-matrix row matches the detected tool, dependency, and artifact
+versions. The finding names every mismatch and the validated alternatives.
+
 Read-only modules run without mutation permission. Modules that create project
 artifacts require explicit output permission and may write only inside the
 declared project output root. Credentials are module-scoped, optional where
@@ -339,6 +404,8 @@ possible, and never persisted in project state or reports.
 The modular engine is complete only when:
 
 - every current capability is represented by a valid independent module;
+- every bioinformatics module declares tested tools, dependencies, formats, and
+  a machine-validated compatibility matrix;
 - a newly added fixture module is discovered without editing kernel or router;
 - the planner creates valid single, serial, parallel, and mixed DAGs from module
   contracts and project context;
@@ -349,6 +416,7 @@ The modular engine is complete only when:
 - the 89,314-file assimilation report accounts for all inclusion and exclusion
   decisions without overstating equivalence;
 - module, contract, end-to-end, replay, independence, and release tests pass;
+- unsupported tool or format versions are proven to block before execution;
 - Codex official plugin and skill validators pass;
 - installation from GitHub exposes one skill and the complete generated module
   index in a new conversation.
