@@ -59,6 +59,31 @@
     },
     {
       "access": "offline",
+      "description": "Execute exact-version samtools flagstat on a content-addressed coordinate-sorted BAM bundle and preserve the QC-stratified JSON report for downstream scientific gating.",
+      "entrypoint": "scientific-command",
+      "id": "alignment-quality-samtools",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "threads": {
+            "maximum": 16,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threads"
+        ],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Qualify alignment mechanics with samtools flagstat",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
       "description": "Calculate confusion metrics, predictive values, accuracy, and tie-aware rank ROC AUC.",
       "entrypoint": "biomed_workbench.capabilities.clinical:biomarker_performance",
       "id": "biomarker-performance",
@@ -2063,7 +2088,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 52,
+  "entry_count": 53,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

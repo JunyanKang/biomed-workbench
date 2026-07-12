@@ -37,6 +37,42 @@ def command(**overrides):
 
 
 class ScientificCommandTests(unittest.TestCase):
+    def test_captures_text_stdout_as_a_declared_content_addressed_output(self):
+        captured = command(
+            arguments=("--input", "{input:reads}", "--label", "{parameter:label}"),
+            outputs=(CommandOutput("report", "report", "report", "report.json", "application/json", "stdout"),),
+        )
+        body = """
+import argparse, json
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True)
+parser.add_argument('--label', required=True)
+args = parser.parse_args()
+print(json.dumps({'label': args.label, 'input_is_materialized': bool(open(args.input).read())}, sort_keys=True))
+"""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tool = executable(root / "fixture-tool", body)
+            source = root / "reads.fastq"
+            source.write_text("ACGT\n", encoding="utf-8")
+            store = ProjectArtifactStore(root / "artifacts")
+            payload = store.import_file(source, role="reads", media_type="text/plain")
+
+            result = execute_scientific_command(
+                captured,
+                store=store,
+                input_payloads={"reads": payload},
+                parameters={"label": "treated"},
+                tool_versions={"fixture-tool": "2.4.1"},
+                dependency_versions={"python": "3.14.3"},
+                compatibility_row_id="fixture-tool-2.4.1-json-1",
+                executable_resolver=lambda _name: tool,
+            )
+            output = json.loads(store.resolve(result.output_payloads[0]).read_text(encoding="utf-8"))
+
+        self.assertEqual(output, {"input_is_materialized": True, "label": "treated"})
+        self.assertEqual(result.stdout, json.dumps(output, sort_keys=True) + "\n")
+
     def test_safely_materializes_a_read_only_zip_collection_for_aggregate_tools(self):
         body = """
 import argparse, json, pathlib
@@ -329,6 +365,14 @@ print('completed')
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads", "zip-directory", "../config.txt"),)),
             lambda: command(working_directory_input="missing"),
             lambda: command(outputs=(CommandOutput("report", "report", "report", "nested/report.json", "application/json"),)),
+            lambda: command(outputs=(CommandOutput("report", "report", "report", "report.bin", "application/octet-stream", "stdout"),)),
+            lambda: command(
+                arguments=("{input:reads}", "{parameter:label}"),
+                outputs=(
+                    CommandOutput("one", "report", "one", "one.txt", "text/plain", "stdout"),
+                    CommandOutput("two", "report", "two", "two.txt", "text/plain", "stdout"),
+                ),
+            ),
         )
         for factory in invalid:
             with self.subTest(factory=factory), self.assertRaises(ValueError):

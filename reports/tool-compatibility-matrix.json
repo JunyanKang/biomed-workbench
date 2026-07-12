@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 52,
-  "module_count": 52,
+  "compatibility_complete": 53,
+  "module_count": 53,
   "modules": [
     {
       "compatibility_rows": [
@@ -114,6 +114,179 @@
         }
       ],
       "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "alignment-quality-samtools-e2e-v1"
+          ],
+          "id": "samtools-1.23-htslib-1.23-bam-1.6-flagstat-json",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "alignment-quality-samtools-regression-v1"
+          ],
+          "verified_at": "2026-07-12"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            "==1.23"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "htslib-runtime",
+          "name": "htslib",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Decode BAM records and alignment flags for samtools flagstat.",
+          "required": true,
+          "tested_versions": [
+            "1.23"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "Using htslib ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "samtools",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/samtools/htslib/releases/tag/1.23"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "alignment-quality-samtools",
+      "input_formats": [
+        {
+          "artifact_type": "alignment_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "bgzf"
+              ],
+              "coordinate_systems": [
+                "one-based-leftmost"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "bam",
+              "orientations": [
+                "alignment-records"
+              ],
+              "representations": [
+                "binary",
+                "container"
+              ],
+              "required_indexes": [
+                "bai"
+              ],
+              "versions": [
+                "1.6"
+              ]
+            }
+          ],
+          "name": "alignments",
+          "processing_levels": [
+            "aligned",
+            "deduplicated",
+            "recalibrated"
+          ],
+          "required_metadata": [
+            "sample-id",
+            "sample-manifest-digest",
+            "read-group",
+            "sort-order",
+            "reference-build",
+            "reference-sequence-digest"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "alignment_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "samtools-flagstat-json",
+              "orientations": [
+                "qc-strata-by-alignment-metric"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.23"
+              ]
+            }
+          ],
+          "name": "alignment_quality_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "sample-id",
+            "reference-build"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            "==1.23"
+          ],
+          "ecosystem": "system",
+          "identity": "samtools",
+          "mismatch_policy": "block",
+          "name": "samtools",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.23"
+          ],
+          "verified_at": "2026-07-12",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==1.23"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated release emits the tested JSON QC strata and metric field names.",
+              "id": "samtools-123-flagstat-json",
+              "required_action": "Use the samtools 1.23 flagstat JSON parser and exact regression fixture.",
+              "source": "https://www.htslib.org/doc/samtools-flagstat.html"
+            }
+          ],
+          "version_pattern": "samtools ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "samtools",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/samtools/samtools/releases/tag/1.23"
+        }
+      ],
       "validation_status": "complete"
     },
     {
@@ -6817,6 +6990,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "bffbb8440706fe48f0b27b18d3a10bcfff01502aac4aee348fd516082b1a3164",
+  "registry_digest": "78b1a5ef8ad275dac1b7ea90ed1d6ecf6847c69b3cefb42c17f4938891f3adc0",
   "schema_version": 1
 }

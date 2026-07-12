@@ -1,7 +1,7 @@
 {
-  "compatibility_row_count": 52,
-  "end_to_end_passed": 52,
-  "module_count": 52,
+  "compatibility_row_count": 53,
+  "end_to_end_passed": 53,
+  "module_count": 53,
   "passed": true,
   "records": [
     {
@@ -34,6 +34,42 @@
       },
       "row_id": "python-3.14.3-inline-json-1",
       "tool_versions": {},
+      "verified_at": "2026-07-12"
+    },
+    {
+      "dependency_versions": {
+        "htslib": [
+          "1.23"
+        ]
+      },
+      "end_to_end": {
+        "digest": "4ce77ea91da3efca07796291c873a59e9d8385d4d963e4758bab0942163feb60",
+        "id": "alignment-quality-samtools-e2e-v1",
+        "passed": true
+      },
+      "input_formats": {
+        "alignments": [
+          "bam@1.6"
+        ]
+      },
+      "module_id": "alignment-quality-samtools",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "alignment_quality_report": [
+          "samtools-flagstat-json@1.23"
+        ]
+      },
+      "regression": {
+        "digest": "4bf725514fa7971d035c98131290e3253690a552b9f48b434b848f45a279139b",
+        "id": "alignment-quality-samtools-regression-v1",
+        "passed": true
+      },
+      "row_id": "samtools-1.23-htslib-1.23-bam-1.6-flagstat-json",
+      "tool_versions": {
+        "samtools": [
+          "1.23"
+        ]
+      },
       "verified_at": "2026-07-12"
     },
     {
@@ -1748,7 +1784,7 @@
       "verified_at": "2026-07-12"
     }
   ],
-  "registry_digest": "bffbb8440706fe48f0b27b18d3a10bcfff01502aac4aee348fd516082b1a3164",
-  "regression_passed": 52,
+  "registry_digest": "78b1a5ef8ad275dac1b7ea90ed1d6ecf6847c69b3cefb42c17f4938891f3adc0",
+  "regression_passed": 53,
   "schema_version": 1
 }

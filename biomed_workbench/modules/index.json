@@ -1,5 +1,5 @@
 {
-  "module_count": 52,
+  "module_count": 53,
   "modules": [
     {
       "access": "offline",
@@ -286,6 +286,343 @@
       "schema_version": 1,
       "title": "Summarize research adverse events",
       "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The BAM header, declared sample identity, read groups, reference build, and reference sequence digest describe the same alignment payload."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "htslib": [
+              "1.23"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "alignment-quality-samtools-e2e-v1"
+          ],
+          "id": "samtools-1.23-htslib-1.23-bam-1.6-flagstat-json",
+          "input_formats": {
+            "alignments": [
+              "bam@1.6"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "alignment_quality_report": [
+              "samtools-flagstat-json@1.23"
+            ]
+          },
+          "platforms": [
+            "macos-arm64"
+          ],
+          "regression_evidence_ids": [
+            "alignment-quality-samtools-regression-v1"
+          ],
+          "tool_versions": {
+            "samtools": [
+              "1.23"
+            ]
+          },
+          "verified_at": "2026-07-12"
+        }
+      ],
+      "complements": [
+        "read-quality-fastqc",
+        "read-quality-fastp",
+        "read-contamination-screen"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            "==1.23"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "htslib-runtime",
+          "name": "htslib",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Decode BAM records and alignment flags for samtools flagstat.",
+          "required": true,
+          "tested_versions": [
+            "1.23"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "Using htslib ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "samtools",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/samtools/htslib/releases/tag/1.23"
+        }
+      ],
+      "description": "Execute exact-version samtools flagstat on a content-addressed coordinate-sorted BAM bundle and preserve the QC-stratified JSON report for downstream scientific gating.",
+      "domains": [
+        "omics"
+      ],
+      "entrypoint": "scientific-command",
+      "evidence_effects": [
+        "qualifies_alignment_mechanics"
+      ],
+      "execution": {
+        "command": {
+          "arguments": [
+            "flagstat",
+            "--threads",
+            "{parameter:threads}",
+            "--output-fmt",
+            "json",
+            "{input:alignments}"
+          ],
+          "executable": "samtools",
+          "inputs": [
+            {
+              "filename": "alignment-bundle",
+              "materialization": "zip-directory",
+              "member": "alignment.bam",
+              "name": "alignments",
+              "port": "alignments",
+              "role": "alignments"
+            }
+          ],
+          "max_output_bytes": 1000000,
+          "max_payload_bytes": 1000000,
+          "outputs": [
+            {
+              "capture": "stdout",
+              "filename": "flagstat.json",
+              "media_type": "application/json",
+              "name": "report",
+              "port": "alignment_quality_report",
+              "role": "report"
+            }
+          ],
+          "parameter_names": [
+            "threads"
+          ],
+          "timeout_seconds": 120,
+          "tool_name": "samtools",
+          "working_directory_input": "alignments"
+        },
+        "kind": "command",
+        "max_output_bytes": 1000000,
+        "timeout_seconds": 120
+      },
+      "id": "alignment-quality-samtools",
+      "input_artifacts": [
+        {
+          "artifact_type": "alignment_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "bgzf"
+              ],
+              "coordinate_systems": [
+                "one-based-leftmost"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "bam",
+              "orientations": [
+                "alignment-records"
+              ],
+              "representations": [
+                "binary",
+                "container"
+              ],
+              "required_indexes": [
+                "bai"
+              ],
+              "versions": [
+                "1.6"
+              ]
+            }
+          ],
+          "name": "alignments",
+          "processing_levels": [
+            "aligned",
+            "deduplicated",
+            "recalibrated"
+          ],
+          "required_metadata": [
+            "sample-id",
+            "sample-manifest-digest",
+            "read-group",
+            "sort-order",
+            "reference-build",
+            "reference-sequence-digest"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "threads": {
+            "maximum": 16,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threads"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "BAM alignment QC",
+        "samtools flagstat",
+        "mapping quality summary",
+        "\u6bd4\u5bf9\u7ed3\u679c\u8d28\u63a7"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The validated row covers coordinate-sorted BAM 1.6 with BAI on macOS arm64; flagstat does not assess coverage uniformity, reference suitability, contamination outside tested references, expression quantification, peak quality, or biological validity."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "alignment_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "samtools-flagstat-json",
+              "orientations": [
+                "qc-strata-by-alignment-metric"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.23"
+              ]
+            }
+          ],
+          "name": "alignment_quality_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "sample-id",
+            "reference-build"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "payload_roles": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "payload_roles"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The bundle contains one root alignment.bam plus alignment.bam.bai, and the BAM header declares coordinate sorting, reference sequences, and read groups consistent with project metadata."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://github.com/samtools/samtools"
+        ],
+        "license": "MIT"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "BAM, index, header, read groups, sample identity, reference build, and reference digest must reconcile before interpretation.",
+          "id": "alignment-bundle-integrity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "QC pass/fail strata, primary/secondary/supplementary classes, and paired read counts must be internally consistent.",
+          "id": "flagstat-count-conservation",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Mapping and pairing percentages require assay-, library-, and reference-specific thresholds; flagstat alone cannot establish biological adequacy.",
+          "id": "alignment-assay-context",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Are alignment class counts, mapping, duplication, pairing, singleton, and QC-failure metrics mechanically consistent and ready for assay-specific review?"
+      ],
+      "schema_version": 1,
+      "title": "Qualify alignment mechanics with samtools flagstat",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==1.23"
+          ],
+          "ecosystem": "system",
+          "identity": "samtools",
+          "mismatch_policy": "block",
+          "name": "samtools",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.23"
+          ],
+          "verified_at": "2026-07-12",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==1.23"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated release emits the tested JSON QC strata and metric field names.",
+              "id": "samtools-123-flagstat-json",
+              "required_action": "Use the samtools 1.23 flagstat JSON parser and exact regression fixture.",
+              "source": "https://www.htslib.org/doc/samtools-flagstat.html"
+            }
+          ],
+          "version_pattern": "samtools ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "samtools",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/samtools/samtools/releases/tag/1.23"
+        }
+      ],
       "version": "1.0.0"
     },
     {
@@ -14084,6 +14421,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "bffbb8440706fe48f0b27b18d3a10bcfff01502aac4aee348fd516082b1a3164",
+  "registry_digest": "78b1a5ef8ad275dac1b7ea90ed1d6ecf6847c69b3cefb42c17f4938891f3adc0",
   "schema_version": 1
 }

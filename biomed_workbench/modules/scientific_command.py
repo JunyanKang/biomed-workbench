@@ -84,12 +84,17 @@ class CommandOutput:
     role: str
     filename: str
     media_type: str
+    capture: str = "file"
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "name", validate_identifier(self.name, "command output name"))
         object.__setattr__(self, "port", validate_identifier(self.port, "command output port"))
         object.__setattr__(self, "role", validate_identifier(self.role, "command output role"))
         object.__setattr__(self, "filename", _filename(self.filename, "command output filename"))
+        if self.capture not in {"file", "stdout", "stderr"}:
+            raise ValueError("command output capture is unsupported")
+        if self.capture != "file" and not (self.media_type.startswith("text/") or self.media_type in {"application/json", "application/xml"}):
+            raise ValueError("captured command streams require a text media type")
         ArtifactPayload(
             role=self.role,
             object_key=f"sha256/{'0' * 2}/{'0' * 64}/payload",
@@ -100,9 +105,12 @@ class CommandOutput:
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, object]) -> "CommandOutput":
-        if set(payload) != {"name", "port", "role", "filename", "media_type"}:
+        allowed = {"name", "port", "role", "filename", "media_type", "capture"}
+        if not {"name", "port", "role", "filename", "media_type"} <= set(payload) or set(payload) - allowed:
             raise ValueError("command output fields are incomplete or unsupported")
-        return cls(**dict(payload))
+        values = dict(payload)
+        values.setdefault("capture", "file")
+        return cls(**values)
 
 
 @dataclass(frozen=True)
@@ -136,6 +144,9 @@ class ScientificCommand:
                 raise ValueError(f"command {location} contain duplicate port-role bindings")
         if len(set(parameter_names)) != len(parameter_names):
             raise ValueError("command parameter names contain duplicates")
+        captures = [item.capture for item in outputs if item.capture != "file"]
+        if len(set(captures)) != len(captures):
+            raise ValueError("command output streams may each be captured once")
         if self.working_directory_input is not None:
             matches = [item for item in inputs if item.name == self.working_directory_input]
             if len(matches) != 1 or matches[0].materialization != "zip-directory":
@@ -156,12 +167,13 @@ class ScientificCommand:
             arguments.append(argument)
         expected = {
             "input": {item.name for item in inputs},
-            "output": {item.name for item in outputs},
+            "output": {item.name for item in outputs if item.capture == "file"},
             "parameter": set(parameter_names),
         }
         output_binding_valid = references["output"] == expected["output"] and not output_directory_referenced
         output_directory_valid = not references["output"] and output_directory_referenced
-        if references["input"] != expected["input"] or references["parameter"] != expected["parameter"] or not (output_binding_valid or output_directory_valid):
+        stream_only_valid = not expected["output"] and not references["output"] and not output_directory_referenced
+        if references["input"] != expected["input"] or references["parameter"] != expected["parameter"] or not (output_binding_valid or output_directory_valid or stream_only_valid):
             raise ValueError("command argument placeholders differ from declared bindings")
         for value, location in (
             (self.timeout_seconds, "timeout"),
@@ -189,15 +201,17 @@ class ScientificCommand:
             "executable": self.executable,
             "arguments": list(self.arguments),
             "inputs": input_rows,
-            "outputs": [
-                {"name": item.name, "port": item.port, "role": item.role, "filename": item.filename, "media_type": item.media_type}
-                for item in self.outputs
-            ],
+            "outputs": [],
             "parameter_names": list(self.parameter_names),
             "timeout_seconds": self.timeout_seconds,
             "max_output_bytes": self.max_output_bytes,
             "max_payload_bytes": self.max_payload_bytes,
         }
+        for item in self.outputs:
+            row = {"name": item.name, "port": item.port, "role": item.role, "filename": item.filename, "media_type": item.media_type}
+            if item.capture != "file":
+                row["capture"] = item.capture
+            payload["outputs"].append(row)
         if self.working_directory_input is not None:
             payload["working_directory_input"] = self.working_directory_input
         return payload
@@ -518,6 +532,13 @@ def execute_scientific_command(
             payload_root=output_root,
             payload_limit=command.max_payload_bytes,
         )
+        captured_streams = {"stdout": stdout, "stderr": stderr}
+        for binding in command.outputs:
+            if binding.capture != "file":
+                try:
+                    runtime_outputs[binding.name].write_text(captured_streams[binding.capture], encoding="utf-8")
+                except OSError as exc:
+                    raise ScientificCommandError("INVALID_OUTPUT") from exc
         if _digest_file(executable_path) != executable_sha256:
             raise ScientificCommandError("EXECUTABLE_DRIFT")
         for binding in command.inputs:

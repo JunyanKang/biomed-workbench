@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 52:
-            errors.append(f"built-in module count must be 52, found {len(modules)}")
+        if len(modules) != 53:
+            errors.append(f"built-in module count must be 53, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -172,10 +172,10 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 342
+                or research_report.get("test_count", 0) < 346
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
-                != {"scientific_command", "command_input_binding", "command_output_binding", "command_zip_directory_input", "bounded_process_result"}
+                != {"scientific_command", "command_input_binding", "command_output_binding", "command_stream_output_capture", "command_zip_directory_input", "bounded_process_result"}
                 or graph_report != {"node_count": len(graph.nodes), "edge_count": len(graph.edges), "digest": graph.digest}
             ):
                 errors.append("research engine report differs from the discovered registry or capability graph")
@@ -317,6 +317,27 @@ def main() -> int:
                 or screen_report.get("html_report_validated") is not True
             ):
                 errors.append("FastQ Screen live verification differs from its module, compatibility row, fixture, references, or runtime lock")
+        alignment_report_path = ROOT / "reports" / "alignment-quality-live-verification.json"
+        try:
+            alignment_report = json.loads(alignment_report_path.read_text(encoding="utf-8"))
+            alignment_manifest = registry.get("alignment-quality-samtools")
+            alignment_row = alignment_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("samtools alignment quality live verification evidence is missing or invalid")
+        else:
+            if (
+                alignment_report.get("passed") is not True
+                or alignment_report.get("module_version") != alignment_manifest.version
+                or alignment_report.get("compatibility_row_id") != alignment_row.id
+                or alignment_report.get("regression_evidence_id") != alignment_row.regression_evidence_ids[0]
+                or alignment_report.get("end_to_end_evidence_id") != alignment_row.end_to_end_evidence_ids[0]
+                or alignment_report.get("tool_versions") != {"samtools": "1.23"}
+                or alignment_report.get("dependency_versions") != {"htslib": "1.23"}
+                or alignment_report.get("fixture_manifest", {}).get("format") != "bam@1.6"
+                or not all(alignment_report.get("bundle_integrity", {}).values())
+                or alignment_report.get("scientific_summary", {}).get("counts", {}).get("total") != 4
+            ):
+                errors.append("samtools alignment quality evidence differs from its module, row, BAM fixture, or integrity checks")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

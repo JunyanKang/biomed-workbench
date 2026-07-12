@@ -101,8 +101,9 @@ External scientific engines remain user-managed dependencies; the plugin validat
 | `quality-report-multiqc` | MultiQC `1.35` | Python `3.13.12` plus exact report-runtime lock | FastQC collection `1.0.0` | MultiQC data ZIP `1.35` and HTML |
 | `read-quality-fastp` | fastp `1.3.6` | Bioconda macOS-arm64 build `ha1d0559_0` | `fastq@sanger-phred33` | fastp JSON `1.3.6` and HTML |
 | `read-contamination-screen` | FastQ Screen `0.16.0` | Bowtie2 `2.5.5` build `h9e91881_0`, Perl `5.32.1` | FASTQ plus versioned reference bundle | mapping summary and HTML |
+| `alignment-quality-samtools` | samtools `1.23` | htslib `1.23` | coordinate-sorted `bam@1.6` plus BAI | QC-stratified flagstat JSON |
 
-Unknown, missing, or mismatched versions block before invocation. The `reports/*-live-verification.json` records bind FastQC, fastp, MultiQC, and FastQ Screen bounded real-fixture executions to normalized scientific summaries, report checks, exact runtime locks, reference-manifest digests, and path-free provenance used by release validation.
+Unknown, missing, or mismatched versions block before invocation. The `reports/*-live-verification.json` records bind FastQC, fastp, MultiQC, FastQ Screen, and samtools bounded real-fixture executions to normalized scientific summaries, report checks, exact runtime locks, reference or alignment manifest digests, and path-free provenance used by release validation.
 
 ## Internal Structure
 

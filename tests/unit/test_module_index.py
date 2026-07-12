@@ -20,7 +20,7 @@ class ModuleIndexTests(unittest.TestCase):
         second = build_index(self.registry)
 
         self.assertEqual(first, second)
-        self.assertEqual(first["module_count"], 52)
+        self.assertEqual(first["module_count"], 53)
         self.assertEqual(first["registry_digest"], self.registry.digest)
         self.assertTrue(first["modules"][0]["intents"])
         self.assertTrue(first["modules"][0]["questions"])
@@ -31,7 +31,7 @@ class ModuleIndexTests(unittest.TestCase):
         catalog = build_compatibility_catalog(self.registry)
         ids = [row["id"] for row in catalog["entries"]]
 
-        self.assertEqual(catalog["entry_count"], 52)
+        self.assertEqual(catalog["entry_count"], 53)
         self.assertEqual(ids, sorted(ids))
         self.assertEqual(
             set(catalog["entries"][0]),
@@ -50,7 +50,7 @@ class ModuleIndexTests(unittest.TestCase):
             second = (module_index.read_bytes(), catalog.read_bytes())
 
         self.assertEqual(first, second)
-        self.assertEqual(json.loads(first[0])["module_count"], 52)
+        self.assertEqual(json.loads(first[0])["module_count"], 53)
 
 
 if __name__ == "__main__":
