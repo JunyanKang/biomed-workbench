@@ -21,10 +21,6 @@ class CatalogTests(unittest.TestCase):
             self.assertTrue(callable(resolve_entrypoint(capability)))
             self.assertEqual(capability.workflow, "evidence")
 
-        runtime = resolve("runtime-status")
-        self.assertTrue(callable(resolve_entrypoint(runtime)))
-        self.assertEqual(runtime.workflow, "runtime")
-
     def test_catalog_serialization_has_no_source_or_bridge_fields(self):
         payload = capability_to_dict(resolve("ncbi-search"))
 

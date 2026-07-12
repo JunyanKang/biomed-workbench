@@ -17,11 +17,10 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(ids_for(plan, "molecular_design")[0], "crispr-design")
         self.assertEqual(ids_for(plan, "publication")[0], "manuscript-audit")
 
-    def test_parallel_analysis_with_runtime_and_publication_is_mixed(self):
-        plan = route("检查环境，然后并行做单细胞和图像分割，最后写论文", per_workflow=2)
+    def test_parallel_analysis_with_publication_is_mixed(self):
+        plan = route("并行做单细胞和图像分割，最后写论文", per_workflow=2)
         self.assertEqual(plan["plan_type"], "mixed")
         modes = {step["workflow"]: step["mode"] for step in plan["steps"]}
-        self.assertEqual(modes["runtime"], "serial")
         self.assertEqual(modes["omics"], "parallel")
         self.assertEqual(modes["imaging"], "parallel")
         self.assertEqual(modes["publication"], "serial")

@@ -10,9 +10,8 @@ from .catalog import all_capabilities
 from .models import Capability
 
 
-WORKFLOW_ORDER = ("runtime", "evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication")
+WORKFLOW_ORDER = ("evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication")
 WORKFLOW_KEYWORDS = {
-    "runtime": ("runtime", "environment", "docker", "container", "gpu", "slurm", "install", "环境", "容器", "集群", "运行时"),
     "evidence": ("evidence", "literature", "pubmed", "pmc", "gene", "variant", "clinvar", "protein", "database", "文献", "证据", "数据库", "基因", "变异", "蛋白"),
     "omics": ("omics", "rna-seq", "rnaseq", "single-cell", "scrna", "expression", "enrichment", "network", "vcf", "组学", "转录组", "单细胞", "差异", "富集", "网络"),
     "molecular_design": ("crispr", "primer", "restriction", "cloning", "codon", "docking", "structure", "guide", "引物", "分子", "对接", "蛋白设计", "克隆"),
@@ -39,14 +38,6 @@ INTENT_BOOSTS = {
     "response-matrix": ("reviewer response", "rebuttal", "回复", "答复"),
     "figure-specification": ("figure", "panel", "图表", "图"),
     "patent-disclosure-audit": ("patent", "invention", "专利", "发明"),
-    "runtime-status": ("runtime", "environment", "环境", "检查"),
-    "container-plan": ("docker", "container", "容器"),
-    "container-run": ("run container", "execute container", "运行容器", "执行容器"),
-    "slurm-plan": ("slurm", "cluster", "集群"),
-    "slurm-submit": ("submit slurm", "submit job", "提交任务", "提交作业"),
-    "slurm-monitor": ("slurm status", "job status", "监控任务", "任务状态"),
-    "local-model-plan": ("local model", "boltz", "foldseek", "proteinmpnn", "diffdock", "本地模型"),
-    "local-model-run": ("run local model", "execute model", "运行本地模型", "执行模型"),
 }
 
 
@@ -101,6 +92,6 @@ def route(query: str, *, per_workflow: int = 3) -> dict[str, Any]:
         plan_type = "serial"
     steps = []
     for workflow in workflows:
-        mode = "parallel" if plan_type in {"parallel", "mixed"} and workflow not in {"runtime", "evidence", "publication"} else "serial"
+        mode = "parallel" if plan_type in {"parallel", "mixed"} and workflow not in {"evidence", "publication"} else "serial"
         steps.append({"workflow": workflow, "mode": mode, "candidates": candidates[workflow]})
     return {"objective": query, "matched_workflows": workflows, "plan_type": plan_type, "steps": steps}

@@ -84,27 +84,6 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         )
         self.assertAlmostEqual(output["max_growth_rate_per_time"], 0.7, places=6)
 
-    def test_container_plan(self):
-        output = execute(
-            "container-plan",
-            {"image": "ghcr.io/example/model:1.0", "command": ["predict", "input.fa"], "gpu": True},
-        )
-        self.assertIn("--gpus", output["argv"])
-        self.assertFalse(output["executes"])
-
-    def test_slurm_plan(self):
-        output = execute(
-            "slurm-plan",
-            {"command": ["python", "run.py"], "job_name": "fold", "cpus": 4, "memory_gb": 16, "time_minutes": 60, "gpus": 1},
-        )
-        self.assertIn("#SBATCH --gres=gpu:1", output["script"])
-        self.assertFalse(output["submits"])
-
-    def test_local_model_plan(self):
-        output = execute("local-model-plan", {"backend": "boltz", "inputs": {"input": "target.yaml", "output": "results"}})
-        self.assertEqual(output["argv"][:2], ["boltz", "predict"])
-        self.assertFalse(output["executes"])
-
     def test_expression_qc(self):
         output = execute("expression-qc", {"genes": ["A", "B"], "samples": ["S1", "S2"], "matrix": [[10, 0], [5, 5]]})
         self.assertEqual(output["library_sizes"]["S1"], 15.0)

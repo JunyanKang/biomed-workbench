@@ -37,7 +37,7 @@ class ReleaseSurfaceTests(unittest.TestCase):
 
         self.assertNotIn("biomed-evidence", text)
         self.assertNotIn("biomed-omics", text)
-        for workflow in ("evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication", "runtime"):
+        for workflow in ("evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication"):
             self.assertIn(f"`{workflow}`", text)
 
     def test_readme_documents_verified_install_and_test_commands(self):

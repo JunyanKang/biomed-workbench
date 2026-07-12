@@ -35,11 +35,9 @@ class SkillEntrypointE2ETests(unittest.TestCase):
         self.assertRegex(self.text, re.compile(r'run_tool\.py"\s+CAPABILITY_ID\s+--input'))
         self.assertNotIn("-- ARGUMENTS", self.text)
 
-    def test_compute_is_an_optional_backend_with_explicit_execution_permission(self):
-        for term in ("local scientific model", "gpu", "container", "slurm"):
-            self.assertIn(term, self.lower)
-        self.assertIn("explicit permission", self.lower)
-        self.assertIn("does not install gpu drivers", self.lower)
+    def test_entrypoint_does_not_claim_compute_infrastructure_ownership(self):
+        for term in ("local scientific model", "gpu", "container", "slurm", "runtime-status"):
+            self.assertNotIn(term, self.lower)
 
     def test_operational_skill_contains_no_source_project_bridge(self):
         forbidden = (
@@ -50,6 +48,8 @@ class SkillEntrypointE2ETests(unittest.TestCase):
             "references/internal_workflows",
             "references/tool_catalog.md",
             "non-direct entries",
+            "nvidia",
+            "ngc",
         )
         for phrase in forbidden:
             self.assertNotIn(phrase, self.lower)

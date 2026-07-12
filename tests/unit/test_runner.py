@@ -39,7 +39,7 @@ class RunnerTests(unittest.TestCase):
     def test_mutating_capability_requires_explicit_permission(self):
         capability = Capability(
             id="fixture-write",
-            workflow="runtime",
+            workflow="publication",
             kind="python",
             title="Fixture write",
             description="A fixture that represents an output-writing capability.",

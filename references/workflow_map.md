@@ -9,4 +9,3 @@ These are internal routes behind the single `biomed-workbench` entry, not separa
 - `clinical`: clinical reports, biomarkers, cohorts, survival, treatment plans, and deidentification.
 - `wetlab`: protocol planning, flow cytometry, ELISA, IHC, microbial assays, and lab automation.
 - `publication`: paper reading, writing, citations, figures, peer review, responses, patents, proposals, and presentations.
-- `runtime`: Python/R runtimes, optional source environments, MCP services, and dependency checks.
