@@ -8,6 +8,7 @@ Biomed Workbench is an independent Codex plugin that organizes biomedical resear
 - OpenScience: https://github.com/synthetic-sciences/openscience (Apache-2.0; inspected commit `e9844a49f1f4d93cbf5f88b8f4880c003adc6e61`)
 - Claude Science: inspected local research workflow snapshot; concepts only
 - Nature Skills: https://github.com/Yuan1z0825/nature-skills (Apache-2.0; integrated metadata snapshot aligned to `74a322725ff2d36984762ca146f7e28cbb49e32d`)
+- BioNeMo Agent Toolkit: https://github.com/NVIDIA-BioNeMo/bionemo-agent-toolkit (Apache-2.0; inspected release `0.1.0`)
 
 ## Redistribution Boundary
 
@@ -16,3 +17,5 @@ This repository does not vendor upstream source trees, local workspaces, credent
 Biomni, OpenScience, and the Nature Skills upstream repository are Apache-2.0 licensed at the inspected source snapshots. Some Nature components also carry compatible MIT declarations. OpenScience notes that its scientific database connectors access third-party APIs governed by their own terms. Biomni includes data-source license notes indicating that some biological datasets require separate licenses or restrict commercial use.
 
 Users are responsible for complying with the terms of external databases, datasets, and APIs they use through this workbench.
+
+Machine-readable attribution and the clean-room integration boundary are recorded in `provenance.json`.

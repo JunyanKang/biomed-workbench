@@ -32,13 +32,11 @@ class ReleaseSurfaceTests(unittest.TestCase):
         self.assertEqual(plugin["license"], "Apache-2.0")
         self.assertEqual(plugin["version"], catalog["version"])
 
-    def test_workflow_map_uses_internal_route_names(self):
-        text = (ROOT / "references" / "workflow_map.md").read_text()
+    def test_domain_specifications_replace_workflow_reference_bridges(self):
+        names = {path.stem for path in (ROOT / "biomed_workbench" / "capability_specs").glob("*.json")}
 
-        self.assertNotIn("biomed-evidence", text)
-        self.assertNotIn("biomed-omics", text)
-        for workflow in ("evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication"):
-            self.assertIn(f"`{workflow}`", text)
+        self.assertEqual(names, {"evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication"})
+        self.assertFalse((ROOT / "references").exists())
 
     def test_readme_documents_verified_install_and_test_commands(self):
         text = (ROOT / "README.md").read_text()
