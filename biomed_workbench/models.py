@@ -10,7 +10,7 @@ from typing import Any
 WORKFLOWS = frozenset({"evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication", "runtime"})
 KINDS = frozenset({"python", "command", "service", "workflow"})
 ACCESS_MODES = frozenset({"offline", "public_api", "optional_api", "local_runtime"})
-MUTABILITY_MODES = frozenset({"read_only", "writes_output", "changes_environment", "starts_service"})
+MUTABILITY_MODES = frozenset({"read_only", "writes_output", "changes_environment", "starts_service", "submits_job"})
 RESULT_STATUSES = frozenset({"completed", "failed", "blocked", "skipped"})
 _ID_RE = re.compile(r"^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$")
 _SECRET_KEY_RE = re.compile(r"(?:api[_-]?key|token|secret|password|credential)", re.IGNORECASE)

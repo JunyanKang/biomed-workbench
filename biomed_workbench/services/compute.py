@@ -7,6 +7,8 @@ import shlex
 from pathlib import Path
 from typing import Any
 
+from .model_backends import backend_catalog, build_model_command
+
 
 _IMAGE_RE = re.compile(r"^[A-Za-z0-9._/-]+(?::[A-Za-z0-9._-]+|@sha256:[0-9a-f]{64})$")
 _JOB_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
@@ -104,45 +106,17 @@ def slurm_plan(
     }
 
 
-def _required(inputs: dict[str, Any], *names: str) -> list[str]:
-    values = []
-    for name in names:
-        value = inputs.get(name)
-        if not isinstance(value, str) or not value:
-            raise ValueError(f"local model input requires {name}")
-        values.append(value)
-    return values
-
-
 def local_model_plan(backend: str, inputs: dict[str, Any]) -> dict[str, Any]:
-    if not isinstance(inputs, dict):
-        raise ValueError("inputs must be an object")
-    if backend == "boltz":
-        source, output = _required(inputs, "input", "output")
-        argv = ["boltz", "predict", source, "--out_dir", output]
-    elif backend == "foldseek":
-        query, database, output = _required(inputs, "query", "database", "output")
-        temporary = str(inputs.get("temporary", f"{output}.tmp"))
-        argv = ["foldseek", "easy-search", query, database, output, temporary]
-    elif backend == "mmseqs":
-        query, database, output = _required(inputs, "query", "database", "output")
-        temporary = str(inputs.get("temporary", f"{output}.tmp"))
-        argv = ["mmseqs", "easy-search", query, database, output, temporary]
-    elif backend == "proteinmpnn":
-        structure, output = _required(inputs, "structure", "output")
-        sequences = int(inputs.get("sequences", 8))
-        if not 1 <= sequences <= 10_000:
-            raise ValueError("sequences must be 1..10000")
-        argv = ["protein_mpnn_run.py", "--pdb_path", structure, "--out_folder", output, "--num_seq_per_target", str(sequences)]
-    elif backend == "diffdock":
-        protein, ligand, output = _required(inputs, "protein", "ligand", "output")
-        argv = ["diffdock", "--protein_path", protein, "--ligand", ligand, "--out_dir", output]
-    else:
-        raise ValueError(f"unsupported local scientific model backend: {backend}")
+    argv = build_model_command(backend, inputs)
+    definition = backend_catalog()[backend]
     return {
         "backend": backend,
         "argv": argv,
         "executable": argv[0],
+        "tasks": list(definition.tasks),
+        "license": {"code": definition.code_license, "weights": definition.weight_license, "url": definition.license_url},
+        "cpu_supported": definition.cpu_supported,
+        "gpu_supported": definition.gpu_supported,
         "execution_mode": "local_scientific_compute",
         "executes": False,
         "requires_explicit_run_permission": True,

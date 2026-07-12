@@ -7,6 +7,8 @@ import subprocess
 from dataclasses import dataclass, field
 from typing import Callable, Sequence
 
+from .model_backends import backend_catalog
+
 
 @dataclass(frozen=True)
 class RuntimeState:
@@ -72,21 +74,7 @@ def runtime_status(*, which: Which = shutil.which, probe: Probe = _default_probe
 
     slurm = _version_state(("sbatch",), ("--version",), which=which, probe=probe)
 
-    local_commands = tuple(
-        command
-        for command in (
-            "boltz",
-            "chai-lab",
-            "colabfold_batch",
-            "diffdock",
-            "foldseek",
-            "mmseqs",
-            "openfold",
-            "proteinmpnn",
-            "rfdiffusion",
-        )
-        if which(command)
-    )
+    local_commands = tuple(backend.id for backend in backend_catalog().values() if which(backend.executable))
     local_model = RuntimeState(
         available=bool(local_commands),
         details={"commands": list(local_commands), "mode": "local_scientific_compute"},

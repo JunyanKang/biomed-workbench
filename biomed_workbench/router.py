@@ -41,8 +41,12 @@ INTENT_BOOSTS = {
     "patent-disclosure-audit": ("patent", "invention", "专利", "发明"),
     "runtime-status": ("runtime", "environment", "环境", "检查"),
     "container-plan": ("docker", "container", "容器"),
+    "container-run": ("run container", "execute container", "运行容器", "执行容器"),
     "slurm-plan": ("slurm", "cluster", "集群"),
+    "slurm-submit": ("submit slurm", "submit job", "提交任务", "提交作业"),
+    "slurm-monitor": ("slurm status", "job status", "监控任务", "任务状态"),
     "local-model-plan": ("local model", "boltz", "foldseek", "proteinmpnn", "diffdock", "本地模型"),
+    "local-model-run": ("run local model", "execute model", "运行本地模型", "执行模型"),
 }
 
 
