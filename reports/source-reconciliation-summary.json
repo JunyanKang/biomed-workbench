@@ -13,11 +13,12 @@
     "rewrite_workflow": 390,
     "synthesize_guidance": 2189
   },
-  "binding_count": 3,
+  "binding_count": 4,
   "binding_resolution_counts": {
-    "superseded": 3
+    "superseded": 4
   },
   "bound_module_count": 4,
+  "bound_project_evidence_count": 1,
   "cluster_status_counts": {
     "clinical_translation": {
       "guidance": 33,
@@ -83,8 +84,8 @@
     "scientific_assistant_core": {
       "guidance": 866,
       "implemented": 1,
-      "pending": 493,
-      "superseded": 195
+      "pending": 492,
+      "superseded": 196
     },
     "sensitive_configuration": {
       "excluded": 52
@@ -114,24 +115,24 @@
     "module_count": 61,
     "registry_digest": "a26b27d6df5e605424bd322b79cacee9b20e7f72ab830890646349b6886c4e81",
     "skill_sha256": "df1238736bf2894540691c773d2fa5f23e5b3dfa67b1115846af8b4734d47c60",
-    "test_count": 385
+    "test_count": 389
   },
   "file_count": 89314,
   "limitations": [
     "The public summary is path-free; exact source path membership is verified locally against the ignored private ledgers.",
     "Pending records are not counted as implemented or superseded and prevent a source-union completeness claim.",
-    "A capability binding changes status only when every named module has current passing compatibility, regression, and end-to-end evidence."
+    "A binding changes status only when every named module has current passing compatibility, regression, and end-to-end evidence and every named project contract has current digest-bound verification evidence."
   ],
   "passed": true,
-  "pending_count": 1821,
-  "receipt_root_digest": "9e527fd2ca62254092fb4b90a4f51f9509d6d46a40a97215857f2b763ba9d765",
-  "reconciled_count": 87493,
+  "pending_count": 1820,
+  "receipt_root_digest": "f8de07bd0dbee8b8cef59e7f5d03ed4cc20cdabc7c61d134e32951e693984eb3",
+  "reconciled_count": 87494,
   "schema_version": 1,
   "source_status_counts": {
     "accelerated-compute": {
       "guidance": 100,
-      "pending": 4,
-      "superseded": 30
+      "pending": 3,
+      "superseded": 31
     },
     "local-research-skills": {
       "excluded": 6,
@@ -170,16 +171,16 @@
     "excluded": 82138,
     "guidance": 2517,
     "implemented": 625,
-    "pending": 1821,
+    "pending": 1820,
     "provenance": 35,
-    "superseded": 2178
+    "superseded": 2179
   },
   "status_definitions": {
     "excluded": "Generated, sensitive, obsolete, or out-of-scope material is intentionally absent from the plugin.",
     "guidance": "Scientific or interaction lessons are retained as source-neutral guidance rather than source code.",
-    "implemented": "The source behavior is represented by independent tests, or a private receipt binding resolves it to current passing module compatibility, regression, and end-to-end evidence.",
-    "pending": "A specific independent module, compatibility row, regression test, and representative execution have not yet been bound to this source record.",
+    "implemented": "The source behavior is represented by independent tests, or a private receipt binding resolves it to current passing module execution evidence or digest-bound project contract evidence.",
+    "pending": "Specific current module execution evidence or digest-bound project contract evidence has not yet been bound to this source record.",
     "provenance": "License and attribution information is retained separately from operational code.",
-    "superseded": "The source-specific workflow or interface is replaced by the unified Codex skill and research kernel, or a private receipt binding resolves it to stronger current passing module evidence."
+    "superseded": "The source-specific workflow, schema, or interface is replaced by stronger current passing module execution evidence or digest-bound project contract evidence."
   }
 }

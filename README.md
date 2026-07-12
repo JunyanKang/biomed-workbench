@@ -123,7 +123,8 @@ Tool-use guidance and routing remain available regardless of the installed versi
 - `tools/validate_workbench.py`: release validation for single-entry skill, catalog consistency, source coverage, and publish-safe paths.
 - `tools/reconcile_sources.py`: development-only one-to-one reconciliation of ignored source/design ledgers into a path-free release receipt root.
 - `reports/compatibility-execution-evidence.json`: path-free regression and end-to-end evidence bound to every supported compatibility row.
-- `reports/source-reconciliation-summary.json`: public counts, pending capability decisions, current registry/test binding, and an irreversible digest over all private per-file receipts.
+- `reports/source-reconciliation-summary.json`: public counts, pending capability decisions, current module/project-contract evidence binding, and an irreversible digest over all private per-file receipts.
+- `reports/plugin-contract-verification.json`: path-free official Codex plugin and Skill validation bound to the current manifest, single Skill entry, generated registry, and isolated snapshot.
 - `biomed_workbench/capabilities/`: independently rewritten scientific implementations.
 - `biomed_workbench/modules/builtin/`: one versioned scientific contract per independently discoverable module.
 - `biomed_workbench/kernel/`: immutable project context, content-addressed artifacts, hypotheses, evidence, decisions, DAG state, and replay.

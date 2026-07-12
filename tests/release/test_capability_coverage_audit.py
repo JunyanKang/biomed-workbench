@@ -31,6 +31,7 @@ class CapabilityCoverageAuditTests(unittest.TestCase):
                 "pending_count": reconciliation["pending_count"],
                 "binding_count": reconciliation["binding_count"],
                 "bound_module_count": reconciliation["bound_module_count"],
+                "bound_project_evidence_count": reconciliation["bound_project_evidence_count"],
                 "receipt_root_digest": reconciliation["receipt_root_digest"],
                 "completeness_claim_allowed": False,
             },

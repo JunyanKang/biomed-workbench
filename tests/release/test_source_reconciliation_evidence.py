@@ -34,6 +34,7 @@ class SourceReconciliationEvidenceTests(unittest.TestCase):
         self.assertEqual(report["action_counts"], design["action_counts"])
         self.assertEqual(report["binding_count"], sum(report["binding_resolution_counts"].values()))
         self.assertLessEqual(report["bound_module_count"], report["current_evidence"]["module_count"])
+        self.assertGreaterEqual(report["bound_project_evidence_count"], 1)
         self.assertEqual(report["current_evidence"]["module_count"], len(registry.all()))
         self.assertEqual(report["current_evidence"]["registry_digest"], registry.digest)
         self.assertEqual(report["current_evidence"]["skill_sha256"], skill_digest)

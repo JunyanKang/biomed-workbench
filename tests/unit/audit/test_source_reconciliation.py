@@ -49,8 +49,8 @@ class SourceReconciliationTests(unittest.TestCase):
             receipt = hashlib.sha256(f"primary-a\0tool.py\0{'a' * 64}".encode()).hexdigest()
             bindings = root / "bindings.jsonl"
             bindings.write_text(
-                json.dumps({"schema_version": 1, "type": "bindings"}) + "\n"
-                + json.dumps({"receipt_id": receipt, "resolution": "implemented", "module_ids": ["variant-filter"]}) + "\n",
+                json.dumps({"schema_version": 2, "type": "bindings"}) + "\n"
+                + json.dumps({"receipt_id": receipt, "resolution": "implemented", "module_ids": ["variant-filter"], "project_evidence_ids": []}) + "\n",
                 encoding="utf-8",
             )
             report = reconcile_ledgers(
@@ -68,6 +68,39 @@ class SourceReconciliationTests(unittest.TestCase):
         self.assertEqual(report["pending_count"], 0)
         self.assertEqual(report["binding_count"], 1)
         self.assertEqual(report["bound_module_count"], 1)
+        self.assertEqual(report["bound_project_evidence_count"], 0)
+
+    def test_current_project_contract_evidence_can_resolve_a_schema_receipt(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest, design = self.write_ledgers(root)
+            receipt = hashlib.sha256(f"primary-a\0tool.py\0{'a' * 64}".encode()).hexdigest()
+            bindings = root / "bindings.jsonl"
+            bindings.write_text(
+                json.dumps({"schema_version": 2, "type": "bindings"}) + "\n"
+                + json.dumps({"receipt_id": receipt, "resolution": "superseded", "module_ids": [], "project_evidence_ids": ["plugin-contract-v1"]}) + "\n",
+                encoding="utf-8",
+            )
+            report = reconcile_ledgers(
+                manifest,
+                design,
+                module_count=4,
+                registry_digest="c" * 64,
+                skill_sha256="d" * 64,
+                test_count=10,
+                bindings_path=bindings,
+                project_evidence={
+                    "plugin-contract-v1": {
+                        "evidence_type": "codex-plugin-contract",
+                        "artifact_sha256": "e" * 64,
+                        "verification_sha256": "f" * 64,
+                    }
+                },
+            )
+
+        self.assertEqual(report["status_counts"], {"excluded": 1, "superseded": 1})
+        self.assertEqual(report["bound_module_count"], 0)
+        self.assertEqual(report["bound_project_evidence_count"], 1)
 
     def test_unknown_module_or_unknown_receipt_binding_fails(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -77,8 +110,8 @@ class SourceReconciliationTests(unittest.TestCase):
             for receipt in ("f" * 64, hashlib.sha256(f"primary-a\0tool.py\0{'a' * 64}".encode()).hexdigest()):
                 with self.subTest(receipt=receipt):
                     bindings.write_text(
-                        json.dumps({"schema_version": 1, "type": "bindings"}) + "\n"
-                        + json.dumps({"receipt_id": receipt, "resolution": "implemented", "module_ids": ["missing"]}) + "\n",
+                        json.dumps({"schema_version": 2, "type": "bindings"}) + "\n"
+                        + json.dumps({"receipt_id": receipt, "resolution": "implemented", "module_ids": ["missing"], "project_evidence_ids": []}) + "\n",
                         encoding="utf-8",
                     )
                     with self.assertRaises(ReconciliationError):
@@ -92,6 +125,39 @@ class SourceReconciliationTests(unittest.TestCase):
                             bindings_path=bindings,
                             module_evidence={},
                         )
+
+    def test_unknown_or_malformed_project_evidence_fails(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest, design = self.write_ledgers(root)
+            receipt = hashlib.sha256(f"primary-a\0tool.py\0{'a' * 64}".encode()).hexdigest()
+            bindings = root / "bindings.jsonl"
+            bindings.write_text(
+                json.dumps({"schema_version": 2, "type": "bindings"}) + "\n"
+                + json.dumps({"receipt_id": receipt, "resolution": "implemented", "module_ids": [], "project_evidence_ids": ["missing"]}) + "\n",
+                encoding="utf-8",
+            )
+            with self.assertRaises(ReconciliationError):
+                reconcile_ledgers(
+                    manifest,
+                    design,
+                    module_count=4,
+                    registry_digest="c" * 64,
+                    skill_sha256="d" * 64,
+                    test_count=10,
+                    bindings_path=bindings,
+                    project_evidence={},
+                )
+            with self.assertRaises(ReconciliationError):
+                reconcile_ledgers(
+                    manifest,
+                    design,
+                    module_count=4,
+                    registry_digest="c" * 64,
+                    skill_sha256="d" * 64,
+                    test_count=10,
+                    project_evidence={"broken": {"evidence_type": "contract", "artifact_sha256": "bad", "verification_sha256": "f" * 64}},
+                )
 
     def test_missing_one_to_one_design_record_fails(self):
         with tempfile.TemporaryDirectory() as temporary:

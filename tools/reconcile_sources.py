@@ -19,6 +19,43 @@ from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 
 
+PROJECT_EVIDENCE_SOURCES = {
+    "codex-plugin-manifest-contract-v1": {
+        "report": "reports/plugin-contract-verification.json",
+        "evidence_type": "codex-plugin-contract",
+        "artifact": ".codex-plugin/plugin.json",
+        "digest_section": "plugin",
+        "digest_field": "manifest_sha256",
+    },
+}
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _project_evidence() -> dict[str, dict[str, str]]:
+    records = {}
+    for evidence_id, source in PROJECT_EVIDENCE_SOURCES.items():
+        report_path = ROOT / source["report"]
+        artifact_path = ROOT / source["artifact"]
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        artifact_sha256 = _sha256(artifact_path)
+        if (
+            report.get("passed") is not True
+            or report.get("evidence_id") != evidence_id
+            or report.get("evidence_type") != source["evidence_type"]
+            or report.get(source["digest_section"], {}).get(source["digest_field"]) != artifact_sha256
+        ):
+            raise RuntimeError(f"project contract evidence is stale or invalid: {evidence_id}")
+        records[evidence_id] = {
+            "evidence_type": source["evidence_type"],
+            "artifact_sha256": artifact_sha256,
+            "verification_sha256": _sha256(report_path),
+        }
+    return records
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, required=True)
@@ -53,6 +90,7 @@ def main() -> int:
         private_output=args.private_output,
         bindings_path=args.capability_bindings,
         module_evidence=module_evidence,
+        project_evidence=_project_evidence(),
     )
     args.public_output.parent.mkdir(parents=True, exist_ok=True)
     args.public_output.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")

@@ -528,6 +528,35 @@ def main() -> int:
             ):
                 errors.append("stable NMF evidence differs from its module, runtime, implementation, fixture, rank selection, reconstruction, or stability checks")
 
+        plugin_contract_path = ROOT / "reports" / "plugin-contract-verification.json"
+        try:
+            plugin_contract = json.loads(plugin_contract_path.read_text(encoding="utf-8"))
+            plugin_manifest_path = ROOT / ".codex-plugin" / "plugin.json"
+            skill_path = ROOT / "skills" / "biomed-workbench" / "SKILL.md"
+            snapshot_path = ROOT / "reports" / "module-registry-verification.json"
+        except (OSError, json.JSONDecodeError):
+            errors.append("official Codex plugin contract evidence is missing or invalid")
+        else:
+            official = plugin_contract.get("official_validation", {})
+            snapshot = plugin_contract.get("isolated_registry_snapshot", {})
+            if (
+                plugin_contract.get("passed") is not True
+                or plugin_contract.get("evidence_id") != "codex-plugin-manifest-contract-v1"
+                or plugin_contract.get("evidence_type") != "codex-plugin-contract"
+                or plugin_contract.get("plugin", {}).get("manifest_sha256") != hashlib.sha256(plugin_manifest_path.read_bytes()).hexdigest()
+                or plugin_contract.get("plugin", {}).get("skill_sha256") != hashlib.sha256(skill_path.read_bytes()).hexdigest()
+                or plugin_contract.get("plugin", {}).get("single_skill_entry") is not True
+                or official.get("plugin_validator", {}).get("passed") is not True
+                or official.get("skill_validator", {}).get("passed") is not True
+                or not re.fullmatch(r"[0-9a-f]{64}", str(official.get("plugin_validator", {}).get("sha256", "")))
+                or not re.fullmatch(r"[0-9a-f]{64}", str(official.get("skill_validator", {}).get("sha256", "")))
+                or snapshot.get("report_sha256") != hashlib.sha256(snapshot_path.read_bytes()).hexdigest()
+                or snapshot.get("module_count") != len(modules)
+                or snapshot.get("registry_digest") != registry.digest
+                or snapshot.get("source_and_snapshot_indexes_match") is not True
+            ):
+                errors.append("official Codex plugin contract evidence is stale or differs from current manifest, skill, validators, or isolated registry")
+
         reconciliation_path = ROOT / "reports" / "source-reconciliation-summary.json"
         assimilation_path = ROOT / "reports" / "source-assimilation-summary.json"
         design_path = ROOT / "reports" / "rewrite-design-summary.json"
@@ -551,6 +580,7 @@ def main() -> int:
                 or reconciliation.get("action_counts") != design.get("action_counts")
                 or reconciliation.get("binding_count") != sum(reconciliation.get("binding_resolution_counts", {}).values())
                 or reconciliation.get("bound_module_count", 0) > len(modules)
+                or reconciliation.get("bound_project_evidence_count", 0) < 1
                 or current.get("module_count") != len(modules)
                 or current.get("registry_digest") != registry.digest
                 or current.get("skill_sha256") != skill_digest

@@ -22,6 +22,8 @@ _PROVENANCE_ACTIONS = {"retain_provenance"}
 _ALL_ACTIONS = _EXCLUDED_ACTIONS | _SUPERSEDED_ACTIONS | _GUIDANCE_ACTIONS | _IMPLEMENTED_ACTIONS | _PENDING_ACTIONS | _PROVENANCE_ACTIONS
 _SOURCE_DISPOSITIONS = {"generated_runtime", "merge", "obsolete", "provenance_only", "rewrite", "sensitive"}
 _BINDING_RESOLUTIONS = {"implemented", "superseded"}
+_BINDING_FIELDS = {"receipt_id", "resolution", "module_ids", "project_evidence_ids"}
+_PROJECT_EVIDENCE_FIELDS = {"evidence_type", "artifact_sha256", "verification_sha256"}
 
 
 def _rows(path: Path, *, skip_manifest_header: bool = False) -> Iterable[dict[str, object]]:
@@ -66,25 +68,29 @@ def _bindings(path: Path | None) -> dict[str, dict[str, object]]:
             for number, line in enumerate(handle, start=1):
                 payload = json.loads(line)
                 if number == 1:
-                    if payload != {"schema_version": 1, "type": "bindings"}:
+                    if payload != {"schema_version": 2, "type": "bindings"}:
                         raise ReconciliationError("capability binding ledger header is missing or invalid")
                     continue
-                if not isinstance(payload, dict) or set(payload) != {"receipt_id", "resolution", "module_ids"}:
+                if not isinstance(payload, dict) or set(payload) != _BINDING_FIELDS:
                     raise ReconciliationError("capability binding row uses unsupported fields")
                 receipt_id = payload.get("receipt_id")
                 resolution = payload.get("resolution")
                 module_ids = payload.get("module_ids")
+                project_evidence_ids = payload.get("project_evidence_ids")
                 if (
                     not isinstance(receipt_id, str)
                     or len(receipt_id) != 64
                     or any(character not in "0123456789abcdef" for character in receipt_id)
                     or resolution not in _BINDING_RESOLUTIONS
                     or not isinstance(module_ids, list)
-                    or not module_ids
                     or any(not isinstance(module_id, str) or not module_id for module_id in module_ids)
                     or len(module_ids) != len(set(module_ids))
+                    or not isinstance(project_evidence_ids, list)
+                    or any(not isinstance(evidence_id, str) or not evidence_id for evidence_id in project_evidence_ids)
+                    or len(project_evidence_ids) != len(set(project_evidence_ids))
+                    or not (module_ids or project_evidence_ids)
                 ):
-                    raise ReconciliationError("capability binding identity, resolution, or modules are invalid")
+                    raise ReconciliationError("capability binding identity, resolution, modules, or project evidence are invalid")
                 if receipt_id in bindings:
                     raise ReconciliationError("capability binding ledger contains a duplicate receipt")
                 bindings[receipt_id] = payload
@@ -126,6 +132,7 @@ def reconcile_ledgers(
     private_output: Path | None = None,
     bindings_path: Path | None = None,
     module_evidence: Mapping[str, tuple[str, str, str]] | None = None,
+    project_evidence: Mapping[str, Mapping[str, str]] | None = None,
 ) -> dict[str, object]:
     if (
         module_count <= 0
@@ -139,6 +146,19 @@ def reconcile_ledgers(
     design_rows = _indexed_rows(design_path, design=True)
     bindings = _bindings(bindings_path)
     current_module_evidence = dict(module_evidence or {})
+    current_project_evidence = {key: dict(value) for key, value in (project_evidence or {}).items()}
+    for evidence_id, evidence_record in current_project_evidence.items():
+        if (
+            not evidence_id
+            or set(evidence_record) != _PROJECT_EVIDENCE_FIELDS
+            or not evidence_record["evidence_type"]
+            or any(
+                len(evidence_record[field]) != 64
+                or any(character not in "0123456789abcdef" for character in evidence_record[field])
+                for field in ("artifact_sha256", "verification_sha256")
+            )
+        ):
+            raise ReconciliationError("current project evidence identity is invalid")
     if len(source_rows) != len(design_rows) or set(source_rows) != set(design_rows):
         raise ReconciliationError("source and design ledgers are not an exact one-to-one mapping")
     if len(source_rows) == 0:
@@ -149,6 +169,7 @@ def reconcile_ledgers(
     action_counts = Counter()
     binding_resolution_counts = Counter()
     bound_modules = set()
+    bound_project_evidence = set()
     observed_bindings = set()
     receipt_digest = hashlib.sha256()
     output = private_output.open("w", encoding="utf-8") if private_output is not None else None
@@ -167,6 +188,7 @@ def reconcile_ledgers(
             receipt_id = _receipt_id(source, path, digest)
             binding = bindings.get(receipt_id)
             bound_evidence = []
+            bound_contract_evidence = []
             if binding is not None:
                 if action not in _PENDING_ACTIONS:
                     raise ReconciliationError("capability bindings may resolve only pending capability or schema records")
@@ -184,12 +206,16 @@ def reconcile_ledgers(
                         }
                     )
                     bound_modules.add(module_id)
+                for evidence_id in binding["project_evidence_ids"]:
+                    try:
+                        evidence_record = current_project_evidence[evidence_id]
+                    except KeyError:
+                        raise ReconciliationError("capability binding references project evidence that is absent or not current") from None
+                    bound_contract_evidence.append({"evidence_id": evidence_id, **evidence_record})
+                    bound_project_evidence.add(evidence_id)
                 status = binding["resolution"]
-                evidence = (
-                    "independent-module-compatibility-and-execution-evidence"
-                    if status == "implemented"
-                    else "stronger-independent-module-compatibility-and-execution-evidence"
-                )
+                evidence_scope = "module" if bound_evidence and not bound_contract_evidence else "project-contract" if bound_contract_evidence and not bound_evidence else "module-and-project-contract"
+                evidence = f"{'stronger-' if status == 'superseded' else ''}independent-{evidence_scope}-evidence"
                 binding_resolution_counts[status] += 1
                 observed_bindings.add(receipt_id)
             receipt = {
@@ -204,6 +230,8 @@ def reconcile_ledgers(
             }
             if bound_evidence:
                 receipt["module_evidence"] = bound_evidence
+            if bound_contract_evidence:
+                receipt["project_evidence"] = bound_contract_evidence
             canonical = json.dumps(receipt, sort_keys=True, separators=(",", ":"))
             receipt_digest.update(canonical.encode("utf-8"))
             receipt_digest.update(b"\n")
@@ -231,6 +259,7 @@ def reconcile_ledgers(
         "binding_count": len(bindings),
         "binding_resolution_counts": dict(sorted(binding_resolution_counts.items())),
         "bound_module_count": len(bound_modules),
+        "bound_project_evidence_count": len(bound_project_evidence),
         "source_status_counts": {source: dict(sorted(counts.items())) for source, counts in sorted(source_counts.items())},
         "cluster_status_counts": {cluster: dict(sorted(counts.items())) for cluster, counts in sorted(cluster_counts.items())},
         "receipt_root_digest": receipt_digest.hexdigest(),
@@ -241,16 +270,16 @@ def reconcile_ledgers(
             "test_count": test_count,
         },
         "status_definitions": {
-            "implemented": "The source behavior is represented by independent tests, or a private receipt binding resolves it to current passing module compatibility, regression, and end-to-end evidence.",
-            "superseded": "The source-specific workflow or interface is replaced by the unified Codex skill and research kernel, or a private receipt binding resolves it to stronger current passing module evidence.",
+            "implemented": "The source behavior is represented by independent tests, or a private receipt binding resolves it to current passing module execution evidence or digest-bound project contract evidence.",
+            "superseded": "The source-specific workflow, schema, or interface is replaced by stronger current passing module execution evidence or digest-bound project contract evidence.",
             "guidance": "Scientific or interaction lessons are retained as source-neutral guidance rather than source code.",
             "excluded": "Generated, sensitive, obsolete, or out-of-scope material is intentionally absent from the plugin.",
             "provenance": "License and attribution information is retained separately from operational code.",
-            "pending": "A specific independent module, compatibility row, regression test, and representative execution have not yet been bound to this source record.",
+            "pending": "Specific current module execution evidence or digest-bound project contract evidence has not yet been bound to this source record.",
         },
         "limitations": [
             "The public summary is path-free; exact source path membership is verified locally against the ignored private ledgers.",
             "Pending records are not counted as implemented or superseded and prevent a source-union completeness claim.",
-            "A capability binding changes status only when every named module has current passing compatibility, regression, and end-to-end evidence.",
+            "A binding changes status only when every named module has current passing compatibility, regression, and end-to-end evidence and every named project contract has current digest-bound verification evidence.",
         ],
     }
