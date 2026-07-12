@@ -1,58 +1,47 @@
 #!/usr/bin/env python3
+"""Run one registered Biomed Workbench capability with validated JSON input."""
+
+from __future__ import annotations
+
 import argparse
 import json
-import os
-import subprocess
 import sys
 from pathlib import Path
 
-CATALOG = Path(__file__).with_name("catalog.json")
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from biomed_workbench.catalog import CapabilityResolutionError  # noqa: E402
+from biomed_workbench.runner import (  # noqa: E402
+    CapabilityExecutionError,
+    InputValidationError,
+    MutationPermissionError,
+    run,
+)
 
 
-def load_entry(tool_id):
-    for entry in json.loads(CATALOG.read_text())["entries"]:
-        if entry["id"] == tool_id:
-            return entry
-    raise SystemExit(f"No tool id: {tool_id}")
-
-
-def command_for(entry, extra_args):
-    path = Path(entry["path"])
-    if not path.is_absolute():
-        path = PROJECT_ROOT / path
-    policy = entry.get("run_policy")
-    if policy == "direct" and entry.get("kind") == "runtime":
-        from adapters.claude_science import command_for_runtime
-
-        return command_for_runtime(entry, extra_args)
-    if policy == "direct" and entry.get("kind") == "script":
-        suffix = path.suffix.lower()
-        if suffix == ".py":
-            return [sys.executable, str(path), *extra_args]
-        if suffix == ".r":
-            return ["Rscript", str(path), *extra_args]
-        if suffix == ".sh":
-            return ["bash", str(path), *extra_args]
-        return [str(path), *extra_args]
-    raise SystemExit(
-        f"{entry['id']} is not directly runnable (run_policy={policy}, kind={entry.get('kind')}). "
-        f"Inspect it with search_tools.py --id {entry['id']}."
-    )
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Run a direct tool from the unified biomedical catalog.")
-    parser.add_argument("tool_id")
-    parser.add_argument("args", nargs=argparse.REMAINDER, help="Arguments passed to the tool; use -- before them.")
-    ns = parser.parse_args()
-    extra = ns.args[1:] if ns.args[:1] == ["--"] else ns.args
-    entry = load_entry(ns.tool_id)
-    cmd = command_for(entry, extra)
-    env = os.environ.copy()
-    env.setdefault("PYTHONNOUSERSITE", "0")
-    raise SystemExit(subprocess.call(cmd, env=env))
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("capability_id")
+    inputs = parser.add_mutually_exclusive_group()
+    inputs.add_argument("--input", default="{}", help="JSON object passed to the capability")
+    inputs.add_argument("--input-file", type=Path, help="Path to a JSON object")
+    parser.add_argument("--allow-mutation", action="store_true")
+    args = parser.parse_args()
+    try:
+        raw = args.input_file.read_text(encoding="utf-8") if args.input_file else args.input
+        payload = json.loads(raw)
+        result = run(args.capability_id, payload, allow_mutation=args.allow_mutation)
+    except json.JSONDecodeError:
+        print(json.dumps({"error": "input is not valid JSON"}), file=sys.stderr)
+        return 2
+    except (CapabilityResolutionError, InputValidationError, MutationPermissionError, CapabilityExecutionError) as exc:
+        print(json.dumps({"error": str(exc)}, sort_keys=True), file=sys.stderr)
+        return 2
+    print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
