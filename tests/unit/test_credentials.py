@@ -13,10 +13,10 @@ class CredentialPolicyTests(unittest.TestCase):
     def test_only_scientific_data_credentials_are_allowed(self):
         self.assertEqual(
             ALLOWED_CREDENTIALS,
-            frozenset({"NCBI_API_KEY", "ELSEVIER_API_KEY", "SYNAPSE_AUTH_TOKEN"}),
+            frozenset({"NCBI_API_KEY"}),
         )
         with self.assertRaises(ValueError):
-            optional_credential("NVIDIA_API_KEY")
+            optional_credential("UNSUPPORTED_CREDENTIAL")
 
     def test_status_never_returns_credential_values(self):
         with patch.dict(os.environ, {"NCBI_API_KEY": "private-value"}, clear=False):

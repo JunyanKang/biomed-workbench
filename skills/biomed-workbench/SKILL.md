@@ -49,7 +49,7 @@ Treat router candidates as recommendations. Verify the selected input schema, un
 
 - Prefer primary records and stable identifiers. Cross-check important identity or clinical assertions across independent authoritative records when possible.
 - Use NCBI E-utilities across supported NCBI databases. `NCBI_API_KEY` is optional and changes rate capacity, not scientific behavior; never put it in an input payload or repository file.
-- `ELSEVIER_API_KEY` and `SYNAPSE_AUTH_TOKEN` are the only other optional credentials recognized by the workbench. A missing optional credential must narrow the plan transparently, not trigger requests for unrelated model-provider keys.
+- Do not request unrelated provider credentials. A missing optional credential must narrow the plan transparently rather than changing the scientific interpretation.
 - Keep retrieved evidence separate from Codex interpretation. Report database coverage, query constraints, dates when material, and negative or incomplete retrievals.
 
 ## Guardrails

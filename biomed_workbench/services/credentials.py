@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 
 
-ALLOWED_CREDENTIALS = frozenset({"NCBI_API_KEY", "ELSEVIER_API_KEY", "SYNAPSE_AUTH_TOKEN"})
+ALLOWED_CREDENTIALS = frozenset({"NCBI_API_KEY"})
 
 
 def optional_credential(name: str) -> str | None:

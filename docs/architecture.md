@@ -54,3 +54,12 @@ python3 -m unittest discover -s tests -v
 ```
 
 Publish only when the generated catalog is unchanged after rebuilding, all end-to-end cases pass, and release validation reports no legacy or bridge surfaces.
+
+For local Codex iteration, apply a cachebuster and reinstall from the configured marketplace:
+
+```bash
+python3 tools/prepare_local_update.py
+codex plugin add biomed-workbench@biomed-workbench
+```
+
+Start a new Codex task after reinstalling so the updated Skill metadata is loaded.

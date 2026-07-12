@@ -48,16 +48,39 @@ def main() -> int:
         plugin = json.loads(plugin_path.read_text())
         if plugin.get("name") != "biomed-workbench" or plugin.get("skills") != "./skills/" or plugin.get("license") != "Apache-2.0":
             errors.append("plugin manifest identity, skill path, or license is invalid")
+        interface = plugin.get("interface", {})
+        if set(interface.get("capabilities", ())) != {"Interactive", "Read"}:
+            errors.append("plugin interface capabilities must use Codex capability conventions")
+        prompts = interface.get("defaultPrompt", ())
+        if not isinstance(prompts, list) or len(prompts) > 3 or any(not isinstance(prompt, str) or len(prompt) > 128 for prompt in prompts):
+            errors.append("plugin default prompts exceed Codex interface limits")
+        for field in ("websiteURL", "privacyPolicyURL", "termsOfServiceURL"):
+            if not str(interface.get(field, "")).startswith("https://"):
+                errors.append(f"plugin interface {field} must be an https URL")
     if not marketplace_path.is_file():
         errors.append("missing marketplace manifest")
     else:
         marketplace = json.loads(marketplace_path.read_text())
         plugins = marketplace.get("plugins", [])
-        if len(plugins) != 1 or plugins[0].get("name") != "biomed-workbench" or plugins[0].get("source") != {"source": "local", "path": "."}:
+        if (
+            marketplace.get("name") != "biomed-workbench"
+            or marketplace.get("interface", {}).get("displayName") != "Biomed Workbench"
+            or len(plugins) != 1
+            or plugins[0].get("name") != "biomed-workbench"
+            or plugins[0].get("source") != {"source": "local", "path": "."}
+            or plugins[0].get("category") != plugin.get("interface", {}).get("category")
+            or plugins[0].get("policy") != {"installation": "AVAILABLE", "authentication": "ON_INSTALL"}
+        ):
             errors.append("marketplace must expose only the repository-root biomed-workbench plugin")
     skill_files = sorted((ROOT / "skills").glob("*/SKILL.md"))
     if [path.relative_to(ROOT).as_posix() for path in skill_files] != ["skills/biomed-workbench/SKILL.md"]:
         errors.append("exactly one user-facing skill is required")
+    agent_metadata = ROOT / "skills" / "biomed-workbench" / "agents" / "openai.yaml"
+    if not agent_metadata.is_file() or "$biomed-workbench" not in agent_metadata.read_text(errors="ignore"):
+        errors.append("skill must include Codex UI metadata with a default invocation prompt")
+    for policy_file in (ROOT / "PRIVACY.md", ROOT / "TERMS.md"):
+        if not policy_file.is_file():
+            errors.append(f"missing public policy document: {policy_file.name}")
 
     catalog_path = ROOT / "tools" / "catalog.json"
     catalog = json.loads(catalog_path.read_text()) if catalog_path.is_file() else {}

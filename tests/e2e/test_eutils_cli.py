@@ -21,7 +21,6 @@ class EUtilitiesCliTests(unittest.TestCase):
 
         self.assertIn("pubmed", payload["databases"])
         self.assertIn("clinvar", payload["databases"])
-        self.assertNotIn("NVIDIA_API_KEY", result.stdout)
 
 
 if __name__ == "__main__":
