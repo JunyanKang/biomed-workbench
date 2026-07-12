@@ -82,7 +82,7 @@ Modify integration and compatibility surfaces:
 - Add `probe_eutils_contract() -> str` returning the exact supported contract token only after a bounded live EInfo shape check.
 - Extend `detect_environment(..., callable_probe_runner, service_probe_runner)` without changing exact-row matching.
 
-- [ ] **Step 1: Write failing typed-probe contract tests**
+- [x] **Step 1: Write failing typed-probe contract tests**
 
 ```python
 def test_service_probe_is_not_dispatched_as_a_shell_command():
@@ -107,17 +107,17 @@ def test_unknown_service_contract_version_blocks_before_entrypoint():
     assert "UNVALIDATED_TOOL_VERSION" in {finding.code for finding in decision.findings}
 ```
 
-- [ ] **Step 2: Run and verify the old untyped probe behavior fails**
+- [x] **Step 2: Run and verify the old untyped probe behavior fails**
 
 Run: `python3 -m unittest tests.unit.test_module_contract tests.unit.test_module_compatibility tests.contract.test_service_version_probe`
 
 Expected: parser rejects the new fields and service dispatch is unavailable.
 
-- [ ] **Step 3: Implement strict probe parsing and dispatch**
+- [x] **Step 3: Implement strict probe parsing and dispatch**
 
 Use a frozen probe-kind enum, reject shell metacharacters for command probes, require `module:function` for Python callables, require an HTTPS target plus project-owned probe callable for service contracts, and cap each probe timeout at 30 seconds. `probe_eutils_contract()` must request EInfo JSON, verify `einforesult` and database metadata structure, and return `contract-2026-03-04`; malformed or unavailable responses return no detected version and therefore block required service modules.
 
-- [ ] **Step 4: Regenerate and verify all 48 manifests**
+- [x] **Step 4: Regenerate and verify all 48 manifests**
 
 Run:
 
@@ -130,7 +130,7 @@ python3 -m unittest tests.release.test_module_migration tests.release.test_modul
 
 Expected: 48 valid modules, 9 typed service-tool probes, 48 compatibility rows, and unchanged capability IDs.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add biomed_workbench/modules biomed_workbench/services/eutils.py tools tests/contract/test_service_version_probe.py tests/unit
@@ -751,8 +751,8 @@ Record contract counts, graph node/edge counts, scenario IDs, plan types, gate s
 ```bash
 python3 -m unittest discover -s tests -p 'test*.py'
 python3 tools/validate_workbench.py --release
-python3 /Users/kangjunyan/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .
-python3 /Users/kangjunyan/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/biomed-workbench
+python3 ~/.codex/skills/.system/plugin-creator/scripts/validate_plugin.py .
+python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/biomed-workbench
 git diff --check
 ```
 

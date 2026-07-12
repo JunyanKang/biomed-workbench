@@ -169,6 +169,8 @@ class ModuleContractTests(unittest.TestCase):
                 "version_source": "",
                 "verified_at": "2026-07-12",
                 "version_probe": ["python", "-c", "import scanpy; print(scanpy.__version__)"],
+                "version_probe_kind": "command",
+                "version_probe_timeout_seconds": 10,
                 "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
                 "mismatch_policy": "block",
                 "version_differences": [],

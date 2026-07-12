@@ -29,6 +29,9 @@ class ModuleCompatibilityReportTests(unittest.TestCase):
         self.assertEqual(module["tools"][0]["name"], "scanpy")
         self.assertEqual(module["tools"][0]["tested_versions"], ["1.11.5"])
         self.assertTrue(module["tools"][0]["version_source"].startswith("https://"))
+        self.assertEqual(module["tools"][0]["version_probe_kind"], "command")
+        self.assertEqual(module["tools"][0]["version_probe_timeout_seconds"], 10)
+        self.assertEqual(module["tools"][0]["version_probe"], ["python", "-c", "import scanpy; print(scanpy.__version__)"])
         self.assertEqual(module["input_formats"][0]["formats"][0]["versions"], ["0.11"])
         self.assertEqual(module["compatibility_rows"], ["scanpy-1.11.5-h5ad-0.11"])
 

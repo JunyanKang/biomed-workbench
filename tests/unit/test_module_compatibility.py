@@ -39,6 +39,8 @@ def external_manifest_payload():
             "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/",
             "verified_at": "2026-07-12",
             "version_probe": ["python", "-c", "import scanpy; print(scanpy.__version__)"],
+            "version_probe_kind": "command",
+            "version_probe_timeout_seconds": 10,
             "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
             "mismatch_policy": "alternative",
             "version_differences": ["Validated against the 1.11 API and h5ad 0.11 serialization behavior."],

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib
 import importlib.metadata
 import json
 import platform as platform_module
@@ -68,6 +69,7 @@ class CompatibilityError(RuntimeError):
 
 
 ProbeRunner = Callable[[tuple[str, ...], int], str]
+CallableProbeRunner = Callable[[str, int], str]
 DependencyProvider = Callable[[str, str], str | None]
 
 
@@ -80,6 +82,20 @@ def _platform_name() -> str:
 def _run_probe(command: tuple[str, ...], timeout: int) -> str:
     completed = subprocess.run(command, capture_output=True, text=True, check=True, timeout=timeout)
     return f"{completed.stdout}\n{completed.stderr}".strip()
+
+
+def _run_callable_probe(target: str, timeout: int) -> str:
+    module_name, separator, attribute_name = target.partition(":")
+    if not separator or not module_name or not attribute_name or attribute_name.startswith("_"):
+        raise ValueError("invalid version probe callable")
+    module = importlib.import_module(module_name)
+    probe = getattr(module, attribute_name)
+    if not callable(probe):
+        raise ValueError("version probe target is not callable")
+    result = probe(timeout_seconds=timeout)
+    if not isinstance(result, str) or not result.strip():
+        raise ValueError("version probe callable returned no version")
+    return result.strip()
 
 
 def _dependency_version(name: str, ecosystem: str) -> str | None:
@@ -97,18 +113,27 @@ def detect_environment(
     manifest: ModuleManifest,
     *,
     probe_runner: ProbeRunner | None = None,
+    callable_probe_runner: CallableProbeRunner | None = None,
+    service_probe_runner: CallableProbeRunner | None = None,
     dependency_provider: DependencyProvider | None = None,
     platform_name: str | None = None,
 ) -> EnvironmentSnapshot:
     """Detect only versions explicitly declared by a module contract."""
     run_probe = probe_runner or _run_probe
+    run_callable_probe = callable_probe_runner or _run_callable_probe
+    run_service_probe = service_probe_runner or _run_callable_probe
     provide_dependency = dependency_provider or _dependency_version
-    timeout = min(manifest.execution.timeout_seconds, 30)
     tools = {}
     for requirement in manifest.tool_requirements:
+        timeout = min(manifest.execution.timeout_seconds, requirement.version_probe_timeout_seconds, 30)
         try:
-            output = run_probe(tuple(requirement.version_probe), timeout)
-        except (OSError, subprocess.SubprocessError, TimeoutError):
+            if requirement.version_probe_kind == "command":
+                output = run_probe(tuple(requirement.version_probe), timeout)
+            elif requirement.version_probe_kind == "python_callable":
+                output = run_callable_probe(requirement.version_probe[0], timeout)
+            else:
+                output = run_service_probe(requirement.version_probe[0], timeout)
+        except (ImportError, AttributeError, OSError, RuntimeError, ValueError, subprocess.SubprocessError, TimeoutError):
             continue
         match = re.search(requirement.version_pattern, output)
         if match:

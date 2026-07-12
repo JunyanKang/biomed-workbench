@@ -15,6 +15,7 @@ MATURITY_LEVELS = frozenset({"experimental", "validated", "reference"})
 SEVERITIES = frozenset({"info", "warning", "major", "fatal"})
 ECOSYSTEMS = frozenset({"python", "r", "java", "system", "service", "database", "runtime"})
 MISMATCH_POLICIES = frozenset({"block", "alternative"})
+VERSION_PROBE_KINDS = frozenset({"command", "python_callable", "service_contract"})
 GENOME_BUILD_POLICIES = frozenset({"not_applicable", "required", "declared", "any_validated"})
 REPRESENTATIONS = frozenset({"structured", "text", "binary", "sparse", "container"})
 ALLOWED_CREDENTIALS = frozenset({"NCBI_API_KEY"})
@@ -75,6 +76,8 @@ class ToolRequirement:
     version_source: str
     verified_at: str
     version_probe: tuple[str, ...]
+    version_probe_kind: str
+    version_probe_timeout_seconds: int
     version_pattern: str
     mismatch_policy: str
     version_differences: tuple[str, ...]
@@ -389,6 +392,19 @@ def _tool(value: Any, location: str) -> ToolRequirement:
     if not source.startswith("https://"):
         raise ValueError(f"{location}.version_source must be an authoritative HTTPS URL")
     probe = _strings(payload["version_probe"], f"{location}.version_probe")
+    probe_kind = _text(payload["version_probe_kind"], f"{location}.version_probe_kind")
+    if probe_kind not in VERSION_PROBE_KINDS:
+        raise ValueError(f"{location}.version_probe_kind is unsupported")
+    if probe_kind in {"python_callable", "service_contract"}:
+        if len(probe) != 1 or not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*", probe[0]):
+            raise ValueError(f"{location}.version_probe must be one public module:function target")
+    if probe_kind == "service_contract" and ecosystem != "service":
+        raise ValueError(f"{location}.service_contract probes require the service ecosystem")
+    if probe_kind == "command" and ecosystem in {"service", "database"}:
+        raise ValueError(f"{location}.service and database probes cannot execute as commands")
+    probe_timeout = _positive_integer(payload["version_probe_timeout_seconds"], f"{location}.version_probe_timeout_seconds")
+    if probe_timeout > 30:
+        raise ValueError(f"{location}.version_probe_timeout_seconds must be at most 30")
     pattern = _text(payload["version_pattern"], f"{location}.version_pattern")
     try:
         re.compile(pattern)
@@ -409,6 +425,8 @@ def _tool(value: Any, location: str) -> ToolRequirement:
         version_source=source,
         verified_at=_date(payload["verified_at"], f"{location}.verified_at"),
         version_probe=probe,
+        version_probe_kind=probe_kind,
+        version_probe_timeout_seconds=probe_timeout,
         version_pattern=pattern,
         mismatch_policy=mismatch_policy,
         version_differences=_strings(payload["version_differences"], f"{location}.version_differences", allow_empty=True),
@@ -634,6 +652,8 @@ def _tool_dict(value: ToolRequirement) -> dict[str, object]:
         "version_source": value.version_source,
         "verified_at": value.verified_at,
         "version_probe": list(value.version_probe),
+        "version_probe_kind": value.version_probe_kind,
+        "version_probe_timeout_seconds": value.version_probe_timeout_seconds,
         "version_pattern": value.version_pattern,
         "mismatch_policy": value.mismatch_policy,
         "version_differences": list(value.version_differences),

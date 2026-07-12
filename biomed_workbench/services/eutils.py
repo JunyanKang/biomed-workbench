@@ -17,6 +17,7 @@ from .credentials import optional_credential
 
 
 BASE_URL = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+EUTILS_CONTRACT_VERSION = "contract-2026-03-04"
 CORE_DATABASES = frozenset(
     {
         "pubmed",
@@ -218,7 +219,6 @@ class EUtilitiesClient:
             params["db"] = _validate_database(database)
         _response, payload = self._request("einfo", params, expect_json=True)
         return payload
-
     def search(
         self,
         database: str,
@@ -362,3 +362,15 @@ class EUtilitiesClient:
             links=tuple(dict.fromkeys(links)),
             link_names=tuple(dict.fromkeys(name for name in names if name)),
         )
+
+
+def probe_eutils_contract(*, timeout_seconds: int = 10) -> str:
+    """Verify the bounded EInfo JSON shape before reporting contract support."""
+    if not isinstance(timeout_seconds, int) or isinstance(timeout_seconds, bool) or not 1 <= timeout_seconds <= 30:
+        raise ValueError("timeout_seconds must be an integer from 1 to 30")
+    payload = EUtilitiesClient(timeout=float(timeout_seconds), retries=0).info()
+    result = payload.get("einforesult") if isinstance(payload, dict) else None
+    databases = result.get("dblist") if isinstance(result, dict) else None
+    if not isinstance(databases, list) or not databases or any(not isinstance(item, str) or not item for item in databases):
+        raise EUtilitiesError("NCBI EInfo response does not match the validated JSON contract")
+    return EUTILS_CONTRACT_VERSION

@@ -163,7 +163,9 @@ def _eutils_tool() -> list[dict[str, object]]:
             "allowed_versions": ["==contract-2026-03-04"],
             "version_source": "https://www.ncbi.nlm.nih.gov/books/NBK25499/",
             "verified_at": "2026-07-12",
-            "version_probe": ["einfo-json-contract"],
+            "version_probe": ["biomed_workbench.services.eutils:probe_eutils_contract"],
+            "version_probe_kind": "service_contract",
+            "version_probe_timeout_seconds": 10,
             "version_pattern": "(contract-[0-9]{4}-[0-9]{2}-[0-9]{2})",
             "mismatch_policy": "block",
             "version_differences": [
