@@ -105,6 +105,30 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         self.assertEqual(output["argv"][:2], ["boltz", "predict"])
         self.assertFalse(output["executes"])
 
+    def test_expression_qc(self):
+        output = execute("expression-qc", {"genes": ["A", "B"], "samples": ["S1", "S2"], "matrix": [[10, 0], [5, 5]]})
+        self.assertEqual(output["library_sizes"]["S1"], 15.0)
+
+    def test_differential_expression(self):
+        output = execute("differential-expression", {"genes": ["G"], "group_a": [[10, 11, 12]], "group_b": [[1, 2, 3]]})
+        self.assertGreater(output["results"][0]["log2_fold_change"], 2)
+
+    def test_enrichment_analysis(self):
+        output = execute("enrichment-analysis", {"query_genes": ["A", "B"], "gene_sets": {"P": ["A", "B", "C"]}, "background_genes": ["A", "B", "C", "D", "E"]})
+        self.assertEqual(output["results"][0]["overlap_count"], 2)
+
+    def test_single_cell_qc(self):
+        output = execute("single-cell-qc", {"genes": ["MT-A", "B"], "cells": ["c1"], "matrix": [[5], [5]], "min_counts": 1, "min_genes": 1, "max_mito_percent": 40})
+        self.assertIn("high_mitochondrial_fraction", output["cells"][0]["flags"])
+
+    def test_variant_summary(self):
+        output = execute("variant-summary", {"variants": [{"chrom": "1", "ref": "A", "alt": "G", "filter": "PASS"}]})
+        self.assertEqual(output["transition_count"], 1)
+
+    def test_network_analysis(self):
+        output = execute("network-analysis", {"edges": [["A", "B"], ["B", "C"]]})
+        self.assertEqual(output["hubs"][0]["node"], "B")
+
 
 if __name__ == "__main__":
     unittest.main()
