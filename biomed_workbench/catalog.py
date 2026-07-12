@@ -174,6 +174,18 @@ def _register_builtins() -> None:
             access="public_api",
             mutability="read_only",
         ),
+        Capability(
+            id="runtime-status",
+            workflow="runtime",
+            kind="python",
+            title="Inspect scientific compute readiness",
+            description="Read available Python, R, container, GPU, SLURM, and local scientific model backends without changing the system.",
+            entrypoint="biomed_workbench.capabilities.runtime:status",
+            input_schema=_object_schema({}, ()),
+            requirements=(),
+            access="local_runtime",
+            mutability="read_only",
+        ),
     )
     for definition in definitions:
         register(definition)
