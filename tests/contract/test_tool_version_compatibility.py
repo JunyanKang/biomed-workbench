@@ -6,12 +6,14 @@ from tests.unit.test_module_compatibility import artifact, environment, external
 
 
 class ToolVersionCompatibilityContractTests(unittest.TestCase):
-    def test_compatibility_is_exact_not_monotonic(self):
+    def test_compatibility_uses_declared_range_not_exact_tested_version(self):
         manifest = parse_manifest(external_manifest_payload())
         validated = evaluate_compatibility(manifest, environment("1.11.5"), (artifact(),))
-        newer_unvalidated = evaluate_compatibility(manifest, environment("1.11.6"), (artifact(),))
+        compatible_patch = evaluate_compatibility(manifest, environment("1.11.6"), (artifact(),))
+        newer_unvalidated = evaluate_compatibility(manifest, environment("1.12.0"), (artifact(),))
 
         self.assertTrue(validated.allowed)
+        self.assertTrue(compatible_patch.allowed)
         self.assertFalse(newer_unvalidated.allowed)
 
     def test_missing_tool_and_artifact_block_independently(self):

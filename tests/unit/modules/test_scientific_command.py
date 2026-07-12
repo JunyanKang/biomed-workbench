@@ -37,6 +37,74 @@ def command(**overrides):
 
 
 class ScientificCommandTests(unittest.TestCase):
+    def test_workdir_relative_path_mode_keeps_machine_paths_out_of_tool_argv(self):
+        relative = command(path_mode="workdir-relative")
+        body = """
+import argparse, json, pathlib
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True)
+parser.add_argument('--output', required=True)
+parser.add_argument('--label', required=True)
+args = parser.parse_args()
+json.dump({'input': args.input, 'output': args.output, 'input_absolute': pathlib.Path(args.input).is_absolute()}, open(args.output, 'w', encoding='utf-8'))
+"""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tool = executable(root / "fixture-tool", body)
+            source = root / "reads.fastq"
+            source.write_text("ACGT\n", encoding="utf-8")
+            store = ProjectArtifactStore(root / "artifacts")
+            payload = store.import_file(source, role="reads", media_type="text/plain")
+            result = execute_scientific_command(
+                relative,
+                store=store,
+                input_payloads={"reads": payload},
+                parameters={"label": "sample-01"},
+                tool_versions={"fixture-tool": "2.4.1"},
+                dependency_versions={"python": "3.14.3"},
+                compatibility_row_id="fixture-tool-2.4.1-json-1",
+                executable_resolver=lambda _name: tool,
+            )
+            output = json.loads(store.resolve(result.output_payloads[0]).read_text(encoding="utf-8"))
+        self.assertEqual(output, {"input": "inputs/reads.fastq", "output": "outputs/report.json", "input_absolute": False})
+        self.assertEqual(result.provenance["executable_argv0"], "fixture-tool")
+
+    def test_renders_validated_scalar_parameters_inside_fixed_argv_templates(self):
+        templated = command(
+            arguments=(
+                "--input", "{input:reads}", "--output", "{output:report}",
+                "--read-group", "@RG\\tID:{parameter:label}\\tSM:{parameter:label}",
+            ),
+        )
+        body = """
+import argparse, json
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True)
+parser.add_argument('--output', required=True)
+parser.add_argument('--read-group', required=True)
+args = parser.parse_args()
+json.dump({'read_group': args.read_group}, open(args.output, 'w', encoding='utf-8'))
+"""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tool = executable(root / "fixture-tool", body)
+            source = root / "reads.fastq"
+            source.write_text("ACGT\n", encoding="utf-8")
+            store = ProjectArtifactStore(root / "artifacts")
+            payload = store.import_file(source, role="reads", media_type="text/plain")
+            result = execute_scientific_command(
+                templated,
+                store=store,
+                input_payloads={"reads": payload},
+                parameters={"label": "sample-01"},
+                tool_versions={"fixture-tool": "2.4.1"},
+                dependency_versions={"python": "3.14.3"},
+                compatibility_row_id="fixture-tool-2.4.1-json-1",
+                executable_resolver=lambda _name: tool,
+            )
+            output = json.loads(store.resolve(result.output_payloads[0]).read_text(encoding="utf-8"))
+        self.assertEqual(output["read_group"], "@RG\\tID:sample-01\\tSM:sample-01")
+
     def test_captures_text_stdout_as_a_declared_content_addressed_output(self):
         captured = command(
             arguments=("--input", "{input:reads}", "--label", "{parameter:label}"),
@@ -358,12 +426,15 @@ print('completed')
             lambda: command(executable="/usr/bin/tool"),
             lambda: command(arguments=("--input", "{input:missing}")),
             lambda: command(arguments=("--label={parameter:label}",)),
+            lambda: command(arguments=("prefix-{input:reads}", "{output:report}", "{parameter:label}")),
+            lambda: command(arguments=("bad-{parameter:label", "{input:reads}", "{output:report}")),
             lambda: command(arguments=("{output-directory}", "{output:report}", "{input:reads}", "{parameter:label}")),
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "../reads.fastq"),)),
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads", "tar-directory"),)),
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads", "file", "config.txt"),)),
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads", "zip-directory", "../config.txt"),)),
             lambda: command(working_directory_input="missing"),
+            lambda: command(path_mode="host-absolute"),
             lambda: command(outputs=(CommandOutput("report", "report", "report", "nested/report.json", "application/json"),)),
             lambda: command(outputs=(CommandOutput("report", "report", "report", "report.bin", "application/octet-stream", "stdout"),)),
             lambda: command(

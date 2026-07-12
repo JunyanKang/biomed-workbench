@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Mapping
 
 from ..formats import FormatRegistry, FormatSnapshot, validate_format
-from .contract import ArtifactPort, CompatibilityRow, FormatContract, ModuleManifest
+from .contract import ArtifactPort, CompatibilityRow, FormatContract, ModuleManifest, version_is_allowed
 
 
 FORMAT_REGISTRY = FormatRegistry.builtin()
@@ -179,16 +179,16 @@ def _tool_findings(manifest: ModuleManifest, row: CompatibilityRow, environment:
             if requirement.required:
                 findings.append(_finding("MISSING_TOOL", requirement.name, "Required scientific tool was not detected by its declared probe."))
             continue
-        if actual not in row.tool_versions.get(requirement.name, ()):
-            findings.append(_finding("UNVALIDATED_TOOL_VERSION", requirement.name, f"Detected version {actual} is not present in compatibility row {row.id}."))
+        if not version_is_allowed(actual, row.tool_versions.get(requirement.name, ())):
+            findings.append(_finding("UNVALIDATED_TOOL_VERSION", requirement.name, f"Detected version {actual} is outside compatibility policy {row.id}."))
     for requirement in manifest.dependencies:
         actual = environment.dependencies.get(requirement.name)
         if actual is None:
             if requirement.required:
                 findings.append(_finding("MISSING_DEPENDENCY", requirement.name, "Required dependency version was not detected."))
             continue
-        if actual not in row.dependency_versions.get(requirement.name, ()):
-            findings.append(_finding("UNVALIDATED_DEPENDENCY_VERSION", requirement.name, f"Detected version {actual} is not present in compatibility row {row.id}."))
+        if not version_is_allowed(actual, row.dependency_versions.get(requirement.name, ())):
+            findings.append(_finding("UNVALIDATED_DEPENDENCY_VERSION", requirement.name, f"Detected version {actual} is outside compatibility policy {row.id}."))
     if "any" not in row.platforms and environment.platform not in row.platforms:
         findings.append(_finding("UNSUPPORTED_PLATFORM", environment.platform, f"Platform is not present in compatibility row {row.id}."))
     return findings
@@ -342,6 +342,14 @@ def invoke_compatible(
         "compatibility_row_id": decision.compatibility_row_id,
         "tools": {key: value for key, value in sorted(environment.tools.items()) if key in declared_tools},
         "dependencies": {key: value for key, value in sorted(environment.dependencies.items()) if key in declared_dependencies},
+        "tested_version_baseline": {
+            "tools": {item.name: environment.tools.get(item.name) in item.tested_versions for item in manifest.tool_requirements if item.name in environment.tools},
+            "dependencies": {item.name: environment.dependencies.get(item.name) in item.tested_versions for item in manifest.dependencies if item.name in environment.dependencies},
+        },
+        "compatibility_policy": {
+            "tools": {key: list(value) for key, value in sorted(next(row for row in manifest.compatibility_matrix if row.id == decision.compatibility_row_id).tool_versions.items())},
+            "dependencies": {key: list(value) for key, value in sorted(next(row for row in manifest.compatibility_matrix if row.id == decision.compatibility_row_id).dependency_versions.items())},
+        },
         "platform": environment.platform,
         "input_formats": {artifact.port: f"{artifact.format}@{artifact.format_version}" for artifact in artifacts},
         "parameters_digest": hashlib.sha256(json.dumps(inputs, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")).hexdigest(),

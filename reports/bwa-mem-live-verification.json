@@ -1,0 +1,118 @@
+{
+  "compatibility_policy": {
+    "dependencies": {
+      "bwa-homebrew-bottle": [
+        ">=0.7,<0.8"
+      ]
+    },
+    "tools": {
+      "bwa": [
+        ">=0.7.17,<0.8"
+      ]
+    }
+  },
+  "compatibility_row_id": "bwa-mem-0.7-single-fastq-sam",
+  "dependency_versions": {
+    "bwa-homebrew-bottle": "0.7.19-bottle-arm64"
+  },
+  "end_to_end_evidence_id": "dna-align-bwa-mem-single-e2e-v1",
+  "execution": {
+    "command_contract_digest": "eea5ae8117260addcef8f2ccbd23599d24809c28e04ab1123fa92681fc0659e0",
+    "executable_sha256": "5256491ed661a89d02219a65c09679060ecd5d0d2af9d33383736e10b94133ac",
+    "inputs": {
+      "reads": {
+        "byte_size": 436,
+        "role": "reads",
+        "sha256": "9a632950502a082f13de5fd33dc7d3a4e43b38a82ddae3f551bc38f550d99f2f"
+      },
+      "reference": {
+        "byte_size": 5030,
+        "role": "reference",
+        "sha256": "e0d9d636c1d66670af1ea727e690e3c061cbc28a12b9de0ab81a6ca679bcdc8c"
+      }
+    },
+    "outputs": [
+      {
+        "byte_size": 841,
+        "media_type": "text/sam",
+        "object_key": "sha256/cc/ccd06afd6f273433390dd0ce203dcb78dbd2a7da0a74d0b693a7515e706caa1d/payload",
+        "role": "alignments",
+        "sha256": "ccd06afd6f273433390dd0ce203dcb78dbd2a7da0a74d0b693a7515e706caa1d"
+      }
+    ],
+    "parameters": {
+      "sample-id": "bwa-fixture-01",
+      "threads": "1"
+    }
+  },
+  "fixture": {
+    "fastq_sha256": "9a632950502a082f13de5fd33dc7d3a4e43b38a82ddae3f551bc38f550d99f2f",
+    "quality_encoding": "sanger-phred33",
+    "read_count": 2,
+    "read_layout": "single-end",
+    "read_length": 100,
+    "reference_manifest_digest": "7d6a54e8701eac09c86e550d73953c7a5f3656d90e9a310a0fd8cd8088d33095",
+    "sample_id": "bwa-fixture-01",
+    "schema_version": 1
+  },
+  "html_report_validated": false,
+  "module_id": "dna-align-bwa-mem-single",
+  "module_version": "1.0.0",
+  "passed": true,
+  "portable_program_record_validated": true,
+  "reference_manifest": {
+    "bwa_tested_baseline": "0.7.19-r1273",
+    "format": "bwa-reference@0.7",
+    "index_digests": {
+      "amb": "e225bcfca7ae112f072574935aa51c5f2627aad65c8d964b10cb7d558f22ce61",
+      "ann": "37699f4b0f1b23c3e94ab8fa52955f0cae3433332a90728dd3ecd6a0a478ba4d",
+      "bwt": "72f5f298dda3e9ecf92bd6bbd640bc2c9340520cfd6848f2a488b5465874cea7",
+      "pac": "40986da14198e4c8faa377bdf74291eedc308c03a66b007dfb356f3f16f2f0a7",
+      "sa": "44368499843130ff67141049c845b95232eb26ef3f9de255ab7324d682cb3950"
+    },
+    "reference_build": "synthetic-build-1",
+    "reference_sequence_digest": "a16524612efa66496631518ab1622651e27f01dce0c676cc126aead0be1319cb",
+    "schema_version": 1,
+    "sequences": [
+      {
+        "length": 1200,
+        "name": "chrSynthetic"
+      }
+    ]
+  },
+  "reference_manifest_digest": "7d6a54e8701eac09c86e550d73953c7a5f3656d90e9a310a0fd8cd8088d33095",
+  "regression_evidence_id": "dna-align-bwa-mem-single-regression-v1",
+  "schema_version": 1,
+  "scientific_summary": {
+    "bwa_version": "0.7.19-r1273",
+    "counts": {
+      "mapped": 1,
+      "primary": 2,
+      "secondary": 0,
+      "supplementary": 0,
+      "total": 2,
+      "unmapped": 1
+    },
+    "downstream_readiness": "technically-ready-for-sam-to-sorted-bam-validation",
+    "interpretation_policy": "BWA-MEM alignment is a technical transformation; reference suitability, read-group design, duplicate handling, mapping ambiguity, coverage, and assay-specific biological adequacy require downstream validation.",
+    "primary_mapping_percent": 50.0,
+    "program_record_paths": "workdir-relative",
+    "reference_sequences": {
+      "chrSynthetic": 1200
+    },
+    "sam_header_version": "1.5",
+    "sample_id": "bwa-fixture-01",
+    "schema_version": 1
+  },
+  "tested_version_baseline": {
+    "dependencies": {
+      "bwa-homebrew-bottle": true
+    },
+    "tools": {
+      "bwa": true
+    }
+  },
+  "tool_versions": {
+    "bwa": "0.7.19-r1273"
+  }
+}

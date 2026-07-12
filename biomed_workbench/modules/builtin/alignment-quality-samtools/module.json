@@ -34,19 +34,19 @@
   "alternatives": [],
   "complements": ["read-quality-fastqc", "read-quality-fastp", "read-contamination-screen"],
   "tool_requirements": [{
-    "name": "samtools", "ecosystem": "system", "identity": "samtools", "required": true, "tested_versions": ["1.23"], "allowed_versions": ["==1.23"],
+    "name": "samtools", "ecosystem": "system", "identity": "samtools", "required": true, "tested_versions": ["1.23"], "allowed_versions": [">=1.23,<1.24"],
     "version_source": "https://github.com/samtools/samtools/releases/tag/1.23", "verified_at": "2026-07-12", "version_probe": ["samtools", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10,
     "version_pattern": "samtools ([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block",
-    "version_differences": [{"id": "samtools-123-flagstat-json", "affected_versions": ["==1.23"], "category": "output-format", "description": "The validated release emits the tested JSON QC strata and metric field names.", "compatibility_effect": "requires-parser", "required_action": "Use the samtools 1.23 flagstat JSON parser and exact regression fixture.", "source": "https://www.htslib.org/doc/samtools-flagstat.html"}],
+    "version_differences": [{"id": "samtools-123-flagstat-json", "affected_versions": [">=1.23,<1.24"], "category": "output-format", "description": "The validated release emits the tested JSON QC strata and metric field names.", "compatibility_effect": "requires-parser", "required_action": "Use the samtools 1.23 flagstat JSON parser and exact regression fixture.", "source": "https://www.htslib.org/doc/samtools-flagstat.html"}],
     "platforms": ["macos-arm64"]
   }],
   "dependencies": [{
-    "name": "htslib", "ecosystem": "runtime", "identity": "htslib-runtime", "required": true, "tested_versions": ["1.23"], "allowed_versions": ["==1.23"],
+    "name": "htslib", "ecosystem": "runtime", "identity": "htslib-runtime", "required": true, "tested_versions": ["1.23"], "allowed_versions": [">=1.23,<1.24"],
     "version_source": "https://github.com/samtools/htslib/releases/tag/1.23", "verified_at": "2026-07-12", "version_probe": ["samtools", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10,
     "version_pattern": "Using htslib ([0-9]+(?:\\.[0-9]+)+)", "purpose": "Decode BAM records and alignment flags for samtools flagstat.", "conflicts": [], "platforms": ["macos-arm64"]
   }],
   "compatibility_matrix": [{
-    "id": "samtools-1.23-htslib-1.23-bam-1.6-flagstat-json", "module_version": "1.0.0", "tool_versions": {"samtools": ["1.23"]}, "dependency_versions": {"htslib": ["1.23"]},
+    "id": "samtools-1.23-htslib-1.23-bam-1.6-flagstat-json", "module_version": "1.0.0", "tool_versions": {"samtools": [">=1.23,<1.24"]}, "dependency_versions": {"htslib": [">=1.23,<1.24"]},
     "input_formats": {"alignments": ["bam@1.6"]}, "output_formats": {"alignment_quality_report": ["samtools-flagstat-json@1.23"]}, "platforms": ["macos-arm64"],
     "regression_evidence_ids": ["alignment-quality-samtools-regression-v1"], "end_to_end_evidence_ids": ["alignment-quality-samtools-e2e-v1"], "verified_at": "2026-07-12"
   }],

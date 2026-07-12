@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 54:
-            errors.append(f"built-in module count must be 54, found {len(modules)}")
+        if len(modules) != 55:
+            errors.append(f"built-in module count must be 55, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -172,10 +172,10 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 349
+                or research_report.get("test_count", 0) < 359
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
-                != {"scientific_command", "command_input_binding", "command_output_binding", "command_stream_output_capture", "command_zip_directory_input", "bounded_process_result"}
+                != {"scientific_command", "command_input_binding", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"}
                 or graph_report != {"node_count": len(graph.nodes), "edge_count": len(graph.edges), "digest": graph.digest}
             ):
                 errors.append("research engine report differs from the discovered registry or capability graph")
@@ -257,7 +257,7 @@ def main() -> int:
         except (OSError, json.JSONDecodeError, ModuleRegistryError):
             errors.append("MultiQC live verification evidence is missing or invalid")
         else:
-            expected_dependencies = {name: versions[0] for name, versions in multiqc_row.dependency_versions.items()}
+            expected_dependencies = {item.name: item.tested_versions[0] for item in multiqc_manifest.dependencies}
             if (
                 multiqc_report.get("passed") is not True
                 or multiqc_report.get("module_version") != multiqc_manifest.version
@@ -302,7 +302,7 @@ def main() -> int:
         except (OSError, json.JSONDecodeError, ModuleRegistryError):
             errors.append("FastQ Screen live verification evidence is missing or invalid")
         else:
-            expected_dependencies = {name: versions[0] for name, versions in screen_row.dependency_versions.items()}
+            expected_dependencies = {item.name: item.tested_versions[0] for item in screen_manifest.dependencies}
             if (
                 screen_report.get("passed") is not True
                 or screen_report.get("module_version") != screen_manifest.version
@@ -359,6 +359,26 @@ def main() -> int:
                 or summary.get("total_pairwise_overlap_bp") != 10
             ):
                 errors.append("bedtools interval evidence differs from its module, row, BED fixture, or overlap checks")
+        bwa_report_path = ROOT / "reports" / "bwa-mem-live-verification.json"
+        try:
+            bwa_report = json.loads(bwa_report_path.read_text(encoding="utf-8"))
+            bwa_manifest = registry.get("dna-align-bwa-mem-single")
+            bwa_row = bwa_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("BWA-MEM live verification evidence is missing or invalid")
+        else:
+            if (
+                bwa_report.get("passed") is not True
+                or bwa_report.get("module_version") != bwa_manifest.version
+                or bwa_report.get("compatibility_row_id") != bwa_row.id
+                or bwa_report.get("tool_versions", {}).get("bwa") != "0.7.19-r1273"
+                or bwa_report.get("dependency_versions", {}).get("bwa-homebrew-bottle") != "0.7.19-bottle-arm64"
+                or not all(bwa_report.get("tested_version_baseline", {}).get("tools", {}).values())
+                or not all(bwa_report.get("tested_version_baseline", {}).get("dependencies", {}).values())
+                or bwa_report.get("scientific_summary", {}).get("counts", {}).get("total") != 2
+                or bwa_report.get("portable_program_record_validated") is not True
+            ):
+                errors.append("BWA-MEM evidence differs from its module, policy, tested baseline, fixture, or portable SAM checks")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

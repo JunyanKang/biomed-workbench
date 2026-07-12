@@ -327,6 +327,26 @@ class ModuleContractTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "outside allowed versions"):
             parse_manifest(payload)
 
+    def test_compatibility_rows_may_use_declared_ranges_covering_tested_baselines(self):
+        payload = valid_manifest_payload()
+        payload["dependencies"][0]["allowed_versions"] = [">=3.14,<3.15"]
+        payload["compatibility_matrix"][0]["dependency_versions"] = {"python": [">=3.14,<3.15"]}
+
+        manifest = parse_manifest(payload)
+
+        self.assertEqual(manifest.dependencies[0].tested_versions, ("3.14.3",))
+        self.assertEqual(manifest.compatibility_matrix[0].dependency_versions["python"], (">=3.14,<3.15",))
+
+    def test_build_qualified_versions_are_compared_by_release_and_preserved_verbatim(self):
+        payload = valid_manifest_payload()
+        payload["dependencies"][0]["tested_versions"] = ["3.14.3-build_arm64_0"]
+        payload["dependencies"][0]["allowed_versions"] = [">=3.14,<3.15"]
+        payload["compatibility_matrix"][0]["dependency_versions"] = {"python": [">=3.14,<3.15"]}
+
+        manifest = parse_manifest(payload)
+
+        self.assertEqual(manifest.dependencies[0].tested_versions, ("3.14.3-build_arm64_0",))
+
     def test_compatibility_rows_must_reference_declared_ports_and_versions(self):
         payload = valid_manifest_payload()
         payload["compatibility_matrix"][0]["input_formats"] = {"missing-port": ["inline-json@1"]}

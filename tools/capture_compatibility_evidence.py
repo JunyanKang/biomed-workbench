@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
 from biomed_workbench.kernel.identity import digest_value  # noqa: E402
 from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
+from biomed_workbench.modules.contract import version_is_allowed  # noqa: E402
 from biomed_workbench.router import route  # noqa: E402
 
 
@@ -35,6 +36,7 @@ SERVICE_COVERAGE = {
 
 COMMAND_EVIDENCE = {
     "alignment-quality-samtools": ("reports/alignment-quality-live-verification.json", "tests.unit.quality.test_alignment"),
+    "dna-align-bwa-mem-single": ("reports/bwa-mem-live-verification.json", "tests.unit.quality.test_alignment"),
     "interval-overlap-bedtools": ("reports/interval-overlap-live-verification.json", "tests.unit.quality.test_intervals"),
     "quality-report-multiqc": ("reports/multiqc-live-verification.json", "tests.unit.quality.test_multiqc"),
     "read-contamination-screen": ("reports/fastq-screen-live-verification.json", "tests.unit.quality.test_fastq_screen"),
@@ -123,8 +125,8 @@ def capture() -> dict[str, object]:
                 live_report.get("passed") is not True
                 or live_report.get("module_id") != manifest.id
                 or live_report.get("compatibility_row_id") != row.id
-                or live_report.get("tool_versions") != {key: values[0] for key, values in row.tool_versions.items()}
-                or live_report.get("dependency_versions") != {key: values[0] for key, values in row.dependency_versions.items()}
+                or any(not version_is_allowed(live_report.get("tool_versions", {}).get(key, ""), rules) for key, rules in row.tool_versions.items())
+                or any(not version_is_allowed(live_report.get("dependency_versions", {}).get(key, ""), rules) for key, rules in row.dependency_versions.items())
             ):
                 raise RuntimeError(f"live command evidence differs from compatibility row: {manifest.id}")
             regression = subprocess.run(

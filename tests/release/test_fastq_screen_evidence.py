@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from biomed_workbench.kernel.identity import digest_value
-from biomed_workbench.modules.contract import parse_manifest
+from biomed_workbench.modules.contract import parse_manifest, version_is_allowed
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -22,7 +22,9 @@ class FastQScreenEvidenceTests(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(report["compatibility_row_id"], row.id)
         self.assertEqual(report["tool_versions"], {"fastq-screen": "0.16.0"})
-        self.assertEqual(report["dependency_versions"], {name: versions[0] for name, versions in row.dependency_versions.items()})
+        self.assertEqual(report["dependency_versions"], {item.name: item.tested_versions[0] for item in manifest.dependencies})
+        self.assertTrue(all(version_is_allowed(report["tool_versions"][name], rules) for name, rules in row.tool_versions.items()))
+        self.assertTrue(all(version_is_allowed(report["dependency_versions"][name], rules) for name, rules in row.dependency_versions.items()))
         self.assertEqual(report["runtime_lock"]["bowtie2"], "2.5.5-h9e91881_0")
         self.assertEqual(report["reference_manifest_digest"], digest_value(report["reference_manifest"]))
         self.assertEqual(report["fixture"]["sha256"], hashlib.sha256(FIXTURE.read_bytes()).hexdigest())

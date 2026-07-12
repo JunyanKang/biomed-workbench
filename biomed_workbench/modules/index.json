@@ -1,5 +1,5 @@
 {
-  "module_count": 54,
+  "module_count": 55,
   "modules": [
     {
       "access": "offline",
@@ -11,7 +11,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -44,7 +44,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -298,7 +298,7 @@
         {
           "dependency_versions": {
             "htslib": [
-              "1.23"
+              ">=1.23,<1.24"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -324,7 +324,7 @@
           ],
           "tool_versions": {
             "samtools": [
-              "1.23"
+              ">=1.23,<1.24"
             ]
           },
           "verified_at": "2026-07-12"
@@ -339,7 +339,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==1.23"
+            ">=1.23,<1.24"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -586,7 +586,7 @@
       "tool_requirements": [
         {
           "allowed_versions": [
-            "==1.23"
+            ">=1.23,<1.24"
           ],
           "ecosystem": "system",
           "identity": "samtools",
@@ -603,7 +603,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==1.23"
+                ">=1.23,<1.24"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -635,7 +635,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -670,7 +670,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -896,7 +896,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -929,7 +929,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1126,7 +1126,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -1159,7 +1159,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1346,7 +1346,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -1379,7 +1379,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1582,7 +1582,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -1615,7 +1615,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1818,7 +1818,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -1851,7 +1851,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2055,7 +2055,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -2088,7 +2088,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2281,7 +2281,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -2317,7 +2317,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2528,7 +2528,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -2561,7 +2561,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2758,13 +2758,410 @@
       "access": "offline",
       "alternatives": [],
       "assumptions": [
+        "Reads are single-end DNA short reads with Sanger Phred+33 qualities, and the reference FASTA plus all BWA index files were generated from the same declared sequence payload."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "bwa-homebrew-bottle": [
+              ">=0.7,<0.8"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "dna-align-bwa-mem-single-e2e-v1"
+          ],
+          "id": "bwa-mem-0.7-single-fastq-sam",
+          "input_formats": {
+            "reads": [
+              "fastq@sanger-phred33"
+            ],
+            "reference": [
+              "bwa-reference@0.7"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "alignments": [
+              "sam@1.6"
+            ]
+          },
+          "platforms": [
+            "macos-arm64"
+          ],
+          "regression_evidence_ids": [
+            "dna-align-bwa-mem-single-regression-v1"
+          ],
+          "tool_versions": {
+            "bwa": [
+              ">=0.7.17,<0.8"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "read-quality-fastqc",
+        "read-quality-fastp",
+        "read-contamination-screen",
+        "alignment-quality-samtools"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=0.7,<0.8"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "homebrew-bwa-runtime",
+          "name": "bwa-homebrew-bottle",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Record the validated macOS-arm64 BWA installation identity without managing the user's software environment.",
+          "required": true,
+          "tested_versions": [
+            "0.7.19-bottle-arm64"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+-bottle-arm64)",
+          "version_probe": [
+            "biomed_workbench.quality.alignment:probe_bwa_homebrew_bottle"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://formulae.brew.sh/formula/bwa"
+        }
+      ],
+      "description": "Guide and execute single-end short-read DNA alignment against a declared BWA reference bundle while preserving sample read-group identity and a portable SAM artifact.",
+      "domains": [
+        "omics"
+      ],
+      "entrypoint": "scientific-command",
+      "evidence_effects": [
+        "produces_reference_aligned_dna_reads"
+      ],
+      "execution": {
+        "command": {
+          "arguments": [
+            "mem",
+            "-t",
+            "{parameter:threads}",
+            "-R",
+            "@RG\\tID:{parameter:sample-id}\\tSM:{parameter:sample-id}\\tPL:ILLUMINA",
+            "{input:reference}",
+            "{input:reads}"
+          ],
+          "executable": "bwa",
+          "inputs": [
+            {
+              "filename": "reads.fastq",
+              "name": "reads",
+              "port": "reads",
+              "role": "reads"
+            },
+            {
+              "filename": "reference-bundle",
+              "materialization": "zip-directory",
+              "member": "reference.fa",
+              "name": "reference",
+              "port": "reference",
+              "role": "reference"
+            }
+          ],
+          "max_output_bytes": 50000000,
+          "max_payload_bytes": 50000000,
+          "outputs": [
+            {
+              "capture": "stdout",
+              "filename": "alignments.sam",
+              "media_type": "text/sam",
+              "name": "alignments",
+              "port": "alignments",
+              "role": "alignments"
+            }
+          ],
+          "parameter_names": [
+            "threads",
+            "sample-id"
+          ],
+          "path_mode": "workdir-relative",
+          "timeout_seconds": 300,
+          "tool_name": "bwa"
+        },
+        "kind": "command",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 300
+      },
+      "id": "dna-align-bwa-mem-single",
+      "input_artifacts": [
+        {
+          "artifact_type": "sequencing_reads",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "fastq",
+              "orientations": [
+                "single-end"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "sanger-phred33"
+              ]
+            }
+          ],
+          "name": "reads",
+          "processing_levels": [
+            "raw",
+            "adapter-trimmed",
+            "quality-trimmed"
+          ],
+          "required_metadata": [
+            "sample-id",
+            "sample-manifest-digest",
+            "read-layout",
+            "quality-encoding"
+          ]
+        },
+        {
+          "artifact_type": "bwa_reference_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "zip"
+              ],
+              "coordinate_systems": [
+                "one-based-leftmost"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "bwa-reference",
+              "orientations": [
+                "fasta-with-bwa-index-prefix"
+              ],
+              "representations": [
+                "container",
+                "binary"
+              ],
+              "required_indexes": [
+                "amb",
+                "ann",
+                "bwt",
+                "pac",
+                "sa"
+              ],
+              "versions": [
+                "0.7"
+              ]
+            }
+          ],
+          "name": "reference",
+          "processing_levels": [
+            "indexed-reference"
+          ],
+          "required_metadata": [
+            "reference-build",
+            "reference-sequence-digest",
+            "reference-manifest-digest",
+            "sequence-dictionary",
+            "bwa-index-version"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "sample-id": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+            "type": "string"
+          },
+          "threads": {
+            "maximum": 32,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threads",
+          "sample-id"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "align single-end DNA reads",
+        "run BWA-MEM",
+        "FASTQ to SAM",
+        "\u5355\u7aefDNA\u6d4b\u5e8f\u6bd4\u5bf9"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The current module covers single-end short-read DNA alignment and emits unsorted SAM; paired-end reads, long reads, RNA splicing, ALT-aware post-processing, duplicate handling, sorted BAM production, and biological interpretation require separate modules."
+      ],
+      "maturity": "validated",
+      "module_type": "transform",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "sequence_alignments",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-leftmost"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "sam",
+              "orientations": [
+                "alignment-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.6"
+              ]
+            }
+          ],
+          "name": "alignments",
+          "processing_levels": [
+            "aligned"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "sample-id",
+            "read-group",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "payload_roles": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "payload_roles"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "FASTQ structure and sample identity pass shared validation; the reference manifest reconciles FASTA digest, sequence dictionary, build identity, and all BWA index members."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://github.com/lh3/bwa"
+        ],
+        "license": "GPL-3.0-or-later"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Reference FASTA, sequence dictionary, manifest digest, build identity, and BWA index members must reconcile before alignment.",
+          "id": "bwa-reference-bundle-integrity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The supplied sample identifier must appear consistently in SAM @RG and every alignment record without machine-local command paths.",
+          "id": "bwa-sample-read-group-identity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Raw unsorted SAM is a technical transformation and requires conversion, sorting, indexing, alignment QC, coverage review, and assay-specific interpretation.",
+          "id": "bwa-alignment-not-interpretation",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "How should declared single-end DNA reads be aligned to the project reference while preserving sample identity and reference provenance for downstream validation?"
+      ],
+      "schema_version": 1,
+      "title": "Align single-end DNA reads with BWA-MEM",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            ">=0.7.17,<0.8"
+          ],
+          "ecosystem": "system",
+          "identity": "bwa",
+          "mismatch_policy": "block",
+          "name": "bwa",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "0.7.19-r1273"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=0.7.17,<0.8"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "The supported BWA-MEM line emits the validated SAM header, read-group, program, flag, coordinate, and CIGAR surfaces.",
+              "id": "bwa-mem-sam-header-contract",
+              "required_action": "Validate the produced SAM header, reference dictionary, sample read group, records, and path portability before evidence ingestion.",
+              "source": "https://github.com/lh3/bwa/blob/master/NEWS.md"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+-r[0-9]+)",
+          "version_probe": [
+            "biomed_workbench.quality.alignment:probe_bwa_version"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/lh3/bwa/releases/tag/v0.7.19"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
         "Concentrations are positive, ordered on a log scale, and empirical half-range interpolation is scientifically adequate."
       ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -2797,7 +3194,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -3022,7 +3419,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -3058,7 +3455,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -3266,7 +3663,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -3299,7 +3696,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -3524,7 +3921,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -3557,7 +3954,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -3779,7 +4176,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -3812,7 +4209,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -4015,7 +4412,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -4048,7 +4445,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -4271,7 +4668,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -4313,7 +4710,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -4572,7 +4969,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -4607,7 +5004,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -4813,7 +5210,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -4849,7 +5246,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -5100,7 +5497,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -5133,7 +5530,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -5347,7 +5744,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -5382,7 +5779,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -5602,7 +5999,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -5635,7 +6032,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -5845,7 +6242,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -5880,7 +6277,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -6113,7 +6510,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -6146,7 +6543,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -6396,7 +6793,7 @@
         {
           "dependency_versions": {
             "xz": [
-              "5.8.3"
+              ">=5.8,<5.9"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -6425,7 +6822,7 @@
           ],
           "tool_versions": {
             "bedtools": [
-              "2.31.1"
+              ">=2.31,<2.32"
             ]
           },
           "verified_at": "2026-07-12"
@@ -6439,7 +6836,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==5.8.3"
+            ">=5.8,<5.9"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -6723,7 +7120,7 @@
       "tool_requirements": [
         {
           "allowed_versions": [
-            "==2.31.1"
+            ">=2.31,<2.32"
           ],
           "ecosystem": "system",
           "identity": "bedtools",
@@ -6740,7 +7137,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==2.31.1"
+                ">=2.31,<2.32"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -6772,7 +7169,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -6813,7 +7210,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -7079,7 +7476,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -7116,7 +7513,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -7338,7 +7735,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -7377,7 +7774,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -7638,7 +8035,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -7677,7 +8074,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -7904,7 +8301,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -7943,7 +8340,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -8205,7 +8602,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -8244,7 +8641,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -8517,7 +8914,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -8556,7 +8953,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -8798,7 +9195,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -8837,7 +9234,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -9078,7 +9475,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -9111,7 +9508,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -9319,7 +9716,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -9354,7 +9751,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -9596,7 +9993,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -9629,7 +10026,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -9843,7 +10240,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -9876,7 +10273,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -10079,7 +10476,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -10114,7 +10511,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -10326,7 +10723,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -10359,7 +10756,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -10620,25 +11017,25 @@
         {
           "dependency_versions": {
             "jinja2": [
-              "3.1.6"
+              ">=3.1,<3.2"
             ],
             "jsonschema": [
-              "4.26.0"
+              ">=4.26,<5"
             ],
             "plotly": [
-              "6.9.0"
+              ">=6.9,<7"
             ],
             "polars": [
-              "1.42.1"
+              ">=1.42,<1.43"
             ],
             "pyarrow": [
-              "25.0.0"
+              ">=25,<26"
             ],
             "pydantic": [
-              "2.13.4"
+              ">=2.13,<2.14"
             ],
             "python": [
-              "3.13.12"
+              ">=3.13,<3.14"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -10665,7 +11062,7 @@
           ],
           "tool_versions": {
             "multiqc": [
-              "1.35"
+              ">=1.35,<1.36"
             ]
           },
           "verified_at": "2026-07-12"
@@ -10678,7 +11075,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.13.12"
+            ">=3.13,<3.14"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -10704,7 +11101,7 @@
         },
         {
           "allowed_versions": [
-            "==2.13.4"
+            ">=2.13,<2.14"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -10729,7 +11126,7 @@
         },
         {
           "allowed_versions": [
-            "==6.9.0"
+            ">=6.9,<7"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -10754,7 +11151,7 @@
         },
         {
           "allowed_versions": [
-            "==25.0.0"
+            ">=25,<26"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -10779,7 +11176,7 @@
         },
         {
           "allowed_versions": [
-            "==1.42.1"
+            ">=1.42,<1.43"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -10804,7 +11201,7 @@
         },
         {
           "allowed_versions": [
-            "==4.26.0"
+            ">=4.26,<5"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -10829,7 +11226,7 @@
         },
         {
           "allowed_versions": [
-            "==3.1.6"
+            ">=3.1,<3.2"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -11054,7 +11451,7 @@
       "tool_requirements": [
         {
           "allowed_versions": [
-            "==1.35"
+            ">=1.35,<1.36"
           ],
           "ecosystem": "python",
           "identity": "multiqc",
@@ -11072,7 +11469,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==1.35"
+                ">=1.35,<1.36"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -11104,13 +11501,13 @@
         {
           "dependency_versions": {
             "bowtie2": [
-              "2.5.5"
+              ">=2.5,<2.6"
             ],
             "bowtie2-bioconda-build": [
-              "2.5.5-h9e91881_0"
+              ">=2.5,<2.6"
             ],
             "perl": [
-              "5.32.1"
+              ">=5.32,<6"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -11139,7 +11536,7 @@
           ],
           "tool_versions": {
             "fastq-screen": [
-              "0.16.0"
+              ">=0.16,<0.17"
             ]
           },
           "verified_at": "2026-07-12"
@@ -11153,7 +11550,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==2.5.5"
+            ">=2.5,<2.6"
           ],
           "conflicts": [],
           "ecosystem": "system",
@@ -11179,7 +11576,7 @@
         },
         {
           "allowed_versions": [
-            "==2.5.5-h9e91881_0"
+            ">=2.5,<2.6"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -11204,7 +11601,7 @@
         },
         {
           "allowed_versions": [
-            "==5.32.1"
+            ">=5.32,<6"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -11487,7 +11884,7 @@
       "tool_requirements": [
         {
           "allowed_versions": [
-            "==0.16.0"
+            ">=0.16,<0.17"
           ],
           "ecosystem": "system",
           "identity": "fastq_screen",
@@ -11504,7 +11901,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==0.16.0"
+                ">=0.16,<0.17"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -11538,7 +11935,7 @@
         {
           "dependency_versions": {
             "fastp-bioconda-build": [
-              "1.3.6-ha1d0559_0"
+              ">=1.3,<1.4"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -11564,7 +11961,7 @@
           ],
           "tool_versions": {
             "fastp": [
-              "1.3.6"
+              ">=1.3,<1.4"
             ]
           },
           "verified_at": "2026-07-12"
@@ -11578,7 +11975,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==1.3.6-ha1d0559_0"
+            ">=1.3,<1.4"
           ],
           "conflicts": [
             {
@@ -11830,7 +12227,7 @@
       "tool_requirements": [
         {
           "allowed_versions": [
-            "==1.3.6"
+            ">=1.3,<1.4"
           ],
           "ecosystem": "system",
           "identity": "fastp",
@@ -11847,7 +12244,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==1.3.6"
+                ">=1.3,<1.4"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -11881,7 +12278,7 @@
         {
           "dependency_versions": {
             "java": [
-              "22"
+              ">=17"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -11908,7 +12305,7 @@
           ],
           "tool_versions": {
             "fastqc": [
-              "0.12.1"
+              ">=0.12,<0.13"
             ]
           },
           "verified_at": "2026-07-12"
@@ -11922,7 +12319,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==22"
+            ">=17"
           ],
           "conflicts": [],
           "ecosystem": "java",
@@ -12158,7 +12555,7 @@
       "tool_requirements": [
         {
           "allowed_versions": [
-            "==0.12.1"
+            ">=0.12,<0.13"
           ],
           "ecosystem": "system",
           "identity": "fastqc",
@@ -12176,7 +12573,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==0.12.1"
+                ">=0.12,<0.13"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -12208,7 +12605,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -12241,7 +12638,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -12438,7 +12835,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -12471,7 +12868,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -12669,7 +13066,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -12705,7 +13102,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -12966,7 +13363,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -12999,7 +13396,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -13205,7 +13602,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -13238,7 +13635,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -13453,7 +13850,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -13488,7 +13885,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -13720,7 +14117,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -13755,7 +14152,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -13962,7 +14359,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -13998,7 +14395,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -14261,7 +14658,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -14303,7 +14700,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -14567,7 +14964,7 @@
         {
           "dependency_versions": {
             "python": [
-              "3.14.3"
+              ">=3.14,<3.15"
             ]
           },
           "end_to_end_evidence_ids": [
@@ -14600,7 +14997,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -14797,6 +15194,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "40d83181188476e1bd258e760a21e8f9f166621392bdda367769406964b43963",
+  "registry_digest": "b2309f9ef87b0dba538ac56a367327e47b2473f1bc0a83f5e8c6778e3352812e",
   "schema_version": 1
 }

@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 54,
-  "module_count": 54,
+  "compatibility_complete": 55,
+  "module_count": 55,
   "modules": [
     {
       "compatibility_rows": [
@@ -19,7 +19,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -133,7 +133,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==1.23"
+            ">=1.23,<1.24"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -250,7 +250,7 @@
       "tools": [
         {
           "allowed_versions": [
-            "==1.23"
+            ">=1.23,<1.24"
           ],
           "ecosystem": "system",
           "identity": "samtools",
@@ -267,7 +267,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==1.23"
+                ">=1.23,<1.24"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -306,7 +306,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -420,7 +420,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -534,7 +534,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -648,7 +648,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -762,7 +762,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -876,7 +876,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -990,7 +990,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1104,7 +1104,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1218,7 +1218,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1319,6 +1319,221 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "dna-align-bwa-mem-single-e2e-v1"
+          ],
+          "id": "bwa-mem-0.7-single-fastq-sam",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "dna-align-bwa-mem-single-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=0.7,<0.8"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "homebrew-bwa-runtime",
+          "name": "bwa-homebrew-bottle",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Record the validated macOS-arm64 BWA installation identity without managing the user's software environment.",
+          "required": true,
+          "tested_versions": [
+            "0.7.19-bottle-arm64"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+-bottle-arm64)",
+          "version_probe": [
+            "biomed_workbench.quality.alignment:probe_bwa_homebrew_bottle"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://formulae.brew.sh/formula/bwa"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "dna-align-bwa-mem-single",
+      "input_formats": [
+        {
+          "artifact_type": "sequencing_reads",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "fastq",
+              "orientations": [
+                "single-end"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "sanger-phred33"
+              ]
+            }
+          ],
+          "name": "reads",
+          "processing_levels": [
+            "raw",
+            "adapter-trimmed",
+            "quality-trimmed"
+          ],
+          "required_metadata": [
+            "sample-id",
+            "sample-manifest-digest",
+            "read-layout",
+            "quality-encoding"
+          ]
+        },
+        {
+          "artifact_type": "bwa_reference_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "zip"
+              ],
+              "coordinate_systems": [
+                "one-based-leftmost"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "bwa-reference",
+              "orientations": [
+                "fasta-with-bwa-index-prefix"
+              ],
+              "representations": [
+                "container",
+                "binary"
+              ],
+              "required_indexes": [
+                "amb",
+                "ann",
+                "bwt",
+                "pac",
+                "sa"
+              ],
+              "versions": [
+                "0.7"
+              ]
+            }
+          ],
+          "name": "reference",
+          "processing_levels": [
+            "indexed-reference"
+          ],
+          "required_metadata": [
+            "reference-build",
+            "reference-sequence-digest",
+            "reference-manifest-digest",
+            "sequence-dictionary",
+            "bwa-index-version"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "sequence_alignments",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-leftmost"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "sam",
+              "orientations": [
+                "alignment-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.6"
+              ]
+            }
+          ],
+          "name": "alignments",
+          "processing_levels": [
+            "aligned"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "sample-id",
+            "read-group",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=0.7.17,<0.8"
+          ],
+          "ecosystem": "system",
+          "identity": "bwa",
+          "mismatch_policy": "block",
+          "name": "bwa",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "0.7.19-r1273"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=0.7.17,<0.8"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "The supported BWA-MEM line emits the validated SAM header, read-group, program, flag, coordinate, and CIGAR surfaces.",
+              "id": "bwa-mem-sam-header-contract",
+              "required_action": "Validate the produced SAM header, reference dictionary, sample read group, records, and path portability before evidence ingestion.",
+              "source": "https://github.com/lh3/bwa/blob/master/NEWS.md"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+-r[0-9]+)",
+          "version_probe": [
+            "biomed_workbench.quality.alignment:probe_bwa_version"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/lh3/bwa/releases/tag/v0.7.19"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "dose-response-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -1332,7 +1547,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1446,7 +1661,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1560,7 +1775,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1674,7 +1889,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1788,7 +2003,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -1902,7 +2117,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2016,7 +2231,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2179,7 +2394,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2293,7 +2508,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2407,7 +2622,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2521,7 +2736,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2635,7 +2850,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2749,7 +2964,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2863,7 +3078,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -2977,7 +3192,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==5.8.3"
+            ">=5.8,<5.9"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -3137,7 +3352,7 @@
       "tools": [
         {
           "allowed_versions": [
-            "==2.31.1"
+            ">=2.31,<2.32"
           ],
           "ecosystem": "system",
           "identity": "bedtools",
@@ -3154,7 +3369,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==2.31.1"
+                ">=2.31,<2.32"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -3193,7 +3408,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -3356,7 +3571,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -3470,7 +3685,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -3633,7 +3848,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -3796,7 +4011,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -3959,7 +4174,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -4122,7 +4337,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -4285,7 +4500,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -4448,7 +4663,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -4562,7 +4777,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -4676,7 +4891,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -4790,7 +5005,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -4904,7 +5119,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -5018,7 +5233,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -5132,7 +5347,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.13.12"
+            ">=3.13,<3.14"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -5158,7 +5373,7 @@
         },
         {
           "allowed_versions": [
-            "==2.13.4"
+            ">=2.13,<2.14"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -5183,7 +5398,7 @@
         },
         {
           "allowed_versions": [
-            "==6.9.0"
+            ">=6.9,<7"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -5208,7 +5423,7 @@
         },
         {
           "allowed_versions": [
-            "==25.0.0"
+            ">=25,<26"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -5233,7 +5448,7 @@
         },
         {
           "allowed_versions": [
-            "==1.42.1"
+            ">=1.42,<1.43"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -5258,7 +5473,7 @@
         },
         {
           "allowed_versions": [
-            "==4.26.0"
+            ">=4.26,<5"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -5283,7 +5498,7 @@
         },
         {
           "allowed_versions": [
-            "==3.1.6"
+            ">=3.1,<3.2"
           ],
           "conflicts": [],
           "ecosystem": "python",
@@ -5385,7 +5600,7 @@
       "tools": [
         {
           "allowed_versions": [
-            "==1.35"
+            ">=1.35,<1.36"
           ],
           "ecosystem": "python",
           "identity": "multiqc",
@@ -5403,7 +5618,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==1.35"
+                ">=1.35,<1.36"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -5442,7 +5657,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==2.5.5"
+            ">=2.5,<2.6"
           ],
           "conflicts": [],
           "ecosystem": "system",
@@ -5468,7 +5683,7 @@
         },
         {
           "allowed_versions": [
-            "==2.5.5-h9e91881_0"
+            ">=2.5,<2.6"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -5493,7 +5708,7 @@
         },
         {
           "allowed_versions": [
-            "==5.32.1"
+            ">=5.32,<6"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -5636,7 +5851,7 @@
       "tools": [
         {
           "allowed_versions": [
-            "==0.16.0"
+            ">=0.16,<0.17"
           ],
           "ecosystem": "system",
           "identity": "fastq_screen",
@@ -5653,7 +5868,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==0.16.0"
+                ">=0.16,<0.17"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -5692,7 +5907,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==1.3.6-ha1d0559_0"
+            ">=1.3,<1.4"
           ],
           "conflicts": [
             {
@@ -5810,7 +6025,7 @@
       "tools": [
         {
           "allowed_versions": [
-            "==1.3.6"
+            ">=1.3,<1.4"
           ],
           "ecosystem": "system",
           "identity": "fastp",
@@ -5827,7 +6042,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==1.3.6"
+                ">=1.3,<1.4"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -5866,7 +6081,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==22"
+            ">=17"
           ],
           "conflicts": [],
           "ecosystem": "java",
@@ -5976,7 +6191,7 @@
       "tools": [
         {
           "allowed_versions": [
-            "==0.12.1"
+            ">=0.12,<0.13"
           ],
           "ecosystem": "system",
           "identity": "fastqc",
@@ -5994,7 +6209,7 @@
           "version_differences": [
             {
               "affected_versions": [
-                "==0.12.1"
+                ">=0.12,<0.13"
               ],
               "category": "output-format",
               "compatibility_effect": "requires-parser",
@@ -6033,7 +6248,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -6147,7 +6362,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -6261,7 +6476,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -6375,7 +6590,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -6489,7 +6704,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -6603,7 +6818,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -6717,7 +6932,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -6831,7 +7046,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -6945,7 +7160,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -7108,7 +7323,7 @@
       "dependencies": [
         {
           "allowed_versions": [
-            "==3.14.3"
+            ">=3.14,<3.15"
           ],
           "conflicts": [],
           "ecosystem": "runtime",
@@ -7206,6 +7421,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "40d83181188476e1bd258e760a21e8f9f166621392bdda367769406964b43963",
+  "registry_digest": "b2309f9ef87b0dba538ac56a367327e47b2473f1bc0a83f5e8c6778e3352812e",
   "schema_version": 1
 }

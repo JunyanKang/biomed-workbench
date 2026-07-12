@@ -25,6 +25,7 @@ _EXECUTABLE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+._-]*$")
 _FILENAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+._-]*$")
 _PLACEHOLDER_RE = re.compile(r"^\{(input|output|parameter):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\}$")
+_PARAMETER_TEMPLATE_RE = re.compile(r"\{parameter:([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\}")
 _OUTPUT_DIRECTORY_PLACEHOLDER = "{output-directory}"
 
 
@@ -125,6 +126,7 @@ class ScientificCommand:
     max_output_bytes: int
     max_payload_bytes: int
     working_directory_input: str | None = None
+    path_mode: str = "absolute"
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "tool_name", validate_identifier(self.tool_name, "command tool name"))
@@ -151,6 +153,8 @@ class ScientificCommand:
             matches = [item for item in inputs if item.name == self.working_directory_input]
             if len(matches) != 1 or matches[0].materialization != "zip-directory":
                 raise ValueError("command working directory must name one zip-directory input")
+        if self.path_mode not in {"absolute", "workdir-relative"}:
+            raise ValueError("command path mode is unsupported")
         references = {"input": set(), "output": set(), "parameter": set()}
         output_directory_referenced = False
         arguments = []
@@ -163,7 +167,11 @@ class ScientificCommand:
             elif match:
                 references[match.group(1)].add(match.group(2))
             elif "{" in argument or "}" in argument:
-                raise ValueError("command placeholders must occupy a complete argument")
+                parameter_references = _PARAMETER_TEMPLATE_RE.findall(argument)
+                remainder = _PARAMETER_TEMPLATE_RE.sub("", argument)
+                if not parameter_references or "{" in remainder or "}" in remainder:
+                    raise ValueError("only scalar parameters may appear inside fixed command argument templates")
+                references["parameter"].update(parameter_references)
             arguments.append(argument)
         expected = {
             "input": {item.name for item in inputs},
@@ -214,6 +222,8 @@ class ScientificCommand:
             payload["outputs"].append(row)
         if self.working_directory_input is not None:
             payload["working_directory_input"] = self.working_directory_input
+        if self.path_mode != "absolute":
+            payload["path_mode"] = self.path_mode
         return payload
 
     @classmethod
@@ -229,7 +239,8 @@ class ScientificCommand:
             "max_output_bytes",
             "max_payload_bytes",
         }
-        if not isinstance(payload, Mapping) or set(payload) not in (expected, expected | {"working_directory_input"}):
+        optional = {"working_directory_input", "path_mode"}
+        if not isinstance(payload, Mapping) or not expected <= set(payload) or set(payload) - expected - optional:
             raise ValueError("scientific command fields are incomplete or unsupported")
         values = dict(payload)
         if (
@@ -245,6 +256,7 @@ class ScientificCommand:
         values["arguments"] = tuple(values["arguments"])
         values["parameter_names"] = tuple(values["parameter_names"])
         values.setdefault("working_directory_input", None)
+        values.setdefault("path_mode", "absolute")
         return cls(**values)
 
 
@@ -274,7 +286,13 @@ def _parameter(value: Any) -> str:
         return str(value)
     if isinstance(value, float) and math.isfinite(value):
         return repr(value)
-    if isinstance(value, str) and value and not value.startswith("-") and not any(marker in value for marker in ("/", "\\", "file://", "\x00")):
+    if (
+        isinstance(value, str)
+        and value
+        and not value.startswith("-")
+        and not any(marker in value for marker in ("/", "\\", "file://", "\x00"))
+        and not any(character in value for character in ("\r", "\n", "\t"))
+    ):
         return value
     raise ScientificCommandError("INVALID_PARAMETER")
 
@@ -299,6 +317,7 @@ def _kill(process: subprocess.Popen[bytes]) -> None:
 def _bounded_process(
     argv: tuple[str, ...],
     *,
+    executable: Path | None = None,
     cwd: Path,
     environment: dict[str, str],
     timeout: int,
@@ -309,6 +328,7 @@ def _bounded_process(
     try:
         process = subprocess.Popen(
             argv,
+            executable=str(executable) if executable is not None else None,
             cwd=cwd,
             env=environment,
             stdin=subprocess.DEVNULL,
@@ -501,17 +521,24 @@ def execute_scientific_command(
                     raise ScientificCommandError("INVALID_INPUT_ARCHIVE")
                 materialized_inputs[binding.name] = archive_path
         runtime_outputs = {binding.name: output_root / binding.filename for binding in command.outputs}
-        argv = [str(executable_path)]
+        execution_cwd = runtime_input_roots[command.working_directory_input] if command.working_directory_input else workdir
+
+        def runtime_argument(path: Path) -> str:
+            if command.path_mode == "workdir-relative":
+                return os.path.relpath(path, execution_cwd)
+            return str(path)
+
+        argv = [command.executable if command.path_mode == "workdir-relative" else str(executable_path)]
         for argument in command.arguments:
             match = _PLACEHOLDER_RE.fullmatch(argument)
             if argument == _OUTPUT_DIRECTORY_PLACEHOLDER:
-                argv.append(str(output_root))
+                argv.append(runtime_argument(output_root))
             elif not match:
-                argv.append(argument)
+                argv.append(_PARAMETER_TEMPLATE_RE.sub(lambda item: normalized_parameters[item.group(1)], argument))
             elif match.group(1) == "input":
-                argv.append(str(runtime_inputs[match.group(2)]))
+                argv.append(runtime_argument(runtime_inputs[match.group(2)]))
             elif match.group(1) == "output":
-                argv.append(str(runtime_outputs[match.group(2)]))
+                argv.append(runtime_argument(runtime_outputs[match.group(2)]))
             else:
                 argv.append(normalized_parameters[match.group(2)])
         environment = {
@@ -525,7 +552,8 @@ def execute_scientific_command(
             environment["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
         stdout, stderr = _bounded_process(
             tuple(argv),
-            cwd=runtime_input_roots[command.working_directory_input] if command.working_directory_input else workdir,
+            executable=executable_path if command.path_mode == "workdir-relative" else None,
+            cwd=execution_cwd,
             environment=environment,
             timeout=command.timeout_seconds,
             output_limit=command.max_output_bytes,
@@ -570,6 +598,7 @@ def execute_scientific_command(
     provenance = {
         "command_contract_digest": digest_value(command.to_dict()),
         "executable_sha256": executable_sha256,
+        "executable_argv0": command.executable,
         "compatibility_row_id": compatibility_row_id,
         "tools": versions,
         "dependencies": dependencies,

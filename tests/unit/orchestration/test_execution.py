@@ -90,8 +90,20 @@ class NodeExecutionTests(unittest.TestCase):
         self.assertEqual(result.artifacts[0].producing_module_id, "data-profile")
         self.assertEqual(result.artifacts[0].producer_tool_versions, {})
         self.assertEqual(result.provenance["dependencies"]["python"], "3.14.3")
+        self.assertTrue(result.provenance["tested_version_baseline"]["dependencies"]["python"])
+        self.assertEqual(result.provenance["compatibility_policy"]["dependencies"]["python"], (">=3.14,<3.15",))
         self.assertRegex(result.provenance["parameters_digest"], r"^[0-9a-f]{64}$")
         self.assertRegex(result.provenance["output_digest"], r"^[0-9a-f]{64}$")
+
+    def test_compatible_runtime_patch_is_recorded_without_claiming_tested_baseline(self):
+        state = execution_state()
+        node = execution_node()
+
+        result = execute_node(state, execution_plan(node), node, self.registry, environment_provider=lambda _manifest: environment("3.14.9"))
+
+        self.assertEqual(result.status, "completed")
+        self.assertEqual(result.provenance["dependencies"]["python"], "3.14.9")
+        self.assertFalse(result.provenance["tested_version_baseline"]["dependencies"]["python"])
 
     def test_unknown_dependency_version_blocks_before_entrypoint(self):
         state = execution_state()

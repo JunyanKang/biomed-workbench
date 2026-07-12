@@ -391,6 +391,37 @@
     },
     {
       "access": "offline",
+      "description": "Guide and execute single-end short-read DNA alignment against a declared BWA reference bundle while preserving sample read-group identity and a portable SAM artifact.",
+      "entrypoint": "scientific-command",
+      "id": "dna-align-bwa-mem-single",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "sample-id": {
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+            "type": "string"
+          },
+          "threads": {
+            "maximum": 32,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threads",
+          "sample-id"
+        ],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Align single-end DNA reads with BWA-MEM",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
       "description": "Check monotonicity and estimate an empirical half-range concentration on a log scale.",
       "entrypoint": "biomed_workbench.capabilities.experiment:dose_response_summary",
       "id": "dose-response",
@@ -2105,7 +2136,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 54,
+  "entry_count": 55,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

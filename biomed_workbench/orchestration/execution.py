@@ -302,12 +302,21 @@ def execute_node(
             }
             output = next(iter(port_content.values())) if len(port_content) == 1 else port_content
             validate_schema_value(manifest.output_schema, output, "output")
+            compatibility_row = next(item for item in manifest.compatibility_matrix if item.id == decision.compatibility_row_id)
             provenance = {
                 "module_id": manifest.id,
                 "module_version": manifest.version,
                 "compatibility_row_id": decision.compatibility_row_id,
                 "tools": thaw(command_result.provenance["tools"]),
                 "dependencies": thaw(command_result.provenance["dependencies"]),
+                "tested_version_baseline": {
+                    "tools": {item.name: environment.tools.get(item.name) in item.tested_versions for item in manifest.tool_requirements if item.name in environment.tools},
+                    "dependencies": {item.name: environment.dependencies.get(item.name) in item.tested_versions for item in manifest.dependencies if item.name in environment.dependencies},
+                },
+                "compatibility_policy": {
+                    "tools": {key: list(value) for key, value in sorted(compatibility_row.tool_versions.items())},
+                    "dependencies": {key: list(value) for key, value in sorted(compatibility_row.dependency_versions.items())},
+                },
                 "platform": environment.platform,
                 "input_formats": {artifact.port: f"{artifact.format}@{artifact.format_version}" for artifact in snapshots},
                 "parameters_digest": digest_value(thaw(command_result.provenance["parameters"])),

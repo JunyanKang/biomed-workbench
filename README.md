@@ -93,9 +93,9 @@ Inspect the input contract with `tools/search_tools.py --id CAPABILITY_ID` befor
 
 ## Scientific Tool Dependencies
 
-External scientific engines remain user-managed dependencies; the plugin validates and invokes them but does not provision Java, Python environments, containers, GPUs, or schedulers. The first production sequencing module has this exact tested combination:
+External scientific engines remain user-managed dependencies; the plugin guides, validates, and invokes them but does not provision Java, Python environments, containers, GPUs, or schedulers. Versions in the table are reproducibility baselines observed in real verification runs, not installation pins. Each module separately declares a conservative compatibility policy and records the user's actual detected versions in execution provenance.
 
-| Module | Tool | Dependency | Input | Outputs |
+| Module | Tested baseline | Tested dependency baseline | Input | Outputs |
 | --- | --- | --- | --- | --- |
 | `read-quality-fastqc` | FastQC `0.12.1` | Java `22` | `fastq@sanger-phred33` | FastQC ZIP `0.12.1` and HTML |
 | `quality-report-multiqc` | MultiQC `1.35` | Python `3.13.12` plus exact report-runtime lock | FastQC collection `1.0.0` | MultiQC data ZIP `1.35` and HTML |
@@ -103,8 +103,9 @@ External scientific engines remain user-managed dependencies; the plugin validat
 | `read-contamination-screen` | FastQ Screen `0.16.0` | Bowtie2 `2.5.5` build `h9e91881_0`, Perl `5.32.1` | FASTQ plus versioned reference bundle | mapping summary and HTML |
 | `alignment-quality-samtools` | samtools `1.23` | htslib `1.23` | coordinate-sorted `bam@1.6` plus BAI | QC-stratified flagstat JSON |
 | `interval-overlap-bedtools` | bedtools `2.31.1` | XZ `5.8.3` runtime | two build-matched `bed@1.0` sets | pairwise query/reference overlaps |
+| `dna-align-bwa-mem-single` | BWA `0.7.19-r1273` | Homebrew arm64 bottle `0.7.19` | single-end FASTQ plus BWA reference bundle | portable unsorted SAM |
 
-Unknown, missing, or mismatched versions block before invocation. The `reports/*-live-verification.json` records bind FastQC, fastp, MultiQC, FastQ Screen, samtools, and bedtools bounded real-fixture executions to normalized scientific summaries, report checks, exact runtime locks, reference or artifact manifest digests, and path-free provenance used by release validation.
+Tool-use guidance and routing remain available regardless of the installed version. For scientific execution, versions inside the declared compatibility policy may run and are recorded verbatim; provenance also states whether each version is an exact tested baseline. Missing tools, versions outside the policy, known breaking changes, or invalid output structures prevent the result from entering the evidence ledger until the environment is corrected or a validated alternative is selected. The `reports/*-live-verification.json` files preserve the concrete versions used for FastQC, fastp, MultiQC, FastQ Screen, samtools, and bedtools regression evidence.
 
 ## Internal Structure
 
@@ -118,14 +119,14 @@ Unknown, missing, or mismatched versions block before invocation. The `reports/*
 - `biomed_workbench/modules/builtin/`: one versioned scientific contract per independently discoverable module.
 - `biomed_workbench/kernel/`: immutable project context, content-addressed artifacts, hypotheses, evidence, decisions, DAG state, and replay.
 - `biomed_workbench/orchestration/`: manifest-derived graph planning, compatibility-gated execution, quality checks, interpretation, and revision control.
-- `biomed_workbench/modules/scientific_command.py`: shell-free, bounded, version-gated execution for payload-backed scientific tools.
+- `biomed_workbench/modules/scientific_command.py`: shell-free, bounded, compatibility-guided execution for payload-backed scientific tools.
 - `biomed_workbench/formats/`: shared exact-version omics format profiles and pre-execution metadata validation.
 - `biomed_workbench/services/`: bounded public scientific database clients and credential policy.
 - `tests/`: unit, contract, end-to-end, and release checks.
 
 The central registry contains no domain definitions. See `docs/architecture.md` for the extension contract, compatibility rules, and release flow.
 
-Changing a supported tool, dependency, or format version requires a new validated compatibility row with named regression and end-to-end evidence. Module and release validation fail when either binding is missing or its captured execution did not pass.
+Changing a tested baseline or widening a compatibility policy requires named regression and end-to-end evidence plus review of known parameter, field, default, and format changes. A compatible runtime version does not masquerade as a tested baseline: both the actual version and baseline-match status are retained.
 
 Foundational FASTQ, FASTA, SAM/BAM/CRAM, VCF/BCF, BED, GTF/GFF3, count-matrix, H5AD, Loom, Matrix Market, fragments, bigWig, and tabular profiles are maintained once in `biomed_workbench/formats/catalog.json`. Modules that declare one of these exact format-version tokens automatically inherit its compression, index, sort, coordinate, reference, annotation, identifier, sample-manifest, orientation, processing-level, metadata, and payload-role gates.
 

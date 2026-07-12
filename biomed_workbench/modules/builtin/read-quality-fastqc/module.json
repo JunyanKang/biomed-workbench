@@ -99,7 +99,7 @@
       "identity": "fastqc",
       "required": true,
       "tested_versions": ["0.12.1"],
-      "allowed_versions": ["==0.12.1"],
+      "allowed_versions": [">=0.12,<0.13"],
       "version_source": "https://www.bioinformatics.babraham.ac.uk/projects/fastqc/",
       "verified_at": "2026-07-12",
       "version_probe": ["fastqc", "--version"],
@@ -110,7 +110,7 @@
       "version_differences": [
         {
           "id": "fastqc-0121-report-layout",
-          "affected_versions": ["==0.12.1"],
+          "affected_versions": [">=0.12,<0.13"],
           "category": "output-format",
           "description": "The validated release emits the tested FastQC archive and HTML report layout.",
           "compatibility_effect": "requires-parser",
@@ -128,7 +128,7 @@
       "identity": "java-runtime",
       "required": true,
       "tested_versions": ["22"],
-      "allowed_versions": ["==22"],
+      "allowed_versions": [">=17"],
       "version_source": "https://www.oracle.com/java/technologies/javase/22-relnotes.html",
       "verified_at": "2026-07-12",
       "version_probe": ["java", "-version"],
@@ -144,8 +144,8 @@
     {
       "id": "fastqc-0.12.1-java-22-fastq-sanger",
       "module_version": "1.0.0",
-      "tool_versions": {"fastqc": ["0.12.1"]},
-      "dependency_versions": {"java": ["22"]},
+      "tool_versions": {"fastqc": [">=0.12,<0.13"]},
+      "dependency_versions": {"java": [">=17"]},
       "input_formats": {"reads": ["fastq@sanger-phred33"]},
       "output_formats": {"read_quality_report": ["fastqc-zip@0.12.1"]},
       "platforms": ["macos-arm64", "linux-x86_64"],

@@ -36,7 +36,7 @@ def external_manifest_payload():
             "identity": "scanpy",
             "required": True,
             "tested_versions": ["1.11.5"],
-            "allowed_versions": ["==1.11.5"],
+            "allowed_versions": [">=1.11,<1.12"],
             "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/",
             "verified_at": "2026-07-12",
             "version_probe": ["python", "-c", "import scanpy; print(scanpy.__version__)"],
@@ -65,7 +65,7 @@ def external_manifest_payload():
             "identity": "anndata",
             "required": True,
             "tested_versions": ["0.11.4"],
-            "allowed_versions": ["==0.11.4"],
+            "allowed_versions": [">=0.11,<0.12"],
             "version_source": "https://anndata.readthedocs.io/en/stable/release-notes/",
             "verified_at": "2026-07-12",
             "version_probe": ["python", "-c", "import anndata; print(anndata.__version__)"],
@@ -90,8 +90,8 @@ def external_manifest_payload():
         {
             "id": "scanpy-1.11.5-h5ad-0.11",
             "module_version": "1.0.0",
-            "tool_versions": {"scanpy": ["1.11.5"]},
-            "dependency_versions": {"python": ["3.14.3"], "anndata": ["0.11.4"]},
+            "tool_versions": {"scanpy": [">=1.11,<1.12"]},
+            "dependency_versions": {"python": ["3.14.3"], "anndata": [">=0.11,<0.12"]},
             "input_formats": {"records": ["h5ad@0.11"]},
             "output_formats": {"profile": ["inline-json@1"]},
             "platforms": ["macos-arm64", "linux-x86_64"],
@@ -132,18 +132,20 @@ class ModuleCompatibilityTests(unittest.TestCase):
     def setUp(self):
         self.manifest = parse_manifest(external_manifest_payload())
 
-    def test_exact_validated_tool_dependency_and_format_row_allows_execution(self):
+    def test_tested_baseline_tool_dependency_and_format_row_allows_execution(self):
         decision = evaluate_compatibility(self.manifest, environment(), (artifact(),))
 
         self.assertTrue(decision.allowed)
         self.assertEqual(decision.compatibility_row_id, "scanpy-1.11.5-h5ad-0.11")
         self.assertEqual(decision.findings, ())
 
-    def test_unknown_tool_version_blocks_instead_of_guessing_newer_is_compatible(self):
-        decision = evaluate_compatibility(self.manifest, environment(scanpy="1.12.0"), (artifact(),))
+    def test_compatible_patch_version_is_allowed_but_next_minor_blocks(self):
+        compatible_patch = evaluate_compatibility(self.manifest, environment(scanpy="1.11.6"), (artifact(),))
+        next_minor = evaluate_compatibility(self.manifest, environment(scanpy="1.12.0"), (artifact(),))
 
-        self.assertFalse(decision.allowed)
-        self.assertIn("UNVALIDATED_TOOL_VERSION", {finding.code for finding in decision.findings})
+        self.assertTrue(compatible_patch.allowed)
+        self.assertFalse(next_minor.allowed)
+        self.assertIn("UNVALIDATED_TOOL_VERSION", {finding.code for finding in next_minor.findings})
 
     def test_dependency_and_format_incompatibilities_are_distinct(self):
         cases = (
@@ -227,6 +229,8 @@ class ModuleCompatibilityTests(unittest.TestCase):
         self.assertEqual(result.provenance["dependencies"]["anndata"], "0.11.4")
         self.assertEqual(result.provenance["input_formats"]["records"], "h5ad@0.11")
         self.assertIn("parameters_digest", result.provenance)
+        self.assertTrue(result.provenance["tested_version_baseline"]["tools"]["scanpy"])
+        self.assertEqual(result.provenance["compatibility_policy"]["tools"]["scanpy"], [">=1.11,<1.12"])
 
     def test_detect_environment_uses_bounded_declared_probe_and_dependency_provider(self):
         commands = []

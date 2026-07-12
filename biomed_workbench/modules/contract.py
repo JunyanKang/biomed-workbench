@@ -254,7 +254,7 @@ def _version_rules(value: Any, location: str) -> tuple[str, ...]:
 
 
 def _release_tuple(value: str) -> tuple[int, ...] | None:
-    match = re.fullmatch(r"(\d+(?:\.\d+)*)(?:[-+][0-9A-Za-z.-]+)?", value)
+    match = re.fullmatch(r"(\d+(?:\.\d+)*)(?:[-+][0-9A-Za-z._-]+)?", value)
     return tuple(int(item) for item in match.group(1).split(".")) if match else None
 
 
@@ -306,6 +306,14 @@ def version_is_allowed(version: str, rules: tuple[str, ...]) -> bool:
     if not isinstance(version, str) or not version or not isinstance(rules, tuple) or not rules:
         return False
     return _version_allowed(version, rules)
+
+
+def _rule_within_policy(rule: str, policy: tuple[str, ...]) -> bool:
+    if rule in policy:
+        return True
+    exact = re.fullmatch(r"==(.+)", rule)
+    candidate = exact.group(1) if exact else rule
+    return not any(operator in candidate for operator in ("!=", ">=", "<=", ">", "<", "~=", ",")) and version_is_allowed(candidate, policy)
 
 
 def _closed_schema(value: Any, location: str) -> dict[str, object]:
@@ -447,7 +455,7 @@ def _tool(value: Any, location: str) -> ToolRequirement:
     parsed_differences = tuple(_version_difference(item, f"{location}.version_differences[{index}]") for index, item in enumerate(differences))
     if len({item.id for item in parsed_differences}) != len(parsed_differences):
         raise ValueError(f"{location}.version_differences contains duplicate ids")
-    if any(set(item.affected_versions) - set(allowed) for item in parsed_differences):
+    if any(any(not _rule_within_policy(rule, allowed) for rule in item.affected_versions) for item in parsed_differences):
         raise ValueError(f"{location}.version_differences references versions outside the allowed rules")
     return ToolRequirement(
         name=_text(payload["name"], f"{location}.name"),
@@ -572,6 +580,11 @@ def _version_map(value: Any, location: str) -> dict[str, tuple[str, ...]]:
     return {str(key): _strings(item, f"{location}.{key}") for key, item in sorted(payload.items())}
 
 
+def _version_rule_map(value: Any, location: str) -> dict[str, tuple[str, ...]]:
+    payload = _object(value, location)
+    return {str(key): _version_rules(item, f"{location}.{key}") for key, item in sorted(payload.items())}
+
+
 def _compatibility(value: Any, location: str) -> CompatibilityRow:
     payload = _object(value, location)
     _exact_fields(payload, _COMPATIBILITY_FIELDS, location)
@@ -582,8 +595,8 @@ def _compatibility(value: Any, location: str) -> CompatibilityRow:
     return CompatibilityRow(
         id=_text(payload["id"], f"{location}.id"),
         module_version=_text(payload["module_version"], f"{location}.module_version"),
-        tool_versions=_version_map(payload["tool_versions"], f"{location}.tool_versions"),
-        dependency_versions=_version_map(payload["dependency_versions"], f"{location}.dependency_versions"),
+        tool_versions=_version_rule_map(payload["tool_versions"], f"{location}.tool_versions"),
+        dependency_versions=_version_rule_map(payload["dependency_versions"], f"{location}.dependency_versions"),
         input_formats=_version_map(payload["input_formats"], f"{location}.input_formats"),
         output_formats=_version_map(payload["output_formats"], f"{location}.output_formats"),
         platforms=_strings(payload["platforms"], f"{location}.platforms"),
@@ -621,19 +634,26 @@ def _validate_compatibility(manifest: ModuleManifest) -> None:
         for name, versions in row.tool_versions.items():
             if name not in tools:
                 raise ValueError(f"compatibility row {row.id} references unknown tool: {name}")
-            if not set(versions) <= set(tools[name].tested_versions):
-                raise ValueError(f"compatibility row {row.id} references untested tool versions")
+            unsupported = [rule for rule in versions if not _rule_within_policy(rule, tools[name].allowed_versions)]
+            if unsupported:
+                raise ValueError(f"compatibility row {row.id} uses tool rules outside the declared compatibility policy")
         for name, versions in row.dependency_versions.items():
             if name not in dependencies:
                 raise ValueError(f"compatibility row {row.id} references unknown dependency: {name}")
-            if not set(versions) <= set(dependencies[name].tested_versions):
-                raise ValueError(f"compatibility row {row.id} references untested dependency versions")
+            unsupported = [rule for rule in versions if not _rule_within_policy(rule, dependencies[name].allowed_versions)]
+            if unsupported:
+                raise ValueError(f"compatibility row {row.id} uses dependency rules outside the declared compatibility policy")
         missing_tools = sorted(name for name, item in tools.items() if item.required and name not in row.tool_versions)
         missing_dependencies = sorted(name for name, item in dependencies.items() if item.required and name not in row.dependency_versions)
         if missing_tools or missing_dependencies:
             raise ValueError(f"compatibility row {row.id} omits required tool or dependency versions")
         _validate_format_map(row.input_formats, inputs, row.id, "input")
         _validate_format_map(row.output_formats, outputs, row.id, "output")
+    for name, requirement in (*tools.items(), *dependencies.items()):
+        rows = [row.tool_versions[name] if name in row.tool_versions else row.dependency_versions[name] for row in manifest.compatibility_matrix if name in row.tool_versions or name in row.dependency_versions]
+        uncovered = [version for version in requirement.tested_versions if not any(version_is_allowed(version, rules) for rules in rows)]
+        if uncovered:
+            raise ValueError(f"tested versions are not covered by any compatibility row for {name}: {', '.join(uncovered)}")
 
 
 def _validate_format_map(
