@@ -123,6 +123,50 @@ def valid_manifest_payload():
     }
 
 
+def command_manifest_payload():
+    payload = valid_manifest_payload()
+    payload["entrypoint"] = "scientific-command"
+    payload["execution"] = {
+        "kind": "command",
+        "timeout_seconds": 30,
+        "max_output_bytes": 1000000,
+        "command": {
+            "tool_name": "fixture-tool",
+            "executable": "fixture-tool",
+            "arguments": ["--input", "{input:records}", "--output", "{output:profile}", "--label", "{parameter:label}"],
+            "inputs": [{"name": "records", "port": "records", "role": "records", "filename": "records.json"}],
+            "outputs": [
+                {"name": "profile", "port": "profile", "role": "profile", "filename": "profile.json", "media_type": "application/json"}
+            ],
+            "parameter_names": ["label"],
+            "timeout_seconds": 30,
+            "max_output_bytes": 1000000,
+            "max_payload_bytes": 1000000,
+        },
+    }
+    payload["tool_requirements"] = [
+        {
+            "name": "fixture-tool",
+            "ecosystem": "system",
+            "identity": "fixture-tool",
+            "required": True,
+            "tested_versions": ["2.4.1"],
+            "allowed_versions": ["==2.4.1"],
+            "version_source": "https://example.org/fixture-tool/releases/2.4.1",
+            "verified_at": "2026-07-12",
+            "version_probe": ["fixture-tool", "--version"],
+            "version_probe_kind": "command",
+            "version_probe_timeout_seconds": 10,
+            "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+            "mismatch_policy": "block",
+            "version_differences": [],
+            "platforms": ["any"],
+        }
+    ]
+    payload["compatibility_matrix"][0]["tool_versions"] = {"fixture-tool": ["2.4.1"]}
+    return payload
+
+
 class ModuleContractTests(unittest.TestCase):
     def test_manifest_requires_complete_scientific_and_version_contracts(self):
         manifest = parse_manifest(valid_manifest_payload())
@@ -144,6 +188,27 @@ class ModuleContractTests(unittest.TestCase):
         serialized = manifest_to_dict(manifest)
         self.assertNotIn("mutated", serialized["intents"])
         self.assertEqual(parse_manifest(serialized), manifest)
+
+    def test_command_manifest_binds_versioned_tool_ports_roles_argv_and_limits(self):
+        manifest = parse_manifest(command_manifest_payload())
+        command = manifest.execution.command
+
+        self.assertEqual(command.tool_name, "fixture-tool")
+        self.assertEqual(command.inputs[0].port, "records")
+        self.assertEqual(command.outputs[0].role, "profile")
+        self.assertEqual(parse_manifest(manifest_to_dict(manifest)), manifest)
+
+    def test_command_manifest_rejects_unversioned_executable_or_port_drift(self):
+        cases = (
+            lambda payload: payload["tool_requirements"][0].__setitem__("identity", "other-tool"),
+            lambda payload: payload["execution"]["command"]["inputs"][0].__setitem__("port", "missing-port"),
+            lambda payload: payload["execution"]["command"].__setitem__("timeout_seconds", 29),
+        )
+        for mutator in cases:
+            payload = command_manifest_payload()
+            mutator(payload)
+            with self.subTest(payload=payload), self.assertRaises(ValueError):
+                parse_manifest(payload)
 
     def test_manifest_rejects_unknown_top_level_and_nested_fields(self):
         for mutator in (

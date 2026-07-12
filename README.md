@@ -102,6 +102,7 @@ Inspect the input contract with `tools/search_tools.py --id CAPABILITY_ID` befor
 - `biomed_workbench/modules/builtin/`: one versioned scientific contract per independently discoverable module.
 - `biomed_workbench/kernel/`: immutable project context, content-addressed artifacts, hypotheses, evidence, decisions, DAG state, and replay.
 - `biomed_workbench/orchestration/`: manifest-derived graph planning, compatibility-gated execution, quality checks, interpretation, and revision control.
+- `biomed_workbench/modules/scientific_command.py`: shell-free, bounded, version-gated execution for payload-backed scientific tools.
 - `biomed_workbench/services/`: bounded public scientific database clients and credential policy.
 - `tests/`: unit, contract, end-to-end, and release checks.
 

@@ -25,6 +25,8 @@ Scientific artifacts preserve format and schema version, compression, orientatio
 
 Large scientific payloads are imported into a project-owned content-addressed store. Project state records only a payload role, SHA-256-derived relative object key, media type, byte size, and SHA-256; it never records the source path or source filename. Import rejects symlinks and non-regular files, while every resolution rechecks containment, file type, byte size, and digest. Inline artifacts keep their original canonical digest, and payload-backed artifacts bind every payload descriptor into artifact identity.
 
+Command modules use a closed shell-free execution contract. Each command declares one versioned tool identity, complete argument tokens, input and output `port + role + runtime filename` bindings, scalar parameters, timeout, combined stdout/stderr limit, and output-payload limit. Runtime materializes only verified project payloads in an isolated working directory, inherits no credential variables, accepts only declared outputs, rechecks input immutability, imports outputs back into content-addressed storage, and deletes the working directory. Provenance records the module, compatibility row, exact tool and dependency versions, command-contract digest, executable SHA-256, normalized parameter digest, input and output payload hashes, formats, and platform without recording executable, project, temporary, or source paths.
+
 Fatal findings stop the affected path. Major findings block interpretation until remediation or an explicit scope decision. Warnings remain attached to downstream artifacts and claims. Refuting, weakening, supporting, and inconclusive evidence remain separate; refuted hypotheses and superseded plans remain in history.
 
 ## Module Contract

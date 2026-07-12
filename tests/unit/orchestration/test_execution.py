@@ -1,17 +1,24 @@
 import unittest
 import time
 from dataclasses import replace
+import json
+import tempfile
+from pathlib import Path
 
 from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
 from biomed_workbench.kernel.state import ProjectState, apply_event
+from biomed_workbench.kernel.artifact_store import ProjectArtifactStore
+from biomed_workbench.kernel.artifacts import ScientificArtifact
 from biomed_workbench.modules.compatibility import EnvironmentSnapshot
 from biomed_workbench.modules.index import BUILTIN_ROOT
 from biomed_workbench.modules.registry import ModuleRegistry
-from biomed_workbench.modules.contract import ExecutionContract
+from biomed_workbench.modules.contract import ExecutionContract, parse_manifest
 from biomed_workbench.orchestration.execution import execute_node
 from tests.unit.kernel.test_context import project_context
 from tests.unit.kernel.test_hypotheses import hypothesis
 from tests.unit.orchestration.test_planner import inline_artifact
+from tests.unit.modules.test_scientific_command import executable
+from tests.unit.test_module_contract import closed_schema, command_manifest_payload
 
 
 def execution_state(*, quality="passed", rows=None):
@@ -145,6 +152,105 @@ class NodeExecutionTests(unittest.TestCase):
         self.assertEqual(result.status, "failed")
         self.assertEqual(result.safe_error_class, "TimeoutError")
         self.assertLess(time.monotonic() - started, 1.8)
+
+    def test_command_node_resolves_payload_roles_and_emits_payload_backed_artifact(self):
+        body = """
+import argparse, json
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True)
+parser.add_argument('--output', required=True)
+parser.add_argument('--label', required=True)
+args = parser.parse_args()
+json.dump({'label': args.label, 'text': open(args.input).read().upper()}, open(args.output, 'w'))
+"""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tool = executable(root / "fixture-tool", body)
+            source = root / "reads.txt"
+            source.write_text("acgt", encoding="utf-8")
+            store = ProjectArtifactStore(root / "artifacts")
+            payload = store.import_file(source, role="records", media_type="text/plain")
+            manifest_payload = command_manifest_payload()
+            manifest_payload["input_schema"] = closed_schema({"label": {"type": "string"}}, ["label"])
+            manifest_payload["output_schema"] = closed_schema(
+                {"payload_roles": {"type": "array", "items": {"type": "string"}}},
+                ["payload_roles"],
+            )
+            manifest_payload["input_artifacts"][0]["required_metadata"] = []
+            manifest = parse_manifest(manifest_payload)
+            registry = ModuleRegistry((manifest,), "command-fixture")
+            state = ProjectState.create(project_context())
+            state = apply_event(state, "hypothesis_added", {"hypothesis": hypothesis().to_dict()}, rationale="Register command execution hypothesis.")
+            artifact = ScientificArtifact.create(
+                id="artifact-command-input",
+                artifact_type="feature_matrix",
+                schema_version="1.0",
+                format_name="inline-json",
+                format_version="1",
+                compression="none",
+                orientation="records",
+                indexes=(),
+                producing_module_id=None,
+                producing_module_version=None,
+                source_artifact_ids=(),
+                scientific_scope={"species": "human"},
+                experimental_unit="independent-organoid-line",
+                denominator="four-independent-lines",
+                processing_level="raw",
+                quality_status="passed",
+                coordinate_system=None,
+                genome_build=None,
+                annotation_release=None,
+                identifier_namespace=None,
+                producer_tool_versions={},
+                content={"label": "treated"},
+                payloads=(payload,),
+            )
+            state = apply_event(state, "artifact_registered", {"artifact": artifact.to_dict()}, rationale="Register command input payload.")
+            node = PlanNode(
+                id="node-command-fixture",
+                module_id=manifest.id,
+                input_bindings={"records": artifact.id},
+                dependencies=(),
+                branch_id="branch-command",
+                target_hypothesis_ids=(hypothesis().id,),
+                expected_evidence_types=("fixture-evidence",),
+                expected_output_artifact_types=("quality_report",),
+                planned_output_artifact_ids={"profile": "artifact-command-profile"},
+                compatibility_row_candidates=(manifest.compatibility_matrix[0].id,),
+                status="ready",
+                attempt=0,
+            )
+            plan = ResearchDAG.create(
+                id="plan-command-execution",
+                objective="Execute one exact version-gated payload command.",
+                nodes=(node,),
+                required_output_artifact_types=("quality_report",),
+                plan_type="single",
+                revision=1,
+                parent_plan_id=None,
+                rationale=("The payload and command contract are exactly compatible.",),
+            )
+
+            result = execute_node(
+                state,
+                plan,
+                node,
+                registry,
+                environment_provider=lambda _manifest: EnvironmentSnapshot(
+                    tools={"fixture-tool": "2.4.1"},
+                    dependencies={"python": "3.14.3"},
+                    platform="macos-arm64",
+                ),
+                artifact_store=store,
+                command_executable_resolver=lambda _name: tool,
+            )
+
+            self.assertEqual(result.status, "completed")
+            self.assertEqual(result.artifacts[0].payloads[0].role, "profile")
+            output = json.loads(store.resolve(result.artifacts[0].payloads[0]).read_text(encoding="utf-8"))
+            self.assertEqual(output, {"label": "treated", "text": "ACGT"})
+            self.assertNotIn(str(root), json.dumps(result.to_dict(), sort_keys=True))
 
 
 if __name__ == "__main__":

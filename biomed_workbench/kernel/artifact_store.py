@@ -153,3 +153,34 @@ class ProjectArtifactStore:
         if digest.hexdigest() != payload.sha256:
             raise ValueError("artifact payload digest differs from its recorded identity")
         return resolved
+
+    def materialize(self, payload: ArtifactPayload, target: str | os.PathLike[str]) -> Path:
+        """Atomically copy one verified payload to a caller-owned runtime file."""
+        source = self.resolve(payload)
+        try:
+            source_fd = os.open(source, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        except OSError as exc:
+            raise ValueError("artifact payload is unavailable") from exc
+        source_stat = os.fstat(source_fd)
+        if not stat.S_ISREG(source_stat.st_mode) or source_stat.st_size != payload.byte_size:
+            os.close(source_fd)
+            raise ValueError("artifact payload type or size differs from its recorded identity")
+        target_path = Path(target)
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary_path: Path | None = None
+        try:
+            with tempfile.NamedTemporaryFile(prefix="materialize-", dir=target_path.parent, delete=False) as temporary:
+                temporary_path = Path(temporary.name)
+            owned_source_fd = source_fd
+            source_fd = -1
+            sha256, byte_size = self._copy_and_digest(owned_source_fd, temporary_path)
+            if sha256 != payload.sha256 or byte_size != payload.byte_size:
+                raise ValueError("artifact payload changed during materialization")
+            os.replace(temporary_path, target_path)
+            temporary_path = None
+            return target_path
+        finally:
+            if source_fd >= 0:
+                os.close(source_fd)
+            if temporary_path is not None:
+                temporary_path.unlink(missing_ok=True)

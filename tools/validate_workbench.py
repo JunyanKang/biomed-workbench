@@ -154,8 +154,10 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 295
+                or research_report.get("test_count", 0) < 303
                 or research_report.get("registry_digest") != registry.digest
+                or set(research_report.get("execution_contracts", ()))
+                != {"scientific_command", "command_input_binding", "command_output_binding", "bounded_process_result"}
                 or graph_report != {"node_count": len(graph.nodes), "edge_count": len(graph.edges), "digest": graph.digest}
             ):
                 errors.append("research engine report differs from the discovered registry or capability graph")
@@ -182,6 +184,9 @@ def main() -> int:
         leaked_ids = [module.id for module in modules if f'"{module.id}"' in orchestration_source or f"'{module.id}'" in orchestration_source]
         if leaked_ids:
             errors.append(f"orchestration source contains central built-in module IDs: {leaked_ids[:5]}")
+        command_source = (ROOT / "biomed_workbench" / "modules" / "scientific_command.py").read_text(encoding="utf-8")
+        if "shell=True" in command_source or "os.system(" in command_source:
+            errors.append("scientific command execution contains a shell invocation surface")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

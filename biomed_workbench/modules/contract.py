@@ -8,6 +8,7 @@ from datetime import date
 from typing import Any, Mapping
 
 from ..models import ACCESS_MODES, KINDS, MUTABILITY_MODES
+from .scientific_command import ScientificCommand
 
 
 MODULE_TYPES = frozenset({"data_source", "transform", "analysis", "validation", "interpretation", "design", "delivery"})
@@ -63,6 +64,7 @@ class ExecutionContract:
     kind: str
     timeout_seconds: int
     max_output_bytes: int
+    command: ScientificCommand | None = None
 
 
 @dataclass(frozen=True)
@@ -154,7 +156,7 @@ _MANIFEST_FIELDS = frozenset(ModuleManifest.__dataclass_fields__)
 _FORMAT_FIELDS = frozenset(FormatContract.__dataclass_fields__)
 _ARTIFACT_FIELDS = frozenset(ArtifactPort.__dataclass_fields__)
 _QUALITY_FIELDS = frozenset(QualityGate.__dataclass_fields__)
-_EXECUTION_FIELDS = frozenset(ExecutionContract.__dataclass_fields__)
+_EXECUTION_BASE_FIELDS = frozenset({"kind", "timeout_seconds", "max_output_bytes"})
 _TOOL_FIELDS = frozenset(ToolRequirement.__dataclass_fields__)
 _DEPENDENCY_FIELDS = frozenset(DependencyRequirement.__dataclass_fields__)
 _COMPATIBILITY_FIELDS = frozenset(CompatibilityRow.__dataclass_fields__)
@@ -370,14 +372,24 @@ def _quality_gate(value: Any, location: str) -> QualityGate:
 
 def _execution(value: Any) -> ExecutionContract:
     payload = _object(value, "execution")
-    _exact_fields(payload, _EXECUTION_FIELDS, "execution")
+    extra = sorted(set(payload) - (_EXECUTION_BASE_FIELDS | {"command"}))
+    missing = sorted(_EXECUTION_BASE_FIELDS - set(payload))
+    if extra:
+        raise ValueError(f"unsupported execution fields: {', '.join(extra)}")
+    if missing:
+        raise ValueError(f"missing execution fields: {', '.join(missing)}")
     kind = _text(payload["kind"], "execution.kind")
     if kind not in KINDS:
         raise ValueError("execution.kind is unsupported")
+    if kind == "command" and "command" not in payload:
+        raise ValueError("command execution requires a scientific command contract")
+    if kind != "command" and "command" in payload:
+        raise ValueError("scientific command contract is only valid for command execution")
     return ExecutionContract(
         kind=kind,
         timeout_seconds=_positive_integer(payload["timeout_seconds"], "execution.timeout_seconds"),
         max_output_bytes=_positive_integer(payload["max_output_bytes"], "execution.max_output_bytes"),
+        command=ScientificCommand.from_dict(_object(payload["command"], "execution.command")) if kind == "command" else None,
     )
 
 
@@ -541,6 +553,27 @@ def _validate_format_map(
                 raise ValueError(f"compatibility row {row_id} references unsupported {direction} format: {token}")
 
 
+def _validate_command_execution(manifest: ModuleManifest) -> None:
+    command = manifest.execution.command
+    if manifest.execution.kind != "command":
+        if command is not None:
+            raise ValueError("non-command module contains a scientific command contract")
+        return
+    if command is None or manifest.entrypoint != "scientific-command":
+        raise ValueError("command modules must use the scientific-command entrypoint")
+    if command.timeout_seconds != manifest.execution.timeout_seconds or command.max_output_bytes != manifest.execution.max_output_bytes:
+        raise ValueError("scientific command limits must equal the module execution limits")
+    input_ports = {port.name for port in manifest.input_artifacts}
+    output_ports = {port.name for port in manifest.output_artifacts}
+    if {binding.port for binding in command.inputs} != input_ports:
+        raise ValueError("scientific command input bindings differ from module input ports")
+    if {binding.port for binding in command.outputs} != output_ports:
+        raise ValueError("scientific command output bindings differ from module output ports")
+    matching_tools = [requirement for requirement in manifest.tool_requirements if requirement.name == command.tool_name]
+    if len(matching_tools) != 1 or not matching_tools[0].required or matching_tools[0].identity != command.executable:
+        raise ValueError("scientific command executable must match one required versioned tool")
+
+
 def parse_manifest(value: Any) -> ModuleManifest:
     payload = _object(value, "manifest")
     _exact_fields(payload, _MANIFEST_FIELDS, "manifest")
@@ -604,6 +637,7 @@ def parse_manifest(value: Any) -> ModuleManifest:
         provenance=_provenance(payload["provenance"]),
     )
     _validate_compatibility(manifest)
+    _validate_command_execution(manifest)
     return manifest
 
 
@@ -690,6 +724,13 @@ def _compatibility_dict(value: CompatibilityRow) -> dict[str, object]:
 
 def manifest_to_dict(value: ModuleManifest) -> dict[str, object]:
     """Return a detached, canonical JSON-compatible representation."""
+    execution = {
+        "kind": value.execution.kind,
+        "timeout_seconds": value.execution.timeout_seconds,
+        "max_output_bytes": value.execution.max_output_bytes,
+    }
+    if value.execution.command is not None:
+        execution["command"] = value.execution.command.to_dict()
     return {
         "schema_version": value.schema_version,
         "id": value.id,
@@ -701,11 +742,7 @@ def manifest_to_dict(value: ModuleManifest) -> dict[str, object]:
         "intents": list(value.intents),
         "questions": list(value.questions),
         "entrypoint": value.entrypoint,
-        "execution": {
-            "kind": value.execution.kind,
-            "timeout_seconds": value.execution.timeout_seconds,
-            "max_output_bytes": value.execution.max_output_bytes,
-        },
+        "execution": execution,
         "maturity": value.maturity,
         "input_artifacts": [_artifact_dict(item) for item in value.input_artifacts],
         "output_artifacts": [_artifact_dict(item) for item in value.output_artifacts],

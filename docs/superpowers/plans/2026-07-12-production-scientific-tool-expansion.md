@@ -18,10 +18,10 @@ Production bioinformatics tools must not be added as path-taking wrappers around
 
 ### Task 2: Scientific command execution contract
 
-- [ ] Add declarative argument templates, input/output payload bindings, working-directory policy, timeout, output-size, and mutation scope.
-- [ ] Resolve only verified project payloads into runtime paths after compatibility approval.
-- [ ] Capture exact executable and dependency versions, selected compatibility row, normalized parameters, input digests, output digests, and safe errors.
-- [ ] Reject shell interpolation, undeclared files, undeclared environment variables, unknown versions, unexpected outputs, and output-schema drift.
+- [x] Add declarative argument templates, input/output payload bindings, working-directory policy, timeout, output-size, and mutation scope.
+- [x] Resolve only verified project payloads into runtime paths after compatibility approval.
+- [x] Capture exact executable and dependency versions, selected compatibility row, normalized parameters, input digests, output digests, and safe errors.
+- [x] Reject shell interpolation, undeclared files, undeclared environment variables, unknown versions, unexpected outputs, and output-schema drift.
 
 ### Task 3: Structured version-change evidence
 

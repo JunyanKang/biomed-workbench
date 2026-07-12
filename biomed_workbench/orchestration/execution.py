@@ -9,13 +9,15 @@ import queue
 import threading
 from typing import Any, Callable, Mapping
 
+from ..kernel.artifact_store import ArtifactPayload, ProjectArtifactStore
 from ..kernel.artifacts import ScientificArtifact
-from ..kernel.identity import freeze_mapping, thaw
+from ..kernel.identity import digest_value, freeze_mapping, thaw
 from ..kernel.plans import PlanNode, ResearchDAG
 from ..kernel.state import ProjectState
 from ..modules.compatibility import ArtifactSnapshot, CompatibilityError, EnvironmentSnapshot, evaluate_compatibility, invoke_compatible
 from ..modules.contract import ArtifactPort, FormatContract, ModuleManifest
 from ..modules.registry import ModuleRegistry, ModuleRegistryError
+from ..modules.scientific_command import ScientificCommandError, execute_scientific_command
 from ..runner import InputValidationError, validate_schema_value
 from .quality import QualityFinding, evaluate_project_quality
 
@@ -175,6 +177,7 @@ def _output_artifacts(
     output: dict[str, Any],
     provenance: Mapping[str, Any],
     quality_findings: tuple[QualityFinding, ...],
+    payloads_by_port: Mapping[str, tuple[ArtifactPayload, ...]] | None = None,
 ) -> tuple[ScientificArtifact, ...]:
     row = next(item for item in manifest.compatibility_matrix if item.id == provenance["compatibility_row_id"])
     source_ids = tuple(node.input_bindings[port.name] for port in manifest.input_artifacts)
@@ -217,6 +220,7 @@ def _output_artifacts(
                 identifier_namespace=None,
                 producer_tool_versions=thaw(provenance["tools"]),
                 content=content,
+                payloads=tuple((payloads_by_port or {}).get(port.name, ())),
             )
         )
     return tuple(values)
@@ -230,6 +234,8 @@ def execute_node(
     *,
     environment_provider: EnvironmentProvider,
     entrypoint_resolver: EntrypointResolver | None = None,
+    artifact_store: ProjectArtifactStore | None = None,
+    command_executable_resolver: Callable[[str], str | os.PathLike[str] | None] | None = None,
     allow_mutation: bool = False,
 ) -> NodeExecution:
     if node.id not in {item.id for item in dag.nodes}:
@@ -253,17 +259,79 @@ def execute_node(
     decision = evaluate_compatibility(manifest, environment, snapshots)
     if not decision.allowed:
         return _blocked(node, manifest, input_ids, "CompatibilityError", quality=quality, compatibility_codes=tuple(item.code for item in decision.findings))
-    resolver = entrypoint_resolver or registry.resolve_entrypoint
     try:
-        entrypoint = resolver(manifest.id)
-        invocation = invoke_compatible(
-            manifest,
-            inputs=inputs,
-            environment=environment,
-            artifacts=snapshots,
-            entrypoint=lambda **kwargs: _bounded_invoke(entrypoint, kwargs, manifest.execution.timeout_seconds),
-        )
-        output_artifacts = _output_artifacts(state, node, manifest, invocation.output, invocation.provenance, quality)
+        if manifest.execution.kind == "command":
+            if artifact_store is None:
+                return _blocked(node, manifest, input_ids, "ArtifactStoreRequiredError", quality=quality)
+            command = manifest.execution.command
+            if command is None:
+                raise ValueError("command module is missing its scientific command contract")
+            artifacts_by_port = {
+                port.name: artifacts[node.input_bindings[port.name]] for port in manifest.input_artifacts
+            }
+            payload_bindings = {}
+            for binding in command.inputs:
+                matches = [payload for payload in artifacts_by_port[binding.port].payloads if payload.role == binding.role]
+                if len(matches) != 1:
+                    raise ValueError(f"command input role is missing or ambiguous: {binding.name}")
+                payload_bindings[binding.name] = matches[0]
+            command_result = execute_scientific_command(
+                command,
+                store=artifact_store,
+                input_payloads=payload_bindings,
+                parameters={name: inputs[name] for name in command.parameter_names},
+                tool_versions=environment.tools,
+                dependency_versions=environment.dependencies,
+                compatibility_row_id=decision.compatibility_row_id,
+                executable_resolver=command_executable_resolver,
+            )
+            payloads_by_port = {}
+            for binding, payload in zip(command.outputs, command_result.output_payloads):
+                payloads_by_port.setdefault(binding.port, []).append(payload)
+            payloads_by_port = {port: tuple(values) for port, values in payloads_by_port.items()}
+            port_content = {
+                port.name: {"payload_roles": [payload.role for payload in payloads_by_port[port.name]]}
+                for port in manifest.output_artifacts
+            }
+            output = next(iter(port_content.values())) if len(port_content) == 1 else port_content
+            validate_schema_value(manifest.output_schema, output, "output")
+            provenance = {
+                "module_id": manifest.id,
+                "module_version": manifest.version,
+                "compatibility_row_id": decision.compatibility_row_id,
+                "tools": thaw(command_result.provenance["tools"]),
+                "dependencies": thaw(command_result.provenance["dependencies"]),
+                "platform": environment.platform,
+                "input_formats": {artifact.port: f"{artifact.format}@{artifact.format_version}" for artifact in snapshots},
+                "parameters_digest": digest_value(thaw(command_result.provenance["parameters"])),
+                "output_digest": digest_value(output),
+                "command_contract_digest": command_result.provenance["command_contract_digest"],
+                "executable_sha256": command_result.provenance["executable_sha256"],
+                "input_payloads": thaw(command_result.provenance["inputs"]),
+                "output_payloads": thaw(command_result.provenance["outputs"]),
+            }
+            output_artifacts = _output_artifacts(
+                state,
+                node,
+                manifest,
+                output,
+                provenance,
+                quality,
+                payloads_by_port,
+            )
+            invocation_provenance = provenance
+        else:
+            resolver = entrypoint_resolver or registry.resolve_entrypoint
+            entrypoint = resolver(manifest.id)
+            invocation = invoke_compatible(
+                manifest,
+                inputs=inputs,
+                environment=environment,
+                artifacts=snapshots,
+                entrypoint=lambda **kwargs: _bounded_invoke(entrypoint, kwargs, manifest.execution.timeout_seconds),
+            )
+            output_artifacts = _output_artifacts(state, node, manifest, invocation.output, invocation.provenance, quality)
+            invocation_provenance = invocation.provenance
     except CompatibilityError as exc:
         return _blocked(node, manifest, input_ids, "CompatibilityError", quality=quality, compatibility_codes=tuple(item.code for item in exc.decision.findings))
     except (ModuleRegistryError, InputValidationError, ValueError, TypeError, RuntimeError, TimeoutError) as exc:
@@ -279,7 +347,7 @@ def execute_node(
             quality,
             (),
             {},
-            type(exc).__name__,
+            f"ScientificCommandError:{exc.code}" if isinstance(exc, ScientificCommandError) else type(exc).__name__,
         )
     return NodeExecution(
         node_id=node.id,
@@ -292,6 +360,6 @@ def execute_node(
         artifacts=output_artifacts,
         quality_findings=quality,
         compatibility_finding_codes=(),
-        provenance=invocation.provenance,
+        provenance=invocation_provenance,
         safe_error_class=None,
     )

@@ -65,6 +65,20 @@ class ProjectArtifactStoreTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 store.import_file(root, role="reads", media_type="text/plain")
 
+    def test_materialize_atomically_revalidates_payload_identity(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "reads.fastq"
+            source.write_bytes(b"@read-1\nACGT\n+\n!!!!\n")
+            store = ProjectArtifactStore(root / "project-artifacts")
+            payload = store.import_file(source, role="reads", media_type="text/plain")
+            target = root / "runtime" / "reads.fastq"
+
+            materialized = store.materialize(payload, target)
+
+            self.assertEqual(materialized, target)
+            self.assertEqual(target.read_bytes(), source.read_bytes())
+
     def test_payload_identity_round_trips_through_project_state(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
