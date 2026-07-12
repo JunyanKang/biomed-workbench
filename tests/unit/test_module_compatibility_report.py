@@ -37,7 +37,8 @@ class ModuleCompatibilityReportTests(unittest.TestCase):
         self.assertEqual(module["dependencies"][1]["version_probe_kind"], "command")
         self.assertEqual(module["dependencies"][1]["conflicts"][0]["versions"], ["<0.11"])
         self.assertEqual(module["input_formats"][0]["formats"][0]["versions"], ["0.11"])
-        self.assertEqual(module["compatibility_rows"], ["scanpy-1.11.5-h5ad-0.11"])
+        self.assertEqual(module["compatibility_rows"][0]["id"], "scanpy-1.11.5-h5ad-0.11")
+        self.assertEqual(module["compatibility_rows"][0]["regression_evidence_ids"], ["fixture-analysis-regression-v1"])
 
     def test_report_is_path_and_credential_free(self):
         report = build_compatibility_report(ModuleRegistry.discover(FIXTURE_ROOT))

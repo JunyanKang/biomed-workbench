@@ -15,7 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from biomed_workbench.services.eutils import EUtilitiesClient  # noqa: E402
-from biomed_workbench.capabilities.evidence import gene_evidence  # noqa: E402
+from biomed_workbench.capabilities.evidence import gene_evidence, literature_evidence, variant_evidence  # noqa: E402
 
 
 def _check(name: str, database: str, passed: bool, detail: dict[str, int | bool]) -> dict[str, object]:
@@ -26,10 +26,23 @@ def run() -> dict[str, object]:
     client = EUtilitiesClient(timeout=20, retries=2)
     checks: list[dict[str, object]] = []
 
+    info = client.info()
+    databases = info.get("einforesult", {}).get("dblist", [])
+    checks.append(_check("info", "entrez", "pubmed" in databases and "gene" in databases, {"databases": len(databases)}))
+
     pubmed = client.search("pubmed", "TP53[Title]", retmax=1)
     checks.append(_check("search", "pubmed", pubmed.count > 0 and len(pubmed.ids) == 1, {"count": pubmed.count}))
     pubmed_summary = client.summary("pubmed", pubmed.ids)
     checks.append(_check("summary", "pubmed", len(pubmed_summary.records) == 1, {"records": len(pubmed_summary.records)}))
+    literature = literature_evidence("TP53[Title]", max_records=1, database="pubmed")
+    checks.append(
+        _check(
+            "composed_workflow",
+            "literature_evidence_bundle",
+            literature["count"] > 0 and len(literature["records"]) == 1,
+            {"count": literature["count"], "records": len(literature["records"])},
+        )
+    )
 
     pmc = client.search("pmc", "retinal development", retmax=1)
     checks.append(_check("search", "pmc", pmc.count > 0, {"count": pmc.count}))
@@ -70,6 +83,16 @@ def run() -> dict[str, object]:
     ):
         result = client.search(database, term, retmax=1)
         checks.append(_check("search", database, result.count > 0, {"count": result.count}))
+
+    variant = variant_evidence("TP53[gene]", max_records=1, max_links=1)
+    checks.append(
+        _check(
+            "composed_workflow",
+            "variant_evidence_bundle",
+            variant["match_count"] > 0 and len(variant["variant_records"]) == 1,
+            {"count": variant["match_count"], "records": len(variant["variant_records"])},
+        )
+    )
 
     return {
         "schema_version": 1,

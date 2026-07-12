@@ -272,6 +272,9 @@ def _manifest(row: dict[str, object], cases: dict[str, dict[str, object]]) -> di
                 "input_formats": {input_name: ["inline-json@1"]},
                 "output_formats": {output_name: [f"{'normalized-json' if service else 'inline-json'}@1"]},
                 "platforms": ["any"],
+                "regression_evidence_ids": [f"{capability_id}-regression-v1"],
+                "end_to_end_evidence_ids": [f"{capability_id}-e2e-v1"],
+                "verified_at": "2026-07-12",
             }
         ],
         "access": row["access"],

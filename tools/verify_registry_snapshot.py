@@ -111,6 +111,16 @@ def verify(output: Path) -> dict[str, object]:
             "input_format_contracts": sum(len(module.input_artifacts) for module in source_registry.all()),
             "output_format_contracts": sum(len(module.output_artifacts) for module in source_registry.all()),
             "compatibility_rows": sum(len(module.compatibility_matrix) for module in source_registry.all()),
+            "regression_evidence_bindings": sum(
+                len(row.regression_evidence_ids)
+                for module in source_registry.all()
+                for row in module.compatibility_matrix
+            ),
+            "end_to_end_evidence_bindings": sum(
+                len(row.end_to_end_evidence_ids)
+                for module in source_registry.all()
+                for row in module.compatibility_matrix
+            ),
         },
         "credentials": ["NCBI_API_KEY"],
         "reload_basis": "Plugin installation creates a versioned cache snapshot; updated Skill metadata and module indexes are loaded by a subsequent Codex task.",

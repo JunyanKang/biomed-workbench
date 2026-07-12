@@ -136,6 +136,9 @@ class CompatibilityRow:
     input_formats: dict[str, tuple[str, ...]]
     output_formats: dict[str, tuple[str, ...]]
     platforms: tuple[str, ...]
+    regression_evidence_ids: tuple[str, ...]
+    end_to_end_evidence_ids: tuple[str, ...]
+    verified_at: str
 
 
 @dataclass(frozen=True)
@@ -572,6 +575,10 @@ def _version_map(value: Any, location: str) -> dict[str, tuple[str, ...]]:
 def _compatibility(value: Any, location: str) -> CompatibilityRow:
     payload = _object(value, location)
     _exact_fields(payload, _COMPATIBILITY_FIELDS, location)
+    regression_ids = _strings(payload["regression_evidence_ids"], f"{location}.regression_evidence_ids")
+    end_to_end_ids = _strings(payload["end_to_end_evidence_ids"], f"{location}.end_to_end_evidence_ids")
+    if any(not _ID_RE.fullmatch(item) for item in (*regression_ids, *end_to_end_ids)):
+        raise ValueError(f"{location} evidence ids are invalid")
     return CompatibilityRow(
         id=_text(payload["id"], f"{location}.id"),
         module_version=_text(payload["module_version"], f"{location}.module_version"),
@@ -580,6 +587,9 @@ def _compatibility(value: Any, location: str) -> CompatibilityRow:
         input_formats=_version_map(payload["input_formats"], f"{location}.input_formats"),
         output_formats=_version_map(payload["output_formats"], f"{location}.output_formats"),
         platforms=_strings(payload["platforms"], f"{location}.platforms"),
+        regression_evidence_ids=regression_ids,
+        end_to_end_evidence_ids=end_to_end_ids,
+        verified_at=_date(payload["verified_at"], f"{location}.verified_at"),
     )
 
 
@@ -836,6 +846,9 @@ def _compatibility_dict(value: CompatibilityRow) -> dict[str, object]:
         "input_formats": {key: list(item) for key, item in value.input_formats.items()},
         "output_formats": {key: list(item) for key, item in value.output_formats.items()},
         "platforms": list(value.platforms),
+        "regression_evidence_ids": list(value.regression_evidence_ids),
+        "end_to_end_evidence_ids": list(value.end_to_end_evidence_ids),
+        "verified_at": value.verified_at,
     }
 
 

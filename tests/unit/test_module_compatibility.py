@@ -94,6 +94,9 @@ def external_manifest_payload():
             "input_formats": {"records": ["h5ad@0.11"]},
             "output_formats": {"profile": ["inline-json@1"]},
             "platforms": ["macos-arm64", "linux-x86_64"],
+            "regression_evidence_ids": ["fixture-analysis-regression-v1"],
+            "end_to_end_evidence_ids": ["fixture-analysis-e2e-v1"],
+            "verified_at": "2026-07-12",
         }
     ]
     return payload

@@ -113,7 +113,16 @@ def build_compatibility_report(registry: ModuleRegistry) -> dict[str, object]:
                 "dependencies": [_dependency(item) for item in manifest.dependencies],
                 "input_formats": [_port(item) for item in manifest.input_artifacts],
                 "output_formats": [_port(item) for item in manifest.output_artifacts],
-                "compatibility_rows": [item.id for item in manifest.compatibility_matrix],
+                "compatibility_rows": [
+                    {
+                        "id": item.id,
+                        "module_version": item.module_version,
+                        "verified_at": item.verified_at,
+                        "regression_evidence_ids": list(item.regression_evidence_ids),
+                        "end_to_end_evidence_ids": list(item.end_to_end_evidence_ids),
+                    }
+                    for item in manifest.compatibility_matrix
+                ],
                 "validation_status": "complete",
             }
         )

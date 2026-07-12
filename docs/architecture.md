@@ -42,7 +42,7 @@ Every `module.json` is closed and versioned. It declares:
 - explicit compatibility rows joining one module version to validated tool, dependency, platform, and input/output format combinations;
 - access, mutation, credential, timeout, output-size, license, and clean-room provenance boundaries.
 
-An undeclared or untested tool, dependency, format, genome build, coordinate system, or compatibility combination blocks execution. A newer version is not assumed compatible until its independent regression and end-to-end evidence is recorded in a new module version.
+An undeclared or untested tool, dependency, format, genome build, coordinate system, or compatibility combination blocks execution. A newer version is not assumed compatible until its independent regression and end-to-end evidence IDs are recorded in a new module version. Release validation resolves every ID against `reports/compatibility-execution-evidence.json`, reruns the evidence capture, and rejects missing, stale, failed, path-bearing, or credential-bearing evidence.
 
 Tool version behavior is structured rather than free text. Each affected surface declares an ID, exact supported version rules, category (`parameter`, `api`, `field`, `default`, `behavior`, `input-format`, or `output-format`), compatibility effect, required action, and authoritative source. Dependencies declare their own identity, typed bounded version probe, parse pattern, tested and allowed versions, platform scope, and structured conflict records. Python runtime, Python/R packages, Java or system commands, services, and databases therefore enter the compatibility decision through declared evidence rather than implicit package discovery.
 

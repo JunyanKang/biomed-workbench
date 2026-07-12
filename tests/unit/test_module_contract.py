@@ -107,6 +107,9 @@ def valid_manifest_payload():
                 "input_formats": {"records": ["inline-json@1"]},
                 "output_formats": {"profile": ["inline-json@1"]},
                 "platforms": ["any"],
+                "regression_evidence_ids": ["fixture-analysis-regression-v1"],
+                "end_to_end_evidence_ids": ["fixture-analysis-e2e-v1"],
+                "verified_at": "2026-07-12",
             }
         ],
         "access": "offline",
@@ -184,6 +187,7 @@ class ModuleContractTests(unittest.TestCase):
         self.assertEqual(manifest.quality_gates[0].severity, "major")
         self.assertEqual(manifest.dependencies[0].tested_versions, ("3.14.3",))
         self.assertEqual(manifest.compatibility_matrix[0].input_formats["records"], ("inline-json@1",))
+        self.assertEqual(manifest.compatibility_matrix[0].regression_evidence_ids, ("fixture-analysis-regression-v1",))
 
     def test_manifest_round_trip_is_canonical_and_detached(self):
         payload = valid_manifest_payload()

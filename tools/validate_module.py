@@ -139,7 +139,7 @@ def _run_case_isolated(module_path: Path, manifest: ModuleManifest, case_index: 
         raise ModuleValidationError(f"test case {case_index} did not produce JSON") from exc
 
 
-def _evidence_flags(manifest: ModuleManifest) -> tuple[bool, bool, bool]:
+def _evidence_flags(manifest: ModuleManifest) -> tuple[bool, bool, bool, bool]:
     tool_complete = all(
         item.tested_versions and item.allowed_versions and item.version_source.startswith("https://") and item.version_probe
         for item in manifest.tool_requirements
@@ -159,7 +159,11 @@ def _evidence_flags(manifest: ModuleManifest) -> tuple[bool, bool, bool]:
         and all(fmt.versions and fmt.representations and fmt.compression and fmt.orientations for fmt in port.formats)
         for port in (*manifest.input_artifacts, *manifest.output_artifacts)
     )
-    return tool_complete, dependency_complete, format_complete
+    compatibility_complete = bool(manifest.compatibility_matrix) and all(
+        row.regression_evidence_ids and row.end_to_end_evidence_ids and row.verified_at
+        for row in manifest.compatibility_matrix
+    )
+    return tool_complete, dependency_complete, format_complete, compatibility_complete
 
 
 def validate_module(path: Path | str, *, require_tests: bool = True, execute_tests: bool = True) -> dict[str, Any]:
@@ -194,11 +198,11 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
 
     entrypoint_resolved = False
     compatibility_rows = 0
-    tool_complete = dependency_complete = format_complete = False
+    tool_complete = dependency_complete = format_complete = compatibility_complete = False
     executed = 0
     if manifest is not None:
         compatibility_rows = len(manifest.compatibility_matrix)
-        tool_complete, dependency_complete, format_complete = _evidence_flags(manifest)
+        tool_complete, dependency_complete, format_complete, compatibility_complete = _evidence_flags(manifest)
         if not version_is_allowed(VERSION, manifest.kernel_compatibility):
             errors.append(f"kernel version {VERSION} is outside declared kernel compatibility")
         try:
@@ -212,6 +216,8 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
             errors.append("dependency version evidence is incomplete")
         if not format_complete:
             errors.append("input or output format evidence is incomplete")
+        if not compatibility_complete:
+            errors.append("compatibility regression or end-to-end evidence is incomplete")
 
     if require_tests and (module_path / "tests" / "cases.json").is_file():
         try:
@@ -236,6 +242,7 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
         "tool_evidence_complete": tool_complete,
         "dependency_evidence_complete": dependency_complete,
         "format_evidence_complete": format_complete,
+        "compatibility_evidence_complete": compatibility_complete,
         "executed_test_cases": executed,
     }
 

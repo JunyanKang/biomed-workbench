@@ -139,9 +139,11 @@ def main() -> int:
                 and report["tool_evidence_complete"]
                 and report["dependency_evidence_complete"]
                 and report["format_evidence_complete"]
+                and report["compatibility_evidence_complete"]
             ):
                 errors.append(f"module scientific compatibility evidence is incomplete: {report['module_id']}")
         research_report_path = ROOT / "reports" / "research-engine-verification.json"
+        compatibility_evidence_path = ROOT / "reports" / "compatibility-execution-evidence.json"
         fixture_root = ROOT / "tests" / "fixtures" / "research-cycles"
         try:
             research_report = json.loads(research_report_path.read_text(encoding="utf-8"))
@@ -154,7 +156,7 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 306
+                or research_report.get("test_count", 0) < 310
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
                 != {"scientific_command", "command_input_binding", "command_output_binding", "bounded_process_result"}
@@ -184,6 +186,28 @@ def main() -> int:
         leaked_ids = [module.id for module in modules if f'"{module.id}"' in orchestration_source or f"'{module.id}'" in orchestration_source]
         if leaked_ids:
             errors.append(f"orchestration source contains central built-in module IDs: {leaked_ids[:5]}")
+        try:
+            compatibility_evidence = json.loads(compatibility_evidence_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            errors.append("compatibility execution evidence is missing or invalid")
+        else:
+            expected_evidence = {
+                (module.id, row.id, row.regression_evidence_ids[0], row.end_to_end_evidence_ids[0])
+                for module in modules
+                for row in module.compatibility_matrix
+            }
+            observed_evidence = {
+                (item.get("module_id"), item.get("row_id"), item.get("regression", {}).get("id"), item.get("end_to_end", {}).get("id"))
+                for item in compatibility_evidence.get("records", ())
+            }
+            if (
+                compatibility_evidence.get("passed") is not True
+                or compatibility_evidence.get("registry_digest") != registry.digest
+                or compatibility_evidence.get("regression_passed") != len(expected_evidence)
+                or compatibility_evidence.get("end_to_end_passed") != len(expected_evidence)
+                or observed_evidence != expected_evidence
+            ):
+                errors.append("compatibility rows are not bound to current passing regression and end-to-end evidence")
         command_source = (ROOT / "biomed_workbench" / "modules" / "scientific_command.py").read_text(encoding="utf-8")
         if "shell=True" in command_source or "os.system(" in command_source:
             errors.append("scientific command execution contains a shell invocation surface")

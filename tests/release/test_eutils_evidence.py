@@ -5,6 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = ROOT / "reports" / "eutils-live-verification.json"
+ZERO_KEY_REPORT = ROOT / "reports" / "eutils-live-zero-key-verification.json"
 
 
 class EUtilitiesEvidenceTests(unittest.TestCase):
@@ -25,6 +26,21 @@ class EUtilitiesEvidenceTests(unittest.TestCase):
         self.assertNotIn("api_key=", serialized.lower())
         self.assertNotIn("NCBI_API_KEY", serialized)
         self.assertNotIn("/Users/", serialized)
+
+    def test_zero_key_supplement_covers_info_literature_and_variant_workflows(self):
+        payload = json.loads(ZERO_KEY_REPORT.read_text(encoding="utf-8"))
+        covered = {(check["name"], check["database"]) for check in payload["checks"] if check["passed"]}
+
+        self.assertTrue(payload["passed"])
+        self.assertEqual(payload["credential_mode"], "zero_key")
+        self.assertTrue(
+            {
+                ("info", "entrez"),
+                ("composed_workflow", "literature_evidence_bundle"),
+                ("composed_workflow", "variant_evidence_bundle"),
+            }
+            <= covered
+        )
 
 
 if __name__ == "__main__":

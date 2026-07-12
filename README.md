@@ -98,6 +98,7 @@ Inspect the input contract with `tools/search_tools.py --id CAPABILITY_ID` befor
 - `tools/search_tools.py`: catalog search and inspection.
 - `tools/run_tool.py`: generic runner for direct, bounded tools.
 - `tools/validate_workbench.py`: release validation for single-entry skill, catalog consistency, source coverage, and publish-safe paths.
+- `reports/compatibility-execution-evidence.json`: path-free regression and end-to-end evidence bound to every supported compatibility row.
 - `biomed_workbench/capabilities/`: independently rewritten scientific implementations.
 - `biomed_workbench/modules/builtin/`: one versioned scientific contract per independently discoverable module.
 - `biomed_workbench/kernel/`: immutable project context, content-addressed artifacts, hypotheses, evidence, decisions, DAG state, and replay.
@@ -107,6 +108,8 @@ Inspect the input contract with `tools/search_tools.py --id CAPABILITY_ID` befor
 - `tests/`: unit, contract, end-to-end, and release checks.
 
 The central registry contains no domain definitions. See `docs/architecture.md` for the extension contract, compatibility rules, and release flow.
+
+Changing a supported tool, dependency, or format version requires a new validated compatibility row with named regression and end-to-end evidence. Module and release validation fail when either binding is missing or its captured execution did not pass.
 
 ## Sources And License Notes
 

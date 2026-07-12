@@ -51,6 +51,8 @@ class ModuleRegistryEvidenceTests(unittest.TestCase):
                 "input_format_contracts": 48,
                 "output_format_contracts": 48,
                 "compatibility_rows": 48,
+                "regression_evidence_bindings": 48,
+                "end_to_end_evidence_bindings": 48,
             },
         )
         self.assertEqual(report["credentials"], ["NCBI_API_KEY"])

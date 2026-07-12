@@ -28,6 +28,7 @@ class ModulePackagingTests(unittest.TestCase):
         self.assertTrue(all(report["compatibility_rows"] >= 1 for report in reports))
         self.assertTrue(all(report["dependency_evidence_complete"] for report in reports))
         self.assertTrue(all(report["format_evidence_complete"] for report in reports))
+        self.assertTrue(all(report["compatibility_evidence_complete"] for report in reports))
 
     def test_release_validator_enforces_module_registry_and_no_central_intent_tables(self):
         source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
