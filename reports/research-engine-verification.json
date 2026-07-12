@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "passed": true,
+  "module_count": 48,
+  "test_count": 288,
+  "registry_digest": "320dc42eff7f1c94ba180c6395b13f0521c1a0f99259f395372cda3595b8a323",
+  "capability_graph": {
+    "node_count": 310,
+    "edge_count": 350,
+    "digest": "557f02f3e6f355e833d6129b18a996c3e75fae5efb5c0cddfd25c2748b9f2f70"
+  },
+  "kernel_contracts": [
+    "project_context",
+    "scientific_artifact",
+    "hypothesis",
+    "evidence_record",
+    "decision_event",
+    "project_state",
+    "plan_node",
+    "research_dag",
+    "quality_finding",
+    "node_execution",
+    "hypothesis_assessment",
+    "cycle_result"
+  ],
+  "scenario_count": 4,
+  "strict_compatibility_blocks": 4,
+  "plan_revisions": 4,
+  "alternative_substitutions": 4,
+  "successful_replays": 4,
+  "scenarios": [
+    {
+      "id": "clinical-conflict-revision",
+      "plan_type": "single",
+      "event_count": 13,
+      "execution_count": 2,
+      "revision_count": 1,
+      "alternative_substitution_count": 1,
+      "evidence_count": 1,
+      "failed_gate_code": "UNVALIDATED_DEPENDENCY_VERSION",
+      "hypothesis_transition": ["active", "refuted"],
+      "final_state_digest": "2591d62dcb7fb4482b4c4deee7827e4fd50d2d7933e028482d02cbf7dc733d1d",
+      "replay_passed": true
+    },
+    {
+      "id": "molecular-validation-revision",
+      "plan_type": "parallel",
+      "event_count": 18,
+      "execution_count": 3,
+      "revision_count": 1,
+      "alternative_substitution_count": 1,
+      "evidence_count": 2,
+      "failed_gate_code": "UNVALIDATED_DEPENDENCY_VERSION",
+      "hypothesis_transition": ["active", "supported"],
+      "final_state_digest": "3a818127940cb20f6c06d4c7f65c2d082bf60fa581bd220599bbafae28786d9e",
+      "replay_passed": true
+    },
+    {
+      "id": "omics-quality-revision",
+      "plan_type": "serial",
+      "event_count": 17,
+      "execution_count": 3,
+      "revision_count": 1,
+      "alternative_substitution_count": 1,
+      "evidence_count": 1,
+      "failed_gate_code": "UNVALIDATED_DEPENDENCY_VERSION",
+      "hypothesis_transition": ["active", "supported"],
+      "final_state_digest": "64600b1cbb3e37f088718dc63013dd1773e458f539429ce11f076ba867792257",
+      "replay_passed": true
+    },
+    {
+      "id": "publication-review-revision",
+      "plan_type": "mixed",
+      "event_count": 22,
+      "execution_count": 4,
+      "revision_count": 1,
+      "alternative_substitution_count": 1,
+      "evidence_count": 2,
+      "failed_gate_code": "UNVALIDATED_DEPENDENCY_VERSION",
+      "hypothesis_transition": ["active", "weakened"],
+      "final_state_digest": "4fcf8208ec692561bfcd51e4d4ad2b6af77965592ad77c78be5bc33229b8fc47",
+      "replay_passed": true
+    }
+  ],
+  "limitations": [
+    "The current 48 modules remain bounded scientific functions and do not yet match the complete source-union breadth.",
+    "Production-scale specialized omics engines and their full version-format matrices remain a subsequent implementation stage.",
+    "Large external artifact persistence is not yet implemented; current replay fixtures use bounded inline structured content.",
+    "The legacy one-shot assistant API remains for v0.2 compatibility while new projects use replayable state."
+  ]
+}

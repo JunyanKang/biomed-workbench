@@ -16,6 +16,7 @@ if str(ROOT) not in sys.path:
 from biomed_workbench.catalog import all_capabilities, capability_to_dict, resolve_entrypoint  # noqa: E402
 from biomed_workbench.modules.index import BUILTIN_ROOT, MODULE_INDEX, build_index  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry, ModuleRegistryError  # noqa: E402
+from biomed_workbench.orchestration.graph import build_capability_graph  # noqa: E402
 from biomed_workbench.services.credentials import ALLOWED_CREDENTIALS  # noqa: E402
 from biomed_workbench.version import VERSION  # noqa: E402
 from tools.validate_module import validate_module  # noqa: E402
@@ -140,6 +141,47 @@ def main() -> int:
                 and report["format_evidence_complete"]
             ):
                 errors.append(f"module scientific compatibility evidence is incomplete: {report['module_id']}")
+        research_report_path = ROOT / "reports" / "research-engine-verification.json"
+        fixture_root = ROOT / "tests" / "fixtures" / "research-cycles"
+        try:
+            research_report = json.loads(research_report_path.read_text(encoding="utf-8"))
+            scenario_fixtures = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(fixture_root.glob("*.json"))]
+        except (OSError, json.JSONDecodeError):
+            errors.append("research engine verification report or fixtures are missing or invalid")
+        else:
+            graph = build_capability_graph(registry)
+            graph_report = research_report.get("capability_graph", {})
+            if (
+                research_report.get("passed") is not True
+                or research_report.get("module_count") != len(modules)
+                or research_report.get("test_count", 0) < 288
+                or research_report.get("registry_digest") != registry.digest
+                or graph_report != {"node_count": len(graph.nodes), "edge_count": len(graph.edges), "digest": graph.digest}
+            ):
+                errors.append("research engine report differs from the discovered registry or capability graph")
+            scenarios = research_report.get("scenarios", [])
+            if (
+                len(scenarios) != 4
+                or len(scenario_fixtures) != 4
+                or {item.get("plan_type") for item in scenarios} != {"single", "serial", "parallel", "mixed"}
+                or {item.get("id"): item.get("final_state_digest") for item in scenarios}
+                != {item.get("id"): item.get("expected_replay_digest") for item in scenario_fixtures}
+                or any(
+                    not item.get("failed_gate_code")
+                    or item.get("revision_count", 0) < 1
+                    or item.get("alternative_substitution_count", 0) < 1
+                    or item.get("evidence_count", 0) < 1
+                    or len(item.get("hypothesis_transition", ())) != 2
+                    or item["hypothesis_transition"][0] == item["hypothesis_transition"][1]
+                    or item.get("replay_passed") is not True
+                    for item in scenarios
+                )
+            ):
+                errors.append("research cycle scenarios lack gate, evidence, plan-type, revision, or replay coverage")
+        orchestration_source = "\n".join(path.read_text(encoding="utf-8") for path in sorted((ROOT / "biomed_workbench" / "orchestration").glob("*.py")))
+        leaked_ids = [module.id for module in modules if f'"{module.id}"' in orchestration_source or f"'{module.id}'" in orchestration_source]
+        if leaked_ids:
+            errors.append(f"orchestration source contains central built-in module IDs: {leaked_ids[:5]}")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

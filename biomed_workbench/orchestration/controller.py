@@ -189,11 +189,13 @@ class ResearchController:
                     raise ValueError("replanner must create the next child revision of the active plan")
                 old_modules = {node.module_id for node in active.nodes if node.status in {"blocked", "failed"}}
                 replacement_modules = {node.module_id for node in revised.nodes}
-                allowed_replacements = set(old_modules)
+                declared_alternatives = set()
                 for module_id in old_modules:
-                    allowed_replacements.update(self._registry.get(module_id).alternatives)
-                if not replacement_modules <= allowed_replacements | {node.module_id for node in active.nodes if node.status == "completed"}:
-                    raise ValueError("replanner selected a module that is not a declared alternative")
+                    declared_alternatives.update(self._registry.get(module_id).alternatives)
+                if declared_alternatives and not replacement_modules & declared_alternatives:
+                    raise ValueError("replanner did not replace a blocked module with one of its declared alternatives")
+                if not replacement_modules <= {module.id for module in self._registry.all()}:
+                    raise ValueError("replanner selected an unregistered module")
                 followup = self.advance(state, revised)
                 return CycleResult(
                     followup.state,

@@ -733,23 +733,23 @@ git commit -m "feat: expose one stateful scientific assistant entry"
 - Modify: `README.md`
 - Modify: `tools/validate_workbench.py`
 
-- [ ] **Step 1: Write failing multi-domain release scenarios**
+- [x] **Step 1: Write failing multi-domain release scenarios**
 
 Each fixture must contain a context, at least one falsifiable hypothesis, typed inputs, requested evidence/deliverables, a controlled module-output sequence, one failed or major gate, one plan revision, one hypothesis status transition, a final evidence ledger, and an expected replay digest. Scenarios must collectively exercise single, serial, parallel, and mixed DAGs.
 
-- [ ] **Step 2: Run and verify missing scenario support**
+- [x] **Step 2: Run and verify missing scenario support**
 
 Run: `python3 -m unittest tests.e2e.test_research_cycle_scenarios tests.release.test_research_engine_evidence`
 
-- [ ] **Step 3: Add path-free verification report**
+- [x] **Step 3: Add path-free verification report**
 
 Record contract counts, graph node/edge counts, scenario IDs, plan types, gate severities, revision counts, hypothesis transitions, replay success, strict compatibility blocks, alternative substitutions, module count, registry digest, test count, and explicit limitations. Do not record raw inputs, paths, credentials, usernames, or source-library names.
 
-- [ ] **Step 4: Add release gates**
+- [x] **Step 4: Add release gates**
 
 `validate_workbench.py --release` must verify kernel and DAG report digests, one Skill, 48 modules, no central module IDs in orchestration source, no machine paths or credentials in state fixtures/reports, all fixture replay digests, and that every scenario includes a failed gate, revision, hypothesis transition, and final evidence ledger.
 
-- [ ] **Step 5: Run complete validation**
+- [x] **Step 5: Run complete validation**
 
 ```bash
 python3 -m unittest discover -s tests -p 'test*.py'
@@ -761,7 +761,7 @@ git diff --check
 
 Expected: all tests and validators pass, 48 modules remain registered, every unsupported version test blocks before execution, and all scenario states replay to their recorded digest.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add tests/e2e tests/fixtures/research-cycles tests/release reports/research-engine-verification.json docs README.md tools/validate_workbench.py

@@ -15,6 +15,16 @@ Biomed Workbench exposes one Codex skill and discovers scientific capabilities f
 
 The plugin does not manage CPUs, GPUs, containers, Slurm, remote compute, or local model infrastructure.
 
+## Stateful Research Engine
+
+`biomed_workbench/kernel/` stores immutable project context, typed scientific artifacts, falsifiable hypotheses, directional evidence, plan nodes, DAGs, decisions, and canonical state digests. Every transition is append-only and links its prior and resulting state digest. Deserialization replays the complete event ledger; a changed payload, event order, lineage link, or digest is rejected.
+
+`biomed_workbench/orchestration/` builds a capability graph from module manifests, searches validated artifact paths, plans single/serial/parallel/mixed DAGs, evaluates cross-module scientific quality, runs exact compatibility gates, executes bounded entrypoints, adjudicates hypotheses, and controls retries or child-plan revisions. The graph and controller contain no built-in module IDs.
+
+Scientific artifacts preserve format and schema version, compression, orientation, companion indexes, coordinates, genome build, annotation release, identifier namespace, producer module/tool versions, experimental unit, denominator, processing level, quality status, source artifact lineage, and content digest. Unknown or incompatible metadata is not inferred from a filename.
+
+Fatal findings stop the affected path. Major findings block interpretation until remediation or an explicit scope decision. Warnings remain attached to downstream artifacts and claims. Refuting, weakening, supporting, and inconclusive evidence remain separate; refuted hypotheses and superseded plans remain in history.
+
 ## Module Contract
 
 Every `module.json` is closed and versioned. It declares:
@@ -76,6 +86,8 @@ python3 -m unittest discover -s tests -p 'test*.py'
 ## Release Flow
 
 The plugin manifest is the package version source. Publish only when rebuilding the generated index and catalog produces no diff, all unit/contract/end-to-end/release tests pass, and release validation confirms the single skill, 48 built-in modules, complete compatibility evidence, source-neutral paths, and absence of legacy registration surfaces.
+
+Release validation also binds `reports/research-engine-verification.json` to the current registry and generated capability graph. Four replayable research-cycle fixtures must cover single, serial, parallel, and mixed plans; each includes a failed compatibility gate, an alternative-module plan revision, evidence ingestion, a hypothesis transition, and an exact final state digest.
 
 For local Codex iteration:
 

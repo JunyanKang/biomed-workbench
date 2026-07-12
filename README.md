@@ -100,6 +100,8 @@ Inspect the input contract with `tools/search_tools.py --id CAPABILITY_ID` befor
 - `tools/validate_workbench.py`: release validation for single-entry skill, catalog consistency, source coverage, and publish-safe paths.
 - `biomed_workbench/capabilities/`: independently rewritten scientific implementations.
 - `biomed_workbench/modules/builtin/`: one versioned scientific contract per independently discoverable module.
+- `biomed_workbench/kernel/`: immutable project context, artifacts, hypotheses, evidence, decisions, DAG state, and replay.
+- `biomed_workbench/orchestration/`: manifest-derived graph planning, compatibility-gated execution, quality checks, interpretation, and revision control.
 - `biomed_workbench/services/`: bounded public scientific database clients and credential policy.
 - `tests/`: unit, contract, end-to-end, and release checks.
 
