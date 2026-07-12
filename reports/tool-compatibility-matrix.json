@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 56,
-  "module_count": 56,
+  "compatibility_complete": 57,
+  "module_count": 57,
   "modules": [
     {
       "compatibility_rows": [
@@ -7485,6 +7485,197 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "variant-region-query-tabix-e2e-v1"
+          ],
+          "id": "tabix-1.23-vcf-4.5-bgzf-tbi-region",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "variant-region-query-tabix-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=1.23,<1.24"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "htslib-runtime",
+          "name": "htslib",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Decode BGZF VCF blocks, read the TBI coordinate index, and retrieve bounded genomic regions.",
+          "required": true,
+          "tested_versions": [
+            "1.23"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "htslib\\) ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "tabix",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/samtools/htslib/releases/tag/1.23"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "variant-region-query-tabix",
+      "input_formats": [
+        {
+          "artifact_type": "variant_bundle",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "bgzf"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "vcf",
+              "orientations": [
+                "sites-by-samples"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [
+                "tbi"
+              ],
+              "versions": [
+                "4.5"
+              ]
+            }
+          ],
+          "name": "variants",
+          "processing_levels": [
+            "raw-calls",
+            "filtered",
+            "normalized",
+            "annotated"
+          ],
+          "required_metadata": [
+            "fileformat",
+            "contig",
+            "sample-id",
+            "sample-manifest-digest",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order",
+            "index-type"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "variant_table",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "vcf",
+              "orientations": [
+                "sites-by-samples"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "4.5"
+              ]
+            }
+          ],
+          "name": "regional_variants",
+          "processing_levels": [
+            "raw-calls",
+            "filtered",
+            "normalized",
+            "annotated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "fileformat",
+            "contig",
+            "sample-id",
+            "sample-manifest-digest",
+            "reference-build",
+            "reference-sequence-digest",
+            "query-region",
+            "sort-order"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=1.23,<1.24"
+          ],
+          "ecosystem": "system",
+          "identity": "tabix",
+          "mismatch_policy": "block",
+          "name": "tabix",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.23"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.23,<1.24"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "The supported line validates -h header-preserving retrieval from a BGZF VCF with an adjacent TBI for reference:start-end regions.",
+              "id": "tabix-123-header-region-query",
+              "required_action": "Validate VCF fileformat, fixed header, sample order, coordinate sorting, regional membership, and exact source-record reconciliation after retrieval.",
+              "source": "https://www.htslib.org/doc/1.23/tabix.html"
+            }
+          ],
+          "version_pattern": "tabix \\(htslib\\) ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "tabix",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/samtools/htslib/releases/tag/1.23"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "variant-summary-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -7596,6 +7787,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "c45f4890c4d1a6f486837413662735708fcb6511f8f7389ddb192779ebbf709c",
+  "registry_digest": "cfbd1ab33e95dabd5774fc04af99d093a12f046fb2f8b9e5702906f37a05d308",
   "schema_version": 1
 }

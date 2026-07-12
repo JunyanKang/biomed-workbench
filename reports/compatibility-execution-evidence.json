@@ -1,7 +1,7 @@
 {
-  "compatibility_row_count": 56,
-  "end_to_end_passed": 56,
-  "module_count": 56,
+  "compatibility_row_count": 57,
+  "end_to_end_passed": 57,
+  "module_count": 57,
   "passed": true,
   "records": [
     {
@@ -1867,6 +1867,42 @@
     },
     {
       "dependency_versions": {
+        "htslib": [
+          ">=1.23,<1.24"
+        ]
+      },
+      "end_to_end": {
+        "digest": "be9c4840d3703ed3d44c661aa4c2c451bc865a6241aa7c75568f955af2df545d",
+        "id": "variant-region-query-tabix-e2e-v1",
+        "passed": true
+      },
+      "input_formats": {
+        "variants": [
+          "vcf@4.5"
+        ]
+      },
+      "module_id": "variant-region-query-tabix",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "regional_variants": [
+          "vcf@4.5"
+        ]
+      },
+      "regression": {
+        "digest": "4f5512d065c42b0305d3f2f7664a5acabd921425b3f7a7d144106b90ff23a5ac",
+        "id": "variant-region-query-tabix-regression-v1",
+        "passed": true
+      },
+      "row_id": "tabix-1.23-vcf-4.5-bgzf-tbi-region",
+      "tool_versions": {
+        "tabix": [
+          ">=1.23,<1.24"
+        ]
+      },
+      "verified_at": "2026-07-13"
+    },
+    {
+      "dependency_versions": {
         "python": [
           ">=3.14,<3.15"
         ]
@@ -1898,7 +1934,7 @@
       "verified_at": "2026-07-12"
     }
   ],
-  "registry_digest": "c45f4890c4d1a6f486837413662735708fcb6511f8f7389ddb192779ebbf709c",
-  "regression_passed": 56,
+  "registry_digest": "cfbd1ab33e95dabd5774fc04af99d093a12f046fb2f8b9e5702906f37a05d308",
+  "regression_passed": 57,
   "schema_version": 1
 }

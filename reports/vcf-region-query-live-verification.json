@@ -1,0 +1,108 @@
+{
+  "bundle_integrity": {
+    "header_and_sample_identity_validated": true,
+    "source_records_reconciled": true,
+    "tbi_payload_bound": true,
+    "vcf_payload_bound": true
+  },
+  "compatibility_policy": {
+    "dependencies": {
+      "htslib": [
+        ">=1.23,<1.24"
+      ]
+    },
+    "tools": {
+      "tabix": [
+        ">=1.23,<1.24"
+      ]
+    }
+  },
+  "compatibility_row_id": "tabix-1.23-vcf-4.5-bgzf-tbi-region",
+  "dependency_versions": {
+    "htslib": "1.23"
+  },
+  "end_to_end_evidence_id": "variant-region-query-tabix-e2e-v1",
+  "execution": {
+    "command_contract_digest": "8fcd63edc49c31d1e16ca7ef3f016cf902f43f8fd396737d67f07d692b330c92",
+    "executable_sha256": "07e36eab316c9a0e840a5f7986aa20432fc0e0ba16e7e7ded97f1b106da684cb",
+    "inputs": {
+      "index": {
+        "byte_size": 126,
+        "role": "index",
+        "sha256": "e0c55709ac23f9ac85e79a2de3e15852ebcc93df1238ca0b4c4d537c98529dd3"
+      },
+      "vcf": {
+        "byte_size": 346,
+        "role": "variants",
+        "sha256": "0aec3985b642a00003d19f8cf711d5110ec86efeb65409a8feba24a0ec530cd6"
+      }
+    },
+    "outputs": [
+      {
+        "byte_size": 313,
+        "media_type": "text/vcf",
+        "object_key": "sha256/dc/dc5ec3fe86686294debe1556ac8e462bf2b63e2b9ef4cc57d49c7cd97df35bee/payload",
+        "role": "variants",
+        "sha256": "dc5ec3fe86686294debe1556ac8e462bf2b63e2b9ef4cc57d49c7cd97df35bee"
+      }
+    ],
+    "parameters": {
+      "region": "chr1:90-220"
+    }
+  },
+  "fixture": {
+    "compression": "bgzf",
+    "coordinate_system": "one-based-inclusive",
+    "format": "vcf@4.5",
+    "index_sha256": "e0c55709ac23f9ac85e79a2de3e15852ebcc93df1238ca0b4c4d537c98529dd3",
+    "index_type": "tbi",
+    "reference_build": "synthetic-build-1",
+    "reference_sequence_digest": "e044121659bff3d6fa3f4531a4f6f850ae763c979e1a6d4041d2e6f44e9edf65",
+    "region": "chr1:90-220",
+    "sample_manifest_digest": "5adb926bea090ebdce7a0675e3216074f06fea19acd4743dc46d9be19dec04d6",
+    "source_record_count": 4,
+    "vcf_sha256": "0aec3985b642a00003d19f8cf711d5110ec86efeb65409a8feba24a0ec530cd6"
+  },
+  "fixture_digest": "f466107ca0bf64105ce18d959e18ea9279cfbda6285a45bc7d0dc13919dc3dad",
+  "html_report_validated": false,
+  "module_id": "variant-region-query-tabix",
+  "module_version": "1.0.0",
+  "passed": true,
+  "regression_evidence_id": "variant-region-query-tabix-regression-v1",
+  "schema_version": 1,
+  "scientific_summary": {
+    "coordinate_system": "one-based-inclusive",
+    "downstream_readiness": "technically-ready-pending-reference-and-analysis-design-review",
+    "empty_result": false,
+    "fileformat": "VCFv4.5",
+    "filter_counts": {
+      "PASS": 2
+    },
+    "header_preserved": true,
+    "interpretation_policy": "Regional retrieval preserves selected records but does not validate variant calling, normalization, annotation, genotype quality, cohort design, or clinical significance.",
+    "record_count": 2,
+    "region": "chr1:90-220",
+    "sample_count": 1,
+    "samples": [
+      "SAMPLE_A"
+    ],
+    "schema_version": 1,
+    "tool": "tabix",
+    "tool_version": "1.23",
+    "type_counts": {
+      "indel_or_mnv": 1,
+      "snv": 1
+    }
+  },
+  "tested_version_baseline": {
+    "dependencies": {
+      "htslib": true
+    },
+    "tools": {
+      "tabix": true
+    }
+  },
+  "tool_versions": {
+    "tabix": "1.23"
+  }
+}

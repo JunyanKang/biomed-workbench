@@ -106,6 +106,7 @@ External scientific engines remain user-managed dependencies; the plugin guides,
 | `interval-overlap-bedtools` | bedtools `2.31.1` | XZ `5.8.3` runtime | two build-matched `bed@1.0` sets | pairwise query/reference overlaps |
 | `dna-align-bwa-mem-single` | BWA `0.7.19-r1273` | Homebrew arm64 bottle `0.7.19` | single-end FASTQ plus BWA reference bundle | portable unsorted SAM |
 | `alignment-sort-index-samtools` | samtools `1.23` | htslib `1.23` | unsorted `sam@1.6` | coordinate-sorted `bam@1.6` plus CSI |
+| `variant-region-query-tabix` | tabix `1.23` | htslib `1.23` | coordinate-sorted `vcf@4.5` BGZF plus TBI | header-preserving regional `vcf@4.5` |
 
 Tool-use guidance and routing remain available regardless of the installed version. For scientific execution, versions inside the declared compatibility policy may run and are recorded verbatim; provenance also states whether each version is an exact tested baseline. Missing tools, versions outside the policy, known breaking changes, or invalid output structures prevent the result from entering the evidence ledger until the environment is corrected or a validated alternative is selected. The `reports/*-live-verification.json` files preserve the concrete versions used for FastQC, fastp, MultiQC, FastQ Screen, samtools, and bedtools regression evidence.
 

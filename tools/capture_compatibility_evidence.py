@@ -43,6 +43,7 @@ COMMAND_EVIDENCE = {
     "read-contamination-screen": ("reports/fastq-screen-live-verification.json", "tests.unit.quality.test_fastq_screen"),
     "read-quality-fastqc": ("reports/fastqc-live-verification.json", "tests.unit.quality.test_fastqc"),
     "read-quality-fastp": ("reports/fastp-live-verification.json", "tests.unit.quality.test_fastp"),
+    "variant-region-query-tabix": ("reports/vcf-region-query-live-verification.json", "tests.unit.quality.test_vcf"),
 }
 
 

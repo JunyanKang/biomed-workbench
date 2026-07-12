@@ -51,6 +51,7 @@ class CommandInput:
     filename: str
     materialization: str = "file"
     member: str | None = None
+    sidecar_for: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "name", validate_identifier(self.name, "command input name"))
@@ -66,15 +67,20 @@ class CommandInput:
             if member.is_absolute() or ".." in member.parts or len(member.parts) != 1:
                 raise ValueError("command input member must be one safe archive-root filename")
             object.__setattr__(self, "member", _filename(self.member, "command input member"))
+        if self.sidecar_for is not None:
+            object.__setattr__(self, "sidecar_for", validate_identifier(self.sidecar_for, "command input sidecar target"))
+            if self.materialization != "file" or self.member is not None:
+                raise ValueError("command input sidecars must be ordinary files")
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, object]) -> "CommandInput":
-        allowed = {"name", "port", "role", "filename", "materialization", "member"}
+        allowed = {"name", "port", "role", "filename", "materialization", "member", "sidecar_for"}
         if not {"name", "port", "role", "filename"} <= set(payload) or set(payload) - allowed:
             raise ValueError("command input fields are incomplete or unsupported")
         values = dict(payload)
         values.setdefault("materialization", "file")
         values.setdefault("member", None)
+        values.setdefault("sidecar_for", None)
         return cls(**values)
 
 
@@ -146,6 +152,15 @@ class ScientificCommand:
                 raise ValueError(f"command {location} contain duplicate port-role bindings")
         if len(set(parameter_names)) != len(parameter_names):
             raise ValueError("command parameter names contain duplicates")
+        input_by_name = {item.name: item for item in inputs}
+        for item in inputs:
+            if item.sidecar_for is None:
+                continue
+            target = input_by_name.get(item.sidecar_for)
+            if target is None or target.sidecar_for is not None or item.name == target.name:
+                raise ValueError("command input sidecar must reference one primary input")
+            if not item.filename.startswith(target.filename + "."):
+                raise ValueError("command input sidecar filename must extend its primary input filename")
         captures = [item.capture for item in outputs if item.capture in {"stdout", "stderr"}]
         if len(set(captures)) != len(captures):
             raise ValueError("command output streams may each be captured once")
@@ -174,7 +189,7 @@ class ScientificCommand:
                 references["parameter"].update(parameter_references)
             arguments.append(argument)
         expected = {
-            "input": {item.name for item in inputs},
+            "input": {item.name for item in inputs if item.sidecar_for is None},
             "output": {item.name for item in outputs if item.capture == "file"},
             "parameter": set(parameter_names),
         }
@@ -203,6 +218,8 @@ class ScientificCommand:
                 row["materialization"] = item.materialization
             if item.member is not None:
                 row["member"] = item.member
+            if item.sidecar_for is not None:
+                row["sidecar_for"] = item.sidecar_for
             input_rows.append(row)
         payload = {
             "tool_name": self.tool_name,

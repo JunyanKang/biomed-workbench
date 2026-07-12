@@ -21,7 +21,7 @@ class IndependentModuleReleaseSurfaceTests(unittest.TestCase):
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
         directories = sorted(path for path in BUILTIN_ROOT.iterdir() if path.is_dir())
 
-        self.assertEqual(len(directories), 56)
+        self.assertEqual(len(directories), 57)
         self.assertEqual({path.name for path in directories}, {module.id for module in registry.all()})
         for path in directories:
             self.assertEqual({item.name for item in path.iterdir()}, {"module.json"})

@@ -2136,6 +2136,32 @@
     },
     {
       "access": "offline",
+      "description": "Guide and execute a header-preserving tabix query against a coordinate-sorted BGZF VCF 4.5 artifact with its declared TBI index, then validate sample identity, reference coordinates, record structure, and bounded regional membership.",
+      "entrypoint": "scientific-command",
+      "id": "variant-region-query-tabix",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "region": {
+            "maxLength": 200,
+            "minLength": 5,
+            "pattern": "[^:\\s]+:[1-9][0-9]*-[1-9][0-9]*",
+            "type": "string"
+          }
+        },
+        "required": [
+          "region"
+        ],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve indexed VCF records by genomic region",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
       "description": "Count SNVs, indels, MNVs, filters, chromosomes, transitions, transversions, and Ti/Tv ratio.",
       "entrypoint": "biomed_workbench.capabilities.omics:variant_summary",
       "id": "variant-summary",
@@ -2161,7 +2187,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 56,
+  "entry_count": 57,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

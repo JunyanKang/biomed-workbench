@@ -37,6 +37,47 @@ def command(**overrides):
 
 
 class ScientificCommandTests(unittest.TestCase):
+    def test_materializes_a_digest_bound_companion_index_without_argv_exposure(self):
+        indexed = command(
+            inputs=(
+                CommandInput("reads", "reads", "reads", "reads.fastq"),
+                CommandInput("index", "reads", "index", "reads.fastq.idx", sidecar_for="reads"),
+            ),
+        )
+        body = """
+import argparse, json, pathlib
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True)
+parser.add_argument('--output', required=True)
+parser.add_argument('--label', required=True)
+args = parser.parse_args()
+sidecar = pathlib.Path(args.input + '.idx')
+json.dump({'index': sidecar.read_text(encoding='utf-8'), 'argv_has_index': any(value.endswith('.idx') for value in __import__('sys').argv)}, open(args.output, 'w', encoding='utf-8'))
+"""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tool = executable(root / "fixture-tool", body)
+            source = root / "reads.fastq"
+            source.write_text("ACGT\n", encoding="utf-8")
+            index = root / "reads.fastq.idx"
+            index.write_text("bound-index", encoding="utf-8")
+            store = ProjectArtifactStore(root / "artifacts")
+            source_payload = store.import_file(source, role="reads", media_type="text/plain")
+            index_payload = store.import_file(index, role="index", media_type="application/octet-stream")
+            result = execute_scientific_command(
+                indexed,
+                store=store,
+                input_payloads={"reads": source_payload, "index": index_payload},
+                parameters={"label": "sample-01"},
+                tool_versions={"fixture-tool": "2.4.1"},
+                dependency_versions={"python": "3.14.3"},
+                compatibility_row_id="fixture-tool-2.4.1-json-1",
+                executable_resolver=lambda _name: tool,
+            )
+            output = json.loads(store.resolve(result.output_payloads[0]).read_text(encoding="utf-8"))
+        self.assertEqual(output, {"index": "bound-index", "argv_has_index": False})
+        self.assertEqual(result.provenance["inputs"]["index"]["sha256"], index_payload.sha256)
+
     def test_imports_declared_derived_sidecar_without_requiring_an_argv_placeholder(self):
         sidecar = command(
             outputs=(
@@ -469,6 +510,8 @@ print('completed')
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads", "tar-directory"),)),
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads", "file", "config.txt"),)),
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads", "zip-directory", "../config.txt"),)),
+            lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads.fastq"), CommandInput("index", "reads", "index", "index.tbi", sidecar_for="missing"))),
+            lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads.fastq"), CommandInput("index", "reads", "index", "other.tbi", sidecar_for="reads"))),
             lambda: command(working_directory_input="missing"),
             lambda: command(path_mode="host-absolute"),
             lambda: command(outputs=(CommandOutput("report", "report", "report", "nested/report.json", "application/json"),)),

@@ -1,5 +1,5 @@
 {
-  "module_count": 56,
+  "module_count": 57,
   "modules": [
     {
       "access": "offline",
@@ -15300,6 +15300,364 @@
       "access": "offline",
       "alternatives": [],
       "assumptions": [
+        "The BGZF VCF and TBI are a matched pair; contig names, coordinate convention, reference build, reference sequence digest, sample order, and processing level are correctly declared."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "htslib": [
+              ">=1.23,<1.24"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "variant-region-query-tabix-e2e-v1"
+          ],
+          "id": "tabix-1.23-vcf-4.5-bgzf-tbi-region",
+          "input_formats": {
+            "variants": [
+              "vcf@4.5"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "regional_variants": [
+              "vcf@4.5"
+            ]
+          },
+          "platforms": [
+            "macos-arm64"
+          ],
+          "regression_evidence_ids": [
+            "variant-region-query-tabix-regression-v1"
+          ],
+          "tool_versions": {
+            "tabix": [
+              ">=1.23,<1.24"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "variant-summary",
+        "variant-evidence",
+        "tumor-mutation-burden"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=1.23,<1.24"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "htslib-runtime",
+          "name": "htslib",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Decode BGZF VCF blocks, read the TBI coordinate index, and retrieve bounded genomic regions.",
+          "required": true,
+          "tested_versions": [
+            "1.23"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "htslib\\) ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "tabix",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/samtools/htslib/releases/tag/1.23"
+        }
+      ],
+      "description": "Guide and execute a header-preserving tabix query against a coordinate-sorted BGZF VCF 4.5 artifact with its declared TBI index, then validate sample identity, reference coordinates, record structure, and bounded regional membership.",
+      "domains": [
+        "omics"
+      ],
+      "entrypoint": "scientific-command",
+      "evidence_effects": [
+        "retrieves_declared_regional_variant_observations"
+      ],
+      "execution": {
+        "command": {
+          "arguments": [
+            "-h",
+            "{input:vcf}",
+            "{parameter:region}"
+          ],
+          "executable": "tabix",
+          "inputs": [
+            {
+              "filename": "variants.vcf.gz",
+              "name": "vcf",
+              "port": "variants",
+              "role": "variants"
+            },
+            {
+              "filename": "variants.vcf.gz.tbi",
+              "name": "index",
+              "port": "variants",
+              "role": "index",
+              "sidecar_for": "vcf"
+            }
+          ],
+          "max_output_bytes": 10000000,
+          "max_payload_bytes": 100000000,
+          "outputs": [
+            {
+              "capture": "stdout",
+              "filename": "regional-variants.vcf",
+              "media_type": "text/vcf",
+              "name": "subset",
+              "port": "regional_variants",
+              "role": "variants"
+            }
+          ],
+          "parameter_names": [
+            "region"
+          ],
+          "path_mode": "workdir-relative",
+          "timeout_seconds": 120,
+          "tool_name": "tabix"
+        },
+        "kind": "command",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 120
+      },
+      "id": "variant-region-query-tabix",
+      "input_artifacts": [
+        {
+          "artifact_type": "variant_bundle",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "bgzf"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "vcf",
+              "orientations": [
+                "sites-by-samples"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [
+                "tbi"
+              ],
+              "versions": [
+                "4.5"
+              ]
+            }
+          ],
+          "name": "variants",
+          "processing_levels": [
+            "raw-calls",
+            "filtered",
+            "normalized",
+            "annotated"
+          ],
+          "required_metadata": [
+            "fileformat",
+            "contig",
+            "sample-id",
+            "sample-manifest-digest",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order",
+            "index-type"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "region": {
+            "maxLength": 200,
+            "minLength": 5,
+            "pattern": "[^:\\s]+:[1-9][0-9]*-[1-9][0-9]*",
+            "type": "string"
+          }
+        },
+        "required": [
+          "region"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "query VCF by region",
+        "retrieve indexed variants",
+        "tabix VCF query",
+        "\u6309\u57fa\u56e0\u7ec4\u533a\u57df\u63d0\u53d6VCF\u53d8\u5f02"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The validated row supports one explicit region per invocation against VCF 4.5 BGZF+TBI on macOS arm64. It does not normalize alleles, split multiallelic records, verify REF against FASTA, annotate consequences, filter genotypes, calculate association, or interpret clinical significance."
+      ],
+      "maturity": "validated",
+      "module_type": "analysis",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "variant_table",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "vcf",
+              "orientations": [
+                "sites-by-samples"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "4.5"
+              ]
+            }
+          ],
+          "name": "regional_variants",
+          "processing_levels": [
+            "raw-calls",
+            "filtered",
+            "normalized",
+            "annotated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "fileformat",
+            "contig",
+            "sample-id",
+            "sample-manifest-digest",
+            "reference-build",
+            "reference-sequence-digest",
+            "query-region",
+            "sort-order"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "payload_roles": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "payload_roles"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "VCF records are coordinate sorted and structurally valid under VCF 4.5; the TBI digest is bound to the same variant artifact; the requested region names a declared contig and uses one-based inclusive coordinates."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://github.com/samtools/htslib"
+        ],
+        "license": "MIT"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "VCF payload, TBI payload, fileformat, contig dictionary, sample manifest, reference build, sequence digest, sort order, and index type must reconcile before execution.",
+          "id": "tabix-vcf-bundle-integrity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Output must preserve the VCF 4.5 header and sample order, remain coordinate sorted, and contain only records overlapping the declared one-based inclusive region.",
+          "id": "tabix-vcf-region-output-integrity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Regional retrieval alone does not establish calling validity, normalization, annotation quality, cohort association, pathogenicity, or clinical actionability.",
+          "id": "tabix-vcf-inference-scope",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Which records in a declared, indexed VCF overlap one bounded one-based genomic region without changing their original header, sample order, alleles, filters, or genotypes?"
+      ],
+      "schema_version": 1,
+      "title": "Retrieve indexed VCF records by genomic region",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            ">=1.23,<1.24"
+          ],
+          "ecosystem": "system",
+          "identity": "tabix",
+          "mismatch_policy": "block",
+          "name": "tabix",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.23"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.23,<1.24"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "The supported line validates -h header-preserving retrieval from a BGZF VCF with an adjacent TBI for reference:start-end regions.",
+              "id": "tabix-123-header-region-query",
+              "required_action": "Validate VCF fileformat, fixed header, sample order, coordinate sorting, regional membership, and exact source-record reconciliation after retrieval.",
+              "source": "https://www.htslib.org/doc/1.23/tabix.html"
+            }
+          ],
+          "version_pattern": "tabix \\(htslib\\) ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "tabix",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/samtools/htslib/releases/tag/1.23"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
         "Variants use one coordinate and reference system and ref/alt alleles are normalized sufficiently for descriptive counting."
       ],
       "compatibility_matrix": [
@@ -15536,6 +15894,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "c45f4890c4d1a6f486837413662735708fcb6511f8f7389ddb192779ebbf709c",
+  "registry_digest": "cfbd1ab33e95dabd5774fc04af99d093a12f046fb2f8b9e5702906f37a05d308",
   "schema_version": 1
 }

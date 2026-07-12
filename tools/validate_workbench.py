@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 56:
-            errors.append(f"built-in module count must be 56, found {len(modules)}")
+        if len(modules) != 57:
+            errors.append(f"built-in module count must be 57, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -173,10 +173,10 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 369
+                or research_report.get("test_count", 0) < 372
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
-                != {"scientific_command", "command_input_binding", "command_derived_sidecar_output", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"}
+                != {"scientific_command", "command_companion_sidecar_input", "command_input_binding", "command_derived_sidecar_output", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"}
                 or graph_report != {"node_count": len(graph.nodes), "edge_count": len(graph.edges), "digest": graph.digest}
             ):
                 errors.append("research engine report differs from the discovered registry or capability graph")
@@ -399,6 +399,29 @@ def main() -> int:
                 or sort_report.get("scientific_summary", {}).get("counts", {}).get("total") != 3
             ):
                 errors.append("samtools sort/index evidence differs from its module, BAM/CSI outputs, header, index, or read accounting")
+        vcf_query_report_path = ROOT / "reports" / "vcf-region-query-live-verification.json"
+        try:
+            vcf_query_report = json.loads(vcf_query_report_path.read_text(encoding="utf-8"))
+            vcf_query_manifest = registry.get("variant-region-query-tabix")
+            vcf_query_row = vcf_query_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("tabix VCF region-query live verification evidence is missing or invalid")
+        else:
+            summary = vcf_query_report.get("scientific_summary", {})
+            if (
+                vcf_query_report.get("passed") is not True
+                or vcf_query_report.get("module_version") != vcf_query_manifest.version
+                or vcf_query_report.get("compatibility_row_id") != vcf_query_row.id
+                or vcf_query_report.get("tool_versions") != {"tabix": "1.23"}
+                or vcf_query_report.get("dependency_versions") != {"htslib": "1.23"}
+                or vcf_query_report.get("fixture", {}).get("format") != "vcf@4.5"
+                or vcf_query_report.get("fixture", {}).get("index_type") != "tbi"
+                or not all(vcf_query_report.get("bundle_integrity", {}).values())
+                or summary.get("record_count") != 2
+                or summary.get("samples") != ["SAMPLE_A"]
+                or summary.get("region") != "chr1:90-220"
+            ):
+                errors.append("tabix VCF region-query evidence differs from its module, row, VCF/TBI fixture, sample, or regional record checks")
 
         reconciliation_path = ROOT / "reports" / "source-reconciliation-summary.json"
         assimilation_path = ROOT / "reports" / "source-assimilation-summary.json"
