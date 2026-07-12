@@ -28,6 +28,7 @@ class CapabilityCoverageAuditTests(unittest.TestCase):
                 "learned_file_count",
                 "current_capability_ids",
                 "source_file_counts",
+                "source_reconciliation",
                 "implemented_expansion",
                 "priority_gaps",
                 "product_exclusions",

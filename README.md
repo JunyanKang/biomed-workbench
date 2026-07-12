@@ -48,6 +48,7 @@ Run these checks from the repository root before pushing or tagging a release:
 ```bash
 python3 tools/validate_workbench.py --release
 python3 -m unittest discover -s tests -v
+python3 tools/reconcile_sources.py --manifest .source-audit/manifest.jsonl --design-ledger .source-audit/rewrite-ledger.jsonl --private-output .source-audit/reconciliation-ledger.jsonl --public-output reports/source-reconciliation-summary.json
 python3 tools/route_task.py "single-cell analysis and Nature-style result writing"
 python3 tools/search_tools.py --workflow publication reviewer --limit 5
 python3 tools/run_tool.py sequence-inspect --input '{"sequence":"ATGCGC","alphabet":"dna"}'
@@ -115,7 +116,9 @@ Tool-use guidance and routing remain available regardless of the installed versi
 - `tools/search_tools.py`: catalog search and inspection.
 - `tools/run_tool.py`: generic runner for direct, bounded tools.
 - `tools/validate_workbench.py`: release validation for single-entry skill, catalog consistency, source coverage, and publish-safe paths.
+- `tools/reconcile_sources.py`: development-only one-to-one reconciliation of ignored source/design ledgers into a path-free release receipt root.
 - `reports/compatibility-execution-evidence.json`: path-free regression and end-to-end evidence bound to every supported compatibility row.
+- `reports/source-reconciliation-summary.json`: public counts, pending capability decisions, current registry/test binding, and an irreversible digest over all private per-file receipts.
 - `biomed_workbench/capabilities/`: independently rewritten scientific implementations.
 - `biomed_workbench/modules/builtin/`: one versioned scientific contract per independently discoverable module.
 - `biomed_workbench/kernel/`: immutable project context, content-addressed artifacts, hypotheses, evidence, decisions, DAG state, and replay.
@@ -135,4 +138,6 @@ Foundational FASTQ, FASTA, SAM/BAM/CRAM, VCF/BCF, BED, GTF/GFF3, count-matrix, H
 
 This workbench is an independent clean-room implementation informed by inspected biomedical research projects and installed research skills. It does not route through those projects or vendor their source trees.
 
-See `NOTICE.md` for attribution and `reports/` for aggregate source-learning evidence.
+Every inspected source file has one private content-identified design receipt. The release reconciler rejects missing or duplicate receipts, then classifies each as implemented, superseded, guidance, excluded, provenance, or pending. Executable capability and schema decisions remain pending until they are bound to an independent module, compatibility policy, regression test, and representative execution; therefore reading a source file is never presented as functional implementation.
+
+The ignored `.source-audit/` ledgers are development evidence and are neither runtime inputs nor published path bridges. The repository publishes only source-neutral aggregate reports and a SHA-256 receipt root. See `NOTICE.md` for attribution and `reports/` for the releasable evidence.

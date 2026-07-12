@@ -161,6 +161,7 @@ def main() -> int:
         research_report_path = ROOT / "reports" / "research-engine-verification.json"
         compatibility_evidence_path = ROOT / "reports" / "compatibility-execution-evidence.json"
         fixture_root = ROOT / "tests" / "fixtures" / "research-cycles"
+        research_report = {}
         try:
             research_report = json.loads(research_report_path.read_text(encoding="utf-8"))
             scenario_fixtures = [json.loads(path.read_text(encoding="utf-8")) for path in sorted(fixture_root.glob("*.json"))]
@@ -172,7 +173,7 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 363
+                or research_report.get("test_count", 0) < 369
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
                 != {"scientific_command", "command_input_binding", "command_derived_sidecar_output", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"}
@@ -398,6 +399,37 @@ def main() -> int:
                 or sort_report.get("scientific_summary", {}).get("counts", {}).get("total") != 3
             ):
                 errors.append("samtools sort/index evidence differs from its module, BAM/CSI outputs, header, index, or read accounting")
+
+        reconciliation_path = ROOT / "reports" / "source-reconciliation-summary.json"
+        assimilation_path = ROOT / "reports" / "source-assimilation-summary.json"
+        design_path = ROOT / "reports" / "rewrite-design-summary.json"
+        try:
+            reconciliation = json.loads(reconciliation_path.read_text(encoding="utf-8"))
+            assimilation = json.loads(assimilation_path.read_text(encoding="utf-8"))
+            design = json.loads(design_path.read_text(encoding="utf-8"))
+            source_file_count = sum(source["file_count"] for source in assimilation["sources"])
+            skill_digest = hashlib.sha256((ROOT / "skills" / "biomed-workbench" / "SKILL.md").read_bytes()).hexdigest()
+        except (OSError, json.JSONDecodeError, KeyError, TypeError):
+            errors.append("source reconciliation evidence is missing or invalid")
+        else:
+            current = reconciliation.get("current_evidence", {})
+            serialized = reconciliation_path.read_text(encoding="utf-8")
+            if (
+                reconciliation.get("passed") is not True
+                or reconciliation.get("file_count") != source_file_count
+                or reconciliation.get("file_count") != design.get("learned_file_count")
+                or reconciliation.get("reconciled_count", 0) + reconciliation.get("pending_count", 0) != source_file_count
+                or sum(reconciliation.get("status_counts", {}).values()) != source_file_count
+                or reconciliation.get("action_counts") != design.get("action_counts")
+                or current.get("module_count") != len(modules)
+                or current.get("registry_digest") != registry.digest
+                or current.get("skill_sha256") != skill_digest
+                or current.get("test_count") != research_report.get("test_count")
+                or not re.fullmatch(r"[0-9a-f]{64}", str(reconciliation.get("receipt_root_digest", "")))
+                or reconciliation.get("pending_count", 0) <= 0
+                or any(marker.lower() in serialized.lower() for marker in ("/Users/", "/private/", '"path"', '"private_path"', "Biomni", "openscience", "claude"))
+            ):
+                errors.append("source reconciliation is stale, incomplete, path-bearing, or overclaims source-union coverage")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):
