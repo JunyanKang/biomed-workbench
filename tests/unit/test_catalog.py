@@ -1,12 +1,15 @@
 import unittest
 
 from biomed_workbench.catalog import (
+    BUILTIN_MODULE_ROOT,
     CapabilityResolutionError,
     all_capabilities,
     capability_to_dict,
+    load_module_capabilities,
     resolve,
     resolve_entrypoint,
 )
+from biomed_workbench.modules.registry import ModuleRegistry
 from biomed_workbench.models import Capability
 
 
@@ -48,6 +51,23 @@ class CatalogTests(unittest.TestCase):
     def test_catalog_ids_are_unique_and_sorted(self):
         ids = [capability.id for capability in all_capabilities()]
         self.assertEqual(ids, sorted(set(ids)))
+
+    def test_runtime_catalog_is_a_projection_of_builtin_modules(self):
+        registry = ModuleRegistry.discover(BUILTIN_MODULE_ROOT)
+        capabilities = {capability.id: capability for capability in all_capabilities()}
+
+        self.assertEqual(set(capabilities), {module.id for module in registry.all()})
+        for module in registry.all():
+            capability = capabilities[module.id]
+            self.assertEqual(capability.entrypoint, module.entrypoint)
+            self.assertEqual(capability.input_schema, module.input_schema)
+            self.assertEqual(capability.kind, module.execution.kind)
+
+    def test_custom_module_root_loads_without_domain_specifications(self):
+        capabilities = load_module_capabilities(BUILTIN_MODULE_ROOT)
+
+        self.assertEqual(len(capabilities), 48)
+        self.assertEqual([item.id for item in capabilities], sorted(item.id for item in capabilities))
 
 
 if __name__ == "__main__":

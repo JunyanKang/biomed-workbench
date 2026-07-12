@@ -504,30 +504,30 @@ git commit -m "feat: generate deterministic scientific module index"
 - Consumes: built-in `ModuleRegistry`.
 - Preserves: `all_capabilities()`, `resolve(id)`, `resolve_entrypoint(capability)`, and `run(id, inputs)`.
 
-- [ ] **Step 1: Add failing facade-parity tests**
+- [x] **Step 1: Add failing facade-parity tests**
 
 Assert 48 IDs, immutable repeated loads, module-to-capability field parity,
 entrypoint resolution, schema rejection, safe error wrapping, and representative
 execution from every domain.
 
-- [ ] **Step 2: Run and verify catalog still reads domain specs**
+- [x] **Step 2: Run and verify catalog still reads domain specs**
 
 The new test must patch the legacy specification root to an invalid directory
 and fail, proving the old dependency remains before implementation.
 
-- [ ] **Step 3: Implement registry-backed compatibility facade**
+- [x] **Step 3: Implement registry-backed compatibility facade**
 
 Create one lazily initialized built-in registry. Convert manifests to existing
 `Capability` values at the boundary. Resolve execution by module ID internally.
 Do not load `capability_specs` or generated `index.json` at runtime.
 
-- [ ] **Step 4: Run all execution regressions**
+- [x] **Step 4: Run all execution regressions**
 
 Run: `python3 -m unittest tests.unit.test_catalog tests.unit.test_runner tests.e2e.test_offline_capabilities`
 
 Expected: all 48 capability executions remain valid.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add biomed_workbench/catalog.py biomed_workbench/runner.py tests/unit/test_catalog.py tests/unit/test_runner.py tests/e2e/test_offline_capabilities.py

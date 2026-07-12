@@ -9,9 +9,12 @@ from pathlib import Path
 from typing import Callable
 
 from .models import Capability
+from .modules.index import BUILTIN_ROOT
+from .modules.registry import ModuleRegistry, ModuleRegistryError
 
 
 SPECIFICATION_ROOT = Path(__file__).with_name("capability_specs")
+BUILTIN_MODULE_ROOT = BUILTIN_ROOT
 SPECIFICATION_FIELDS = {
     "id",
     "workflow",
@@ -78,7 +81,32 @@ def load_capabilities(specification_root: Path = SPECIFICATION_ROOT) -> tuple[Ca
     return tuple(capabilities[capability_id] for capability_id in sorted(capabilities))
 
 
-_CAPABILITIES = load_capabilities()
+def _module_capability(module) -> Capability:
+    values = {
+        "id": module.id,
+        "workflow": module.domains[0],
+        "kind": module.execution.kind,
+        "title": module.title,
+        "description": module.description,
+        "entrypoint": module.entrypoint,
+        "input_schema": dict(module.input_schema),
+        "requirements": (),
+        "access": module.access,
+        "mutability": module.mutability,
+    }
+    return Capability(**values)
+
+
+def load_module_capabilities(module_root: Path = BUILTIN_MODULE_ROOT) -> tuple[Capability, ...]:
+    try:
+        registry = ModuleRegistry.discover(module_root)
+    except ModuleRegistryError as exc:
+        raise CapabilitySpecificationError("invalid scientific module registry") from exc
+    return tuple(_module_capability(module) for module in registry.all())
+
+
+_MODULE_REGISTRY = ModuleRegistry.discover(BUILTIN_MODULE_ROOT)
+_CAPABILITIES = tuple(_module_capability(module) for module in _MODULE_REGISTRY.all())
 _REGISTRY = {capability.id: capability for capability in _CAPABILITIES}
 
 
@@ -90,6 +118,12 @@ def resolve(capability_id: str) -> Capability:
 
 
 def resolve_entrypoint(capability: Capability) -> Callable[..., object] | Path:
+    registered = _REGISTRY.get(capability.id)
+    if registered is not None and registered.entrypoint == capability.entrypoint:
+        try:
+            return _MODULE_REGISTRY.resolve_entrypoint(capability.id)
+        except ModuleRegistryError:
+            raise CapabilityResolutionError(f"entrypoint cannot be resolved: {capability.id}") from None
     if capability.kind == "workflow" and ":" not in capability.entrypoint:
         path = Path(capability.entrypoint)
         if not path.is_file():
