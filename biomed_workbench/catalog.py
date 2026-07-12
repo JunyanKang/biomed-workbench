@@ -556,6 +556,36 @@ def _register_builtins() -> None:
             entrypoint="biomed_workbench.capabilities.clinical:audit_report",
             input_schema=_object_schema({"text":{"type":"string","minLength":1},"standard":{"type":"string","enum":["CARE","CONSORT","ICH-E3"]}},("text",)), requirements=(), access="offline", mutability="read_only",
         ),
+        Capability(
+            id="manuscript-audit", workflow="publication", kind="python", title="Audit manuscript readiness",
+            description="Check core sections, claim grounding, figures, data availability, and code availability before editorial synthesis.",
+            entrypoint="biomed_workbench.capabilities.publication:manuscript_audit",
+            input_schema=_object_schema({"sections":{"type":"object"},"claims":{"type":"array","items":{"type":"object"}},"figure_count":{"type":"integer","minimum":0},"data_availability":{"type":"boolean"},"code_availability":{"type":"boolean"}},("sections","claims")), requirements=(), access="offline", mutability="read_only",
+        ),
+        Capability(
+            id="citation-audit", workflow="publication", kind="python", title="Audit reference metadata",
+            description="Normalize DOI values, detect duplicates, and report missing citation metadata without asserting validity.",
+            entrypoint="biomed_workbench.capabilities.publication:citation_audit",
+            input_schema=_object_schema({"references":{"type":"array","items":{"type":"object"}}},("references",)), requirements=(), access="offline", mutability="read_only",
+        ),
+        Capability(
+            id="response-matrix", workflow="publication", kind="python", title="Build a reviewer response matrix",
+            description="Preserve every reviewer comment, response, manuscript action, status, and unresolved item.",
+            entrypoint="biomed_workbench.capabilities.publication:response_matrix",
+            input_schema=_object_schema({"comments":{"type":"array","items":{"type":"object"}}},("comments",)), requirements=(), access="offline", mutability="read_only",
+        ),
+        Capability(
+            id="figure-specification", workflow="publication", kind="python", title="Specify a scientific figure",
+            description="Require a claim, data source, and plot form for every uniquely labeled figure panel.",
+            entrypoint="biomed_workbench.capabilities.publication:figure_specification",
+            input_schema=_object_schema({"title":{"type":"string","minLength":1},"panels":{"type":"array","items":{"type":"object"},"minItems":1}},("title","panels")), requirements=(), access="offline", mutability="read_only",
+        ),
+        Capability(
+            id="patent-disclosure-audit", workflow="publication", kind="python", title="Audit a research invention disclosure",
+            description="Check inventive concept, essential features, enablement examples, alternatives, and prior-art evidence.",
+            entrypoint="biomed_workbench.capabilities.publication:patent_disclosure_audit",
+            input_schema=_object_schema({"problem":{"type":"string"},"solution":{"type":"string"},"essential_features":{"type":"array","items":{"type":"string"}},"examples":{"type":"array","items":{"type":"string"}},"alternatives":{"type":"array","items":{"type":"string"}},"prior_art":{"type":"array","items":{"type":"string"}}},("problem","solution","essential_features","examples","alternatives","prior_art")), requirements=(), access="offline", mutability="read_only",
+        ),
     )
     for definition in definitions:
         register(definition)

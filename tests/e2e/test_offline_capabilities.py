@@ -165,6 +165,26 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         output = execute("clinical-report-audit", {"text": "Title Abstract Case presentation Timeline Diagnosis Treatment Follow-up Consent", "standard": "CARE"})
         self.assertIn("timeline", output["present_sections"])
 
+    def test_manuscript_audit(self):
+        output = execute("manuscript-audit", {"sections": {"abstract":"A","introduction":"I","results":"R","discussion":"D","methods":"M"}, "claims": [{"claim":"C","citation_count":1,"evidence":"experiment"}], "figure_count": 1, "data_availability": True, "code_availability": True})
+        self.assertTrue(output["ready"])
+
+    def test_citation_audit(self):
+        output = execute("citation-audit", {"references": [{"authors":"A","title":"T","year":2020,"journal":"J","doi":"10.1000/x"}]})
+        self.assertEqual(output["complete_count"], 1)
+
+    def test_response_matrix(self):
+        output = execute("response-matrix", {"comments": [{"reviewer":"1","comment":"C","response":"R","action":"A","status":"completed"}]})
+        self.assertEqual(output["unresolved_indices"], [])
+
+    def test_figure_specification(self):
+        output = execute("figure-specification", {"title":"F","panels":[{"label":"a","claim":"C","data_source":"D","plot":"scatter"}]})
+        self.assertTrue(output["ready"])
+
+    def test_patent_disclosure_audit(self):
+        output = execute("patent-disclosure-audit", {"problem":"P","solution":"S","essential_features":["E"],"examples":["X"],"alternatives":["A"],"prior_art":["R"]})
+        self.assertTrue(output["ready_for_claim_drafting"])
+
 
 if __name__ == "__main__":
     unittest.main()
