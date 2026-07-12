@@ -12,7 +12,11 @@ import sys
 from dataclasses import dataclass
 from typing import Any, Callable, Mapping
 
+from ..formats import FormatRegistry, FormatSnapshot, validate_format
 from .contract import ArtifactPort, CompatibilityRow, FormatContract, ModuleManifest
+
+
+FORMAT_REGISTRY = FormatRegistry.builtin()
 
 
 @dataclass(frozen=True)
@@ -34,6 +38,13 @@ class ArtifactSnapshot:
     annotation_release: str | None
     orientation: str
     metadata_fields: tuple[str, ...]
+    representation: str = "structured"
+    sort_order: str = "unsorted"
+    reference_sequence_digest: str | None = None
+    identifier_namespace: str | None = None
+    sample_manifest_digest: str | None = None
+    payload_roles: tuple[str, ...] = ()
+    processing_level: str = "raw"
 
 
 @dataclass(frozen=True)
@@ -220,6 +231,29 @@ def _artifact_findings(
         missing_metadata = sorted(set(port.required_metadata) - set(artifact.metadata_fields))
         if missing_metadata:
             findings.append(_finding("MISSING_METADATA", port.name, f"Required metadata fields are absent: {', '.join(missing_metadata)}."))
+        profile = FORMAT_REGISTRY.find_token(token)
+        if profile is not None:
+            profile_snapshot = FormatSnapshot(
+                profile_id=profile.id,
+                representation=artifact.representation,
+                compression=artifact.compression,
+                indexes=artifact.indexes,
+                sort_order=artifact.sort_order,
+                coordinate_system=artifact.coordinate_system,
+                genome_build=artifact.genome_build,
+                reference_sequence_digest=artifact.reference_sequence_digest,
+                annotation_release=artifact.annotation_release,
+                identifier_namespace=artifact.identifier_namespace,
+                sample_manifest_digest=artifact.sample_manifest_digest,
+                orientation=artifact.orientation,
+                processing_level=artifact.processing_level,
+                metadata_fields=artifact.metadata_fields,
+                payload_roles=artifact.payload_roles,
+            )
+            findings.extend(
+                _finding(item.code, port.name, item.message)
+                for item in validate_format(profile, profile_snapshot)
+            )
     unknown_ports = sorted(set(supplied) - {port.name for port in manifest.input_artifacts})
     for port_name in unknown_ports:
         findings.append(_finding("UNKNOWN_ARTIFACT_PORT", port_name, "Artifact metadata targets an undeclared input port."))

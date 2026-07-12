@@ -1,5 +1,6 @@
 import copy
 import unittest
+from dataclasses import replace
 
 from biomed_workbench.modules.compatibility import (
     ArtifactSnapshot,
@@ -168,6 +169,34 @@ class ModuleCompatibilityTests(unittest.TestCase):
 
         decision = evaluate_compatibility(manifest, environment(), (artifact(),))
         self.assertIn("MISSING_INDEX", {finding.code for finding in decision.findings})
+
+    def test_registered_format_profile_adds_foundational_metadata_gate(self):
+        payload = external_manifest_payload()
+        payload["input_artifacts"][0]["formats"][0]["versions"] = ["0.1.0"]
+        payload["input_artifacts"][0]["formats"][0]["orientations"] = ["observations-by-variables"]
+        payload["compatibility_matrix"][0]["input_formats"] = {"records": ["h5ad@0.1.0"]}
+        manifest = parse_manifest(payload)
+        metadata_fields = ("sample_id", "batch", "encoding-type", "encoding-version", "obs-index", "var-index")
+        snapshot = artifact(
+            format_version="0.1.0",
+            orientation="observations-by-variables",
+            metadata_fields=metadata_fields,
+            representation="container",
+            sort_order="matrix-index-order",
+            identifier_namespace="ensembl-gene",
+            payload_roles=("matrix",),
+            processing_level="filtered-counts",
+        )
+
+        rejected = evaluate_compatibility(manifest, environment(), (snapshot,))
+        accepted = evaluate_compatibility(
+            manifest,
+            environment(),
+            (replace(snapshot, sample_manifest_digest="b" * 64),),
+        )
+
+        self.assertIn("SAMPLE_MANIFEST_MISSING", {finding.code for finding in rejected.findings})
+        self.assertTrue(accepted.allowed)
 
     def test_unvalidated_environment_never_invokes_entrypoint(self):
         calls = []

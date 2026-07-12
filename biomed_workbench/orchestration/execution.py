@@ -155,6 +155,13 @@ def _snapshots(manifest: ModuleManifest, node: PlanNode, artifacts: dict[str, Sc
                 annotation_release=artifact.annotation_release,
                 orientation=artifact.orientation,
                 metadata_fields=tuple(sorted(metadata - {""})),
+                representation=artifact.representation,
+                sort_order=artifact.sort_order or "unsorted",
+                reference_sequence_digest=artifact.reference_sequence_digest,
+                identifier_namespace=artifact.identifier_namespace,
+                sample_manifest_digest=artifact.sample_manifest_digest,
+                payload_roles=tuple(payload.role for payload in artifact.payloads),
+                processing_level=artifact.processing_level,
             )
         )
     return tuple(snapshots)

@@ -14,12 +14,14 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from biomed_workbench.catalog import all_capabilities, capability_to_dict, resolve_entrypoint  # noqa: E402
+from biomed_workbench.formats import FormatRegistry  # noqa: E402
 from biomed_workbench.modules.index import BUILTIN_ROOT, MODULE_INDEX, build_index  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry, ModuleRegistryError  # noqa: E402
 from biomed_workbench.orchestration.graph import build_capability_graph  # noqa: E402
 from biomed_workbench.services.credentials import ALLOWED_CREDENTIALS  # noqa: E402
 from biomed_workbench.version import VERSION  # noqa: E402
 from tools.validate_module import validate_module  # noqa: E402
+from tools.build_format_contract_report import build as build_format_contract_report  # noqa: E402
 
 CATALOG_FIELDS = {"id", "workflow", "kind", "title", "description", "entrypoint", "input_schema", "requirements", "access", "mutability"}
 SECRET_PATTERNS = [
@@ -111,6 +113,19 @@ def main() -> int:
         if any(marker in operational_identity for marker in FORBIDDEN_INFRASTRUCTURE_MARKERS):
             errors.append(f"capability claims excluded infrastructure ownership: {capability.id}")
 
+    format_registry = None
+    format_report_path = ROOT / "reports" / "format-contract-registry.json"
+    try:
+        format_registry = FormatRegistry.builtin()
+        format_report = json.loads(format_report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, ValueError) as exc:
+        errors.append(f"format contract registry or report is missing or invalid: {exc}")
+    else:
+        if format_report != build_format_contract_report():
+            errors.append("format contract report differs from the built-in format registry")
+        if len(format_registry.all()) != 17 or format_report.get("registry_digest") != format_registry.digest:
+            errors.append("foundational format profile count or digest is invalid")
+
     registry = None
     try:
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
@@ -156,7 +171,7 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 310
+                or research_report.get("test_count", 0) < 322
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
                 != {"scientific_command", "command_input_binding", "command_output_binding", "bounded_process_result"}
@@ -266,6 +281,9 @@ def main() -> int:
     if registry is not None:
         print(f"modules={len(registry.all())}")
         print(f"registry_digest={registry.digest}")
+    if format_registry is not None:
+        print(f"format_profiles={len(format_registry.all())}")
+        print(f"format_registry_digest={format_registry.digest}")
     print("credentials=" + ",".join(sorted(ALLOWED_CREDENTIALS)))
     return 0
 

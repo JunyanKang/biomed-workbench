@@ -99,10 +99,28 @@ class ScientificArtifactTests(unittest.TestCase):
             {"quality_status": "looks-good"},
             {"content": {"NCBI_API_KEY": "private"}},
             {"content": {"source": "/Users/researcher/source.tsv"}},
+            {"reference_sequence_digest": "not-a-digest"},
+            {"sample_manifest_digest": "not-a-digest"},
+            {"metadata_fields": ("sample-id", "sample-id")},
         )
         for overrides in invalid:
             with self.subTest(overrides=overrides), self.assertRaises(ValueError):
                 artifact(**overrides)
+
+    def test_explicit_format_validation_metadata_round_trips(self):
+        value = artifact(
+            sort_order="coordinate",
+            reference_sequence_digest="a" * 64,
+            sample_manifest_digest="b" * 64,
+            metadata_fields=("sample-id", "batch"),
+            representation="container",
+        )
+
+        restored = ScientificArtifact.from_dict(value.to_dict())
+
+        self.assertEqual(restored, value)
+        self.assertEqual(restored.sort_order, "coordinate")
+        self.assertEqual(restored.sample_manifest_digest, "b" * 64)
 
 
 if __name__ == "__main__":

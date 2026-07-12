@@ -13,6 +13,7 @@ from .identity import FrozenMapping, digest_value, freeze_mapping, thaw, validat
 QUALITY_STATUSES = frozenset({"unassessed", "passed", "warning", "major", "fatal"})
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+._-]*$")
 _VERSION_RE = re.compile(r"^[0-9A-Za-z][0-9A-Za-z+._-]*$")
+_DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 def _token(value: str, location: str, pattern: re.Pattern[str] = _TOKEN_RE) -> str:
@@ -51,6 +52,11 @@ class ScientificArtifact:
     content: Mapping[str, Any]
     content_digest: str
     payloads: tuple[ArtifactPayload, ...] = ()
+    sort_order: str | None = None
+    reference_sequence_digest: str | None = None
+    sample_manifest_digest: str | None = None
+    metadata_fields: tuple[str, ...] = ()
+    representation: str = "structured"
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "artifact.id"))
@@ -100,6 +106,16 @@ class ScientificArtifact:
         if len({payload.role for payload in payloads}) != len(payloads):
             raise ValueError("artifact payload roles must be unique")
         object.__setattr__(self, "payloads", payloads)
+        object.__setattr__(self, "sort_order", _optional_token(self.sort_order, "artifact.sort_order"))
+        for field_name in ("reference_sequence_digest", "sample_manifest_digest"):
+            value = getattr(self, field_name)
+            if value is not None and (not isinstance(value, str) or not _DIGEST_RE.fullmatch(value)):
+                raise ValueError(f"artifact.{field_name} must be a SHA-256 digest")
+        metadata_fields = tuple(_token(value, "artifact.metadata_fields") for value in self.metadata_fields)
+        if len(set(metadata_fields)) != len(metadata_fields):
+            raise ValueError("artifact.metadata_fields contains duplicates")
+        object.__setattr__(self, "metadata_fields", metadata_fields)
+        object.__setattr__(self, "representation", _token(self.representation, "artifact.representation"))
         expected = self._content_digest(content, payloads)
         if self.content_digest != expected:
             raise ValueError("artifact content digest does not match canonical content")
@@ -126,6 +142,7 @@ class ScientificArtifact:
         values = dict(payload)
         values["source_artifact_ids"] = tuple(values["source_artifact_ids"])
         values["indexes"] = tuple(values["indexes"])
+        values["metadata_fields"] = tuple(values.get("metadata_fields", ()))
         values["payloads"] = tuple(ArtifactPayload.from_dict(item) for item in values.get("payloads", ()))
         return cls(**values)
 
@@ -157,4 +174,14 @@ class ScientificArtifact:
         }
         if self.payloads:
             payload["payloads"] = [value.to_dict() for value in self.payloads]
+        if self.sort_order is not None:
+            payload["sort_order"] = self.sort_order
+        if self.reference_sequence_digest is not None:
+            payload["reference_sequence_digest"] = self.reference_sequence_digest
+        if self.sample_manifest_digest is not None:
+            payload["sample_manifest_digest"] = self.sample_manifest_digest
+        if self.metadata_fields:
+            payload["metadata_fields"] = list(self.metadata_fields)
+        if self.representation != "structured":
+            payload["representation"] = self.representation
         return payload

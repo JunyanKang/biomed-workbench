@@ -46,6 +46,8 @@ An undeclared or untested tool, dependency, format, genome build, coordinate sys
 
 Tool version behavior is structured rather than free text. Each affected surface declares an ID, exact supported version rules, category (`parameter`, `api`, `field`, `default`, `behavior`, `input-format`, or `output-format`), compatibility effect, required action, and authoritative source. Dependencies declare their own identity, typed bounded version probe, parse pattern, tested and allowed versions, platform scope, and structured conflict records. Python runtime, Python/R packages, Java or system commands, services, and databases therefore enter the compatibility decision through declared evidence rather than implicit package discovery.
 
+Foundational omics formats are defined once in the project-owned registry under `biomed_workbench/formats/`. An exact `name@specification-version` match activates the shared profile during the normal module compatibility gate. The profile adds representation, compression, conditional companion-index, sort, coordinate, reference-sequence digest, annotation release, identifier namespace, sample-manifest digest, orientation, processing-level, metadata-field, and payload-role validation. No nearest-version or extension-based fallback is permitted. `reports/format-contract-registry.json` is rebuilt and digest-checked during release validation.
+
 ## Add A Module
 
 Implement an importable, bounded scientific function, then prepare a complete creation request:

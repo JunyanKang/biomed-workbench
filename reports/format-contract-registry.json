@@ -1,0 +1,840 @@
+{
+  "format_names": [
+    "bam",
+    "bcf",
+    "bed",
+    "bigwig",
+    "count-matrix",
+    "cram",
+    "fasta",
+    "fastq",
+    "fragments",
+    "gff3",
+    "gtf",
+    "h5ad",
+    "loom",
+    "matrix-market",
+    "sam",
+    "tabular",
+    "vcf"
+  ],
+  "profile_count": 17,
+  "profiles": [
+    {
+      "annotation_policy": "declared",
+      "authority": "GA4GH-hts-specs",
+      "compression": [
+        "bgzf"
+      ],
+      "coordinate_systems": [
+        "one-based-leftmost"
+      ],
+      "id": "bam-v1",
+      "identifier_namespace_policy": "declared",
+      "index_requirements": [
+        {
+          "all_of": [],
+          "one_of": [
+            "bai",
+            "csi"
+          ],
+          "when_compression": []
+        }
+      ],
+      "name": "bam",
+      "orientations": [
+        "alignment-records"
+      ],
+      "processing_levels": [
+        "aligned",
+        "deduplicated",
+        "recalibrated"
+      ],
+      "reference_policy": "required",
+      "representations": [
+        "binary",
+        "container"
+      ],
+      "required_metadata": [
+        "read-group",
+        "sort-order"
+      ],
+      "required_payload_roles": [
+        "alignments"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "coordinate"
+      ],
+      "specification_source": "https://samtools.github.io/hts-specs/SAMv1.pdf",
+      "specification_version": "1.6"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "GA4GH-hts-specs",
+      "compression": [
+        "bgzf"
+      ],
+      "coordinate_systems": [
+        "one-based-inclusive"
+      ],
+      "id": "bcf-v2",
+      "identifier_namespace_policy": "declared",
+      "index_requirements": [
+        {
+          "all_of": [],
+          "one_of": [
+            "csi"
+          ],
+          "when_compression": []
+        }
+      ],
+      "name": "bcf",
+      "orientations": [
+        "sites-by-samples"
+      ],
+      "processing_levels": [
+        "raw-calls",
+        "filtered",
+        "normalized",
+        "annotated"
+      ],
+      "reference_policy": "required",
+      "representations": [
+        "binary",
+        "container"
+      ],
+      "required_metadata": [
+        "fileformat",
+        "contig",
+        "sample-id"
+      ],
+      "required_payload_roles": [
+        "variants"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "coordinate"
+      ],
+      "specification_source": "https://samtools.github.io/hts-specs/VCFv4.5.pdf",
+      "specification_version": "2.2"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "GA4GH-hts-specs",
+      "compression": [
+        "none",
+        "bgzf"
+      ],
+      "coordinate_systems": [
+        "zero-based-half-open"
+      ],
+      "id": "bed-v1",
+      "identifier_namespace_policy": "declared",
+      "index_requirements": [
+        {
+          "all_of": [],
+          "one_of": [
+            "tbi",
+            "csi"
+          ],
+          "when_compression": [
+            "bgzf"
+          ]
+        }
+      ],
+      "name": "bed",
+      "orientations": [
+        "interval-records"
+      ],
+      "processing_levels": [
+        "features",
+        "peaks",
+        "regions",
+        "fragments"
+      ],
+      "reference_policy": "required",
+      "representations": [
+        "text"
+      ],
+      "required_metadata": [
+        "bed-field-count"
+      ],
+      "required_payload_roles": [
+        "intervals"
+      ],
+      "sample_manifest_policy": "declared",
+      "sort_orders": [
+        "coordinate"
+      ],
+      "specification_source": "https://samtools.github.io/hts-specs/BEDv1.pdf",
+      "specification_version": "1.0"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "UCSC",
+      "compression": [
+        "internal"
+      ],
+      "coordinate_systems": [
+        "zero-based-half-open"
+      ],
+      "id": "bigwig-ucsc-v4",
+      "identifier_namespace_policy": "declared",
+      "index_requirements": [],
+      "name": "bigwig",
+      "orientations": [
+        "genomic-signal"
+      ],
+      "processing_levels": [
+        "coverage",
+        "normalized-signal",
+        "score-track"
+      ],
+      "reference_policy": "required",
+      "representations": [
+        "binary",
+        "container"
+      ],
+      "required_metadata": [
+        "chromosome-sizes",
+        "signal-semantics"
+      ],
+      "required_payload_roles": [
+        "signal"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "coordinate"
+      ],
+      "specification_source": "https://genome.ucsc.edu/goldenPath/help/bigWig.html",
+      "specification_version": "4"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "Biomed-Workbench",
+      "compression": [
+        "none",
+        "gzip"
+      ],
+      "coordinate_systems": [],
+      "id": "count-matrix-v1",
+      "identifier_namespace_policy": "required",
+      "index_requirements": [],
+      "name": "count-matrix",
+      "orientations": [
+        "features-by-samples",
+        "samples-by-features",
+        "genes-by-cells",
+        "cells-by-genes"
+      ],
+      "processing_levels": [
+        "raw-counts",
+        "filtered-counts",
+        "normalized"
+      ],
+      "reference_policy": "declared",
+      "representations": [
+        "structured",
+        "sparse"
+      ],
+      "required_metadata": [
+        "feature-axis",
+        "observation-axis",
+        "value-semantics"
+      ],
+      "required_payload_roles": [
+        "matrix",
+        "features",
+        "observations"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "declared-axis-order"
+      ],
+      "specification_source": "docs/format-contracts.md",
+      "specification_version": "1.0.0"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "GA4GH-hts-specs",
+      "compression": [
+        "cram"
+      ],
+      "coordinate_systems": [
+        "one-based-leftmost"
+      ],
+      "id": "cram-v3",
+      "identifier_namespace_policy": "declared",
+      "index_requirements": [
+        {
+          "all_of": [
+            "crai"
+          ],
+          "one_of": [],
+          "when_compression": []
+        }
+      ],
+      "name": "cram",
+      "orientations": [
+        "alignment-records"
+      ],
+      "processing_levels": [
+        "aligned",
+        "deduplicated",
+        "recalibrated"
+      ],
+      "reference_policy": "required",
+      "representations": [
+        "binary",
+        "container"
+      ],
+      "required_metadata": [
+        "read-group",
+        "sort-order",
+        "reference-md5"
+      ],
+      "required_payload_roles": [
+        "alignments"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "coordinate"
+      ],
+      "specification_source": "https://samtools.github.io/hts-specs/CRAMv3.pdf",
+      "specification_version": "3.1"
+    },
+    {
+      "annotation_policy": "not_applicable",
+      "authority": "GA4GH-hts-specs",
+      "compression": [
+        "none",
+        "gzip",
+        "bgzf"
+      ],
+      "coordinate_systems": [],
+      "id": "fasta-sequence",
+      "identifier_namespace_policy": "required",
+      "index_requirements": [
+        {
+          "all_of": [
+            "fai",
+            "gzi"
+          ],
+          "one_of": [],
+          "when_compression": [
+            "bgzf"
+          ]
+        }
+      ],
+      "name": "fasta",
+      "orientations": [
+        "sequence-records"
+      ],
+      "processing_levels": [
+        "reference",
+        "consensus",
+        "assembled",
+        "translated"
+      ],
+      "reference_policy": "declared",
+      "representations": [
+        "text"
+      ],
+      "required_metadata": [
+        "sequence-alphabet"
+      ],
+      "required_payload_roles": [
+        "sequences"
+      ],
+      "sample_manifest_policy": "declared",
+      "sort_orders": [
+        "record-order"
+      ],
+      "specification_source": "https://samtools.github.io/hts-specs/",
+      "specification_version": "pearson-sequence"
+    },
+    {
+      "annotation_policy": "not_applicable",
+      "authority": "GA4GH-hts-specs",
+      "compression": [
+        "none",
+        "gzip",
+        "bgzf"
+      ],
+      "coordinate_systems": [],
+      "id": "fastq-sanger",
+      "identifier_namespace_policy": "declared",
+      "index_requirements": [],
+      "name": "fastq",
+      "orientations": [
+        "single-end",
+        "paired-end",
+        "interleaved"
+      ],
+      "processing_levels": [
+        "raw",
+        "adapter-trimmed",
+        "quality-trimmed"
+      ],
+      "reference_policy": "not_applicable",
+      "representations": [
+        "text"
+      ],
+      "required_metadata": [
+        "sample-id",
+        "read-layout",
+        "quality-encoding"
+      ],
+      "required_payload_roles": [
+        "reads"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "read-order",
+        "unsorted"
+      ],
+      "specification_source": "https://samtools.github.io/hts-specs/",
+      "specification_version": "sanger-phred33"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "10x-Genomics",
+      "compression": [
+        "bgzf"
+      ],
+      "coordinate_systems": [
+        "zero-based-half-open"
+      ],
+      "id": "fragments-10x-v22",
+      "identifier_namespace_policy": "required",
+      "index_requirements": [
+        {
+          "all_of": [
+            "tbi"
+          ],
+          "one_of": [],
+          "when_compression": []
+        }
+      ],
+      "name": "fragments",
+      "orientations": [
+        "fragments-by-barcodes"
+      ],
+      "processing_levels": [
+        "deduplicated-fragments"
+      ],
+      "reference_policy": "required",
+      "representations": [
+        "text"
+      ],
+      "required_metadata": [
+        "barcode-namespace",
+        "primary-contigs",
+        "column-schema"
+      ],
+      "required_payload_roles": [
+        "fragments"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "coordinate"
+      ],
+      "specification_source": "https://www.10xgenomics.com/support/software/cell-ranger-atac/latest/analysis/fragments-file",
+      "specification_version": "cell-ranger-atac-2.2"
+    },
+    {
+      "annotation_policy": "required",
+      "authority": "Sequence-Ontology",
+      "compression": [
+        "none",
+        "gzip",
+        "bgzf"
+      ],
+      "coordinate_systems": [
+        "one-based-inclusive"
+      ],
+      "id": "gff3-v126",
+      "identifier_namespace_policy": "required",
+      "index_requirements": [
+        {
+          "all_of": [],
+          "one_of": [
+            "tbi",
+            "csi"
+          ],
+          "when_compression": [
+            "bgzf"
+          ]
+        }
+      ],
+      "name": "gff3",
+      "orientations": [
+        "feature-records"
+      ],
+      "processing_levels": [
+        "reference-annotation",
+        "custom-annotation"
+      ],
+      "reference_policy": "required",
+      "representations": [
+        "text"
+      ],
+      "required_metadata": [
+        "gff-version",
+        "id-parent-integrity"
+      ],
+      "required_payload_roles": [
+        "annotation"
+      ],
+      "sample_manifest_policy": "not_applicable",
+      "sort_orders": [
+        "coordinate",
+        "parent-before-child"
+      ],
+      "specification_source": "https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md",
+      "specification_version": "1.26"
+    },
+    {
+      "annotation_policy": "required",
+      "authority": "Ensembl",
+      "compression": [
+        "none",
+        "gzip",
+        "bgzf"
+      ],
+      "coordinate_systems": [
+        "one-based-inclusive"
+      ],
+      "id": "gtf-v22",
+      "identifier_namespace_policy": "required",
+      "index_requirements": [
+        {
+          "all_of": [],
+          "one_of": [
+            "tbi",
+            "csi"
+          ],
+          "when_compression": [
+            "bgzf"
+          ]
+        }
+      ],
+      "name": "gtf",
+      "orientations": [
+        "feature-records"
+      ],
+      "processing_levels": [
+        "reference-annotation",
+        "custom-annotation"
+      ],
+      "reference_policy": "required",
+      "representations": [
+        "text"
+      ],
+      "required_metadata": [
+        "gene-id",
+        "transcript-id"
+      ],
+      "required_payload_roles": [
+        "annotation"
+      ],
+      "sample_manifest_policy": "not_applicable",
+      "sort_orders": [
+        "coordinate"
+      ],
+      "specification_source": "https://www.ensembl.org/info/website/upload/gff.html",
+      "specification_version": "2.2"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "scverse",
+      "compression": [
+        "none",
+        "gzip",
+        "lzf"
+      ],
+      "coordinate_systems": [],
+      "id": "h5ad-v010",
+      "identifier_namespace_policy": "required",
+      "index_requirements": [],
+      "name": "h5ad",
+      "orientations": [
+        "observations-by-variables"
+      ],
+      "processing_levels": [
+        "raw-counts",
+        "filtered-counts",
+        "normalized",
+        "integrated",
+        "annotated"
+      ],
+      "reference_policy": "declared",
+      "representations": [
+        "container",
+        "sparse"
+      ],
+      "required_metadata": [
+        "encoding-type",
+        "encoding-version",
+        "obs-index",
+        "var-index"
+      ],
+      "required_payload_roles": [
+        "matrix"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "matrix-index-order"
+      ],
+      "specification_source": "https://anndata.readthedocs.io/en/stable/fileformat-prose.html",
+      "specification_version": "0.1.0"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "Linnarsson-Lab",
+      "compression": [
+        "gzip"
+      ],
+      "coordinate_systems": [],
+      "id": "loom-v300",
+      "identifier_namespace_policy": "required",
+      "index_requirements": [],
+      "name": "loom",
+      "orientations": [
+        "genes-by-cells"
+      ],
+      "processing_levels": [
+        "raw-counts",
+        "filtered-counts",
+        "normalized",
+        "annotated"
+      ],
+      "reference_policy": "declared",
+      "representations": [
+        "container",
+        "sparse"
+      ],
+      "required_metadata": [
+        "loom-spec-version",
+        "row-attributes",
+        "column-attributes"
+      ],
+      "required_payload_roles": [
+        "matrix"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "matrix-index-order"
+      ],
+      "specification_source": "https://loompy.org/loompy_format/",
+      "specification_version": "3.0.0"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "NIST",
+      "compression": [
+        "none",
+        "gzip"
+      ],
+      "coordinate_systems": [],
+      "id": "matrix-market-v2",
+      "identifier_namespace_policy": "required",
+      "index_requirements": [],
+      "name": "matrix-market",
+      "orientations": [
+        "features-by-samples",
+        "genes-by-cells",
+        "cells-by-genes"
+      ],
+      "processing_levels": [
+        "raw-counts",
+        "filtered-counts",
+        "normalized"
+      ],
+      "reference_policy": "declared",
+      "representations": [
+        "text",
+        "sparse"
+      ],
+      "required_metadata": [
+        "matrix-market-header",
+        "feature-count",
+        "observation-count"
+      ],
+      "required_payload_roles": [
+        "matrix",
+        "features",
+        "observations"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "coordinate-entry-order",
+        "unsorted"
+      ],
+      "specification_source": "https://math.nist.gov/MatrixMarket/formats.html",
+      "specification_version": "2.0"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "GA4GH-hts-specs",
+      "compression": [
+        "none",
+        "gzip",
+        "bgzf"
+      ],
+      "coordinate_systems": [
+        "one-based-leftmost"
+      ],
+      "id": "sam-v1",
+      "identifier_namespace_policy": "declared",
+      "index_requirements": [
+        {
+          "all_of": [],
+          "one_of": [
+            "csi"
+          ],
+          "when_compression": [
+            "bgzf"
+          ]
+        }
+      ],
+      "name": "sam",
+      "orientations": [
+        "alignment-records"
+      ],
+      "processing_levels": [
+        "aligned",
+        "deduplicated",
+        "recalibrated"
+      ],
+      "reference_policy": "required",
+      "representations": [
+        "text"
+      ],
+      "required_metadata": [
+        "read-group",
+        "sort-order"
+      ],
+      "required_payload_roles": [
+        "alignments"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "coordinate",
+        "queryname",
+        "unsorted"
+      ],
+      "specification_source": "https://samtools.github.io/hts-specs/SAMv1.pdf",
+      "specification_version": "1.6"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "Biomed-Workbench",
+      "compression": [
+        "none",
+        "gzip",
+        "bgzf"
+      ],
+      "coordinate_systems": [],
+      "id": "tabular-v1",
+      "identifier_namespace_policy": "declared",
+      "index_requirements": [],
+      "name": "tabular",
+      "orientations": [
+        "records-by-fields"
+      ],
+      "processing_levels": [
+        "raw",
+        "cleaned",
+        "derived",
+        "summary"
+      ],
+      "reference_policy": "declared",
+      "representations": [
+        "text",
+        "structured"
+      ],
+      "required_metadata": [
+        "delimiter",
+        "header",
+        "column-schema",
+        "missing-value-policy"
+      ],
+      "required_payload_roles": [
+        "table"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "declared-row-order",
+        "unsorted"
+      ],
+      "specification_source": "docs/format-contracts.md",
+      "specification_version": "1.0.0"
+    },
+    {
+      "annotation_policy": "declared",
+      "authority": "GA4GH-hts-specs",
+      "compression": [
+        "none",
+        "bgzf"
+      ],
+      "coordinate_systems": [
+        "one-based-inclusive"
+      ],
+      "id": "vcf-v45",
+      "identifier_namespace_policy": "declared",
+      "index_requirements": [
+        {
+          "all_of": [],
+          "one_of": [
+            "tbi",
+            "csi"
+          ],
+          "when_compression": [
+            "bgzf"
+          ]
+        }
+      ],
+      "name": "vcf",
+      "orientations": [
+        "sites-by-samples"
+      ],
+      "processing_levels": [
+        "raw-calls",
+        "filtered",
+        "normalized",
+        "annotated"
+      ],
+      "reference_policy": "required",
+      "representations": [
+        "text"
+      ],
+      "required_metadata": [
+        "fileformat",
+        "contig",
+        "sample-id"
+      ],
+      "required_payload_roles": [
+        "variants"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "coordinate"
+      ],
+      "specification_source": "https://samtools.github.io/hts-specs/VCFv4.5.pdf",
+      "specification_version": "4.5"
+    }
+  ],
+  "registry_digest": "14e6e8bc89d8fe2d66f7f52514ea4712040873df80e3ad8ff50e64933616b5a7",
+  "requirement_coverage": {
+    "annotation_required": 2,
+    "coordinate_aware": 10,
+    "identifier_namespace_required": 8,
+    "indexed": 10,
+    "multi_payload": 2,
+    "reference_required": 10,
+    "sample_manifest_required": 13
+  },
+  "schema_version": 1
+}

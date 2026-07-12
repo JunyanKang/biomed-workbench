@@ -104,12 +104,15 @@ Inspect the input contract with `tools/search_tools.py --id CAPABILITY_ID` befor
 - `biomed_workbench/kernel/`: immutable project context, content-addressed artifacts, hypotheses, evidence, decisions, DAG state, and replay.
 - `biomed_workbench/orchestration/`: manifest-derived graph planning, compatibility-gated execution, quality checks, interpretation, and revision control.
 - `biomed_workbench/modules/scientific_command.py`: shell-free, bounded, version-gated execution for payload-backed scientific tools.
+- `biomed_workbench/formats/`: shared exact-version omics format profiles and pre-execution metadata validation.
 - `biomed_workbench/services/`: bounded public scientific database clients and credential policy.
 - `tests/`: unit, contract, end-to-end, and release checks.
 
 The central registry contains no domain definitions. See `docs/architecture.md` for the extension contract, compatibility rules, and release flow.
 
 Changing a supported tool, dependency, or format version requires a new validated compatibility row with named regression and end-to-end evidence. Module and release validation fail when either binding is missing or its captured execution did not pass.
+
+Foundational FASTQ, FASTA, SAM/BAM/CRAM, VCF/BCF, BED, GTF/GFF3, count-matrix, H5AD, Loom, Matrix Market, fragments, bigWig, and tabular profiles are maintained once in `biomed_workbench/formats/catalog.json`. Modules that declare one of these exact format-version tokens automatically inherit its compression, index, sort, coordinate, reference, annotation, identifier, sample-manifest, orientation, processing-level, metadata, and payload-role gates.
 
 ## Sources And License Notes
 

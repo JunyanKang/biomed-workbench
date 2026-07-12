@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "vcf45-bgzf-tabix-accepted",
+      "profile_id": "vcf-v45",
+      "accepted": true,
+      "expected_codes": [],
+      "snapshot": {
+        "representation": "text", "compression": "bgzf", "indexes": ["tbi"], "sort_order": "coordinate",
+        "coordinate_system": "one-based-inclusive", "genome_build": "GRCh38", "reference_sequence_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "annotation_release": null, "identifier_namespace": null, "sample_manifest_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "orientation": "sites-by-samples", "processing_level": "filtered", "metadata_fields": ["fileformat", "contig", "sample-id"], "payload_roles": ["variants"]
+      }
+    },
+    {
+      "id": "h5ad010-filtered-counts-accepted",
+      "profile_id": "h5ad-v010",
+      "accepted": true,
+      "expected_codes": [],
+      "snapshot": {
+        "representation": "container", "compression": "gzip", "indexes": [], "sort_order": "matrix-index-order",
+        "coordinate_system": null, "genome_build": null, "reference_sequence_digest": null, "annotation_release": null,
+        "identifier_namespace": "ensembl-gene", "sample_manifest_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "orientation": "observations-by-variables", "processing_level": "filtered-counts",
+        "metadata_fields": ["encoding-type", "encoding-version", "obs-index", "var-index"], "payload_roles": ["matrix"]
+      }
+    },
+    {
+      "id": "matrix-market-companions-accepted",
+      "profile_id": "matrix-market-v2",
+      "accepted": true,
+      "expected_codes": [],
+      "snapshot": {
+        "representation": "text", "compression": "none", "indexes": [], "sort_order": "coordinate-entry-order",
+        "coordinate_system": null, "genome_build": null, "reference_sequence_digest": null, "annotation_release": null,
+        "identifier_namespace": "ensembl-gene", "sample_manifest_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "orientation": "genes-by-cells", "processing_level": "raw-counts",
+        "metadata_fields": ["matrix-market-header", "feature-count", "observation-count"], "payload_roles": ["matrix", "features", "observations"]
+      }
+    },
+    {
+      "id": "bam16-missing-index-rejected",
+      "profile_id": "bam-v1",
+      "accepted": false,
+      "expected_codes": ["MISSING_INDEX"],
+      "snapshot": {
+        "representation": "binary", "compression": "bgzf", "indexes": [], "sort_order": "coordinate",
+        "coordinate_system": "one-based-leftmost", "genome_build": "GRCh38", "reference_sequence_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "annotation_release": null, "identifier_namespace": null, "sample_manifest_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "orientation": "alignment-records", "processing_level": "aligned", "metadata_fields": ["read-group", "sort-order"], "payload_roles": ["alignments"]
+      }
+    },
+    {
+      "id": "fragments-one-based-rejected",
+      "profile_id": "fragments-10x-v22",
+      "accepted": false,
+      "expected_codes": ["COORDINATE_SYSTEM_MISMATCH"],
+      "snapshot": {
+        "representation": "text", "compression": "bgzf", "indexes": ["tbi"], "sort_order": "coordinate",
+        "coordinate_system": "one-based-inclusive", "genome_build": "GRCh38", "reference_sequence_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "annotation_release": null, "identifier_namespace": "10x-cell-barcode", "sample_manifest_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "orientation": "fragments-by-barcodes", "processing_level": "deduplicated-fragments",
+        "metadata_fields": ["barcode-namespace", "primary-contigs", "column-schema"], "payload_roles": ["fragments"]
+      }
+    },
+    {
+      "id": "gtf22-missing-annotation-release-rejected",
+      "profile_id": "gtf-v22",
+      "accepted": false,
+      "expected_codes": ["ANNOTATION_RELEASE_MISSING"],
+      "snapshot": {
+        "representation": "text", "compression": "none", "indexes": [], "sort_order": "coordinate",
+        "coordinate_system": "one-based-inclusive", "genome_build": "GRCh38", "reference_sequence_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "annotation_release": null, "identifier_namespace": "ensembl-gene", "sample_manifest_digest": null,
+        "orientation": "feature-records", "processing_level": "reference-annotation", "metadata_fields": ["gene-id", "transcript-id"], "payload_roles": ["annotation"]
+      }
+    },
+    {
+      "id": "fastq-missing-sample-manifest-rejected",
+      "profile_id": "fastq-sanger",
+      "accepted": false,
+      "expected_codes": ["SAMPLE_MANIFEST_MISSING"],
+      "snapshot": {
+        "representation": "text", "compression": "gzip", "indexes": [], "sort_order": "read-order",
+        "coordinate_system": null, "genome_build": null, "reference_sequence_digest": null, "annotation_release": null,
+        "identifier_namespace": null, "sample_manifest_digest": null, "orientation": "paired-end", "processing_level": "raw",
+        "metadata_fields": ["sample-id", "read-layout", "quality-encoding"], "payload_roles": ["reads"]
+      }
+    },
+    {
+      "id": "bigwig-missing-reference-digest-rejected",
+      "profile_id": "bigwig-ucsc-v4",
+      "accepted": false,
+      "expected_codes": ["REFERENCE_METADATA_MISSING"],
+      "snapshot": {
+        "representation": "binary", "compression": "internal", "indexes": [], "sort_order": "coordinate",
+        "coordinate_system": "zero-based-half-open", "genome_build": "GRCh38", "reference_sequence_digest": null,
+        "annotation_release": null, "identifier_namespace": null, "sample_manifest_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "orientation": "genomic-signal", "processing_level": "coverage", "metadata_fields": ["chromosome-sizes", "signal-semantics"], "payload_roles": ["signal"]
+      }
+    }
+  ]
+}

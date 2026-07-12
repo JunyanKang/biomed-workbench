@@ -32,9 +32,9 @@ Production bioinformatics tools must not be added as path-taking wrappers around
 
 ### Task 4: Foundational omics artifact and format contracts
 
-- [ ] Add FASTQ, FASTA, SAM/BAM/CRAM, VCF/BCF, BED, GTF/GFF3, count-matrix, H5AD, Loom, MTX, fragment, bigWig, and tabular contracts.
-- [ ] Validate compression, companion indexes, sorting, coordinate convention, reference assembly, annotation release, identifier namespace, orientation, sample manifest, and processing level.
-- [ ] Add format-pair fixtures covering accepted and rejected version combinations.
+- [x] Add FASTQ, FASTA, SAM/BAM/CRAM, VCF/BCF, BED, GTF/GFF3, count-matrix, H5AD, Loom, MTX, fragment, bigWig, and tabular contracts.
+- [x] Validate compression, companion indexes, sorting, coordinate convention, reference assembly, annotation release, identifier namespace, orientation, sample manifest, and processing level.
+- [x] Add format-pair fixtures covering accepted and rejected version combinations.
 
 ### Task 5: Production sequencing quality modules
 
