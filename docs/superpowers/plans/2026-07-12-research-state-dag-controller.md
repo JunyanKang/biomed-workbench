@@ -416,19 +416,19 @@ def producers(graph, artifact_type) -> tuple[str, ...]: ...
 def consumers(graph, artifact_type) -> tuple[str, ...]: ...
 ```
 
-- [ ] **Step 1: Write failing graph construction tests**
+- [x] **Step 1: Write failing graph construction tests**
 
 Assert `consumes`, `produces`, `alternative-to`, `complements`, `validates`, `addresses-intent`, and `addresses-question` edges derive only from manifests; graph order and digest are deterministic; unknown relationships fail; no module ID literals appear in graph source.
 
-- [ ] **Step 2: Prove a future module changes the graph without code edits**
+- [x] **Step 2: Prove a future module changes the graph without code edits**
 
 Create a temporary module that consumes `quality_report`, produces `novel_biomarker_table`, and uses domain `systems_biology`. Discover it, rebuild, and assert the new nodes and edges appear while `graph.py` remains unchanged.
 
-- [ ] **Step 3: Implement graph construction**
+- [x] **Step 3: Implement graph construction**
 
 Use bipartite module/artifact nodes plus relationship edges. Add validation edges from modules whose type is `validation` to their consumed and produced artifact families. Preserve all domains as metadata rather than graph partitions.
 
-- [ ] **Step 4: Run tests and commit**
+- [x] **Step 4: Run tests and commit**
 
 ```bash
 python3 -m unittest tests.unit.orchestration.test_capability_graph tests.e2e.test_future_module_graph
