@@ -687,13 +687,13 @@ git commit -m "refactor: retire domain-owned capability specifications"
 **Interfaces:**
 - Produces: path-free release evidence for source checkout and installed cache.
 
-- [ ] **Step 1: Write failing evidence tests**
+- [x] **Step 1: Write failing evidence tests**
 
 Require module count 48, registry and index digests, dynamic fixture discovery,
 installed-cache route and execution, tool/dependency/format compatibility
 counts, one skill, credential list, and absence of machine paths.
 
-- [ ] **Step 2: Run the isolated installation flow**
+- [x] **Step 2: Run the isolated installation flow**
 
 Using the bundled Codex CLI and a temporary HOME/CODEX_HOME:
 
@@ -705,12 +705,12 @@ Using the bundled Codex CLI and a temporary HOME/CODEX_HOME:
 6. validate that a new conversation is required to load the changed skill and
    module index.
 
-- [ ] **Step 3: Write path-free evidence reports**
+- [x] **Step 3: Write path-free evidence reports**
 
 Record booleans, counts, IDs, digests, and command outcomes only. Do not record
 temporary paths, usernames, credentials, or raw environment dumps.
 
-- [ ] **Step 4: Run all release gates**
+- [x] **Step 4: Run all release gates**
 
 ```bash
 python3 -m unittest discover -s tests -p 'test*.py'
@@ -720,7 +720,7 @@ python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py skills/b
 git diff --check
 ```
 
-- [ ] **Step 5: Commit the verified foundation**
+- [x] **Step 5: Commit the verified foundation**
 
 ```bash
 git add reports tests/release

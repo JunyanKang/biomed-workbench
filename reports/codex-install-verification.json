@@ -1,10 +1,19 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "passed": true,
   "plugin": "biomed-workbench",
   "version": "0.2.0-dev",
   "marketplace": "biomed-workbench",
+  "codex_cli_distribution": "desktop-bundled",
+  "codex_cli_version": "0.144.0-alpha.4",
   "isolated_home": true,
+  "installed_module_count": 48,
+  "installed_registry_digest": "9df3e70be5d0cc61128b1813231791ce85f5589c9e09cb47479fa302b77f630a",
+  "installed_skill_count": 1,
+  "credentials": [
+    "NCBI_API_KEY"
+  ],
+  "new_task_required": true,
   "checks": [
     {
       "operation": "marketplace_add",
@@ -23,6 +32,10 @@
       "passed": true
     },
     {
+      "operation": "installed_cache_module_index",
+      "passed": true
+    },
+    {
       "operation": "installed_cache_routing",
       "passed": true
     },
@@ -32,6 +45,14 @@
     },
     {
       "operation": "installed_skill_metadata",
+      "passed": true
+    },
+    {
+      "operation": "cache_snapshot_isolation",
+      "passed": true
+    },
+    {
+      "operation": "new_task_reload_required",
       "passed": true
     }
   ]
