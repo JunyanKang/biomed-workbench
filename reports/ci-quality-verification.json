@@ -1,0 +1,38 @@
+{
+  "evidence_id": "github-quality-and-secret-gates-v1",
+  "evidence_type": "github-quality-and-secret-gates",
+  "excluded_claims": [
+    "CI does not prove scientific source-union completeness.",
+    "CI does not replace module-specific regression, compatibility, or end-to-end evidence.",
+    "Repository checks do not install arbitrary remote Skills into the scientific runtime."
+  ],
+  "passed": true,
+  "quality_gates": {
+    "complete_unittest_suite": true,
+    "deterministic_registry_rebuild": true,
+    "full_history_secret_scan": true,
+    "generated_diff_rejected": true,
+    "gitleaks_release_checksum_verified": true,
+    "release_validator": true,
+    "secret_findings_redacted": true
+  },
+  "requirements": {
+    "sha256": "19842e01c2dda77c9b9601f0e082c6a406748323b1c5d9ed33dcbe2e86889d23",
+    "tested_baselines": {
+      "Pillow": "10.4.0",
+      "PyYAML": "6.0.3",
+      "numpy": "2.4.4",
+      "scikit-learn": "1.8.0",
+      "scipy": "1.17.1"
+    }
+  },
+  "schema_version": 1,
+  "workflow": {
+    "jobs": [
+      "secrets",
+      "verify"
+    ],
+    "read_only_permissions": true,
+    "sha256": "f607652b4fe5a2213bd308ddf6999683e9f95323a13ecd1fe8910e589b4261aa"
+  }
+}

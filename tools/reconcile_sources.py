@@ -20,6 +20,13 @@ from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 
 
 PROJECT_EVIDENCE_SOURCES = {
+    "github-quality-and-secret-gates-v1": {
+        "report": "reports/ci-quality-verification.json",
+        "evidence_type": "github-quality-and-secret-gates",
+        "artifact": ".github/workflows/quality.yml",
+        "digest_section": "workflow",
+        "digest_field": "sha256",
+    },
     "codex-local-update-cachebuster-v1": {
         "report": "reports/local-update-verification.json",
         "evidence_type": "codex-plugin-local-update-contract",

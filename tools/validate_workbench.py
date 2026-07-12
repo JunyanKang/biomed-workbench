@@ -604,6 +604,24 @@ def main() -> int:
             ):
                 errors.append("local plugin update evidence is stale, incomplete, or misclassified as scientific runtime")
 
+        ci_quality_path = ROOT / "reports" / "ci-quality-verification.json"
+        ci_workflow_path = ROOT / ".github" / "workflows" / "quality.yml"
+        ci_requirements_path = ROOT / "requirements-ci.txt"
+        try:
+            ci_quality = json.loads(ci_quality_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            errors.append("GitHub quality and secret-gate evidence is missing or invalid")
+        else:
+            if (
+                ci_quality.get("passed") is not True
+                or ci_quality.get("evidence_id") != "github-quality-and-secret-gates-v1"
+                or ci_quality.get("workflow", {}).get("sha256") != hashlib.sha256(ci_workflow_path.read_bytes()).hexdigest()
+                or ci_quality.get("requirements", {}).get("sha256") != hashlib.sha256(ci_requirements_path.read_bytes()).hexdigest()
+                or not all(ci_quality.get("quality_gates", {}).values())
+                or len(ci_quality.get("excluded_claims", ())) < 3
+            ):
+                errors.append("GitHub quality or secret-gate evidence is stale, incomplete, or overclaims scientific coverage")
+
         native_handoff_path = ROOT / "reports" / "codex-native-handoff-verification.json"
         native_skill_path = ROOT / "skills" / "biomed-workbench" / "SKILL.md"
         try:

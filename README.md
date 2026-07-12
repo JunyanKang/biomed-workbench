@@ -132,6 +132,7 @@ Tool-use guidance and routing remain available regardless of the installed versi
 - `reports/source-reconciliation-summary.json`: public counts, pending capability decisions, current module/project-contract evidence binding, and an irreversible digest over all private per-file receipts.
 - `reports/plugin-contract-verification.json`: path-free official Codex plugin and Skill validation bound to the current manifest, single Skill entry, generated registry, and isolated snapshot.
 - `reports/local-update-verification.json`: digest-bound proof that local cachebuster updates replace one SemVer build suffix atomically and never enter the scientific runtime.
+- `reports/ci-quality-verification.json`: current GitHub test, release-validation, deterministic-evidence, and checksum-verified full-history secret-scan contract.
 - `biomed_workbench/capabilities/`: independently rewritten scientific implementations.
 - `biomed_workbench/modules/builtin/`: one versioned scientific contract per independently discoverable module.
 - `biomed_workbench/kernel/`: immutable project context, content-addressed artifacts, hypotheses, evidence, decisions, DAG state, and replay.
@@ -142,6 +143,8 @@ Tool-use guidance and routing remain available regardless of the installed versi
 - `tests/`: unit, contract, end-to-end, and release checks.
 
 The central registry contains no domain definitions. See `docs/architecture.md` for the extension contract, compatibility rules, and release flow.
+
+Public CI uses the exact repository verification baselines in `requirements-ci.txt`; these versions reproduce release testing but do not pin a user's scientific environment. The workflow rebuilds deterministic registry evidence and rejects any diff, while Gitleaks `8.30.1` is downloaded from its official release, SHA-256 checked, and run over complete Git history with redacted findings.
 
 Changing a tested baseline or widening a compatibility policy requires named regression and end-to-end evidence plus review of known parameter, field, default, and format changes. A compatible runtime version does not masquerade as a tested baseline: both the actual version and baseline-match status are retained.
 
