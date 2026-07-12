@@ -124,3 +124,13 @@ class ProjectContext:
             "required_evidence_types": list(self.required_evidence_types),
             "privacy_level": self.privacy_level,
         }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "ProjectContext":
+        values = dict(payload)
+        values["species"] = tuple(values["species"])
+        values["comparisons"] = tuple(Comparison(**{**item, "covariates": tuple(item["covariates"])}) for item in values["comparisons"])
+        values["constraints"] = tuple(Constraint(**item) for item in values["constraints"])
+        values["required_deliverables"] = tuple(values["required_deliverables"])
+        values["required_evidence_types"] = tuple(values["required_evidence_types"])
+        return cls(**values)

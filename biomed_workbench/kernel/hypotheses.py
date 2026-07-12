@@ -122,6 +122,21 @@ class Hypothesis:
             "revision": self.revision,
         }
 
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "Hypothesis":
+        values = dict(payload)
+        for field in (
+            "expected_observations",
+            "disconfirming_observations",
+            "alternative_explanations",
+            "required_evidence_types",
+            "supporting_evidence_ids",
+            "conflicting_evidence_ids",
+            "missing_evidence_types",
+        ):
+            values[field] = tuple(values[field])
+        return cls(**values)
+
 
 def add_hypothesis(ledger: tuple[Hypothesis, ...], hypothesis: Hypothesis) -> tuple[Hypothesis, ...]:
     if not isinstance(hypothesis, Hypothesis):

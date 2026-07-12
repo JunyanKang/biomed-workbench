@@ -35,6 +35,7 @@ Create focused kernel units:
 - `biomed_workbench/kernel/hypotheses.py`: falsifiable hypothesis and revision-lineage contracts.
 - `biomed_workbench/kernel/evidence.py`: normalized supporting, weakening, refuting, and inconclusive evidence.
 - `biomed_workbench/kernel/decisions.py`: append-only scientific decision and plan-revision events.
+- `biomed_workbench/kernel/plans.py`: immutable plan-node and research-DAG state contracts.
 - `biomed_workbench/kernel/state.py`: canonical project state, transitions, serialization, and replay.
 
 Create orchestration units:
@@ -296,6 +297,7 @@ git commit -m "feat: add falsifiable hypothesis and evidence ledgers"
 
 **Files:**
 - Create: `biomed_workbench/kernel/decisions.py`
+- Create: `biomed_workbench/kernel/plans.py`
 - Create: `biomed_workbench/kernel/state.py`
 - Modify: `biomed_workbench/kernel/__init__.py`
 - Test: `tests/unit/kernel/test_state.py`
@@ -304,6 +306,34 @@ git commit -m "feat: add falsifiable hypothesis and evidence ledgers"
 **Interfaces:**
 
 ```python
+NODE_STATUSES = {"pending", "ready", "running", "completed", "blocked", "failed", "superseded", "skipped"}
+
+@dataclass(frozen=True)
+class PlanNode:
+    id: str
+    module_id: str
+    input_bindings: dict[str, str]
+    dependencies: tuple[str, ...]
+    branch_id: str
+    target_hypothesis_ids: tuple[str, ...]
+    expected_evidence_types: tuple[str, ...]
+    expected_output_artifact_types: tuple[str, ...]
+    compatibility_row_candidates: tuple[str, ...]
+    status: str
+    attempt: int
+
+@dataclass(frozen=True)
+class ResearchDAG:
+    id: str
+    objective: str
+    nodes: tuple[PlanNode, ...]
+    required_output_artifact_types: tuple[str, ...]
+    plan_type: str
+    revision: int
+    parent_plan_id: str | None
+    rationale: tuple[str, ...]
+    digest: str
+
 @dataclass(frozen=True)
 class DecisionEvent:
     id: str
@@ -334,19 +364,19 @@ class ProjectState:
     state_digest: str
 ```
 
-- [ ] **Step 1: Write failing transition and replay tests**
+- [x] **Step 1: Write failing transition and replay tests**
 
 Test monotonic event sequences, exact prior/result digest linkage, immutable refuted hypotheses, preserved failed artifacts, secret/path rejection, canonical round trip, tamper detection, replay equivalence, and rejection of events that reference unknown state objects.
 
-- [ ] **Step 2: Run and verify missing state engine**
+- [x] **Step 2: Run and verify missing state engine**
 
 Run: `python3 -m unittest tests.unit.kernel.test_state tests.contract.test_state_replay`
 
-- [ ] **Step 3: Implement validated event application and replay**
+- [x] **Step 3: Implement validated event application and replay**
 
 Implement explicit event handlers for context creation, artifact registration, hypothesis addition/revision, evidence addition, plan creation/revision, node status, quality finding, and delivery readiness. `apply_event(state, event_payload)` calculates the next digest; `replay(context, events)` starts from a canonical empty state and verifies every link. Unknown event types fail closed.
 
-- [ ] **Step 4: Run tests and commit**
+- [x] **Step 4: Run tests and commit**
 
 ```bash
 python3 -m unittest tests.unit.kernel.test_state tests.contract.test_state_replay
@@ -418,34 +448,6 @@ git commit -m "feat: derive capability graph from module manifests"
 **Interfaces:**
 
 ```python
-NODE_STATUSES = {"pending", "ready", "running", "completed", "blocked", "failed", "superseded", "skipped"}
-
-@dataclass(frozen=True)
-class PlanNode:
-    id: str
-    module_id: str
-    input_bindings: dict[str, str]
-    dependencies: tuple[str, ...]
-    branch_id: str
-    target_hypothesis_ids: tuple[str, ...]
-    expected_evidence_types: tuple[str, ...]
-    expected_output_artifact_types: tuple[str, ...]
-    compatibility_row_candidates: tuple[str, ...]
-    status: str
-    attempt: int
-
-@dataclass(frozen=True)
-class ResearchDAG:
-    id: str
-    objective: str
-    nodes: tuple[PlanNode, ...]
-    required_output_artifact_types: tuple[str, ...]
-    plan_type: str
-    revision: int
-    parent_plan_id: str | None
-    rationale: tuple[str, ...]
-    digest: str
-
 def plan_research(state, registry, graph, requests) -> ResearchDAG: ...
 ```
 

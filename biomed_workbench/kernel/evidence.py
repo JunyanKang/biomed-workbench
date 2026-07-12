@@ -80,6 +80,12 @@ class EvidenceRecord:
             "rationale": self.rationale,
         }
 
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "EvidenceRecord":
+        values = dict(payload)
+        values["limitations"] = tuple(values["limitations"])
+        return cls(**values)
+
 
 def add_evidence(ledger: tuple[EvidenceRecord, ...], evidence: EvidenceRecord) -> tuple[EvidenceRecord, ...]:
     if not isinstance(evidence, EvidenceRecord):
