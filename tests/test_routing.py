@@ -52,6 +52,7 @@ class RoutingTests(unittest.TestCase):
         self.assertNotIn("source_path", serialized)
         self.assertNotIn("run_policy", serialized)
         self.assertNotIn("adapter", serialized)
+        self.assertTrue(all(candidate["selection_reasons"] for step in plan["steps"] for candidate in step["candidates"]))
 
 
 if __name__ == "__main__":

@@ -17,7 +17,7 @@ if str(ROOT) not in sys.path:
 from biomed_workbench.modules.contract import manifest_to_dict, parse_manifest  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 from tools.build_tool_compatibility_matrix import build_compatibility_report  # noqa: E402
-from tools.module_migration_definitions import ARTIFACTS, ASSUMPTIONS, CHINESE_INTENTS, COMPLEMENTS, QUESTIONS  # noqa: E402
+from tools.module_migration_definitions import ARTIFACTS, ASSUMPTIONS, CHINESE_INTENTS, COMPLEMENTS, INTENT_ALIASES, QUESTIONS  # noqa: E402
 
 
 CATALOG = ROOT / "tools" / "catalog.json"
@@ -201,7 +201,7 @@ def _manifest(row: dict[str, object], cases: dict[str, dict[str, object]]) -> di
         "description": row["description"],
         "module_type": _module_type(capability_id, workflow),
         "domains": [workflow],
-        "intents": [capability_id.replace("-", " "), str(row["title"]), CHINESE_INTENTS[capability_id]],
+        "intents": [capability_id.replace("-", " "), str(row["title"]), CHINESE_INTENTS[capability_id], *INTENT_ALIASES.get(capability_id, [])],
         "questions": [QUESTIONS[capability_id]],
         "entrypoint": row["entrypoint"],
         "execution": {"kind": row["kind"], "timeout_seconds": 60 if service else 30, "max_output_bytes": 10000000},

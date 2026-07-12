@@ -107,6 +107,26 @@ CHINESE_INTENTS = {
 }
 
 
+INTENT_ALIASES = {
+    "adverse-event-summary": ["不良事件", "临床安全性"],
+    "crispr-design": ["CRISPR设计", "sgRNA设计"],
+    "differential-expression": ["差异表达"],
+    "enrichment-analysis": ["基因集富集", "通路富集"],
+    "flow-cytometry-summary": ["流式门控"],
+    "gene-evidence": ["基因证据", "靶点证据"],
+    "golden-gate-plan": ["Golden Gate组装", "克隆组装"],
+    "image-segment": ["图像分割"],
+    "literature-evidence": ["文献证据", "检索文献"],
+    "manuscript-audit": ["写论文", "审计论文", "Nature论文"],
+    "qpcr-relative-expression": ["qPCR相对表达"],
+    "reviewer-assessment": ["同行评审", "Nature审稿人评审"],
+    "single-cell-qc": ["单细胞质量控制", "单细胞分析"],
+    "survival-analysis": ["生存分析"],
+    "tumor-mutation-burden": ["肿瘤突变负荷", "TMB"],
+    "variant-evidence": ["变异证据", "ClinVar证据"],
+}
+
+
 ARTIFACTS = {
     "adverse-event-summary": ("events", "adverse_event_table", "safety", "safety_summary"),
     "biomarker-performance": ("observations", "biomarker_table", "performance", "diagnostic_performance"),

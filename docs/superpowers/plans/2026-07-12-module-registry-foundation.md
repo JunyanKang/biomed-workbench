@@ -547,7 +547,7 @@ git commit -m "refactor: execute capabilities through module registry"
 - Consumes: module `intents`, `questions`, `domains`, title, and description.
 - Produces: existing route response plus selected module rationale.
 
-- [ ] **Step 1: Write failing no-central-edit routing test**
+- [x] **Step 1: Write failing no-central-edit routing test**
 
 ```python
 def test_new_fixture_module_routes_from_its_manifest_only(tmp_path):
@@ -560,22 +560,22 @@ def test_new_fixture_module_routes_from_its_manifest_only(tmp_path):
 Also assert existing Chinese and English routing, single/serial/parallel/mixed
 plans, deterministic ties, and no source/adaptor fields.
 
-- [ ] **Step 2: Run and verify missing injectable-registry failure**
+- [x] **Step 2: Run and verify missing injectable-registry failure**
 
 Run: `python3 -m unittest tests.e2e.test_dynamic_module_routing tests.test_routing`
 
-- [ ] **Step 3: Implement metadata-driven scoring**
+- [x] **Step 3: Implement metadata-driven scoring**
 
 Remove `INTENT_BOOSTS` and per-capability keyword constants. Infer candidate
 domains from module metadata, score exact phrase, token, artifact, question,
 maturity, and compatibility matches, and include a concise `selection_reasons`
 array. Preserve plan-type behavior.
 
-- [ ] **Step 4: Run routing and assistant regressions**
+- [x] **Step 4: Run routing and assistant regressions**
 
 Run: `python3 -m unittest tests.test_routing tests.unit.test_assistant tests.e2e.test_dynamic_module_routing`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add biomed_workbench/router.py tests/test_routing.py tests/e2e/test_dynamic_module_routing.py
