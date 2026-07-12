@@ -8,7 +8,7 @@ Biomed Workbench exposes one Codex skill and discovers scientific capabilities f
 2. `biomed_workbench/modules/builtin/<module-id>/module.json` is the source of truth for every built-in capability.
 3. `biomed_workbench/modules/contract.py` validates scientific, execution, version, dependency, format, and provenance contracts.
 4. `biomed_workbench/modules/registry.py` discovers modules recursively and rejects duplicate IDs or unresolved relationships.
-5. `biomed_workbench/router.py` ranks intents, questions, artifact types, and domains read from manifests.
+5. `biomed_workbench/router.py` ranks intents, questions, artifact types, and the primary routing workflow read from manifests; later domain entries are descriptive tags and cannot create phantom workflow steps.
 6. `biomed_workbench/runner.py` validates structured input and invokes resolved entrypoints.
 7. `biomed_workbench/catalog.py` provides the v0.2 compatibility projection; it does not define or load a second capability registry.
 8. `biomed_workbench/modules/index.json` and `tools/catalog.json` are generated release artifacts and are never edited manually.
@@ -41,6 +41,8 @@ Every `module.json` is closed and versioned. It declares:
 - input/output format names and versions, representation, compression, required indexes, coordinate systems, genome builds, annotation releases, and orientations;
 - explicit compatibility rows joining one module version to validated tool, dependency, platform, and input/output format combinations;
 - access, mutation, credential, timeout, output-size, license, and clean-room provenance boundaries.
+
+The first `domains[]` value is the module's routing workflow. It may introduce a future scientific workflow without router edits. Additional values describe cross-cutting scientific scope, but routing and the compatibility catalog never treat them as separate required workflow branches.
 
 `access: codex_native` is reserved for a validated handoff to a Codex-managed built-in tool. Such a module must request no user provider credential, invoke no provider SDK or CLI, emit a recognized operation plus post-result quality gates, and keep the handoff distinct from an observed artifact. The single Skill performs the host-native call and may record an artifact only after Codex returns and inspects it.
 

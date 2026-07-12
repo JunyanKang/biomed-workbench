@@ -52,6 +52,17 @@ class RoutingTests(unittest.TestCase):
         routed = [candidate["id"] for step in plan["steps"] for candidate in step["candidates"]]
         self.assertEqual(routed[0], "source-freshness-audit")
 
+    def test_citation_resolution_and_gold_set_requests_route_to_new_quality_modules(self):
+        citation = route("判断文献解析结果是匹配、标识符未找到还是无法判定")
+        evaluation = route("评估分类 gold set 的阈值、逐类指标和回归")
+
+        citation_ids = [candidate["id"] for step in citation["steps"] for candidate in step["candidates"]]
+        evaluation_ids = [candidate["id"] for step in evaluation["steps"] for candidate in step["candidates"]]
+        self.assertEqual(citation_ids[0], "citation-resolution-adjudication")
+        self.assertEqual(evaluation_ids[0], "classification-gold-set-evaluation")
+        self.assertEqual(evaluation["matched_workflows"], ["evidence"])
+        self.assertEqual(evaluation["plan_type"], "single")
+
     def test_route_output_has_no_source_or_adapter_fields(self):
         plan = route("search TP53 gene evidence")
         serialized = repr(plan).lower()

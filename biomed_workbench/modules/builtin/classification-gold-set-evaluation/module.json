@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "id": "classification-gold-set-evaluation",
+  "version": "1.0.0",
+  "title": "Evaluate a classification gold set with provenance and regression gates",
+  "description": "Compute closed-label confusion, aggregate and per-class metrics, minimum-support-aware thresholds, advisory expert concordance, and baseline regressions while blocking circular or leakage-unreviewed gold sets.",
+  "module_type": "validation",
+  "domains": ["evidence", "research-quality", "statistics"],
+  "intents": ["classification gold set evaluation", "evaluate benchmark thresholds and regressions", "评估分类 gold set 的阈值、逐类指标和回归", "科研算法评测与基准回归检查"],
+  "questions": ["Does the independently adjudicated classification gold set meet declared aggregate, per-class, support, provenance, leakage, and regression gates?"],
+  "entrypoint": "biomed_workbench.capabilities.evaluation:evaluate_classification_gold_set",
+  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 10000000},
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "evaluation_cases",
+      "artifact_type": "classification_gold_set",
+      "formats": [{"name": "classification-gold-set", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["request-object"]}],
+      "processing_levels": ["adjudicated"],
+      "required_metadata": ["gold_set_id", "gold_set_version", "annotation_source", "adjudication_method", "independent_from_system", "leakage_reviewed"]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "evaluation_report",
+      "artifact_type": "classification_evaluation_report",
+      "formats": [{"name": "classification-evaluation-report", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["module-output"]}],
+      "processing_levels": ["validated"],
+      "required_metadata": ["module_version", "compatibility_row_id", "gold_set_version", "dataset_digest"]
+    }
+  ],
+  "preconditions": ["Cases have unique IDs, closed declared labels, independently recorded expected and observed labels, and explicit gold-set provenance."],
+  "assumptions": ["Each case is an independent evaluation unit unless the study design explicitly justifies a different effective-sample interpretation outside this module."],
+  "quality_gates": [
+    {"id": "gold-set-independence", "severity": "major", "description": "Gold annotations must be independent of the evaluated system rather than copied from its reducer or outputs.", "blocks_interpretation": true},
+    {"id": "gold-set-leakage", "severity": "major", "description": "Train, prompt, fixture, benchmark, and annotation leakage must be reviewed before performance interpretation.", "blocks_interpretation": true},
+    {"id": "gold-set-class-support", "severity": "major", "description": "Every gated class metric must meet its declared minimum gold support; empty or undersampled classes cannot silently pass.", "blocks_interpretation": true},
+    {"id": "gold-set-regression", "severity": "major", "description": "Dropped baseline metrics and polarity-corrected regressions beyond the declared fractional limit block acceptance.", "blocks_interpretation": true}
+  ],
+  "limitations": ["Performance applies only to the declared task, population, label policy, gold-set version, and sampled cases; correlated cases, prevalence shift, calibration, uncertainty intervals, and external validity require separate analysis."],
+  "evidence_effects": ["validates_algorithm_performance", "detects_performance_regression", "limits_benchmark_claim"],
+  "alternatives": [],
+  "complements": ["citation-resolution-adjudication", "source-freshness-audit", "reviewer-assessment"],
+  "tool_requirements": [],
+  "dependencies": [
+    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-13", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute deterministic finite classification metrics, threshold gates, canonical digests, and baseline comparisons.", "conflicts": [], "platforms": ["any"]}
+  ],
+  "compatibility_matrix": [
+    {"id": "python-3.14.3-classification-gold-set-1", "module_version": "1.0.0", "tool_versions": {}, "dependency_versions": {"python": [">=3.14,<3.15"]}, "input_formats": {"evaluation_cases": ["classification-gold-set@1"]}, "output_formats": {"evaluation_report": ["classification-evaluation-report@1"]}, "platforms": ["any"], "regression_evidence_ids": ["classification-gold-set-evaluation-regression-v1"], "end_to_end_evidence_ids": ["classification-gold-set-evaluation-e2e-v1"], "verified_at": "2026-07-13"}
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "cases": {
+        "type": "array", "minItems": 1, "maxItems": 100000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "expected_label": {"type": "string", "minLength": 1, "maxLength": 128},
+            "observed_label": {"type": "string", "minLength": 1, "maxLength": 128},
+            "expert_label": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}
+          },
+          "required": ["id", "expected_label", "observed_label"]
+        }
+      },
+      "labels": {"type": "array", "minItems": 2, "maxItems": 64, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+      "thresholds": {
+        "type": "array", "minItems": 1, "maxItems": 10000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "scope": {"type": "string", "enum": ["aggregate", "per_class"]},
+            "class_name": {"type": "string", "minLength": 1, "maxLength": 128},
+            "metric": {"type": "string", "enum": ["accuracy", "balanced_accuracy", "macro_precision", "macro_recall", "macro_f1", "precision", "recall", "f1", "one_vs_rest_accuracy"]},
+            "comparison": {"type": "string", "enum": [">=", ">", "<=", "<"]},
+            "threshold_value": {"type": "number", "minimum": 0, "maximum": 1},
+            "minimum_support": {"type": "integer", "minimum": 1}
+          },
+          "required": ["scope", "class_name", "metric", "comparison", "threshold_value", "minimum_support"]
+        }
+      },
+      "gold_provenance": {
+        "type": "object", "additionalProperties": false,
+        "properties": {
+          "gold_set_id": {"type": "string", "minLength": 1, "maxLength": 500},
+          "gold_set_version": {"type": "string", "minLength": 1, "maxLength": 500},
+          "annotation_source": {"type": "string", "minLength": 1, "maxLength": 500},
+          "adjudication_method": {"type": "string", "minLength": 1, "maxLength": 500},
+          "independent_from_system": {"type": "boolean"},
+          "leakage_reviewed": {"type": "boolean"}
+        },
+        "required": ["gold_set_id", "gold_set_version", "annotation_source", "adjudication_method", "independent_from_system", "leakage_reviewed"]
+      },
+      "baseline_metrics": {
+        "type": "array", "maxItems": 10000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "scope": {"type": "string", "minLength": 1}, "class_name": {"type": "string", "minLength": 1}, "metric": {"type": "string", "minLength": 1},
+            "value": {"type": "number", "minimum": 0, "maximum": 1}, "direction": {"type": "string", "enum": ["higher_is_better", "lower_is_better"]}
+          },
+          "required": ["scope", "class_name", "metric", "value", "direction"]
+        }
+      },
+      "regression_limit": {"type": "number", "minimum": 0, "maximum": 1}
+    },
+    "required": ["cases", "labels", "thresholds", "gold_provenance"]
+  },
+  "output_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "gold_set_id": {"type": "string"}, "gold_set_version": {"type": "string"}, "dataset_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "sample_count": {"type": "integer", "minimum": 1},
+      "labels": {"type": "array", "items": {"type": "string"}},
+      "confusion_matrix": {
+        "type": "array",
+        "items": {"type": "object", "additionalProperties": false, "properties": {"expected_label": {"type": "string"}, "observed_label": {"type": "string"}, "count": {"type": "integer", "minimum": 0}}, "required": ["expected_label", "observed_label", "count"]}
+      },
+      "aggregate_metrics": {
+        "type": "object", "additionalProperties": false,
+        "properties": {"accuracy": {"type": "number"}, "balanced_accuracy": {"type": "number"}, "macro_precision": {"type": "number"}, "macro_recall": {"type": "number"}, "macro_f1": {"type": "number"}},
+        "required": ["accuracy", "balanced_accuracy", "macro_precision", "macro_recall", "macro_f1"]
+      },
+      "class_metrics": {
+        "type": "array",
+        "items": {"type": "object", "additionalProperties": false, "properties": {"class_name": {"type": "string"}, "gold_support": {"type": "integer"}, "predicted_count": {"type": "integer"}, "true_positive": {"type": "integer"}, "false_positive": {"type": "integer"}, "false_negative": {"type": "integer"}, "true_negative": {"type": "integer"}, "precision": {"type": "number"}, "recall": {"type": "number"}, "f1": {"type": "number"}, "one_vs_rest_accuracy": {"type": "number"}}, "required": ["class_name", "gold_support", "predicted_count", "true_positive", "false_positive", "false_negative", "true_negative", "precision", "recall", "f1", "one_vs_rest_accuracy"]}
+      },
+      "threshold_results": {
+        "type": "array",
+        "items": {"type": "object", "additionalProperties": false, "properties": {"key": {"type": "string"}, "scope": {"type": "string"}, "class_name": {"type": "string"}, "metric": {"type": "string"}, "observed_value": {"type": "number"}, "comparison": {"type": "string"}, "threshold_value": {"type": "number"}, "support": {"type": "integer"}, "minimum_support": {"type": "integer"}, "status": {"type": "string", "enum": ["passed", "failed", "insufficient_support"]}, "passed": {"type": "boolean"}}, "required": ["key", "scope", "class_name", "metric", "observed_value", "comparison", "threshold_value", "support", "minimum_support", "status", "passed"]}
+      },
+      "failed_gate_ids": {"type": "array", "items": {"type": "string"}},
+      "baseline_comparisons": {
+        "type": "array",
+        "items": {"type": "object", "additionalProperties": false, "properties": {"scope": {"type": "string"}, "class_name": {"type": "string"}, "metric": {"type": "string"}, "baseline": {"type": "number", "nullable": true}, "current": {"type": "number", "nullable": true}, "signed_lift": {"type": "number", "nullable": true}, "change_type": {"type": "string", "enum": ["new_metric", "dropped_metric", "unchanged_zero", "improved_from_zero", "regression", "improvement", "within_tolerance"]}, "regression": {"type": "boolean"}}, "required": ["scope", "class_name", "metric", "baseline", "current", "signed_lift", "change_type", "regression"]}
+      },
+      "regression_ids": {"type": "array", "items": {"type": "string"}}, "provenance_gate_ids": {"type": "array", "items": {"type": "string"}},
+      "structural_gate_ids": {"type": "array", "items": {"type": "string"}},
+      "expert_concordance": {"type": "object", "additionalProperties": false, "properties": {"labeled_count": {"type": "integer"}, "agreement_count": {"type": "integer"}, "agreement_rate": {"type": "number", "nullable": true}, "gates": {"type": "boolean"}}, "required": ["labeled_count", "agreement_count", "agreement_rate", "gates"]},
+      "regression_limit": {"type": "number"}, "overall_status": {"type": "string", "enum": ["passed", "blocked"]},
+      "quality_gates": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["gold_set_id", "gold_set_version", "dataset_digest", "sample_count", "labels", "confusion_matrix", "aggregate_metrics", "class_metrics", "threshold_results", "failed_gate_ids", "baseline_comparisons", "regression_ids", "provenance_gate_ids", "structural_gate_ids", "expert_concordance", "regression_limit", "overall_status", "quality_gates"]
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned clean-room rewrite documented by the aggregate source-assimilation report."]}
+}

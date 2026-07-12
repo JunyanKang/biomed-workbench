@@ -93,8 +93,8 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
     for module in active.all():
         score, reasons = _score_module(module, query)
         if reasons:
-            for domain in module.domains:
-                domain_scores[domain] = max(domain_scores[domain], score)
+            workflow = module.domains[0]
+            domain_scores[workflow] = max(domain_scores[workflow], score)
     matched = {domain for domain, score in domain_scores.items() if score >= 5.0}
     if matched:
         return _domain_order(matched)
@@ -121,7 +121,7 @@ def score_capability(
             text = f"{capability.id} {capability.title} {capability.description}"
             return float(len(_features(query) & _features(text)))
     score, _reasons = _score_module(module, query)
-    if set(module.domains) & set(workflows):
+    if module.domains[0] in set(workflows):
         score += 2.0
     return score
 
@@ -134,9 +134,9 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
     grouped: dict[str, list[tuple[float, ModuleManifest, list[str]]]] = defaultdict(list)
     for module in active.all():
         score, reasons = _score_module(module, query)
-        for domain in module.domains:
-            if domain in workflows:
-                grouped[domain].append((score + 2.0, module, reasons or [f"available in matched domain: {domain}"]))
+        workflow = module.domains[0]
+        if workflow in workflows:
+            grouped[workflow].append((score + 2.0, module, reasons or [f"available in matched workflow: {workflow}"]))
     candidates = {}
     assigned_modules = set()
     for workflow in workflows:

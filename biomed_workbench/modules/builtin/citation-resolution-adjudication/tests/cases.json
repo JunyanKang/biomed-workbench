@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "matched-source-overrides-other-misses",
+      "input": {"resolver_outcomes": [{"source": "resolver-a", "status": "unmatched", "queried_by": "identifier"}, {"source": "resolver-b", "status": "matched", "queried_by": "title"}, {"source": "resolver-c", "status": "skipped", "queried_by": null}]},
+      "expected_subset": {"resolution_class": "verified_match", "matched_sources": ["resolver-b"], "identifier_unmatched_sources": ["resolver-a"]}
+    },
+    {
+      "name": "title-only-miss-remains-unresolved",
+      "input": {"resolver_outcomes": [{"source": "resolver-a", "status": "unmatched", "queried_by": "title"}, {"source": "resolver-b", "status": "unreachable", "queried_by": null}]},
+      "expected_subset": {"resolution_class": "unresolved", "title_only_unmatched_sources": ["resolver-a"]}
+    }
+  ]
+}

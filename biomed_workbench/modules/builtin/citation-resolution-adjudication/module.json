@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "id": "citation-resolution-adjudication",
+  "version": "1.0.0",
+  "title": "Adjudicate multi-source citation resolution evidence",
+  "description": "Distinguish verified matches, identifier lookup failures, and unresolved title or availability gaps without treating resolver coverage as proof of existence or nonexistence.",
+  "module_type": "validation",
+  "domains": ["evidence", "publication"],
+  "intents": ["citation resolution adjudication", "classify citation resolver outcomes", "判断文献解析结果是匹配、标识符未找到还是无法判定", "文献存在性核验结果裁决"],
+  "questions": ["Do the supplied resolver outcomes establish a matched work, an identifier lookup failure, or an unresolved coverage gap?"],
+  "entrypoint": "biomed_workbench.capabilities.evaluation:adjudicate_citation_resolution",
+  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 10000000},
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "resolver_evidence",
+      "artifact_type": "citation_resolver_outcomes",
+      "formats": [{"name": "citation-resolver-outcomes", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["request-object"]}],
+      "processing_levels": ["observed"],
+      "required_metadata": ["source", "status", "queried_by"]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "resolution_adjudication",
+      "artifact_type": "citation_resolution_adjudication",
+      "formats": [{"name": "citation-resolution-adjudication", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["module-output"]}],
+      "processing_levels": ["validated"],
+      "required_metadata": ["module_version", "compatibility_row_id", "resolution_class"]
+    }
+  ],
+  "preconditions": ["Every outcome is an observed result from a named resolver and records whether the query used an identifier or title."],
+  "assumptions": ["Resolver names identify distinct lookup surfaces, and statuses accurately preserve skipped and unreachable attempts rather than converting them to unmatched."],
+  "quality_gates": [
+    {"id": "citation-resolution-identity", "severity": "major", "description": "A matched result requires work-identity and version confirmation before citation use.", "blocks_interpretation": true},
+    {"id": "citation-resolution-nonexistence", "severity": "major", "description": "Identifier lookup failure is not proof that no work exists and requires manual resolution before a nonexistence claim.", "blocks_interpretation": true},
+    {"id": "citation-resolution-coverage", "severity": "major", "description": "Title-only misses, outages, and skipped resolvers remain unresolved rather than being collapsed into a negative verdict.", "blocks_interpretation": true}
+  ],
+  "limitations": ["The module does not contact resolvers, verify bibliographic identity, assess claim support, or establish that an unmatched identifier is fabricated."],
+  "evidence_effects": ["validates_citation_resolution", "limits_nonexistence_claim"],
+  "alternatives": [],
+  "complements": ["citation-audit", "literature-evidence", "source-freshness-audit"],
+  "tool_requirements": [],
+  "dependencies": [
+    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-13", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute deterministic resolver-outcome validation and evidence adjudication.", "conflicts": [], "platforms": ["any"]}
+  ],
+  "compatibility_matrix": [
+    {"id": "python-3.14.3-citation-resolution-1", "module_version": "1.0.0", "tool_versions": {}, "dependency_versions": {"python": [">=3.14,<3.15"]}, "input_formats": {"resolver_evidence": ["citation-resolver-outcomes@1"]}, "output_formats": {"resolution_adjudication": ["citation-resolution-adjudication@1"]}, "platforms": ["any"], "regression_evidence_ids": ["citation-resolution-adjudication-regression-v1"], "end_to_end_evidence_ids": ["citation-resolution-adjudication-e2e-v1"], "verified_at": "2026-07-13"}
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "resolver_outcomes": {
+        "type": "array", "minItems": 1, "maxItems": 32,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "source": {"type": "string", "minLength": 1, "maxLength": 128},
+            "status": {"type": "string", "enum": ["matched", "unmatched", "unreachable", "skipped"]},
+            "queried_by": {"type": "string", "enum": ["identifier", "title"], "nullable": true}
+          },
+          "required": ["source", "status", "queried_by"]
+        }
+      }
+    },
+    "required": ["resolver_outcomes"]
+  },
+  "output_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "resolution_class": {"type": "string", "enum": ["verified_match", "identifier_not_found", "unresolved"]},
+      "interpretation_status": {"type": "string"},
+      "resolver_count": {"type": "integer"},
+      "status_counts": {"type": "object", "additionalProperties": false, "properties": {"matched": {"type": "integer", "minimum": 1}, "unmatched": {"type": "integer", "minimum": 1}, "unreachable": {"type": "integer", "minimum": 1}, "skipped": {"type": "integer", "minimum": 1}}, "required": []},
+      "matched_sources": {"type": "array", "items": {"type": "string"}},
+      "identifier_unmatched_sources": {"type": "array", "items": {"type": "string"}},
+      "title_only_unmatched_sources": {"type": "array", "items": {"type": "string"}},
+      "resolver_outcomes": {"type": "array", "items": {"type": "object", "additionalProperties": false, "properties": {"source": {"type": "string"}, "status": {"type": "string", "enum": ["matched", "unmatched", "unreachable", "skipped"]}, "queried_by": {"type": "string", "enum": ["identifier", "title"], "nullable": true}}, "required": ["source", "status", "queried_by"]}},
+      "quality_gates": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["resolution_class", "interpretation_status", "resolver_count", "status_counts", "matched_sources", "identifier_unmatched_sources", "title_only_unmatched_sources", "resolver_outcomes", "quality_gates"]
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned clean-room rewrite documented by the aggregate source-assimilation report."]}
+}

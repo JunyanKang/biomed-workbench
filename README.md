@@ -121,6 +121,8 @@ Tool-use guidance and routing remain available regardless of the installed versi
 
 `source-freshness-audit` performs deterministic, offline review-window governance for reporting guidelines, database snapshots, protocols, and other versioned research sources. It requires an explicit as-of date, upstream URL and version, intended use, review interval, currentness requirement, and due policy; rejects future-dated snapshots; and blocks or warns on due records exactly as declared. A young snapshot is only inside its review window: the module always reports `upstream_drift_assessed: false` and never treats snapshot age as proof that the upstream source is unchanged or current.
 
+`citation-resolution-adjudication` keeps resolver evidence honest: a match wins, an identifier-keyed miss is separated from a title-only coverage gap, and outages or skipped resolvers remain unresolved. None of these states alone proves claim support or nonexistence. `classification-gold-set-evaluation` then evaluates any closed-label scientific classifier with a digest-bound gold-set version, confusion matrix, explicit aggregate and per-class metrics, minimum-support gates, independent-annotation and leakage gates, advisory expert concordance, and polarity-aware baseline regression checks. It names per-class recall as recall rather than the ambiguous "per-class accuracy", blocks empty declared classes, treats dropped metrics as regressions, and does not misclassify improvement from a zero baseline as regression.
+
 ## Internal Structure
 
 - `skills/biomed-workbench/`: the only visible Codex skill.

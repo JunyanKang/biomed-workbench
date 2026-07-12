@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 64,
-  "module_count": 64,
+  "compatibility_complete": 66,
+  "module_count": 66,
   "modules": [
     {
       "compatibility_rows": [
@@ -686,6 +686,248 @@
           "required_metadata": [
             "module_version",
             "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "citation-resolution-adjudication-e2e-v1"
+          ],
+          "id": "python-3.14.3-citation-resolution-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "citation-resolution-adjudication-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic resolver-outcome validation and evidence adjudication.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "citation-resolution-adjudication",
+      "input_formats": [
+        {
+          "artifact_type": "citation_resolver_outcomes",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "citation-resolver-outcomes",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "resolver_evidence",
+          "processing_levels": [
+            "observed"
+          ],
+          "required_metadata": [
+            "source",
+            "status",
+            "queried_by"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "citation_resolution_adjudication",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "citation-resolution-adjudication",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "resolution_adjudication",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "resolution_class"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "classification-gold-set-evaluation-e2e-v1"
+          ],
+          "id": "python-3.14.3-classification-gold-set-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "classification-gold-set-evaluation-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic finite classification metrics, threshold gates, canonical digests, and baseline comparisons.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "classification-gold-set-evaluation",
+      "input_formats": [
+        {
+          "artifact_type": "classification_gold_set",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "classification-gold-set",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "evaluation_cases",
+          "processing_levels": [
+            "adjudicated"
+          ],
+          "required_metadata": [
+            "gold_set_id",
+            "gold_set_version",
+            "annotation_source",
+            "adjudication_method",
+            "independent_from_system",
+            "leakage_reviewed"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "classification_evaluation_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "classification-evaluation-report",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "evaluation_report",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "gold_set_version",
+            "dataset_digest"
           ]
         }
       ],
@@ -9231,6 +9473,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "b022173e97ec7865f9f7b2a488029d12361dbf72d7ad36c956fdbb2a4651d29e",
+  "registry_digest": "6d4b763aac9ec6c5fa96e94081b5102041ba865ae10299773d87c27b3ee46302",
   "schema_version": 1
 }

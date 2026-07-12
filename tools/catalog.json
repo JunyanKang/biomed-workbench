@@ -174,6 +174,283 @@
     },
     {
       "access": "offline",
+      "description": "Distinguish verified matches, identifier lookup failures, and unresolved title or availability gaps without treating resolver coverage as proof of existence or nonexistence.",
+      "entrypoint": "biomed_workbench.capabilities.evaluation:adjudicate_citation_resolution",
+      "id": "citation-resolution-adjudication",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "resolver_outcomes": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "queried_by": {
+                  "enum": [
+                    "identifier",
+                    "title"
+                  ],
+                  "nullable": true,
+                  "type": "string"
+                },
+                "source": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "matched",
+                    "unmatched",
+                    "unreachable",
+                    "skipped"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "source",
+                "status",
+                "queried_by"
+              ],
+              "type": "object"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "resolver_outcomes"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Adjudicate multi-source citation resolution evidence",
+      "workflow": "evidence"
+    },
+    {
+      "access": "offline",
+      "description": "Compute closed-label confusion, aggregate and per-class metrics, minimum-support-aware thresholds, advisory expert concordance, and baseline regressions while blocking circular or leakage-unreviewed gold sets.",
+      "entrypoint": "biomed_workbench.capabilities.evaluation:evaluate_classification_gold_set",
+      "id": "classification-gold-set-evaluation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "baseline_metrics": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "class_name": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "direction": {
+                  "enum": [
+                    "higher_is_better",
+                    "lower_is_better"
+                  ],
+                  "type": "string"
+                },
+                "metric": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "scope": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "value": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "scope",
+                "class_name",
+                "metric",
+                "value",
+                "direction"
+              ],
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "type": "array"
+          },
+          "cases": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "expected_label": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "expert_label": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "observed_label": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "expected_label",
+                "observed_label"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100000,
+            "minItems": 1,
+            "type": "array"
+          },
+          "gold_provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "adjudication_method": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "annotation_source": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "gold_set_id": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "gold_set_version": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "independent_from_system": {
+                "type": "boolean"
+              },
+              "leakage_reviewed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "gold_set_id",
+              "gold_set_version",
+              "annotation_source",
+              "adjudication_method",
+              "independent_from_system",
+              "leakage_reviewed"
+            ],
+            "type": "object"
+          },
+          "labels": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "minItems": 2,
+            "type": "array"
+          },
+          "regression_limit": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "thresholds": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "class_name": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "comparison": {
+                  "enum": [
+                    ">=",
+                    ">",
+                    "<=",
+                    "<"
+                  ],
+                  "type": "string"
+                },
+                "metric": {
+                  "enum": [
+                    "accuracy",
+                    "balanced_accuracy",
+                    "macro_precision",
+                    "macro_recall",
+                    "macro_f1",
+                    "precision",
+                    "recall",
+                    "f1",
+                    "one_vs_rest_accuracy"
+                  ],
+                  "type": "string"
+                },
+                "minimum_support": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "scope": {
+                  "enum": [
+                    "aggregate",
+                    "per_class"
+                  ],
+                  "type": "string"
+                },
+                "threshold_value": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "scope",
+                "class_name",
+                "metric",
+                "comparison",
+                "threshold_value",
+                "minimum_support"
+              ],
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "cases",
+          "labels",
+          "thresholds",
+          "gold_provenance"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Evaluate a classification gold set with provenance and regression gates",
+      "workflow": "evidence"
+    },
+    {
+      "access": "offline",
       "description": "Redact direct identifier fields plus email and phone patterns while reporting residual privacy limits.",
       "entrypoint": "biomed_workbench.capabilities.clinical:deidentify_record",
       "id": "clinical-deidentify",
@@ -2544,7 +2821,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 64,
+  "entry_count": 66,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

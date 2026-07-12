@@ -115,6 +115,49 @@
       ]
     }
   },
+  "citation-resolution-adjudication": {
+    "input": {
+      "resolver_outcomes": [
+        {"source": "resolver-a", "status": "unmatched", "queried_by": "identifier"},
+        {"source": "resolver-b", "status": "matched", "queried_by": "title"},
+        {"source": "resolver-c", "status": "skipped", "queried_by": null}
+      ]
+    },
+    "output": {
+      "resolution_class": "verified_match",
+      "resolver_count": 3,
+      "matched_sources": ["resolver-b"],
+      "identifier_unmatched_sources": ["resolver-a"],
+      "title_only_unmatched_sources": []
+    }
+  },
+  "classification-gold-set-evaluation": {
+    "input": {
+      "cases": [
+        {"id": "v1", "expected_label": "verified", "observed_label": "verified", "expert_label": "verified"},
+        {"id": "v2", "expected_label": "verified", "observed_label": "verified"},
+        {"id": "u1", "expected_label": "unresolved", "observed_label": "unresolved"},
+        {"id": "u2", "expected_label": "unresolved", "observed_label": "unresolved"}
+      ],
+      "labels": ["verified", "unresolved"],
+      "thresholds": [
+        {"scope": "aggregate", "class_name": "aggregate", "metric": "accuracy", "comparison": ">=", "threshold_value": 0.9, "minimum_support": 4},
+        {"scope": "per_class", "class_name": "verified", "metric": "recall", "comparison": ">=", "threshold_value": 0.9, "minimum_support": 2},
+        {"scope": "per_class", "class_name": "unresolved", "metric": "precision", "comparison": ">=", "threshold_value": 0.9, "minimum_support": 2}
+      ],
+      "gold_provenance": {"gold_set_id": "citation-resolution-independent", "gold_set_version": "1.0.0", "annotation_source": "independent dual review", "adjudication_method": "consensus with arbitration", "independent_from_system": true, "leakage_reviewed": true},
+      "baseline_metrics": [{"scope": "aggregate", "class_name": "aggregate", "metric": "accuracy", "value": 0.95, "direction": "higher_is_better"}],
+      "regression_limit": 0.05
+    },
+    "output": {
+      "sample_count": 4,
+      "overall_status": "passed",
+      "failed_gate_ids": [],
+      "regression_ids": [],
+      "provenance_gate_ids": [],
+      "structural_gate_ids": []
+    }
+  },
   "clinical-deidentify": {
     "input": {
       "record": {

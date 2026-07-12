@@ -70,6 +70,7 @@ Inspect every returned image at full resolution against the handoff gates. Gener
 - Do not request unrelated provider credentials. A missing optional credential must narrow the plan transparently rather than changing the scientific interpretation.
 - Keep retrieved evidence separate from Codex interpretation. Report database coverage, query constraints, dates when material, and negative or incomplete retrievals.
 - Route versioned guidelines, protocols, and database snapshots through `source-freshness-audit` when their review date or currentness matters. Treat its temporal status as scheduling evidence only: perform and record a separate upstream check before claiming that a source remains current or unchanged.
+- Use `citation-resolution-adjudication` only after collecting explicit resolver outcomes; a match still needs identity and claim-support review, while identifier misses and title-only gaps require different follow-up. Use `classification-gold-set-evaluation` for algorithm evaluation, and block broad performance claims when annotations are not independent, leakage was not reviewed, a declared class is empty, support is inadequate, or a baseline metric regressed or disappeared.
 
 ## Guardrails
 

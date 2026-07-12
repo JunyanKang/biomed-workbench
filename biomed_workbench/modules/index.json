@@ -1,5 +1,5 @@
 {
-  "module_count": 64,
+  "module_count": 66,
   "modules": [
     {
       "access": "offline",
@@ -1455,6 +1455,1140 @@
       ],
       "schema_version": 1,
       "title": "Audit reference metadata",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "Resolver names identify distinct lookup surfaces, and statuses accurately preserve skipped and unreachable attempts rather than converting them to unmatched."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "citation-resolution-adjudication-e2e-v1"
+          ],
+          "id": "python-3.14.3-citation-resolution-1",
+          "input_formats": {
+            "resolver_evidence": [
+              "citation-resolver-outcomes@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "resolution_adjudication": [
+              "citation-resolution-adjudication@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "citation-resolution-adjudication-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "citation-audit",
+        "literature-evidence",
+        "source-freshness-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic resolver-outcome validation and evidence adjudication.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Distinguish verified matches, identifier lookup failures, and unresolved title or availability gaps without treating resolver coverage as proof of existence or nonexistence.",
+      "domains": [
+        "evidence",
+        "publication"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evaluation:adjudicate_citation_resolution",
+      "evidence_effects": [
+        "validates_citation_resolution",
+        "limits_nonexistence_claim"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 30
+      },
+      "id": "citation-resolution-adjudication",
+      "input_artifacts": [
+        {
+          "artifact_type": "citation_resolver_outcomes",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "citation-resolver-outcomes",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "resolver_evidence",
+          "processing_levels": [
+            "observed"
+          ],
+          "required_metadata": [
+            "source",
+            "status",
+            "queried_by"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "resolver_outcomes": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "queried_by": {
+                  "enum": [
+                    "identifier",
+                    "title"
+                  ],
+                  "nullable": true,
+                  "type": "string"
+                },
+                "source": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "matched",
+                    "unmatched",
+                    "unreachable",
+                    "skipped"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "source",
+                "status",
+                "queried_by"
+              ],
+              "type": "object"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "resolver_outcomes"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "citation resolution adjudication",
+        "classify citation resolver outcomes",
+        "\u5224\u65ad\u6587\u732e\u89e3\u6790\u7ed3\u679c\u662f\u5339\u914d\u3001\u6807\u8bc6\u7b26\u672a\u627e\u5230\u8fd8\u662f\u65e0\u6cd5\u5224\u5b9a",
+        "\u6587\u732e\u5b58\u5728\u6027\u6838\u9a8c\u7ed3\u679c\u88c1\u51b3"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The module does not contact resolvers, verify bibliographic identity, assess claim support, or establish that an unmatched identifier is fabricated."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "citation_resolution_adjudication",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "citation-resolution-adjudication",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "resolution_adjudication",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "resolution_class"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "identifier_unmatched_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "interpretation_status": {
+            "type": "string"
+          },
+          "matched_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "quality_gates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "resolution_class": {
+            "enum": [
+              "verified_match",
+              "identifier_not_found",
+              "unresolved"
+            ],
+            "type": "string"
+          },
+          "resolver_count": {
+            "type": "integer"
+          },
+          "resolver_outcomes": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "queried_by": {
+                  "enum": [
+                    "identifier",
+                    "title"
+                  ],
+                  "nullable": true,
+                  "type": "string"
+                },
+                "source": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "matched",
+                    "unmatched",
+                    "unreachable",
+                    "skipped"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "source",
+                "status",
+                "queried_by"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "status_counts": {
+            "additionalProperties": false,
+            "properties": {
+              "matched": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "skipped": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "unmatched": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "unreachable": {
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [],
+            "type": "object"
+          },
+          "title_only_unmatched_sources": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "resolution_class",
+          "interpretation_status",
+          "resolver_count",
+          "status_counts",
+          "matched_sources",
+          "identifier_unmatched_sources",
+          "title_only_unmatched_sources",
+          "resolver_outcomes",
+          "quality_gates"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Every outcome is an observed result from a named resolver and records whether the query used an identifier or title."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "A matched result requires work-identity and version confirmation before citation use.",
+          "id": "citation-resolution-identity",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Identifier lookup failure is not proof that no work exists and requires manual resolution before a nonexistence claim.",
+          "id": "citation-resolution-nonexistence",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Title-only misses, outages, and skipped resolvers remain unresolved rather than being collapsed into a negative verdict.",
+          "id": "citation-resolution-coverage",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Do the supplied resolver outcomes establish a matched work, an identifier lookup failure, or an unresolved coverage gap?"
+      ],
+      "schema_version": 1,
+      "title": "Adjudicate multi-source citation resolution evidence",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "Each case is an independent evaluation unit unless the study design explicitly justifies a different effective-sample interpretation outside this module."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "classification-gold-set-evaluation-e2e-v1"
+          ],
+          "id": "python-3.14.3-classification-gold-set-1",
+          "input_formats": {
+            "evaluation_cases": [
+              "classification-gold-set@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "evaluation_report": [
+              "classification-evaluation-report@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "classification-gold-set-evaluation-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "citation-resolution-adjudication",
+        "source-freshness-audit",
+        "reviewer-assessment"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic finite classification metrics, threshold gates, canonical digests, and baseline comparisons.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Compute closed-label confusion, aggregate and per-class metrics, minimum-support-aware thresholds, advisory expert concordance, and baseline regressions while blocking circular or leakage-unreviewed gold sets.",
+      "domains": [
+        "evidence",
+        "research-quality",
+        "statistics"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evaluation:evaluate_classification_gold_set",
+      "evidence_effects": [
+        "validates_algorithm_performance",
+        "detects_performance_regression",
+        "limits_benchmark_claim"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 30
+      },
+      "id": "classification-gold-set-evaluation",
+      "input_artifacts": [
+        {
+          "artifact_type": "classification_gold_set",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "classification-gold-set",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "evaluation_cases",
+          "processing_levels": [
+            "adjudicated"
+          ],
+          "required_metadata": [
+            "gold_set_id",
+            "gold_set_version",
+            "annotation_source",
+            "adjudication_method",
+            "independent_from_system",
+            "leakage_reviewed"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "baseline_metrics": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "class_name": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "direction": {
+                  "enum": [
+                    "higher_is_better",
+                    "lower_is_better"
+                  ],
+                  "type": "string"
+                },
+                "metric": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "scope": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "value": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "scope",
+                "class_name",
+                "metric",
+                "value",
+                "direction"
+              ],
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "type": "array"
+          },
+          "cases": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "expected_label": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "expert_label": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "observed_label": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "expected_label",
+                "observed_label"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100000,
+            "minItems": 1,
+            "type": "array"
+          },
+          "gold_provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "adjudication_method": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "annotation_source": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "gold_set_id": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "gold_set_version": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "independent_from_system": {
+                "type": "boolean"
+              },
+              "leakage_reviewed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "gold_set_id",
+              "gold_set_version",
+              "annotation_source",
+              "adjudication_method",
+              "independent_from_system",
+              "leakage_reviewed"
+            ],
+            "type": "object"
+          },
+          "labels": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "minItems": 2,
+            "type": "array"
+          },
+          "regression_limit": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "thresholds": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "class_name": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "comparison": {
+                  "enum": [
+                    ">=",
+                    ">",
+                    "<=",
+                    "<"
+                  ],
+                  "type": "string"
+                },
+                "metric": {
+                  "enum": [
+                    "accuracy",
+                    "balanced_accuracy",
+                    "macro_precision",
+                    "macro_recall",
+                    "macro_f1",
+                    "precision",
+                    "recall",
+                    "f1",
+                    "one_vs_rest_accuracy"
+                  ],
+                  "type": "string"
+                },
+                "minimum_support": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "scope": {
+                  "enum": [
+                    "aggregate",
+                    "per_class"
+                  ],
+                  "type": "string"
+                },
+                "threshold_value": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "scope",
+                "class_name",
+                "metric",
+                "comparison",
+                "threshold_value",
+                "minimum_support"
+              ],
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "cases",
+          "labels",
+          "thresholds",
+          "gold_provenance"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "classification gold set evaluation",
+        "evaluate benchmark thresholds and regressions",
+        "\u8bc4\u4f30\u5206\u7c7b gold set \u7684\u9608\u503c\u3001\u9010\u7c7b\u6307\u6807\u548c\u56de\u5f52",
+        "\u79d1\u7814\u7b97\u6cd5\u8bc4\u6d4b\u4e0e\u57fa\u51c6\u56de\u5f52\u68c0\u67e5"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Performance applies only to the declared task, population, label policy, gold-set version, and sampled cases; correlated cases, prevalence shift, calibration, uncertainty intervals, and external validity require separate analysis."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "classification_evaluation_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "classification-evaluation-report",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "evaluation_report",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "gold_set_version",
+            "dataset_digest"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "aggregate_metrics": {
+            "additionalProperties": false,
+            "properties": {
+              "accuracy": {
+                "type": "number"
+              },
+              "balanced_accuracy": {
+                "type": "number"
+              },
+              "macro_f1": {
+                "type": "number"
+              },
+              "macro_precision": {
+                "type": "number"
+              },
+              "macro_recall": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "accuracy",
+              "balanced_accuracy",
+              "macro_precision",
+              "macro_recall",
+              "macro_f1"
+            ],
+            "type": "object"
+          },
+          "baseline_comparisons": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "baseline": {
+                  "nullable": true,
+                  "type": "number"
+                },
+                "change_type": {
+                  "enum": [
+                    "new_metric",
+                    "dropped_metric",
+                    "unchanged_zero",
+                    "improved_from_zero",
+                    "regression",
+                    "improvement",
+                    "within_tolerance"
+                  ],
+                  "type": "string"
+                },
+                "class_name": {
+                  "type": "string"
+                },
+                "current": {
+                  "nullable": true,
+                  "type": "number"
+                },
+                "metric": {
+                  "type": "string"
+                },
+                "regression": {
+                  "type": "boolean"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "signed_lift": {
+                  "nullable": true,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "scope",
+                "class_name",
+                "metric",
+                "baseline",
+                "current",
+                "signed_lift",
+                "change_type",
+                "regression"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "class_metrics": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "class_name": {
+                  "type": "string"
+                },
+                "f1": {
+                  "type": "number"
+                },
+                "false_negative": {
+                  "type": "integer"
+                },
+                "false_positive": {
+                  "type": "integer"
+                },
+                "gold_support": {
+                  "type": "integer"
+                },
+                "one_vs_rest_accuracy": {
+                  "type": "number"
+                },
+                "precision": {
+                  "type": "number"
+                },
+                "predicted_count": {
+                  "type": "integer"
+                },
+                "recall": {
+                  "type": "number"
+                },
+                "true_negative": {
+                  "type": "integer"
+                },
+                "true_positive": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "class_name",
+                "gold_support",
+                "predicted_count",
+                "true_positive",
+                "false_positive",
+                "false_negative",
+                "true_negative",
+                "precision",
+                "recall",
+                "f1",
+                "one_vs_rest_accuracy"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "confusion_matrix": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "count": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "expected_label": {
+                  "type": "string"
+                },
+                "observed_label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "expected_label",
+                "observed_label",
+                "count"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "dataset_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "expert_concordance": {
+            "additionalProperties": false,
+            "properties": {
+              "agreement_count": {
+                "type": "integer"
+              },
+              "agreement_rate": {
+                "nullable": true,
+                "type": "number"
+              },
+              "gates": {
+                "type": "boolean"
+              },
+              "labeled_count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "labeled_count",
+              "agreement_count",
+              "agreement_rate",
+              "gates"
+            ],
+            "type": "object"
+          },
+          "failed_gate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "gold_set_id": {
+            "type": "string"
+          },
+          "gold_set_version": {
+            "type": "string"
+          },
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "overall_status": {
+            "enum": [
+              "passed",
+              "blocked"
+            ],
+            "type": "string"
+          },
+          "provenance_gate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "quality_gates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "regression_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "regression_limit": {
+            "type": "number"
+          },
+          "sample_count": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "structural_gate_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "threshold_results": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "class_name": {
+                  "type": "string"
+                },
+                "comparison": {
+                  "type": "string"
+                },
+                "key": {
+                  "type": "string"
+                },
+                "metric": {
+                  "type": "string"
+                },
+                "minimum_support": {
+                  "type": "integer"
+                },
+                "observed_value": {
+                  "type": "number"
+                },
+                "passed": {
+                  "type": "boolean"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "passed",
+                    "failed",
+                    "insufficient_support"
+                  ],
+                  "type": "string"
+                },
+                "support": {
+                  "type": "integer"
+                },
+                "threshold_value": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "key",
+                "scope",
+                "class_name",
+                "metric",
+                "observed_value",
+                "comparison",
+                "threshold_value",
+                "support",
+                "minimum_support",
+                "status",
+                "passed"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "gold_set_id",
+          "gold_set_version",
+          "dataset_digest",
+          "sample_count",
+          "labels",
+          "confusion_matrix",
+          "aggregate_metrics",
+          "class_metrics",
+          "threshold_results",
+          "failed_gate_ids",
+          "baseline_comparisons",
+          "regression_ids",
+          "provenance_gate_ids",
+          "structural_gate_ids",
+          "expert_concordance",
+          "regression_limit",
+          "overall_status",
+          "quality_gates"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Cases have unique IDs, closed declared labels, independently recorded expected and observed labels, and explicit gold-set provenance."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Gold annotations must be independent of the evaluated system rather than copied from its reducer or outputs.",
+          "id": "gold-set-independence",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Train, prompt, fixture, benchmark, and annotation leakage must be reviewed before performance interpretation.",
+          "id": "gold-set-leakage",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every gated class metric must meet its declared minimum gold support; empty or undersampled classes cannot silently pass.",
+          "id": "gold-set-class-support",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Dropped baseline metrics and polarity-corrected regressions beyond the declared fractional limit block acceptance.",
+          "id": "gold-set-regression",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Does the independently adjudicated classification gold set meet declared aggregate, per-class, support, provenance, leakage, and regression gates?"
+      ],
+      "schema_version": 1,
+      "title": "Evaluate a classification gold set with provenance and regression gates",
       "tool_requirements": [],
       "version": "1.0.0"
     },
@@ -18978,6 +20112,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "b022173e97ec7865f9f7b2a488029d12361dbf72d7ad36c956fdbb2a4651d29e",
+  "registry_digest": "6d4b763aac9ec6c5fa96e94081b5102041ba865ae10299773d87c27b3ee46302",
   "schema_version": 1
 }

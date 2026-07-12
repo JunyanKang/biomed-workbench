@@ -713,6 +713,7 @@ def parse_manifest(value: Any) -> ModuleManifest:
         raise ValueError("manifest module_type or maturity is unsupported")
     if access not in ACCESS_MODES or mutability not in MUTABILITY_MODES:
         raise ValueError("manifest access or mutability is unsupported")
+    domains = _strings(payload["domains"], "manifest.domains")
     credentials = _strings(payload["credentials"], "manifest.credentials", allow_empty=True)
     if set(credentials) - ALLOWED_CREDENTIALS:
         raise ValueError("manifest requests an unsupported credential")
@@ -732,7 +733,7 @@ def parse_manifest(value: Any) -> ModuleManifest:
         title=_text(payload["title"], "manifest.title"),
         description=_text(payload["description"], "manifest.description", minimum=24),
         module_type=module_type,
-        domains=_strings(payload["domains"], "manifest.domains"),
+        domains=domains,
         intents=_strings(payload["intents"], "manifest.intents"),
         questions=_strings(payload["questions"], "manifest.questions"),
         entrypoint=_text(payload["entrypoint"], "manifest.entrypoint"),
