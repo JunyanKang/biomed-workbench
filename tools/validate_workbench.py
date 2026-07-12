@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 61:
-            errors.append(f"built-in module count must be 61, found {len(modules)}")
+        if len(modules) != 62:
+            errors.append(f"built-in module count must be 62, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -556,6 +556,37 @@ def main() -> int:
                 or snapshot.get("source_and_snapshot_indexes_match") is not True
             ):
                 errors.append("official Codex plugin contract evidence is stale or differs from current manifest, skill, validators, or isolated registry")
+
+        native_handoff_path = ROOT / "reports" / "codex-native-handoff-verification.json"
+        native_skill_path = ROOT / "skills" / "biomed-workbench" / "SKILL.md"
+        try:
+            native_handoff = json.loads(native_handoff_path.read_text(encoding="utf-8"))
+            native_manifest = registry.get("scientific-illustration-generation")
+            native_manifest_path = ROOT / "biomed_workbench" / "modules" / "builtin" / native_manifest.id / "module.json"
+            compatibility_path = ROOT / "reports" / "compatibility-execution-evidence.json"
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("Codex-native image handoff evidence is missing or invalid")
+        else:
+            handoff = native_handoff.get("handoff", {})
+            if (
+                native_handoff.get("passed") is not True
+                or native_handoff.get("evidence_id") != "codex-native-image-generation-handoff-v1"
+                or native_handoff.get("evidence_type") != "codex-native-tool-handoff"
+                or native_handoff.get("module", {}).get("manifest_sha256") != hashlib.sha256(native_manifest_path.read_bytes()).hexdigest()
+                or native_handoff.get("module", {}).get("access") != "codex_native"
+                or native_handoff.get("module", {}).get("credentials") != []
+                or native_handoff.get("skill", {}).get("sha256") != hashlib.sha256(native_skill_path.read_bytes()).hexdigest()
+                or handoff.get("tool") != "image_gen"
+                or handoff.get("authentication") != "codex-managed"
+                or handoff.get("provider_sdk_or_cli") is not False
+                or handoff.get("provider_credential_requested") is not False
+                or handoff.get("deterministic_handoff_executed") is not True
+                or handoff.get("native_bitmap_invocation_tested") is not False
+                or handoff.get("module_routed_once") is not True
+                or native_handoff.get("compatibility_evidence_sha256") != hashlib.sha256(compatibility_path.read_bytes()).hexdigest()
+                or native_handoff.get("source_behavior_disposition", {}).get("provider_auth_model_endpoint_and_retry_client") != "retired-codex-managed"
+            ):
+                errors.append("Codex-native image handoff evidence is stale, credential-bearing, duplicated, or overclaims bitmap execution")
 
         reconciliation_path = ROOT / "reports" / "source-reconciliation-summary.json"
         assimilation_path = ROOT / "reports" / "source-assimilation-summary.json"

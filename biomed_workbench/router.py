@@ -138,8 +138,10 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
             if domain in workflows:
                 grouped[domain].append((score + 2.0, module, reasons or [f"available in matched domain: {domain}"]))
     candidates = {}
+    assigned_modules = set()
     for workflow in workflows:
         ranked = sorted(grouped[workflow], key=lambda item: (-item[0], item[1].id))
+        ranked = [item for item in ranked if item[1].id not in assigned_modules]
         candidates[workflow] = [
             {
                 "id": module.id,
@@ -152,6 +154,7 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
             }
             for score, module, reasons in ranked[:per_workflow]
         ]
+        assigned_modules.update(item["id"] for item in candidates[workflow])
     parallel_requested = any(term in _normalize(query) for term in ("parallel", "并行", "同时"))
     if len(workflows) == 1:
         plan_type = "single"

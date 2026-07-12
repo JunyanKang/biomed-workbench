@@ -114,6 +114,8 @@ External scientific engines remain user-managed dependencies; the plugin guides,
 
 Tool-use guidance and routing remain available regardless of the installed version. For scientific execution, versions inside the declared compatibility policy may run and are recorded verbatim; provenance also states whether each version is an exact tested baseline. Missing tools, versions outside the policy, known breaking changes, or invalid output structures prevent the result from entering the evidence ledger until the environment is corrected or a validated alternative is selected. The `reports/*-live-verification.json` files preserve the concrete versions used for FastQC, fastp, MultiQC, FastQ Screen, samtools, bedtools, VCF processing, TMB, and NMF regression evidence.
 
+`scientific-illustration-generation` uses a separate `codex_native` contract. It validates a non-evidentiary scientific illustration brief and returns a machine-readable handoff to Codex `image_gen`; the unified Skill invokes the native tool and checks the observed bitmap. It never asks the user for a provider image API key, runs a provider SDK/CLI, or claims that a handoff alone created an image. See `reports/codex-native-handoff-verification.json` for the exact covered and retired source behaviors.
+
 ## Internal Structure
 
 - `skills/biomed-workbench/`: the only visible Codex skill.

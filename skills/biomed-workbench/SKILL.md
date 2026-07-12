@@ -55,6 +55,14 @@ python3 "$WORKBENCH_ROOT/tools/run_tool.py" CAPABILITY_ID --input-file INPUT.jso
 
 Treat router candidates as recommendations. Verify the selected input schema, units, organism/build, identifiers, dependency readiness, and scientific compatibility before execution. Do not substitute a merely available capability for the analysis the question requires.
 
+## Codex-Native Handoffs
+
+Some modules validate a scientific brief and return an `execution_handoff` for a Codex-managed native tool. Accept a handoff only when the module contract declares `access: codex_native`, no user credential, a recognized tool and operation, explicit quality gates, and a passing deterministic module result.
+
+For `tool: image_gen`, invoke the built-in image generation tool directly with the emitted prompt. Never run or recreate a provider SDK/CLI client, request a provider image API key, select an undeclared model, or silently downgrade to another execution path. For edits, first make every target image visible to Codex; inspect local images with the native image viewer before invoking the edit. The handoff is not proof that a bitmap exists: record an artifact only after the native tool returns an observed image.
+
+Inspect every returned image at full resolution against the handoff gates. Generated illustrations are communication material, never microscopy, gels, blots, quantitative plots, diagnostic images, structural predictions, or other observed scientific evidence. Check biological accuracy, requested labels, reference invariants, unsupported visual claims, copyright/consent, and required AI-generation disclosure before delivery.
+
 ## Evidence And Databases
 
 - Prefer primary records and stable identifiers. Cross-check important identity or clinical assertions across independent authoritative records when possible.

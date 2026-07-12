@@ -4,6 +4,22 @@ from biomed_workbench.models import Artifact, Capability, EvidenceItem, Executio
 
 
 class ModelTests(unittest.TestCase):
+    def test_codex_native_access_requires_no_provider_credential_mode(self):
+        capability = Capability(
+            id="native-image-handoff",
+            workflow="imaging",
+            kind="workflow",
+            title="Native image handoff",
+            description="Prepare a bounded handoff to a Codex-managed native image tool.",
+            entrypoint="module:function",
+            input_schema={"type": "object", "properties": {}, "required": [], "additionalProperties": False},
+            requirements=(),
+            access="codex_native",
+            mutability="read_only",
+        )
+
+        self.assertEqual(capability.access, "codex_native")
+
     def test_capability_is_immutable_and_validated(self):
         capability = Capability(
             id="ncbi-search",

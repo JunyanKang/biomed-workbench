@@ -27,6 +27,13 @@ PROJECT_EVIDENCE_SOURCES = {
         "digest_section": "plugin",
         "digest_field": "manifest_sha256",
     },
+    "codex-native-image-generation-handoff-v1": {
+        "report": "reports/codex-native-handoff-verification.json",
+        "evidence_type": "codex-native-tool-handoff",
+        "artifact": "skills/biomed-workbench/SKILL.md",
+        "digest_section": "skill",
+        "digest_field": "sha256",
+    },
 }
 
 

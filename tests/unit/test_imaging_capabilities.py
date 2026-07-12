@@ -1,6 +1,6 @@
 import unittest
 
-from biomed_workbench.capabilities.imaging import colocalization, image_profile, segment_components, track_points
+from biomed_workbench.capabilities.imaging import colocalization, image_profile, scientific_illustration_generation, segment_components, track_points
 
 
 class ImagingCapabilityTests(unittest.TestCase):
@@ -41,6 +41,35 @@ class ImagingCapabilityTests(unittest.TestCase):
         self.assertEqual(lengths, [1, 1, 3])
         longest = max(result["tracks"], key=lambda track: len(track["points"]))
         self.assertEqual([point["x"] for point in longest["points"]], [0.0, 1.0, 2.0])
+
+    def test_scientific_illustration_handoff_is_codex_native_and_non_evidentiary(self):
+        result = scientific_illustration_generation(
+            "retinal progenitor differentiation into rods and cones",
+            "BANP loss disrupts the transition from progenitor state to mature photoreceptor lineages",
+            "conceptual-mechanism",
+            labels=["RPC", "Rod", "Cone"],
+            palette=["teal progenitor", "magenta rod", "gold cone"],
+            visual_semantics=["solid arrows indicate differentiation", "dashed bar indicates disrupted transition"],
+            constraints=["white background", "color-blind-safe lineage colors"],
+            avoid=["photorealistic microscopy"],
+            disclosure_context="manuscript",
+        )
+
+        self.assertTrue(result["ready"])
+        self.assertEqual(result["representation_scope"], "scientific-communication-only")
+        self.assertEqual(result["execution_handoff"]["tool"], "image_gen")
+        self.assertEqual(result["execution_handoff"]["authentication"], "codex-managed")
+        self.assertFalse(result["execution_handoff"]["cli_fallback_allowed"])
+        self.assertIn("not measured data", result["execution_handoff"]["prompt"])
+        self.assertIn("Visual semantics", result["execution_handoff"]["prompt"])
+        self.assertEqual(result["disclosure_context"], "manuscript")
+        self.assertEqual({gate["id"] for gate in result["quality_gates"]}, {"generated-not-observed-data", "scientific-accuracy-review", "text-label-fidelity", "reference-invariant-preservation", "generation-disclosure"})
+
+    def test_scientific_illustration_edit_requires_visible_reference_and_rejects_unknown_modes(self):
+        with self.assertRaisesRegex(ValueError, "visible reference"):
+            scientific_illustration_generation("cell", "show a conceptual edit", "scientific-illustration", mode="edit")
+        with self.assertRaisesRegex(ValueError, "unsupported"):
+            scientific_illustration_generation("cell", "show data", "microscopy-result")
 
 
 if __name__ == "__main__":

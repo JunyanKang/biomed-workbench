@@ -50,6 +50,30 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         self.assertEqual(plan["matched_workflows"], ["ecology"])
         self.assertEqual(plan["steps"][0]["candidates"][0]["id"], "ecology-flux")
 
+    def test_multi_domain_module_is_scheduled_once_without_a_central_special_case(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            shared = valid_manifest_payload()
+            shared["id"] = "shared-visual"
+            shared["domains"] = ["imaging", "publication"]
+            shared["title"] = "Create shared visual"
+            shared["intents"] = ["create shared visual"]
+            shared["questions"] = ["What shared visual should be created?"]
+            write_manifest(root, shared)
+            for identifier, domain in (("image-check", "imaging"), ("publication-check", "publication")):
+                payload = valid_manifest_payload()
+                payload["id"] = identifier
+                payload["domains"] = [domain]
+                payload["title"] = identifier.replace("-", " ")
+                payload["intents"] = [identifier.replace("-", " ")]
+                write_manifest(root, payload)
+
+            plan = route("create shared visual for publication", registry=ModuleRegistry.discover(root))
+
+        routed = [item["id"] for step in plan["steps"] for item in step["candidates"]]
+        self.assertEqual(routed.count("shared-visual"), 1)
+        self.assertIn("publication-check", routed)
+
 
 if __name__ == "__main__":
     unittest.main()

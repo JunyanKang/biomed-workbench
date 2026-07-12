@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 61,
-  "module_count": 61,
+  "compatibility_complete": 62,
+  "module_count": 62,
   "modules": [
     {
       "compatibility_rows": [
@@ -7055,6 +7055,129 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "scientific-illustration-generation-e2e-v1"
+          ],
+          "id": "python-3.14.3-codex-native-image-handoff-v1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "scientific-illustration-generation-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate the scientific illustration brief and serialize a deterministic Codex-native tool handoff without a provider SDK.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "scientific-illustration-generation",
+      "input_formats": [
+        {
+          "artifact_type": "scientific_communication_brief",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "illustration_brief",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [
+            "intended-claim",
+            "illustration-type",
+            "representation-scope",
+            "reference-image-count"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "codex_native_tool_handoff",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "image_generation_handoff",
+          "processing_levels": [
+            "validated-handoff"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "native-tool",
+            "operation",
+            "representation-scope",
+            "quality-gate-ids"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "sequence-back-translate-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -8738,6 +8861,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "a26b27d6df5e605424bd322b79cacee9b20e7f72ab830890646349b6886c4e81",
+  "registry_digest": "4e07ea89c869eaa638314d3405c31af0381e989573e41ac48dbd656cb247fc74",
   "schema_version": 1
 }

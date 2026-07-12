@@ -1571,6 +1571,97 @@
       }
     }
   },
+  "scientific-illustration-generation": {
+    "input": {
+      "aspect_ratio": "landscape",
+      "audience": "developmental biology researchers",
+      "avoid": [
+        "photorealistic microscopy"
+      ],
+      "background": "white background with no decorative texture",
+      "composition": "left-to-right lineage progression with one disrupted branch",
+      "constraints": [
+        "white background",
+        "color-blind-safe lineage colors"
+      ],
+      "disclosure_context": "manuscript",
+      "illustration_type": "conceptual-mechanism",
+      "intended_claim": "BANP loss disrupts the transition from progenitor state to mature photoreceptor lineages",
+      "labels": [
+        "RPC",
+        "Rod",
+        "Cone"
+      ],
+      "mode": "generate",
+      "palette": [
+        "teal progenitor",
+        "magenta rod",
+        "gold cone"
+      ],
+      "protected_elements": [],
+      "reference_image_count": 0,
+      "style": "scientifically precise flat editorial illustration",
+      "subject": "retinal progenitor differentiation into rods and cones",
+      "visual_semantics": [
+        "solid arrows indicate differentiation",
+        "dashed bar indicates disrupted transition"
+      ]
+    },
+    "output": {
+      "disclosure_context": "manuscript",
+      "execution_handoff": {
+        "authentication": "codex-managed",
+        "cli_fallback_allowed": false,
+        "operation": "generate",
+        "output_kind": "bitmap",
+        "prompt": "Use case: conceptual-mechanism for developmental biology researchers.\nPrimary subject: retinal progenitor differentiation into rods and cones.\nCommunication claim: BANP loss disrupts the transition from progenitor state to mature photoreceptor lineages.\nComposition: left-to-right lineage progression with one disrupted branch.\nStyle: scientifically precise flat editorial illustration.\nBackground: white background with no decorative texture.\nAspect ratio: landscape.\nText labels to render verbatim: RPC | Rod | Cone.\nColor palette: teal progenitor | magenta rod | gold cone.\nVisual semantics that must remain consistent: solid arrows indicate differentiation | dashed bar indicates disrupted transition.\nRequired constraints: white background | color-blind-safe lineage colors.\nScientific integrity: create a clearly conceptual generated illustration, not measured data. Do not fabricate microscopy fields, gel bands, blots, instrument readouts, quantitative plots, patient-specific findings, numerical results, or exact molecular evidence.\nAvoid: invented experimental evidence | unlabeled ambiguity | decorative elements that imply unsupported mechanism | photorealistic microscopy.",
+        "reference_image_count": 0,
+        "requires_visible_reference_images": false,
+        "tool": "image_gen"
+      },
+      "limitations": [
+        "The handoff prepares and constrains a Codex-native image operation; the bitmap exists only after the native tool returns an observed result.",
+        "Generated scientific illustrations require expert factual review and cannot substitute for plots, microscopy, diagnostic images, structural predictions, or experimental evidence.",
+        "The plugin does not call a provider SDK, request a provider API key, select a hidden model, or silently fall back to a CLI client."
+      ],
+      "post_generation_validation": [
+        "Inspect the generated bitmap at full resolution.",
+        "Confirm all requested subjects and relationships are present and no unsupported element was introduced.",
+        "Confirm text, symbols, arrows, color semantics, and panel hierarchy are correct and non-occluding.",
+        "For edits, verify every protected element against the visible source image at matched scale.",
+        "Record that the artifact is generated communication material and not primary research data."
+      ],
+      "quality_gates": [
+        {
+          "check": "The image is never represented as acquired, measured, simulated, or experimentally observed evidence.",
+          "id": "generated-not-observed-data",
+          "severity": "fatal"
+        },
+        {
+          "check": "A domain expert checks anatomy, molecular relationships, scale cues, directionality, and causal implications before publication.",
+          "id": "scientific-accuracy-review",
+          "severity": "major"
+        },
+        {
+          "check": "Every requested label is visually inspected character by character; incorrect generated text is regenerated or replaced in an editable figure workflow.",
+          "id": "text-label-fidelity",
+          "severity": "major"
+        },
+        {
+          "check": "For edits, declared objects, geometry, identity, and protected regions are compared against every visible reference image.",
+          "id": "reference-invariant-preservation",
+          "severity": "major"
+        },
+        {
+          "check": "Journal, institutional, copyright, consent, and AI-image disclosure requirements are checked before external use.",
+          "id": "generation-disclosure",
+          "severity": "major"
+        }
+      ],
+      "ready": true,
+      "representation_scope": "scientific-communication-only"
+    }
+  },
   "sequence-back-translate": {
     "input": {
       "organism": "human",

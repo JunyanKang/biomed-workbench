@@ -1891,6 +1891,155 @@
       "workflow": "publication"
     },
     {
+      "access": "codex_native",
+      "description": "Prepare a deterministic, credential-free handoff to Codex-native image generation or editing with explicit scientific communication scope, reference-image requirements, non-evidentiary labeling, factual review, text fidelity, disclosure, and post-generation visual validation gates.",
+      "entrypoint": "biomed_workbench.capabilities.imaging:scientific_illustration_generation",
+      "id": "scientific-illustration-generation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "aspect_ratio": {
+            "enum": [
+              "auto",
+              "square",
+              "landscape",
+              "portrait",
+              "wide",
+              "tall"
+            ],
+            "type": "string"
+          },
+          "audience": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "avoid": {
+            "items": {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "background": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "composition": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "constraints": {
+            "items": {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "disclosure_context": {
+            "enum": [
+              "internal-draft",
+              "manuscript",
+              "presentation",
+              "public-communication"
+            ],
+            "type": "string"
+          },
+          "illustration_type": {
+            "enum": [
+              "conceptual-mechanism",
+              "graphical-abstract",
+              "experimental-schematic",
+              "scientific-illustration",
+              "editorial-cover",
+              "educational-diagram"
+            ],
+            "type": "string"
+          },
+          "intended_claim": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "labels": {
+            "items": {
+              "maxLength": 80,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "generate",
+              "edit"
+            ],
+            "type": "string"
+          },
+          "palette": {
+            "items": {
+              "maxLength": 80,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 12,
+            "type": "array"
+          },
+          "protected_elements": {
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "reference_image_count": {
+            "maximum": 5,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "style": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "visual_semantics": {
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          }
+        },
+        "required": [
+          "subject",
+          "intended_claim",
+          "illustration_type"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Generate or edit a bounded scientific illustration",
+      "workflow": "imaging"
+    },
+    {
       "access": "offline",
       "description": "Create a deterministic preferred-codon coding sequence with explicit optimization limits.",
       "entrypoint": "biomed_workbench.capabilities.molecular:back_translate",
@@ -2292,7 +2441,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 61,
+  "entry_count": 62,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

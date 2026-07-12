@@ -1,5 +1,5 @@
 {
-  "module_count": 61,
+  "module_count": 62,
   "modules": [
     {
       "access": "offline",
@@ -14251,6 +14251,411 @@
       "version": "1.0.0"
     },
     {
+      "access": "codex_native",
+      "alternatives": [
+        "figure-specification"
+      ],
+      "assumptions": [
+        "The requested image is communication material rather than primary data, diagnostic evidence, quantitative output, or a substitute for a scientific analysis; supplied references are visible to Codex and authorized for the requested use."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "scientific-illustration-generation-e2e-v1"
+          ],
+          "id": "python-3.14.3-codex-native-image-handoff-v1",
+          "input_formats": {
+            "illustration_brief": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "image_generation_handoff": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "scientific-illustration-generation-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "figure-specification",
+        "manuscript-audit",
+        "reviewer-assessment"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate the scientific illustration brief and serialize a deterministic Codex-native tool handoff without a provider SDK.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Prepare a deterministic, credential-free handoff to Codex-native image generation or editing with explicit scientific communication scope, reference-image requirements, non-evidentiary labeling, factual review, text fidelity, disclosure, and post-generation visual validation gates.",
+      "domains": [
+        "imaging",
+        "publication"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.imaging:scientific_illustration_generation",
+      "evidence_effects": [
+        "prepares_non_evidentiary_scientific_visual_communication",
+        "constrains_codex_native_image_generation",
+        "requires_generated_artifact_disclosure_and_review"
+      ],
+      "execution": {
+        "kind": "workflow",
+        "max_output_bytes": 1000000,
+        "timeout_seconds": 30
+      },
+      "id": "scientific-illustration-generation",
+      "input_artifacts": [
+        {
+          "artifact_type": "scientific_communication_brief",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "illustration_brief",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [
+            "intended-claim",
+            "illustration-type",
+            "representation-scope",
+            "reference-image-count"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "aspect_ratio": {
+            "enum": [
+              "auto",
+              "square",
+              "landscape",
+              "portrait",
+              "wide",
+              "tall"
+            ],
+            "type": "string"
+          },
+          "audience": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "avoid": {
+            "items": {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "background": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "composition": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "constraints": {
+            "items": {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "disclosure_context": {
+            "enum": [
+              "internal-draft",
+              "manuscript",
+              "presentation",
+              "public-communication"
+            ],
+            "type": "string"
+          },
+          "illustration_type": {
+            "enum": [
+              "conceptual-mechanism",
+              "graphical-abstract",
+              "experimental-schematic",
+              "scientific-illustration",
+              "editorial-cover",
+              "educational-diagram"
+            ],
+            "type": "string"
+          },
+          "intended_claim": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "labels": {
+            "items": {
+              "maxLength": 80,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "generate",
+              "edit"
+            ],
+            "type": "string"
+          },
+          "palette": {
+            "items": {
+              "maxLength": 80,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 12,
+            "type": "array"
+          },
+          "protected_elements": {
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "reference_image_count": {
+            "maximum": 5,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "style": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "subject": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "visual_semantics": {
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          }
+        },
+        "required": [
+          "subject",
+          "intended_claim",
+          "illustration_type"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "generate a scientific illustration",
+        "create graphical abstract image",
+        "edit conceptual biology image",
+        "\u751f\u6210\u79d1\u7814\u793a\u610f\u56fe",
+        "\u5236\u4f5c\u56fe\u5f62\u6458\u8981\u63d2\u56fe"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "This module validates and emits the native-tool handoff; a bitmap exists only after Codex invokes image_gen and observes its return. It does not generate research data, validate biological truth automatically, guarantee exact text rendering, create editable vectors, perform quantitative image analysis, or replace expert figure review. Native-tool availability is a Codex host capability and is checked at invocation time."
+      ],
+      "maturity": "validated",
+      "module_type": "design",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "codex_native_tool_handoff",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "image_generation_handoff",
+          "processing_levels": [
+            "validated-handoff"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "native-tool",
+            "operation",
+            "representation-scope",
+            "quality-gate-ids"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "disclosure_context": {
+            "type": "string"
+          },
+          "execution_handoff": {
+            "type": "object"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "post_generation_validation": {
+            "type": "array"
+          },
+          "quality_gates": {
+            "type": "array"
+          },
+          "ready": {
+            "type": "boolean"
+          },
+          "representation_scope": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ready",
+          "representation_scope",
+          "disclosure_context",
+          "execution_handoff",
+          "quality_gates",
+          "post_generation_validation",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Subject, intended claim, illustration type, audience, labels, visual constraints, reference count, and edit/generate intent are declared; edit mode has at least one visible reference image; publication, consent, copyright, and institutional policies can be reviewed before external delivery."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Independent source-neutral contract for Codex-managed scientific illustration generation and editing."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "The generated bitmap must remain explicitly scoped as conceptual communication and must never be represented as microscopy, a gel or blot, an instrument readout, a quantitative plot, patient-specific evidence, a structural prediction, or another observed result.",
+          "id": "generated-not-observed-data",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Execution must hand off to the Codex-managed image_gen tool; the plugin must not invoke a provider SDK, request or persist a provider API key, select a hidden model, or silently fall back to a CLI client.",
+          "id": "codex-native-no-provider-credential",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "A domain expert must inspect biological entities, anatomy, molecular relationships, directionality, scale cues, and causal implications before publication or presentation.",
+          "id": "scientific-accuracy-review",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Requested text is checked character by character and edit invariants are compared against every visible reference; failures require regeneration or editable post-processing.",
+          "id": "text-and-reference-fidelity",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Journal, institutional, consent, copyright, and AI-generation disclosure requirements must be resolved before external use.",
+          "id": "generation-disclosure",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "What constrained generated bitmap can communicate the declared scientific concept without being mistaken for measured data or introducing unsupported biological claims?"
+      ],
+      "schema_version": 1,
+      "title": "Generate or edit a bounded scientific illustration",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
       "access": "offline",
       "alternatives": [],
       "assumptions": [
@@ -17650,6 +18055,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "a26b27d6df5e605424bd322b79cacee9b20e7f72ab830890646349b6886c4e81",
+  "registry_digest": "4e07ea89c869eaa638314d3405c31af0381e989573e41ac48dbd656cb247fc74",
   "schema_version": 1
 }

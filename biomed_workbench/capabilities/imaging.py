@@ -187,3 +187,145 @@ def track_points(frames: list[list[list[float]]], max_distance: float) -> dict[s
             next_active[track_id] = point
         active = next_active
     return {"tracks": tracks, "track_count": len(tracks), "max_distance": max_distance, "method": "frame-local greedy one-to-one nearest-neighbor linking", "limitations": ["Crossings, missed detections, motion models, and gap closing are not resolved."]}
+
+
+_ILLUSTRATION_TYPES = {
+    "conceptual-mechanism",
+    "graphical-abstract",
+    "experimental-schematic",
+    "scientific-illustration",
+    "editorial-cover",
+    "educational-diagram",
+}
+_ASPECT_RATIOS = {"auto", "square", "landscape", "portrait", "wide", "tall"}
+
+
+def _bounded_text(value: str, name: str, *, maximum: int = 2000) -> str:
+    if not isinstance(value, str) or not value.strip() or len(value.strip()) > maximum:
+        raise ValueError(f"{name} must be nonempty and at most {maximum} characters")
+    return value.strip()
+
+
+def _bounded_strings(values: list[str] | None, name: str, *, maximum_items: int = 20, maximum_length: int = 300) -> list[str]:
+    if values is None:
+        return []
+    if not isinstance(values, list) or len(values) > maximum_items:
+        raise ValueError(f"{name} must contain at most {maximum_items} strings")
+    normalized = [_bounded_text(value, f"{name} item", maximum=maximum_length) for value in values]
+    if len(normalized) != len(set(normalized)):
+        raise ValueError(f"{name} must not contain duplicate values")
+    return normalized
+
+
+def scientific_illustration_generation(
+    subject: str,
+    intended_claim: str,
+    illustration_type: str,
+    *,
+    mode: str = "generate",
+    audience: str = "scientific",
+    composition: str = "clear hierarchy with uncluttered negative space",
+    style: str = "scientifically precise editorial illustration",
+    background: str = "clean neutral background",
+    aspect_ratio: str = "auto",
+    labels: list[str] | None = None,
+    palette: list[str] | None = None,
+    visual_semantics: list[str] | None = None,
+    protected_elements: list[str] | None = None,
+    constraints: list[str] | None = None,
+    avoid: list[str] | None = None,
+    reference_image_count: int = 0,
+    disclosure_context: str = "internal-draft",
+) -> dict[str, Any]:
+    """Prepare a bounded Codex-native image-generation handoff for scientific communication."""
+
+    subject = _bounded_text(subject, "subject")
+    intended_claim = _bounded_text(intended_claim, "intended_claim")
+    audience = _bounded_text(audience, "audience", maximum=200)
+    composition = _bounded_text(composition, "composition", maximum=500)
+    style = _bounded_text(style, "style", maximum=300)
+    background = _bounded_text(background, "background", maximum=300)
+    if illustration_type not in _ILLUSTRATION_TYPES:
+        raise ValueError("illustration_type is unsupported")
+    if mode not in {"generate", "edit"}:
+        raise ValueError("mode must be generate or edit")
+    if aspect_ratio not in _ASPECT_RATIOS:
+        raise ValueError("aspect_ratio is unsupported")
+    if disclosure_context not in {"internal-draft", "manuscript", "presentation", "public-communication"}:
+        raise ValueError("disclosure_context is unsupported")
+    if not isinstance(reference_image_count, int) or isinstance(reference_image_count, bool) or not 0 <= reference_image_count <= 5:
+        raise ValueError("reference_image_count must be an integer from 0 through 5")
+    if mode == "edit" and reference_image_count == 0:
+        raise ValueError("edit mode requires at least one visible reference image")
+    normalized_labels = _bounded_strings(labels, "labels", maximum_length=80)
+    normalized_palette = _bounded_strings(palette, "palette", maximum_items=12, maximum_length=80)
+    normalized_semantics = _bounded_strings(visual_semantics, "visual_semantics", maximum_length=200)
+    normalized_protected = _bounded_strings(protected_elements, "protected_elements", maximum_length=200)
+    normalized_constraints = _bounded_strings(constraints, "constraints")
+    normalized_avoid = _bounded_strings(avoid, "avoid")
+    integrity_constraint = (
+        "Scientific integrity: create a clearly conceptual generated illustration, not measured data. "
+        "Do not fabricate microscopy fields, gel bands, blots, instrument readouts, quantitative plots, "
+        "patient-specific findings, numerical results, or exact molecular evidence."
+    )
+    prompt_sections = [
+        f"Use case: {illustration_type} for {audience}.",
+        f"Primary subject: {subject}.",
+        f"Communication claim: {intended_claim}.",
+        f"Composition: {composition}.",
+        f"Style: {style}.",
+        f"Background: {background}.",
+        f"Aspect ratio: {aspect_ratio}.",
+    ]
+    if normalized_labels:
+        prompt_sections.append("Text labels to render verbatim: " + " | ".join(normalized_labels) + ".")
+    if normalized_palette:
+        prompt_sections.append("Color palette: " + " | ".join(normalized_palette) + ".")
+    if normalized_semantics:
+        prompt_sections.append("Visual semantics that must remain consistent: " + " | ".join(normalized_semantics) + ".")
+    if normalized_protected:
+        prompt_sections.append("Protected elements for reference-preserving edits: " + " | ".join(normalized_protected) + ".")
+    if normalized_constraints:
+        prompt_sections.append("Required constraints: " + " | ".join(normalized_constraints) + ".")
+    prompt_sections.append(integrity_constraint)
+    avoid_values = [
+        "invented experimental evidence",
+        "unlabeled ambiguity",
+        "decorative elements that imply unsupported mechanism",
+        *normalized_avoid,
+    ]
+    prompt_sections.append("Avoid: " + " | ".join(avoid_values) + ".")
+    return {
+        "ready": True,
+        "representation_scope": "scientific-communication-only",
+        "disclosure_context": disclosure_context,
+        "execution_handoff": {
+            "tool": "image_gen",
+            "operation": mode,
+            "prompt": "\n".join(prompt_sections),
+            "reference_image_count": reference_image_count,
+            "requires_visible_reference_images": mode == "edit" or reference_image_count > 0,
+            "authentication": "codex-managed",
+            "cli_fallback_allowed": False,
+            "output_kind": "bitmap",
+        },
+        "quality_gates": [
+            {"id": "generated-not-observed-data", "severity": "fatal", "check": "The image is never represented as acquired, measured, simulated, or experimentally observed evidence."},
+            {"id": "scientific-accuracy-review", "severity": "major", "check": "A domain expert checks anatomy, molecular relationships, scale cues, directionality, and causal implications before publication."},
+            {"id": "text-label-fidelity", "severity": "major", "check": "Every requested label is visually inspected character by character; incorrect generated text is regenerated or replaced in an editable figure workflow."},
+            {"id": "reference-invariant-preservation", "severity": "major", "check": "For edits, declared objects, geometry, identity, and protected regions are compared against every visible reference image."},
+            {"id": "generation-disclosure", "severity": "major", "check": "Journal, institutional, copyright, consent, and AI-image disclosure requirements are checked before external use."},
+        ],
+        "post_generation_validation": [
+            "Inspect the generated bitmap at full resolution.",
+            "Confirm all requested subjects and relationships are present and no unsupported element was introduced.",
+            "Confirm text, symbols, arrows, color semantics, and panel hierarchy are correct and non-occluding.",
+            "For edits, verify every protected element against the visible source image at matched scale.",
+            "Record that the artifact is generated communication material and not primary research data.",
+        ],
+        "limitations": [
+            "The handoff prepares and constrains a Codex-native image operation; the bitmap exists only after the native tool returns an observed result.",
+            "Generated scientific illustrations require expert factual review and cannot substitute for plots, microscopy, diagnostic images, structural predictions, or experimental evidence.",
+            "The plugin does not call a provider SDK, request a provider API key, select a hidden model, or silently fall back to a CLI client.",
+        ],
+    }

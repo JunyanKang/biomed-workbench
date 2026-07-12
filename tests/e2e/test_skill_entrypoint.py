@@ -34,6 +34,10 @@ class SkillEntrypointE2ETests(unittest.TestCase):
         self.assertIn('$WORKBENCH_ROOT/tools/search_tools.py', self.text)
         self.assertRegex(self.text, re.compile(r'run_tool\.py"\s+CAPABILITY_ID\s+--input'))
         self.assertNotIn("-- ARGUMENTS", self.text)
+        self.assertIn("execution_handoff", self.text)
+        self.assertIn("access: codex_native", self.text)
+        self.assertIn("tool: image_gen", self.text)
+        self.assertIn("The handoff is not proof that a bitmap exists", self.text)
 
     def test_entrypoint_does_not_claim_compute_infrastructure_ownership(self):
         for term in ("local scientific model", "gpu", "container", "slurm", "runtime-status"):
