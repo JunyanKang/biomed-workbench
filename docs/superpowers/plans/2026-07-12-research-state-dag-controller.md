@@ -193,21 +193,21 @@ class ScientificArtifact:
     content_digest: str
 ```
 
-- [ ] **Step 1: Write failing immutability, denominator, and digest tests**
+- [x] **Step 1: Write failing immutability, denominator, and digest tests**
 
 Test exact IDs, nonempty objective/question, unique comparison IDs, explicit experimental unit and denominator, closed known enums, digest recomputation, nested secret redaction, machine-path rejection, and detached serialization.
 
-- [ ] **Step 2: Run and verify kernel imports fail**
+- [x] **Step 2: Run and verify kernel imports fail**
 
 Run: `python3 -m unittest discover -s tests/unit/kernel -p 'test*.py'`
 
 Expected: imports fail because `biomed_workbench.kernel` does not exist.
 
-- [ ] **Step 3: Implement canonical identity and artifact contracts**
+- [x] **Step 3: Implement canonical identity and artifact contracts**
 
 `canonical_json()` sorts keys and uses compact UTF-8 JSON. `content_digest()` hashes the redacted canonical payload. IDs use source-neutral lowercase tokens plus a caller-supplied stable namespace. Reject absolute paths, `file://`, credential-shaped keys, non-finite numbers, unordered sets, and digest mismatches. Preserve format version, genome build, annotation release, orientation, and producer versions as scientific data.
 
-- [ ] **Step 4: Run focused tests and commit**
+- [x] **Step 4: Run focused tests and commit**
 
 ```bash
 python3 -m unittest discover -s tests/unit/kernel -p 'test*.py'
