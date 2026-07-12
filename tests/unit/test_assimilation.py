@@ -135,6 +135,67 @@ class AssimilationTests(unittest.TestCase):
             self.assertEqual(record.semantic["module_doc"], "Analyze a cohort.")
             self.assertEqual(record.semantic["public_symbols"], ["summarize"])
             self.assertEqual(record.semantic["imports"], ["csv"])
+            self.assertEqual(record.semantic["functions"][0]["signature"], "summarize(values)")
+            self.assertEqual(record.understanding["purpose"], "Analyze a cohort.")
+
+    def test_markdown_record_extracts_frontmatter_purpose_and_rules(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            skill = root / "SKILL.md"
+            skill.write_text(
+                "---\nname: evidence-search\ndescription: Search biomedical evidence.\n---\n\n"
+                "# Evidence Search\n\nFind primary records and return a cited evidence table.\n\n"
+                "## Rules\n\n- Verify identifiers.\n",
+                encoding="utf-8",
+            )
+
+            record = read_record(skill, root, "fixture")
+
+            self.assertEqual(record.semantic["frontmatter_keys"], ["description", "name"])
+            self.assertIn("Find primary records", record.semantic["purpose"])
+            self.assertEqual(record.understanding["role"], "assistant_workflow")
+            self.assertIn("Find primary records", record.understanding["purpose"])
+
+    def test_javascript_record_extracts_imports_exports_and_functions(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            module = root / "client.ts"
+            module.write_text(
+                "import { z } from 'zod';\nexport async function searchGene(term: string) { return term; }\n",
+                encoding="utf-8",
+            )
+
+            record = read_record(module, root, "fixture")
+
+            self.assertEqual(record.format, "javascript_typescript")
+            self.assertEqual(record.semantic["imports"], ["zod"])
+            self.assertEqual(record.semantic["exports"], ["searchGene"])
+            self.assertIn("searchGene", record.semantic["functions"])
+
+    def test_notebook_record_understands_markdown_and_code_cells(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            notebook = root / "analysis.ipynb"
+            notebook.write_text(
+                json.dumps(
+                    {
+                        "cells": [
+                            {"cell_type": "markdown", "source": ["# Aim\n", "Analyze retinal genes."]},
+                            {"cell_type": "code", "source": ["import pandas as pd\n", "def score(x): return x\n"], "outputs": []},
+                        ],
+                        "metadata": {"kernelspec": {"language": "python"}},
+                        "nbformat": 4,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            record = read_record(notebook, root, "fixture")
+
+            self.assertEqual(record.semantic["cell_count"], 2)
+            self.assertEqual(record.semantic["code_imports"], ["pandas"])
+            self.assertEqual(record.semantic["code_symbols"], ["score"])
+            self.assertIn("Analyze retinal genes", record.semantic["purpose"])
 
     def test_assimilation_is_deterministic_and_complete(self):
         with tempfile.TemporaryDirectory() as directory:

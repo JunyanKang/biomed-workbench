@@ -12,11 +12,15 @@ class AssimilationSummaryReleaseTests(unittest.TestCase):
         payload = json.loads(SUMMARY.read_text(encoding="utf-8"))
         sources = {source["source"]: source for source in payload["sources"]}
 
-        self.assertEqual(set(sources), {"primary-a", "primary-b", "primary-c"})
+        self.assertEqual(
+            set(sources),
+            {"primary-a", "primary-b", "primary-c", "local-research-skills", "accelerated-compute"},
+        )
         for source in sources.values():
             self.assertGreater(source["file_count"], 0)
             self.assertGreater(source["total_bytes"], 0)
             self.assertEqual(source["unreadable_count"], 0)
+            self.assertEqual(source["understood_count"], source["file_count"])
             self.assertRegex(source["root_digest"], r"^[0-9a-f]{64}$")
             self.assertEqual(sum(source["format_counts"].values()), source["file_count"])
             self.assertEqual(sum(source["disposition_counts"].values()), source["file_count"])
@@ -24,7 +28,7 @@ class AssimilationSummaryReleaseTests(unittest.TestCase):
             self.assertNotIn("unclassified", source["capability_counts"])
 
         self.assertTrue(
-            all(source["capability_counts"].get("codex_native_orchestration", 0) > 0 for source in sources.values())
+            all(sources[alias]["capability_counts"].get("codex_native_orchestration", 0) > 0 for alias in ("primary-a", "primary-b", "primary-c"))
         )
 
     def test_public_summary_contains_no_machine_paths_or_file_names(self):

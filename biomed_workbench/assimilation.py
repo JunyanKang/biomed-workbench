@@ -68,7 +68,6 @@ _GENERATED_PARTS = {
     "logs",
     "node_modules",
     "pkgs",
-    "runtime",
     "site-packages",
     "tls",
     "venv",
@@ -125,6 +124,9 @@ class SourceSummary:
     disposition_counts: dict[str, int]
     capability_counts: dict[str, int]
     unreadable_count: int
+    understood_count: int
+    public_symbol_count: int
+    assistant_workflow_count: int
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -289,8 +291,21 @@ def _understanding(path: Path, file_format: str, disposition: str, semantic: dic
         role = "structured_scientific_asset"
     else:
         role = "binary_or_visual_asset"
-    result: dict[str, Any] = {"role": role}
     runtime_group = _runtime_group(path)
+    purpose = str(semantic.get("purpose") or semantic.get("module_doc") or "").strip()
+    if not purpose:
+        subject = path.stem.replace("_", " ").replace("-", " ").strip() or path.name
+        if disposition == "generated_runtime":
+            purpose = f"Generated runtime object for {runtime_group or subject}."
+        elif disposition == "sensitive":
+            purpose = "Sensitive configuration or credential material; content is intentionally redacted."
+        elif disposition == "provenance_only":
+            purpose = "License or attribution material governing redistribution and provenance."
+        elif disposition == "obsolete":
+            purpose = "Non-functional metadata artifact with no reusable scientific behavior."
+        else:
+            purpose = f"Provides {subject} as {role.replace('_', ' ')}."
+    result: dict[str, Any] = {"role": role, "purpose": purpose[:1500]}
     if runtime_group:
         result["runtime_group"] = runtime_group
     for source_key, target_key in (
@@ -329,10 +344,47 @@ def _python_semantics(text: str) -> dict[str, Any]:
     symbols: list[str] = []
     imports: set[str] = set()
     side_effect_calls: list[str] = []
+    functions: list[dict[str, Any]] = []
+    classes: list[dict[str, Any]] = []
+    cli_options: list[str] = []
     for node in tree.body:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
             if not node.name.startswith("_"):
                 symbols.append(node.name)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                calls: set[str] = set()
+                for child in ast.walk(node):
+                    if isinstance(child, ast.Call):
+                        if isinstance(child.func, ast.Name):
+                            calls.add(child.func.id)
+                        elif isinstance(child.func, ast.Attribute):
+                            calls.add(child.func.attr)
+                try:
+                    arguments = ast.unparse(node.args)
+                except Exception:
+                    arguments = "..."
+                functions.append(
+                    {
+                        "name": node.name,
+                        "signature": f"{node.name}({arguments})",
+                        "doc": (ast.get_docstring(node) or "")[:1000],
+                        "async": isinstance(node, ast.AsyncFunctionDef),
+                        "calls": sorted(calls)[:200],
+                        "decorators": [ast.unparse(item)[:200] for item in node.decorator_list],
+                    }
+                )
+            else:
+                classes.append(
+                    {
+                        "name": node.name,
+                        "doc": (ast.get_docstring(node) or "")[:1000],
+                        "methods": [
+                            child.name
+                            for child in node.body
+                            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)) and not child.name.startswith("_")
+                        ],
+                    }
+                )
         elif isinstance(node, ast.Import):
             imports.update(alias.name.split(".")[0] for alias in node.names)
         elif isinstance(node, ast.ImportFrom) and node.module:
@@ -343,18 +395,42 @@ def _python_semantics(text: str) -> dict[str, Any]:
                 side_effect_calls.append(call.id)
             elif isinstance(call, ast.Attribute):
                 side_effect_calls.append(call.attr)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "add_argument":
+            for argument in node.args:
+                if isinstance(argument, ast.Constant) and isinstance(argument.value, str):
+                    cli_options.append(argument.value)
+    module_doc = (ast.get_docstring(tree) or "")[:1000]
+    purpose = module_doc or next((item["doc"] for item in functions if item["doc"]), "")
     return {
-        "module_doc": (ast.get_docstring(tree) or "")[:500],
+        "module_doc": module_doc,
+        "purpose": purpose,
         "public_symbols": symbols,
         "imports": sorted(imports),
         "top_level_calls": side_effect_calls,
+        "functions": functions,
+        "classes": classes,
+        "cli_options": list(dict.fromkeys(cli_options)),
     }
 
 
 def _markdown_semantics(text: str) -> dict[str, Any]:
     headings = []
     fences = Counter()
-    for line in text.splitlines():
+    lines = text.splitlines()
+    frontmatter_keys: list[str] = []
+    body_start = 0
+    if lines[:1] == ["---"]:
+        try:
+            body_start = lines[1:].index("---") + 2
+        except ValueError:
+            body_start = 0
+        else:
+            for line in lines[1 : body_start - 1]:
+                match = re.match(r"^([A-Za-z0-9_.-]+):", line)
+                if match:
+                    frontmatter_keys.append(match.group(1))
+    for line in lines:
         if line.startswith("#"):
             level = len(line) - len(line.lstrip("#"))
             if level <= 6 and len(line) > level and line[level] == " ":
@@ -362,7 +438,35 @@ def _markdown_semantics(text: str) -> dict[str, Any]:
         match = re.match(r"^```\s*([\w+-]*)", line)
         if match:
             fences[match.group(1) or "plain"] += 1
-    return {"headings": headings, "code_fences": dict(sorted(fences.items()))}
+    paragraphs: list[str] = []
+    paragraph_lines: list[str] = []
+    in_fence = False
+    for line in lines[body_start:]:
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            in_fence = not in_fence
+            continue
+        if in_fence or stripped.startswith("#") or stripped.startswith(("- ", "* ", "> ")):
+            if paragraph_lines:
+                paragraphs.append(" ".join(paragraph_lines))
+                paragraph_lines = []
+            continue
+        if not stripped:
+            if paragraph_lines:
+                paragraphs.append(" ".join(paragraph_lines))
+                paragraph_lines = []
+        else:
+            paragraph_lines.append(stripped)
+    if paragraph_lines:
+        paragraphs.append(" ".join(paragraph_lines))
+    purpose = next((paragraph for paragraph in paragraphs if len(paragraph) >= 12), "")[:1500]
+    return {
+        "headings": headings,
+        "code_fences": dict(sorted(fences.items())),
+        "frontmatter_keys": sorted(set(frontmatter_keys)),
+        "purpose": purpose,
+        "paragraph_count": len(paragraphs),
+    }
 
 
 def _structured_semantics(value: Any) -> dict[str, Any]:
@@ -377,8 +481,76 @@ def _notebook_semantics(value: Any) -> dict[str, Any]:
     base = _structured_semantics(value)
     if isinstance(value, dict) and isinstance(value.get("cells"), list):
         types = Counter(str(cell.get("cell_type", "unknown")) for cell in value["cells"] if isinstance(cell, dict))
-        base.update({"cell_count": len(value["cells"]), "cell_types": dict(sorted(types.items()))})
+        markdown_parts: list[str] = []
+        code_parts: list[str] = []
+        output_count = 0
+        for cell in value["cells"]:
+            if not isinstance(cell, dict):
+                continue
+            source = cell.get("source", "")
+            source_text = "".join(source) if isinstance(source, list) else str(source)
+            if cell.get("cell_type") == "markdown":
+                markdown_parts.append(source_text)
+            elif cell.get("cell_type") == "code":
+                code_parts.append(source_text)
+                output_count += len(cell.get("outputs", ()))
+        markdown = _markdown_semantics("\n\n".join(markdown_parts)) if markdown_parts else {}
+        code = _python_semantics("\n\n".join(code_parts)) if code_parts else {}
+        base.update(
+            {
+                "cell_count": len(value["cells"]),
+                "cell_types": dict(sorted(types.items())),
+                "purpose": markdown.get("purpose", ""),
+                "markdown_headings": markdown.get("headings", ()),
+                "code_imports": code.get("imports", ()),
+                "code_symbols": code.get("public_symbols", ()),
+                "output_count": output_count,
+            }
+        )
     return base
+
+
+def _javascript_semantics(text: str) -> dict[str, Any]:
+    imports = set(re.findall(r"(?:from\s+|require\(\s*)[\"']([^\"']+)", text))
+    exports = set(
+        re.findall(
+            r"\bexport\s+(?:default\s+)?(?:async\s+)?(?:function|class|const|let|var)\s+([A-Za-z_$][\w$]*)",
+            text,
+        )
+    )
+    functions = set(re.findall(r"\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(", text))
+    functions.update(re.findall(r"\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?\([^)]*\)\s*=>", text))
+    comments = re.findall(r"(?m)^\s*//\s*(.+)$", text[:8000])
+    return {
+        "imports": sorted(imports),
+        "exports": sorted(exports),
+        "functions": sorted(functions),
+        "classes": sorted(set(re.findall(r"\bclass\s+([A-Za-z_$][\w$]*)", text))),
+        "purpose": " ".join(comments[:4])[:1000],
+        "line_count": len(text.splitlines()),
+    }
+
+
+def _r_semantics(text: str) -> dict[str, Any]:
+    return {
+        "imports": sorted(set(re.findall(r"(?:library|require)\s*\(\s*[\"']?([A-Za-z0-9.]+)", text))),
+        "functions": sorted(set(re.findall(r"(?m)^\s*([A-Za-z.][A-Za-z0-9._]*)\s*<-\s*function\s*\(", text))),
+        "uses_command_args": "commandArgs(" in text,
+        "line_count": len(text.splitlines()),
+    }
+
+
+def _shell_semantics(text: str) -> dict[str, Any]:
+    functions = sorted(set(re.findall(r"(?m)^\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(\)\s*\{", text)))
+    commands: set[str] = set()
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith(("#", "if ", "then", "fi", "for ", "do", "done", "case ", "esac")):
+            continue
+        match = re.match(r"(?:sudo\s+)?([A-Za-z0-9_.+-]+)", stripped)
+        if match and "=" not in match.group(1):
+            commands.add(match.group(1))
+    return {"functions": functions, "commands": sorted(commands)[:300], "line_count": len(text.splitlines())}
 
 
 def _archive_semantics(path: Path, suffix: str) -> dict[str, Any]:
@@ -440,11 +612,47 @@ def _text_semantics(text: str) -> dict[str, Any]:
     }
 
 
-def _classify(path: Path, data: bytes, text_value: str | None, truncated: bool) -> tuple[str, str, dict[str, Any]]:
+def _classify(
+    path: Path,
+    data: bytes,
+    text_value: str | None,
+    truncated: bool,
+    *,
+    lightweight: bool = False,
+) -> tuple[str, str, dict[str, Any]]:
     suffix = path.suffix.lower()
     media_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    if lightweight:
+        lightweight_formats = {
+            ".py": ("python", "text/x-python"),
+            ".js": ("javascript_typescript", media_type),
+            ".jsx": ("javascript_typescript", media_type),
+            ".mjs": ("javascript_typescript", media_type),
+            ".cjs": ("javascript_typescript", media_type),
+            ".ts": ("javascript_typescript", media_type),
+            ".tsx": ("javascript_typescript", media_type),
+            ".r": ("r", "text/x-r"),
+            ".sh": ("shell", "text/x-shellscript"),
+            ".md": ("markdown", media_type),
+            ".json": ("json", "application/json"),
+            ".yaml": ("yaml", "application/yaml"),
+            ".yml": ("yaml", "application/yaml"),
+        }
+        if suffix in lightweight_formats:
+            file_format, detected_media = lightweight_formats[suffix]
+            return file_format, detected_media, {
+                "line_count": len(text_value.splitlines()) if text_value is not None else None,
+                "sample_truncated": truncated,
+                "generated_runtime": True,
+            }
     if suffix == ".py" and text_value is not None:
         return "python", "text/x-python", _python_semantics(text_value)
+    if suffix in {".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx"} and text_value is not None:
+        return "javascript_typescript", media_type, _javascript_semantics(text_value)
+    if suffix == ".r" and text_value is not None:
+        return "r", "text/x-r", _r_semantics(text_value)
+    if suffix in {".sh", ".bash", ".zsh"} and text_value is not None:
+        return "shell", "text/x-shellscript", _shell_semantics(text_value)
     if suffix == ".ipynb" and text_value is not None:
         try:
             return "notebook", "application/x-ipynb+json", _notebook_semantics(json.loads(text_value))
@@ -527,6 +735,7 @@ def read_record(path: Path, root: Path, source: str) -> FileRecord:
         file_format = "symlink"
         media_type = "inode/symlink"
         sensitive = _is_sensitive(path, data)
+        disposition = _disposition(Path(relative), sensitive)
         semantic = {} if sensitive else {"target": target}
         size = len(data)
         sha256 = hashlib.sha256(data).hexdigest()
@@ -535,7 +744,14 @@ def read_record(path: Path, root: Path, source: str) -> FileRecord:
         kind = "file"
         sensitive = _is_sensitive(path, data) or content_sensitive
         text_value = None if sensitive else _decode_text(data)
-        file_format, media_type, semantic = _classify(path, data, text_value, size > len(data))
+        disposition = _disposition(Path(relative), sensitive)
+        file_format, media_type, semantic = _classify(
+            path,
+            data,
+            text_value,
+            size > len(data),
+            lightweight=disposition == "generated_runtime",
+        )
         if sensitive:
             semantic = {"redacted": True, "detected_by": "name_or_content_policy"}
         else:
@@ -551,7 +767,7 @@ def read_record(path: Path, root: Path, source: str) -> FileRecord:
         sha256=sha256,
         format=file_format,
         media_type=media_type,
-        disposition=(disposition := _disposition(Path(relative), sensitive)),
+        disposition=disposition,
         capability_cluster=_capability_cluster(Path(relative), disposition),
         understanding=_understanding(Path(relative), file_format, disposition, semantic),
         semantic=semantic,
@@ -588,6 +804,9 @@ def summarize(source: str, records: list[FileRecord]) -> SourceSummary:
         disposition_counts=dict(sorted(Counter(record.disposition for record in records).items())),
         capability_counts=dict(sorted(Counter(record.capability_cluster for record in records).items())),
         unreadable_count=sum(record.read_error is not None for record in records),
+        understood_count=sum(bool(record.understanding.get("purpose")) for record in records),
+        public_symbol_count=sum(int(record.understanding.get("public_symbol_count", 0)) for record in records),
+        assistant_workflow_count=sum(record.understanding.get("role") == "assistant_workflow" for record in records),
     )
 
 
@@ -600,13 +819,19 @@ def verify_complete(root: Path, records: Iterable[FileRecord], source: str) -> N
     extra = sorted(set(recorded) - live)
     unreadable = sorted(record.path for record in records if record.source == source and record.read_error)
     invalid = sorted(record.path for record in records if record.source == source and record.disposition not in DISPOSITIONS)
-    if missing or extra or duplicates or unreadable or invalid:
+    ununderstood = sorted(
+        record.path
+        for record in records
+        if record.source == source and not str(record.understanding.get("purpose", "")).strip()
+    )
+    if missing or extra or duplicates or unreadable or invalid or ununderstood:
         details = {
             "missing": missing[:20],
             "extra": extra[:20],
             "duplicates": duplicates[:20],
             "unreadable": unreadable[:20],
             "invalid_disposition": invalid[:20],
+            "ununderstood": ununderstood[:20],
         }
         raise IncompleteAssimilationError(json.dumps(details, sort_keys=True))
 
