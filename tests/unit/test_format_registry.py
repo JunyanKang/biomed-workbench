@@ -46,10 +46,11 @@ class FormatRegistryTests(unittest.TestCase):
         expected = {
             "fastq", "fasta", "sam", "bam", "cram", "vcf", "bcf", "bed", "gtf", "gff3",
             "count-matrix", "h5ad", "loom", "matrix-market", "fragments", "bigwig", "tabular",
+            "png", "jpeg", "webp",
         }
 
         self.assertEqual({profile.name for profile in self.registry.all()}, expected)
-        self.assertEqual(len(self.registry.all()), 17)
+        self.assertEqual(len(self.registry.all()), 20)
         self.assertTrue(all(profile.specification_version and profile.specification_source for profile in self.registry.all()))
 
     def test_every_builtin_profile_accepts_a_complete_snapshot(self):
@@ -67,6 +68,8 @@ class FormatRegistryTests(unittest.TestCase):
             ("matrix-market-v2", {"payload_roles": ("matrix",)}, "PAYLOAD_ROLE_MISSING"),
             ("vcf-v45", {"sort_order": "unsorted"}, "SORT_ORDER_MISMATCH"),
             ("count-matrix-v1", {"orientation": "unknown"}, "ORIENTATION_MISMATCH"),
+            ("png-v3", {"processing_level": "raw"}, "PROCESSING_LEVEL_MISMATCH"),
+            ("webp-riff-2025", {"compression": "deflate"}, "COMPRESSION_MISMATCH"),
         )
         for profile_id, overrides, code in cases:
             profile = self.registry.get(profile_id)

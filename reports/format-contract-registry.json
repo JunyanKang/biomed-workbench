@@ -12,13 +12,16 @@
     "gff3",
     "gtf",
     "h5ad",
+    "jpeg",
     "loom",
     "matrix-market",
+    "png",
     "sam",
     "tabular",
-    "vcf"
+    "vcf",
+    "webp"
   ],
-  "profile_count": 17,
+  "profile_count": 20,
   "profiles": [
     {
       "annotation_policy": "declared",
@@ -591,6 +594,45 @@
       "specification_version": "0.1.0"
     },
     {
+      "annotation_policy": "not_applicable",
+      "authority": "ITU-T",
+      "compression": [
+        "lossy-dct"
+      ],
+      "coordinate_systems": [],
+      "id": "jpeg-t81",
+      "identifier_namespace_policy": "not_applicable",
+      "index_requirements": [],
+      "name": "jpeg",
+      "orientations": [
+        "top-left-raster"
+      ],
+      "processing_levels": [
+        "generated-asset",
+        "communication-asset",
+        "derived-visual"
+      ],
+      "reference_policy": "not_applicable",
+      "representations": [
+        "binary"
+      ],
+      "required_metadata": [
+        "pixel-dimensions",
+        "color-space",
+        "frame-count",
+        "image-purpose"
+      ],
+      "required_payload_roles": [
+        "image"
+      ],
+      "sample_manifest_policy": "not_applicable",
+      "sort_orders": [
+        "raster-scanline"
+      ],
+      "specification_source": "https://www.itu.int/rec/T-REC-T.81",
+      "specification_version": "T.81"
+    },
+    {
       "annotation_policy": "declared",
       "authority": "Linnarsson-Lab",
       "compression": [
@@ -674,6 +716,46 @@
       ],
       "specification_source": "https://math.nist.gov/MatrixMarket/formats.html",
       "specification_version": "2.0"
+    },
+    {
+      "annotation_policy": "not_applicable",
+      "authority": "W3C",
+      "compression": [
+        "deflate"
+      ],
+      "coordinate_systems": [],
+      "id": "png-v3",
+      "identifier_namespace_policy": "not_applicable",
+      "index_requirements": [],
+      "name": "png",
+      "orientations": [
+        "top-left-raster"
+      ],
+      "processing_levels": [
+        "generated-asset",
+        "communication-asset",
+        "derived-visual"
+      ],
+      "reference_policy": "not_applicable",
+      "representations": [
+        "binary",
+        "container"
+      ],
+      "required_metadata": [
+        "pixel-dimensions",
+        "color-space",
+        "frame-count",
+        "image-purpose"
+      ],
+      "required_payload_roles": [
+        "image"
+      ],
+      "sample_manifest_policy": "not_applicable",
+      "sort_orders": [
+        "raster-scanline"
+      ],
+      "specification_source": "https://www.w3.org/TR/png-3/",
+      "specification_version": "3.0"
     },
     {
       "annotation_policy": "declared",
@@ -824,9 +906,50 @@
       ],
       "specification_source": "https://samtools.github.io/hts-specs/VCFv4.5.pdf",
       "specification_version": "4.5"
+    },
+    {
+      "annotation_policy": "not_applicable",
+      "authority": "Google-WebP",
+      "compression": [
+        "vp8",
+        "vp8l"
+      ],
+      "coordinate_systems": [],
+      "id": "webp-riff-2025",
+      "identifier_namespace_policy": "not_applicable",
+      "index_requirements": [],
+      "name": "webp",
+      "orientations": [
+        "top-left-raster"
+      ],
+      "processing_levels": [
+        "generated-asset",
+        "communication-asset",
+        "derived-visual"
+      ],
+      "reference_policy": "not_applicable",
+      "representations": [
+        "binary",
+        "container"
+      ],
+      "required_metadata": [
+        "pixel-dimensions",
+        "color-space",
+        "frame-count",
+        "image-purpose"
+      ],
+      "required_payload_roles": [
+        "image"
+      ],
+      "sample_manifest_policy": "not_applicable",
+      "sort_orders": [
+        "raster-scanline"
+      ],
+      "specification_source": "https://developers.google.com/speed/webp/docs/riff_container",
+      "specification_version": "riff-container-2025"
     }
   ],
-  "registry_digest": "14e6e8bc89d8fe2d66f7f52514ea4712040873df80e3ad8ff50e64933616b5a7",
+  "registry_digest": "82bb115f4725de208a540dc63dd23fef386cac68a1d744d9dcaddbec73c20f49",
   "requirement_coverage": {
     "annotation_required": 2,
     "coordinate_aware": 10,

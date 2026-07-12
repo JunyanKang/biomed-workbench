@@ -1,7 +1,7 @@
 {
-  "compatibility_row_count": 62,
-  "end_to_end_passed": 62,
-  "module_count": 62,
+  "compatibility_row_count": 63,
+  "end_to_end_passed": 63,
+  "module_count": 63,
   "passed": true,
   "records": [
     {
@@ -761,12 +761,53 @@
     },
     {
       "dependency_versions": {
+        "Pillow": [
+          ">=10.4,<11"
+        ]
+      },
+      "end_to_end": {
+        "digest": "4fc4c1d33a2d85d8387d440c4f1fbf23d3b84b19910f997d9569fe75eb7614bd",
+        "id": "image-chroma-key-remove-e2e-v1",
+        "passed": true
+      },
+      "input_formats": {
+        "source_image": [
+          "png@3.0",
+          "jpeg@T.81",
+          "webp@riff-container-2025"
+        ]
+      },
+      "module_id": "image-chroma-key-remove",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "matte_report": [
+          "biomed-chroma-key-report@1.0.0"
+        ],
+        "transparent_image": [
+          "png@3.0"
+        ]
+      },
+      "regression": {
+        "digest": "fc18c89ef06547873765f14e40e307b5b793ed64797b3410508777d46bad37de",
+        "id": "image-chroma-key-remove-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14-pillow-10.4-static-raster-chroma-v1",
+      "tool_versions": {
+        "python3": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "verified_at": "2026-07-13"
+    },
+    {
+      "dependency_versions": {
         "python": [
           ">=3.14,<3.15"
         ]
       },
       "end_to_end": {
-        "digest": "7762b39f2d8fd0b2b6c296fd4261c207ecb8e5554f18027acff4a24f6c9e54ec",
+        "digest": "d1a86d8d042f7b0942fe99c9dbcdf8c4ee970d77448ff38e74fd419eb64ccda5",
         "id": "image-colocalization-e2e-v1",
         "passed": true
       },
@@ -830,7 +871,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "639aa0add559783e512e6829f775f77c2dadc7cd4364dd710a17ccc129a847c3",
+        "digest": "550592301d2f111583818134048229df58aa571019432770aadb9feb0300f085",
         "id": "image-segment-e2e-v1",
         "passed": true
       },
@@ -2128,7 +2169,7 @@
       "verified_at": "2026-07-12"
     }
   ],
-  "registry_digest": "4e07ea89c869eaa638314d3405c31af0381e989573e41ac48dbd656cb247fc74",
-  "regression_passed": 62,
+  "registry_digest": "8f7a54a9bfa6d3c6d502996004f27c73ffc49c39510831265f2274d95d5c0a9e",
+  "regression_passed": 63,
   "schema_version": 1
 }

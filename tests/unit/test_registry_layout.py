@@ -13,7 +13,7 @@ class RegistryLayoutTests(unittest.TestCase):
     def test_flat_builtin_modules_are_the_only_runtime_source(self):
         directories = sorted(path for path in BUILTIN_ROOT.iterdir() if path.is_dir())
 
-        self.assertEqual(len(directories), 62)
+        self.assertEqual(len(directories), len(all_capabilities()))
         self.assertEqual(len(load_module_capabilities()), len(all_capabilities()))
         self.assertTrue(all((path / "module.json").is_file() for path in directories))
 

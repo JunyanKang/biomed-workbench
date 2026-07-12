@@ -1,0 +1,131 @@
+{
+  "compatibility_policy": {
+    "dependencies": {
+      "Pillow": [
+        ">=10.4,<11"
+      ]
+    },
+    "tools": {
+      "python3": [
+        ">=3.14,<3.15"
+      ]
+    }
+  },
+  "compatibility_row_id": "python-3.14-pillow-10.4-static-raster-chroma-v1",
+  "dependency_versions": {
+    "Pillow": "10.4.0"
+  },
+  "end_to_end_evidence_id": "image-chroma-key-remove-e2e-v1",
+  "execution": {
+    "command_contract_digest": "7173c78c8d6ab8827b0a11aa9e60f240c27580efe2e70bb62c2e2cf2c45b43b5",
+    "executable_sha256": "cbf84109626aa1013bbe408fbb9590bd0f1c1548f038b2221c6b8b87de26ca43",
+    "inputs": {
+      "image": {
+        "byte_size": 277,
+        "role": "image",
+        "sha256": "8c70ca3c73d4a91f482b4dc0dd3357a3bb3caf55cbbe81a323446a0398685d84"
+      }
+    },
+    "outputs": [
+      {
+        "byte_size": 189,
+        "media_type": "image/png",
+        "object_key": "sha256/a7/a705c12ca74905505f831bb9f0b859c2a8dc8806d3ffb86b36b69ec8758d57b9/payload",
+        "role": "image",
+        "sha256": "a705c12ca74905505f831bb9f0b859c2a8dc8806d3ffb86b36b69ec8758d57b9"
+      },
+      {
+        "byte_size": 1780,
+        "media_type": "application/json",
+        "object_key": "sha256/f7/f784509408d80415b6f65ff7d17e87179679d9e5ebe99936871614e92fd5067f/payload",
+        "role": "report",
+        "sha256": "f784509408d80415b6f65ff7d17e87179679d9e5ebe99936871614e92fd5067f"
+      }
+    ],
+    "parameters": {
+      "auto-key": "corners",
+      "auto-key-maximum-deviation": "18.0",
+      "auto-key-minimum-consensus": "0.9",
+      "despill-strength": "1.0",
+      "edge-contract": "0",
+      "edge-feather": "0.0",
+      "key-color": "#00ff00",
+      "opaque-threshold": "90.0",
+      "source-format": "png",
+      "transparent-threshold": "8.0"
+    }
+  },
+  "fixture": {
+    "color_space": "untagged-srgb",
+    "dimensions": [
+      64,
+      64
+    ],
+    "format": "png@3.0",
+    "orientation": "top-left-raster",
+    "parameters": {
+      "auto-key": "corners",
+      "auto-key-maximum-deviation": 18.0,
+      "auto-key-minimum-consensus": 0.9,
+      "despill-strength": 1.0,
+      "edge-contract": 0,
+      "edge-feather": 0.0,
+      "key-color": "#00ff00",
+      "opaque-threshold": 90.0,
+      "source-format": "png",
+      "transparent-threshold": 8.0
+    },
+    "processing_level": "generated-asset",
+    "source_sha256": "8c70ca3c73d4a91f482b4dc0dd3357a3bb3caf55cbbe81a323446a0398685d84"
+  },
+  "fixture_digest": "7c96b11935844221a776a41571a039a0c81df669315960c83ef896329ae3006f",
+  "html_report_validated": false,
+  "implementation": {
+    "module": "biomed_workbench.implementations.chroma_key",
+    "sha256": "a799c64db6c251beaca5d0c3628138e342f89af4ddf8bfd0bee3d93cbfb684d0"
+  },
+  "module_id": "image-chroma-key-remove",
+  "module_version": "1.0.0",
+  "passed": true,
+  "regression_evidence_id": "image-chroma-key-remove-regression-v1",
+  "schema_version": 1,
+  "scientific_summary": {
+    "alpha_counts": {
+      "opaque": 1023,
+      "partial": 129,
+      "transparent": 2944
+    },
+    "alpha_fractions": {
+      "opaque": 0.2497558594,
+      "partial": 0.0314941406,
+      "transparent": 0.71875
+    },
+    "dimensions": [
+      64,
+      64
+    ],
+    "full_resolution_review_required": true,
+    "key_rgb": [
+      0,
+      255,
+      0
+    ],
+    "output_sha256": "a705c12ca74905505f831bb9f0b859c2a8dc8806d3ffb86b36b69ec8758d57b9",
+    "partial_key_dominance_p95": 46.0,
+    "quality_status": "passed",
+    "quantitative_interpretation_allowed": false,
+    "scientific_use": "communication-asset-only",
+    "source_sha256": "8c70ca3c73d4a91f482b4dc0dd3357a3bb3caf55cbbe81a323446a0398685d84"
+  },
+  "tested_version_baseline": {
+    "dependencies": {
+      "Pillow": true
+    },
+    "tools": {
+      "python3": true
+    }
+  },
+  "tool_versions": {
+    "python3": "3.14.3"
+  }
+}

@@ -57,15 +57,16 @@ class ModuleMigrationReleaseTests(unittest.TestCase):
     def test_migration_and_compatibility_reports_prove_parity(self):
         migration = json.loads(MIGRATION_REPORT.read_text(encoding="utf-8"))
         compatibility = json.loads(COMPATIBILITY_REPORT.read_text(encoding="utf-8"))
+        module_count = len(ModuleRegistry.discover(BUILTIN_ROOT).all())
 
         self.assertEqual(migration["legacy_capability_count"], 48)
-        self.assertEqual(migration["module_count"], 62)
+        self.assertEqual(migration["module_count"], module_count)
         self.assertEqual(migration["entrypoint_parity_count"], 48)
         self.assertEqual(migration["input_schema_parity_count"], 48)
-        self.assertEqual(migration["scientific_contract_complete_count"], 62)
-        self.assertEqual(migration["compatibility_contract_complete_count"], 62)
-        self.assertEqual(compatibility["module_count"], 62)
-        self.assertEqual(compatibility["compatibility_complete"], 62)
+        self.assertEqual(migration["scientific_contract_complete_count"], module_count)
+        self.assertEqual(migration["compatibility_contract_complete_count"], module_count)
+        self.assertEqual(compatibility["module_count"], module_count)
+        self.assertEqual(compatibility["compatibility_complete"], module_count)
         self.assertEqual(migration["registry_digest"], compatibility["registry_digest"])
 
     def test_public_reports_and_manifests_have_no_machine_or_source_paths(self):

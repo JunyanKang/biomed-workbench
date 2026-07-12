@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 62,
-  "module_count": 62,
+  "compatibility_complete": 63,
+  "module_count": 63,
   "modules": [
     {
       "compatibility_rows": [
@@ -2892,6 +2892,257 @@
         }
       ],
       "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "image-chroma-key-remove-e2e-v1"
+          ],
+          "id": "python-3.14-pillow-10.4-static-raster-chroma-v1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "image-chroma-key-remove-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=10.4,<11"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "PIL",
+          "name": "Pillow",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Decode validated static PNG, JPEG, and WebP rasters, preserve and filter alpha, and encode a canonical lossless RGBA PNG.",
+          "required": true,
+          "tested_versions": [
+            "10.4.0"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import PIL; print(PIL.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://pillow.readthedocs.io/en/stable/releasenotes/10.4.0.html"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "image-chroma-key-remove",
+      "input_formats": [
+        {
+          "artifact_type": "communication_image",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "deflate"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "png",
+              "orientations": [
+                "top-left-raster"
+              ],
+              "representations": [
+                "binary",
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.0"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "lossy-dct"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "jpeg",
+              "orientations": [
+                "top-left-raster"
+              ],
+              "representations": [
+                "binary"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "T.81"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "vp8",
+                "vp8l"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "webp",
+              "orientations": [
+                "top-left-raster"
+              ],
+              "representations": [
+                "binary",
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "riff-container-2025"
+              ]
+            }
+          ],
+          "name": "source_image",
+          "processing_levels": [
+            "generated-asset",
+            "communication-asset",
+            "derived-visual"
+          ],
+          "required_metadata": [
+            "pixel-dimensions",
+            "color-space",
+            "frame-count",
+            "image-purpose",
+            "source-digest"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "transparent_communication_image",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "deflate"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "png",
+              "orientations": [
+                "top-left-raster"
+              ],
+              "representations": [
+                "binary",
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.0"
+              ]
+            }
+          ],
+          "name": "transparent_image",
+          "processing_levels": [
+            "communication-asset"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "pixel-dimensions",
+            "color-space",
+            "alpha-semantics",
+            "source-digest",
+            "parameter-digest",
+            "implementation-digest"
+          ]
+        },
+        {
+          "artifact_type": "quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "biomed-chroma-key-report",
+              "orientations": [
+                "image-matte-diagnostics"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "matte_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "source-digest",
+            "output-digest",
+            "parameter-digest",
+            "implementation-digest"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "ecosystem": "system",
+          "identity": "python3",
+          "mismatch_policy": "block",
+          "name": "python3",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.14,<3.15"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated command boundary and deterministic JSON serialization execute under Python 3.14 semantics.",
+              "id": "python-314-chroma-command-runtime",
+              "required_action": "Record the actual interpreter and implementation digest and rerun the static-raster regression before accepting output.",
+              "source": "https://docs.python.org/3.14/"
+            }
+          ],
+          "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
       "validation_status": "complete"
     },
     {
@@ -8861,6 +9112,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "4e07ea89c869eaa638314d3405c31af0381e989573e41ac48dbd656cb247fc74",
+  "registry_digest": "8f7a54a9bfa6d3c6d502996004f27c73ffc49c39510831265f2274d95d5c0a9e",
   "schema_version": 1
 }

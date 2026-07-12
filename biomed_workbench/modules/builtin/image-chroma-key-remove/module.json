@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "id": "image-chroma-key-remove",
+  "version": "1.0.0",
+  "title": "Remove a uniform chroma-key background from a static communication image",
+  "description": "Decode one declared static PNG, JPEG, or WebP communication asset, validate its raster and color assumptions, select an explicit or statistically consistent border key, construct a soft alpha matte in linearized sRGB, preserve existing alpha, reduce key-channel edge spill, emit a canonical RGBA PNG, and independently verify the output structure, matte fractions, hidden transparent colors, digest, and scientific-use boundary.",
+  "module_type": "transform",
+  "domains": ["imaging", "publication"],
+  "intents": ["remove chroma key background", "make scientific illustration background transparent", "despill green screen image", "去除科研示意图纯色背景"],
+  "questions": ["Can a declared uniform key background be removed from this static communication image without silently accepting format, color-space, animation, edge-spill, or scientific-interpretation errors?"],
+  "maturity": "validated",
+  "entrypoint": "scientific-command",
+  "input_schema": {"type": "object", "additionalProperties": false, "properties": {}, "required": []},
+  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"payload_roles": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2}}, "required": ["payload_roles"]},
+  "input_artifacts": [
+    {
+      "name": "source_image",
+      "artifact_type": "communication_image",
+      "formats": [
+        {"name": "png", "versions": ["3.0"], "representations": ["binary", "container"], "compression": ["deflate"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["top-left-raster"]},
+        {"name": "jpeg", "versions": ["T.81"], "representations": ["binary"], "compression": ["lossy-dct"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["top-left-raster"]},
+        {"name": "webp", "versions": ["riff-container-2025"], "representations": ["binary", "container"], "compression": ["vp8", "vp8l"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["top-left-raster"]}
+      ],
+      "processing_levels": ["generated-asset", "communication-asset", "derived-visual"],
+      "required_metadata": ["pixel-dimensions", "color-space", "frame-count", "image-purpose", "source-digest"]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "transparent_image",
+      "artifact_type": "transparent_communication_image",
+      "formats": [{"name": "png", "versions": ["3.0"], "representations": ["binary", "container"], "compression": ["deflate"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["top-left-raster"]}],
+      "processing_levels": ["communication-asset"],
+      "required_metadata": ["module-version", "compatibility-row-id", "pixel-dimensions", "color-space", "alpha-semantics", "source-digest", "parameter-digest", "implementation-digest"]
+    },
+    {
+      "name": "matte_report",
+      "artifact_type": "quality_report",
+      "formats": [{"name": "biomed-chroma-key-report", "versions": ["1.0.0"], "representations": ["structured", "text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["image-matte-diagnostics"]}],
+      "processing_levels": ["derived"],
+      "required_metadata": ["module-version", "compatibility-row-id", "source-digest", "output-digest", "parameter-digest", "implementation-digest"]
+    }
+  ],
+  "assumptions": ["The source is a single static 8-bit raster intended only as a communication asset, uses canonical top-left orientation, is untagged sRGB or has already been explicitly converted to sRGB, and contains a deliberately uniform key background distinguishable from the foreground."],
+  "preconditions": ["The declared source format must match the decoded PNG, JPEG, or WebP signature; animation, multiple frames, embedded ICC profiles, noncanonical EXIF orientation, unsupported pixel modes, dimensions above 16384 pixels, and more than 40 million pixels are rejected. Automatic key selection requires statistically consistent opaque corner or border samples; otherwise an explicit key is required."],
+  "quality_gates": [
+    {"id": "chroma-format-and-color-contract", "severity": "fatal", "description": "File signature, declared format, frame count, dimensions, pixel mode, orientation, color-space assumptions, source digest, and output RGBA PNG structure must pass validation without implicit conversion of unknown formats or profiles.", "blocks_interpretation": true},
+    {"id": "chroma-key-consensus", "severity": "fatal", "description": "Automatically sampled key pixels must meet the declared p95 distance and consensus thresholds; heterogeneous borders are blocked rather than guessed.", "blocks_interpretation": true},
+    {"id": "chroma-matte-preservation", "severity": "fatal", "description": "The result must retain both transparent background and opaque foreground, preserve source dimensions, use existing alpha as an upper bound before any explicitly requested contraction or feathering, canonicalize hidden colors in fully transparent pixels, and pass independent digest and alpha-count recomputation.", "blocks_interpretation": true},
+    {"id": "chroma-full-resolution-review", "severity": "major", "description": "Foreground colors near the key, antialiased boundaries, fine structures, labels, and residual spill require full-resolution comparison with the source before dissemination.", "blocks_interpretation": true},
+    {"id": "chroma-communication-only", "severity": "fatal", "description": "The transformed image is a communication asset only and must never replace primary image data, define segmentation, or support intensity, morphology, localization, colocalization, or other quantitative scientific claims.", "blocks_interpretation": true}
+  ],
+  "evidence_effects": ["produces_transparent_communication_asset", "documents_matte_quality_and_limitations", "does_not_create_quantitative_image_evidence"],
+  "alternatives": ["scientific-illustration-generation"],
+  "complements": ["figure-specification", "image-profile", "manuscript-audit", "scientific-illustration-generation"],
+  "tool_requirements": [
+    {"name": "python3", "ecosystem": "system", "identity": "python3", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-13", "version_probe": ["python3", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "python-314-chroma-command-runtime", "affected_versions": [">=3.14,<3.15"], "category": "behavior", "description": "The validated command boundary and deterministic JSON serialization execute under Python 3.14 semantics.", "compatibility_effect": "requires-parser", "required_action": "Record the actual interpreter and implementation digest and rerun the static-raster regression before accepting output.", "source": "https://docs.python.org/3.14/"}], "platforms": ["macos-arm64"]}
+  ],
+  "dependencies": [
+    {"name": "Pillow", "ecosystem": "python", "identity": "PIL", "required": true, "tested_versions": ["10.4.0"], "allowed_versions": [">=10.4,<11"], "version_source": "https://pillow.readthedocs.io/en/stable/releasenotes/10.4.0.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import PIL; print(PIL.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Decode validated static PNG, JPEG, and WebP rasters, preserve and filter alpha, and encode a canonical lossless RGBA PNG.", "conflicts": [], "platforms": ["macos-arm64"]}
+  ],
+  "compatibility_matrix": [
+    {"id": "python-3.14-pillow-10.4-static-raster-chroma-v1", "module_version": "1.0.0", "tool_versions": {"python3": [">=3.14,<3.15"]}, "dependency_versions": {"Pillow": [">=10.4,<11"]}, "input_formats": {"source_image": ["png@3.0", "jpeg@T.81", "webp@riff-container-2025"]}, "output_formats": {"transparent_image": ["png@3.0"], "matte_report": ["biomed-chroma-key-report@1.0.0"]}, "platforms": ["macos-arm64"], "regression_evidence_ids": ["image-chroma-key-remove-regression-v1"], "end_to_end_evidence_ids": ["image-chroma-key-remove-e2e-v1"], "verified_at": "2026-07-13"}
+  ],
+  "execution": {
+    "kind": "command",
+    "timeout_seconds": 180,
+    "max_output_bytes": 250000000,
+    "command": {
+      "tool_name": "python3",
+      "executable": "python3",
+      "implementation_module": "biomed_workbench.implementations.chroma_key",
+      "arguments": ["{implementation}", "--input", "{input:image}", "--output", "{output:image}", "--report", "{output:report}", "--source-format", "{parameter:source-format}", "--key-color", "{parameter:key-color}", "--auto-key", "{parameter:auto-key}", "--transparent-threshold", "{parameter:transparent-threshold}", "--opaque-threshold", "{parameter:opaque-threshold}", "--auto-key-maximum-deviation", "{parameter:auto-key-maximum-deviation}", "--auto-key-minimum-consensus", "{parameter:auto-key-minimum-consensus}", "--despill-strength", "{parameter:despill-strength}", "--edge-contract", "{parameter:edge-contract}", "--edge-feather", "{parameter:edge-feather}"],
+      "inputs": [{"name": "image", "port": "source_image", "role": "image", "filename": "source-image.bin"}],
+      "outputs": [
+        {"name": "image", "port": "transparent_image", "role": "image", "filename": "transparent-image.png", "media_type": "image/png"},
+        {"name": "report", "port": "matte_report", "role": "report", "filename": "chroma-key-report.json", "media_type": "application/json"}
+      ],
+      "parameter_names": ["source-format", "key-color", "auto-key", "transparent-threshold", "opaque-threshold", "auto-key-maximum-deviation", "auto-key-minimum-consensus", "despill-strength", "edge-contract", "edge-feather"],
+      "timeout_seconds": 180,
+      "max_output_bytes": 250000000,
+      "max_payload_bytes": 250000000,
+      "path_mode": "workdir-relative"
+    }
+  },
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "limitations": ["The validated row covers one static 8-bit untagged-sRGB PNG, JPEG, or WebP on macOS arm64 and emits PNG only. It does not perform color-profile conversion, animation processing, semantic foreground segmentation, hair or microscopy-specific matting, manual mask refinement, calibrated image analysis, or batch processing. JPEG key backgrounds may contain compression artifacts and need wider declared thresholds plus full-resolution review. Compute resource provisioning remains outside plugin scope."],
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room implementation informed by general chroma-key compositing, alpha-matte, and despill principles.", "https://www.w3.org/TR/png-3/", "https://developers.google.com/speed/webp/docs/riff_container", "https://pillow.readthedocs.io/en/stable/releasenotes/10.4.0.html"]}
+}

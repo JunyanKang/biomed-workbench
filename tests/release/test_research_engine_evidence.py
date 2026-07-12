@@ -2,6 +2,9 @@ import json
 import unittest
 from pathlib import Path
 
+from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.registry import ModuleRegistry
+
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = ROOT / "reports" / "research-engine-verification.json"
@@ -14,7 +17,7 @@ class ResearchEngineEvidenceTests(unittest.TestCase):
         scenarios = report["scenarios"]
 
         self.assertTrue(report["passed"])
-        self.assertEqual(report["module_count"], 62)
+        self.assertEqual(report["module_count"], len(ModuleRegistry.discover(BUILTIN_ROOT).all()))
         self.assertGreaterEqual(report["test_count"], 363)
         self.assertEqual(
             set(report["execution_contracts"]),

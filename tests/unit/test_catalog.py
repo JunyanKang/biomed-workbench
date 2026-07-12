@@ -65,8 +65,9 @@ class CatalogTests(unittest.TestCase):
 
     def test_custom_module_root_loads_without_domain_specifications(self):
         capabilities = load_module_capabilities(BUILTIN_MODULE_ROOT)
+        registry = ModuleRegistry.discover(BUILTIN_MODULE_ROOT)
 
-        self.assertEqual(len(capabilities), 62)
+        self.assertEqual(len(capabilities), len(registry.all()))
         self.assertEqual([item.id for item in capabilities], sorted(item.id for item in capabilities))
 
 

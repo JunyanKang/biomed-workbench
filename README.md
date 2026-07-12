@@ -111,10 +111,13 @@ External scientific engines remain user-managed dependencies; the plugin guides,
 | `variant-decompress-bgzip` | bgzip `1.23` | htslib `1.23` | coordinate-sorted `vcf@4.5` BGZF plus TBI | byte-preserved uncompressed `vcf@4.5` |
 | `tumor-mutation-burden-vcf` | Python `3.14.3` | Python standard library `3.14.3` | filtered ANN `vcf@4.5` plus build-matched callable `bed@1.0` | auditable nonsynonymous mutations per callable union Mb |
 | `metagene-factorization-nmf` | Python `3.14.3` | NumPy `2.4.4`, SciPy `1.17.1`, scikit-learn `1.8.0` | normalized nonnegative `count-matrix@1.0.0` plus ordered feature/sample manifests | stable rank-selected metagene loadings, sample exposures, and independently reconstructed quality report |
+| `image-chroma-key-remove` | Python `3.14.3` | Pillow `10.4.0` | one static untagged-sRGB PNG `3.0`, JPEG `T.81`, or WebP `riff-container-2025` communication asset | canonical RGBA PNG plus independently recomputed matte-quality report |
 
 Tool-use guidance and routing remain available regardless of the installed version. For scientific execution, versions inside the declared compatibility policy may run and are recorded verbatim; provenance also states whether each version is an exact tested baseline. Missing tools, versions outside the policy, known breaking changes, or invalid output structures prevent the result from entering the evidence ledger until the environment is corrected or a validated alternative is selected. The `reports/*-live-verification.json` files preserve the concrete versions used for FastQC, fastp, MultiQC, FastQ Screen, samtools, bedtools, VCF processing, TMB, and NMF regression evidence.
 
 `scientific-illustration-generation` uses a separate `codex_native` contract. It validates a non-evidentiary scientific illustration brief and returns a machine-readable handoff to Codex `image_gen`; the unified Skill invokes the native tool and checks the observed bitmap. It never asks the user for a provider image API key, runs a provider SDK/CLI, or claims that a handoff alone created an image. See `reports/codex-native-handoff-verification.json` for the exact covered and retired source behaviors.
+
+`image-chroma-key-remove` is the local deterministic follow-up for a deliberately uniform key background. It rejects format-signature mismatches, animation, oversized rasters, unsupported modes, embedded ICC profiles, noncanonical orientation, and heterogeneous automatic key samples; then emits a lossless RGBA PNG and a digest-bound report that independently recomputes alpha classes and residual edge spill. Its output is a communication asset only and cannot replace primary image data or support segmentation, intensity, morphology, localization, or colocalization claims. See `reports/chroma-key-live-verification.json`.
 
 ## Internal Structure
 
@@ -125,6 +128,7 @@ Tool-use guidance and routing remain available regardless of the installed versi
 - `tools/validate_workbench.py`: release validation for single-entry skill, catalog consistency, source coverage, and publish-safe paths.
 - `tools/reconcile_sources.py`: development-only one-to-one reconciliation of ignored source/design ledgers into a path-free release receipt root.
 - `reports/compatibility-execution-evidence.json`: path-free regression and end-to-end evidence bound to every supported compatibility row.
+- `reports/chroma-key-live-verification.json`: real command-boundary execution, synthetic edge fixture, output digests, alpha-class checks, and non-quantitative-use evidence for chroma keying.
 - `reports/source-reconciliation-summary.json`: public counts, pending capability decisions, current module/project-contract evidence binding, and an irreversible digest over all private per-file receipts.
 - `reports/plugin-contract-verification.json`: path-free official Codex plugin and Skill validation bound to the current manifest, single Skill entry, generated registry, and isolated snapshot.
 - `biomed_workbench/capabilities/`: independently rewritten scientific implementations.
@@ -140,7 +144,7 @@ The central registry contains no domain definitions. See `docs/architecture.md` 
 
 Changing a tested baseline or widening a compatibility policy requires named regression and end-to-end evidence plus review of known parameter, field, default, and format changes. A compatible runtime version does not masquerade as a tested baseline: both the actual version and baseline-match status are retained.
 
-Foundational FASTQ, FASTA, SAM/BAM/CRAM, VCF/BCF, BED, GTF/GFF3, count-matrix, H5AD, Loom, Matrix Market, fragments, bigWig, and tabular profiles are maintained once in `biomed_workbench/formats/catalog.json`. Modules that declare one of these exact format-version tokens automatically inherit its compression, index, sort, coordinate, reference, annotation, identifier, sample-manifest, orientation, processing-level, metadata, and payload-role gates.
+Foundational FASTQ, FASTA, SAM/BAM/CRAM, VCF/BCF, BED, GTF/GFF3, count-matrix, H5AD, Loom, Matrix Market, fragments, bigWig, tabular, PNG, JPEG, and WebP profiles are maintained once in `biomed_workbench/formats/catalog.json`. Modules that declare one of these exact format-version tokens automatically inherit its compression, index, sort, coordinate, reference, annotation, identifier, sample-manifest, orientation, processing-level, metadata, and payload-role gates.
 
 ## Sources And License Notes
 

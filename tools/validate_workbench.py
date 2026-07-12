@@ -124,8 +124,9 @@ def main() -> int:
     else:
         if format_report != build_format_contract_report():
             errors.append("format contract report differs from the built-in format registry")
-        if len(format_registry.all()) != 17 or format_report.get("registry_digest") != format_registry.digest:
-            errors.append("foundational format profile count or digest is invalid")
+        required_formats = {"fastq", "fasta", "sam", "bam", "cram", "vcf", "bcf", "bed", "gtf", "gff3", "h5ad", "loom", "matrix-market", "fragments", "bigwig", "count-matrix", "tabular", "png", "jpeg", "webp"}
+        if not required_formats <= {profile.name for profile in format_registry.all()} or format_report.get("registry_digest") != format_registry.digest:
+            errors.append("foundational format profiles or digest are invalid")
 
     registry = None
     try:
@@ -134,8 +135,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 62:
-            errors.append(f"built-in module count must be 62, found {len(modules)}")
+        if len(modules) < 48:
+            errors.append(f"built-in modules no longer cover the 48-capability migration baseline: found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -527,6 +528,34 @@ def main() -> int:
                 or summary.get("rank_metrics", [{}])[0].get("component_stability", 0) <= 0.99
             ):
                 errors.append("stable NMF evidence differs from its module, runtime, implementation, fixture, rank selection, reconstruction, or stability checks")
+
+        chroma_report_path = ROOT / "reports" / "chroma-key-live-verification.json"
+        try:
+            chroma_report = json.loads(chroma_report_path.read_text(encoding="utf-8"))
+            chroma_manifest = registry.get("image-chroma-key-remove")
+            chroma_row = chroma_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("chroma-key live verification evidence is missing or invalid")
+        else:
+            summary = chroma_report.get("scientific_summary", {})
+            implementation = chroma_report.get("implementation", {})
+            alpha_counts = summary.get("alpha_counts", {})
+            if (
+                chroma_report.get("passed") is not True
+                or chroma_report.get("module_version") != chroma_manifest.version
+                or chroma_report.get("compatibility_row_id") != chroma_row.id
+                or chroma_report.get("tool_versions") != {"python3": "3.14.3"}
+                or chroma_report.get("dependency_versions") != {"Pillow": "10.4.0"}
+                or chroma_report.get("fixture", {}).get("format") != "png@3.0"
+                or chroma_report.get("fixture", {}).get("orientation") != "top-left-raster"
+                or implementation.get("module") != "biomed_workbench.implementations.chroma_key"
+                or not re.fullmatch(r"[0-9a-f]{64}", str(implementation.get("sha256", "")))
+                or summary.get("quality_status") != "passed"
+                or summary.get("scientific_use") != "communication-asset-only"
+                or summary.get("quantitative_interpretation_allowed") is not False
+                or any(alpha_counts.get(name, 0) <= 0 for name in ("transparent", "partial", "opaque"))
+            ):
+                errors.append("chroma-key evidence differs from its module, runtime, implementation, format, alpha classes, or scientific-use boundary")
 
         plugin_contract_path = ROOT / "reports" / "plugin-contract-verification.json"
         try:

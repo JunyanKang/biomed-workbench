@@ -871,6 +871,23 @@
     },
     {
       "access": "offline",
+      "description": "Decode one declared static PNG, JPEG, or WebP communication asset, validate its raster and color assumptions, select an explicit or statistically consistent border key, construct a soft alpha matte in linearized sRGB, preserve existing alpha, reduce key-channel edge spill, emit a canonical RGBA PNG, and independently verify the output structure, matte fractions, hidden transparent colors, digest, and scientific-use boundary.",
+      "entrypoint": "scientific-command",
+      "id": "image-chroma-key-remove",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Remove a uniform chroma-key background from a static communication image",
+      "workflow": "imaging"
+    },
+    {
+      "access": "offline",
       "description": "Calculate Pearson intensity correlation and thresholded Manders overlap coefficients.",
       "entrypoint": "biomed_workbench.capabilities.imaging:colocalization",
       "id": "image-colocalization",
@@ -2441,7 +2458,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 62,
+  "entry_count": 63,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

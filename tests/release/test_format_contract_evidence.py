@@ -19,10 +19,11 @@ class FormatContractEvidenceTests(unittest.TestCase):
         expected = {
             "fastq", "fasta", "sam", "bam", "cram", "vcf", "bcf", "bed", "gtf", "gff3",
             "count-matrix", "h5ad", "loom", "matrix-market", "fragments", "bigwig", "tabular",
+            "png", "jpeg", "webp",
         }
 
         self.assertEqual(set(report["format_names"]), expected)
-        self.assertEqual(report["profile_count"], 17)
+        self.assertEqual(report["profile_count"], len(FormatRegistry.builtin().all()))
         self.assertEqual(report["registry_digest"], FormatRegistry.builtin().digest)
         self.assertTrue(all(profile["specification_version"] for profile in report["profiles"]))
 
