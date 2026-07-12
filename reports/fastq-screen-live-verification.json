@@ -1,0 +1,130 @@
+{
+  "compatibility_row_id": "fastq-screen-0.16.0-bowtie2-2.5.5-reference-1",
+  "dependency_versions": {
+    "bowtie2": "2.5.5",
+    "bowtie2-bioconda-build": "2.5.5-h9e91881_0",
+    "perl": "5.32.1"
+  },
+  "end_to_end_evidence_id": "read-contamination-screen-e2e-v1",
+  "execution": {
+    "command_contract_digest": "6f3a8cd297ed054065530e7b4a37cf101d6b7b322522979c6242b0281900ca97",
+    "executable_sha256": "3faf844388cf12f1188ce93c54262aa3c2babff2e55bb040a982b4b0192b53d6",
+    "inputs": {
+      "reads": {
+        "byte_size": 1368,
+        "role": "reads",
+        "sha256": "4508bc6abe1ea838afb6641fd99b7e02d685c392bb2613e290ad3d9b013b27c3"
+      },
+      "references": {
+        "byte_size": 16780729,
+        "role": "references",
+        "sha256": "9abb1456e4f0d8f90f263c0b46eab48c3ffa3d05a44ff4d447898b7b5ab20afd"
+      }
+    },
+    "outputs": [
+      {
+        "byte_size": 460,
+        "media_type": "text/tab-separated-values",
+        "object_key": "sha256/b4/b4a3a0327172789a51a12a8fe005cc1ae44efd64beabe5faa1623118396e7197/payload",
+        "role": "data",
+        "sha256": "b4a3a0327172789a51a12a8fe005cc1ae44efd64beabe5faa1623118396e7197"
+      },
+      {
+        "byte_size": 3359326,
+        "media_type": "text/html",
+        "object_key": "sha256/d5/d5f9b3d0701dee72e4b2c08500182a7e0ea7aee0412ae8095aa2ac4aa1e3ce45/payload",
+        "role": "report",
+        "sha256": "d5f9b3d0701dee72e4b2c08500182a7e0ea7aee0412ae8095aa2ac4aa1e3ce45"
+      }
+    ],
+    "parameters": {
+      "threads": "1"
+    }
+  },
+  "fixture": {
+    "record_count": 12,
+    "sha256": "4508bc6abe1ea838afb6641fd99b7e02d685c392bb2613e290ad3d9b013b27c3"
+  },
+  "html_report_validated": true,
+  "module_id": "read-contamination-screen",
+  "module_version": "1.0.0",
+  "passed": true,
+  "reference_manifest": {
+    "expected_references": [
+      "target"
+    ],
+    "references": [
+      {
+        "index_prefix": "target",
+        "name": "target",
+        "sequence_sha256": "5369e9f0ef18d3cab80dc0e79e90c2473ab0b492ee34b25d695287411f48a9fe"
+      },
+      {
+        "index_prefix": "contaminant",
+        "name": "contaminant",
+        "sequence_sha256": "ba31b89f9486439fdf551f597fede0c10260f9b404866dba4a6555375f486359"
+      }
+    ],
+    "schema_version": 1
+  },
+  "reference_manifest_digest": "d8fbff50cddd504971388a90a1b07cc834e7348572c10dd863f8155e30debea7",
+  "regression_evidence_id": "read-contamination-screen-regression-v1",
+  "runtime_lock": {
+    "bowtie2": "2.5.5-h9e91881_0",
+    "bzip2": "1.0.8-hd037594_9",
+    "ca-certificates": "2026.6.17-hbd8a1cb_0",
+    "libcxx": "22.1.8-h55c6f16_0",
+    "libexpat": "2.8.1-hf6b4638_1",
+    "libffi": "3.5.2-he5f378a_0",
+    "liblzma": "5.8.3-h8088a28_0",
+    "libmpdec": "4.0.0-h84a0fba_1",
+    "libsqlite": "3.53.3-h1b79a29_0",
+    "libzlib": "1.3.2-h8088a28_2",
+    "llvm-openmp": "22.1.8-hc7d1edf_0",
+    "ncurses": "6.6-h1d4f5a5_0",
+    "openssl": "3.6.3-hd24854e_0",
+    "perl": "5.32.1-7_h4614cfb_perl5",
+    "python": "3.14.6-h156bc91_100_cp314",
+    "python_abi": "3.14-8_cp314",
+    "readline": "8.3-h46df422_0",
+    "tk": "8.6.13-h892fb3f_3",
+    "tzdata": "2025c-hc9c84f9_1",
+    "zstd": "1.5.7-hbf9d68e_6"
+  },
+  "schema_version": 1,
+  "scientific_summary": {
+    "aligner": "bowtie2",
+    "contamination_screening": {
+      "reference_count": 2,
+      "status": "passed"
+    },
+    "downstream_readiness": "technically-ready-pending-design-review",
+    "expected_references": [
+      "target"
+    ],
+    "fastq_screen_version": "0.16.0",
+    "flagged_unexpected_references": [],
+    "interpretation_policy": "Screening is limited to the declared reference bundle and cannot rule out unrepresented contaminants.",
+    "max_unexpected_percent": 1.0,
+    "reads_processed": 12,
+    "references": {
+      "contaminant": {
+        "mapped_any_percent": 0.0,
+        "reads_processed": 12,
+        "unmapped_percent": 100.0
+      },
+      "target": {
+        "mapped_any_percent": 50.0,
+        "reads_processed": 12,
+        "unmapped_percent": 50.0
+      }
+    },
+    "schema_version": 1,
+    "unexpected_reference_percentages": {
+      "contaminant": 0.0
+    }
+  },
+  "tool_versions": {
+    "fastq-screen": "0.16.0"
+  }
+}

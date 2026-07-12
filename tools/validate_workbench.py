@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 51:
-            errors.append(f"built-in module count must be 51, found {len(modules)}")
+        if len(modules) != 52:
+            errors.append(f"built-in module count must be 52, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -172,7 +172,7 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 337
+                or research_report.get("test_count", 0) < 342
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
                 != {"scientific_command", "command_input_binding", "command_output_binding", "command_zip_directory_input", "bounded_process_result"}
@@ -294,6 +294,29 @@ def main() -> int:
                 or fastp_report.get("html_report_validated") is not True
             ):
                 errors.append("fastp live verification differs from its module, compatibility row, fixture, or runtime lock")
+        screen_report_path = ROOT / "reports" / "fastq-screen-live-verification.json"
+        try:
+            screen_report = json.loads(screen_report_path.read_text(encoding="utf-8"))
+            screen_manifest = registry.get("read-contamination-screen")
+            screen_row = screen_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("FastQ Screen live verification evidence is missing or invalid")
+        else:
+            expected_dependencies = {name: versions[0] for name, versions in screen_row.dependency_versions.items()}
+            if (
+                screen_report.get("passed") is not True
+                or screen_report.get("module_version") != screen_manifest.version
+                or screen_report.get("compatibility_row_id") != screen_row.id
+                or screen_report.get("regression_evidence_id") != screen_row.regression_evidence_ids[0]
+                or screen_report.get("end_to_end_evidence_id") != screen_row.end_to_end_evidence_ids[0]
+                or screen_report.get("tool_versions") != {"fastq-screen": "0.16.0"}
+                or screen_report.get("dependency_versions") != expected_dependencies
+                or screen_report.get("runtime_lock", {}).get("bowtie2") != "2.5.5-h9e91881_0"
+                or screen_report.get("fixture", {}).get("sha256") != fixture_digest
+                or screen_report.get("scientific_summary", {}).get("contamination_screening") != {"status": "passed", "reference_count": 2}
+                or screen_report.get("html_report_validated") is not True
+            ):
+                errors.append("FastQ Screen live verification differs from its module, compatibility row, fixture, references, or runtime lock")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

@@ -226,6 +226,18 @@ class ModuleContractTests(unittest.TestCase):
         self.assertEqual(manifest.execution.command.inputs[0].materialization, "zip-directory")
         self.assertEqual(parse_manifest(manifest_to_dict(manifest)), manifest)
 
+    def test_command_manifest_binds_archive_member_and_input_working_directory(self):
+        payload = command_manifest_payload()
+        command = payload["execution"]["command"]
+        command["inputs"][0].update({"materialization": "zip-directory", "member": "screen.conf"})
+        command["working_directory_input"] = "records"
+
+        manifest = parse_manifest(payload)
+
+        self.assertEqual(manifest.execution.command.inputs[0].member, "screen.conf")
+        self.assertEqual(manifest.execution.command.working_directory_input, "records")
+        self.assertEqual(parse_manifest(manifest_to_dict(manifest)), manifest)
+
     def test_command_manifest_rejects_unversioned_executable_or_port_drift(self):
         cases = (
             lambda payload: payload["tool_requirements"][0].__setitem__("identity", "other-tool"),

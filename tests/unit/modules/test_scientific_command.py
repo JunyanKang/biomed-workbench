@@ -75,6 +75,46 @@ json.dump({'files': files}, open(args.output, 'w', encoding='utf-8'))
             output = json.loads(store.resolve(result.output_payloads[0]).read_text(encoding="utf-8"))
         self.assertEqual(output["files"], ["fastqc_data.txt", "fastqc_data.txt"])
 
+    def test_archive_member_and_bounded_input_working_directory_support_reference_bundles(self):
+        body = """
+import argparse, json, pathlib
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True)
+parser.add_argument('--output', required=True)
+parser.add_argument('--label', required=True)
+args = parser.parse_args()
+config = pathlib.Path(args.input).read_text(encoding='utf-8').strip()
+reference = pathlib.Path(config).read_text(encoding='utf-8').strip()
+json.dump({'reference': reference, 'cwd': pathlib.Path.cwd().name}, open(args.output, 'w', encoding='utf-8'))
+"""
+        reference_command = command(
+            inputs=(CommandInput("reads", "reads", "reads", "reference-bundle", "zip-directory", "screen.conf"),),
+            working_directory_input="reads",
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tool = executable(root / "fixture-tool", body)
+            bundle = root / "reference.zip"
+            with zipfile.ZipFile(bundle, "w") as output:
+                output.writestr("screen.conf", "reference.txt\n")
+                output.writestr("reference.txt", "validated-reference\n")
+            store = ProjectArtifactStore(root / "artifacts")
+            payload = store.import_file(bundle, role="reads", media_type="application/zip")
+
+            result = execute_scientific_command(
+                reference_command,
+                store=store,
+                input_payloads={"reads": payload},
+                parameters={"label": "screen"},
+                tool_versions={"fixture-tool": "2.4.1"},
+                dependency_versions={"python": "3.14.3"},
+                compatibility_row_id="fixture-tool-2.4.1-json-1",
+                executable_resolver=lambda _name: tool,
+            )
+            output = json.loads(store.resolve(result.output_payloads[0]).read_text(encoding="utf-8"))
+
+        self.assertEqual(output, {"reference": "validated-reference", "cwd": "reference-bundle"})
+
     def test_rejects_unsafe_zip_collection_before_tool_execution(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -285,6 +325,9 @@ print('completed')
             lambda: command(arguments=("{output-directory}", "{output:report}", "{input:reads}", "{parameter:label}")),
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "../reads.fastq"),)),
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads", "tar-directory"),)),
+            lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads", "file", "config.txt"),)),
+            lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads", "zip-directory", "../config.txt"),)),
+            lambda: command(working_directory_input="missing"),
             lambda: command(outputs=(CommandOutput("report", "report", "report", "nested/report.json", "application/json"),)),
         )
         for factory in invalid:

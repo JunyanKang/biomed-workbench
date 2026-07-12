@@ -1565,6 +1565,31 @@
     },
     {
       "access": "offline",
+      "description": "Execute FastQ Screen with Bowtie2 against a content-addressed reference bundle and quantify expected and unexpected reference mapping without claiming coverage beyond the supplied references.",
+      "entrypoint": "scientific-command",
+      "id": "read-contamination-screen",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "threads": {
+            "maximum": 16,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threads"
+        ],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Screen sequencing reads against declared references",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
       "description": "Execute fastp in a non-filtering QC-only mode and preserve its JSON and HTML reports as a validated alternative read-quality evidence path.",
       "entrypoint": "scientific-command",
       "id": "read-quality-fastp",
@@ -2038,7 +2063,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 51,
+  "entry_count": 52,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

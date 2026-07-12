@@ -93,7 +93,7 @@ python3 -m unittest discover -s tests -p 'test*.py'
 
 ## Release Flow
 
-The plugin manifest is the package version source. Publish only when rebuilding the generated index and catalog produces no diff, all unit/contract/end-to-end/release tests pass, and release validation confirms the single skill, 51 built-in modules, complete compatibility evidence, source-neutral paths, and absence of legacy registration surfaces.
+The plugin manifest is the package version source. Publish only when rebuilding the generated index and catalog produces no diff, all unit/contract/end-to-end/release tests pass, and release validation confirms the single skill, 52 built-in modules, complete compatibility evidence, source-neutral paths, and absence of legacy registration surfaces.
 
 Release validation also binds `reports/research-engine-verification.json` to the current registry and generated capability graph. Four replayable research-cycle fixtures must cover single, serial, parallel, and mixed plans; each includes a failed compatibility gate, an alternative-module plan revision, evidence ingestion, a hypothesis transition, and an exact final state digest.
 

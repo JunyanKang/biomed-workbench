@@ -18,8 +18,8 @@ class ModuleRegistryEvidenceTests(unittest.TestCase):
         installed = report["installed_cache"]
 
         self.assertTrue(report["passed"])
-        self.assertEqual(source["module_count"], 51)
-        self.assertEqual(installed["module_count"], 51)
+        self.assertEqual(source["module_count"], 52)
+        self.assertEqual(installed["module_count"], 52)
         self.assertEqual(source["registry_digest"], source["index_digest"])
         self.assertEqual(installed["registry_digest"], installed["index_digest"])
         self.assertEqual(source["registry_digest"], installed["registry_digest"])
@@ -44,15 +44,15 @@ class ModuleRegistryEvidenceTests(unittest.TestCase):
         self.assertEqual(
             report["compatibility_evidence"],
             {
-                "tool_requirements": 12,
-                "dependency_requirements": 57,
-                "dependency_probes": 57,
-                "structured_version_differences": 21,
-                "input_format_contracts": 51,
-                "output_format_contracts": 51,
-                "compatibility_rows": 51,
-                "regression_evidence_bindings": 51,
-                "end_to_end_evidence_bindings": 51,
+                "tool_requirements": 13,
+                "dependency_requirements": 60,
+                "dependency_probes": 60,
+                "structured_version_differences": 22,
+                "input_format_contracts": 53,
+                "output_format_contracts": 52,
+                "compatibility_rows": 52,
+                "regression_evidence_bindings": 52,
+                "end_to_end_evidence_bindings": 52,
             },
         )
         self.assertEqual(report["credentials"], ["NCBI_API_KEY"])
@@ -68,10 +68,10 @@ class ModuleRegistryEvidenceTests(unittest.TestCase):
         dependencies = [item for module in modules for item in module.dependencies]
         differences = [item for module in modules for tool in module.tool_requirements for item in tool.version_differences]
 
-        self.assertEqual(len(dependencies), 57)
+        self.assertEqual(len(dependencies), 60)
         self.assertTrue(all(item.identity and item.version_probe and item.version_pattern for item in dependencies))
         self.assertEqual({item.version_probe_kind for item in dependencies}, {"python_callable", "command"})
-        self.assertEqual(len(differences), 21)
+        self.assertEqual(len(differences), 22)
         self.assertTrue(all(item.category and item.compatibility_effect and item.required_action and item.source.startswith("https://") for item in differences))
 
 

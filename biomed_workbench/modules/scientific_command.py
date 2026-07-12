@@ -49,6 +49,7 @@ class CommandInput:
     role: str
     filename: str
     materialization: str = "file"
+    member: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "name", validate_identifier(self.name, "command input name"))
@@ -57,13 +58,22 @@ class CommandInput:
         object.__setattr__(self, "filename", _filename(self.filename, "command input filename"))
         if self.materialization not in {"file", "zip-directory"}:
             raise ValueError("command input materialization is unsupported")
+        if self.member is not None:
+            if self.materialization != "zip-directory":
+                raise ValueError("command input members require zip-directory materialization")
+            member = Path(self.member)
+            if member.is_absolute() or ".." in member.parts or len(member.parts) != 1:
+                raise ValueError("command input member must be one safe archive-root filename")
+            object.__setattr__(self, "member", _filename(self.member, "command input member"))
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, object]) -> "CommandInput":
-        if set(payload) not in ({"name", "port", "role", "filename"}, {"name", "port", "role", "filename", "materialization"}):
+        allowed = {"name", "port", "role", "filename", "materialization", "member"}
+        if not {"name", "port", "role", "filename"} <= set(payload) or set(payload) - allowed:
             raise ValueError("command input fields are incomplete or unsupported")
         values = dict(payload)
         values.setdefault("materialization", "file")
+        values.setdefault("member", None)
         return cls(**values)
 
 
@@ -106,6 +116,7 @@ class ScientificCommand:
     timeout_seconds: int
     max_output_bytes: int
     max_payload_bytes: int
+    working_directory_input: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "tool_name", validate_identifier(self.tool_name, "command tool name"))
@@ -125,6 +136,10 @@ class ScientificCommand:
                 raise ValueError(f"command {location} contain duplicate port-role bindings")
         if len(set(parameter_names)) != len(parameter_names):
             raise ValueError("command parameter names contain duplicates")
+        if self.working_directory_input is not None:
+            matches = [item for item in inputs if item.name == self.working_directory_input]
+            if len(matches) != 1 or matches[0].materialization != "zip-directory":
+                raise ValueError("command working directory must name one zip-directory input")
         references = {"input": set(), "output": set(), "parameter": set()}
         output_directory_referenced = False
         arguments = []
@@ -166,8 +181,10 @@ class ScientificCommand:
             row = {"name": item.name, "port": item.port, "role": item.role, "filename": item.filename}
             if item.materialization != "file":
                 row["materialization"] = item.materialization
+            if item.member is not None:
+                row["member"] = item.member
             input_rows.append(row)
-        return {
+        payload = {
             "tool_name": self.tool_name,
             "executable": self.executable,
             "arguments": list(self.arguments),
@@ -181,6 +198,9 @@ class ScientificCommand:
             "max_output_bytes": self.max_output_bytes,
             "max_payload_bytes": self.max_payload_bytes,
         }
+        if self.working_directory_input is not None:
+            payload["working_directory_input"] = self.working_directory_input
+        return payload
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, object]) -> "ScientificCommand":
@@ -195,7 +215,7 @@ class ScientificCommand:
             "max_output_bytes",
             "max_payload_bytes",
         }
-        if not isinstance(payload, Mapping) or set(payload) != expected:
+        if not isinstance(payload, Mapping) or set(payload) not in (expected, expected | {"working_directory_input"}):
             raise ValueError("scientific command fields are incomplete or unsupported")
         values = dict(payload)
         if (
@@ -210,6 +230,7 @@ class ScientificCommand:
         values["outputs"] = tuple(CommandOutput.from_dict(item) for item in values["outputs"])
         values["arguments"] = tuple(values["arguments"])
         values["parameter_names"] = tuple(values["parameter_names"])
+        values.setdefault("working_directory_input", None)
         return cls(**values)
 
 
@@ -253,7 +274,12 @@ def _kill(process: subprocess.Popen[bytes]) -> None:
         else:
             process.kill()
     except ProcessLookupError:
-        pass
+        return
+    except OSError:
+        try:
+            process.kill()
+        except ProcessLookupError:
+            return
 
 
 def _bounded_process(
@@ -437,6 +463,7 @@ def execute_scientific_command(
         for directory in (input_root, output_root, home_root, temp_root):
             directory.mkdir()
         runtime_inputs = {}
+        runtime_input_roots = {}
         materialized_inputs = {}
         input_tree_digests = {}
         for binding in command.inputs:
@@ -446,6 +473,7 @@ def execute_scientific_command(
                 store.materialize(payload, target)
                 target.chmod(0o444)
                 runtime_inputs[binding.name] = target
+                runtime_input_roots[binding.name] = None
                 materialized_inputs[binding.name] = target
             else:
                 archive_path = input_root / f"{binding.filename}.zip"
@@ -453,7 +481,10 @@ def execute_scientific_command(
                 archive_path.chmod(0o444)
                 target = input_root / binding.filename
                 input_tree_digests[binding.name] = _extract_zip_directory(archive_path, target)
-                runtime_inputs[binding.name] = target
+                runtime_input_roots[binding.name] = target
+                runtime_inputs[binding.name] = target / binding.member if binding.member else target
+                if binding.member and (not runtime_inputs[binding.name].is_file() or runtime_inputs[binding.name].is_symlink()):
+                    raise ScientificCommandError("INVALID_INPUT_ARCHIVE")
                 materialized_inputs[binding.name] = archive_path
         runtime_outputs = {binding.name: output_root / binding.filename for binding in command.outputs}
         argv = [str(executable_path)]
@@ -480,7 +511,7 @@ def execute_scientific_command(
             environment["SYSTEMROOT"] = os.environ["SYSTEMROOT"]
         stdout, stderr = _bounded_process(
             tuple(argv),
-            cwd=workdir,
+            cwd=runtime_input_roots[command.working_directory_input] if command.working_directory_input else workdir,
             environment=environment,
             timeout=command.timeout_seconds,
             output_limit=command.max_output_bytes,
@@ -492,7 +523,7 @@ def execute_scientific_command(
         for binding in command.inputs:
             if _digest_file(materialized_inputs[binding.name]) != input_payloads[binding.name].sha256:
                 raise ScientificCommandError("INPUT_MUTATION")
-            if binding.materialization == "zip-directory" and _digest_tree(runtime_inputs[binding.name]) != input_tree_digests[binding.name]:
+            if binding.materialization == "zip-directory" and _digest_tree(runtime_input_roots[binding.name]) != input_tree_digests[binding.name]:
                 raise ScientificCommandError("INPUT_MUTATION")
         declared_paths = {binding.filename for binding in command.outputs}
         observed_paths = {path.name for path in output_root.iterdir()}

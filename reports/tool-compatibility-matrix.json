@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 51,
-  "module_count": 51,
+  "compatibility_complete": 52,
+  "module_count": 52,
   "modules": [
     {
       "compatibility_rows": [
@@ -5040,6 +5040,256 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "read-contamination-screen-e2e-v1"
+          ],
+          "id": "fastq-screen-0.16.0-bowtie2-2.5.5-reference-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "read-contamination-screen-regression-v1"
+          ],
+          "verified_at": "2026-07-12"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            "==2.5.5"
+          ],
+          "conflicts": [],
+          "ecosystem": "system",
+          "identity": "bowtie2",
+          "name": "bowtie2",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Align reads to every declared screening reference.",
+          "required": true,
+          "tested_versions": [
+            "2.5.5"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "bowtie2-align-s version ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "bowtie2",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/BenLangmead/bowtie2/releases/tag/v2.5.5"
+        },
+        {
+          "allowed_versions": [
+            "==2.5.5-h9e91881_0"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "bioconda-bowtie2-runtime",
+          "name": "bowtie2-bioconda-build",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Bind Bowtie2 to the exact validated macOS-arm64 Bioconda build.",
+          "required": true,
+          "tested_versions": [
+            "2.5.5-h9e91881_0"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+-[A-Za-z0-9_]+)",
+          "version_probe": [
+            "biomed_workbench.quality.fastq_screen:probe_bowtie2_bioconda_build"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://anaconda.org/bioconda/bowtie2/files?version=2.5.5"
+        },
+        {
+          "allowed_versions": [
+            "==5.32.1"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "perl-runtime",
+          "name": "perl",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Execute the validated FastQ Screen Perl application.",
+          "required": true,
+          "tested_versions": [
+            "5.32.1"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.quality.fastq_screen:probe_fastq_screen_perl"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://perldoc.perl.org/5.32.1/perldelta"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "read-contamination-screen",
+      "input_formats": [
+        {
+          "artifact_type": "sequencing_reads",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none",
+                "gzip",
+                "bgzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "fastq",
+              "orientations": [
+                "single-end",
+                "paired-end",
+                "interleaved"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "sanger-phred33"
+              ]
+            }
+          ],
+          "name": "reads",
+          "processing_levels": [
+            "raw",
+            "adapter-trimmed",
+            "quality-trimmed"
+          ],
+          "required_metadata": [
+            "sample-id",
+            "read-layout",
+            "quality-encoding"
+          ]
+        },
+        {
+          "artifact_type": "screening_reference_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "zip"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "fastq-screen-reference",
+              "orientations": [
+                "references-by-index-prefix"
+              ],
+              "representations": [
+                "container",
+                "binary"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "references",
+          "processing_levels": [
+            "indexed-reference"
+          ],
+          "required_metadata": [
+            "reference-count",
+            "reference-manifest-digest",
+            "bowtie2-version"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "sequencing_contamination_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "fastq-screen-report",
+              "orientations": [
+                "references-by-mapping-category"
+              ],
+              "representations": [
+                "text",
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "0.16.0"
+              ]
+            }
+          ],
+          "name": "contamination_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            "==0.16.0"
+          ],
+          "ecosystem": "system",
+          "identity": "fastq_screen",
+          "mismatch_policy": "block",
+          "name": "fastq-screen",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "0.16.0"
+          ],
+          "verified_at": "2026-07-12",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==0.16.0"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated release emits the tested reference mapping categories and summary headers.",
+              "id": "fastq-screen-0160-summary-columns",
+              "required_action": "Use only the FastQ Screen 0.16.0 parser and exact reference-bundle regression fixtures.",
+              "source": "https://github.com/StevenWingett/FastQ-Screen/releases/tag/v0.16.0"
+            }
+          ],
+          "version_pattern": "FastQ Screen v([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "fastq_screen",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/StevenWingett/FastQ-Screen/releases/tag/v0.16.0"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "read-quality-fastp-e2e-v1"
           ],
           "id": "fastp-1.3.6-bioconda-ha1d0559_0-fastq-sanger",
@@ -6567,6 +6817,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "edba6778439ad6c722ded3dd2f0e37a33f6da2496c0ee39e1043376d5e791e72",
+  "registry_digest": "bffbb8440706fe48f0b27b18d3a10bcfff01502aac4aee348fd516082b1a3164",
   "schema_version": 1
 }

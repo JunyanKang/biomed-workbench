@@ -38,8 +38,8 @@ Production bioinformatics tools must not be added as path-taking wrappers around
 
 ### Task 5: Production sequencing quality modules
 
-- [ ] Implement read-level QC and aggregate QC modules using established tools with exact tested versions.
-- [ ] Validate real bounded fixtures, output structures, tool reports, sample identity, contamination indicators, and downstream readiness.
+- [x] Implement read-level QC and aggregate QC modules using established tools with exact tested versions.
+- [x] Validate real bounded fixtures, output structures, tool reports, sample identity, contamination indicators, and downstream readiness.
 - [ ] Provide declared alternatives where a validated tool is absent or incompatible; never infer compatibility.
 
 ### Task 6: Production bulk, single-cell, epigenomic, and variant modules
