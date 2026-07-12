@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 59:
-            errors.append(f"built-in module count must be 59, found {len(modules)}")
+        if len(modules) != 60:
+            errors.append(f"built-in module count must be 60, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -173,7 +173,7 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 379
+                or research_report.get("test_count", 0) < 383
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
                 != {"scientific_command", "command_companion_sidecar_input", "command_digest_bound_project_implementation", "command_input_binding", "command_derived_sidecar_output", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"}
@@ -470,6 +470,36 @@ def main() -> int:
                 or summary.get("coordinate_sorted") is not True
             ):
                 errors.append("BGZF VCF decompression evidence differs from its module, row, bundle, byte roundtrip, or VCF document checks")
+        tmb_vcf_report_path = ROOT / "reports" / "tmb-vcf-live-verification.json"
+        try:
+            tmb_vcf_report = json.loads(tmb_vcf_report_path.read_text(encoding="utf-8"))
+            tmb_vcf_manifest = registry.get("tumor-mutation-burden-vcf")
+            tmb_vcf_row = tmb_vcf_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("VCF/BED TMB live verification evidence is missing or invalid")
+        else:
+            summary = tmb_vcf_report.get("scientific_summary", {})
+            serial = tmb_vcf_report.get("serial_execution", {})
+            implementation = tmb_vcf_report.get("implementation", {})
+            if (
+                tmb_vcf_report.get("passed") is not True
+                or tmb_vcf_report.get("module_version") != tmb_vcf_manifest.version
+                or tmb_vcf_report.get("compatibility_row_id") != tmb_vcf_row.id
+                or tmb_vcf_report.get("tool_versions") != {"python3": "3.14.3"}
+                or tmb_vcf_report.get("dependency_versions") != {"python-stdlib": "3.14.3"}
+                or tmb_vcf_report.get("fixture", {}).get("vcf_format") != "vcf@4.5"
+                or tmb_vcf_report.get("fixture", {}).get("bed_format") != "bed@1.0"
+                or implementation.get("module") != "biomed_workbench.implementations.tmb_vcf"
+                or not re.fullmatch(r"[0-9a-f]{64}", str(implementation.get("sha256", "")))
+                or serial.get("plan") != ["variant-filter-vcf", "tumor-mutation-burden-vcf"]
+                or summary.get("input_variant_count") != 2
+                or summary.get("nonsynonymous_variant_count") != 2
+                or summary.get("callable_bases") != 1500000
+                or summary.get("merged_interval_count") != 2
+                or not abs(summary.get("tmb_mutations_per_mb", 0) - 4 / 3) < 1e-12
+                or not str(summary.get("classification_policy", "")).startswith("none")
+            ):
+                errors.append("VCF/BED TMB evidence differs from its module, serial filter plan, implementation, callable union, ANN counts, or arithmetic")
 
         reconciliation_path = ROOT / "reports" / "source-reconciliation-summary.json"
         assimilation_path = ROOT / "reports" / "source-assimilation-summary.json"

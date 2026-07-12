@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 59,
-  "module_count": 59,
+  "compatibility_complete": 60,
+  "module_count": 60,
   "modules": [
     {
       "compatibility_rows": [
@@ -7322,6 +7322,236 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "tumor-mutation-burden-vcf-e2e-v1"
+          ],
+          "id": "python-3.14-vcf-4.5-bed-1.0-tmb-v1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "tumor-mutation-burden-vcf-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-standard-library",
+          "name": "python-stdlib",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Provide deterministic parsing, interval union, counting, and JSON serialization for the TMB implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "tumor-mutation-burden-vcf",
+      "input_formats": [
+        {
+          "artifact_type": "variant_table",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "vcf",
+              "orientations": [
+                "sites-by-samples"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "4.5"
+              ]
+            }
+          ],
+          "name": "variants",
+          "processing_levels": [
+            "filtered",
+            "annotated"
+          ],
+          "required_metadata": [
+            "fileformat",
+            "contig",
+            "sample-id",
+            "sample-manifest-digest",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order",
+            "filter-parameter-digest",
+            "annotation-release"
+          ]
+        },
+        {
+          "artifact_type": "genomic_intervals",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "zero-based-half-open"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "bed",
+              "orientations": [
+                "interval-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0"
+              ]
+            }
+          ],
+          "name": "callable_territory",
+          "processing_levels": [
+            "regions"
+          ],
+          "required_metadata": [
+            "bed-field-count",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order",
+            "sample-manifest-digest",
+            "assay-id",
+            "callability-definition"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "statistical_summary",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive",
+                "zero-based-half-open"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "biomed-tmb-report",
+              "orientations": [
+                "variant-count-per-callable-union-megabase"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "mutation_burden",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "reference-build",
+            "reference-sequence-digest",
+            "sample-manifest-digest",
+            "assay-id",
+            "annotation-release",
+            "filter-parameter-digest",
+            "callable-territory-digest"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "ecosystem": "system",
+          "identity": "python3",
+          "mismatch_policy": "block",
+          "name": "python3",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.14,<3.15"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "The supported line executes deterministic ANN classification, BED union, and JSON number handling in the digest-bound project implementation.",
+              "id": "python-314-tmb-vcf-bed",
+              "required_action": "Record interpreter and implementation hashes and independently verify variant classification, interval union, denominator, and TMB arithmetic.",
+              "source": "https://docs.python.org/3.14/"
+            }
+          ],
+          "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "variant-decompress-bgzip-e2e-v1"
           ],
           "id": "bgzip-1.23-vcf-4.5-bgzf-to-plain",
@@ -8205,6 +8435,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "207fe68c116d33dc03c89e40d39cc32317863e37eabdda5e19fe89ac8e32c0c8",
+  "registry_digest": "1b65e094d7f3fff3d2fea4799538058b05b32da0ada3c6a429fe90b274157d7b",
   "schema_version": 1
 }

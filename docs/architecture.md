@@ -93,7 +93,7 @@ python3 -m unittest discover -s tests -p 'test*.py'
 
 ## Release Flow
 
-The plugin manifest is the package version source. Publish only when rebuilding the generated index and catalog produces no diff, all unit/contract/end-to-end/release tests pass, and release validation confirms the single skill, 59 built-in modules, complete compatibility evidence, source-neutral paths, and absence of legacy registration surfaces.
+The plugin manifest is the package version source. Publish only when rebuilding the generated index and catalog produces no diff, all unit/contract/end-to-end/release tests pass, and release validation confirms the single skill, 60 built-in modules, complete compatibility evidence, source-neutral paths, and absence of legacy registration surfaces.
 
 Source assimilation has a separate release gate. Ignored development ledgers hold one content identity and one clean-room design decision per inspected file. `tools/reconcile_sources.py` rejects duplicates and non-bijective ledgers, emits a private per-file reconciliation ledger, and publishes only status totals plus a canonical receipt-root digest. A `rewrite_capability` or `redesign_schema` decision stays `pending` until a private path-free receipt binding names independent modules whose current compatibility rows, regression tests, and representative executions all pass. Unknown modules, duplicate or absent receipts, bindings to non-pending records, and stale evidence fail reconciliation. Nonzero pending receipts explicitly prohibit a source-union completeness claim; they do not block publishing truthful incremental releases.
 

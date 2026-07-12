@@ -16,13 +16,13 @@ class ModulePackagingTests(unittest.TestCase):
     def test_checked_module_index_exactly_matches_all_builtin_manifests(self):
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
 
-        self.assertEqual(len(registry.all()), 59)
+        self.assertEqual(len(registry.all()), 60)
         self.assertEqual(json.loads(MODULE_INDEX.read_text(encoding="utf-8")), build_index(registry))
 
     def test_every_builtin_module_passes_strict_packaging_validation(self):
         reports = [validate_module(path.parent, require_tests=False) for path in sorted(BUILTIN_ROOT.glob("*/module.json"))]
 
-        self.assertEqual(len(reports), 59)
+        self.assertEqual(len(reports), 60)
         self.assertTrue(all(report["valid"] for report in reports))
         self.assertTrue(all(report["entrypoint_resolved"] for report in reports))
         self.assertTrue(all(report["compatibility_rows"] >= 1 for report in reports))
@@ -44,7 +44,7 @@ class ModulePackagingTests(unittest.TestCase):
         )
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("modules=59", result.stdout)
+        self.assertIn("modules=60", result.stdout)
         self.assertIn("registry_digest=", result.stdout)
 
 

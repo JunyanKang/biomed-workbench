@@ -35,7 +35,7 @@ class ReleaseSurfaceTests(unittest.TestCase):
     def test_independent_modules_replace_workflow_reference_bridges(self):
         module_files = sorted((ROOT / "biomed_workbench" / "modules" / "builtin").glob("*/module.json"))
 
-        self.assertEqual(len(module_files), 59)
+        self.assertEqual(len(module_files), 60)
         self.assertFalse((ROOT / "biomed_workbench" / "capability_specs").exists())
         self.assertFalse((ROOT / "tools" / "add_capability.py").exists())
         self.assertFalse((ROOT / "references").exists())

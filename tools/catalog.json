@@ -2102,6 +2102,23 @@
     },
     {
       "access": "offline",
+      "description": "Execute a digest-bound implementation that classifies ALT-matched ANN consequences in a filtered biallelic VCF, merges overlapping callable BED intervals, restricts variants to that territory, and reports nonsynonymous mutations per union megabase without universal clinical cutoffs.",
+      "entrypoint": "scientific-command",
+      "id": "tumor-mutation-burden-vcf",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Calculate TMB from filtered VCF and callable BED territory",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
       "description": "Guide and execute HTSlib bgzip decompression of a digest-bound VCF 4.5 BGZF+TBI bundle and verify byte-exact recovery of the coordinate-sorted VCF document for downstream filtering and analysis.",
       "entrypoint": "scientific-command",
       "id": "variant-decompress-bgzip",
@@ -2258,7 +2275,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 59,
+  "entry_count": 60,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

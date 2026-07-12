@@ -1,5 +1,5 @@
 {
-  "module_count": 59,
+  "module_count": 60,
   "modules": [
     {
       "access": "offline",
@@ -14992,6 +14992,408 @@
     },
     {
       "access": "offline",
+      "alternatives": [
+        "tumor-mutation-burden"
+      ],
+      "assumptions": [
+        "The VCF is a somatic, upstream-filtered, ALT-specific ANN-annotated call set; BED intervals represent assay-specific callable territory rather than nominal targets; VCF and BED share reference build, sequence digest, chromosome namespace, sample, and assay identity."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python-stdlib": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "tumor-mutation-burden-vcf-e2e-v1"
+          ],
+          "id": "python-3.14-vcf-4.5-bed-1.0-tmb-v1",
+          "input_formats": {
+            "callable_territory": [
+              "bed@1.0"
+            ],
+            "variants": [
+              "vcf@4.5"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "mutation_burden": [
+              "biomed-tmb-report@1.0.0"
+            ]
+          },
+          "platforms": [
+            "macos-arm64"
+          ],
+          "regression_evidence_ids": [
+            "tumor-mutation-burden-vcf-regression-v1"
+          ],
+          "tool_versions": {
+            "python3": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "variant-decompress-bgzip",
+        "variant-filter-vcf",
+        "variant-evidence",
+        "clinical-report-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-standard-library",
+          "name": "python-stdlib",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Provide deterministic parsing, interval union, counting, and JSON serialization for the TMB implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Execute a digest-bound implementation that classifies ALT-matched ANN consequences in a filtered biallelic VCF, merges overlapping callable BED intervals, restricts variants to that territory, and reports nonsynonymous mutations per union megabase without universal clinical cutoffs.",
+      "domains": [
+        "omics",
+        "clinical"
+      ],
+      "entrypoint": "scientific-command",
+      "evidence_effects": [
+        "quantifies_nonsynonymous_mutation_burden_with_explicit_callable_denominator"
+      ],
+      "execution": {
+        "command": {
+          "arguments": [
+            "{implementation}",
+            "--vcf",
+            "{input:vcf}",
+            "--callable-bed",
+            "{input:bed}",
+            "--report",
+            "{output:report}"
+          ],
+          "executable": "python3",
+          "implementation_module": "biomed_workbench.implementations.tmb_vcf",
+          "inputs": [
+            {
+              "filename": "filtered.vcf",
+              "name": "vcf",
+              "port": "variants",
+              "role": "variants"
+            },
+            {
+              "filename": "callable.bed",
+              "name": "bed",
+              "port": "callable_territory",
+              "role": "regions"
+            }
+          ],
+          "max_output_bytes": 2000000,
+          "max_payload_bytes": 100000000,
+          "outputs": [
+            {
+              "filename": "tmb-report.json",
+              "media_type": "application/json",
+              "name": "report",
+              "port": "mutation_burden",
+              "role": "report"
+            }
+          ],
+          "parameter_names": [],
+          "path_mode": "workdir-relative",
+          "timeout_seconds": 120,
+          "tool_name": "python3"
+        },
+        "kind": "command",
+        "max_output_bytes": 2000000,
+        "timeout_seconds": 120
+      },
+      "id": "tumor-mutation-burden-vcf",
+      "input_artifacts": [
+        {
+          "artifact_type": "variant_table",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "vcf",
+              "orientations": [
+                "sites-by-samples"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "4.5"
+              ]
+            }
+          ],
+          "name": "variants",
+          "processing_levels": [
+            "filtered",
+            "annotated"
+          ],
+          "required_metadata": [
+            "fileformat",
+            "contig",
+            "sample-id",
+            "sample-manifest-digest",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order",
+            "filter-parameter-digest",
+            "annotation-release"
+          ]
+        },
+        {
+          "artifact_type": "genomic_intervals",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "zero-based-half-open"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-in-project"
+              ],
+              "name": "bed",
+              "orientations": [
+                "interval-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0"
+              ]
+            }
+          ],
+          "name": "callable_territory",
+          "processing_levels": [
+            "regions"
+          ],
+          "required_metadata": [
+            "bed-field-count",
+            "reference-build",
+            "reference-sequence-digest",
+            "sort-order",
+            "sample-manifest-digest",
+            "assay-id",
+            "callability-definition"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "intents": [
+        "calculate TMB from VCF",
+        "tumor mutational burden with panel BED",
+        "ANN nonsynonymous burden",
+        "\u6839\u636eVCF\u548c\u53ef\u8c03\u7528BED\u8ba1\u7b97\u80bf\u7624\u7a81\u53d8\u8d1f\u8377"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The validated row accepts upstream-filtered, biallelic VCF 4.5 with ALT-matched ANN and assay-specific BED 1.0 territory. It does not perform germline subtraction, purity or clonality modeling, mutational signatures, callability estimation, assay calibration, clinical cutoff validation, or treatment recommendation."
+      ],
+      "maturity": "validated",
+      "module_type": "analysis",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "statistical_summary",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive",
+                "zero-based-half-open"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "biomed-tmb-report",
+              "orientations": [
+                "variant-count-per-callable-union-megabase"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "mutation_burden",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "reference-build",
+            "reference-sequence-digest",
+            "sample-manifest-digest",
+            "assay-id",
+            "annotation-release",
+            "filter-parameter-digest",
+            "callable-territory-digest"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "payload_roles": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 1,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "payload_roles"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "VCF records are biallelic, coordinate sorted, PASS-filtered, and ANN-annotated; callable BED records are valid zero-based half-open intervals; reference and sample identities reconcile exactly before execution."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Independent clean-room implementation of ANN-based mutation burden with callable-territory union."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "VCF and BED reference build, sequence digest, chromosome namespace, sample manifest, assay identity, filtering provenance, annotation release, and coordinate conventions must reconcile.",
+          "id": "tmb-vcf-bed-identity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Callable BED intervals must be valid and their per-contig union must be positive; overlapping or adjacent bases are counted once.",
+          "id": "tmb-callable-union-denominator",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every VCF record requires an ANN entry matching its ALT allele; each variant is counted at most once using its highest-impact declared nonsynonymous consequence.",
+          "id": "tmb-ann-alt-consequence",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "TMB has no universal high/low cutoff; assay, indication, germline subtraction, purity, clonality, sequencing sensitivity, validation, and jurisdiction-specific evidence are required before clinical interpretation.",
+          "id": "tmb-clinical-scope",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "What is the nonsynonymous mutation burden after ALT-specific ANN classification and normalization by the nonoverlapping callable territory of the same assay and reference assembly?"
+      ],
+      "schema_version": 1,
+      "title": "Calculate TMB from filtered VCF and callable BED territory",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "ecosystem": "system",
+          "identity": "python3",
+          "mismatch_policy": "block",
+          "name": "python3",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.14,<3.15"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "The supported line executes deterministic ANN classification, BED union, and JSON number handling in the digest-bound project implementation.",
+              "id": "python-314-tmb-vcf-bed",
+              "required_action": "Record interpreter and implementation hashes and independently verify variant classification, interval union, denominator, and TMB arithmetic.",
+              "source": "https://docs.python.org/3.14/"
+            }
+          ],
+          "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
       "alternatives": [],
       "assumptions": [
         "The BGZF payload and TBI are a matched digest-bound bundle and decompression is a representation change that must preserve all VCF content and processing semantics."
@@ -16693,6 +17095,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "207fe68c116d33dc03c89e40d39cc32317863e37eabdda5e19fe89ac8e32c0c8",
+  "registry_digest": "1b65e094d7f3fff3d2fea4799538058b05b32da0ada3c6a429fe90b274157d7b",
   "schema_version": 1
 }

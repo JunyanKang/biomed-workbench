@@ -6,6 +6,7 @@ from .fastp import FastPReportError, parse_fastp_report
 from .fastq_screen import FastQScreenReportError, parse_fastq_screen_report
 from .intervals import IntervalReportError, parse_bedtools_intersect_report
 from .multiqc import MultiQCReportError, parse_multiqc_archive
+from .tmb import TMBReportError, parse_tmb_report
 from .vcf import VCFReportError, parse_tabix_vcf_query, parse_vcf_document, parse_vcf_filter_outputs
 
 __all__ = [
@@ -15,6 +16,7 @@ __all__ = [
     "FastQScreenReportError",
     "IntervalReportError",
     "MultiQCReportError",
+    "TMBReportError",
     "VCFReportError",
     "parse_fastp_report",
     "parse_fastq_screen_report",
@@ -24,6 +26,7 @@ __all__ = [
     "parse_multiqc_archive",
     "parse_samtools_flagstat_report",
     "parse_tabix_vcf_query",
+    "parse_tmb_report",
     "parse_vcf_document",
     "parse_vcf_filter_outputs",
     "probe_bwa_homebrew_bottle",

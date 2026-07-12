@@ -109,6 +109,7 @@ External scientific engines remain user-managed dependencies; the plugin guides,
 | `variant-region-query-tabix` | tabix `1.23` | htslib `1.23` | coordinate-sorted `vcf@4.5` BGZF plus TBI | header-preserving regional `vcf@4.5` |
 | `variant-filter-vcf` | Python `3.14.3` | Python standard library `3.14.3` | one-sample or sites-only biallelic `vcf@4.5` | filtered `vcf@4.5` plus exclusion audit |
 | `variant-decompress-bgzip` | bgzip `1.23` | htslib `1.23` | coordinate-sorted `vcf@4.5` BGZF plus TBI | byte-preserved uncompressed `vcf@4.5` |
+| `tumor-mutation-burden-vcf` | Python `3.14.3` | Python standard library `3.14.3` | filtered ANN `vcf@4.5` plus build-matched callable `bed@1.0` | auditable nonsynonymous mutations per callable union Mb |
 
 Tool-use guidance and routing remain available regardless of the installed version. For scientific execution, versions inside the declared compatibility policy may run and are recorded verbatim; provenance also states whether each version is an exact tested baseline. Missing tools, versions outside the policy, known breaking changes, or invalid output structures prevent the result from entering the evidence ledger until the environment is corrected or a validated alternative is selected. The `reports/*-live-verification.json` files preserve the concrete versions used for FastQC, fastp, MultiQC, FastQ Screen, samtools, and bedtools regression evidence.
 
