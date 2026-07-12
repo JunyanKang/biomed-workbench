@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 48,
-  "module_count": 48,
+  "compatibility_complete": 49,
+  "module_count": 49,
   "modules": [
     {
       "compatibility_rows": [
@@ -4730,6 +4730,173 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "read-quality-fastqc-e2e-v1"
+          ],
+          "id": "fastqc-0.12.1-java-22-fastq-sanger",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "read-quality-fastqc-regression-v1"
+          ],
+          "verified_at": "2026-07-12"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            "==22"
+          ],
+          "conflicts": [],
+          "ecosystem": "java",
+          "identity": "java-runtime",
+          "name": "java",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Execute the validated FastQC 0.12.1 Java application.",
+          "required": true,
+          "tested_versions": [
+            "22"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "version \\\"([0-9]+)",
+          "version_probe": [
+            "java",
+            "-version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.oracle.com/java/technologies/javase/22-relnotes.html"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "read-quality-fastqc",
+      "input_formats": [
+        {
+          "artifact_type": "sequencing_reads",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none",
+                "gzip",
+                "bgzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "fastq",
+              "orientations": [
+                "single-end",
+                "paired-end",
+                "interleaved"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "sanger-phred33"
+              ]
+            }
+          ],
+          "name": "reads",
+          "processing_levels": [
+            "raw",
+            "adapter-trimmed",
+            "quality-trimmed"
+          ],
+          "required_metadata": [
+            "sample-id",
+            "read-layout",
+            "quality-encoding"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "sequencing_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "zip"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "fastqc-zip",
+              "orientations": [
+                "report-bundle"
+              ],
+              "representations": [
+                "container",
+                "binary"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "0.12.1"
+              ]
+            }
+          ],
+          "name": "read_quality_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            "==0.12.1"
+          ],
+          "ecosystem": "system",
+          "identity": "fastqc",
+          "mismatch_policy": "block",
+          "name": "fastqc",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "0.12.1"
+          ],
+          "verified_at": "2026-07-12",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==0.12.1"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated release emits the tested FastQC archive and HTML report layout.",
+              "id": "fastqc-0121-report-layout",
+              "required_action": "Use only the version-specific report parser and regression fixtures for FastQC 0.12.1.",
+              "source": "https://www.bioinformatics.babraham.ac.uk/projects/fastqc/RELEASE_NOTES.txt"
+            }
+          ],
+          "version_pattern": "FastQC v([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "fastqc",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.bioinformatics.babraham.ac.uk/projects/fastqc/"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "response-matrix-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -5916,6 +6083,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "43af51f5c7a41a0343b75689e86f13123451c4f57496eb49d2478c507100f72f",
+  "registry_digest": "97a995098926a69879cac8be195f9d999868df919c3764a0bf36fa8c48465a06",
   "schema_version": 1
 }

@@ -14,12 +14,16 @@ COMPATIBILITY_REPORT = ROOT / "reports" / "tool-compatibility-matrix.json"
 
 class ModuleMigrationReleaseTests(unittest.TestCase):
     def test_every_legacy_capability_has_one_behavior_preserving_module(self):
-        legacy = {row["id"]: row for row in json.loads(LEGACY_CATALOG.read_text(encoding="utf-8"))["entries"]}
+        catalog = {row["id"]: row for row in json.loads(LEGACY_CATALOG.read_text(encoding="utf-8"))["entries"]}
+        migration = json.loads(MIGRATION_REPORT.read_text(encoding="utf-8"))
+        expanded = set(migration["expanded_module_ids"])
+        legacy = {module_id: row for module_id, row in catalog.items() if module_id not in expanded}
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
         current = {module.id: module for module in registry.all()}
 
         self.assertEqual(len(legacy), 48)
-        self.assertEqual(set(current), set(legacy))
+        self.assertEqual(set(current), set(catalog))
+        self.assertEqual(set(current) - set(legacy), expanded)
         for module_id, row in legacy.items():
             module = current[module_id]
             self.assertEqual(module.entrypoint, row["entrypoint"])
@@ -55,13 +59,13 @@ class ModuleMigrationReleaseTests(unittest.TestCase):
         compatibility = json.loads(COMPATIBILITY_REPORT.read_text(encoding="utf-8"))
 
         self.assertEqual(migration["legacy_capability_count"], 48)
-        self.assertEqual(migration["module_count"], 48)
+        self.assertEqual(migration["module_count"], 49)
         self.assertEqual(migration["entrypoint_parity_count"], 48)
         self.assertEqual(migration["input_schema_parity_count"], 48)
-        self.assertEqual(migration["scientific_contract_complete_count"], 48)
-        self.assertEqual(migration["compatibility_contract_complete_count"], 48)
-        self.assertEqual(compatibility["module_count"], 48)
-        self.assertEqual(compatibility["compatibility_complete"], 48)
+        self.assertEqual(migration["scientific_contract_complete_count"], 49)
+        self.assertEqual(migration["compatibility_contract_complete_count"], 49)
+        self.assertEqual(compatibility["module_count"], 49)
+        self.assertEqual(compatibility["compatibility_complete"], 49)
         self.assertEqual(migration["registry_digest"], compatibility["registry_digest"])
 
     def test_public_reports_and_manifests_have_no_machine_or_source_paths(self):

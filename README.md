@@ -91,6 +91,16 @@ python3 tools/run_tool.py clinical-deidentify --input-file record.json
 
 Inspect the input contract with `tools/search_tools.py --id CAPABILITY_ID` before supplying data.
 
+## Scientific Tool Dependencies
+
+External scientific engines remain user-managed dependencies; the plugin validates and invokes them but does not provision Java, Python environments, containers, GPUs, or schedulers. The first production sequencing module has this exact tested combination:
+
+| Module | Tool | Dependency | Input | Outputs |
+| --- | --- | --- | --- | --- |
+| `read-quality-fastqc` | FastQC `0.12.1` | Java `22` | `fastq@sanger-phred33` | FastQC ZIP `0.12.1` and HTML |
+
+Unknown, missing, or mismatched versions block before invocation. `reports/fastqc-live-verification.json` records the bounded real-fixture execution, normalized scientific summary, report checks, and path-free provenance used by release validation.
+
 ## Internal Structure
 
 - `skills/biomed-workbench/`: the only visible Codex skill.

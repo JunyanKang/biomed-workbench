@@ -19,7 +19,7 @@ class CapabilityGraphTests(unittest.TestCase):
         relations = set(self.graph.relation_types)
 
         self.assertEqual(self.graph, repeated)
-        self.assertEqual(len(self.graph.module_ids), 48)
+        self.assertEqual(len(self.graph.module_ids), 49)
         self.assertRegex(self.graph.digest, r"^[0-9a-f]{64}$")
         self.assertTrue({"consumes", "produces", "validates", "alternative-to", "complements", "addresses-intent", "addresses-question"} <= relations)
         self.assertIn("complements", {edge.relation for edge in self.graph.edges})

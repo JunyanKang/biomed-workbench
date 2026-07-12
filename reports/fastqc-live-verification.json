@@ -1,0 +1,97 @@
+{
+  "compatibility_row_id": "fastqc-0.12.1-java-22-fastq-sanger",
+  "dependency_versions": {
+    "java": "22"
+  },
+  "end_to_end_evidence_id": "read-quality-fastqc-e2e-v1",
+  "execution": {
+    "command_contract_digest": "a908bef793c384b50450b80e074282cca2d7c52b743500d4d153b1b4707ec099",
+    "executable_sha256": "49c9936860e7ecdf9f2529559c42f937014bfb774d41c843c342a47fd45f931e",
+    "input": {
+      "byte_size": 1368,
+      "role": "reads",
+      "sha256": "4508bc6abe1ea838afb6641fd99b7e02d685c392bb2613e290ad3d9b013b27c3"
+    },
+    "outputs": [
+      {
+        "byte_size": 379187,
+        "media_type": "application/zip",
+        "object_key": "sha256/ed/ed86af09c659adf8d8c1738b3b952d8a87d155ce36768939691fe7e0336af1ff/payload",
+        "role": "archive",
+        "sha256": "ed86af09c659adf8d8c1738b3b952d8a87d155ce36768939691fe7e0336af1ff"
+      },
+      {
+        "byte_size": 565831,
+        "media_type": "text/html",
+        "object_key": "sha256/ee/ee0594c82962c03d7cb32a911f75d39f0733b3787e9c5093715ed6985d2ae8a9/payload",
+        "role": "report",
+        "sha256": "ee0594c82962c03d7cb32a911f75d39f0733b3787e9c5093715ed6985d2ae8a9"
+      }
+    ],
+    "parameters": {
+      "threads": "1"
+    }
+  },
+  "fixture": {
+    "format": "fastq@sanger-phred33",
+    "record_count": 12,
+    "sha256": "4508bc6abe1ea838afb6641fd99b7e02d685c392bb2613e290ad3d9b013b27c3"
+  },
+  "html_report_validated": true,
+  "module_id": "read-quality-fastqc",
+  "module_version": "1.0.0",
+  "passed": true,
+  "regression_evidence_id": "read-quality-fastqc-regression-v1",
+  "schema_version": 1,
+  "scientific_summary": {
+    "basic_statistics": {
+      "file_type": "Conventional base calls",
+      "gc_percent": 50.0,
+      "quality_encoding": "Illumina 1.5",
+      "sequence_length": "50",
+      "total_sequences": 12
+    },
+    "downstream_readiness": "requires-assay-aware-review",
+    "fastqc_version": "0.12.1",
+    "flagged_modules": [
+      {
+        "module": "Overrepresented sequences",
+        "status": "fail"
+      },
+      {
+        "module": "Per sequence GC content",
+        "status": "warn"
+      },
+      {
+        "module": "Per sequence quality scores",
+        "status": "fail"
+      },
+      {
+        "module": "Sequence Duplication Levels",
+        "status": "fail"
+      }
+    ],
+    "interpretation_policy": "FastQC flags require assay, library-design, organism, and downstream-method context.",
+    "module_statuses": {
+      "Adapter Content": "pass",
+      "Basic Statistics": "pass",
+      "Overrepresented sequences": "fail",
+      "Per base N content": "pass",
+      "Per base sequence content": "pass",
+      "Per base sequence quality": "pass",
+      "Per sequence GC content": "warn",
+      "Per sequence quality scores": "fail",
+      "Sequence Duplication Levels": "fail",
+      "Sequence Length Distribution": "pass"
+    },
+    "schema_version": 1,
+    "status_counts": {
+      "fail": 3,
+      "pass": 6,
+      "warn": 1
+    }
+  },
+  "tool_versions": {
+    "fastqc": "0.12.1"
+  }
+}

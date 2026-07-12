@@ -1548,6 +1548,31 @@
     },
     {
       "access": "offline",
+      "description": "Execute FastQC on one versioned FASTQ payload and preserve its complete archive and HTML report as content-addressed scientific evidence.",
+      "entrypoint": "scientific-command",
+      "id": "read-quality-fastqc",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "threads": {
+            "maximum": 32,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threads"
+        ],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Run read-level sequencing quality control",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
       "description": "Preserve every reviewer comment, response, manuscript action, status, and unresolved item.",
       "entrypoint": "biomed_workbench.capabilities.publication:response_matrix",
       "id": "response-matrix",
@@ -1971,7 +1996,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 48,
+  "entry_count": 49,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

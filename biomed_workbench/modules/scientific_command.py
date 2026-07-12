@@ -24,6 +24,7 @@ _EXECUTABLE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+._-]*$")
 _FILENAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+._-]*$")
 _PLACEHOLDER_RE = re.compile(r"^\{(input|output|parameter):([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\}$")
+_OUTPUT_DIRECTORY_PLACEHOLDER = "{output-directory}"
 
 
 class ScientificCommandError(RuntimeError):
@@ -119,12 +120,15 @@ class ScientificCommand:
         if len(set(parameter_names)) != len(parameter_names):
             raise ValueError("command parameter names contain duplicates")
         references = {"input": set(), "output": set(), "parameter": set()}
+        output_directory_referenced = False
         arguments = []
         for argument in self.arguments:
             if not isinstance(argument, str) or not argument or "\x00" in argument:
                 raise ValueError("command arguments must be nonempty strings without NUL bytes")
             match = _PLACEHOLDER_RE.fullmatch(argument)
-            if match:
+            if argument == _OUTPUT_DIRECTORY_PLACEHOLDER:
+                output_directory_referenced = True
+            elif match:
                 references[match.group(1)].add(match.group(2))
             elif "{" in argument or "}" in argument:
                 raise ValueError("command placeholders must occupy a complete argument")
@@ -134,7 +138,9 @@ class ScientificCommand:
             "output": {item.name for item in outputs},
             "parameter": set(parameter_names),
         }
-        if references != expected:
+        output_binding_valid = references["output"] == expected["output"] and not output_directory_referenced
+        output_directory_valid = not references["output"] and output_directory_referenced
+        if references["input"] != expected["input"] or references["parameter"] != expected["parameter"] or not (output_binding_valid or output_directory_valid):
             raise ValueError("command argument placeholders differ from declared bindings")
         for value, location in (
             (self.timeout_seconds, "timeout"),
@@ -387,7 +393,9 @@ def execute_scientific_command(
         argv = [str(executable_path)]
         for argument in command.arguments:
             match = _PLACEHOLDER_RE.fullmatch(argument)
-            if not match:
+            if argument == _OUTPUT_DIRECTORY_PLACEHOLDER:
+                argv.append(str(output_root))
+            elif not match:
                 argv.append(argument)
             elif match.group(1) == "input":
                 argv.append(str(runtime_inputs[match.group(2)]))

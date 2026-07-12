@@ -27,8 +27,8 @@ class CompatibilityExecutionEvidenceTests(unittest.TestCase):
 
         self.assertTrue(report["passed"])
         self.assertEqual(report["registry_digest"], registry.digest)
-        self.assertEqual(report["regression_passed"], 48)
-        self.assertEqual(report["end_to_end_passed"], 48)
+        self.assertEqual(report["regression_passed"], len(expected))
+        self.assertEqual(report["end_to_end_passed"], len(expected))
         self.assertEqual(observed, expected)
 
     def test_report_is_reproducible_from_real_execution(self):

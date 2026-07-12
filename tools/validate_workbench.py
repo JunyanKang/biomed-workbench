@@ -3,6 +3,7 @@
 
 import argparse
 import ast
+import hashlib
 import json
 import re
 import subprocess
@@ -133,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 48:
-            errors.append(f"built-in module count must be 48, found {len(modules)}")
+        if len(modules) != 49:
+            errors.append(f"built-in module count must be 49, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -171,7 +172,7 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 322
+                or research_report.get("test_count", 0) < 327
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
                 != {"scientific_command", "command_input_binding", "command_output_binding", "bounded_process_result"}
@@ -226,6 +227,28 @@ def main() -> int:
         command_source = (ROOT / "biomed_workbench" / "modules" / "scientific_command.py").read_text(encoding="utf-8")
         if "shell=True" in command_source or "os.system(" in command_source:
             errors.append("scientific command execution contains a shell invocation surface")
+        fastqc_report_path = ROOT / "reports" / "fastqc-live-verification.json"
+        fastqc_fixture_path = ROOT / "tests" / "fixtures" / "sequencing" / "read-qc-balanced.fastq"
+        try:
+            fastqc_report = json.loads(fastqc_report_path.read_text(encoding="utf-8"))
+            fastqc_manifest = registry.get("read-quality-fastqc")
+            fastqc_row = fastqc_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("FastQC live verification evidence is missing or invalid")
+        else:
+            fixture_digest = hashlib.sha256(fastqc_fixture_path.read_bytes()).hexdigest()
+            if (
+                fastqc_report.get("passed") is not True
+                or fastqc_report.get("module_version") != fastqc_manifest.version
+                or fastqc_report.get("compatibility_row_id") != fastqc_row.id
+                or fastqc_report.get("regression_evidence_id") != fastqc_row.regression_evidence_ids[0]
+                or fastqc_report.get("end_to_end_evidence_id") != fastqc_row.end_to_end_evidence_ids[0]
+                or fastqc_report.get("tool_versions") != {"fastqc": "0.12.1"}
+                or fastqc_report.get("dependency_versions") != {"java": "22"}
+                or fastqc_report.get("fixture", {}).get("sha256") != fixture_digest
+                or fastqc_report.get("html_report_validated") is not True
+            ):
+                errors.append("FastQC live verification differs from its module, compatibility row, or fixture")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

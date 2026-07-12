@@ -1,5 +1,5 @@
 {
-  "module_count": 48,
+  "module_count": 49,
   "modules": [
     {
       "access": "offline",
@@ -9901,6 +9901,330 @@
       "access": "offline",
       "alternatives": [],
       "assumptions": [
+        "FASTQ records are complete and the declared quality encoding and read layout match the payload."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "java": [
+              "22"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "read-quality-fastqc-e2e-v1"
+          ],
+          "id": "fastqc-0.12.1-java-22-fastq-sanger",
+          "input_formats": {
+            "reads": [
+              "fastq@sanger-phred33"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "read_quality_report": [
+              "fastqc-zip@0.12.1"
+            ]
+          },
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "regression_evidence_ids": [
+            "read-quality-fastqc-regression-v1"
+          ],
+          "tool_versions": {
+            "fastqc": [
+              "0.12.1"
+            ]
+          },
+          "verified_at": "2026-07-12"
+        }
+      ],
+      "complements": [],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            "==22"
+          ],
+          "conflicts": [],
+          "ecosystem": "java",
+          "identity": "java-runtime",
+          "name": "java",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Execute the validated FastQC 0.12.1 Java application.",
+          "required": true,
+          "tested_versions": [
+            "22"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "version \\\"([0-9]+)",
+          "version_probe": [
+            "java",
+            "-version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.oracle.com/java/technologies/javase/22-relnotes.html"
+        }
+      ],
+      "description": "Execute FastQC on one versioned FASTQ payload and preserve its complete archive and HTML report as content-addressed scientific evidence.",
+      "domains": [
+        "omics"
+      ],
+      "entrypoint": "scientific-command",
+      "evidence_effects": [
+        "qualifies_sequencing_input"
+      ],
+      "execution": {
+        "command": {
+          "arguments": [
+            "--threads",
+            "{parameter:threads}",
+            "--outdir",
+            "{output-directory}",
+            "{input:reads}"
+          ],
+          "executable": "fastqc",
+          "inputs": [
+            {
+              "filename": "reads.fastq",
+              "name": "reads",
+              "port": "reads",
+              "role": "reads"
+            }
+          ],
+          "max_output_bytes": 1000000,
+          "max_payload_bytes": 50000000,
+          "outputs": [
+            {
+              "filename": "reads_fastqc.zip",
+              "media_type": "application/zip",
+              "name": "archive",
+              "port": "read_quality_report",
+              "role": "archive"
+            },
+            {
+              "filename": "reads_fastqc.html",
+              "media_type": "text/html",
+              "name": "report",
+              "port": "read_quality_report",
+              "role": "report"
+            }
+          ],
+          "parameter_names": [
+            "threads"
+          ],
+          "timeout_seconds": 300,
+          "tool_name": "fastqc"
+        },
+        "kind": "command",
+        "max_output_bytes": 1000000,
+        "timeout_seconds": 300
+      },
+      "id": "read-quality-fastqc",
+      "input_artifacts": [
+        {
+          "artifact_type": "sequencing_reads",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none",
+                "gzip",
+                "bgzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "fastq",
+              "orientations": [
+                "single-end",
+                "paired-end",
+                "interleaved"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "sanger-phred33"
+              ]
+            }
+          ],
+          "name": "reads",
+          "processing_levels": [
+            "raw",
+            "adapter-trimmed",
+            "quality-trimmed"
+          ],
+          "required_metadata": [
+            "sample-id",
+            "read-layout",
+            "quality-encoding"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "threads": {
+            "maximum": 32,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threads"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "FASTQ quality control",
+        "run FastQC",
+        "read-level sequencing QC",
+        "\u6d4b\u5e8f\u539f\u59cb\u6570\u636e\u8d28\u63a7"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "FastQC flags are descriptive technical diagnostics; assay-specific expected composition and biological design determine whether a warning is actionable."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "sequencing_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "zip"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "fastqc-zip",
+              "orientations": [
+                "report-bundle"
+              ],
+              "representations": [
+                "container",
+                "binary"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "0.12.1"
+              ]
+            }
+          ],
+          "name": "read_quality_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "payload_roles": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          }
+        },
+        "required": [
+          "payload_roles"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The FASTQ payload, sample manifest digest, read layout, quality encoding, and processing level pass the shared format profile."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://www.bioinformatics.babraham.ac.uk/projects/fastqc/"
+        ],
+        "license": "GPL-3.0-or-later"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "The FastQC archive and HTML report must both exist, be nonempty, and identify FastQC 0.12.1 before interpretation.",
+          "id": "fastqc-report-completeness",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every WARN or FAIL module must be interpreted against assay design rather than converted directly into a pass or fail decision.",
+          "id": "fastqc-module-status-review",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Are read qualities, sequence composition, duplication, adapters, and overrepresented sequences suitable for downstream analysis?"
+      ],
+      "schema_version": 1,
+      "title": "Run read-level sequencing quality control",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==0.12.1"
+          ],
+          "ecosystem": "system",
+          "identity": "fastqc",
+          "mismatch_policy": "block",
+          "name": "fastqc",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "0.12.1"
+          ],
+          "verified_at": "2026-07-12",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==0.12.1"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated release emits the tested FastQC archive and HTML report layout.",
+              "id": "fastqc-0121-report-layout",
+              "required_action": "Use only the version-specific report parser and regression fixtures for FastQC 0.12.1.",
+              "source": "https://www.bioinformatics.babraham.ac.uk/projects/fastqc/RELEASE_NOTES.txt"
+            }
+          ],
+          "version_pattern": "FastQC v([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "fastqc",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.bioinformatics.babraham.ac.uk/projects/fastqc/"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
         "Every supplied reviewer comment requires one traceable response and manuscript action."
       ],
       "compatibility_matrix": [
@@ -12496,6 +12820,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "43af51f5c7a41a0343b75689e86f13123451c4f57496eb49d2478c507100f72f",
+  "registry_digest": "97a995098926a69879cac8be195f9d999868df919c3764a0bf36fa8c48465a06",
   "schema_version": 1
 }

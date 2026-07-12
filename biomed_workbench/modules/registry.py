@@ -78,6 +78,10 @@ class ModuleRegistry:
 
     def resolve_entrypoint(self, module_id: str) -> Callable[..., object]:
         manifest = self.get(module_id)
+        if manifest.execution.kind == "command" and manifest.entrypoint == "scientific-command":
+            from .scientific_command import execute_scientific_command
+
+            return execute_scientific_command
         module_name, separator, attribute_name = manifest.entrypoint.partition(":")
         if not separator or not module_name or not attribute_name or attribute_name.startswith("_"):
             raise ModuleRegistryError(f"invalid entrypoint for module: {module_id}")

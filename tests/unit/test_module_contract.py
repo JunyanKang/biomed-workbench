@@ -207,6 +207,16 @@ class ModuleContractTests(unittest.TestCase):
         self.assertEqual(command.outputs[0].role, "profile")
         self.assertEqual(parse_manifest(manifest_to_dict(manifest)), manifest)
 
+    def test_command_manifest_accepts_one_bounded_output_directory_for_derived_files(self):
+        payload = command_manifest_payload()
+        payload["execution"]["command"]["arguments"] = [
+            "--input", "{input:records}", "--outdir", "{output-directory}", "--label", "{parameter:label}"
+        ]
+
+        manifest = parse_manifest(payload)
+
+        self.assertIn("{output-directory}", manifest.execution.command.arguments)
+
     def test_command_manifest_rejects_unversioned_executable_or_port_drift(self):
         cases = (
             lambda payload: payload["tool_requirements"][0].__setitem__("identity", "other-tool"),

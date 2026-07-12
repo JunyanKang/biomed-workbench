@@ -33,6 +33,10 @@ SERVICE_COVERAGE = {
     "variant-evidence": (("composed_workflow", "variant_evidence_bundle"),),
 }
 
+COMMAND_EVIDENCE = {
+    "read-quality-fastqc": ("reports/fastqc-live-verification.json", "tests.unit.quality.test_fastqc"),
+}
+
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -104,7 +108,42 @@ def capture() -> dict[str, object]:
             "input_formats": {key: list(value) for key, value in row.input_formats.items()},
             "output_formats": {key: list(value) for key, value in row.output_formats.items()},
         }
-        if manifest.tool_requirements:
+        if manifest.execution.kind == "command":
+            try:
+                report_path, regression_test = COMMAND_EVIDENCE[manifest.id]
+            except KeyError:
+                raise RuntimeError(f"command execution evidence is not configured: {manifest.id}") from None
+            live_report = json.loads((ROOT / report_path).read_text(encoding="utf-8"))
+            if (
+                live_report.get("passed") is not True
+                or live_report.get("module_id") != manifest.id
+                or live_report.get("compatibility_row_id") != row.id
+                or live_report.get("tool_versions") != {key: values[0] for key, values in row.tool_versions.items()}
+                or live_report.get("dependency_versions") != {key: values[0] for key, values in row.dependency_versions.items()}
+            ):
+                raise RuntimeError(f"live command evidence differs from compatibility row: {manifest.id}")
+            regression = subprocess.run(
+                [sys.executable, "-m", "unittest", regression_test],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=60,
+            )
+            if regression.returncode != 0:
+                raise RuntimeError(f"command regression suite failed: {manifest.id}")
+            plan = route(manifest.intents[0], registry=registry)
+            candidates = [item["id"] for step in plan["steps"] for item in step["candidates"]]
+            if manifest.id not in candidates:
+                raise RuntimeError(f"command module did not route through the unified entry: {manifest.id}")
+            source_digest = _sha256(ROOT / report_path)
+            regression_digest = digest_value(
+                {**context, "kind": "regression", "source": source_digest, "fixture": live_report["fixture"], "summary": live_report["scientific_summary"]}
+            )
+            e2e_digest = digest_value(
+                {**context, "kind": "end-to-end", "source": source_digest, "execution": live_report["execution"], "html_validated": live_report["html_report_validated"]}
+            )
+        elif manifest.tool_requirements:
             required = set(SERVICE_COVERAGE[manifest.id])
             if not required <= service_coverage:
                 raise RuntimeError(f"live service evidence is incomplete: {manifest.id}")

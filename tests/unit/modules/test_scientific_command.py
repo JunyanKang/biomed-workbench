@@ -36,6 +36,46 @@ def command(**overrides):
 
 
 class ScientificCommandTests(unittest.TestCase):
+    def test_output_directory_supports_tools_with_derived_declared_filenames(self):
+        body = """
+import argparse, pathlib
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True)
+parser.add_argument('--outdir', required=True)
+parser.add_argument('--label', required=True)
+args = parser.parse_args()
+name = pathlib.Path(args.input).stem
+pathlib.Path(args.outdir, f'{name}_qc.txt').write_text('PASS\\n', encoding='utf-8')
+pathlib.Path(args.outdir, f'{name}_qc.html').write_text('<html></html>', encoding='utf-8')
+"""
+        derived = command(
+            arguments=("--input", "{input:reads}", "--outdir", "{output-directory}", "--label", "{parameter:label}"),
+            outputs=(
+                CommandOutput("data", "report", "data", "reads_qc.txt", "text/plain"),
+                CommandOutput("html", "report", "html", "reads_qc.html", "text/html"),
+            ),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tool = executable(root / "fixture-tool", body)
+            source = root / "reads.fastq"
+            source.write_text("acgt", encoding="utf-8")
+            store = ProjectArtifactStore(root / "artifacts")
+            payload = store.import_file(source, role="reads", media_type="text/plain")
+
+            result = execute_scientific_command(
+                derived,
+                store=store,
+                input_payloads={"reads": payload},
+                parameters={"label": "treated"},
+                tool_versions={"fixture-tool": "2.4.1"},
+                dependency_versions={"python": "3.14.3"},
+                compatibility_row_id="fixture-tool-2.4.1-json-1",
+                executable_resolver=lambda _name: tool,
+            )
+
+        self.assertEqual([payload.role for payload in result.output_payloads], ["data", "html"])
+
     def test_executes_declared_argv_and_imports_only_declared_outputs(self):
         body = """
 import argparse, json
@@ -143,6 +183,7 @@ print('completed')
             lambda: command(executable="/usr/bin/tool"),
             lambda: command(arguments=("--input", "{input:missing}")),
             lambda: command(arguments=("--label={parameter:label}",)),
+            lambda: command(arguments=("{output-directory}", "{output:report}", "{input:reads}", "{parameter:label}")),
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "../reads.fastq"),)),
             lambda: command(outputs=(CommandOutput("report", "report", "report", "nested/report.json", "application/json"),)),
         )
