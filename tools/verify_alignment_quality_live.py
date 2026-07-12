@@ -10,7 +10,6 @@ import os
 import subprocess
 import sys
 import tempfile
-import zipfile
 from pathlib import Path
 
 
@@ -78,16 +77,8 @@ def verify(executable: Path) -> dict[str, object]:
                 "bam_sha256": _sha256(bam),
                 "index_sha256": _sha256(bundle_root / "alignment.bam.bai"),
             }
-            (bundle_root / "artifact-manifest.json").write_text(
-                json.dumps(fixture_manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-            )
-            archive = root / "alignment-bundle.zip"
-            with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_STORED) as output:
-                for path in sorted(bundle_root.iterdir()):
-                    output.write(path, arcname=path.name)
-            bundle_sha256 = hashlib.sha256(archive.read_bytes()).hexdigest()
             store = ProjectArtifactStore(root / "project")
-            input_payload = store.import_file(archive, role="alignments", media_type="application/zip")
+            input_payload = store.import_file(bam, role="alignments", media_type="application/bam")
             result = execute_scientific_command(
                 manifest.execution.command,
                 store=store,
@@ -114,7 +105,6 @@ def verify(executable: Path) -> dict[str, object]:
             "fixture_manifest": fixture_manifest,
             "fixture": fixture_manifest,
             "fixture_manifest_digest": digest_value(fixture_manifest),
-            "bundle_sha256": bundle_sha256,
             "bundle_integrity": {"quickcheck_passed": True, "index_present": True, "header_identity_passed": True},
             "execution": {
                 "command_contract_digest": provenance["command_contract_digest"],

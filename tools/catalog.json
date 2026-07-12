@@ -84,6 +84,31 @@
     },
     {
       "access": "offline",
+      "description": "Guide and execute samtools sort with automatic CSI generation, producing a content-addressed BAM plus index that can feed alignment QC, coverage, and variant modules.",
+      "entrypoint": "scientific-command",
+      "id": "alignment-sort-index-samtools",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "threads": {
+            "maximum": 16,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threads"
+        ],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Coordinate-sort and index SAM alignments",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
       "description": "Calculate confusion metrics, predictive values, accuracy, and tie-aware rank ROC AUC.",
       "entrypoint": "biomed_workbench.capabilities.clinical:biomarker_performance",
       "id": "biomarker-performance",
@@ -2136,7 +2161,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 55,
+  "entry_count": 56,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

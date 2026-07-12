@@ -1,0 +1,126 @@
+{
+  "bundle_integrity": {
+    "coordinate_sorted": true,
+    "csi_readable": true,
+    "header_identity_passed": true,
+    "portable_program_record": true,
+    "quickcheck_passed": true
+  },
+  "compatibility_policy": {
+    "dependencies": {
+      "htslib": [
+        ">=1.23,<1.24"
+      ]
+    },
+    "tools": {
+      "samtools": [
+        ">=1.23,<1.24"
+      ]
+    }
+  },
+  "compatibility_row_id": "samtools-sort-1.23-sam-1.6-bam-csi",
+  "dependency_versions": {
+    "htslib": "1.23"
+  },
+  "end_to_end_evidence_id": "alignment-sort-index-samtools-e2e-v1",
+  "execution": {
+    "command_contract_digest": "a4548549c1b3e66589210020ec9caff9201eb23ea89b70328ffcf5f67c15dda0",
+    "executable_sha256": "697182a47380c79b8fdf5cd62e04e8ad74f31fdf3b621f752d24922edd60425f",
+    "inputs": {
+      "sam": {
+        "byte_size": 293,
+        "role": "alignments",
+        "sha256": "2e1e314726624eb94bef657c9cc0903681000304fd20f1652c8426ac31e9cab2"
+      }
+    },
+    "outputs": [
+      {
+        "byte_size": 368,
+        "media_type": "application/bam",
+        "object_key": "sha256/3e/3ed505fd772ad1cb3650f2f8f298a3525edccd57347203cdb3dc6251db04e7ce/payload",
+        "role": "alignments",
+        "sha256": "3ed505fd772ad1cb3650f2f8f298a3525edccd57347203cdb3dc6251db04e7ce"
+      },
+      {
+        "byte_size": 86,
+        "media_type": "application/octet-stream",
+        "object_key": "sha256/f4/f4b4074b89107baada78729de3f9a1cd126f82cbc497b552416da1bf7164ecaf/payload",
+        "role": "index",
+        "sha256": "f4b4074b89107baada78729de3f9a1cd126f82cbc497b552416da1bf7164ecaf"
+      }
+    ],
+    "parameters": {
+      "threads": "1"
+    }
+  },
+  "fixture": {
+    "format": "sam@1.6",
+    "read_group": "sort-rg",
+    "record_count": 3,
+    "reference_build": "synthetic-build-1",
+    "reference_sequence_digest": "7f28d6752ce8f5050439543a51fd7f24ccdd285f9361021f3c38c426d80b5041",
+    "sam_sha256": "2e1e314726624eb94bef657c9cc0903681000304fd20f1652c8426ac31e9cab2",
+    "sample_id": "sort-fixture-01",
+    "schema_version": 1
+  },
+  "fixture_digest": "46dc02a954ed8e772d12f231c958f5a19fe7faba2e1c7c7eebcb38bb5e5f709b",
+  "html_report_validated": false,
+  "module_id": "alignment-sort-index-samtools",
+  "module_version": "1.0.0",
+  "output_manifest": {
+    "bam_sha256": "3ed505fd772ad1cb3650f2f8f298a3525edccd57347203cdb3dc6251db04e7ce",
+    "csi_sha256": "f4b4074b89107baada78729de3f9a1cd126f82cbc497b552416da1bf7164ecaf",
+    "format": "bam@1.6",
+    "index_type": "csi",
+    "sample_id": "sort-fixture-01",
+    "sort_order": "coordinate"
+  },
+  "output_manifest_digest": "3bb21106a4063bd918924727d2af4c337efbc5cb6b7e808ef6486bf030be4824",
+  "passed": true,
+  "regression_evidence_id": "alignment-sort-index-samtools-regression-v1",
+  "schema_version": 1,
+  "scientific_summary": {
+    "counts": {
+      "duplicates": 0,
+      "mapped": 2,
+      "paired in sequencing": 0,
+      "primary": 3,
+      "primary duplicates": 0,
+      "primary mapped": 2,
+      "properly paired": 0,
+      "read1": 0,
+      "read2": 0,
+      "secondary": 0,
+      "singletons": 0,
+      "supplementary": 0,
+      "total": 3,
+      "with itself and mate mapped": 0,
+      "with mate mapped to a different chr": 0,
+      "with mate mapped to a different chr (mapQ >= 5)": 0
+    },
+    "downstream_readiness": "technically-ready-pending-design-and-reference-review",
+    "interpretation_policy": "Flag statistics qualify alignment mechanics only; assay design, reference choice, read groups, coverage, bias, and biological adequacy require separate checks.",
+    "metrics": {
+      "duplicate_percent": 0.0,
+      "mapped_percent": 66.666667,
+      "primary_mapped_percent": 66.666667,
+      "properly_paired_percent": null,
+      "qc_failed_percent": 0.0,
+      "singleton_percent": null
+    },
+    "paired_end_observed": false,
+    "samtools_version": "1.23",
+    "schema_version": 1
+  },
+  "tested_version_baseline": {
+    "dependencies": {
+      "htslib": true
+    },
+    "tools": {
+      "samtools": true
+    }
+  },
+  "tool_versions": {
+    "samtools": "1.23"
+  }
+}

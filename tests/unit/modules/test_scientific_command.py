@@ -37,6 +37,42 @@ def command(**overrides):
 
 
 class ScientificCommandTests(unittest.TestCase):
+    def test_imports_declared_derived_sidecar_without_requiring_an_argv_placeholder(self):
+        sidecar = command(
+            outputs=(
+                CommandOutput("report", "report", "report", "report.json", "application/json"),
+                CommandOutput("index", "report", "index", "report.json.csi", "application/octet-stream", "derived"),
+            ),
+        )
+        body = """
+import argparse, json, pathlib
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True)
+parser.add_argument('--output', required=True)
+parser.add_argument('--label', required=True)
+args = parser.parse_args()
+json.dump({'label': args.label}, open(args.output, 'w', encoding='utf-8'))
+pathlib.Path(args.output + '.csi').write_bytes(b'validated-index')
+"""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tool = executable(root / "fixture-tool", body)
+            source = root / "reads.fastq"
+            source.write_text("ACGT\n", encoding="utf-8")
+            store = ProjectArtifactStore(root / "artifacts")
+            payload = store.import_file(source, role="reads", media_type="text/plain")
+            result = execute_scientific_command(
+                sidecar,
+                store=store,
+                input_payloads={"reads": payload},
+                parameters={"label": "sample-01"},
+                tool_versions={"fixture-tool": "2.4.1"},
+                dependency_versions={"python": "3.14.3"},
+                compatibility_row_id="fixture-tool-2.4.1-json-1",
+                executable_resolver=lambda _name: tool,
+            )
+        self.assertEqual([payload.role for payload in result.output_payloads], ["report", "index"])
+
     def test_workdir_relative_path_mode_keeps_machine_paths_out_of_tool_argv(self):
         relative = command(path_mode="workdir-relative")
         body = """

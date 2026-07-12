@@ -14,7 +14,7 @@
   "output_schema": {"type": "object", "additionalProperties": false, "properties": {"payload_roles": {"type": "array", "items": {"type": "string"}, "minItems": 1, "maxItems": 1}}, "required": ["payload_roles"]},
   "input_artifacts": [{
     "name": "alignments", "artifact_type": "alignment_bundle",
-    "formats": [{"name": "bam", "versions": ["1.6"], "representations": ["binary", "container"], "compression": ["bgzf"], "required_indexes": ["bai"], "coordinate_systems": ["one-based-leftmost"], "genome_build_policy": "required", "genome_builds": ["declared-in-project"], "annotation_releases": [], "orientations": ["alignment-records"]}],
+    "formats": [{"name": "bam", "versions": ["1.6"], "representations": ["binary", "container"], "compression": ["bgzf"], "required_indexes": [], "coordinate_systems": ["one-based-leftmost"], "genome_build_policy": "required", "genome_builds": ["declared-in-project"], "annotation_releases": [], "orientations": ["alignment-records"]}],
     "processing_levels": ["aligned", "deduplicated", "recalibrated"],
     "required_metadata": ["sample-id", "sample-manifest-digest", "read-group", "sort-order", "reference-build", "reference-sequence-digest"]
   }],
@@ -24,7 +24,7 @@
     "processing_levels": ["derived"], "required_metadata": ["module_version", "compatibility_row_id", "sample-id", "reference-build"]
   }],
   "assumptions": ["The BAM header, declared sample identity, read groups, reference build, and reference sequence digest describe the same alignment payload."],
-  "preconditions": ["The bundle contains one root alignment.bam plus alignment.bam.bai, and the BAM header declares coordinate sorting, reference sequences, and read groups consistent with project metadata."],
+  "preconditions": ["The alignment artifact contains a coordinate-sorted BAM plus a declared BAI or CSI payload, and the BAM header declares reference sequences and read groups consistent with project metadata."],
   "quality_gates": [
     {"id": "alignment-bundle-integrity", "severity": "fatal", "description": "BAM, index, header, read groups, sample identity, reference build, and reference digest must reconcile before interpretation.", "blocks_interpretation": true},
     {"id": "flagstat-count-conservation", "severity": "fatal", "description": "QC pass/fail strata, primary/secondary/supplementary classes, and paired read counts must be internally consistent.", "blocks_interpretation": true},
@@ -52,12 +52,12 @@
   }],
   "execution": {"kind": "command", "timeout_seconds": 120, "max_output_bytes": 1000000, "command": {
     "tool_name": "samtools", "executable": "samtools", "arguments": ["flagstat", "--threads", "{parameter:threads}", "--output-fmt", "json", "{input:alignments}"],
-    "inputs": [{"name": "alignments", "port": "alignments", "role": "alignments", "filename": "alignment-bundle", "materialization": "zip-directory", "member": "alignment.bam"}],
+    "inputs": [{"name": "alignments", "port": "alignments", "role": "alignments", "filename": "alignments.bam"}],
     "outputs": [{"name": "report", "port": "alignment_quality_report", "role": "report", "filename": "flagstat.json", "media_type": "application/json", "capture": "stdout"}],
-    "parameter_names": ["threads"], "timeout_seconds": 120, "max_output_bytes": 1000000, "max_payload_bytes": 1000000, "working_directory_input": "alignments"
+    "parameter_names": ["threads"], "timeout_seconds": 120, "max_output_bytes": 1000000, "max_payload_bytes": 1000000, "path_mode": "workdir-relative"
   }},
   "access": "offline", "mutability": "read_only", "credentials": [],
-  "limitations": ["The validated row covers coordinate-sorted BAM 1.6 with BAI on macOS arm64; flagstat does not assess coverage uniformity, reference suitability, contamination outside tested references, expression quantification, peak quality, or biological validity."],
+  "limitations": ["The validated row covers coordinate-sorted BAM 1.6 with a declared BAI or CSI artifact on macOS arm64; flagstat does not assess coverage uniformity, reference suitability, contamination outside tested references, expression quantification, peak quality, or biological validity."],
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
   "provenance": {"license": "MIT", "concept_sources": ["https://github.com/samtools/samtools"]}
 }

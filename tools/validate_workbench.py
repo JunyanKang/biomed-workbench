@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 55:
-            errors.append(f"built-in module count must be 55, found {len(modules)}")
+        if len(modules) != 56:
+            errors.append(f"built-in module count must be 56, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -172,10 +172,10 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 359
+                or research_report.get("test_count", 0) < 363
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
-                != {"scientific_command", "command_input_binding", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"}
+                != {"scientific_command", "command_input_binding", "command_derived_sidecar_output", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"}
                 or graph_report != {"node_count": len(graph.nodes), "edge_count": len(graph.edges), "digest": graph.digest}
             ):
                 errors.append("research engine report differs from the discovered registry or capability graph")
@@ -379,6 +379,25 @@ def main() -> int:
                 or bwa_report.get("portable_program_record_validated") is not True
             ):
                 errors.append("BWA-MEM evidence differs from its module, policy, tested baseline, fixture, or portable SAM checks")
+        sort_report_path = ROOT / "reports" / "alignment-sort-live-verification.json"
+        try:
+            sort_report = json.loads(sort_report_path.read_text(encoding="utf-8"))
+            sort_manifest = registry.get("alignment-sort-index-samtools")
+            sort_row = sort_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("samtools sort/index live verification evidence is missing or invalid")
+        else:
+            if (
+                sort_report.get("passed") is not True
+                or sort_report.get("module_version") != sort_manifest.version
+                or sort_report.get("compatibility_row_id") != sort_row.id
+                or sort_report.get("output_manifest", {}).get("format") != "bam@1.6"
+                or sort_report.get("output_manifest", {}).get("index_type") != "csi"
+                or sort_report.get("output_manifest", {}).get("sort_order") != "coordinate"
+                or not all(sort_report.get("bundle_integrity", {}).values())
+                or sort_report.get("scientific_summary", {}).get("counts", {}).get("total") != 3
+            ):
+                errors.append("samtools sort/index evidence differs from its module, BAM/CSI outputs, header, index, or read accounting")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

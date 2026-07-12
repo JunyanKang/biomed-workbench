@@ -92,9 +92,9 @@ class CommandOutput:
         object.__setattr__(self, "port", validate_identifier(self.port, "command output port"))
         object.__setattr__(self, "role", validate_identifier(self.role, "command output role"))
         object.__setattr__(self, "filename", _filename(self.filename, "command output filename"))
-        if self.capture not in {"file", "stdout", "stderr"}:
+        if self.capture not in {"file", "derived", "stdout", "stderr"}:
             raise ValueError("command output capture is unsupported")
-        if self.capture != "file" and not (self.media_type.startswith("text/") or self.media_type in {"application/json", "application/xml"}):
+        if self.capture in {"stdout", "stderr"} and not (self.media_type.startswith("text/") or self.media_type in {"application/json", "application/xml"}):
             raise ValueError("captured command streams require a text media type")
         ArtifactPayload(
             role=self.role,
@@ -146,7 +146,7 @@ class ScientificCommand:
                 raise ValueError(f"command {location} contain duplicate port-role bindings")
         if len(set(parameter_names)) != len(parameter_names):
             raise ValueError("command parameter names contain duplicates")
-        captures = [item.capture for item in outputs if item.capture != "file"]
+        captures = [item.capture for item in outputs if item.capture in {"stdout", "stderr"}]
         if len(set(captures)) != len(captures):
             raise ValueError("command output streams may each be captured once")
         if self.working_directory_input is not None:
@@ -562,7 +562,7 @@ def execute_scientific_command(
         )
         captured_streams = {"stdout": stdout, "stderr": stderr}
         for binding in command.outputs:
-            if binding.capture != "file":
+            if binding.capture in {"stdout", "stderr"}:
                 try:
                     runtime_outputs[binding.name].write_text(captured_streams[binding.capture], encoding="utf-8")
                 except OSError as exc:
