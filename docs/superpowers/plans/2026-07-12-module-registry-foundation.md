@@ -451,7 +451,7 @@ git commit -m "refactor: migrate capabilities to independent modules"
 - Consumes: `ModuleRegistry`.
 - Produces: canonical module index and the old capability catalog projection.
 
-- [ ] **Step 1: Write failing deterministic-index test**
+- [x] **Step 1: Write failing deterministic-index test**
 
 ```python
 def test_index_is_deterministic_and_contains_scientific_search_fields():
@@ -463,11 +463,11 @@ def test_index_is_deterministic_and_contains_scientific_search_fields():
     assert first["modules"][0]["input_artifacts"]
 ```
 
-- [ ] **Step 2: Run and verify missing index builder failure**
+- [x] **Step 2: Run and verify missing index builder failure**
 
 Run: `python3 -m unittest tests.unit.test_module_index`
 
-- [ ] **Step 3: Implement canonical index and compatibility projection**
+- [x] **Step 3: Implement canonical index and compatibility projection**
 
 `build_index` includes all scientific search fields and a registry digest.
 It also includes exact tested versions, allowed versions, format contracts, and
@@ -476,12 +476,12 @@ compatibility-row IDs for pre-execution inspection.
 access, mutability, title, description, and primary domain into the existing
 catalog shape so external users do not break during v0.2.
 
-- [ ] **Step 4: Verify rebuild cleanliness**
+- [x] **Step 4: Verify rebuild cleanliness**
 
 Run `python3 tools/build_module_index.py` twice and assert the second run leaves
 `git diff --exit-code biomed_workbench/modules/index.json tools/catalog.json`.
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 ```bash
 python3 -m unittest tests.unit.test_module_index tests.test_catalog_quality
