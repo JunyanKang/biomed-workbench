@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "id": "fixture-analysis",
+  "version": "1.0.0",
+  "title": "Analyze a fixture",
+  "description": "Analyze a structured fixture with explicit scientific quality controls.",
+  "module_type": "analysis",
+  "domains": ["omics"],
+  "intents": ["analyze fixture", "分析测试数据"],
+  "questions": ["Does the fixture contain the expected signal?"],
+  "entrypoint": "biomed_workbench.capabilities.data:profile_table",
+  "execution": {
+    "kind": "python",
+    "timeout_seconds": 30,
+    "max_output_bytes": 1000000
+  },
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "records",
+      "artifact_type": "feature_matrix",
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable"
+        }
+      ],
+      "processing_levels": ["raw", "processed"],
+      "required_metadata": ["sample_id"]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "profile",
+      "artifact_type": "quality_report",
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable"
+        }
+      ],
+      "processing_levels": ["derived"],
+      "required_metadata": ["module_version"]
+    }
+  ],
+  "preconditions": ["At least one structured record is available."],
+  "assumptions": ["Rows are observations and columns are consistently typed."],
+  "quality_gates": [
+    {
+      "id": "missingness-reviewed",
+      "severity": "major",
+      "description": "Missingness is quantified before interpretation.",
+      "blocks_interpretation": true
+    }
+  ],
+  "limitations": ["A profile does not establish a biological association."],
+  "evidence_effects": ["describes_data_quality"],
+  "alternatives": [],
+  "complements": [],
+  "tool_requirements": [],
+  "dependencies": [
+    {
+      "name": "python",
+      "ecosystem": "runtime",
+      "required": true,
+      "tested_versions": ["3.14.3"],
+      "allowed_versions": ["==3.14.3"],
+      "version_source": "https://www.python.org/downloads/release/python-3143/",
+      "verified_at": "2026-07-12",
+      "purpose": "Execute the module entrypoint.",
+      "conflicts": [],
+      "platforms": ["any"]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {"python": ["3.14.3"]},
+      "input_formats": {"records": ["inline-json@1"]},
+      "output_formats": {"profile": ["inline-json@1"]},
+      "platforms": ["any"]
+    }
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "properties": {"rows": {"type": "array", "items": {"type": "object"}}},
+    "required": ["rows"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {"row_count": {"type": "integer"}, "columns": {"type": "object"}},
+    "required": ["row_count", "columns"],
+    "additionalProperties": false
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {
+    "license": "Apache-2.0",
+    "concept_sources": ["Project-owned clean-room scientific contract."]
+  }
+}

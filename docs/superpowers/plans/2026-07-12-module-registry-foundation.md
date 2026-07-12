@@ -214,7 +214,7 @@ git commit -m "feat: define scientific module contract"
 - Consumes: `ModuleManifest`, `parse_manifest` from Task 1.
 - Produces: `ModuleRegistry.discover(root)`, `all()`, `get(id)`, `search_terms(id)`, `resolve_entrypoint(id)`, and `digest`.
 
-- [ ] **Step 1: Write failing recursive-discovery tests**
+- [x] **Step 1: Write failing recursive-discovery tests**
 
 ```python
 def test_registry_discovers_fixture_without_registration_code():
@@ -227,13 +227,13 @@ def test_registry_rejects_duplicate_ids_across_directories():
         ModuleRegistry.discover(DUPLICATE_FIXTURE_ROOT)
 ```
 
-- [ ] **Step 2: Run and verify registry import failure**
+- [x] **Step 2: Run and verify registry import failure**
 
 Run: `python3 -m unittest tests.unit.test_module_registry`
 
 Expected: import failure for `ModuleRegistry`.
 
-- [ ] **Step 3: Implement deterministic discovery**
+- [x] **Step 3: Implement deterministic discovery**
 
 Discover only files named `module.json`, parse every manifest, sort by module
 ID, reject duplicate IDs, verify alternative and complement references after
@@ -241,13 +241,13 @@ the complete set is known, and calculate SHA-256 over canonical manifest JSON.
 Resolve Python entrypoints as `module:function`, reject private names, and
 require a callable.
 
-- [ ] **Step 4: Prove filesystem addition changes registry without code edits**
+- [x] **Step 4: Prove filesystem addition changes registry without code edits**
 
 In the test, copy the fixture directory to a temporary registry root, discover
 one module, add a second valid `module.json`, rediscover, and assert two IDs and
 a changed digest. Do not monkeypatch registry internals.
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 Run: `python3 -m unittest tests.unit.test_module_contract tests.unit.test_module_registry`
 
