@@ -11,10 +11,23 @@ from .decisions import DecisionEvent
 from .evidence import EvidenceRecord, add_evidence
 from .hypotheses import Hypothesis, add_hypothesis, attach_evidence
 from .identity import digest_value, freeze_mapping, thaw
-from .plans import ResearchDAG
+from .plans import NODE_STATUSES, PlanNode, ResearchDAG
 
 
-EVENT_TYPES = frozenset({"artifact_registered", "hypothesis_added", "hypothesis_revised", "evidence_added", "plan_created", "plan_revised"})
+EVENT_TYPES = frozenset(
+    {
+        "artifact_registered",
+        "hypothesis_added",
+        "hypothesis_revised",
+        "hypothesis_assessed",
+        "evidence_added",
+        "plan_created",
+        "plan_revised",
+        "node_status_changed",
+        "node_execution_recorded",
+        "quality_finding_recorded",
+    }
+)
 
 
 def _state_basis(
@@ -176,6 +189,46 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
         plans = (*plans, item)
         if payload["activate"]:
             active_plan_id = item.id
+    elif event_type == "node_status_changed":
+        if set(payload) != {"plan_id", "node_id", "status", "attempt"} or payload["status"] not in NODE_STATUSES:
+            raise ValueError("node_status_changed payload is invalid")
+        if not isinstance(payload["attempt"], int) or payload["attempt"] < 0:
+            raise ValueError("node status attempt must be nonnegative")
+        plan_index = next((index for index, value in enumerate(plans) if value.id == payload["plan_id"]), None)
+        if plan_index is None:
+            raise ValueError("node status references an unknown plan")
+        plan = plans[plan_index]
+        if payload["node_id"] not in {node.id for node in plan.nodes}:
+            raise ValueError("node status references an unknown node")
+        nodes = tuple(
+            replace(node, status=payload["status"], attempt=payload["attempt"])
+            if node.id == payload["node_id"]
+            else node
+            for node in plan.nodes
+        )
+        updated = ResearchDAG.create(
+            id=plan.id,
+            objective=plan.objective,
+            nodes=nodes,
+            required_output_artifact_types=plan.required_output_artifact_types,
+            plan_type=plan.plan_type,
+            revision=plan.revision,
+            parent_plan_id=plan.parent_plan_id,
+            rationale=plan.rationale,
+        )
+        plans = tuple(updated if index == plan_index else value for index, value in enumerate(plans))
+    elif event_type == "hypothesis_assessed":
+        if set(payload) != {"hypothesis_id", "status"}:
+            raise ValueError("hypothesis_assessed payload is invalid")
+        if payload["hypothesis_id"] not in {item.id for item in hypotheses}:
+            raise ValueError("hypothesis assessment references an unknown hypothesis")
+        hypotheses = tuple(replace(item, status=payload["status"]) if item.id == payload["hypothesis_id"] else item for item in hypotheses)
+    elif event_type == "node_execution_recorded":
+        if set(payload) != {"execution"} or not isinstance(payload["execution"], dict):
+            raise ValueError("node_execution_recorded payload is invalid")
+    elif event_type == "quality_finding_recorded":
+        if set(payload) != {"finding"} or not isinstance(payload["finding"], dict):
+            raise ValueError("quality_finding_recorded payload is invalid")
     return artifacts, hypotheses, evidence, plans, active_plan_id
 
 

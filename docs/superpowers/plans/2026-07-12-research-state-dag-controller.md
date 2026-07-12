@@ -652,23 +652,23 @@ class ResearchController:
     def resume(self, serialized_state: dict[str, object]) -> CycleResult: ...
 ```
 
-- [ ] **Step 1: Write failing controller behavior tests**
+- [x] **Step 1: Write failing controller behavior tests**
 
 Cover serial dependency execution, parallel independent branches, mixed convergence, branch isolation, fatal block, major remediation node insertion, alternative-module substitution, transient failure retry bound, permanent failure preservation, evidence ingestion, hypothesis status change, plan revision lineage, max-revision stop, resume after interruption, and deterministic event ordering despite parallel completion order.
 
-- [ ] **Step 2: Run and verify controller import failure**
+- [x] **Step 2: Run and verify controller import failure**
 
 Run: `python3 -m unittest tests.unit.orchestration.test_controller tests.contract.test_controller_recovery`
 
-- [ ] **Step 3: Implement dependency-aware execution**
+- [x] **Step 3: Implement dependency-aware execution**
 
 Ready nodes have all dependencies completed and valid input artifacts. Execute independent ready nodes with `ThreadPoolExecutor`; merge results in stable node-ID order. Never share mutable branch state. Failed downstream branches do not invalidate completed independent branches.
 
-- [ ] **Step 4: Implement revision policy**
+- [x] **Step 4: Implement revision policy**
 
 Fatal findings block the affected branch. Major findings create remediation requests when a producer exists; otherwise the branch remains blocked. Compatibility findings select only declared alternatives whose own preflight passes. New evidence triggers hypothesis assessment and, when required evidence remains missing or conflict persists, a child plan with explicit superseded and replacement node IDs.
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 ```bash
 python3 -m unittest tests.unit.orchestration.test_controller tests.contract.test_controller_recovery

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import multiprocessing
 import os
 import queue
+import threading
 from typing import Any, Callable, Mapping
 
 from ..kernel.artifacts import ScientificArtifact
@@ -31,7 +32,7 @@ def _entrypoint_worker(result_queue, entrypoint, inputs) -> None:
 
 
 def _bounded_invoke(entrypoint: Callable[..., object], inputs: dict[str, Any], timeout_seconds: int) -> object:
-    method = "fork" if hasattr(os, "fork") else "spawn"
+    method = "fork" if hasattr(os, "fork") and threading.current_thread() is threading.main_thread() else "spawn"
     context = multiprocessing.get_context(method)
     result_queue = context.Queue(maxsize=1)
     process = context.Process(target=_entrypoint_worker, args=(result_queue, entrypoint, inputs), daemon=True)
