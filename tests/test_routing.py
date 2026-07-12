@@ -46,6 +46,12 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(ids_for(safety, "clinical")[0], "adverse-event-summary")
         self.assertEqual(ids_for(review, "publication")[0], "reviewer-assessment")
 
+    def test_source_review_window_request_selects_freshness_audit(self):
+        plan = route("审计科研来源快照日期和复核期限")
+
+        routed = [candidate["id"] for step in plan["steps"] for candidate in step["candidates"]]
+        self.assertEqual(routed[0], "source-freshness-audit")
+
     def test_route_output_has_no_source_or_adapter_fields(self):
         plan = route("search TP53 gene evidence")
         serialized = repr(plan).lower()

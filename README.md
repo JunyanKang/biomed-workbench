@@ -119,6 +119,8 @@ Tool-use guidance and routing remain available regardless of the installed versi
 
 `image-chroma-key-remove` is the local deterministic follow-up for a deliberately uniform key background. It rejects format-signature mismatches, animation, oversized rasters, unsupported modes, embedded ICC profiles, noncanonical orientation, and heterogeneous automatic key samples; then emits a lossless RGBA PNG and a digest-bound report that independently recomputes alpha classes and residual edge spill. Its output is a communication asset only and cannot replace primary image data or support segmentation, intensity, morphology, localization, or colocalization claims. See `reports/chroma-key-live-verification.json`.
 
+`source-freshness-audit` performs deterministic, offline review-window governance for reporting guidelines, database snapshots, protocols, and other versioned research sources. It requires an explicit as-of date, upstream URL and version, intended use, review interval, currentness requirement, and due policy; rejects future-dated snapshots; and blocks or warns on due records exactly as declared. A young snapshot is only inside its review window: the module always reports `upstream_drift_assessed: false` and never treats snapshot age as proof that the upstream source is unchanged or current.
+
 ## Internal Structure
 
 - `skills/biomed-workbench/`: the only visible Codex skill.

@@ -1744,6 +1744,44 @@
       }
     }
   },
+  "source-freshness-audit": {
+    "input": {
+      "as_of_date": "2026-07-13",
+      "due_policy": "block_use_when_due",
+      "records": [
+        {
+          "currentness_required": true,
+          "id": "reporting-guideline",
+          "intended_use": "Current reporting guidance",
+          "review_interval_days": 180,
+          "snapshot_date": "2026-01-20",
+          "upstream_source": "https://example.org/reporting-guideline",
+          "upstream_version": "2026-01 snapshot"
+        },
+        {
+          "currentness_required": false,
+          "id": "archival-taxonomy",
+          "intended_use": "Historical coding reproduction",
+          "review_interval_days": 365,
+          "snapshot_date": "2025-01-01",
+          "upstream_source": "https://example.org/archival-taxonomy",
+          "upstream_version": "1.0"
+        }
+      ]
+    },
+    "output": {
+      "blocked_record_ids": ["archival-taxonomy"],
+      "currentness_verification_record_ids": ["reporting-guideline"],
+      "overall_status": "blocked",
+      "record_count": 2,
+      "review_due_record_ids": ["archival-taxonomy"],
+      "status_counts": {
+        "review_due": 1,
+        "within_review_window": 1
+      },
+      "upstream_drift_assessed": false
+    }
+  },
   "survival-analysis": {
     "input": {
       "durations": [

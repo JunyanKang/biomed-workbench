@@ -2,12 +2,89 @@ import unittest
 
 from biomed_workbench.capabilities.research_quality import (
     assess_manuscript,
+    audit_source_freshness,
     calculate_tumor_mutation_burden,
     summarize_adverse_events,
 )
 
 
 class ResearchQualityTests(unittest.TestCase):
+    def test_source_freshness_separates_review_window_from_upstream_drift(self):
+        result = audit_source_freshness(
+            records=[
+                {
+                    "id": "reporting-guideline",
+                    "snapshot_date": "2026-01-20",
+                    "upstream_source": "https://example.org/reporting-guideline",
+                    "upstream_version": "2026-01 snapshot",
+                    "review_interval_days": 180,
+                    "intended_use": "Current reporting guidance",
+                    "currentness_required": True,
+                },
+                {
+                    "id": "archival-taxonomy",
+                    "snapshot_date": "2025-01-01",
+                    "upstream_source": "https://example.org/archival-taxonomy",
+                    "upstream_version": "1.0",
+                    "review_interval_days": 365,
+                    "intended_use": "Historical coding reproduction",
+                    "currentness_required": False,
+                },
+            ],
+            as_of_date="2026-07-13",
+        )
+
+        self.assertEqual(result["overall_status"], "blocked")
+        self.assertEqual(result["records"][0]["temporal_status"], "within_review_window")
+        self.assertFalse(result["records"][0]["upstream_drift_assessed"])
+        self.assertFalse(result["records"][0]["currentness_claim_allowed"])
+        self.assertEqual(result["records"][1]["temporal_status"], "review_due")
+        self.assertEqual(result["blocked_record_ids"], ["archival-taxonomy"])
+
+    def test_source_freshness_warn_policy_allows_limited_use_but_not_currentness_claim(self):
+        result = audit_source_freshness(
+            records=[
+                {
+                    "id": "archival-protocol",
+                    "snapshot_date": "2024-01-01",
+                    "upstream_source": "https://example.org/protocol",
+                    "upstream_version": "2.1",
+                    "review_interval_days": 180,
+                    "intended_use": "Reproduce a historical analysis",
+                    "currentness_required": False,
+                }
+            ],
+            as_of_date="2026-07-13",
+            due_policy="warn_when_due",
+        )
+
+        self.assertEqual(result["overall_status"], "review_required")
+        self.assertTrue(result["records"][0]["use_allowed"])
+        self.assertFalse(result["records"][0]["currentness_claim_allowed"])
+
+    def test_source_freshness_rejects_future_dates_credentials_and_unknown_fields(self):
+        base = {
+            "id": "source",
+            "snapshot_date": "2026-07-14",
+            "upstream_source": "https://example.org/source",
+            "upstream_version": "1",
+            "review_interval_days": 30,
+            "intended_use": "Guidance",
+            "currentness_required": True,
+        }
+        result = audit_source_freshness([base], "2026-07-13")
+        self.assertEqual(result["overall_status"], "invalid")
+        self.assertFalse(result["records"][0]["use_allowed"])
+
+        with self.assertRaises(ValueError):
+            audit_source_freshness([{**base, "snapshot_date": "2026-01-01", "upstream_source": "https://user:secret@example.org/source"}], "2026-07-13")
+        with self.assertRaises(ValueError):
+            audit_source_freshness([{**base, "snapshot_date": "2026-01-01", "upstream_source": "https://example.org/source?token=secret"}], "2026-07-13")
+        with self.assertRaises(ValueError):
+            audit_source_freshness([{**base, "unexpected": "field"}], "2026-07-13")
+        with self.assertRaises(ValueError):
+            audit_source_freshness([base, {**base, "id": " source "}], "2026-07-13")
+
     def test_tmb_exposes_rule_level_exclusions_and_callable_denominator(self):
         result = calculate_tumor_mutation_burden(
             variants=[

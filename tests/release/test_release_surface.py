@@ -17,16 +17,21 @@ class IndependentModuleReleaseSurfaceTests(unittest.TestCase):
         for legacy_name in ("SPECIFICATION_ROOT", "_read_specification", "load_capabilities"):
             self.assertNotIn(legacy_name, catalog_source)
 
-    def test_every_builtin_is_one_independent_flat_module_directory(self):
+    def test_every_builtin_is_one_independent_module_package(self):
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
         directories = sorted(path for path in BUILTIN_ROOT.iterdir() if path.is_dir())
 
         self.assertEqual(len(directories), len(registry.all()))
         self.assertEqual({path.name for path in directories}, {module.id for module in registry.all()})
         for path in directories:
-            self.assertEqual({item.name for item in path.iterdir()}, {"module.json"})
+            children = {item.name for item in path.iterdir()}
+            self.assertIn("module.json", children)
+            self.assertLessEqual(children, {"module.json", "tests"})
+            if "tests" in children:
+                self.assertEqual({item.name for item in (path / "tests").iterdir()}, {"cases.json"})
             self.assertEqual(path.name, path.name.lower())
             self.assertNotIn(path.name, {"evidence", "omics", "molecular-design", "imaging", "clinical", "wetlab", "publication"})
+        self.assertTrue((BUILTIN_ROOT / "source-freshness-audit" / "tests" / "cases.json").is_file())
 
     def test_single_skill_and_module_creator_are_the_only_extension_surface(self):
         skill_files = sorted((ROOT / "skills").glob("*/SKILL.md"))

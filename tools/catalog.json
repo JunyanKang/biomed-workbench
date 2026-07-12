@@ -2184,6 +2184,92 @@
     },
     {
       "access": "offline",
+      "description": "Compute deterministic source-snapshot review dates, block future-dated or policy-expired use, and keep temporal review status distinct from unassessed upstream drift.",
+      "entrypoint": "biomed_workbench.capabilities.research_quality:audit_source_freshness",
+      "id": "source-freshness-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "as_of_date": {
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "type": "string"
+          },
+          "due_policy": {
+            "enum": [
+              "block_use_when_due",
+              "warn_when_due"
+            ],
+            "type": "string"
+          },
+          "records": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "currentness_required": {
+                  "type": "boolean"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "intended_use": {
+                  "maxLength": 1000,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "review_interval_days": {
+                  "maximum": 3650,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "snapshot_date": {
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                  "type": "string"
+                },
+                "upstream_source": {
+                  "maxLength": 2048,
+                  "minLength": 9,
+                  "pattern": "^https://[^?#\\s]+$",
+                  "type": "string"
+                },
+                "upstream_version": {
+                  "maxLength": 256,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "snapshot_date",
+                "upstream_source",
+                "upstream_version",
+                "review_interval_days",
+                "intended_use",
+                "currentness_required"
+              ],
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "records",
+          "as_of_date",
+          "due_policy"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit source review windows without overstating currentness",
+      "workflow": "evidence"
+    },
+    {
+      "access": "offline",
       "description": "Calculate a product-limit survival curve, censoring counts, Greenwood error, and median survival.",
       "entrypoint": "biomed_workbench.capabilities.clinical:kaplan_meier",
       "id": "survival-analysis",
@@ -2458,7 +2544,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 63,
+  "entry_count": 64,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

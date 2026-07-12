@@ -173,11 +173,12 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
     if module_path.is_symlink():
         errors.append("module path must not be a symbolic link")
     expected_files = {"module.json", "tests/cases.json"} if require_tests else {"module.json"}
+    allowed_files = {"module.json", "tests/cases.json"}
     if not module_path.is_dir():
         errors.append("module path must be a directory")
     files = _relative_files(module_path) if module_path.is_dir() else set()
     missing = sorted(expected_files - files)
-    extra = sorted(files - expected_files)
+    extra = sorted(files - allowed_files)
     if missing:
         errors.append(f"module package is missing required files: {', '.join(missing)}")
     if extra:
@@ -219,7 +220,7 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
         if not compatibility_complete:
             errors.append("compatibility regression or end-to-end evidence is incomplete")
 
-    if require_tests and (module_path / "tests" / "cases.json").is_file():
+    if (module_path / "tests" / "cases.json").is_file():
         try:
             cases = _load_cases(module_path / "tests" / "cases.json")
             if manifest is not None and entrypoint_resolved:

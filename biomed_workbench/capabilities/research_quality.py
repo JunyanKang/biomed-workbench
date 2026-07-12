@@ -5,7 +5,150 @@ from __future__ import annotations
 import math
 import re
 from collections import Counter, defaultdict
+from datetime import date, timedelta
 from typing import Any
+from urllib.parse import urlparse
+
+
+_FRESHNESS_RECORD_FIELDS = {
+    "id",
+    "snapshot_date",
+    "upstream_source",
+    "upstream_version",
+    "review_interval_days",
+    "intended_use",
+    "currentness_required",
+}
+
+
+def audit_source_freshness(
+    records: list[dict[str, Any]],
+    as_of_date: str,
+    due_policy: str = "block_use_when_due",
+) -> dict[str, Any]:
+    """Audit deterministic review dates without pretending to assess upstream drift."""
+    try:
+        as_of = date.fromisoformat(as_of_date)
+    except (TypeError, ValueError):
+        raise ValueError("as_of_date must be an ISO 8601 calendar date") from None
+    if due_policy not in {"block_use_when_due", "warn_when_due"}:
+        raise ValueError("due_policy must be block_use_when_due or warn_when_due")
+    if not isinstance(records, list) or not 1 <= len(records) <= 10000:
+        raise ValueError("records must be a nonempty list with at most 10000 items")
+
+    audited = []
+    seen_ids = set()
+    status_counts: Counter[str] = Counter()
+    blocked_ids = []
+    review_due_ids = []
+    currentness_verification_ids = []
+    for index, record in enumerate(records, start=1):
+        if not isinstance(record, dict) or set(record) != _FRESHNESS_RECORD_FIELDS:
+            raise ValueError(f"record {index} must contain exactly the supported freshness fields")
+        identifier = record["id"]
+        source = record["upstream_source"]
+        upstream_version = record["upstream_version"]
+        intended_use = record["intended_use"]
+        interval = record["review_interval_days"]
+        currentness_required = record["currentness_required"]
+        if not isinstance(identifier, str) or identifier != identifier.strip() or not 1 <= len(identifier) <= 128:
+            raise ValueError("record IDs must be nonempty and unique")
+        if identifier in seen_ids:
+            raise ValueError("record IDs must be nonempty and unique")
+        seen_ids.add(identifier)
+        parsed_source = urlparse(source) if isinstance(source, str) else None
+        if (
+            parsed_source is None
+            or source.strip() != source
+            or not 9 <= len(source) <= 2048
+            or parsed_source.scheme != "https"
+            or not parsed_source.netloc
+            or parsed_source.username
+            or parsed_source.password
+            or parsed_source.query
+            or parsed_source.fragment
+        ):
+            raise ValueError(f"record {identifier} upstream_source must be an absolute credential-free HTTPS URL")
+        if not isinstance(upstream_version, str) or upstream_version != upstream_version.strip() or not 1 <= len(upstream_version) <= 256:
+            raise ValueError(f"record {identifier} upstream_version must be meaningful text")
+        if not isinstance(intended_use, str) or intended_use != intended_use.strip() or not 1 <= len(intended_use) <= 1000:
+            raise ValueError(f"record {identifier} intended_use must be meaningful text")
+        if not isinstance(interval, int) or isinstance(interval, bool) or not 1 <= interval <= 3650:
+            raise ValueError(f"record {identifier} review_interval_days must be an integer from 1 to 3650")
+        if not isinstance(currentness_required, bool):
+            raise ValueError(f"record {identifier} currentness_required must be boolean")
+        try:
+            snapshot = date.fromisoformat(record["snapshot_date"])
+        except (TypeError, ValueError):
+            raise ValueError(f"record {identifier} snapshot_date must be an ISO 8601 calendar date") from None
+
+        review_due_date = snapshot + timedelta(days=interval)
+        age_days = (as_of - snapshot).days
+        if snapshot > as_of:
+            temporal_status = "future_dated"
+            action = "reject_future_dated_snapshot"
+            use_allowed = False
+        elif as_of >= review_due_date:
+            temporal_status = "review_due"
+            review_due_ids.append(identifier)
+            use_allowed = due_policy == "warn_when_due"
+            action = "reverify_upstream_before_use" if not use_allowed else "reverify_upstream_and_report_limitation"
+        else:
+            temporal_status = "within_review_window"
+            use_allowed = True
+            action = "verify_upstream_before_currentness_claim" if currentness_required else "temporal_review_pass"
+        if currentness_required:
+            currentness_verification_ids.append(identifier)
+        if not use_allowed:
+            blocked_ids.append(identifier)
+        status_counts[temporal_status] += 1
+        audited.append(
+            {
+                "id": identifier,
+                "snapshot_date": snapshot.isoformat(),
+                "as_of_date": as_of.isoformat(),
+                "age_days": age_days,
+                "review_interval_days": interval,
+                "review_due_date": review_due_date.isoformat(),
+                "temporal_status": temporal_status,
+                "upstream_source": source,
+                "upstream_version": upstream_version,
+                "intended_use": intended_use,
+                "currentness_required": currentness_required,
+                "upstream_drift_assessed": False,
+                "currentness_claim_allowed": False,
+                "use_allowed": use_allowed,
+                "action": action,
+            }
+        )
+
+    if any(item["temporal_status"] == "future_dated" for item in audited):
+        overall_status = "invalid"
+    elif blocked_ids:
+        overall_status = "blocked"
+    elif review_due_ids:
+        overall_status = "review_required"
+    elif currentness_verification_ids:
+        overall_status = "pass_with_currentness_limit"
+    else:
+        overall_status = "pass"
+    return {
+        "as_of_date": as_of.isoformat(),
+        "due_policy": due_policy,
+        "record_count": len(audited),
+        "status_counts": dict(sorted(status_counts.items())),
+        "blocked_record_ids": blocked_ids,
+        "review_due_record_ids": review_due_ids,
+        "currentness_verification_record_ids": currentness_verification_ids,
+        "overall_status": overall_status,
+        "upstream_drift_assessed": False,
+        "records": audited,
+        "quality_gates": [
+            "A review-window pass measures snapshot age only; it does not prove that the upstream source is unchanged or current.",
+            "Any currentness-sensitive claim requires a separate, recorded upstream verification at the time of use.",
+            "Future-dated snapshots are invalid, and review-due records follow the explicit due policy without silent fallback.",
+        ],
+    }
 
 
 def calculate_tumor_mutation_burden(

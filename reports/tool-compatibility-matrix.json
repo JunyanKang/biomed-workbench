@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 63,
-  "module_count": 63,
+  "compatibility_complete": 64,
+  "module_count": 64,
   "modules": [
     {
       "compatibility_rows": [
@@ -7771,6 +7771,125 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "source-freshness-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-source-freshness-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "source-freshness-audit-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute strict ISO date, URL, and policy validation with the standard library.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "source-freshness-audit",
+      "input_formats": [
+        {
+          "artifact_type": "source_snapshot_registry",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "source-freshness-records",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "source_records",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [
+            "as_of_date",
+            "due_policy"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "source_freshness_audit",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "source-freshness-audit",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "freshness_audit",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "as_of_date",
+            "upstream_drift_assessed"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "survival-analysis-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -9112,6 +9231,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "8f7a54a9bfa6d3c6d502996004f27c73ffc49c39510831265f2274d95d5c0a9e",
+  "registry_digest": "b022173e97ec7865f9f7b2a488029d12361dbf72d7ad36c956fdbb2a4651d29e",
   "schema_version": 1
 }

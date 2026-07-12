@@ -21,6 +21,7 @@ class ModulePackagingTests(unittest.TestCase):
 
     def test_every_builtin_module_passes_strict_packaging_validation(self):
         reports = [validate_module(path.parent, require_tests=False) for path in sorted(BUILTIN_ROOT.glob("*/module.json"))]
+        by_id = {report["module_id"]: report for report in reports}
 
         self.assertEqual(len(reports), len(ModuleRegistry.discover(BUILTIN_ROOT).all()))
         self.assertTrue(all(report["valid"] for report in reports))
@@ -29,6 +30,7 @@ class ModulePackagingTests(unittest.TestCase):
         self.assertTrue(all(report["dependency_evidence_complete"] for report in reports))
         self.assertTrue(all(report["format_evidence_complete"] for report in reports))
         self.assertTrue(all(report["compatibility_evidence_complete"] for report in reports))
+        self.assertEqual(by_id["source-freshness-audit"]["executed_test_cases"], 1)
 
     def test_release_validator_enforces_module_registry_and_no_central_intent_tables(self):
         source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")

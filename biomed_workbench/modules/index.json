@@ -1,5 +1,5 @@
 {
-  "module_count": 63,
+  "module_count": 64,
   "modules": [
     {
       "access": "offline",
@@ -15881,6 +15881,461 @@
       "access": "offline",
       "alternatives": [],
       "assumptions": [
+        "The supplied snapshot metadata faithfully identifies the material actually used; no live upstream request is performed by this offline audit."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "source-freshness-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-source-freshness-1",
+          "input_formats": {
+            "source_records": [
+              "source-freshness-records@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "freshness_audit": [
+              "source-freshness-audit@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "source-freshness-audit-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "citation-audit",
+        "literature-evidence",
+        "manuscript-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute strict ISO date, URL, and policy validation with the standard library.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Compute deterministic source-snapshot review dates, block future-dated or policy-expired use, and keep temporal review status distinct from unassessed upstream drift.",
+      "domains": [
+        "evidence",
+        "publication",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.research_quality:audit_source_freshness",
+      "evidence_effects": [
+        "validates_evidence_provenance",
+        "limits_currentness_claim"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 30
+      },
+      "id": "source-freshness-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "source_snapshot_registry",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "source-freshness-records",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "source_records",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [
+            "as_of_date",
+            "due_policy"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "as_of_date": {
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "type": "string"
+          },
+          "due_policy": {
+            "enum": [
+              "block_use_when_due",
+              "warn_when_due"
+            ],
+            "type": "string"
+          },
+          "records": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "currentness_required": {
+                  "type": "boolean"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "intended_use": {
+                  "maxLength": 1000,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "review_interval_days": {
+                  "maximum": 3650,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "snapshot_date": {
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+                  "type": "string"
+                },
+                "upstream_source": {
+                  "maxLength": 2048,
+                  "minLength": 9,
+                  "pattern": "^https://[^?#\\s]+$",
+                  "type": "string"
+                },
+                "upstream_version": {
+                  "maxLength": 256,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "snapshot_date",
+                "upstream_source",
+                "upstream_version",
+                "review_interval_days",
+                "intended_use",
+                "currentness_required"
+              ],
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "records",
+          "as_of_date",
+          "due_policy"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "source freshness audit",
+        "Audit evidence source snapshot dates and review windows",
+        "check whether a reporting guideline snapshot needs review",
+        "\u5ba1\u8ba1\u79d1\u7814\u6765\u6e90\u5feb\u7167\u65e5\u671f\u548c\u590d\u6838\u671f\u9650",
+        "\u68c0\u67e5\u6307\u5357\u6216\u6570\u636e\u5e93\u5feb\u7167\u662f\u5426\u9700\u8981\u66f4\u65b0"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "This deterministic offline audit does not fetch upstream content, compare versions or digests, evaluate substantive guideline changes, or prove source currentness."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "source_freshness_audit",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "source-freshness-audit",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "freshness_audit",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "as_of_date",
+            "upstream_drift_assessed"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "as_of_date": {
+            "type": "string"
+          },
+          "blocked_record_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "currentness_verification_record_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "due_policy": {
+            "type": "string"
+          },
+          "overall_status": {
+            "enum": [
+              "invalid",
+              "blocked",
+              "review_required",
+              "pass_with_currentness_limit",
+              "pass"
+            ],
+            "type": "string"
+          },
+          "quality_gates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "record_count": {
+            "type": "integer"
+          },
+          "records": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "action": {
+                  "enum": [
+                    "reject_future_dated_snapshot",
+                    "reverify_upstream_before_use",
+                    "reverify_upstream_and_report_limitation",
+                    "verify_upstream_before_currentness_claim",
+                    "temporal_review_pass"
+                  ],
+                  "type": "string"
+                },
+                "age_days": {
+                  "type": "integer"
+                },
+                "as_of_date": {
+                  "type": "string"
+                },
+                "currentness_claim_allowed": {
+                  "type": "boolean"
+                },
+                "currentness_required": {
+                  "type": "boolean"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "intended_use": {
+                  "type": "string"
+                },
+                "review_due_date": {
+                  "type": "string"
+                },
+                "review_interval_days": {
+                  "type": "integer"
+                },
+                "snapshot_date": {
+                  "type": "string"
+                },
+                "temporal_status": {
+                  "enum": [
+                    "future_dated",
+                    "review_due",
+                    "within_review_window"
+                  ],
+                  "type": "string"
+                },
+                "upstream_drift_assessed": {
+                  "type": "boolean"
+                },
+                "upstream_source": {
+                  "type": "string"
+                },
+                "upstream_version": {
+                  "type": "string"
+                },
+                "use_allowed": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "snapshot_date",
+                "as_of_date",
+                "age_days",
+                "review_interval_days",
+                "review_due_date",
+                "temporal_status",
+                "upstream_source",
+                "upstream_version",
+                "intended_use",
+                "currentness_required",
+                "upstream_drift_assessed",
+                "currentness_claim_allowed",
+                "use_allowed",
+                "action"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "review_due_record_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status_counts": {
+            "additionalProperties": false,
+            "properties": {
+              "future_dated": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "review_due": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "within_review_window": {
+                "minimum": 1,
+                "type": "integer"
+              }
+            },
+            "required": [],
+            "type": "object"
+          },
+          "upstream_drift_assessed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "as_of_date",
+          "due_policy",
+          "record_count",
+          "status_counts",
+          "blocked_record_ids",
+          "review_due_record_ids",
+          "currentness_verification_record_ids",
+          "overall_status",
+          "upstream_drift_assessed",
+          "records",
+          "quality_gates"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Each record declares an immutable snapshot date, credential-free HTTPS upstream source, upstream version label, intended use, review interval, and whether currentness is required."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "A snapshot dated after the explicit as-of date is invalid and cannot be used.",
+          "id": "source-freshness-future-date",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "A review-window pass never establishes that an upstream source is unchanged; currentness-sensitive claims require separately recorded upstream verification.",
+          "id": "source-freshness-currentness-boundary",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Review-due use follows the explicit block or warning policy and cannot silently fall back to an older snapshot.",
+          "id": "source-freshness-due-policy",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Which declared source snapshots are future-dated, inside their review window, or due for upstream re-verification?"
+      ],
+      "schema_version": 1,
+      "title": "Audit source review windows without overstating currentness",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
         "Censoring is non-informative and event indicators and durations are correctly aligned."
       ],
       "compatibility_matrix": [
@@ -18523,6 +18978,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "8f7a54a9bfa6d3c6d502996004f27c73ffc49c39510831265f2274d95d5c0a9e",
+  "registry_digest": "b022173e97ec7865f9f7b2a488029d12361dbf72d7ad36c956fdbb2a4651d29e",
   "schema_version": 1
 }

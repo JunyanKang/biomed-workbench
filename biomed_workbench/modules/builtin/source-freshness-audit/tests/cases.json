@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "separates-review-window-from-currentness",
+      "input": {
+        "as_of_date": "2026-07-13",
+        "due_policy": "block_use_when_due",
+        "records": [
+          {
+            "id": "reporting-guideline",
+            "snapshot_date": "2026-01-20",
+            "upstream_source": "https://example.org/reporting-guideline",
+            "upstream_version": "2026-01 snapshot",
+            "review_interval_days": 180,
+            "intended_use": "Current reporting guidance",
+            "currentness_required": true
+          },
+          {
+            "id": "archival-taxonomy",
+            "snapshot_date": "2025-01-01",
+            "upstream_source": "https://example.org/archival-taxonomy",
+            "upstream_version": "1.0",
+            "review_interval_days": 365,
+            "intended_use": "Historical coding reproduction",
+            "currentness_required": false
+          }
+        ]
+      },
+      "expected_subset": {
+        "record_count": 2,
+        "overall_status": "blocked",
+        "upstream_drift_assessed": false,
+        "blocked_record_ids": ["archival-taxonomy"],
+        "review_due_record_ids": ["archival-taxonomy"],
+        "currentness_verification_record_ids": ["reporting-guideline"]
+      }
+    }
+  ]
+}
