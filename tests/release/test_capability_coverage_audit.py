@@ -60,6 +60,16 @@ class CapabilityCoverageAuditTests(unittest.TestCase):
         self.assertFalse(audit["verdict"]["overall_superiority_proven"])
         self.assertGreater(len(audit["priority_gaps"]), 10)
         self.assertIn("compute_infrastructure", audit["product_exclusions"])
+        cluster = audit["product_exclusions"]["boundary_evidence"]["cluster_orchestration_family"]
+        self.assertEqual(cluster["files_reviewed"], 5)
+        self.assertEqual(cluster["scientific_analysis_or_result_quality_contracts"], 0)
+        self.assertEqual(cluster["disposition"], "excluded-no-runtime-code-or-operational-guidance-retained")
+        self.assertIn("job_submission", cluster["operational_functions"])
+        runtime = audit["product_exclusions"]["boundary_evidence"]["gpu_container_runtime_readiness_family"]
+        self.assertEqual(runtime["files_reviewed"], 2)
+        self.assertEqual(runtime["scientific_analysis_or_result_quality_contracts"], 0)
+        self.assertIn("gpu_driver_probe", runtime["operational_functions"])
+        self.assertEqual(runtime["disposition"], "excluded-while-genomics-method-guidance-remains-separately-audited")
         self.assertIn("Signals may overlap", audit["measurement_note"])
 
     def test_public_audit_is_source_neutral_and_path_free(self):

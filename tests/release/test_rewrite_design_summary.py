@@ -2,6 +2,8 @@ import json
 import unittest
 from pathlib import Path
 
+from tools.build_rewrite_design_summary import build_summary
+
 
 ROOT = Path(__file__).resolve().parents[2]
 DESIGN = ROOT / "reports" / "rewrite-design-summary.json"
@@ -19,6 +21,7 @@ class RewriteDesignSummaryTests(unittest.TestCase):
         self.assertEqual(sum(design["action_counts"].values()), assimilated_count)
         self.assertEqual(sum(design["reuse_mode_counts"].values()), assimilated_count)
         self.assertRegex(design["design_digest"], r"^[0-9a-f]{64}$")
+        self.assertEqual(design, build_summary(ROOT / ".source-audit" / "rewrite-ledger.jsonl"))
 
     def test_reuse_policy_is_clean_room_only(self):
         design = json.loads(DESIGN.read_text(encoding="utf-8"))
