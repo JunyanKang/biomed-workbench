@@ -30,6 +30,7 @@ The router and catalog are internal implementation details. User-facing response
 - Upstream project names and commits may appear only in `NOTICE.md` and `references/provenance.json`, where attribution and license compliance require them.
 - Scientific model identifiers remain valid only when the corresponding implementation can run locally under a clear redistribution and usage license.
 - The default assistant must work without any user-supplied API key.
+- Codex is the only general-purpose language-model reasoning layer. Upstream code that calls a model vendor, manages model-provider tokens, or implements a second agent loop is rewritten as Codex skill guidance, typed tool contracts, deterministic local functions, or removed.
 - A small allowlist of optional scientific API credentials is permitted when it materially expands evidence or controlled-data access. Model-vendor inference credentials are outside the initial allowlist.
 - No credential value is stored, printed, committed, or included in error messages.
 - Third-party protocol text, restricted datasets, model weights, caches, and generated environments are not copied into the repository.
@@ -127,6 +128,12 @@ The catalog generator imports every registered capability and fails when an entr
 `assistant.py` owns the research-assistant loop. `research.py` defines the structured research record: objective, inputs, plan, evidence ledger, executed capabilities, artifacts, conclusions, limitations, and next decisions. Records are written only into the user's active project when the task benefits from reproducibility; ordinary questions do not create files unnecessarily.
 
 ## API Policy
+
+### Codex-native model integration
+
+Biomed Workbench does not call a second general-purpose LLM from inside the plugin. Codex owns scientific reasoning, task decomposition, tool selection, synthesis, and user interaction. Source files for OpenAI, Anthropic, NVIDIA-hosted inference, generic model endpoints, provider token management, and nested agent loops are assimilated for their workflow ideas but their execution path is rewritten to Codex-native skill instructions and structured tool inputs/outputs. They are never copied as another model client.
+
+This boundary does not prohibit open scientific models running locally. A local structure, sequence, imaging, or omics model is a scientific compute backend, not a replacement reasoning agent, and remains subject to the license and reproducibility gates below.
 
 Zero-key operation is the baseline. PubMed/PMC, Europe PMC, Crossref, OpenAlex, UniProt, RCSB PDB, Ensembl, ClinicalTrials.gov, ChEMBL, PubChem, and other stable public endpoints use their documented unauthenticated routes where available.
 

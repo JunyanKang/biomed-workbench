@@ -14,6 +14,7 @@
 - Default operation requires zero user-supplied API keys.
 - The only optional credential families in v0.2.0 are `NCBI_API_KEY`, `ELSEVIER_API_KEY`, and `SYNAPSE_AUTH_TOKEN`.
 - Do not use model-vendor inference credentials or paid hosted inference as core capabilities.
+- Do not ship a nested general-purpose LLM client or agent loop. Rewrite upstream provider/token/model-endpoint code into Codex-native skill guidance, typed tool contracts, deterministic functions, or an explicit removal record.
 - Operational files and catalog records must not classify capabilities by upstream project name.
 - Upstream names and commits are restricted to `NOTICE.md`, `references/provenance.json`, and historical design/plan documents.
 - Remove source checkout environment variables and source-specific adapters.
@@ -112,6 +113,8 @@ Append records using stable source aliases. Exact inventory equality and root di
 - [ ] **Step 7: Review every non-generated source record by capability cluster**
 
 Produce integration mappings from code symbols, scripts, skills, workflows, connectors, prompts, and scientific references. Generated runtime packages are grouped by package/version/role only after every file has an individual record. Sensitive records remain local and contribute only aggregate counts to the public summary.
+
+Model-provider clients, provider-token handlers, hosted generic model endpoints, and nested agent loops receive the `rewrite` disposition and `codex_native_orchestration` capability cluster. Their useful planning and interaction contracts are translated into the single `biomed-workbench` skill and typed tool interfaces; their vendor API execution code is not retained.
 
 - [ ] **Step 8: Verify assimilation evidence**
 

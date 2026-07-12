@@ -2,6 +2,7 @@
 import ast
 import json
 import re
+import subprocess
 import sys
 from collections import Counter
 from pathlib import Path
@@ -38,12 +39,17 @@ def fail(message):
 
 
 def text_files():
-    skip_dirs = {".git", "__pycache__", ".venv", "build", "dist"}
-    for path in ROOT.rglob("*"):
-        if any(part in skip_dirs for part in path.parts):
-            continue
-        if path.is_file():
-            yield path
+    result = subprocess.run(
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    )
+    for relative in result.stdout.decode("utf-8").split("\0"):
+        if relative:
+            path = ROOT / relative
+            if path.is_file():
+                yield path
 
 
 def main():
