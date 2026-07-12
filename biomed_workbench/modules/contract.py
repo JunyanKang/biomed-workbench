@@ -264,6 +264,13 @@ def _validate_tested_versions(tested: tuple[str, ...], allowed: tuple[str, ...],
         raise ValueError(f"{location} tested versions are outside allowed versions: {', '.join(outside)}")
 
 
+def version_is_allowed(version: str, rules: tuple[str, ...]) -> bool:
+    """Return whether an exact version satisfies at least one declared rule."""
+    if not isinstance(version, str) or not version or not isinstance(rules, tuple) or not rules:
+        return False
+    return _version_allowed(version, rules)
+
+
 def _closed_schema(value: Any, location: str) -> dict[str, object]:
     schema = _object(value, location)
     properties = schema.get("properties")

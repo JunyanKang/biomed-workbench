@@ -596,17 +596,17 @@ git commit -m "feat: route dynamically from module manifests"
 **Interfaces:**
 - Produces: `validate_module(path) -> report` and atomic CLI module creation.
 
-- [ ] **Step 1: Write failing create-validate-discover test**
+- [x] **Step 1: Write failing create-validate-discover test**
 
 The test creates a temporary module from a complete JSON request, validates it,
 discovers it, routes a matching query, invokes the fixture implementation, and
 asserts the repository built-in registry was not modified.
 
-- [ ] **Step 2: Run and verify missing tools**
+- [x] **Step 2: Run and verify missing tools**
 
 Run: `python3 -m unittest tests.e2e.test_create_module`
 
-- [ ] **Step 3: Implement validators and atomic creator**
+- [x] **Step 3: Implement validators and atomic creator**
 
 `validate_module.py` checks exact files, manifest contract, entrypoint,
 permissions, credential allowlist, tested version evidence, dependency and
@@ -614,14 +614,14 @@ format contracts, compatibility rows, test presence, source-path absence, and
 kernel compatibility. `create_module.py` writes to a temporary directory,
 validates it, then atomically renames it; failures leave no partial module.
 
-- [ ] **Step 4: Add release gates**
+- [x] **Step 4: Add release gates**
 
 `validate_workbench.py --release` must discover 48 modules, compare the checked
 index digest, reject central intent tables, ensure one skill, check that all
 module entrypoints and schemas load, and reject any bioinformatics module whose
 tool, dependency, format, or compatibility evidence is incomplete.
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 ```bash
 python3 -m unittest tests.e2e.test_create_module tests.release.test_module_packaging

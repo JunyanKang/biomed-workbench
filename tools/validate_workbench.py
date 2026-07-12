@@ -15,8 +15,11 @@ if str(ROOT) not in sys.path:
 
 from biomed_workbench.catalog import SPECIFICATION_ROOT, all_capabilities, capability_to_dict, resolve_entrypoint  # noqa: E402
 from biomed_workbench.models import WORKFLOWS  # noqa: E402
+from biomed_workbench.modules.index import BUILTIN_ROOT, MODULE_INDEX, build_index  # noqa: E402
+from biomed_workbench.modules.registry import ModuleRegistry, ModuleRegistryError  # noqa: E402
 from biomed_workbench.services.credentials import ALLOWED_CREDENTIALS  # noqa: E402
 from biomed_workbench.version import VERSION  # noqa: E402
+from tools.validate_module import validate_module  # noqa: E402
 
 CATALOG_FIELDS = {"id", "workflow", "kind", "title", "description", "entrypoint", "input_schema", "requirements", "access", "mutability"}
 SECRET_PATTERNS = [
@@ -104,6 +107,42 @@ def main() -> int:
         if any(marker in operational_identity for marker in FORBIDDEN_INFRASTRUCTURE_MARKERS):
             errors.append(f"capability claims excluded infrastructure ownership: {capability.id}")
 
+    registry = None
+    try:
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
+    except ModuleRegistryError as exc:
+        errors.append(f"module registry discovery failed: {exc}")
+    if registry is not None:
+        modules = registry.all()
+        if len(modules) != 48:
+            errors.append(f"built-in module count must be 48, found {len(modules)}")
+        if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
+            errors.append("module registry and compatibility capability projection differ")
+        try:
+            checked_index = json.loads(MODULE_INDEX.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            errors.append("checked module index is missing or invalid")
+        else:
+            if checked_index != build_index(registry):
+                errors.append("checked module index differs from discovered module manifests")
+        for manifest_path in sorted(BUILTIN_ROOT.glob("*/module.json")):
+            report = validate_module(manifest_path.parent, require_tests=False)
+            if not report["valid"]:
+                errors.append(f"module package validation failed for {report['module_id']}: {'; '.join(report['errors'])}")
+            if not (
+                report["entrypoint_resolved"]
+                and report["compatibility_rows"] >= 1
+                and report["tool_evidence_complete"]
+                and report["dependency_evidence_complete"]
+                and report["format_evidence_complete"]
+            ):
+                errors.append(f"module scientific compatibility evidence is incomplete: {report['module_id']}")
+
+    router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
+    for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):
+        if forbidden_table in router_source:
+            errors.append(f"central routing table is forbidden: {forbidden_table}")
+
     tracked = list(publishable_files())
     for path in tracked:
         text = path.read_text(errors="ignore")
@@ -150,6 +189,9 @@ def main() -> int:
         return 1
     print(f"OK: biomed-workbench {'release' if args.release else 'development'} validation passed")
     print(f"capabilities={len(capabilities)}")
+    if registry is not None:
+        print(f"modules={len(registry.all())}")
+        print(f"registry_digest={registry.digest}")
     print("credentials=" + ",".join(sorted(ALLOWED_CREDENTIALS)))
     return 0
 

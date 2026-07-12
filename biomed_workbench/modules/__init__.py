@@ -12,6 +12,7 @@ from .contract import (
     ToolRequirement,
     manifest_to_dict,
     parse_manifest,
+    version_is_allowed,
 )
 from .compatibility import (
     ArtifactSnapshot,
@@ -46,4 +47,5 @@ __all__ = [
     "invoke_compatible",
     "manifest_to_dict",
     "parse_manifest",
+    "version_is_allowed",
 ]
