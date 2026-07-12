@@ -55,7 +55,9 @@ def all_capabilities() -> tuple[Capability, ...]:
 
 
 def capability_to_dict(capability: Capability) -> dict[str, object]:
-    return asdict(capability)
+    payload = asdict(capability)
+    payload["requirements"] = list(capability.requirements)
+    return payload
 
 
 def _object_schema(properties: dict[str, object], required: tuple[str, ...]) -> dict[str, object]:

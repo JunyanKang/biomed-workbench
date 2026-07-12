@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 import unittest
@@ -8,30 +9,23 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def search(*args):
-    return subprocess.run(
-        [sys.executable, str(ROOT / "tools" / "search_tools.py"), *args],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout
+    result = subprocess.run([sys.executable, "tools/search_tools.py", *args], cwd=ROOT, check=True, capture_output=True, text=True)
+    return json.loads(result.stdout)
 
 
 class SearchToolTests(unittest.TestCase):
-    def test_review_and_citation_search_uses_router_intent_priority(self):
-        output = search("--workflow", "publication", "review", "citation", "--limit", "5")
+    def test_publication_search_uses_new_registry(self):
+        payload = search("--workflow", "publication", "citation", "--limit", "3")
+        ids = [item["id"] for item in payload["capabilities"]]
+        self.assertEqual(ids[0], "citation-audit")
 
-        reviewer = output.index("publication_reviewer")
-        verifier = output.index("publication_ref_verifier")
-        citation = output.index("publication_citation")
-        self.assertLess(reviewer, verifier)
-        self.assertLess(verifier, citation)
-
-    def test_search_output_hides_source_code_as_descriptions(self):
-        output = search("--workflow", "imaging", "morphology", "--limit", "5")
-
-        self.assertNotIn("import argparse", output)
-        self.assertNotRegex(output, r"def [a-z_]+\(")
+    def test_exact_capability_has_only_source_neutral_contract_fields(self):
+        payload = search("--id", "gene-evidence")
+        row = payload["capabilities"][0]
+        self.assertEqual(row["entrypoint"], "biomed_workbench.capabilities.evidence:gene_evidence")
+        self.assertNotIn("source", row)
+        self.assertNotIn("source_path", row)
+        self.assertNotIn("run_policy", row)
 
 
 if __name__ == "__main__":

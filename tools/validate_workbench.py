@@ -1,217 +1,124 @@
 #!/usr/bin/env python3
+"""Validate the clean-room Biomed Workbench development or release surface."""
+
+import argparse
 import ast
 import json
 import re
 import subprocess
 import sys
-from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-FORBIDDEN = [
-    "/Users/" + "kangjunyan",
-    ".claude" + "-science",
-    "biomedical-agent" + "-sources",
-    "local" + ":",
-]
-REQUIRED_WORKFLOWS = {
-    "evidence",
-    "omics",
-    "molecular_design",
-    "imaging",
-    "clinical",
-    "wetlab",
-    "publication",
-    "runtime",
-}
-REQUIRED_ENTRY_FIELDS = {"id", "workflow", "kind", "name", "description", "source", "run_policy", "path"}
-BAD_DESCRIPTION = re.compile(r"\b(import\s+\w+|from\s+\w+\s+import|def\s+[a-z_]\w*\s*\()")
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from biomed_workbench.catalog import all_capabilities, capability_to_dict, resolve_entrypoint  # noqa: E402
+from biomed_workbench.services.credentials import ALLOWED_CREDENTIALS  # noqa: E402
+
+CATALOG_FIELDS = {"id", "workflow", "kind", "title", "description", "entrypoint", "input_schema", "requirements", "access", "mutability"}
 SECRET_PATTERNS = [
-    re.compile(r"nvapi-[A-Za-z0-9_-]{20,}"),
-    re.compile(r"sk-[A-Za-z0-9_-]{32,}"),
-    re.compile(r"gh[opsu]_[A-Za-z0-9]{30,}"),
+    re.compile(r"nvapi-[A-Za-z0-9_-]{20,}"), re.compile(r"sk-[A-Za-z0-9_-]{32,}"), re.compile(r"gh[opsu]_[A-Za-z0-9]{30,}"),
 ]
+LOCAL_PATH_PATTERNS = ("/Users/" + "kangjunyan", "/private/" + "var/folders/")
+LEGACY_PATHS = ("scripts", "tools/adapters", "references/source_manifest.json", "references/source_file_audit.json")
 
 
-def fail(message):
-    print(f"FAIL: {message}")
-    return 1
+def publishable_files():
+    result = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"], cwd=ROOT, check=True, capture_output=True)
+    for relative in result.stdout.decode().split("\0"):
+        if relative and (ROOT / relative).is_file():
+            yield ROOT / relative
 
 
-def text_files():
-    result = subprocess.run(
-        ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-    )
-    for relative in result.stdout.decode("utf-8").split("\0"):
-        if relative:
-            path = ROOT / relative
-            if path.is_file():
-                yield path
-
-
-def main():
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--release", action="store_true", help="Enforce removal of all migration-only legacy surfaces")
+    args = parser.parse_args()
     errors = []
-
-    plugin_json = ROOT / ".codex-plugin" / "plugin.json"
-    if not plugin_json.exists():
-        errors.append("missing .codex-plugin/plugin.json")
+    plugin_path = ROOT / ".codex-plugin" / "plugin.json"
+    marketplace_path = ROOT / ".agents" / "plugins" / "marketplace.json"
+    if not plugin_path.is_file():
+        errors.append("missing plugin manifest")
         plugin = {}
     else:
-        plugin = json.loads(plugin_json.read_text())
-        if plugin.get("name") != "biomed-workbench":
-            errors.append("plugin name must be biomed-workbench")
-        if plugin.get("skills") != "./skills/":
-            errors.append("plugin skills path must be ./skills/")
-        if plugin.get("license") != "Apache-2.0":
-            errors.append("plugin license must be Apache-2.0")
-
-    if not (ROOT / "LICENSE").exists():
-        errors.append("missing LICENSE")
-
-    marketplace_path = ROOT / ".agents" / "plugins" / "marketplace.json"
-    if not marketplace_path.exists():
-        errors.append("missing .agents/plugins/marketplace.json")
+        plugin = json.loads(plugin_path.read_text())
+        if plugin.get("name") != "biomed-workbench" or plugin.get("skills") != "./skills/" or plugin.get("license") != "Apache-2.0":
+            errors.append("plugin manifest identity, skill path, or license is invalid")
+    if not marketplace_path.is_file():
+        errors.append("missing marketplace manifest")
     else:
         marketplace = json.loads(marketplace_path.read_text())
         plugins = marketplace.get("plugins", [])
-        if marketplace.get("name") != "biomed-workbench":
-            errors.append("marketplace name must be biomed-workbench")
-        if len(plugins) != 1 or plugins[0].get("name") != "biomed-workbench":
-            errors.append("marketplace must expose exactly biomed-workbench")
-        elif plugins[0].get("source") != {"source": "local", "path": "."}:
-            errors.append("marketplace plugin source must point to repository root")
-
+        if len(plugins) != 1 or plugins[0].get("name") != "biomed-workbench" or plugins[0].get("source") != {"source": "local", "path": "."}:
+            errors.append("marketplace must expose only the repository-root biomed-workbench plugin")
     skill_files = sorted((ROOT / "skills").glob("*/SKILL.md"))
-    if [p.relative_to(ROOT).as_posix() for p in skill_files] != ["skills/biomed-workbench/SKILL.md"]:
-        errors.append("skills must expose exactly skills/biomed-workbench/SKILL.md")
+    if [path.relative_to(ROOT).as_posix() for path in skill_files] != ["skills/biomed-workbench/SKILL.md"]:
+        errors.append("exactly one user-facing skill is required")
 
     catalog_path = ROOT / "tools" / "catalog.json"
-    if not catalog_path.exists():
-        errors.append("missing tools/catalog.json")
-        catalog = {"entries": []}
-    else:
-        catalog = json.loads(catalog_path.read_text())
-
-    entries = catalog.get("entries", [])
-    if catalog.get("entry_count") != len(entries):
-        errors.append(f"catalog entry_count {catalog.get('entry_count')} != actual {len(entries)}")
-
-    ids = [entry.get("id") for entry in entries]
-    duplicates = sorted([tool_id for tool_id, count in Counter(ids).items() if count > 1])
-    if duplicates:
-        errors.append(f"duplicate catalog ids: {duplicates[:10]}")
-
-    if set(catalog.get("workflows", [])) != REQUIRED_WORKFLOWS:
-        errors.append("catalog workflows do not match the supported internal routes")
+    catalog = json.loads(catalog_path.read_text()) if catalog_path.is_file() else {}
+    capabilities = all_capabilities()
+    expected_rows = [capability_to_dict(item) for item in capabilities]
+    if catalog.get("entry_count") != len(capabilities) or catalog.get("entries") != expected_rows:
+        errors.append("generated catalog does not exactly match the registry")
     if plugin.get("version") != catalog.get("version"):
         errors.append("plugin and catalog versions differ")
-
-    malformed = []
-    bad_descriptions = []
-    unsafe_paths = []
-    for entry in entries:
-        missing = sorted(REQUIRED_ENTRY_FIELDS - entry.keys())
-        if missing or entry.get("workflow") not in REQUIRED_WORKFLOWS:
-            malformed.append((entry.get("id"), missing))
-        description = str(entry.get("description", "")).strip()
-        if description in {"", ">-", "|", "\ufeff---"} or BAD_DESCRIPTION.search(description):
-            bad_descriptions.append(entry.get("id"))
-        rel = str(entry.get("path", ""))
-        path = Path(rel)
-        if path.is_absolute() or ".." in path.parts:
-            unsafe_paths.append((entry.get("id"), rel))
-    if malformed:
-        errors.append(f"malformed catalog entries: {malformed[:10]}")
-    if bad_descriptions:
-        errors.append(f"non-human catalog descriptions: {bad_descriptions[:10]}")
-    if unsafe_paths:
-        errors.append(f"unsafe catalog paths: {unsafe_paths[:10]}")
-
-    required_sources = {"Biomni", "OpenScience", "Claude Science", "Nature Skills"}
-    source_counts = Counter(entry.get("source") for entry in entries)
-    missing_sources = sorted(source for source in required_sources if source_counts[source] == 0)
-    if missing_sources:
-        errors.append(f"missing source coverage: {missing_sources}")
-
-    source_manifest_path = ROOT / "references" / "source_manifest.json"
-    if source_manifest_path.exists():
-        manifest = json.loads(source_manifest_path.read_text())
-        expected_counts = manifest.get("counts", {}).get("by_source", {})
-        if dict(source_counts) != expected_counts:
-            errors.append("source_manifest.json source counts are stale")
-        expected_workflows = manifest.get("counts", {}).get("by_workflow", {})
-        actual_workflows = dict(Counter(entry.get("workflow") for entry in entries))
-        if actual_workflows != expected_workflows:
-            errors.append("source_manifest.json workflow counts are stale")
-    else:
-        errors.append("missing references/source_manifest.json")
-
-    missing_paths = []
-    for entry in entries:
-        rel = entry.get("path")
-        if not rel:
-            continue
-        if "://" in rel:
-            continue
-        if not (ROOT / rel).exists():
-            missing_paths.append((entry.get("id"), rel))
-    if missing_paths:
-        sample = ", ".join(f"{tool_id}:{rel}" for tool_id, rel in missing_paths[:10])
-        errors.append(f"catalog path entries missing in project: {sample}")
-
-    forbidden_hits = []
-    for path in text_files():
+    for capability in capabilities:
+        if set(capability_to_dict(capability)) != CATALOG_FIELDS:
+            errors.append(f"capability {capability.id} has an invalid operational field set")
         try:
-            text = path.read_text(errors="ignore")
-        except UnicodeDecodeError:
-            continue
-        for needle in FORBIDDEN:
-            if needle in text:
-                forbidden_hits.append((path.relative_to(ROOT).as_posix(), needle))
-                break
-    if forbidden_hits:
-        sample = ", ".join(f"{path}:{needle}" for path, needle in forbidden_hits[:10])
-        errors.append(f"forbidden publish strings found: {sample}")
+            resolve_entrypoint(capability)
+        except Exception:
+            errors.append(f"capability entrypoint does not resolve: {capability.id}")
 
-    secret_hits = []
-    for path in text_files():
+    tracked = list(publishable_files())
+    for path in tracked:
         text = path.read_text(errors="ignore")
+        relative = path.relative_to(ROOT).as_posix()
         if any(pattern.search(text) for pattern in SECRET_PATTERNS):
-            secret_hits.append(path.relative_to(ROOT).as_posix())
-    if secret_hits:
-        errors.append(f"credential-like values found: {secret_hits[:10]}")
+            errors.append(f"credential-like value found in {relative}")
+        if any(pattern in text for pattern in LOCAL_PATH_PATTERNS):
+            errors.append(f"machine-local path found in {relative}")
+
+    operational_roots = [ROOT / "biomed_workbench", ROOT / "tools", ROOT / "skills"]
+    credential_names = set()
+    for root in operational_roots:
+        if not root.exists():
+            continue
+        for path in root.rglob("*"):
+            if path.is_file() and ".source-audit" not in path.parts:
+                text = path.read_text(errors="ignore")
+                credential_names.update(re.findall(r"\b[A-Z][A-Z0-9_]*(?:API_KEY|AUTH_TOKEN)\b", text))
+    undeclared = sorted(credential_names - set(ALLOWED_CREDENTIALS))
+    if undeclared:
+        errors.append(f"undeclared operational credentials: {undeclared}")
 
     syntax_errors = []
-    for path in list((ROOT / "tools").rglob("*.py")) + list((ROOT / "scripts").rglob("*.py")):
-        try:
-            ast.parse(path.read_text(errors="ignore"), filename=str(path))
-        except SyntaxError as exc:
-            syntax_errors.append(f"{path.relative_to(ROOT)}:{exc.lineno}")
+    for root in (ROOT / "biomed_workbench", ROOT / "tools"):
+        for path in root.rglob("*.py"):
+            try:
+                ast.parse(path.read_text(errors="ignore"), filename=str(path))
+            except SyntaxError as exc:
+                syntax_errors.append(f"{path.relative_to(ROOT)}:{exc.lineno}")
     if syntax_errors:
         errors.append(f"Python syntax errors: {syntax_errors[:10]}")
 
-    readme = (ROOT / "README.md").read_text(errors="ignore")
-    required_readme = [
-        "codex plugin marketplace add JunyanKang/biomed-workbench --ref main",
-        "codex plugin add biomed-workbench@biomed-workbench",
-        "python3 -m unittest discover -s tests -v",
-        "new Codex task",
-    ]
-    missing_docs = [line for line in required_readme if line not in readme]
-    if missing_docs:
-        errors.append(f"README missing release guidance: {missing_docs}")
+    if args.release:
+        remaining = [path for path in LEGACY_PATHS if (ROOT / path).exists()]
+        if remaining:
+            errors.append(f"legacy migration surfaces remain: {remaining}")
+        forbidden_fields = {"source", "source_path", "run_policy", "adapter"}
+        if any(forbidden_fields & set(row) for row in catalog.get("entries", [])):
+            errors.append("release catalog contains bridge fields")
 
     if errors:
-        for error in errors:
-            fail(error)
+        for error in dict.fromkeys(errors):
+            print(f"FAIL: {error}")
         return 1
-
-    print("OK: biomed-workbench validation passed")
-    print(f"entries={len(entries)}")
-    print("sources=" + ", ".join(f"{k}:{source_counts[k]}" for k in sorted(required_sources)))
+    print(f"OK: biomed-workbench {'release' if args.release else 'development'} validation passed")
+    print(f"capabilities={len(capabilities)}")
+    print("credentials=" + ",".join(sorted(ALLOWED_CREDENTIALS)))
     return 0
 
 
