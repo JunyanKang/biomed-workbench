@@ -549,23 +549,23 @@ class NodeExecution:
 def execute_node(state, dag, node, registry, environment_provider, executor) -> NodeExecution: ...
 ```
 
-- [ ] **Step 1: Write failing pre-execution and provenance tests**
+- [x] **Step 1: Write failing pre-execution and provenance tests**
 
 Assert input schema validation, mutation permission, exact environment detection, exact artifact snapshots, compatibility decision, entrypoint non-invocation on mismatch, output schema validation, output-size bound, module/tool/dependency/format provenance, parameter/output digests, safe errors, and absence of credentials and paths.
 
-- [ ] **Step 2: Run and verify gateway import failure**
+- [x] **Step 2: Run and verify gateway import failure**
 
 Run: `python3 -m unittest tests.unit.orchestration.test_execution tests.contract.test_execution_provenance`
 
-- [ ] **Step 3: Implement normalized node execution**
+- [x] **Step 3: Implement normalized node execution**
 
 Convert `ScientificArtifact` metadata to `ArtifactSnapshot`, run project quality gates, detect only declared versions, call `invoke_compatible`, create one output artifact per declared output port, and append node/provenance events. Preserve completed upstream artifacts when a downstream node blocks or fails.
 
-- [ ] **Step 4: Keep direct runner compatibility**
+- [x] **Step 4: Keep direct runner compatibility**
 
 Retain `run(capability_id, inputs)` for v0.2 callers. Add `run_compatible(...)` for the controller and route all new stateful execution through it. Existing direct tests remain unchanged while new controller tests prove strict preflight behavior.
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 ```bash
 python3 -m unittest tests.unit.test_runner tests.unit.orchestration.test_execution tests.contract.test_execution_provenance

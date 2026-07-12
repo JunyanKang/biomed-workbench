@@ -85,6 +85,11 @@ def validate_inputs(capability: Capability, inputs: dict[str, Any]) -> None:
     _validate(capability.input_schema, inputs, "input")
 
 
+def validate_schema_value(schema: dict[str, Any], value: Any, location: str = "value") -> None:
+    """Validate a value against the bounded schema subset used by modules."""
+    _validate(schema, value, location)
+
+
 def run(capability_id: str, inputs: dict[str, Any], *, allow_mutation: bool = False) -> ExecutionResult:
     capability = resolve(capability_id)
     validate_inputs(capability, inputs)
