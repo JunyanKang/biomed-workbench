@@ -1,0 +1,80 @@
+{
+  "compatibility_row_id": "fastp-1.3.6-bioconda-ha1d0559_0-fastq-sanger",
+  "dependency_versions": {
+    "fastp-bioconda-build": "1.3.6-ha1d0559_0"
+  },
+  "end_to_end_evidence_id": "read-quality-fastp-e2e-v1",
+  "execution": {
+    "command_contract_digest": "9103eedfd63aeadc2365e77f107a9e13e01b1cf6c229e7709b34c5cbbf241b54",
+    "executable_sha256": "26e9624c2758b340107d40ebbecbd14015eaf0e720461de99e46ded8575c17ca",
+    "input": {
+      "byte_size": 1368,
+      "role": "reads",
+      "sha256": "4508bc6abe1ea838afb6641fd99b7e02d685c392bb2613e290ad3d9b013b27c3"
+    },
+    "outputs": [
+      {
+        "byte_size": 31943,
+        "media_type": "application/json",
+        "object_key": "sha256/ce/ce9d25310d9b40d87dafe9a8c95a735cda6206f4984082f2180bc63b3c7b8ffc/payload",
+        "role": "data",
+        "sha256": "ce9d25310d9b40d87dafe9a8c95a735cda6206f4984082f2180bc63b3c7b8ffc"
+      },
+      {
+        "byte_size": 191749,
+        "media_type": "text/html",
+        "object_key": "sha256/8d/8de7ca84cdd4d942e76b505e2a760f0a72b9ef5fd86906fc87feb1ebff201554/payload",
+        "role": "report",
+        "sha256": "8de7ca84cdd4d942e76b505e2a760f0a72b9ef5fd86906fc87feb1ebff201554"
+      }
+    ],
+    "parameters": {
+      "threads": "1"
+    }
+  },
+  "fixture": {
+    "format": "fastq@sanger-phred33",
+    "record_count": 12,
+    "sha256": "4508bc6abe1ea838afb6641fd99b7e02d685c392bb2613e290ad3d9b013b27c3"
+  },
+  "html_report_validated": true,
+  "module_id": "read-quality-fastp",
+  "module_version": "1.0.0",
+  "passed": true,
+  "regression_evidence_id": "read-quality-fastp-regression-v1",
+  "runtime_lock": {
+    "fastp": "1.3.6-ha1d0559_0",
+    "isa-l": "2.31.1-h5505292_1",
+    "libcxx": "22.1.8-h55c6f16_0",
+    "libdeflate": "1.25-hc11a715_0",
+    "libhwy": "1.3.0-h48b13b8_1"
+  },
+  "schema_version": 1,
+  "scientific_summary": {
+    "contamination_screening": {
+      "reason": "fastp composition and overrepresentation metrics do not establish taxonomic contamination.",
+      "status": "not-assessed"
+    },
+    "downstream_readiness": "requires-assay-aware-review",
+    "fastp_version": "1.3.6",
+    "flagged_metrics": [
+      "high-duplication-rate"
+    ],
+    "interpretation_policy": "fastp QC metrics complement but do not replace FastQC modules, taxonomic screening, or assay-specific review.",
+    "metrics": {
+      "duplication_rate": 0.833333,
+      "gc_fraction": 0.5,
+      "mean_read1_length": 50.0,
+      "q20_rate": 1.0,
+      "q30_rate": 1.0,
+      "total_bases": 600,
+      "total_reads": 12
+    },
+    "qc_only_read_accounting_passed": true,
+    "schema_version": 1,
+    "sequencing": "single end (50 cycles)"
+  },
+  "tool_versions": {
+    "fastp": "1.3.6"
+  }
+}

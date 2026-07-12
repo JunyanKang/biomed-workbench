@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 50,
-  "module_count": 50,
+  "compatibility_complete": 51,
+  "module_count": 51,
   "modules": [
     {
       "compatibility_rows": [
@@ -5040,6 +5040,180 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "read-quality-fastp-e2e-v1"
+          ],
+          "id": "fastp-1.3.6-bioconda-ha1d0559_0-fastq-sanger",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "read-quality-fastp-regression-v1"
+          ],
+          "verified_at": "2026-07-12"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            "==1.3.6-ha1d0559_0"
+          ],
+          "conflicts": [
+            {
+              "dependency": "fastp-bioconda-build",
+              "reason": "Other package builds may link different compression and SIMD libraries and are not covered by this row.",
+              "required_action": "Block execution until a build-specific compatibility row and end-to-end evidence are added.",
+              "source": "https://anaconda.org/bioconda/fastp/files?version=1.3.6",
+              "versions": [
+                "!=1.3.6-ha1d0559_0"
+              ]
+            }
+          ],
+          "ecosystem": "runtime",
+          "identity": "bioconda-fastp-runtime",
+          "name": "fastp-bioconda-build",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Bind fastp to the exact validated Bioconda package build and dynamic-library environment.",
+          "required": true,
+          "tested_versions": [
+            "1.3.6-ha1d0559_0"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+-[A-Za-z0-9_]+)",
+          "version_probe": [
+            "biomed_workbench.quality.fastp:probe_fastp_bioconda_build"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://anaconda.org/bioconda/fastp/files?version=1.3.6"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "read-quality-fastp",
+      "input_formats": [
+        {
+          "artifact_type": "sequencing_reads",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none",
+                "gzip",
+                "bgzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "fastq",
+              "orientations": [
+                "single-end",
+                "paired-end",
+                "interleaved"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "sanger-phred33"
+              ]
+            }
+          ],
+          "name": "reads",
+          "processing_levels": [
+            "raw",
+            "adapter-trimmed",
+            "quality-trimmed"
+          ],
+          "required_metadata": [
+            "sample-id",
+            "read-layout",
+            "quality-encoding"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "sequencing_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "fastp-report",
+              "orientations": [
+                "report-bundle"
+              ],
+              "representations": [
+                "structured",
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.3.6"
+              ]
+            }
+          ],
+          "name": "read_quality_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            "==1.3.6"
+          ],
+          "ecosystem": "system",
+          "identity": "fastp",
+          "mismatch_policy": "alternative",
+          "name": "fastp",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.3.6"
+          ],
+          "verified_at": "2026-07-12",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==1.3.6"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated release emits the tested summary, filtering, duplication, and per-read JSON structures.",
+              "id": "fastp-136-json-schema",
+              "required_action": "Use only the fastp 1.3.6 parser and QC-only command regression fixtures.",
+              "source": "https://github.com/OpenGene/fastp/releases/tag/v1.3.6"
+            }
+          ],
+          "version_pattern": "fastp ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "fastp",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/OpenGene/fastp/releases/tag/v1.3.6"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "read-quality-fastqc-e2e-v1"
           ],
           "id": "fastqc-0.12.1-java-22-fastq-sanger",
@@ -6393,6 +6567,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "9cd4d138e6b50b2c5a4384bbf7d986402115116624dce0b3672739ec2de99e01",
+  "registry_digest": "edba6778439ad6c722ded3dd2f0e37a33f6da2496c0ee39e1043376d5e791e72",
   "schema_version": 1
 }

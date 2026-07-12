@@ -36,6 +36,7 @@ SERVICE_COVERAGE = {
 COMMAND_EVIDENCE = {
     "quality-report-multiqc": ("reports/multiqc-live-verification.json", "tests.unit.quality.test_multiqc"),
     "read-quality-fastqc": ("reports/fastqc-live-verification.json", "tests.unit.quality.test_fastqc"),
+    "read-quality-fastp": ("reports/fastp-live-verification.json", "tests.unit.quality.test_fastp"),
 }
 
 

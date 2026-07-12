@@ -19,11 +19,13 @@ class CapabilityGraphTests(unittest.TestCase):
         relations = set(self.graph.relation_types)
 
         self.assertEqual(self.graph, repeated)
-        self.assertEqual(len(self.graph.module_ids), 50)
+        self.assertEqual(len(self.graph.module_ids), 51)
         self.assertRegex(self.graph.digest, r"^[0-9a-f]{64}$")
         self.assertTrue({"consumes", "produces", "validates", "alternative-to", "complements", "addresses-intent", "addresses-question"} <= relations)
         self.assertIn("complements", {edge.relation for edge in self.graph.edges})
-        self.assertNotIn("alternative-to", {edge.relation for edge in self.graph.edges})
+        alternative_edges = {(edge.source, edge.target) for edge in self.graph.edges if edge.relation == "alternative-to"}
+        self.assertIn(("module_read-quality-fastqc", "module_read-quality-fastp"), alternative_edges)
+        self.assertIn(("module_read-quality-fastp", "module_read-quality-fastqc"), alternative_edges)
         self.assertEqual(self.graph.module_ids, tuple(sorted(self.graph.module_ids)))
         self.assertEqual(self.graph.artifact_types, tuple(sorted(self.graph.artifact_types)))
 

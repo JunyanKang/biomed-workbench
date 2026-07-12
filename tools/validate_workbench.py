@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 50:
-            errors.append(f"built-in module count must be 50, found {len(modules)}")
+        if len(modules) != 51:
+            errors.append(f"built-in module count must be 51, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -172,7 +172,7 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 334
+                or research_report.get("test_count", 0) < 337
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
                 != {"scientific_command", "command_input_binding", "command_output_binding", "command_zip_directory_input", "bounded_process_result"}
@@ -272,6 +272,28 @@ def main() -> int:
                 or multiqc_report.get("html_report_validated") is not True
             ):
                 errors.append("MultiQC live verification differs from its module, compatibility row, fixture, or runtime lock")
+        fastp_report_path = ROOT / "reports" / "fastp-live-verification.json"
+        try:
+            fastp_report = json.loads(fastp_report_path.read_text(encoding="utf-8"))
+            fastp_manifest = registry.get("read-quality-fastp")
+            fastp_row = fastp_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("fastp live verification evidence is missing or invalid")
+        else:
+            if (
+                fastp_report.get("passed") is not True
+                or fastp_report.get("module_version") != fastp_manifest.version
+                or fastp_report.get("compatibility_row_id") != fastp_row.id
+                or fastp_report.get("regression_evidence_id") != fastp_row.regression_evidence_ids[0]
+                or fastp_report.get("end_to_end_evidence_id") != fastp_row.end_to_end_evidence_ids[0]
+                or fastp_report.get("tool_versions") != {"fastp": "1.3.6"}
+                or fastp_report.get("dependency_versions") != {"fastp-bioconda-build": "1.3.6-ha1d0559_0"}
+                or fastp_report.get("runtime_lock", {}).get("fastp") != "1.3.6-ha1d0559_0"
+                or fastp_report.get("fixture", {}).get("sha256") != fixture_digest
+                or fastp_report.get("scientific_summary", {}).get("qc_only_read_accounting_passed") is not True
+                or fastp_report.get("html_report_validated") is not True
+            ):
+                errors.append("fastp live verification differs from its module, compatibility row, fixture, or runtime lock")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

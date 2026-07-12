@@ -99,8 +99,9 @@ External scientific engines remain user-managed dependencies; the plugin validat
 | --- | --- | --- | --- | --- |
 | `read-quality-fastqc` | FastQC `0.12.1` | Java `22` | `fastq@sanger-phred33` | FastQC ZIP `0.12.1` and HTML |
 | `quality-report-multiqc` | MultiQC `1.35` | Python `3.13.12` plus exact report-runtime lock | FastQC collection `1.0.0` | MultiQC data ZIP `1.35` and HTML |
+| `read-quality-fastp` | fastp `1.3.6` | Bioconda macOS-arm64 build `ha1d0559_0` | `fastq@sanger-phred33` | fastp JSON `1.3.6` and HTML |
 
-Unknown, missing, or mismatched versions block before invocation. `reports/fastqc-live-verification.json` and `reports/multiqc-live-verification.json` record bounded real-fixture execution, normalized scientific summaries, report checks, and path-free provenance used by release validation.
+Unknown, missing, or mismatched versions block before invocation. The `reports/*-live-verification.json` records bind FastQC, fastp, and MultiQC bounded real-fixture executions to normalized scientific summaries, report checks, exact runtime locks, and path-free provenance used by release validation.
 
 ## Internal Structure
 

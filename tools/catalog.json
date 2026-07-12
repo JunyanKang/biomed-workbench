@@ -1565,6 +1565,31 @@
     },
     {
       "access": "offline",
+      "description": "Execute fastp in a non-filtering QC-only mode and preserve its JSON and HTML reports as a validated alternative read-quality evidence path.",
+      "entrypoint": "scientific-command",
+      "id": "read-quality-fastp",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "threads": {
+            "maximum": 16,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "threads"
+        ],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Run independent FASTQ quality metrics with fastp",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
       "description": "Execute FastQC on one versioned FASTQ payload and preserve its complete archive and HTML report as content-addressed scientific evidence.",
       "entrypoint": "scientific-command",
       "id": "read-quality-fastqc",
@@ -2013,7 +2038,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 50,
+  "entry_count": 51,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

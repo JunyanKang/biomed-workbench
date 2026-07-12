@@ -14,8 +14,8 @@ class ResearchEngineEvidenceTests(unittest.TestCase):
         scenarios = report["scenarios"]
 
         self.assertTrue(report["passed"])
-        self.assertEqual(report["module_count"], 50)
-        self.assertGreaterEqual(report["test_count"], 334)
+        self.assertEqual(report["module_count"], 51)
+        self.assertGreaterEqual(report["test_count"], 337)
         self.assertEqual(
             set(report["execution_contracts"]),
             {"scientific_command", "command_input_binding", "command_output_binding", "command_zip_directory_input", "bounded_process_result"},

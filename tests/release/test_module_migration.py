@@ -59,13 +59,13 @@ class ModuleMigrationReleaseTests(unittest.TestCase):
         compatibility = json.loads(COMPATIBILITY_REPORT.read_text(encoding="utf-8"))
 
         self.assertEqual(migration["legacy_capability_count"], 48)
-        self.assertEqual(migration["module_count"], 50)
+        self.assertEqual(migration["module_count"], 51)
         self.assertEqual(migration["entrypoint_parity_count"], 48)
         self.assertEqual(migration["input_schema_parity_count"], 48)
-        self.assertEqual(migration["scientific_contract_complete_count"], 50)
-        self.assertEqual(migration["compatibility_contract_complete_count"], 50)
-        self.assertEqual(compatibility["module_count"], 50)
-        self.assertEqual(compatibility["compatibility_complete"], 50)
+        self.assertEqual(migration["scientific_contract_complete_count"], 51)
+        self.assertEqual(migration["compatibility_contract_complete_count"], 51)
+        self.assertEqual(compatibility["module_count"], 51)
+        self.assertEqual(compatibility["compatibility_complete"], 51)
         self.assertEqual(migration["registry_digest"], compatibility["registry_digest"])
 
     def test_public_reports_and_manifests_have_no_machine_or_source_paths(self):
