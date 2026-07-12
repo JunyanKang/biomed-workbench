@@ -11,6 +11,8 @@ def artifact(**overrides):
         "format_name": "h5ad",
         "format_version": "0.11",
         "compression": "gzip",
+        "orientation": "cells-by-genes",
+        "indexes": ("h5ad-index",),
         "producing_module_id": "single-cell-qc",
         "producing_module_version": "1.0.0",
         "source_artifact_ids": ("artifact-raw-01",),
@@ -36,6 +38,8 @@ class ScientificArtifactTests(unittest.TestCase):
         payload = value.to_dict()
 
         self.assertEqual(value.format_version, "0.11")
+        self.assertEqual(value.orientation, "cells-by-genes")
+        self.assertEqual(value.indexes, ("h5ad-index",))
         self.assertEqual(value.experimental_unit, "independent-organoid-line")
         self.assertEqual(value.denominator, "four-lines-two-batches")
         self.assertEqual(payload["producer_tool_versions"]["scanpy"], "1.11.5")
@@ -64,6 +68,7 @@ class ScientificArtifactTests(unittest.TestCase):
             {"denominator": ""},
             {"format_version": ""},
             {"compression": ""},
+            {"orientation": ""},
             {"producing_module_id": None, "producing_module_version": "1.0.0"},
             {"genome_build": "GRCh38", "coordinate_system": None},
             {"quality_status": "looks-good"},

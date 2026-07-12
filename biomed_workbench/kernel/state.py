@@ -161,8 +161,18 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
             raise ValueError("plan_revised requires a known parent")
         artifact_ids = {value.id for value in artifacts}
         hypothesis_ids = {value.id for value in hypotheses}
-        if any(not set(node.input_bindings.values()) <= artifact_ids or not set(node.target_hypothesis_ids) <= hypothesis_ids for node in item.nodes):
-            raise ValueError("plan nodes reference unknown artifacts or hypotheses")
+        output_owner = {artifact_id: node.id for node in item.nodes for artifact_id in node.planned_output_artifact_ids.values()}
+        if set(output_owner) & artifact_ids:
+            raise ValueError("planned outputs cannot overwrite registered artifacts")
+        for node in item.nodes:
+            if not set(node.target_hypothesis_ids) <= hypothesis_ids:
+                raise ValueError("plan nodes reference unknown hypotheses")
+            for artifact_id in node.input_bindings.values():
+                if artifact_id in artifact_ids:
+                    continue
+                owner = output_owner.get(artifact_id)
+                if owner is None or owner not in node.dependencies:
+                    raise ValueError("plan nodes reference unknown artifacts or undeclared producer dependencies")
         plans = (*plans, item)
         if payload["activate"]:
             active_plan_id = item.id

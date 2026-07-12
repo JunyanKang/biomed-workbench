@@ -318,6 +318,7 @@ class PlanNode:
     target_hypothesis_ids: tuple[str, ...]
     expected_evidence_types: tuple[str, ...]
     expected_output_artifact_types: tuple[str, ...]
+    planned_output_artifact_ids: dict[str, str]
     compatibility_row_candidates: tuple[str, ...]
     status: str
     attempt: int
@@ -451,19 +452,19 @@ git commit -m "feat: derive capability graph from module manifests"
 def plan_research(state, registry, graph, requests) -> ResearchDAG: ...
 ```
 
-- [ ] **Step 1: Write failing constrained-planning tests**
+- [x] **Step 1: Write failing constrained-planning tests**
 
 Test direct single-module plans, dependent serial plans, independent parallel branches, mixed convergence, missing-artifact blockage, quality-invalid input exclusion, credential-aware ranking, exact compatibility candidate recording, orthogonal evidence requirements, cycle rejection, deterministic topological order, and declared-alternative selection.
 
-- [ ] **Step 2: Run and verify planner import failure**
+- [x] **Step 2: Run and verify planner import failure**
 
 Run: `python3 -m unittest tests.unit.orchestration.test_planner tests.contract.test_dag_validity`
 
-- [ ] **Step 3: Implement constrained graph search**
+- [x] **Step 3: Implement constrained graph search**
 
 Search backward from requested artifact and evidence types to currently available valid artifacts. Rank paths by satisfied preconditions, validated format continuity, maturity, directness, independent evidence gain, nonfatal quality risk, optional credential burden, and node count in that order. Never choose a shorter path that violates an experimental-unit, format, identifier, or quality requirement.
 
-- [ ] **Step 4: Run tests and commit**
+- [x] **Step 4: Run tests and commit**
 
 ```bash
 python3 -m unittest tests.unit.orchestration.test_planner tests.contract.test_dag_validity

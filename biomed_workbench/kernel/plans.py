@@ -49,6 +49,7 @@ class PlanNode:
     target_hypothesis_ids: tuple[str, ...]
     expected_evidence_types: tuple[str, ...]
     expected_output_artifact_types: tuple[str, ...]
+    planned_output_artifact_ids: Mapping[str, str]
     compatibility_row_candidates: tuple[str, ...]
     status: str
     attempt: int
@@ -70,6 +71,14 @@ class PlanNode:
         object.__setattr__(self, "target_hypothesis_ids", _ids(tuple(self.target_hypothesis_ids), "plan_node.target_hypothesis_ids"))
         object.__setattr__(self, "expected_evidence_types", _ids(tuple(self.expected_evidence_types), "plan_node.expected_evidence_types"))
         object.__setattr__(self, "expected_output_artifact_types", _ids(tuple(self.expected_output_artifact_types), "plan_node.expected_output_artifact_types", allow_empty=False))
+        outputs = freeze_mapping(self.planned_output_artifact_ids)
+        if not outputs or any(not _TOKEN_RE.fullmatch(port) or not isinstance(artifact_id, str) for port, artifact_id in outputs.items()):
+            raise ValueError("plan node outputs must map ports to planned artifact IDs")
+        for artifact_id in outputs.values():
+            validate_identifier(artifact_id, "plan_node.planned_output_artifact_ids")
+        if len(set(outputs.values())) != len(outputs) or set(outputs.values()) & set(bindings.values()):
+            raise ValueError("planned output artifact IDs must be unique and differ from inputs")
+        object.__setattr__(self, "planned_output_artifact_ids", outputs)
         object.__setattr__(self, "compatibility_row_candidates", _tokens(tuple(self.compatibility_row_candidates), "plan_node.compatibility_row_candidates", allow_empty=False))
         if self.status not in NODE_STATUSES:
             raise ValueError("plan node status is unsupported")
@@ -86,6 +95,7 @@ class PlanNode:
             "target_hypothesis_ids": list(self.target_hypothesis_ids),
             "expected_evidence_types": list(self.expected_evidence_types),
             "expected_output_artifact_types": list(self.expected_output_artifact_types),
+            "planned_output_artifact_ids": thaw(self.planned_output_artifact_ids),
             "compatibility_row_candidates": list(self.compatibility_row_candidates),
             "status": self.status,
             "attempt": self.attempt,
@@ -140,6 +150,9 @@ class ResearchDAG:
         if any(not set(node.dependencies) <= node_ids for node in nodes):
             raise ValueError("plan node references an unknown dependency")
         _validate_acyclic(nodes)
+        planned_ids = [artifact_id for node in nodes for artifact_id in node.planned_output_artifact_ids.values()]
+        if len(set(planned_ids)) != len(planned_ids):
+            raise ValueError("planned artifact IDs must be unique across the DAG")
         object.__setattr__(self, "nodes", nodes)
         object.__setattr__(self, "required_output_artifact_types", _ids(tuple(self.required_output_artifact_types), "plan.required_output_artifact_types", allow_empty=False))
         if self.plan_type not in PLAN_TYPES:

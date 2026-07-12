@@ -32,6 +32,8 @@ class ScientificArtifact:
     format_name: str
     format_version: str
     compression: str
+    orientation: str
+    indexes: tuple[str, ...]
     producing_module_id: str | None
     producing_module_version: str | None
     source_artifact_ids: tuple[str, ...]
@@ -55,6 +57,11 @@ class ScientificArtifact:
         object.__setattr__(self, "format_name", _token(self.format_name, "artifact.format_name"))
         object.__setattr__(self, "format_version", _token(self.format_version, "artifact.format_version", _VERSION_RE))
         object.__setattr__(self, "compression", _token(self.compression, "artifact.compression"))
+        object.__setattr__(self, "orientation", _token(self.orientation, "artifact.orientation"))
+        indexes = tuple(_token(value, "artifact.indexes") for value in self.indexes)
+        if len(set(indexes)) != len(indexes):
+            raise ValueError("artifact.indexes contains duplicates")
+        object.__setattr__(self, "indexes", indexes)
         if (self.producing_module_id is None) != (self.producing_module_version is None):
             raise ValueError("producing module ID and version must be declared together")
         if self.producing_module_id is not None:
@@ -102,6 +109,7 @@ class ScientificArtifact:
     def from_dict(cls, payload: Mapping[str, Any]) -> "ScientificArtifact":
         values = dict(payload)
         values["source_artifact_ids"] = tuple(values["source_artifact_ids"])
+        values["indexes"] = tuple(values["indexes"])
         return cls(**values)
 
     def to_dict(self) -> dict[str, object]:
@@ -112,6 +120,8 @@ class ScientificArtifact:
             "format_name": self.format_name,
             "format_version": self.format_version,
             "compression": self.compression,
+            "orientation": self.orientation,
+            "indexes": list(self.indexes),
             "producing_module_id": self.producing_module_id,
             "producing_module_version": self.producing_module_version,
             "source_artifact_ids": list(self.source_artifact_ids),

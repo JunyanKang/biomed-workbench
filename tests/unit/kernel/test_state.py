@@ -19,6 +19,7 @@ def research_plan(**overrides):
         target_hypothesis_ids=("hypothesis-lineage-shift-v1",),
         expected_evidence_types=("cell-state-association",),
         expected_output_artifact_types=("quality_report",),
+        planned_output_artifact_ids={"cell_quality": "artifact-planned-cell-quality"},
         compatibility_row_candidates=("python-3.14.3-inline-json-1",),
         status="pending",
         attempt=0,
