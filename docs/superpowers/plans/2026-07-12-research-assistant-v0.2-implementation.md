@@ -45,6 +45,92 @@
 
 ---
 
+### Task 0: Exhaustively Read And Assimilate Every Source File
+
+**Files:**
+- Create: `tools/assimilate_sources.py`
+- Create: `biomed_workbench/assimilation.py`
+- Create: `tests/unit/test_assimilation.py`
+- Create: `tests/release/test_assimilation_summary.py`
+- Create locally, ignored: `.source-audit/manifest.jsonl`
+- Create locally, ignored: `.source-audit/file-errors.jsonl`
+- Create: `reports/source-assimilation-summary.json`
+- Modify: `references/provenance.json` when Task 7 creates the final public provenance file.
+
+**Interfaces:**
+- Produces: `FileRecord`, `SourceSummary`, `inventory(root)`, `read_record(path, root)`, `verify_complete(root, records)`, and a deterministic root digest.
+- Consumes: source roots passed explicitly on the CLI; no machine-local path is written into tracked files.
+
+- [ ] **Step 1: Write failing exhaustive-coverage tests**
+
+```python
+def test_manifest_requires_exact_inventory_equality():
+    with temporary_source({"a.py": "def a(): return 1", "b.md": "# B"}) as root:
+        records = [read_record(root / "a.py", root)]
+        with self.assertRaises(IncompleteAssimilationError):
+            verify_complete(root, records)
+
+def test_sensitive_text_is_redacted_but_counted():
+    record = read_record(secret_fixture(), secret_fixture().parent)
+    self.assertEqual(record.disposition, "sensitive")
+    self.assertNotIn("secret-value", json.dumps(record.to_dict()))
+```
+
+- [ ] **Step 2: Verify RED**
+
+Run: `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.unit.test_assimilation -v`
+
+Expected: import failure because the assimilation module does not exist.
+
+- [ ] **Step 3: Implement safe per-format readers**
+
+Every reader starts from the already-read byte stream and records SHA-256, relative path, size, media/format, and disposition. Implement AST extraction for Python, structured parsing for JSON/YAML/TOML/notebooks, Markdown heading/rule extraction, safe `pickletools` opcode inspection without unpickling, archive member listing without extraction, image dimensions, PDF metadata/text availability, executable headers, symlink targets, and a bounded redacted text summary. Unknown formats still receive a byte-level record and cannot be skipped.
+
+- [ ] **Step 4: Implement completeness and privacy gates**
+
+`verify_complete()` compares normalized live relative paths to manifest paths exactly, detects changes during scanning, rejects duplicate paths, records read failures, and fails when any file lacks a disposition. Tracked reports contain source aliases rather than local absolute roots and exclude private relative paths from sensitive/runtime sources.
+
+- [ ] **Step 5: Run the three original sources exhaustively**
+
+Run:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 tools/assimilate_sources.py \
+  --source primary-a="$PRIMARY_A_ROOT" \
+  --source primary-b="$PRIMARY_B_ROOT" \
+  --source primary-c="$PRIMARY_C_ROOT" \
+  --private-manifest .source-audit/manifest.jsonl \
+  --public-summary reports/source-assimilation-summary.json
+```
+
+Use the actual local roots at execution time without saving them in tracked output. Expected baseline at plan creation: 260 files in the first source, 3,952 in the second, and 82,807 in the third. The scan must use live inventory totals rather than hard-coded counts.
+
+- [ ] **Step 6: Run later-added Nature and accelerated-compute sources through the same reader**
+
+Append records using stable source aliases. Exact inventory equality and root digests apply independently to all five sources.
+
+- [ ] **Step 7: Review every non-generated source record by capability cluster**
+
+Produce integration mappings from code symbols, scripts, skills, workflows, connectors, prompts, and scientific references. Generated runtime packages are grouped by package/version/role only after every file has an individual record. Sensitive records remain local and contribute only aggregate counts to the public summary.
+
+- [ ] **Step 8: Verify assimilation evidence**
+
+Run:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 python3 tools/assimilate_sources.py --verify .source-audit/manifest.jsonl
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest tests.unit.test_assimilation tests.release.test_assimilation_summary -v
+```
+
+Expected: zero missing, extra, unreadable, duplicate, or unclassified files; public counts and root digests match the private manifest without exposing machine paths or secrets.
+
+- [ ] **Step 9: Commit**
+
+```bash
+git add biomed_workbench/assimilation.py tools/assimilate_sources.py tests reports/source-assimilation-summary.json .gitignore
+git commit -m "feat: add exhaustive source assimilation"
+```
+
 ### Task 1: Establish The Research Assistant Kernel
 
 **Files:**

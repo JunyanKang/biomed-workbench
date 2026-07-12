@@ -34,6 +34,23 @@ The router and catalog are internal implementation details. User-facing response
 - No credential value is stored, printed, committed, or included in error messages.
 - Third-party protocol text, restricted datasets, model weights, caches, and generated environments are not copied into the repository.
 - Catalog size is an outcome, not a target. A smaller executable catalog is preferable to a larger catalog containing ghost capabilities.
+- Every file in the three original source roots must be read and classified before capability migration is considered complete. Later-added Nature and accelerated-compute sources use the same exhaustive process.
+
+## Exhaustive Source Assimilation
+
+Source assimilation precedes implementation selection. The process enumerates every regular file and symlink, reads every file as bytes, computes a content hash, identifies its format, and produces a safe semantic record:
+
+- source code: module purpose, public symbols, imports, side effects, command surfaces, and reusable algorithms;
+- documentation/prompts: workflow rules, scientific assumptions, output contracts, and reusable guidance;
+- structured data/notebooks: schema, dimensions or cell structure, declared dependencies, and role;
+- binary/runtime artifacts: format, package or runtime role, architecture metadata where safely readable, and whether they are generated;
+- sensitive/configuration material: classification and redacted structural summary only, never content or secret values.
+
+No file may disappear through an unrecorded ignore rule. Every record receives one disposition: `integrate`, `rewrite`, `merge`, `provenance_only`, `generated_runtime`, `restricted`, `sensitive`, or `obsolete`. Generated/runtime and restricted files are still read and understood; their disposition explains why their bytes are not copied.
+
+The exhaustive manifest is local release evidence because it may contain private runtime filenames and hashes. It is stored under the ignored `.source-audit/` directory. The public repository contains a redacted summary with source revision, total files, total bytes, format counts, disposition counts, capability mappings, and a deterministic root digest proving that the local manifest covered the inspected snapshot.
+
+Completion requires exact set equality between the live source inventory and the local manifest for each inspected root. Counts or sampling are insufficient.
 
 ## Target Architecture
 
