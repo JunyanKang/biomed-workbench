@@ -1,0 +1,19 @@
+"""Central allowlist for optional scientific data credentials."""
+
+from __future__ import annotations
+
+import os
+
+
+ALLOWED_CREDENTIALS = frozenset({"NCBI_API_KEY", "ELSEVIER_API_KEY", "SYNAPSE_AUTH_TOKEN"})
+
+
+def optional_credential(name: str) -> str | None:
+    if name not in ALLOWED_CREDENTIALS:
+        raise ValueError(f"credential is not allowlisted: {name}")
+    value = os.environ.get(name, "").strip()
+    return value or None
+
+
+def credential_status() -> dict[str, bool]:
+    return {name: bool(os.environ.get(name, "").strip()) for name in sorted(ALLOWED_CREDENTIALS)}
