@@ -281,6 +281,72 @@
     },
     {
       "access": "offline",
+      "description": "Apply declared somatic, filter, effect, and allele-fraction rules before dividing eligible mutations by explicit callable megabases.",
+      "entrypoint": "biomed_workbench.capabilities.research_quality:calculate_tumor_mutation_burden",
+      "id": "tumor-mutation-burden",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "callable_megabases": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "include_effects": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "minimum_allele_fraction": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "variants": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "allele_fraction": {
+                  "maximum": 1,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "effect": {
+                  "type": "string"
+                },
+                "filter": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "somatic": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "effect"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "variants",
+          "callable_megabases"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Calculate auditable tumor mutation burden",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
       "description": "Count SNVs, indels, MNVs, filters, chromosomes, transitions, transversions, and Ti/Tv ratio.",
       "entrypoint": "biomed_workbench.capabilities.omics:variant_summary",
       "id": "variant-summary",

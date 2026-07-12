@@ -2,6 +2,63 @@
   "capabilities": [
     {
       "access": "offline",
+      "description": "Separate event counts from affected-participant incidence while stratifying severity grade, seriousness, relatedness, and event term.",
+      "entrypoint": "biomed_workbench.capabilities.research_quality:summarize_adverse_events",
+      "id": "adverse-event-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "enrolled_participants": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "events": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "grade": {
+                  "maximum": 5,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "participant": {
+                  "type": "string"
+                },
+                "relatedness": {
+                  "type": "string"
+                },
+                "serious": {
+                  "type": "boolean"
+                },
+                "term": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "participant",
+                "term",
+                "grade",
+                "serious"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "events",
+          "enrolled_participants"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize research adverse events",
+      "workflow": "clinical"
+    },
+    {
+      "access": "offline",
       "description": "Calculate confusion metrics, predictive values, accuracy, and tie-aware rank ROC AUC.",
       "entrypoint": "biomed_workbench.capabilities.clinical:biomarker_performance",
       "id": "biomarker-performance",

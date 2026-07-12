@@ -178,6 +178,86 @@
       "requirements": [],
       "title": "Build a reviewer response matrix",
       "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Evaluate claim language against evidence design and combine reproducibility, statistics, data, ethics, and novelty into a structured review.",
+      "entrypoint": "biomed_workbench.capabilities.research_quality:assess_manuscript",
+      "id": "reviewer-assessment",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "claims": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "claim": {
+                  "type": "string"
+                },
+                "evidence_design": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                },
+                "replicated": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "claim",
+                "evidence_design",
+                "replicated"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "novelty": {
+            "enum": [
+              "low",
+              "moderate",
+              "high"
+            ],
+            "type": "string"
+          },
+          "review_domains": {
+            "additionalProperties": false,
+            "properties": {
+              "data_available": {
+                "type": "boolean"
+              },
+              "ethics_resolved": {
+                "type": "boolean"
+              },
+              "methods_reproducible": {
+                "type": "boolean"
+              },
+              "statistics_adequate": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "methods_reproducible",
+              "statistics_adequate",
+              "data_available",
+              "ethics_resolved"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "claims",
+          "review_domains",
+          "novelty"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Build a claim-linked manuscript assessment",
+      "workflow": "publication"
     }
   ],
   "schema_version": 1,

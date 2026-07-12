@@ -84,6 +84,57 @@
     },
     {
       "access": "offline",
+      "description": "Apply parent-linked rectangular gates to event measurements and report total and parent-relative yields with retained event indices.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_flow_cytometry",
+      "id": "flow-cytometry-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "events": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "gates": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "conditions": {
+                  "type": "object"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "parent": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "conditions"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "events",
+          "gates"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Apply a sequential flow-cytometry gating plan",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
       "description": "Estimate maximum log-phase growth rate and doubling time from positive measurements.",
       "entrypoint": "biomed_workbench.capabilities.experiment:growth_curve_summary",
       "id": "growth-curve",
@@ -123,6 +174,77 @@
     },
     {
       "access": "offline",
+      "description": "Aggregate standard replicates, fit and diagnose a calibrated response model, back-calculate diluted unknowns, and flag extrapolation.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:fit_immunoassay_curve",
+      "id": "immunoassay-quantification",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "model": {
+            "enum": [
+              "linear"
+            ],
+            "type": "string"
+          },
+          "standards": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "concentration": {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "response": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "concentration",
+                "response"
+              ],
+              "type": "object"
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "unknowns": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "dilution_factor": {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "response": {
+                  "type": "number"
+                },
+                "sample": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "sample",
+                "response"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "standards",
+          "unknowns"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Quantify an immunoassay calibration curve",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
       "description": "Calculate per-reaction and overage-adjusted PCR component volumes with conservation checks.",
       "entrypoint": "biomed_workbench.capabilities.experiment:pcr_mix",
       "id": "pcr-plan",
@@ -158,6 +280,79 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Calculate a PCR master mix",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
+      "description": "Aggregate technical replicates, normalize across multiple reference assays, apply assay efficiencies, and report sample-level QC.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:quantify_relative_expression",
+      "id": "qpcr-relative-expression",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "calibrator_samples": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "efficiencies": {
+            "type": "object"
+          },
+          "measurements": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "assay": {
+                  "type": "string"
+                },
+                "ct": {
+                  "maximum": 50,
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "sample": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "sample",
+                "assay",
+                "ct"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "reference_assays": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "replicate_ct_sd_limit": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "target_assay": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "measurements",
+          "target_assay",
+          "reference_assays",
+          "calibrator_samples"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Quantify relative qPCR expression",
       "workflow": "wetlab"
     }
   ],

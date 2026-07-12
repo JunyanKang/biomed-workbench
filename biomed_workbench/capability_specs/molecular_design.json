@@ -36,6 +36,151 @@
     },
     {
       "access": "offline",
+      "description": "Fit Michaelis-Menten, Hill, or substrate-inhibition models and return parameters, observation residuals, convergence, RMSE, and AICc.",
+      "entrypoint": "biomed_workbench.capabilities.biochemical_design:fit_enzyme_kinetics",
+      "id": "enzyme-kinetics",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "model": {
+            "enum": [
+              "michaelis_menten",
+              "hill",
+              "substrate_inhibition"
+            ],
+            "type": "string"
+          },
+          "observations": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "substrate": {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "velocity": {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                "weight": {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              },
+              "required": [
+                "substrate",
+                "velocity"
+              ],
+              "type": "object"
+            },
+            "minItems": 4,
+            "type": "array"
+          }
+        },
+        "required": [
+          "observations"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Fit steady-state enzyme kinetics",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Report N-linked sequons, proline-blocked sequons, serine/threonine-rich windows, local sequence context, coordinates, and inference limits.",
+      "entrypoint": "biomed_workbench.capabilities.biochemical_design:scan_glycosylation",
+      "id": "glycosylation-scan",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "context_radius": {
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "protein": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "protein"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Scan protein glycosylation contexts",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Check ordered Type IIS fragments for both-strand internal sites, incompatible junctions, repeated overhangs, palindromes, and construct-verification gates.",
+      "entrypoint": "biomed_workbench.capabilities.biochemical_design:plan_golden_gate",
+      "id": "golden-gate-plan",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "circular": {
+            "type": "boolean"
+          },
+          "enzyme": {
+            "enum": [
+              "BsaI",
+              "BbsI",
+              "BsmBI"
+            ],
+            "type": "string"
+          },
+          "fragments": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "left_overhang": {
+                  "pattern": "[ACGTacgt]{4}",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "right_overhang": {
+                  "pattern": "[ACGTacgt]{4}",
+                  "type": "string"
+                },
+                "sequence": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "sequence",
+                "left_overhang",
+                "right_overhang"
+              ],
+              "type": "object"
+            },
+            "minItems": 2,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fragments"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit a Golden Gate assembly plan",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
       "description": "Rank facing primer pairs with explicit thermodynamic approximations and validation limits.",
       "entrypoint": "biomed_workbench.capabilities.molecular:design_primers",
       "id": "primer-design",

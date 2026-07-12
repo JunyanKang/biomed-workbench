@@ -13,11 +13,11 @@ from .models import Capability
 WORKFLOW_ORDER = ("evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication")
 WORKFLOW_KEYWORDS = {
     "evidence": ("evidence", "literature", "pubmed", "pmc", "gene", "variant", "clinvar", "protein", "database", "文献", "证据", "数据库", "基因", "变异", "蛋白"),
-    "omics": ("omics", "rna-seq", "rnaseq", "single-cell", "scrna", "expression", "enrichment", "network", "vcf", "组学", "转录组", "单细胞", "差异", "富集", "网络"),
-    "molecular_design": ("crispr", "primer", "restriction", "cloning", "codon", "docking", "structure", "guide", "引物", "分子", "对接", "蛋白设计", "克隆"),
+    "omics": ("omics", "rna-seq", "rnaseq", "single-cell", "scrna", "expression", "enrichment", "network", "vcf", "tmb", "组学", "转录组", "单细胞", "差异", "富集", "网络", "突变负荷"),
+    "molecular_design": ("crispr", "primer", "restriction", "cloning", "golden gate", "codon", "kinetics", "glycosylation", "docking", "structure", "guide", "引物", "分子", "对接", "蛋白设计", "克隆", "酶动力学", "糖基化", "组装"),
     "imaging": ("image", "microscopy", "segment", "morphology", "colocalization", "tracking", "dicom", "图像", "显微", "分割", "形态", "共定位", "追踪"),
-    "clinical": ("clinical", "cohort", "survival", "biomarker", "patient", "trial", "case report", "临床", "队列", "生存", "标志物", "患者", "试验"),
-    "wetlab": ("protocol", "pcr", "dilution", "dose response", "growth curve", "assay", "elisa", "实验", "方案", "稀释", "剂量", "生长曲线"),
+    "clinical": ("clinical", "cohort", "survival", "biomarker", "patient", "trial", "adverse event", "case report", "临床", "队列", "生存", "标志物", "患者", "试验", "不良事件", "安全性"),
+    "wetlab": ("protocol", "pcr", "qpcr", "flow cytometry", "dilution", "dose response", "growth curve", "assay", "elisa", "实验", "方案", "稀释", "剂量", "生长曲线", "流式", "免疫测定"),
     "publication": ("manuscript", "paper", "review", "citation", "figure", "patent", "response", "presentation", "nature", "论文", "审稿", "引用", "图表", "专利", "回复", "写作"),
 }
 INTENT_BOOSTS = {
@@ -38,6 +38,15 @@ INTENT_BOOSTS = {
     "response-matrix": ("reviewer response", "rebuttal", "回复", "答复"),
     "figure-specification": ("figure", "panel", "图表", "图"),
     "patent-disclosure-audit": ("patent", "invention", "专利", "发明"),
+    "qpcr-relative-expression": ("qpcr", "delta ct", "relative expression", "相对表达", "技术重复"),
+    "immunoassay-quantification": ("elisa", "immunoassay", "standard curve", "免疫测定", "标准曲线"),
+    "flow-cytometry-summary": ("flow cytometry", "gating", "流式", "门控"),
+    "enzyme-kinetics": ("enzyme kinetics", "michaelis", "酶动力学", "米氏"),
+    "glycosylation-scan": ("glycosylation", "sequon", "糖基化"),
+    "golden-gate-plan": ("golden gate", "type iis", "金门", "组装"),
+    "tumor-mutation-burden": ("tmb", "tumor mutation burden", "肿瘤突变负荷", "突变负荷"),
+    "adverse-event-summary": ("adverse event", "safety", "不良事件", "严重性", "安全性"),
+    "reviewer-assessment": ("peer review", "reviewer", "审稿人", "评审", "主张与证据"),
 }
 
 

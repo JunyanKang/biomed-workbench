@@ -32,6 +32,20 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(plan["plan_type"], "single")
         self.assertEqual(ids_for(plan, "clinical")[0], "survival-analysis")
 
+    def test_assay_and_construct_intents_select_mature_capabilities(self):
+        qpcr = route("分析qPCR相对表达和技术重复")
+        assembly = route("检查Golden Gate克隆组装设计")
+
+        self.assertEqual(ids_for(qpcr, "wetlab")[0], "qpcr-relative-expression")
+        self.assertEqual(ids_for(assembly, "molecular_design")[0], "golden-gate-plan")
+
+    def test_safety_and_peer_review_intents_select_quality_capabilities(self):
+        safety = route("汇总临床试验不良事件和严重性")
+        review = route("以Nature审稿人标准评审论文主张与证据")
+
+        self.assertEqual(ids_for(safety, "clinical")[0], "adverse-event-summary")
+        self.assertEqual(ids_for(review, "publication")[0], "reviewer-assessment")
+
     def test_route_output_has_no_source_or_adapter_fields(self):
         plan = route("search TP53 gene evidence")
         serialized = repr(plan).lower()

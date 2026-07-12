@@ -164,6 +164,58 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         output = execute("patent-disclosure-audit", {"problem":"P","solution":"S","essential_features":["E"],"examples":["X"],"alternatives":["A"],"prior_art":["R"]})
         self.assertTrue(output["ready_for_claim_drafting"])
 
+    def test_qpcr_relative_expression(self):
+        measurements = [
+            {"sample": sample, "assay": assay, "ct": ct}
+            for sample, assay, values in (
+                ("control", "target", [20.0, 20.2]), ("control", "ref", [16.0, 16.2]),
+                ("treated", "target", [18.0, 18.2]), ("treated", "ref", [16.0, 16.2]),
+            )
+            for ct in values
+        ]
+        output = execute("qpcr-relative-expression", {"measurements": measurements, "target_assay": "target", "reference_assays": ["ref"], "calibrator_samples": ["control"]})
+        treated = next(row for row in output["samples"] if row["sample"] == "treated")
+        self.assertAlmostEqual(treated["relative_expression"], 4.0)
+
+    def test_immunoassay_quantification(self):
+        standards = [{"concentration": x, "response": 0.1 + 0.4 * x} for x in [0, 1, 2, 3]]
+        output = execute("immunoassay-quantification", {"standards": standards, "unknowns": [{"sample": "u1", "response": 0.7, "dilution_factor": 2}]})
+        self.assertAlmostEqual(output["unknowns"][0]["reported_concentration"], 3.0)
+
+    def test_flow_cytometry_summary(self):
+        output = execute("flow-cytometry-summary", {
+            "events": [{"FSC": 100, "CD3": 5}, {"FSC": 120, "CD3": 12}, {"FSC": 10, "CD3": 20}],
+            "gates": [{"name": "cells", "parent": "all", "conditions": {"FSC": {"min": 50}}}, {"name": "positive", "parent": "cells", "conditions": {"CD3": {"min": 10}}}],
+        })
+        self.assertEqual(output["gates"][-1]["event_count"], 1)
+
+    def test_enzyme_kinetics(self):
+        output = execute("enzyme-kinetics", {"observations": [{"substrate": s, "velocity": 10 * s / (3 + s)} for s in [0.5, 1, 2, 5, 10, 20]]})
+        self.assertAlmostEqual(output["parameters"]["km"], 3.0, places=4)
+
+    def test_glycosylation_scan(self):
+        output = execute("glycosylation-scan", {"protein": "MANVTNPSNAT", "context_radius": 2})
+        self.assertEqual([row["start"] for row in output["n_linked_sequons"]], [3, 9])
+
+    def test_golden_gate_plan(self):
+        output = execute("golden-gate-plan", {"fragments": [
+            {"name": "a", "sequence": "ATGCGCAT", "left_overhang": "AATG", "right_overhang": "GGCT"},
+            {"name": "b", "sequence": "ATGAAATAG", "left_overhang": "GGCT", "right_overhang": "CGCT"},
+        ]})
+        self.assertTrue(output["assembly_ready"])
+
+    def test_tumor_mutation_burden(self):
+        output = execute("tumor-mutation-burden", {"variants": [{"id": "v1", "effect": "missense", "filter": "PASS", "allele_fraction": 0.2, "somatic": True}], "callable_megabases": 2})
+        self.assertEqual(output["tmb_mutations_per_mb"], 0.5)
+
+    def test_adverse_event_summary(self):
+        output = execute("adverse-event-summary", {"events": [{"participant": "p1", "term": "Nausea", "grade": 2, "serious": False, "relatedness": "possible"}], "enrolled_participants": 4})
+        self.assertEqual(output["by_term"]["Nausea"]["participant_incidence_percent"], 25.0)
+
+    def test_reviewer_assessment(self):
+        output = execute("reviewer-assessment", {"claims": [{"id": "c1", "claim": "Marker causally drives fate", "evidence_design": "observational", "replicated": False}], "review_domains": {"methods_reproducible": False, "statistics_adequate": True, "data_available": True, "ethics_resolved": True}, "novelty": "high"})
+        self.assertEqual(output["recommendation"], "major_revision")
+
 
 if __name__ == "__main__":
     unittest.main()
