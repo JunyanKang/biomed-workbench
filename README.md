@@ -131,6 +131,7 @@ Tool-use guidance and routing remain available regardless of the installed versi
 - `reports/chroma-key-live-verification.json`: real command-boundary execution, synthetic edge fixture, output digests, alpha-class checks, and non-quantitative-use evidence for chroma keying.
 - `reports/source-reconciliation-summary.json`: public counts, pending capability decisions, current module/project-contract evidence binding, and an irreversible digest over all private per-file receipts.
 - `reports/plugin-contract-verification.json`: path-free official Codex plugin and Skill validation bound to the current manifest, single Skill entry, generated registry, and isolated snapshot.
+- `reports/local-update-verification.json`: digest-bound proof that local cachebuster updates replace one SemVer build suffix atomically and never enter the scientific runtime.
 - `biomed_workbench/capabilities/`: independently rewritten scientific implementations.
 - `biomed_workbench/modules/builtin/`: one versioned scientific contract per independently discoverable module.
 - `biomed_workbench/kernel/`: immutable project context, content-addressed artifacts, hypotheses, evidence, decisions, DAG state, and replay.

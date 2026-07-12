@@ -20,6 +20,13 @@ from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 
 
 PROJECT_EVIDENCE_SOURCES = {
+    "codex-local-update-cachebuster-v1": {
+        "report": "reports/local-update-verification.json",
+        "evidence_type": "codex-plugin-local-update-contract",
+        "artifact": "tools/prepare_local_update.py",
+        "digest_section": "implementation",
+        "digest_field": "sha256",
+    },
     "codex-plugin-manifest-contract-v1": {
         "report": "reports/plugin-contract-verification.json",
         "evidence_type": "codex-plugin-contract",

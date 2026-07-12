@@ -586,6 +586,24 @@ def main() -> int:
             ):
                 errors.append("official Codex plugin contract evidence is stale or differs from current manifest, skill, validators, or isolated registry")
 
+        local_update_path = ROOT / "reports" / "local-update-verification.json"
+        local_update_implementation = ROOT / "tools" / "prepare_local_update.py"
+        try:
+            local_update = json.loads(local_update_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            errors.append("local plugin update evidence is missing or invalid")
+        else:
+            if (
+                local_update.get("passed") is not True
+                or local_update.get("evidence_id") != "codex-local-update-cachebuster-v1"
+                or local_update.get("evidence_type") != "codex-plugin-local-update-contract"
+                or local_update.get("implementation", {}).get("sha256") != hashlib.sha256(local_update_implementation.read_bytes()).hexdigest()
+                or local_update.get("regression", {}).get("passed") is not True
+                or not all(local_update.get("verified_behaviors", {}).values())
+                or local_update.get("scientific_runtime_capability") is not False
+            ):
+                errors.append("local plugin update evidence is stale, incomplete, or misclassified as scientific runtime")
+
         native_handoff_path = ROOT / "reports" / "codex-native-handoff-verification.json"
         native_skill_path = ROOT / "skills" / "biomed-workbench" / "SKILL.md"
         try:

@@ -1,0 +1,28 @@
+{
+  "evidence_id": "codex-local-update-cachebuster-v1",
+  "evidence_type": "codex-plugin-local-update-contract",
+  "examples": {
+    "existing_build": "1.2.3+codex.reviewed-2",
+    "plain": "1.2.3+codex.reviewed-1",
+    "prerelease": "1.2.3-rc.1+codex.reviewed-3"
+  },
+  "implementation": {
+    "sha256": "b589fe25fbb95b04e1d6043e3034b65c59bb4af6e6cb5a082b63e347bb31dc4c"
+  },
+  "passed": true,
+  "regression": {
+    "passed": true,
+    "test_module": "tests.unit.test_local_update"
+  },
+  "schema_version": 1,
+  "scientific_runtime_capability": false,
+  "scope": "developer-local-plugin-reload-only",
+  "verified_behaviors": {
+    "atomic_manifest_replacement": true,
+    "existing_build_metadata_replaced": true,
+    "prerelease_preserved": true,
+    "repeatable_manifest_update": true,
+    "single_build_metadata_suffix": true,
+    "unsafe_token_rejected": true
+  }
+}
