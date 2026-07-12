@@ -498,6 +498,34 @@ def _register_builtins() -> None:
             input_schema=_object_schema({"edges":{"type":"array","items":{"type":"array"}},"directed":{"type":"boolean"}},("edges",)),
             requirements=(), access="offline", mutability="read_only",
         ),
+        Capability(
+            id="image-profile", workflow="imaging", kind="python", title="Profile an image array",
+            description="Report shape, range, mean, variance, percentiles, and zero fraction for a finite image matrix.",
+            entrypoint="biomed_workbench.capabilities.imaging:image_profile",
+            input_schema=_object_schema({"image":{"type":"array","items":{"type":"array"},"minItems":1}},("image",)),
+            requirements=(), access="offline", mutability="read_only",
+        ),
+        Capability(
+            id="image-segment", workflow="imaging", kind="python", title="Segment image components",
+            description="Threshold a small image and measure connected-component area, centroid, bounds, perimeter, and circularity.",
+            entrypoint="biomed_workbench.capabilities.imaging:segment_components",
+            input_schema=_object_schema({"image":{"type":"array","items":{"type":"array"},"minItems":1},"threshold":{"type":"number"},"connectivity":{"type":"integer","enum":[4,8]},"minimum_area":{"type":"integer","minimum":1},"polarity":{"type":"string","enum":["high","low"]}},("image","threshold")),
+            requirements=(), access="offline", mutability="read_only",
+        ),
+        Capability(
+            id="image-colocalization", workflow="imaging", kind="python", title="Measure two-channel colocalization",
+            description="Calculate Pearson intensity correlation and thresholded Manders overlap coefficients.",
+            entrypoint="biomed_workbench.capabilities.imaging:colocalization",
+            input_schema=_object_schema({"channel_a":{"type":"array","items":{"type":"array"},"minItems":1},"channel_b":{"type":"array","items":{"type":"array"},"minItems":1},"threshold_a":{"type":"number"},"threshold_b":{"type":"number"}},("channel_a","channel_b")),
+            requirements=(), access="offline", mutability="read_only",
+        ),
+        Capability(
+            id="point-tracking", workflow="imaging", kind="python", title="Track points across frames",
+            description="Link point detections with a bounded one-to-one nearest-neighbor rule and explicit tracking limits.",
+            entrypoint="biomed_workbench.capabilities.imaging:track_points",
+            input_schema=_object_schema({"frames":{"type":"array","items":{"type":"array"},"minItems":1},"max_distance":{"type":"number","minimum":0.000000001}},("frames","max_distance")),
+            requirements=(), access="offline", mutability="read_only",
+        ),
     )
     for definition in definitions:
         register(definition)

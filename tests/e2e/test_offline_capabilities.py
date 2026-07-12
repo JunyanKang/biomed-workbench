@@ -129,6 +129,22 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         output = execute("network-analysis", {"edges": [["A", "B"], ["B", "C"]]})
         self.assertEqual(output["hubs"][0]["node"], "B")
 
+    def test_image_profile(self):
+        output = execute("image-profile", {"image": [[0, 1], [2, 3]]})
+        self.assertEqual(output["mean"], 1.5)
+
+    def test_image_segment(self):
+        output = execute("image-segment", {"image": [[0, 5], [0, 5]], "threshold": 4, "connectivity": 4})
+        self.assertEqual(output["components"][0]["area"], 2)
+
+    def test_image_colocalization(self):
+        output = execute("image-colocalization", {"channel_a": [[0, 1], [2, 3]], "channel_b": [[0, 2], [4, 6]]})
+        self.assertAlmostEqual(output["pearson_r"], 1.0)
+
+    def test_point_tracking(self):
+        output = execute("point-tracking", {"frames": [[[0, 0]], [[1, 0]], [[2, 0]]], "max_distance": 2})
+        self.assertEqual(len(output["tracks"][0]["points"]), 3)
+
 
 if __name__ == "__main__":
     unittest.main()
