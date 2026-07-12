@@ -14,6 +14,7 @@ import subprocess
 import tempfile
 import threading
 import time
+import zipfile
 from typing import Any, Callable, Mapping
 
 from ..kernel.artifact_store import ArtifactPayload, ProjectArtifactStore
@@ -47,18 +48,23 @@ class CommandInput:
     port: str
     role: str
     filename: str
+    materialization: str = "file"
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "name", validate_identifier(self.name, "command input name"))
         object.__setattr__(self, "port", validate_identifier(self.port, "command input port"))
         object.__setattr__(self, "role", validate_identifier(self.role, "command input role"))
         object.__setattr__(self, "filename", _filename(self.filename, "command input filename"))
+        if self.materialization not in {"file", "zip-directory"}:
+            raise ValueError("command input materialization is unsupported")
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, object]) -> "CommandInput":
-        if set(payload) != {"name", "port", "role", "filename"}:
+        if set(payload) not in ({"name", "port", "role", "filename"}, {"name", "port", "role", "filename", "materialization"}):
             raise ValueError("command input fields are incomplete or unsupported")
-        return cls(**dict(payload))
+        values = dict(payload)
+        values.setdefault("materialization", "file")
+        return cls(**values)
 
 
 @dataclass(frozen=True)
@@ -155,11 +161,17 @@ class ScientificCommand:
         object.__setattr__(self, "parameter_names", parameter_names)
 
     def to_dict(self) -> dict[str, object]:
+        input_rows = []
+        for item in self.inputs:
+            row = {"name": item.name, "port": item.port, "role": item.role, "filename": item.filename}
+            if item.materialization != "file":
+                row["materialization"] = item.materialization
+            input_rows.append(row)
         return {
             "tool_name": self.tool_name,
             "executable": self.executable,
             "arguments": list(self.arguments),
-            "inputs": [{"name": item.name, "port": item.port, "role": item.role, "filename": item.filename} for item in self.inputs],
+            "inputs": input_rows,
             "outputs": [
                 {"name": item.name, "port": item.port, "role": item.role, "filename": item.filename, "media_type": item.media_type}
                 for item in self.outputs
@@ -333,6 +345,48 @@ def _digest_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _extract_zip_directory(archive_path: Path, target: Path) -> str:
+    try:
+        with zipfile.ZipFile(archive_path) as archive:
+            members = archive.infolist()
+            if not members or len(members) > 5000 or sum(item.file_size for item in members) > 200_000_000:
+                raise ScientificCommandError("INVALID_INPUT_ARCHIVE")
+            target.mkdir()
+            for item in members:
+                relative = Path(*Path(item.filename).parts)
+                mode = item.external_attr >> 16
+                if "\\" in item.filename or relative.is_absolute() or ".." in relative.parts or item.flag_bits & 0x1 or (mode & 0o170000) == 0o120000:
+                    raise ScientificCommandError("INVALID_INPUT_ARCHIVE")
+                destination = target / relative
+                if item.is_dir():
+                    destination.mkdir(parents=True, exist_ok=True)
+                    continue
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                with archive.open(item) as source, destination.open("xb") as output:
+                    shutil.copyfileobj(source, output, length=1024 * 1024)
+                destination.chmod(0o444)
+    except (OSError, zipfile.BadZipFile, RuntimeError) as exc:
+        if isinstance(exc, ScientificCommandError):
+            raise
+        raise ScientificCommandError("INVALID_INPUT_ARCHIVE") from exc
+    return _digest_tree(target)
+
+
+def _digest_tree(root: Path) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(root.rglob("*"), key=lambda item: item.relative_to(root).as_posix()):
+        relative = path.relative_to(root).as_posix()
+        if path.is_symlink() or (not path.is_file() and not path.is_dir()):
+            raise ScientificCommandError("INVALID_INPUT_ARCHIVE")
+        digest.update(("d" if path.is_dir() else "f").encode())
+        digest.update(relative.encode("utf-8"))
+        digest.update(b"\0")
+        if path.is_file():
+            digest.update(str(path.stat().st_size).encode())
+            digest.update(_digest_file(path).encode())
+    return digest.hexdigest()
+
+
 def execute_scientific_command(
     command: ScientificCommand,
     *,
@@ -383,12 +437,24 @@ def execute_scientific_command(
         for directory in (input_root, output_root, home_root, temp_root):
             directory.mkdir()
         runtime_inputs = {}
+        materialized_inputs = {}
+        input_tree_digests = {}
         for binding in command.inputs:
             payload = input_payloads[binding.name]
-            target = input_root / binding.filename
-            store.materialize(payload, target)
-            target.chmod(0o444)
-            runtime_inputs[binding.name] = target
+            if binding.materialization == "file":
+                target = input_root / binding.filename
+                store.materialize(payload, target)
+                target.chmod(0o444)
+                runtime_inputs[binding.name] = target
+                materialized_inputs[binding.name] = target
+            else:
+                archive_path = input_root / f"{binding.filename}.zip"
+                store.materialize(payload, archive_path)
+                archive_path.chmod(0o444)
+                target = input_root / binding.filename
+                input_tree_digests[binding.name] = _extract_zip_directory(archive_path, target)
+                runtime_inputs[binding.name] = target
+                materialized_inputs[binding.name] = archive_path
         runtime_outputs = {binding.name: output_root / binding.filename for binding in command.outputs}
         argv = [str(executable_path)]
         for argument in command.arguments:
@@ -424,7 +490,9 @@ def execute_scientific_command(
         if _digest_file(executable_path) != executable_sha256:
             raise ScientificCommandError("EXECUTABLE_DRIFT")
         for binding in command.inputs:
-            if _digest_file(runtime_inputs[binding.name]) != input_payloads[binding.name].sha256:
+            if _digest_file(materialized_inputs[binding.name]) != input_payloads[binding.name].sha256:
+                raise ScientificCommandError("INPUT_MUTATION")
+            if binding.materialization == "zip-directory" and _digest_tree(runtime_inputs[binding.name]) != input_tree_digests[binding.name]:
                 raise ScientificCommandError("INPUT_MUTATION")
         declared_paths = {binding.filename for binding in command.outputs}
         observed_paths = {path.name for path in output_root.iterdir()}

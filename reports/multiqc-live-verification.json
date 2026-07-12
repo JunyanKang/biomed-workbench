@@ -1,0 +1,142 @@
+{
+  "compatibility_row_id": "multiqc-1.35-python-3.13.12-fastqc-collection-1",
+  "dependency_versions": {
+    "jinja2": "3.1.6",
+    "jsonschema": "4.26.0",
+    "plotly": "6.9.0",
+    "polars": "1.42.1",
+    "pyarrow": "25.0.0",
+    "pydantic": "2.13.4",
+    "python": "3.13.12"
+  },
+  "end_to_end_evidence_id": "quality-report-multiqc-e2e-v1",
+  "execution": {
+    "command_contract_digest": "ec363ec4a15d42dd3ecfd56d203d05dc26b4d849ae1212ce12ce028ef15ed999",
+    "executable_sha256": "0b83a773fb1f3a7971c00ada3d2a96cb3f5b368ecc723c617f53f06f6ae3ac15",
+    "input": {
+      "byte_size": 758973,
+      "role": "bundle",
+      "sha256": "8705863fc897fb2cdbef81facedf64580f799c938191f4b0ee38c00fd43fa8cd"
+    },
+    "outputs": [
+      {
+        "byte_size": 2318583,
+        "media_type": "text/html",
+        "object_key": "sha256/7f/7f474044e79c4c67ffcc5bae56e1207f279fdeda8dcc9e61bc13bb51faeb5852/payload",
+        "role": "report",
+        "sha256": "7f474044e79c4c67ffcc5bae56e1207f279fdeda8dcc9e61bc13bb51faeb5852"
+      },
+      {
+        "byte_size": 67868,
+        "media_type": "application/zip",
+        "object_key": "sha256/ab/ab9ade5f2cef257a4b4caba549ca42676bc163da16f8e770abe4d34ea26a7ab0/payload",
+        "role": "data",
+        "sha256": "ab9ade5f2cef257a4b4caba549ca42676bc163da16f8e770abe4d34ea26a7ab0"
+      }
+    ],
+    "parameters": {}
+  },
+  "fixture": {
+    "sha256": "4508bc6abe1ea838afb6641fd99b7e02d685c392bb2613e290ad3d9b013b27c3",
+    "source_fastqc_version": "0.12.1",
+    "source_sample_count": 2
+  },
+  "html_report_validated": true,
+  "module_id": "quality-report-multiqc",
+  "module_version": "1.0.0",
+  "passed": true,
+  "regression_evidence_id": "quality-report-multiqc-regression-v1",
+  "runtime_lock": {
+    "Jinja2": "3.1.6",
+    "Markdown": "3.10.2",
+    "MarkupSafe": "3.0.3",
+    "PyYAML": "6.0.3",
+    "Pygments": "2.20.0",
+    "annotated-types": "0.7.0",
+    "attrs": "26.1.0",
+    "boto3": "1.43.46",
+    "botocore": "1.43.46",
+    "certifi": "2026.6.17",
+    "charset-normalizer": "3.4.9",
+    "click": "8.4.2",
+    "coloredlogs": "15.0.1",
+    "colormath2": "3.0.3",
+    "humanfriendly": "10.0",
+    "humanize": "4.16.0",
+    "idna": "3.18",
+    "importlib_metadata": "9.0.0",
+    "jmespath": "1.1.0",
+    "jsonschema": "4.26.0",
+    "jsonschema-specifications": "2025.9.1",
+    "kaleido": "0.2.1",
+    "markdown-it-py": "4.2.0",
+    "mdurl": "0.1.2",
+    "multiqc": "1.35",
+    "narwhals": "2.23.0",
+    "natsort": "8.4.0",
+    "networkx": "3.6.1",
+    "numpy": "2.5.1",
+    "packaging": "26.2",
+    "pillow": "12.3.0",
+    "plotly": "6.9.0",
+    "polars": "1.42.1",
+    "polars-runtime-32": "1.42.1",
+    "polars-runtime-compat": "1.42.1",
+    "pyarrow": "25.0.0",
+    "pydantic": "2.13.4",
+    "pydantic_core": "2.46.4",
+    "python-dateutil": "2.9.0.post0",
+    "python-dotenv": "1.2.2",
+    "referencing": "0.37.0",
+    "regex": "2026.7.10",
+    "requests": "2.34.2",
+    "rich": "15.0.0",
+    "rich-click": "1.9.8",
+    "rpds-py": "2026.6.3",
+    "s3transfer": "0.19.1",
+    "six": "1.17.0",
+    "spectra": "0.1.0",
+    "tiktoken": "0.13.0",
+    "tqdm": "4.68.4",
+    "typeguard": "4.5.2",
+    "typing-inspection": "0.4.2",
+    "typing_extensions": "4.16.0",
+    "urllib3": "2.7.0",
+    "zipp": "4.1.0"
+  },
+  "schema_version": 1,
+  "scientific_summary": {
+    "downstream_readiness": "requires-assay-aware-review",
+    "fastqc_versions": [
+      "0.12.1"
+    ],
+    "flagged_samples": [
+      "sample-a",
+      "sample-b"
+    ],
+    "interpretation_policy": "Aggregate QC prioritizes cross-sample outliers but does not replace assay-aware review of individual FastQC modules.",
+    "multiqc_version": "1.35",
+    "sample_count": 2,
+    "samples": {
+      "sample-a": {
+        "avg_sequence_length": 50.0,
+        "percent_duplicates": 83.33333333333334,
+        "percent_fails": 30.0,
+        "percent_gc": 50.0,
+        "total_sequences": 12.0
+      },
+      "sample-b": {
+        "avg_sequence_length": 50.0,
+        "percent_duplicates": 83.33333333333334,
+        "percent_fails": 30.0,
+        "percent_gc": 50.0,
+        "total_sequences": 12.0
+      }
+    },
+    "schema_version": 1
+  },
+  "source_fastqc_completed": true,
+  "tool_versions": {
+    "multiqc": "1.35"
+  }
+}

@@ -1,6 +1,7 @@
 import json
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 from biomed_workbench.kernel.artifact_store import ProjectArtifactStore
@@ -36,6 +37,104 @@ def command(**overrides):
 
 
 class ScientificCommandTests(unittest.TestCase):
+    def test_safely_materializes_a_read_only_zip_collection_for_aggregate_tools(self):
+        body = """
+import argparse, json, pathlib
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True)
+parser.add_argument('--output', required=True)
+parser.add_argument('--label', required=True)
+args = parser.parse_args()
+files = sorted(path.name for path in pathlib.Path(args.input).rglob('*') if path.is_file())
+json.dump({'files': files}, open(args.output, 'w', encoding='utf-8'))
+"""
+        aggregate = command(
+            inputs=(CommandInput("reads", "reads", "reads", "qc-inputs", "zip-directory"),),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            tool = executable(root / "fixture-tool", body)
+            bundle = root / "reports.zip"
+            with zipfile.ZipFile(bundle, "w") as output:
+                output.writestr("sample-a/fastqc_data.txt", "PASS")
+                output.writestr("sample-b/fastqc_data.txt", "WARN")
+            store = ProjectArtifactStore(root / "artifacts")
+            payload = store.import_file(bundle, role="reads", media_type="application/zip")
+
+            result = execute_scientific_command(
+                aggregate,
+                store=store,
+                input_payloads={"reads": payload},
+                parameters={"label": "cohort"},
+                tool_versions={"fixture-tool": "2.4.1"},
+                dependency_versions={"python": "3.14.3"},
+                compatibility_row_id="fixture-tool-2.4.1-json-1",
+                executable_resolver=lambda _name: tool,
+            )
+
+            output = json.loads(store.resolve(result.output_payloads[0]).read_text(encoding="utf-8"))
+        self.assertEqual(output["files"], ["fastqc_data.txt", "fastqc_data.txt"])
+
+    def test_rejects_unsafe_zip_collection_before_tool_execution(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = root / "unsafe.zip"
+            with zipfile.ZipFile(bundle, "w") as output:
+                output.writestr("../escape.txt", "unsafe")
+            store = ProjectArtifactStore(root / "artifacts")
+            payload = store.import_file(bundle, role="reads", media_type="application/zip")
+            aggregate = command(inputs=(CommandInput("reads", "reads", "reads", "qc-inputs", "zip-directory"),))
+            tool = executable(root / "fixture-tool", "raise RuntimeError('must not execute')")
+
+            with self.assertRaises(ScientificCommandError) as caught:
+                execute_scientific_command(
+                    aggregate,
+                    store=store,
+                    input_payloads={"reads": payload},
+                    parameters={"label": "cohort"},
+                    tool_versions={"fixture-tool": "2.4.1"},
+                    dependency_versions={"python": "3.14.3"},
+                    compatibility_row_id="fixture-tool-2.4.1-json-1",
+                    executable_resolver=lambda _name: tool,
+                )
+        self.assertEqual(caught.exception.code, "INVALID_INPUT_ARCHIVE")
+
+    def test_detects_extracted_collection_mutation_after_tool_execution(self):
+        body = """
+import argparse, json, pathlib
+parser = argparse.ArgumentParser()
+parser.add_argument('--input', required=True)
+parser.add_argument('--output', required=True)
+parser.add_argument('--label', required=True)
+args = parser.parse_args()
+source = next(path for path in pathlib.Path(args.input).rglob('*') if path.is_file())
+source.chmod(0o644)
+source.write_text('mutated', encoding='utf-8')
+json.dump({'status': 'completed'}, open(args.output, 'w', encoding='utf-8'))
+"""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            bundle = root / "reports.zip"
+            with zipfile.ZipFile(bundle, "w") as output:
+                output.writestr("sample/fastqc_data.txt", "PASS")
+            store = ProjectArtifactStore(root / "artifacts")
+            payload = store.import_file(bundle, role="reads", media_type="application/zip")
+            aggregate = command(inputs=(CommandInput("reads", "reads", "reads", "qc-inputs", "zip-directory"),))
+            tool = executable(root / "fixture-tool", body)
+
+            with self.assertRaises(ScientificCommandError) as caught:
+                execute_scientific_command(
+                    aggregate,
+                    store=store,
+                    input_payloads={"reads": payload},
+                    parameters={"label": "cohort"},
+                    tool_versions={"fixture-tool": "2.4.1"},
+                    dependency_versions={"python": "3.14.3"},
+                    compatibility_row_id="fixture-tool-2.4.1-json-1",
+                    executable_resolver=lambda _name: tool,
+                )
+        self.assertEqual(caught.exception.code, "INPUT_MUTATION")
+
     def test_output_directory_supports_tools_with_derived_declared_filenames(self):
         body = """
 import argparse, pathlib
@@ -185,6 +284,7 @@ print('completed')
             lambda: command(arguments=("--label={parameter:label}",)),
             lambda: command(arguments=("{output-directory}", "{output:report}", "{input:reads}", "{parameter:label}")),
             lambda: command(inputs=(CommandInput("reads", "reads", "reads", "../reads.fastq"),)),
+            lambda: command(inputs=(CommandInput("reads", "reads", "reads", "reads", "tar-directory"),)),
             lambda: command(outputs=(CommandOutput("report", "report", "report", "nested/report.json", "application/json"),)),
         )
         for factory in invalid:

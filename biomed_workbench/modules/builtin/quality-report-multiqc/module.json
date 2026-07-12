@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "id": "quality-report-multiqc",
+  "version": "1.0.0",
+  "title": "Aggregate sequencing quality reports across samples",
+  "description": "Execute MultiQC on a safely materialized collection of FastQC archives and preserve its HTML and structured data bundle for cross-sample review.",
+  "module_type": "validation",
+  "domains": ["omics"],
+  "intents": ["aggregate sequencing QC", "run MultiQC", "compare FastQC reports", "多样本测序质控汇总"],
+  "questions": ["Which samples are cross-sample technical outliers, which QC failures recur across the cohort, and what remains unresolved before downstream analysis?"],
+  "maturity": "validated",
+  "entrypoint": "scientific-command",
+  "input_schema": {"type": "object", "additionalProperties": false, "properties": {}, "required": []},
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {"payload_roles": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2}},
+    "required": ["payload_roles"]
+  },
+  "input_artifacts": [
+    {
+      "name": "quality_reports",
+      "artifact_type": "sequencing_quality_report_collection",
+      "formats": [
+        {
+          "name": "fastqc-collection",
+          "versions": ["1.0.0"],
+          "representations": ["container", "binary"],
+          "compression": ["zip"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["reports-by-samples"]
+        }
+      ],
+      "processing_levels": ["derived"],
+      "required_metadata": ["sample-count", "source-tool-versions"]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "aggregate_quality_report",
+      "artifact_type": "aggregate_sequencing_quality_report",
+      "formats": [
+        {
+          "name": "multiqc-bundle",
+          "versions": ["1.35"],
+          "representations": ["container", "binary"],
+          "compression": ["zip"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["samples-by-metrics"]
+        }
+      ],
+      "processing_levels": ["derived"],
+      "required_metadata": ["module_version", "compatibility_row_id"]
+    }
+  ],
+  "assumptions": ["Every collected FastQC archive belongs to one declared sample and was produced by a version recorded in collection metadata."],
+  "preconditions": ["The collection is a bounded ZIP containing complete FastQC archives with unique sample identities and no unsafe archive entries."],
+  "quality_gates": [
+    {
+      "id": "multiqc-sample-accounting",
+      "severity": "fatal",
+      "description": "The parsed MultiQC sample count and sample identifiers must reconcile exactly with the declared input collection.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "multiqc-outlier-review",
+      "severity": "major",
+      "description": "Cross-sample outliers and recurrent failures require assay-aware review of individual reports before downstream readiness is assigned.",
+      "blocks_interpretation": true
+    }
+  ],
+  "evidence_effects": ["qualifies_sequencing_cohort"],
+  "alternatives": [],
+  "complements": ["read-quality-fastqc"],
+  "tool_requirements": [
+    {
+      "name": "multiqc",
+      "ecosystem": "python",
+      "identity": "multiqc",
+      "required": true,
+      "tested_versions": ["1.35"],
+      "allowed_versions": ["==1.35"],
+      "version_source": "https://github.com/MultiQC/MultiQC/releases/tag/v1.35",
+      "verified_at": "2026-07-12",
+      "version_probe": ["multiqc", "--version"],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_pattern": "version ([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [
+        {
+          "id": "multiqc-135-data-bundle",
+          "affected_versions": ["==1.35"],
+          "category": "output-format",
+          "description": "The validated release emits the tested MultiQC JSON data and software-version structures.",
+          "compatibility_effect": "requires-parser",
+          "required_action": "Use the MultiQC 1.35 aggregate parser and reject unvalidated report schema versions.",
+          "source": "https://github.com/MultiQC/MultiQC/blob/v1.35/CHANGELOG.md"
+        }
+      ],
+      "platforms": ["macos-arm64", "linux-x86_64"]
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "python", "ecosystem": "runtime", "identity": "multiqc-python-runtime", "required": true,
+      "tested_versions": ["3.13.12"], "allowed_versions": ["==3.13.12"], "version_source": "https://www.python.org/downloads/release/python-31312/", "verified_at": "2026-07-12",
+      "version_probe": ["biomed_workbench.quality.multiqc:probe_multiqc_python"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 10,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute the validated MultiQC application environment.", "conflicts": [], "platforms": ["macos-arm64", "linux-x86_64"]
+    },
+    {
+      "name": "pydantic", "ecosystem": "python", "identity": "pydantic", "required": true,
+      "tested_versions": ["2.13.4"], "allowed_versions": ["==2.13.4"], "version_source": "https://github.com/pydantic/pydantic/releases/tag/v2.13.4", "verified_at": "2026-07-12",
+      "version_probe": ["biomed_workbench.quality.multiqc:probe_multiqc_pydantic"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 10,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate MultiQC configuration and report data models.", "conflicts": [], "platforms": ["any"]
+    },
+    {
+      "name": "plotly", "ecosystem": "python", "identity": "plotly", "required": true,
+      "tested_versions": ["6.9.0"], "allowed_versions": ["==6.9.0"], "version_source": "https://github.com/plotly/plotly.py/releases/tag/v6.9.0", "verified_at": "2026-07-12",
+      "version_probe": ["biomed_workbench.quality.multiqc:probe_multiqc_plotly"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 10,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Render the validated interactive aggregate report plots.", "conflicts": [], "platforms": ["any"]
+    },
+    {
+      "name": "pyarrow", "ecosystem": "python", "identity": "pyarrow", "required": true,
+      "tested_versions": ["25.0.0"], "allowed_versions": ["==25.0.0"], "version_source": "https://arrow.apache.org/release/25.0.0.html", "verified_at": "2026-07-12",
+      "version_probe": ["biomed_workbench.quality.multiqc:probe_multiqc_pyarrow"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 10,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Write and read the validated MultiQC columnar data bundle.", "conflicts": [], "platforms": ["any"]
+    },
+    {
+      "name": "polars", "ecosystem": "python", "identity": "polars", "required": true,
+      "tested_versions": ["1.42.1"], "allowed_versions": ["==1.42.1"], "version_source": "https://github.com/pola-rs/polars/releases/tag/py-1.42.1", "verified_at": "2026-07-12",
+      "version_probe": ["biomed_workbench.quality.multiqc:probe_multiqc_polars"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 10,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Transform aggregate sample metrics in the validated MultiQC runtime.", "conflicts": [], "platforms": ["any"]
+    },
+    {
+      "name": "jsonschema", "ecosystem": "python", "identity": "jsonschema", "required": true,
+      "tested_versions": ["4.26.0"], "allowed_versions": ["==4.26.0"], "version_source": "https://github.com/python-jsonschema/jsonschema/releases/tag/v4.26.0", "verified_at": "2026-07-12",
+      "version_probe": ["biomed_workbench.quality.multiqc:probe_multiqc_jsonschema"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 10,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate structured MultiQC configuration and data schemas.", "conflicts": [], "platforms": ["any"]
+    },
+    {
+      "name": "jinja2", "ecosystem": "python", "identity": "jinja2", "required": true,
+      "tested_versions": ["3.1.6"], "allowed_versions": ["==3.1.6"], "version_source": "https://jinja.palletsprojects.com/en/stable/changes/#version-3-1-6", "verified_at": "2026-07-12",
+      "version_probe": ["biomed_workbench.quality.multiqc:probe_multiqc_jinja2"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 10,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Render the validated MultiQC HTML report template.", "conflicts": [], "platforms": ["any"]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "multiqc-1.35-python-3.13.12-fastqc-collection-1",
+      "module_version": "1.0.0",
+      "tool_versions": {"multiqc": ["1.35"]},
+      "dependency_versions": {"python": ["3.13.12"], "pydantic": ["2.13.4"], "plotly": ["6.9.0"], "pyarrow": ["25.0.0"], "polars": ["1.42.1"], "jsonschema": ["4.26.0"], "jinja2": ["3.1.6"]},
+      "input_formats": {"quality_reports": ["fastqc-collection@1.0.0"]},
+      "output_formats": {"aggregate_quality_report": ["multiqc-bundle@1.35"]},
+      "platforms": ["macos-arm64", "linux-x86_64"],
+      "regression_evidence_ids": ["quality-report-multiqc-regression-v1"],
+      "end_to_end_evidence_ids": ["quality-report-multiqc-e2e-v1"],
+      "verified_at": "2026-07-12"
+    }
+  ],
+  "execution": {
+    "kind": "command",
+    "timeout_seconds": 300,
+    "max_output_bytes": 2000000,
+    "command": {
+      "tool_name": "multiqc",
+      "executable": "multiqc",
+      "arguments": ["{input:bundle}", "--outdir", "{output-directory}", "--filename", "multiqc_report.html", "--data-dir", "--zip-data-dir", "--data-format", "json", "--force", "--quiet"],
+      "inputs": [
+        {"name": "bundle", "port": "quality_reports", "role": "bundle", "filename": "qc-inputs", "materialization": "zip-directory"}
+      ],
+      "outputs": [
+        {"name": "report", "port": "aggregate_quality_report", "role": "report", "filename": "multiqc_report.html", "media_type": "text/html"},
+        {"name": "data", "port": "aggregate_quality_report", "role": "data", "filename": "multiqc_report_data.zip", "media_type": "application/zip"}
+      ],
+      "parameter_names": [],
+      "timeout_seconds": 300,
+      "max_output_bytes": 2000000,
+      "max_payload_bytes": 100000000
+    }
+  },
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "limitations": ["MultiQC aggregates the reports it finds; absent, duplicated, mislabeled, or methodologically incomparable samples require independent manifest reconciliation."],
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "GPL-3.0-or-later", "concept_sources": ["https://github.com/MultiQC/MultiQC"]}
+}

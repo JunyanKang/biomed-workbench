@@ -1548,6 +1548,23 @@
     },
     {
       "access": "offline",
+      "description": "Execute MultiQC on a safely materialized collection of FastQC archives and preserve its HTML and structured data bundle for cross-sample review.",
+      "entrypoint": "scientific-command",
+      "id": "quality-report-multiqc",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Aggregate sequencing quality reports across samples",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
       "description": "Execute FastQC on one versioned FASTQ payload and preserve its complete archive and HTML report as content-addressed scientific evidence.",
       "entrypoint": "scientific-command",
       "id": "read-quality-fastqc",
@@ -1996,7 +2013,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 49,
+  "entry_count": 50,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

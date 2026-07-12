@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 49:
-            errors.append(f"built-in module count must be 49, found {len(modules)}")
+        if len(modules) != 50:
+            errors.append(f"built-in module count must be 50, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -172,10 +172,10 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 327
+                or research_report.get("test_count", 0) < 334
                 or research_report.get("registry_digest") != registry.digest
                 or set(research_report.get("execution_contracts", ()))
-                != {"scientific_command", "command_input_binding", "command_output_binding", "bounded_process_result"}
+                != {"scientific_command", "command_input_binding", "command_output_binding", "command_zip_directory_input", "bounded_process_result"}
                 or graph_report != {"node_count": len(graph.nodes), "edge_count": len(graph.edges), "digest": graph.digest}
             ):
                 errors.append("research engine report differs from the discovered registry or capability graph")
@@ -229,6 +229,7 @@ def main() -> int:
             errors.append("scientific command execution contains a shell invocation surface")
         fastqc_report_path = ROOT / "reports" / "fastqc-live-verification.json"
         fastqc_fixture_path = ROOT / "tests" / "fixtures" / "sequencing" / "read-qc-balanced.fastq"
+        fixture_digest = hashlib.sha256(fastqc_fixture_path.read_bytes()).hexdigest()
         try:
             fastqc_report = json.loads(fastqc_report_path.read_text(encoding="utf-8"))
             fastqc_manifest = registry.get("read-quality-fastqc")
@@ -236,7 +237,6 @@ def main() -> int:
         except (OSError, json.JSONDecodeError, ModuleRegistryError):
             errors.append("FastQC live verification evidence is missing or invalid")
         else:
-            fixture_digest = hashlib.sha256(fastqc_fixture_path.read_bytes()).hexdigest()
             if (
                 fastqc_report.get("passed") is not True
                 or fastqc_report.get("module_version") != fastqc_manifest.version
@@ -249,6 +249,29 @@ def main() -> int:
                 or fastqc_report.get("html_report_validated") is not True
             ):
                 errors.append("FastQC live verification differs from its module, compatibility row, or fixture")
+        multiqc_report_path = ROOT / "reports" / "multiqc-live-verification.json"
+        try:
+            multiqc_report = json.loads(multiqc_report_path.read_text(encoding="utf-8"))
+            multiqc_manifest = registry.get("quality-report-multiqc")
+            multiqc_row = multiqc_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("MultiQC live verification evidence is missing or invalid")
+        else:
+            expected_dependencies = {name: versions[0] for name, versions in multiqc_row.dependency_versions.items()}
+            if (
+                multiqc_report.get("passed") is not True
+                or multiqc_report.get("module_version") != multiqc_manifest.version
+                or multiqc_report.get("compatibility_row_id") != multiqc_row.id
+                or multiqc_report.get("regression_evidence_id") != multiqc_row.regression_evidence_ids[0]
+                or multiqc_report.get("end_to_end_evidence_id") != multiqc_row.end_to_end_evidence_ids[0]
+                or multiqc_report.get("tool_versions") != {"multiqc": "1.35"}
+                or multiqc_report.get("dependency_versions") != expected_dependencies
+                or multiqc_report.get("fixture", {}).get("sha256") != fixture_digest
+                or multiqc_report.get("scientific_summary", {}).get("sample_count") != 2
+                or len(multiqc_report.get("runtime_lock", {})) < 50
+                or multiqc_report.get("html_report_validated") is not True
+            ):
+                errors.append("MultiQC live verification differs from its module, compatibility row, fixture, or runtime lock")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

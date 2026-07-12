@@ -217,6 +217,15 @@ class ModuleContractTests(unittest.TestCase):
 
         self.assertIn("{output-directory}", manifest.execution.command.arguments)
 
+    def test_command_manifest_accepts_safe_zip_directory_materialization(self):
+        payload = command_manifest_payload()
+        payload["execution"]["command"]["inputs"][0]["materialization"] = "zip-directory"
+
+        manifest = parse_manifest(payload)
+
+        self.assertEqual(manifest.execution.command.inputs[0].materialization, "zip-directory")
+        self.assertEqual(parse_manifest(manifest_to_dict(manifest)), manifest)
+
     def test_command_manifest_rejects_unversioned_executable_or_port_drift(self):
         cases = (
             lambda payload: payload["tool_requirements"][0].__setitem__("identity", "other-tool"),
