@@ -12,7 +12,8 @@ The plugin continues to expose exactly one Codex skill: `biomed-workbench`.
 - `tools/adapters/` and all source-named bridge modules are removed.
 - `BIOMNI_SOURCE_ROOT`, `OPENSCIENCE_SOURCE_ROOT`, `CLAUDE_SCIENCE_*`, and equivalent source-checkout environment variables are removed.
 - Upstream project names and commits may appear only in `NOTICE.md` and `references/provenance.json`, where attribution and license compliance require them.
-- Product and runtime identifiers that users must actually configure remain valid: model names such as Boltz2, DiffDock, OpenFold3, Evo2, ProteinMPNN, RFdiffusion, Parabricks, and environment variables such as `NVIDIA_API_KEY` and `NGC_API_KEY`.
+- Scientific model identifiers remain valid only when the corresponding implementation can run locally under a clear redistribution and usage license.
+- Vendor-hosted model APIs, vendor registry credentials, and paid inference services are outside the core architecture.
 - No credential value is stored, printed, committed, or included in error messages.
 - Third-party protocol text, restricted datasets, model weights, caches, and generated environments are not copied into the repository.
 - Catalog size is an outcome, not a target. A smaller executable catalog is preferable to a larger catalog containing ghost capabilities.
@@ -39,7 +40,7 @@ biomed-workbench/
     services/
       http.py
       credentials.py
-      hosted_models.py
+      model_backends.py
       containers.py
       schedulers.py
       environments.py
@@ -73,7 +74,7 @@ Each capability is represented by a validated record with these fields:
 class Capability:
     id: str
     workflow: str
-    kind: Literal["python", "command", "hosted", "workflow"]
+    kind: Literal["python", "command", "service", "workflow"]
     title: str
     description: str
     entrypoint: str
@@ -114,25 +115,25 @@ The source-specific runtime adapter is replaced by generic environment discovery
 - `BIOMED_PYTHON` overrides the Python executable.
 - `BIOMED_RSCRIPT` overrides the R executable.
 - PATH discovery is the default.
-- Docker, NVIDIA Container Toolkit, Parabricks, SLURM, and local model services are detected through explicit runtime probes.
+- Docker, generic GPU availability, SLURM, and local model services are detected through explicit runtime probes.
 
-Runtime status reports capabilities such as `python`, `r`, `docker`, `gpu`, `slurm`, and `hosted_model_key`; it does not report upstream application installation state.
+Runtime status reports capabilities such as `python`, `r`, `docker`, `gpu`, `slurm`, and locally available scientific model commands; it does not report upstream application installation state.
 
 ## Accelerated Model And Compute Fusion
 
 The installed accelerated life-science toolkit is absorbed by capability rather than by skill name.
 
-### Hosted and local model service
+### Local model backends
 
-A single `HostedModelClient` handles:
+A single `ModelBackend` contract handles:
 
-- hosted bearer authentication using `NGC_API_KEY`, falling back to `NVIDIA_API_KEY`;
-- local endpoints without hosted authorization headers;
-- endpoint-specific timeouts;
+- local Python packages, command-line tools, and containers;
+- explicit executable and model-weight discovery;
+- backend-specific timeouts and resource requirements;
 - JSON, text, structure, and archive artifacts;
 - response validation and safe output paths.
 
-Model definitions provide endpoint, mode support, input validator, output parser, and scientific validation checklist. Initial integrated models are Boltz2, DiffDock, Evo2, GenMol, MolMIM, MSA Search, OpenFold2, OpenFold3, ProteinMPNN, and RFdiffusion.
+Model definitions provide command construction, input validation, output parsing, license status, installation guidance, and a scientific validation checklist. Candidate implementations include local Boltz, DiffDock, ProteinMPNN, RFdiffusion, OpenFold, and other independently installable models. A candidate is included only after its code, weights, and required datasets pass the license and reproducibility gate. Vendor-only models and endpoints are omitted.
 
 ### Composite workflows
 
@@ -141,28 +142,28 @@ The following become first-class Workbench workflows rather than exposed subskil
 - MSA search followed by structure prediction.
 - Structure prediction, docking, molecule generation, and candidate ranking.
 - RFdiffusion backbone generation followed by ProteinMPNN sequence design and structure validation.
-- Evo2 sequence generation or variant scoring followed by evidence and validation checks.
+- Local sequence generation or variant scoring followed by evidence and validation checks.
 
-Each workflow persists an execution manifest containing inputs, model/endpoint identifiers, parameters, artifact paths, validation results, and failures. Secrets are never written to the manifest.
+Each workflow persists an execution manifest containing inputs, model/backend identifiers, parameters, artifact paths, validation results, and failures. Secrets are never written to the manifest.
 
 ### Local GPU, container, and cluster execution
 
-- Parabricks commands are generated from a typed tool registry and guarded by GPU/runtime preflight.
-- Complexa and KERMT operations are represented as command workflows with setup, target, run, monitor, and evaluate phases.
+- Accelerated genomics is implemented with independently runnable tools such as DeepVariant, BWA-MEM2, GATK, samtools, and compatible workflow engines. Proprietary command suites are not required.
+- Protein-complex design and molecular pretraining workflows retain useful setup, target, run, monitor, and evaluate phases only when those phases can be mapped to open local implementations.
 - SLURM support is implemented through a generic scheduler backend; cluster configuration remains user-owned.
-- cuEquivariance and nvMolKit remain optional Python capabilities discovered by import, not copied libraries.
+- Optional Python acceleration libraries are discovered by import and used only when their installation and license are independently acceptable.
 
 ## Routing Behavior
 
 The router scores scientific intent, input type, runtime readiness, and capability confidence. It must distinguish:
 
 - scientific work that can run immediately;
-- hosted work requiring an available API key;
 - local GPU/container work requiring runtime readiness;
 - cluster work requiring explicit configuration;
+- model work that has no acceptable local backend and therefore must be rejected rather than rerouted to a paid service;
 - procedural workflow guidance.
 
-When multiple backends can satisfy a request, the router prefers an already-ready backend and reports the chosen execution mode. It never silently changes from hosted to local GPU execution or starts containers and services without explicit user intent.
+When multiple local backends can satisfy a request, the router prefers an already-ready backend and reports the chosen execution mode. It never starts containers, downloads model weights, or submits cluster work without explicit user intent.
 
 ## Repository Cleanup
 
@@ -184,15 +185,15 @@ The following are removed or replaced:
 Release validation must prove all of the following:
 
 1. Exactly one visible skill exists.
-2. Every operational catalog entry resolves to a local callable, command builder, hosted model definition, or local workflow document.
+2. Every operational catalog entry resolves to a local callable, command builder, public scientific service client, local model definition, or local workflow document.
 3. No operational path or catalog field contains the forbidden source project names.
 4. No source-root environment variable remains.
 5. No credential-like value exists in tracked files.
-6. Hosted clients never send authorization to local endpoints.
+6. No vendor-hosted model credential or paid inference dependency exists in the operational package.
 7. Input validation rejects malformed sequences, structures, SMILES, file paths, and unsupported parameters before network or process execution.
-8. Command builders are tested without launching Docker, SLURM, GPU jobs, or paid hosted calls.
+8. Command builders are tested without launching Docker, SLURM, GPU jobs, or model downloads.
 9. Network clients use mocked contract tests by default. Live smoke tests are opt-in and environment-gated.
-10. Router regression scenarios cover single, serial, parallel, mixed, hosted, local GPU, and cluster plans.
+10. Router regression scenarios cover single, serial, parallel, mixed, CPU, local GPU, unavailable-backend, and cluster plans.
 11. README installation commands and plugin cache validation remain correct.
 
 ## Delivery Sequence
@@ -201,7 +202,7 @@ The work is delivered as four independently testable phases:
 
 1. **Kernel fusion:** package, capability schema, runner, generic runtime discovery, catalog migration, bridge removal.
 2. **Scientific fusion:** portable function migration, executable evidence clients, removal of ghost entries.
-3. **Accelerated compute fusion:** hosted model client, model definitions, composite workflows, GPU/container/SLURM command backends.
+3. **Accelerated compute fusion:** local model backends, composite workflows, open genomics tools, and GPU/container/SLURM command backends.
 4. **Product surface:** router tuning, icon and diagrams, README rebuild, v0.2.0 migration notes, cache reinstall, GitHub release.
 
 Each phase uses test-first implementation and leaves the plugin installable. The v0.2.0 release is created only after all four phases pass release validation from both the repository and installed Codex cache.
@@ -210,8 +211,8 @@ Each phase uses test-first implementation and leaves the plugin installable. The
 
 - A repository-wide scan finds no bridge/adaptor architecture or operational source-project naming.
 - The screenshot state that motivated this refactor cannot recur because release validation forbids it.
-- A user invokes only `biomed-workbench`; routing can select one or several scientific, publication, hosted-model, GPU, or cluster capabilities.
+- A user invokes only `biomed-workbench`; routing can select one or several scientific, publication, CPU, local-model, GPU, or cluster capabilities.
 - Catalog claims and executable reality match.
 - The project installs from GitHub without any upstream checkout path.
-- Existing hosted NVIDIA credentials continue to work through the generic hosted-model runtime.
+- The plugin remains useful without any vendor-hosted model account or credential.
 - The README and icon describe Biomed Workbench itself, not the projects it absorbed.
