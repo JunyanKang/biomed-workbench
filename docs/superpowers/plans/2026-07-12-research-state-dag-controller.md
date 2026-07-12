@@ -693,23 +693,23 @@ git commit -m "feat: control self-correcting research cycles"
 - Add `ResearchAssistant.continue_project(state, requests=()) -> CycleResult`.
 - Keep `ResearchAssistant.run(objective, actions=..., ...) -> AssistantResult` by converting actions into a one-cycle compatibility DAG and converting the final state back to `ResearchRecord`.
 
-- [ ] **Step 1: Write failing one-entry and compatibility tests**
+- [x] **Step 1: Write failing one-entry and compatibility tests**
 
 Test natural project state creation, no user-facing module selection requirement, automatic graph/planner/controller use, state continuation, explicit gates and hypothesis changes in output, no routing scores in scientific delivery, secret/path-free serialization, and unchanged existing assistant tests.
 
-- [ ] **Step 2: Run and verify stateful APIs are absent**
+- [x] **Step 2: Run and verify stateful APIs are absent**
 
 Run: `python3 -m unittest tests.unit.test_assistant tests.e2e.test_stateful_assistant tests.e2e.test_skill_entrypoint`
 
-- [ ] **Step 3: Implement facade conversion**
+- [x] **Step 3: Implement facade conversion**
 
 The compatibility facade preserves legacy lifecycle stage order and fields. The stateful API exposes current question, active hypotheses, passed/failed gates, executed branches, evidence effects, plan revisions, unresolved requirements, and stop reason. It never asks users to invoke internal modules by ID.
 
-- [ ] **Step 4: Update Skill operating instructions**
+- [x] **Step 4: Update Skill operating instructions**
 
 Require Codex to inspect or initialize project state, formulate disconfirming observations and alternatives, request or infer artifact metadata without guessing versions, call the stateful planner/controller, report plan revisions, and open a new task only for plugin reload rather than for ordinary project continuation.
 
-- [ ] **Step 5: Run tests and commit**
+- [x] **Step 5: Run tests and commit**
 
 ```bash
 python3 -m unittest tests.unit.test_assistant tests.e2e.test_stateful_assistant tests.e2e.test_skill_entrypoint

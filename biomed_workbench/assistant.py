@@ -8,11 +8,21 @@ delivery state so multi-step research remains auditable.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Mapping
 
 from .models import EvidenceItem, ExecutionResult
 from .research import ResearchAction, ResearchRecord, StageRecord
 from .runner import run
+from .kernel.artifacts import ScientificArtifact
+from .kernel.context import ProjectContext
+from .kernel.hypotheses import Hypothesis
+from .kernel.state import ProjectState, apply_event
+from .modules.compatibility import detect_environment
+from .modules.index import BUILTIN_ROOT
+from .modules.registry import ModuleRegistry
+from .orchestration.controller import CycleResult, ResearchController
+from .orchestration.graph import build_capability_graph
+from .orchestration.planner import PlanningRequest, plan_research
 
 
 Executor = Callable[..., ExecutionResult]
@@ -49,8 +59,59 @@ def _evidence_from_execution(execution: ExecutionResult) -> tuple[EvidenceItem, 
 
 
 class ResearchAssistant:
-    def __init__(self, *, executor: Executor = run) -> None:
+    def __init__(
+        self,
+        *,
+        executor: Executor = run,
+        registry: ModuleRegistry | None = None,
+        controller: ResearchController | None = None,
+    ) -> None:
         self._executor = executor
+        self._registry = registry or ModuleRegistry.discover(BUILTIN_ROOT)
+        self._controller = controller or ResearchController(self._registry, environment_provider=detect_environment)
+
+    def start(
+        self,
+        context: ProjectContext,
+        *,
+        artifacts: tuple[ScientificArtifact, ...],
+        hypotheses: tuple[Hypothesis, ...],
+        requests: tuple[PlanningRequest, ...],
+    ) -> CycleResult:
+        if not isinstance(context, ProjectContext) or not artifacts or not hypotheses or not requests:
+            raise ValueError("stateful research requires context, artifacts, hypotheses, and planning requests")
+        state = ProjectState.create(context)
+        for hypothesis in hypotheses:
+            state = apply_event(
+                state,
+                "hypothesis_added",
+                {"hypothesis": hypothesis.to_dict()},
+                rationale="Register a falsifiable hypothesis through the unified assistant entry.",
+                affected_hypothesis_ids=(hypothesis.id,),
+            )
+        for artifact in artifacts:
+            state = apply_event(
+                state,
+                "artifact_registered",
+                {"artifact": artifact.to_dict()},
+                rationale="Register a typed project artifact through the unified assistant entry.",
+                affected_artifact_ids=(artifact.id,),
+            )
+        graph = build_capability_graph(self._registry)
+        plan = plan_research(state, self._registry, graph, requests)
+        return self._controller.advance(state, plan)
+
+    def continue_project(
+        self,
+        state: ProjectState | Mapping[str, object],
+        *,
+        requests: tuple[PlanningRequest, ...] = (),
+    ) -> CycleResult:
+        current = state if isinstance(state, ProjectState) else ProjectState.from_dict(state)
+        if requests:
+            plan = plan_research(current, self._registry, build_capability_graph(self._registry), requests)
+            return self._controller.advance(current, plan)
+        return self._controller.resume(current.to_dict())
 
     def run(
         self,

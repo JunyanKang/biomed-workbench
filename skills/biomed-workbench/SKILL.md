@@ -19,6 +19,14 @@ Complete every applicable stage. Routing and tool output are intermediate state,
 6. **Deliver**: return the scientific result or requested artifact, not capability IDs, routing scores, or command transcripts. Make the conclusion, supporting evidence, practical next decision, and limitations easy to find.
 7. **Audit**: confirm every material claim is traceable to supplied data, a capability result, or an identified source; report failed or skipped steps, unresolved uncertainty, and reproducibility details.
 
+## Project State
+
+For a continuing investigation, inspect and reuse the validated project state rather than rebuilding conclusions from chat history. Initialize explicit project context, typed artifacts, falsifiable hypotheses, disconfirming observations, alternative explanations, evidence requirements, and requested deliverables. Never infer a missing tool version, format version, orientation, index, coordinate system, genome build, experimental unit, or denominator from a filename.
+
+Build the capability graph and DAG from registered module contracts. Explain which branches are independent, which outputs feed later nodes, which compatibility row is required, and what evidence each node is expected to contribute. After execution, preserve quality findings, failed nodes, conflicting evidence, refuted hypotheses, plan revisions, and completed upstream artifacts in the event ledger. Continue or revise the project from replay-validated state; do not silently restart it.
+
+Treat `fatal` findings as branch stops and `major` findings as interpretation blocks requiring remediation or an explicit scope decision. Do not turn missing evidence into refutation, observational evidence into causal support, repeated records from one cohort into orthogonal evidence, or a new plan into evidence that prior work was executed.
+
 ## Internal Commands
 
 Resolve `WORKBENCH_ROOT` as the directory two levels above this `SKILL.md`; do not depend on the user's working directory.

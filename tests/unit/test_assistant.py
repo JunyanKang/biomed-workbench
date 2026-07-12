@@ -6,6 +6,11 @@ from biomed_workbench.research import ResearchAction
 
 
 class AssistantTests(unittest.TestCase):
+    def test_assistant_exposes_stateful_start_and_continue_without_module_selection_api(self):
+        self.assertTrue(callable(getattr(ResearchAssistant, "start", None)))
+        self.assertTrue(callable(getattr(ResearchAssistant, "continue_project", None)))
+        self.assertFalse(hasattr(ResearchAssistant, "select_module"))
+
     def test_assistant_finishes_with_scientific_output_not_tool_ids(self):
         def executor(capability_id, inputs, allow_mutation=False):
             self.assertEqual(capability_id, "ncbi-search-summary")
