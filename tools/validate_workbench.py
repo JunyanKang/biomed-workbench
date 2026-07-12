@@ -134,8 +134,8 @@ def main() -> int:
         errors.append(f"module registry discovery failed: {exc}")
     if registry is not None:
         modules = registry.all()
-        if len(modules) != 60:
-            errors.append(f"built-in module count must be 60, found {len(modules)}")
+        if len(modules) != 61:
+            errors.append(f"built-in module count must be 61, found {len(modules)}")
         if len(modules) != len(capabilities) or {item.id for item in modules} != {item.id for item in capabilities}:
             errors.append("module registry and compatibility capability projection differ")
         try:
@@ -500,6 +500,33 @@ def main() -> int:
                 or not str(summary.get("classification_policy", "")).startswith("none")
             ):
                 errors.append("VCF/BED TMB evidence differs from its module, serial filter plan, implementation, callable union, ANN counts, or arithmetic")
+        nmf_report_path = ROOT / "reports" / "nmf-live-verification.json"
+        try:
+            nmf_report = json.loads(nmf_report_path.read_text(encoding="utf-8"))
+            nmf_manifest = registry.get("metagene-factorization-nmf")
+            nmf_row = nmf_manifest.compatibility_matrix[0]
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("stable NMF live verification evidence is missing or invalid")
+        else:
+            summary = nmf_report.get("scientific_summary", {})
+            implementation = nmf_report.get("implementation", {})
+            if (
+                nmf_report.get("passed") is not True
+                or nmf_report.get("module_version") != nmf_manifest.version
+                or nmf_report.get("compatibility_row_id") != nmf_row.id
+                or nmf_report.get("tool_versions") != {"python3": "3.14.3"}
+                or nmf_report.get("dependency_versions") != {"numpy": "2.4.4", "scipy": "1.17.1", "scikit-learn": "1.8.0"}
+                or nmf_report.get("fixture", {}).get("format") != "count-matrix@1.0.0"
+                or nmf_report.get("fixture", {}).get("orientation") != "features-by-samples"
+                or implementation.get("module") != "biomed_workbench.implementations.nmf_metagenes"
+                or not re.fullmatch(r"[0-9a-f]{64}", str(implementation.get("sha256", "")))
+                or summary.get("selected_rank") != 2
+                or summary.get("removed_features") != ["GENE_ZERO", "GENE_CONSTANT"]
+                or summary.get("quality_status") != "passed"
+                or summary.get("selected_relative_error", 1) >= 0.001
+                or summary.get("rank_metrics", [{}])[0].get("component_stability", 0) <= 0.99
+            ):
+                errors.append("stable NMF evidence differs from its module, runtime, implementation, fixture, rank selection, reconstruction, or stability checks")
 
         reconciliation_path = ROOT / "reports" / "source-reconciliation-summary.json"
         assimilation_path = ROOT / "reports" / "source-assimilation-summary.json"

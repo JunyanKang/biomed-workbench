@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 60,
-  "module_count": 60,
+  "compatibility_complete": 61,
+  "module_count": 61,
   "modules": [
     {
       "compatibility_rows": [
@@ -3841,6 +3841,309 @@
         }
       ],
       "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "metagene-factorization-nmf-e2e-v1"
+          ],
+          "id": "python-3.14-numpy-2.4-scipy-1.17-sklearn-1.8-count-matrix-1.0-nmf-v1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "metagene-factorization-nmf-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=2.4,<2.5"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "numpy",
+          "name": "numpy",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Provide finite nonnegative matrix arithmetic, deterministic factor normalization, reconstruction, and stable ranking.",
+          "required": true,
+          "tested_versions": [
+            "2.4.4"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import numpy; print(numpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://numpy.org/doc/stable/release/2.4.4-notes.html"
+        },
+        {
+          "allowed_versions": [
+            ">=1.17,<1.18"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "scipy",
+          "name": "scipy",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Align components across independent NMF restarts with the Hungarian linear-sum assignment algorithm.",
+          "required": true,
+          "tested_versions": [
+            "1.17.1"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import scipy; print(scipy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://docs.scipy.org/doc/scipy/release/1.17.1-notes.html"
+        },
+        {
+          "allowed_versions": [
+            ">=1.8,<1.9"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "sklearn",
+          "name": "scikit-learn",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "purpose": "Fit coordinate-descent Frobenius NMF with explicit initialization, convergence tolerance, iteration limit, regularization, shuffle, and random-state settings.",
+          "required": true,
+          "tested_versions": [
+            "1.8.0"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import sklearn; print(sklearn.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://scikit-learn.org/stable/whats_new/v1.8.html"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "metagene-factorization-nmf",
+      "input_formats": [
+        {
+          "artifact_type": "feature_matrix_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "count-matrix",
+              "orientations": [
+                "features-by-samples"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "expression_matrix",
+          "processing_levels": [
+            "normalized"
+          ],
+          "required_metadata": [
+            "feature-axis",
+            "observation-axis",
+            "value-semantics",
+            "identifier-namespace",
+            "annotation-release-or-not-applicable",
+            "sample-manifest-digest",
+            "experimental-unit",
+            "normalization-method",
+            "batch-correction-method",
+            "missing-value-policy"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "factor_loadings",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "biomed-nmf-loadings",
+              "orientations": [
+                "features-by-components"
+              ],
+              "representations": [
+                "text",
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "metagene_loadings",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "feature-axis",
+            "component-axis",
+            "identifier-namespace",
+            "annotation-release-or-not-applicable",
+            "sample-manifest-digest",
+            "normalization-method",
+            "parameter-digest"
+          ]
+        },
+        {
+          "artifact_type": "factor_exposures",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "biomed-nmf-exposures",
+              "orientations": [
+                "components-by-samples"
+              ],
+              "representations": [
+                "text",
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "sample_exposures",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "component-axis",
+            "observation-axis",
+            "sample-manifest-digest",
+            "parameter-digest"
+          ]
+        },
+        {
+          "artifact_type": "quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "biomed-nmf-report",
+              "orientations": [
+                "candidate-ranks-by-stability-and-reconstruction"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "factorization_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "sample-manifest-digest",
+            "parameter-digest",
+            "implementation-digest"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "ecosystem": "system",
+          "identity": "python3",
+          "mismatch_policy": "block",
+          "name": "python3",
+          "platforms": [
+            "macos-arm64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.14,<3.15"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated runtime executes the digest-bound project implementation and strict factor/report serialization under Python 3.14 semantics.",
+              "id": "python-314-nmf-implementation-runtime",
+              "required_action": "Record the actual interpreter and implementation digest and independently validate all factor outputs before evidence ingestion.",
+              "source": "https://docs.python.org/3.14/"
+            }
+          ],
+          "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
       "validation_status": "complete"
     },
     {
@@ -8435,6 +8738,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "1b65e094d7f3fff3d2fea4799538058b05b32da0ada3c6a429fe90b274157d7b",
+  "registry_digest": "a26b27d6df5e605424bd322b79cacee9b20e7f72ab830890646349b6886c4e81",
   "schema_version": 1
 }

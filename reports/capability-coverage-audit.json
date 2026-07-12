@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "learned_file_count": 89314,
-  "current_capability_count": 60,
+  "current_capability_count": 61,
   "module_registry_verification": {
-    "module_count": 60,
-    "registry_digest": "1b65e094d7f3fff3d2fea4799538058b05b32da0ada3c6a429fe90b274157d7b",
+    "module_count": 61,
+    "registry_digest": "a26b27d6df5e605424bd322b79cacee9b20e7f72ab830890646349b6886c4e81",
     "installed_cache_verified": true,
     "dynamic_registration_verified": true,
-    "strict_compatibility_rows": 60
+    "strict_compatibility_rows": 61
   },
   "current_capability_ids": [
     "adverse-event-summary",
@@ -40,6 +40,7 @@
     "interval-overlap-bedtools",
     "literature-evidence",
     "manuscript-audit",
+    "metagene-factorization-nmf",
     "ncbi-fetch",
     "ncbi-info",
     "ncbi-link",
@@ -71,7 +72,7 @@
     "variant-region-query-tabix",
     "variant-summary"
   ],
-  "reassessment_digest": "307a10dfa71f21f592ca1051c9f8f888f14c6b671563b9341b8b0b94e36dec77",
+  "reassessment_digest": "60659af5f2d2e2d4eeba707f4523fe6fb0662cf239ced42b72726897e8f214df",
   "digest_basis": "SHA-256 over learned file count, current capability IDs, source counts, source reconciliation, implemented expansion, priority gaps, and product exclusions using canonical sorted JSON.",
   "source_file_counts": {
     "primary-a": 260,
@@ -82,15 +83,15 @@
   },
   "source_reconciliation": {
     "file_count": 89314,
-    "reconciled_count": 87492,
-    "pending_count": 1822,
-    "binding_count": 2,
-    "bound_module_count": 3,
-    "receipt_root_digest": "2b555401a8e16f5bcbf13e7c793522a1592c81c7b1c90142ae5c029dbb0a5589",
+    "reconciled_count": 87493,
+    "pending_count": 1821,
+    "binding_count": 3,
+    "bound_module_count": 4,
+    "receipt_root_digest": "9e527fd2ca62254092fb4b90a4f51f9509d6d46a40a97215857f2b763ba9d765",
     "completeness_claim_allowed": false
   },
   "family_signal_summary": {
-    "covered": 60,
+    "covered": 61,
     "partial": 670,
     "missing": 432,
     "unresolved": 1110
@@ -114,6 +115,7 @@
     "auditable_vcf_quality_depth_frequency_and_gene_filtering",
     "byte_preserving_bgzf_vcf_decompression",
     "ann_and_callable_bed_tumor_mutation_burden",
+    "stable_multistart_rank_selected_nmf_metagene_factorization",
     "adverse_event_summary",
     "biochemical_kinetics",
     "cloning_assembly",
@@ -129,25 +131,95 @@
     "declared_reference_contamination_screening"
   ],
   "priority_gaps": [
-    {"domain": "evidence", "family": "citation_verification", "signals": 74},
-    {"domain": "evidence", "family": "preprint_discovery", "signals": 48},
-    {"domain": "evidence", "family": "chemical_database_query", "signals": 22},
-    {"domain": "evidence", "family": "clinical_trial_registry", "signals": 7},
-    {"domain": "evidence", "family": "structure_database_query", "signals": 3},
-    {"domain": "omics", "family": "comparative_genomics", "signals": 3},
-    {"domain": "omics", "family": "epigenomics", "signals": 4},
-    {"domain": "imaging", "family": "medical_imaging", "signals": 16},
-    {"domain": "imaging", "family": "physiology_timeseries", "signals": 4},
-    {"domain": "imaging", "family": "electrophysiology", "signals": 2},
-    {"domain": "clinical", "family": "clinical_decision_support", "signals": 7},
-    {"domain": "clinical", "family": "terminology_validation", "signals": 2},
-    {"domain": "publication", "family": "presentation_design", "signals": 51},
-    {"domain": "publication", "family": "proposal_design", "signals": 6},
-    {"domain": "publication", "family": "literature_corpus", "signals": 1},
-    {"domain": "wetlab", "family": "microbial_assay", "signals": 4}
+    {
+      "domain": "evidence",
+      "family": "citation_verification",
+      "signals": 74
+    },
+    {
+      "domain": "evidence",
+      "family": "preprint_discovery",
+      "signals": 48
+    },
+    {
+      "domain": "evidence",
+      "family": "chemical_database_query",
+      "signals": 22
+    },
+    {
+      "domain": "evidence",
+      "family": "clinical_trial_registry",
+      "signals": 7
+    },
+    {
+      "domain": "evidence",
+      "family": "structure_database_query",
+      "signals": 3
+    },
+    {
+      "domain": "omics",
+      "family": "comparative_genomics",
+      "signals": 3
+    },
+    {
+      "domain": "omics",
+      "family": "epigenomics",
+      "signals": 4
+    },
+    {
+      "domain": "imaging",
+      "family": "medical_imaging",
+      "signals": 16
+    },
+    {
+      "domain": "imaging",
+      "family": "physiology_timeseries",
+      "signals": 4
+    },
+    {
+      "domain": "imaging",
+      "family": "electrophysiology",
+      "signals": 2
+    },
+    {
+      "domain": "clinical",
+      "family": "clinical_decision_support",
+      "signals": 7
+    },
+    {
+      "domain": "clinical",
+      "family": "terminology_validation",
+      "signals": 2
+    },
+    {
+      "domain": "publication",
+      "family": "presentation_design",
+      "signals": 51
+    },
+    {
+      "domain": "publication",
+      "family": "proposal_design",
+      "signals": 6
+    },
+    {
+      "domain": "publication",
+      "family": "literature_corpus",
+      "signals": 1
+    },
+    {
+      "domain": "wetlab",
+      "family": "microbial_assay",
+      "signals": 4
+    }
   ],
   "product_exclusions": {
-    "compute_infrastructure": ["cpu_runtime_management", "gpu_runtime_management", "container_orchestration", "slurm", "local_model_hosting"],
+    "compute_infrastructure": [
+      "cpu_runtime_management",
+      "gpu_runtime_management",
+      "container_orchestration",
+      "slurm",
+      "local_model_hosting"
+    ],
     "rationale": "These are deployment and compute-platform responsibilities, not scientific-assistant capabilities. Public database access and bounded deterministic analysis remain in scope."
   }
 }

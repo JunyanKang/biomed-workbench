@@ -1,0 +1,242 @@
+{
+  "compatibility_policy": {
+    "dependencies": {
+      "numpy": [
+        ">=2.4,<2.5"
+      ],
+      "scikit-learn": [
+        ">=1.8,<1.9"
+      ],
+      "scipy": [
+        ">=1.17,<1.18"
+      ]
+    },
+    "tools": {
+      "python3": [
+        ">=3.14,<3.15"
+      ]
+    }
+  },
+  "compatibility_row_id": "python-3.14-numpy-2.4-scipy-1.17-sklearn-1.8-count-matrix-1.0-nmf-v1",
+  "dependency_versions": {
+    "numpy": "2.4.4",
+    "scikit-learn": "1.8.0",
+    "scipy": "1.17.1"
+  },
+  "end_to_end_evidence_id": "metagene-factorization-nmf-e2e-v1",
+  "execution": {
+    "command_contract_digest": "800b842d137f1913254585d804322669d3c022a3a7d29af2bc4b47242992c550",
+    "executable_sha256": "cbf84109626aa1013bbe408fbb9590bd0f1c1548f038b2221c6b8b87de26ca43",
+    "inputs": {
+      "features": {
+        "byte_size": 66,
+        "role": "features",
+        "sha256": "1cb8f7a252f844922dc05cf04d45b6d2e2c14e22083e5aec50935483e92374d0"
+      },
+      "matrix": {
+        "byte_size": 274,
+        "role": "matrix",
+        "sha256": "395fd2216dc36e3a3ddc82fff00163b98876a5af320cff76773621cae7d7fb3a"
+      },
+      "samples": {
+        "byte_size": 84,
+        "role": "observations",
+        "sha256": "6dd17a436e00b9b2bc4323c0ed174fceec5cfaa4b331cf2228b54d71e1fa1a6b"
+      }
+    },
+    "outputs": [
+      {
+        "byte_size": 303,
+        "media_type": "text/tab-separated-values",
+        "object_key": "sha256/71/71f81b6331b1deffe7427dc0f09cd27f056bc49ddcdcc0d82995efaf38011e29/payload",
+        "role": "loadings",
+        "sha256": "71f81b6331b1deffe7427dc0f09cd27f056bc49ddcdcc0d82995efaf38011e29"
+      },
+      {
+        "byte_size": 404,
+        "media_type": "text/tab-separated-values",
+        "object_key": "sha256/83/830426528c44b9051a420a93a388b3b366375969fa39cbc4fcb99a40e9be5594/payload",
+        "role": "exposures",
+        "sha256": "830426528c44b9051a420a93a388b3b366375969fa39cbc4fcb99a40e9be5594"
+      },
+      {
+        "byte_size": 2657,
+        "media_type": "application/json",
+        "object_key": "sha256/41/41814dd4f87cd20a03edcea0e3b263352dce99851602a722772147d4d8b776ac/payload",
+        "role": "report",
+        "sha256": "41814dd4f87cd20a03edcea0e3b263352dce99851602a722772147d4d8b776ac"
+      }
+    ],
+    "parameters": {
+      "max-iter": "2000",
+      "maximum-component-similarity": "0.95",
+      "minimum-assignment-stability": "0.95",
+      "minimum-component-stability": "0.95",
+      "ranks": "2,3",
+      "restarts": "8",
+      "seed": "271828",
+      "selection-error-gap": "0.01",
+      "tolerance": "1e-05",
+      "top-genes": "3"
+    }
+  },
+  "fixture": {
+    "experimental_unit": "synthetic-independent-sample",
+    "feature_identifier_namespace": "synthetic-gene-symbol",
+    "features_sha256": "1cb8f7a252f844922dc05cf04d45b6d2e2c14e22083e5aec50935483e92374d0",
+    "format": "count-matrix@1.0.0",
+    "matrix_sha256": "395fd2216dc36e3a3ddc82fff00163b98876a5af320cff76773621cae7d7fb3a",
+    "orientation": "features-by-samples",
+    "parameters": {
+      "max-iter": 2000,
+      "maximum-component-similarity": 0.95,
+      "minimum-assignment-stability": 0.95,
+      "minimum-component-stability": 0.95,
+      "ranks": "2,3",
+      "restarts": 8,
+      "seed": 271828,
+      "selection-error-gap": 0.01,
+      "tolerance": 1e-05,
+      "top-genes": 3
+    },
+    "processing_level": "normalized",
+    "sample_manifest_digest": "6dd17a436e00b9b2bc4323c0ed174fceec5cfaa4b331cf2228b54d71e1fa1a6b",
+    "samples_sha256": "6dd17a436e00b9b2bc4323c0ed174fceec5cfaa4b331cf2228b54d71e1fa1a6b"
+  },
+  "fixture_digest": "c9304503e34d624d9eb075943753f7f9158bd2abfd165ae2ea632278c546e33c",
+  "html_report_validated": false,
+  "implementation": {
+    "module": "biomed_workbench.implementations.nmf_metagenes",
+    "sha256": "d864a57e3091d76ac0a39945ea68c630ca7dc9ae79b8d5e392a6f95dc0781565"
+  },
+  "module_id": "metagene-factorization-nmf",
+  "module_version": "1.0.0",
+  "passed": true,
+  "regression_evidence_id": "metagene-factorization-nmf-regression-v1",
+  "schema_version": 1,
+  "scientific_summary": {
+    "candidate_ranks": [
+      2,
+      3
+    ],
+    "dominant_component_by_sample": {
+      "SAMPLE_A1": "Metagene_1",
+      "SAMPLE_A2": "Metagene_1",
+      "SAMPLE_A3": "Metagene_1",
+      "SAMPLE_B1": "Metagene_2",
+      "SAMPLE_B2": "Metagene_2",
+      "SAMPLE_B3": "Metagene_2",
+      "SAMPLE_MIX1": "Metagene_1",
+      "SAMPLE_MIX2": "Metagene_1"
+    },
+    "input_feature_count": 8,
+    "max_iter": 2000,
+    "maximum_component_similarity": 0.34655654900035415,
+    "method": "sklearn-nmf-cd-frobenius-random-multistart-v1",
+    "quality_findings": [],
+    "quality_status": "passed",
+    "quality_thresholds": {
+      "maximum_component_similarity": 0.95,
+      "minimum_assignment_stability": 0.95,
+      "minimum_component_stability": 0.95
+    },
+    "rank_metrics": [
+      {
+        "assignment_stability": 0.96875,
+        "best_relative_error": 0.0007103480412275291,
+        "component_stability": 0.9995973885239748,
+        "converged_restarts": 8,
+        "iterations": [
+          25,
+          22,
+          23,
+          24,
+          24,
+          24,
+          22,
+          21
+        ],
+        "mean_relative_error": 0.0007103539336977924,
+        "rank": 2,
+        "relative_error_sd": 4.056097139603224e-09
+      },
+      {
+        "assignment_stability": 0.890625,
+        "best_relative_error": 0.0005119847168363118,
+        "component_stability": 0.9205439746166514,
+        "converged_restarts": 8,
+        "iterations": [
+          75,
+          27,
+          40,
+          54,
+          80,
+          21,
+          42,
+          21
+        ],
+        "mean_relative_error": 0.000584566792926694,
+        "rank": 3,
+        "relative_error_sd": 6.403384764200825e-05
+      }
+    ],
+    "removed_features": [
+      "GENE_ZERO",
+      "GENE_CONSTANT"
+    ],
+    "restarts": 8,
+    "retained_feature_count": 6,
+    "sample_count": 8,
+    "schema_version": 1,
+    "seed": 271828,
+    "selected_mse": 1.057305218725746e-05,
+    "selected_rank": 2,
+    "selected_relative_error": 0.0007103480412275291,
+    "selection_error_gap": 0.01,
+    "selection_rule": "highest component then assignment stability within an additive relative-reconstruction-error gap; smaller rank breaks ties",
+    "tolerance": 1e-05,
+    "top_features": {
+      "Metagene_1": [
+        {
+          "feature": "GENE_A",
+          "weight": 0.4131963112116003
+        },
+        {
+          "feature": "GENE_B",
+          "weight": 0.3304808888978879
+        },
+        {
+          "feature": "GENE_C",
+          "weight": 0.20650034326120892
+        }
+      ],
+      "Metagene_2": [
+        {
+          "feature": "GENE_D",
+          "weight": 0.4342811381268599
+        },
+        {
+          "feature": "GENE_E",
+          "weight": 0.3472189701710654
+        },
+        {
+          "feature": "GENE_F",
+          "weight": 0.21694011903674593
+        }
+      ]
+    }
+  },
+  "tested_version_baseline": {
+    "dependencies": {
+      "numpy": true,
+      "scikit-learn": true,
+      "scipy": true
+    },
+    "tools": {
+      "python3": true
+    }
+  },
+  "tool_versions": {
+    "python3": "3.14.3"
+  }
+}

@@ -1151,6 +1151,23 @@
       "workflow": "publication"
     },
     {
+      "access": "offline",
+      "description": "Factorize a declared nonnegative normalized feature-by-sample matrix across candidate ranks and deterministic restarts, select a stable parsimonious rank within an explicit reconstruction-error gap, and independently validate metagene loadings, sample exposures, assignments, reconstruction, convergence, stability, and component redundancy.",
+      "entrypoint": "scientific-command",
+      "id": "metagene-factorization-nmf",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Discover stable metagene programs with multi-start NMF",
+      "workflow": "omics"
+    },
+    {
       "access": "public_api",
       "description": "Fetch database-native records such as XML, MEDLINE, GenBank, or FASTA.",
       "entrypoint": "biomed_workbench.capabilities.ncbi:fetch",
@@ -2275,7 +2292,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 60,
+  "entry_count": 61,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }
