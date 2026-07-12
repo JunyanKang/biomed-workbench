@@ -1,5 +1,6 @@
 """Public immutable contracts for stateful scientific research projects."""
 
+from .artifact_store import ArtifactPayload, ProjectArtifactStore
 from .artifacts import QUALITY_STATUSES, ScientificArtifact
 from .context import CONSTRAINT_KINDS, PRIVACY_LEVELS, Comparison, Constraint, ProjectContext
 from .evidence import EVIDENCE_RELATIONS, EvidenceRecord, add_evidence, evidence_partition, independent_evidence_groups
@@ -25,6 +26,8 @@ __all__ = [
     "DecisionEvent",
     "EvidenceRecord",
     "FrozenMapping",
+    "ArtifactPayload",
+    "ProjectArtifactStore",
     "ProjectContext",
     "Hypothesis",
     "PlanNode",

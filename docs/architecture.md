@@ -23,6 +23,8 @@ The plugin does not manage CPUs, GPUs, containers, Slurm, remote compute, or loc
 
 Scientific artifacts preserve format and schema version, compression, orientation, companion indexes, coordinates, genome build, annotation release, identifier namespace, producer module/tool versions, experimental unit, denominator, processing level, quality status, source artifact lineage, and content digest. Unknown or incompatible metadata is not inferred from a filename.
 
+Large scientific payloads are imported into a project-owned content-addressed store. Project state records only a payload role, SHA-256-derived relative object key, media type, byte size, and SHA-256; it never records the source path or source filename. Import rejects symlinks and non-regular files, while every resolution rechecks containment, file type, byte size, and digest. Inline artifacts keep their original canonical digest, and payload-backed artifacts bind every payload descriptor into artifact identity.
+
 Fatal findings stop the affected path. Major findings block interpretation until remediation or an explicit scope decision. Warnings remain attached to downstream artifacts and claims. Refuting, weakening, supporting, and inconclusive evidence remain separate; refuted hypotheses and superseded plans remain in history.
 
 ## Module Contract

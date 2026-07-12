@@ -154,7 +154,7 @@ def main() -> int:
             if (
                 research_report.get("passed") is not True
                 or research_report.get("module_count") != len(modules)
-                or research_report.get("test_count", 0) < 288
+                or research_report.get("test_count", 0) < 295
                 or research_report.get("registry_digest") != registry.digest
                 or graph_report != {"node_count": len(graph.nodes), "edge_count": len(graph.edges), "digest": graph.digest}
             ):

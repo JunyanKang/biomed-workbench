@@ -15,7 +15,7 @@ class ResearchEngineEvidenceTests(unittest.TestCase):
 
         self.assertTrue(report["passed"])
         self.assertEqual(report["module_count"], 48)
-        self.assertGreaterEqual(report["test_count"], 288)
+        self.assertGreaterEqual(report["test_count"], 295)
         self.assertEqual(report["scenario_count"], 4)
         self.assertEqual({item["plan_type"] for item in scenarios}, {"single", "serial", "parallel", "mixed"})
         self.assertEqual(report["strict_compatibility_blocks"], 4)
@@ -39,6 +39,18 @@ class ResearchEngineEvidenceTests(unittest.TestCase):
         for marker in ("/Users/", "/private/", "NCBI_API_KEY", "nvapi-", "source_path"):
             self.assertNotIn(marker, text)
         self.assertGreaterEqual(len(json.loads(REPORT.read_text())["limitations"]), 4)
+
+    def test_large_artifact_contract_is_project_relative_and_content_addressed(self):
+        from biomed_workbench.kernel.artifact_store import ArtifactPayload
+
+        digest = "a" * 64
+        payload = ArtifactPayload("reads", f"sha256/aa/{digest}/payload", "application/gzip", 100, digest).to_dict()
+        serialized = json.dumps(payload, sort_keys=True)
+
+        self.assertEqual(set(payload), {"role", "object_key", "media_type", "byte_size", "sha256"})
+        self.assertFalse(Path(payload["object_key"]).is_absolute())
+        for marker in ("/Users/", "/Volumes/", "file://", "sample.fastq", "API_KEY"):
+            self.assertNotIn(marker, serialized)
 
 
 if __name__ == "__main__":

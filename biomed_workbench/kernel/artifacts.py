@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+from .artifact_store import ArtifactPayload
 from .identity import FrozenMapping, digest_value, freeze_mapping, thaw, validate_identifier
 
 
@@ -49,6 +50,7 @@ class ScientificArtifact:
     producer_tool_versions: Mapping[str, str]
     content: Mapping[str, Any]
     content_digest: str
+    payloads: tuple[ArtifactPayload, ...] = ()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "artifact.id"))
@@ -92,9 +94,21 @@ class ScientificArtifact:
         object.__setattr__(self, "producer_tool_versions", versions)
         content = freeze_mapping(self.content)
         object.__setattr__(self, "content", content)
-        expected = digest_value(content)
+        payloads = tuple(self.payloads)
+        if any(not isinstance(payload, ArtifactPayload) for payload in payloads):
+            raise ValueError("artifact payloads must be ArtifactPayload values")
+        if len({payload.role for payload in payloads}) != len(payloads):
+            raise ValueError("artifact payload roles must be unique")
+        object.__setattr__(self, "payloads", payloads)
+        expected = self._content_digest(content, payloads)
         if self.content_digest != expected:
             raise ValueError("artifact content digest does not match canonical content")
+
+    @staticmethod
+    def _content_digest(content: Mapping[str, Any], payloads: tuple[ArtifactPayload, ...]) -> str:
+        if not payloads:
+            return digest_value(content)
+        return digest_value({"content": thaw(content), "payloads": [payload.to_dict() for payload in payloads]})
 
     @classmethod
     def create(cls, **values: Any) -> "ScientificArtifact":
@@ -103,17 +117,20 @@ class ScientificArtifact:
         content = values.get("content")
         if not isinstance(content, Mapping):
             raise ValueError("artifact.content must be an object")
-        return cls(**values, content_digest=digest_value(content))
+        payloads = tuple(values.get("payloads", ()))
+        values["payloads"] = payloads
+        return cls(**values, content_digest=cls._content_digest(content, payloads))
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "ScientificArtifact":
         values = dict(payload)
         values["source_artifact_ids"] = tuple(values["source_artifact_ids"])
         values["indexes"] = tuple(values["indexes"])
+        values["payloads"] = tuple(ArtifactPayload.from_dict(item) for item in values.get("payloads", ()))
         return cls(**values)
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload = {
             "id": self.id,
             "artifact_type": self.artifact_type,
             "schema_version": self.schema_version,
@@ -138,3 +155,6 @@ class ScientificArtifact:
             "content": thaw(self.content),
             "content_digest": self.content_digest,
         }
+        if self.payloads:
+            payload["payloads"] = [value.to_dict() for value in self.payloads]
+        return payload
