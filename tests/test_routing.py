@@ -71,6 +71,14 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(plan["matched_workflows"], ["evidence"])
         self.assertEqual(plan["plan_type"], "single")
 
+    def test_claim_provenance_request_routes_to_claim_integrity_audit(self):
+        plan = route("核查论文主张与原文证据、实验结果和预设约束的一致性")
+
+        routed = [candidate["id"] for step in plan["steps"] for candidate in step["candidates"]]
+        self.assertEqual(routed[0], "claim-evidence-integrity-audit")
+        self.assertEqual(plan["matched_workflows"], ["publication"])
+        self.assertEqual(plan["plan_type"], "single")
+
     def test_route_output_has_no_source_or_adapter_fields(self):
         plan = route("search TP53 gene evidence")
         serialized = repr(plan).lower()

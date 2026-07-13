@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "id": "claim-evidence-integrity-audit",
+  "version": "1.0.0",
+  "title": "Audit claim provenance and evidence integrity",
+  "description": "Reconcile declared and emitted claims with independently reviewed literature and experiment evidence, preserving unresolved retrieval, negative results, refutation, causal-design limits, and prespecified constraints.",
+  "module_type": "validation",
+  "domains": ["publication", "evidence", "research-quality"],
+  "intents": [
+    "audit claim evidence integrity before research delivery",
+    "verify manuscript claims against reviewed citations and executed experiments",
+    "核查论文主张与原文证据、实验结果和预设约束的一致性",
+    "审计科研结论是否存在未读原文、未执行实验、因果升级或反证遗漏"
+  ],
+  "questions": [
+    "Are emitted scientific claims within their declared scope and supported by independently reviewed, provenance-complete, design-appropriate literature or experiment evidence without ignored refutation or constraint violations?"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.claim_integrity:audit_claim_evidence_integrity",
+  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 10000000},
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "claim_evidence_bundle",
+      "artifact_type": "claim_evidence_bundle",
+      "formats": [{"name": "claim-evidence-bundle", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["request-object"]}],
+      "processing_levels": ["independently-adjudicated"],
+      "required_metadata": ["audit_id", "audit_version", "review_owner", "reviewed_at", "rules_independent_from_writer", "leakage_reviewed"]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "claim_integrity_report",
+      "artifact_type": "claim_integrity_report",
+      "formats": [{"name": "claim-integrity-report", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["module-output"]}],
+      "processing_levels": ["validated"],
+      "required_metadata": ["module_version", "compatibility_row_id", "audit_version", "audit_digest"]
+    }
+  ],
+  "preconditions": [
+    "Semantic evidence relations and constraint verdicts have been recorded by a reviewer or deterministic result check independently of the writer being audited."
+  ],
+  "assumptions": [
+    "Evidence IDs, independent-group assignments, source acquisition claims, experiment execution records, and adjudication rationales accurately describe the reviewed materials."
+  ],
+  "quality_gates": [
+    {"id": "claim-source-content-review", "severity": "major", "description": "Citation identity or metadata resolution cannot establish claim support without original-source content review.", "blocks_interpretation": true},
+    {"id": "claim-experiment-execution", "severity": "major", "description": "Fully skipped, unreviewed, or result-less experiments cannot support claims, and every skipped planned unit requires a reason.", "blocks_interpretation": true},
+    {"id": "claim-refutation-priority", "severity": "major", "description": "Eligible refuting evidence and prespecified negative-constraint violations override concurrent support for release decisions.", "blocks_interpretation": true},
+    {"id": "claim-causal-design", "severity": "major", "description": "Causal claims require eligible evidence from randomized, interventional, or controlled-perturbation designs.", "blocks_interpretation": true},
+    {"id": "claim-audit-independence", "severity": "major", "description": "Audit rules must be independent of the writer and leakage must be reviewed.", "blocks_interpretation": true}
+  ],
+  "limitations": [
+    "This deterministic reducer audits supplied adjudications; it does not itself read papers, inspect raw experiment files, infer semantic entailment, or prove reviewer independence."
+  ],
+  "evidence_effects": ["validates_claim_evidence_alignment", "detects_claim_scope_drift", "preserves_refuting_evidence", "limits_release_readiness_claim"],
+  "alternatives": [],
+  "complements": ["citation-resolution-adjudication", "classification-gold-set-evaluation", "research-contract-consistency-audit", "literature-evidence", "manuscript-audit", "reviewer-assessment", "response-matrix"],
+  "tool_requirements": [],
+  "dependencies": [
+    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-13", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate bounded claim, citation, experiment, provenance, and directional evidence records with deterministic release gates.", "conflicts": [], "platforms": ["any"]}
+  ],
+  "compatibility_matrix": [
+    {"id": "python-3.14.3-claim-evidence-bundle-1", "module_version": "1.0.0", "tool_versions": {}, "dependency_versions": {"python": [">=3.14,<3.15"]}, "input_formats": {"claim_evidence_bundle": ["claim-evidence-bundle@1"]}, "output_formats": {"claim_integrity_report": ["claim-integrity-report@1"]}, "platforms": ["any"], "regression_evidence_ids": ["claim-evidence-integrity-audit-regression-v1"], "end_to_end_evidence_ids": ["claim-evidence-integrity-audit-e2e-v1"], "verified_at": "2026-07-13"}
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "declared_claims": {
+        "type": "array", "minItems": 1, "maxItems": 10000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "text": {"type": "string", "minLength": 1, "maxLength": 4000},
+            "claim_strength": {"type": "string", "enum": ["descriptive", "association", "prediction", "causal"]},
+            "intended_evidence_types": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["literature", "experiment", "clinical", "omics", "imaging", "statistical"]}},
+            "citation_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+            "experiment_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+            "analysis_artifact_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+            "minimum_independent_supports": {"type": "integer", "minimum": 1, "maximum": 100},
+            "negative_constraints": {
+              "type": "array",
+              "items": {"type": "object", "additionalProperties": false, "properties": {"id": {"type": "string", "minLength": 1, "maxLength": 128}, "description": {"type": "string", "minLength": 1, "maxLength": 4000}}, "required": ["id", "description"]}
+            },
+            "partial_support_policy": {"type": "string", "enum": ["forbidden", "allowed_with_qualification"]}
+          },
+          "required": ["id", "text", "claim_strength", "intended_evidence_types", "citation_ids", "experiment_ids", "analysis_artifact_ids", "minimum_independent_supports", "negative_constraints", "partial_support_policy"]
+        }
+      },
+      "emitted_claims": {
+        "type": "array", "maxItems": 10000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "declared_claim_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true},
+            "text": {"type": "string", "minLength": 1, "maxLength": 4000},
+            "claim_strength": {"type": "string", "enum": ["descriptive", "association", "prediction", "causal"]},
+            "citation_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+            "experiment_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+            "analysis_artifact_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 128}}
+          },
+          "required": ["id", "declared_claim_id", "text", "claim_strength", "citation_ids", "experiment_ids", "analysis_artifact_ids"]
+        }
+      },
+      "citations": {
+        "type": "array", "maxItems": 100000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "identity_status": {"type": "string", "enum": ["verified_match", "identifier_not_found", "unresolved"]},
+            "source_acquired": {"type": "boolean"},
+            "metadata_verified_against_original": {"type": "boolean"},
+            "claim_content_reviewed": {"type": "boolean"},
+            "retrieval_status": {"type": "string", "enum": ["completed", "not_found", "unreachable", "not_attempted"]},
+            "verification_method": {"type": "string", "enum": ["original_source_review", "manual_source_review", "resolver_only", "none"]},
+            "study_design": {"type": "string", "enum": ["descriptive", "cross-sectional", "case-control", "observational-cohort", "systematic-review", "meta-analysis", "randomized", "interventional", "controlled-perturbation"]},
+            "independent_group": {"type": "string", "minLength": 1, "maxLength": 128}
+          },
+          "required": ["id", "identity_status", "source_acquired", "metadata_verified_against_original", "claim_content_reviewed", "retrieval_status", "verification_method", "study_design", "independent_group"]
+        }
+      },
+      "experiments": {
+        "type": "array", "maxItems": 10000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "study_design": {"type": "string", "enum": ["descriptive", "cross-sectional", "case-control", "observational-cohort", "systematic-review", "meta-analysis", "randomized", "interventional", "controlled-perturbation"]},
+            "independent_group": {"type": "string", "minLength": 1, "maxLength": 128},
+            "planned_units": {
+              "type": "array", "minItems": 1,
+              "items": {"type": "object", "additionalProperties": false, "properties": {"id": {"type": "string", "minLength": 1, "maxLength": 128}, "planned": {"type": "string", "minLength": 1, "maxLength": 4000}, "executed": {"type": "boolean"}, "skip_reason": {"type": "string", "minLength": 1, "maxLength": 4000, "nullable": true}, "result_pointer": {"type": "string", "minLength": 1, "maxLength": 1000, "nullable": true}}, "required": ["id", "planned", "executed", "skip_reason", "result_pointer"]}
+            },
+            "negative_results": {"type": "array", "items": {"type": "object", "additionalProperties": false, "properties": {"id": {"type": "string", "minLength": 1, "maxLength": 128}, "description": {"type": "string", "minLength": 1, "maxLength": 2000}}, "required": ["id", "description"]}},
+            "known_limitations": {"type": "array", "items": {"type": "object", "additionalProperties": false, "properties": {"id": {"type": "string", "minLength": 1, "maxLength": 128}, "description": {"type": "string", "minLength": 1, "maxLength": 2000}}, "required": ["id", "description"]}},
+            "results_reviewed": {"type": "boolean"},
+            "reproducibility_record": {"type": "object", "additionalProperties": false, "properties": {"input_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "parameter_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "software_recorded": {"type": "boolean"}, "randomization_recorded": {"type": "boolean"}}, "required": ["input_digest", "parameter_digest", "software_recorded", "randomization_recorded"]}
+          },
+          "required": ["id", "study_design", "independent_group", "planned_units", "negative_results", "known_limitations", "results_reviewed", "reproducibility_record"]
+        }
+      },
+      "analysis_artifacts": {
+        "type": "array", "maxItems": 100000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "evidence_type": {"type": "string", "enum": ["clinical", "omics", "imaging", "statistical"]},
+            "study_design": {"type": "string", "enum": ["descriptive", "cross-sectional", "case-control", "observational-cohort", "systematic-review", "meta-analysis", "randomized", "interventional", "controlled-perturbation"]},
+            "independent_group": {"type": "string", "minLength": 1, "maxLength": 128},
+            "result_reviewed": {"type": "boolean"},
+            "provenance_complete": {"type": "boolean"},
+            "quality_status": {"type": "string", "enum": ["passed", "warning", "major", "fatal"]}
+          },
+          "required": ["id", "evidence_type", "study_design", "independent_group", "result_reviewed", "provenance_complete", "quality_status"]
+        }
+      },
+      "evidence_assessments": {
+        "type": "array", "maxItems": 200000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "emitted_claim_id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "evidence_kind": {"type": "string", "enum": ["citation", "experiment", "artifact"]},
+            "evidence_id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "relation": {"type": "string", "enum": ["supports", "weakens", "refutes", "ambiguous", "not_assessed"]},
+            "adjudication_status": {"type": "string", "enum": ["completed", "inconclusive", "tool_failure"]},
+            "review_method": {"type": "string", "enum": ["original_source_review", "manual_review", "deterministic_result_check", "not_reviewed"]},
+            "independent_from_writer": {"type": "boolean"},
+            "rationale": {"type": "string", "minLength": 1, "maxLength": 4000}
+          },
+          "required": ["emitted_claim_id", "evidence_kind", "evidence_id", "relation", "adjudication_status", "review_method", "independent_from_writer", "rationale"]
+        }
+      },
+      "constraint_assessments": {
+        "type": "array", "maxItems": 100000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "emitted_claim_id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "constraint_id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "verdict": {"type": "string", "enum": ["violated", "not_violated", "unresolved"]},
+            "review_method": {"type": "string", "enum": ["original_source_review", "manual_review", "deterministic_result_check", "not_reviewed"]},
+            "independent_from_writer": {"type": "boolean"},
+            "rationale": {"type": "string", "minLength": 1, "maxLength": 4000}
+          },
+          "required": ["emitted_claim_id", "constraint_id", "verdict", "review_method", "independent_from_writer", "rationale"]
+        }
+      },
+      "audit_provenance": {
+        "type": "object", "additionalProperties": false,
+        "properties": {"audit_id": {"type": "string", "minLength": 1, "maxLength": 500}, "audit_version": {"type": "string", "minLength": 1, "maxLength": 500}, "review_owner": {"type": "string", "minLength": 1, "maxLength": 500}, "reviewed_at": {"type": "string", "minLength": 1, "maxLength": 500}, "rules_independent_from_writer": {"type": "boolean"}, "leakage_reviewed": {"type": "boolean"}},
+        "required": ["audit_id", "audit_version", "review_owner", "reviewed_at", "rules_independent_from_writer", "leakage_reviewed"]
+      }
+    },
+    "required": ["declared_claims", "emitted_claims", "citations", "experiments", "analysis_artifacts", "evidence_assessments", "constraint_assessments", "audit_provenance"]
+  },
+  "output_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "audit_id": {"type": "string"}, "audit_version": {"type": "string"}, "audit_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+      "declared_claim_count": {"type": "integer"}, "emitted_claim_count": {"type": "integer"}, "citation_count": {"type": "integer"}, "experiment_count": {"type": "integer"}, "analysis_artifact_count": {"type": "integer"},
+      "claim_results": {
+        "type": "array",
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "emitted_claim_id": {"type": "string"}, "declared_claim_id": {"type": "string", "nullable": true},
+            "claim_state": {"type": "string", "enum": ["supported", "weakened", "refuted", "inconclusive"]},
+            "emission_gate": {"type": "string", "enum": ["passed", "review_required", "blocked"]},
+            "eligible_support_ids": {"type": "array", "items": {"type": "string"}}, "weakening_ids": {"type": "array", "items": {"type": "string"}}, "refuting_ids": {"type": "array", "items": {"type": "string"}}, "unresolved_evidence_ids": {"type": "array", "items": {"type": "string"}}, "independent_support_groups": {"type": "array", "items": {"type": "string"}}, "missing_evidence_types": {"type": "array", "items": {"type": "string"}}, "violated_constraint_ids": {"type": "array", "items": {"type": "string"}}, "unresolved_constraint_ids": {"type": "array", "items": {"type": "string"}},
+            "issues": {"type": "array", "items": {"type": "object", "additionalProperties": false, "properties": {"code": {"type": "string"}, "severity": {"type": "string", "enum": ["major", "warning"]}, "subject_ids": {"type": "array", "items": {"type": "string"}}, "message": {"type": "string"}}, "required": ["code", "severity", "subject_ids", "message"]}}
+          },
+          "required": ["emitted_claim_id", "declared_claim_id", "claim_state", "emission_gate", "eligible_support_ids", "weakening_ids", "refuting_ids", "unresolved_evidence_ids", "independent_support_groups", "missing_evidence_types", "violated_constraint_ids", "unresolved_constraint_ids", "issues"]
+        }
+      },
+      "declared_not_emitted_ids": {"type": "array", "items": {"type": "string"}},
+      "global_issues": {"type": "array", "items": {"type": "object", "additionalProperties": false, "properties": {"code": {"type": "string"}, "severity": {"type": "string", "enum": ["major", "warning"]}, "subject_ids": {"type": "array", "items": {"type": "string"}}, "message": {"type": "string"}}, "required": ["code", "severity", "subject_ids", "message"]}},
+      "issue_counts": {"type": "object", "additionalProperties": false, "properties": {"major": {"type": "integer"}, "warning": {"type": "integer"}}, "required": ["major", "warning"]},
+      "provenance_gate_ids": {"type": "array", "items": {"type": "string"}},
+      "overall_status": {"type": "string", "enum": ["passed", "review_required", "blocked"]},
+      "quality_gates": {"type": "array", "items": {"type": "string"}},
+      "limitations": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["audit_id", "audit_version", "audit_digest", "declared_claim_count", "emitted_claim_count", "citation_count", "experiment_count", "analysis_artifact_count", "claim_results", "declared_not_emitted_ids", "global_issues", "issue_counts", "provenance_gate_ids", "overall_status", "quality_gates", "limitations"]
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned clean-room rewrite documented by the aggregate source-assimilation report."]}
+}

@@ -232,6 +232,698 @@
     },
     {
       "access": "offline",
+      "description": "Reconcile declared and emitted claims with independently reviewed literature and experiment evidence, preserving unresolved retrieval, negative results, refutation, causal-design limits, and prespecified constraints.",
+      "entrypoint": "biomed_workbench.capabilities.claim_integrity:audit_claim_evidence_integrity",
+      "id": "claim-evidence-integrity-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_artifacts": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "evidence_type": {
+                  "enum": [
+                    "clinical",
+                    "omics",
+                    "imaging",
+                    "statistical"
+                  ],
+                  "type": "string"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "independent_group": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "provenance_complete": {
+                  "type": "boolean"
+                },
+                "quality_status": {
+                  "enum": [
+                    "passed",
+                    "warning",
+                    "major",
+                    "fatal"
+                  ],
+                  "type": "string"
+                },
+                "result_reviewed": {
+                  "type": "boolean"
+                },
+                "study_design": {
+                  "enum": [
+                    "descriptive",
+                    "cross-sectional",
+                    "case-control",
+                    "observational-cohort",
+                    "systematic-review",
+                    "meta-analysis",
+                    "randomized",
+                    "interventional",
+                    "controlled-perturbation"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "evidence_type",
+                "study_design",
+                "independent_group",
+                "result_reviewed",
+                "provenance_complete",
+                "quality_status"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100000,
+            "type": "array"
+          },
+          "audit_provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "audit_id": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "audit_version": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "leakage_reviewed": {
+                "type": "boolean"
+              },
+              "review_owner": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "reviewed_at": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "rules_independent_from_writer": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "audit_id",
+              "audit_version",
+              "review_owner",
+              "reviewed_at",
+              "rules_independent_from_writer",
+              "leakage_reviewed"
+            ],
+            "type": "object"
+          },
+          "citations": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "claim_content_reviewed": {
+                  "type": "boolean"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "identity_status": {
+                  "enum": [
+                    "verified_match",
+                    "identifier_not_found",
+                    "unresolved"
+                  ],
+                  "type": "string"
+                },
+                "independent_group": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "metadata_verified_against_original": {
+                  "type": "boolean"
+                },
+                "retrieval_status": {
+                  "enum": [
+                    "completed",
+                    "not_found",
+                    "unreachable",
+                    "not_attempted"
+                  ],
+                  "type": "string"
+                },
+                "source_acquired": {
+                  "type": "boolean"
+                },
+                "study_design": {
+                  "enum": [
+                    "descriptive",
+                    "cross-sectional",
+                    "case-control",
+                    "observational-cohort",
+                    "systematic-review",
+                    "meta-analysis",
+                    "randomized",
+                    "interventional",
+                    "controlled-perturbation"
+                  ],
+                  "type": "string"
+                },
+                "verification_method": {
+                  "enum": [
+                    "original_source_review",
+                    "manual_source_review",
+                    "resolver_only",
+                    "none"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "identity_status",
+                "source_acquired",
+                "metadata_verified_against_original",
+                "claim_content_reviewed",
+                "retrieval_status",
+                "verification_method",
+                "study_design",
+                "independent_group"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100000,
+            "type": "array"
+          },
+          "constraint_assessments": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "constraint_id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "emitted_claim_id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "independent_from_writer": {
+                  "type": "boolean"
+                },
+                "rationale": {
+                  "maxLength": 4000,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "review_method": {
+                  "enum": [
+                    "original_source_review",
+                    "manual_review",
+                    "deterministic_result_check",
+                    "not_reviewed"
+                  ],
+                  "type": "string"
+                },
+                "verdict": {
+                  "enum": [
+                    "violated",
+                    "not_violated",
+                    "unresolved"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "emitted_claim_id",
+                "constraint_id",
+                "verdict",
+                "review_method",
+                "independent_from_writer",
+                "rationale"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100000,
+            "type": "array"
+          },
+          "declared_claims": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "analysis_artifact_ids": {
+                  "items": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "citation_ids": {
+                  "items": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "claim_strength": {
+                  "enum": [
+                    "descriptive",
+                    "association",
+                    "prediction",
+                    "causal"
+                  ],
+                  "type": "string"
+                },
+                "experiment_ids": {
+                  "items": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "intended_evidence_types": {
+                  "items": {
+                    "enum": [
+                      "literature",
+                      "experiment",
+                      "clinical",
+                      "omics",
+                      "imaging",
+                      "statistical"
+                    ],
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "minimum_independent_supports": {
+                  "maximum": 100,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "negative_constraints": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "maxLength": 4000,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "id": {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "description"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "partial_support_policy": {
+                  "enum": [
+                    "forbidden",
+                    "allowed_with_qualification"
+                  ],
+                  "type": "string"
+                },
+                "text": {
+                  "maxLength": 4000,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "text",
+                "claim_strength",
+                "intended_evidence_types",
+                "citation_ids",
+                "experiment_ids",
+                "analysis_artifact_ids",
+                "minimum_independent_supports",
+                "negative_constraints",
+                "partial_support_policy"
+              ],
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "type": "array"
+          },
+          "emitted_claims": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "analysis_artifact_ids": {
+                  "items": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "citation_ids": {
+                  "items": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "claim_strength": {
+                  "enum": [
+                    "descriptive",
+                    "association",
+                    "prediction",
+                    "causal"
+                  ],
+                  "type": "string"
+                },
+                "declared_claim_id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "nullable": true,
+                  "type": "string"
+                },
+                "experiment_ids": {
+                  "items": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "text": {
+                  "maxLength": 4000,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "declared_claim_id",
+                "text",
+                "claim_strength",
+                "citation_ids",
+                "experiment_ids",
+                "analysis_artifact_ids"
+              ],
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "type": "array"
+          },
+          "evidence_assessments": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "adjudication_status": {
+                  "enum": [
+                    "completed",
+                    "inconclusive",
+                    "tool_failure"
+                  ],
+                  "type": "string"
+                },
+                "emitted_claim_id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "evidence_id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "evidence_kind": {
+                  "enum": [
+                    "citation",
+                    "experiment",
+                    "artifact"
+                  ],
+                  "type": "string"
+                },
+                "independent_from_writer": {
+                  "type": "boolean"
+                },
+                "rationale": {
+                  "maxLength": 4000,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "relation": {
+                  "enum": [
+                    "supports",
+                    "weakens",
+                    "refutes",
+                    "ambiguous",
+                    "not_assessed"
+                  ],
+                  "type": "string"
+                },
+                "review_method": {
+                  "enum": [
+                    "original_source_review",
+                    "manual_review",
+                    "deterministic_result_check",
+                    "not_reviewed"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "emitted_claim_id",
+                "evidence_kind",
+                "evidence_id",
+                "relation",
+                "adjudication_status",
+                "review_method",
+                "independent_from_writer",
+                "rationale"
+              ],
+              "type": "object"
+            },
+            "maxItems": 200000,
+            "type": "array"
+          },
+          "experiments": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "independent_group": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "known_limitations": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "maxLength": 2000,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "id": {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "description"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "negative_results": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "description": {
+                        "maxLength": 2000,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "id": {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "description"
+                    ],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "planned_units": {
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "executed": {
+                        "type": "boolean"
+                      },
+                      "id": {
+                        "maxLength": 128,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "planned": {
+                        "maxLength": 4000,
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "result_pointer": {
+                        "maxLength": 1000,
+                        "minLength": 1,
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "skip_reason": {
+                        "maxLength": 4000,
+                        "minLength": 1,
+                        "nullable": true,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "planned",
+                      "executed",
+                      "skip_reason",
+                      "result_pointer"
+                    ],
+                    "type": "object"
+                  },
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "reproducibility_record": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "input_digest": {
+                      "pattern": "^[0-9a-f]{64}$",
+                      "type": "string"
+                    },
+                    "parameter_digest": {
+                      "pattern": "^[0-9a-f]{64}$",
+                      "type": "string"
+                    },
+                    "randomization_recorded": {
+                      "type": "boolean"
+                    },
+                    "software_recorded": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "input_digest",
+                    "parameter_digest",
+                    "software_recorded",
+                    "randomization_recorded"
+                  ],
+                  "type": "object"
+                },
+                "results_reviewed": {
+                  "type": "boolean"
+                },
+                "study_design": {
+                  "enum": [
+                    "descriptive",
+                    "cross-sectional",
+                    "case-control",
+                    "observational-cohort",
+                    "systematic-review",
+                    "meta-analysis",
+                    "randomized",
+                    "interventional",
+                    "controlled-perturbation"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "study_design",
+                "independent_group",
+                "planned_units",
+                "negative_results",
+                "known_limitations",
+                "results_reviewed",
+                "reproducibility_record"
+              ],
+              "type": "object"
+            },
+            "maxItems": 10000,
+            "type": "array"
+          }
+        },
+        "required": [
+          "declared_claims",
+          "emitted_claims",
+          "citations",
+          "experiments",
+          "analysis_artifacts",
+          "evidence_assessments",
+          "constraint_assessments",
+          "audit_provenance"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit claim provenance and evidence integrity",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
       "description": "Compute closed-label confusion, aggregate and per-class metrics, minimum-support-aware thresholds, advisory expert concordance, and baseline regressions while blocking circular or leakage-unreviewed gold sets.",
       "entrypoint": "biomed_workbench.capabilities.evaluation:evaluate_classification_gold_set",
       "id": "classification-gold-set-evaluation",
@@ -2988,7 +3680,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 67,
+  "entry_count": 68,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

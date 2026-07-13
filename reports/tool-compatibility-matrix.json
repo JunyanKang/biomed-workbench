@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 67,
-  "module_count": 67,
+  "compatibility_complete": 68,
+  "module_count": 68,
   "modules": [
     {
       "compatibility_rows": [
@@ -805,6 +805,129 @@
             "module_version",
             "compatibility_row_id",
             "resolution_class"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "claim-evidence-integrity-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-claim-evidence-bundle-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "claim-evidence-integrity-audit-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate bounded claim, citation, experiment, provenance, and directional evidence records with deterministic release gates.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "claim-evidence-integrity-audit",
+      "input_formats": [
+        {
+          "artifact_type": "claim_evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "claim-evidence-bundle",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "claim_evidence_bundle",
+          "processing_levels": [
+            "independently-adjudicated"
+          ],
+          "required_metadata": [
+            "audit_id",
+            "audit_version",
+            "review_owner",
+            "reviewed_at",
+            "rules_independent_from_writer",
+            "leakage_reviewed"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "claim_integrity_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "claim-integrity-report",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "claim_integrity_report",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "audit_version",
+            "audit_digest"
           ]
         }
       ],
@@ -9597,6 +9720,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "98c6e9180392a8d646202a690ae601446d7919ea78d33c862c5d2e4a14b48c1a",
+  "registry_digest": "4a78edffac13009396c334ab834de2816b01d73ca27cd8e9efe097dfd299c5bb",
   "schema_version": 1
 }

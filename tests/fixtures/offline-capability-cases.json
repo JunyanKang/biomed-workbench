@@ -131,6 +131,42 @@
       "title_only_unmatched_sources": []
     }
   },
+  "claim-evidence-integrity-audit": {
+    "input": {
+      "declared_claims": [
+        {"id": "claim-1", "text": "Perturbing regulator X causally reduces outcome Y.", "claim_strength": "causal", "intended_evidence_types": ["literature", "experiment"], "citation_ids": ["citation-1"], "experiment_ids": ["experiment-1"], "analysis_artifact_ids": [], "minimum_independent_supports": 2, "negative_constraints": [{"id": "constraint-1", "description": "Do not claim complete rescue."}], "partial_support_policy": "forbidden"}
+      ],
+      "emitted_claims": [
+        {"id": "emitted-1", "declared_claim_id": "claim-1", "text": "Perturbing regulator X causally reduces outcome Y.", "claim_strength": "causal", "citation_ids": ["citation-1"], "experiment_ids": ["experiment-1"], "analysis_artifact_ids": []}
+      ],
+      "citations": [
+        {"id": "citation-1", "identity_status": "verified_match", "source_acquired": true, "metadata_verified_against_original": true, "claim_content_reviewed": true, "retrieval_status": "completed", "verification_method": "original_source_review", "study_design": "observational-cohort", "independent_group": "published-cohort-1"}
+      ],
+      "experiments": [
+        {"id": "experiment-1", "study_design": "controlled-perturbation", "independent_group": "local-perturbation-1", "planned_units": [{"id": "unit-1", "planned": "Measure outcome Y after perturbation.", "executed": true, "skip_reason": null, "result_pointer": "artifact-result-1"}], "negative_results": [], "known_limitations": [{"id": "limitation-1", "description": "One biological system was tested."}], "results_reviewed": true, "reproducibility_record": {"input_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "parameter_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "software_recorded": true, "randomization_recorded": true}}
+      ],
+      "analysis_artifacts": [],
+      "evidence_assessments": [
+        {"emitted_claim_id": "emitted-1", "evidence_kind": "citation", "evidence_id": "citation-1", "relation": "supports", "adjudication_status": "completed", "review_method": "original_source_review", "independent_from_writer": true, "rationale": "The original source directly supports the bounded association."},
+        {"emitted_claim_id": "emitted-1", "evidence_kind": "experiment", "evidence_id": "experiment-1", "relation": "supports", "adjudication_status": "completed", "review_method": "deterministic_result_check", "independent_from_writer": true, "rationale": "The reviewed perturbation result supports causal direction."}
+      ],
+      "constraint_assessments": [
+        {"emitted_claim_id": "emitted-1", "constraint_id": "constraint-1", "verdict": "not_violated", "review_method": "manual_review", "independent_from_writer": true, "rationale": "The emitted claim does not assert complete rescue."}
+      ],
+      "audit_provenance": {"audit_id": "claim-audit-1", "audit_version": "1.0.0", "review_owner": "independent evidence reviewer", "reviewed_at": "2026-07-13", "rules_independent_from_writer": true, "leakage_reviewed": true}
+    },
+    "output": {
+      "audit_id": "claim-audit-1",
+      "declared_claim_count": 1,
+      "emitted_claim_count": 1,
+      "citation_count": 1,
+      "experiment_count": 1,
+      "analysis_artifact_count": 0,
+      "declared_not_emitted_ids": [],
+      "provenance_gate_ids": [],
+      "overall_status": "passed"
+    }
+  },
   "classification-gold-set-evaluation": {
     "input": {
       "cases": [
