@@ -127,3 +127,14 @@ def welch_t_test(group_a: list[float], group_b: list[float]) -> dict[str, Any]:
         "p_value_two_sided": min(1.0, max(0.0, p_value)),
         "method": "Welch unequal-variance two-sample t-test",
     }
+
+
+def student_t_two_sided_p(t_statistic: float, degrees_of_freedom: float) -> float:
+    """Return the two-sided Student t tail probability for finite inputs."""
+    statistic = float(t_statistic)
+    degrees = float(degrees_of_freedom)
+    if not math.isfinite(statistic) or not math.isfinite(degrees) or degrees <= 0:
+        raise ValueError("t statistic and positive degrees of freedom must be finite")
+    x = degrees / (degrees + statistic**2)
+    probability = _regularized_beta(x, degrees / 2.0, 0.5)
+    return min(1.0, max(0.0, probability))

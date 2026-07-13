@@ -1484,6 +1484,79 @@
     },
     {
       "access": "offline",
+      "description": "Construct a pairwise-complete Pearson or Spearman coexpression network, enforce minimum sample size and BH false-discovery control, add mutation context, and emit explicitly noncausal functional-dependency hypotheses for independent perturbation testing.",
+      "entrypoint": "biomed_workbench.capabilities.omics:ddr_coexpression_hypothesis_network",
+      "id": "ddr-coexpression-hypothesis-network",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "ddr_genes": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "expression": {
+            "minProperties": 2,
+            "type": "object"
+          },
+          "false_discovery_rate": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "type": "number"
+          },
+          "method": {
+            "enum": [
+              "pearson",
+              "spearman"
+            ],
+            "type": "string"
+          },
+          "minimum_absolute_correlation": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "minimum_paired_samples": {
+            "minimum": 3,
+            "type": "integer"
+          },
+          "mutated_samples": {
+            "type": "object"
+          },
+          "sample_ids": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "sample_ids",
+          "expression",
+          "ddr_genes",
+          "mutated_samples",
+          "method",
+          "minimum_paired_samples",
+          "minimum_absolute_correlation",
+          "false_discovery_rate"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Build an FDR-controlled DDR coexpression hypothesis network",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
       "description": "Calculate feature means, log2 fold changes, Welch tests, and BH-adjusted p-values for two groups.",
       "entrypoint": "biomed_workbench.capabilities.omics:differential_expression",
       "id": "differential-expression",
@@ -2413,6 +2486,60 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Discover stable metagene programs with multi-start NMF",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Validate a shared reference and normalized biallelic variant matrix, distinguish alternate, reference, and not-callable states, calculate pairwise concordance on jointly callable loci, and emit deterministic phase-set haplotype signatures without simulated ancestry or divergence claims.",
+      "entrypoint": "biomed_workbench.capabilities.omics:multi_sample_variant_concordance",
+      "id": "multi-sample-variant-concordance",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "normalization": {
+            "enum": [
+              "split-left-normalized-biallelic"
+            ],
+            "type": "string"
+          },
+          "reference_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_sequence_digest": {
+            "pattern": "^[0-9a-fA-F]{64}$",
+            "type": "string"
+          },
+          "samples": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 2,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "variants": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "samples",
+          "variants",
+          "reference_build",
+          "reference_sequence_digest",
+          "normalization"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Compare multi-sample variant states without collapsing missingness",
       "workflow": "omics"
     },
     {
@@ -4623,7 +4750,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 72,
+  "entry_count": 74,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

@@ -116,6 +116,42 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         output = execute("network-analysis", {"edges": [["A", "B"], ["B", "C"]]})
         self.assertEqual(output["hubs"][0]["node"], "B")
 
+    def test_multi_sample_variant_concordance(self):
+        output = execute("multi-sample-variant-concordance", {
+            "samples": ["S1", "S2", "S3"],
+            "reference_build": "GRCh38",
+            "reference_sequence_digest": "a" * 64,
+            "normalization": "split-left-normalized-biallelic",
+            "variants": [
+                {"chrom": "1", "position": 100, "ref": "A", "alt": "G", "states": {"S1": "alternate", "S2": "alternate", "S3": "not_callable"}, "phases": {"S1": {"phase_set": "PS1", "haplotypes": [1]}, "S2": {"phase_set": "PS1", "haplotypes": [1, 2]}}},
+                {"chrom": "1", "position": 120, "ref": "C", "alt": "T", "states": {"S1": "alternate", "S2": "reference", "S3": "reference"}},
+            ],
+        })
+        pair = output["pairwise"][0]
+        self.assertEqual(pair["jointly_callable_count"], 2)
+        self.assertEqual(pair["shared_alternate_count"], 1)
+        self.assertEqual(output["sample_summaries"][2]["not_callable_count"], 1)
+        self.assertEqual(len(output["haplotype_signatures"]), 2)
+
+    def test_ddr_coexpression_hypothesis_network(self):
+        output = execute("ddr-coexpression-hypothesis-network", {
+            "sample_ids": [f"S{i}" for i in range(1, 9)],
+            "expression": {
+                "ATM": [1, 2, 3, 4, 5, 6, 7, 8],
+                "CHEK2": [2, 4, 6, 8, 10, 12, 14, 16],
+                "MKI67": [8, 1, 7, 2, 6, 3, 5, 4]
+            },
+            "ddr_genes": ["ATM", "CHEK2"],
+            "mutated_samples": {"ATM": ["S1", "S2"]},
+            "method": "spearman",
+            "minimum_paired_samples": 8,
+            "minimum_absolute_correlation": 0.9,
+            "false_discovery_rate": 0.05
+        })
+        self.assertEqual(output["edge_count"], 1)
+        self.assertEqual(output["functional_dependency_hypotheses"][0]["interpretation"], "functional_dependency_hypothesis_requires_independent_perturbation_evidence")
+        self.assertIn("not synthetic lethality", output["limitations"][0])
+
     def test_image_profile(self):
         output = execute("image-profile", {"image": [[0, 1], [2, 3]]})
         self.assertEqual(output["mean"], 1.5)

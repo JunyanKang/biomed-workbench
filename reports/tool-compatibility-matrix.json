@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 72,
-  "module_count": 72,
+  "compatibility_complete": 74,
+  "module_count": 74,
   "modules": [
     {
       "compatibility_rows": [
@@ -1743,6 +1743,136 @@
           "required_metadata": [
             "module_version",
             "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "ddr-coexpression-hypothesis-network-e2e-v1"
+          ],
+          "id": "python-3.14-inline-ddr-network-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "ddr-coexpression-hypothesis-network-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic rank, correlation, Student t, and BH calculations.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "ddr-coexpression-hypothesis-network",
+      "input_formats": [
+        {
+          "artifact_type": "matched_expression_mutation_bundle",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "genes-by-matched-samples"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "expression_and_mutation_context",
+          "processing_levels": [
+            "normalized",
+            "quality-controlled"
+          ],
+          "required_metadata": [
+            "sample-manifest-digest",
+            "experimental-unit",
+            "expression-normalization",
+            "gene-identifier-namespace",
+            "annotation-release",
+            "mutation-call-policy"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "statistical_hypothesis_network",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "gene-pairs-by-statistical-evidence"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "ddr_hypothesis_network",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "sample-manifest-digest",
+            "correlation-method",
+            "multiplicity-method",
+            "thresholds"
           ]
         }
       ],
@@ -5161,6 +5291,139 @@
           "version_source": "https://www.python.org/downloads/release/python-3143/"
         }
       ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "multi-sample-variant-concordance-e2e-v1"
+          ],
+          "id": "python-3.14-inline-variant-state-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "multi-sample-variant-concordance-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic state validation and set-based concordance calculations.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "multi-sample-variant-concordance",
+      "input_formats": [
+        {
+          "artifact_type": "multi_sample_variant_state_matrix",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-matching-reference-digest"
+              ],
+              "name": "inline-json",
+              "orientations": [
+                "variants-by-samples"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "variant_state_matrix",
+          "processing_levels": [
+            "split-left-normalized-biallelic"
+          ],
+          "required_metadata": [
+            "reference-build",
+            "reference-sequence-digest",
+            "sample-manifest-digest",
+            "callability-policy",
+            "normalization-method"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "comparative_variant_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "inline-json",
+              "orientations": [
+                "sample-pairs-by-jointly-callable-loci"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "concordance_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "reference-build",
+            "reference-sequence-digest",
+            "sample-manifest-digest",
+            "callability-policy",
+            "normalization-method"
+          ]
+        }
+      ],
+      "tools": [],
       "validation_status": "complete"
     },
     {
@@ -10243,6 +10506,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "f930bd5122ae0415390a756819422e3bec83aa88ef18e5a8bf56538dbcf841dd",
+  "registry_digest": "4495998192f74cc992400fa50a487440f499c57ad0cd67acdd27904f99b90c25",
   "schema_version": 1
 }

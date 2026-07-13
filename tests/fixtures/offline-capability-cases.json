@@ -656,6 +656,119 @@
       "row_count": 2
     }
   },
+  "ddr-coexpression-hypothesis-network": {
+    "input": {
+      "ddr_genes": [
+        "ATM",
+        "CHEK2"
+      ],
+      "expression": {
+        "ATM": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "CHEK2": [
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16
+        ],
+        "MKI67": [
+          8,
+          1,
+          7,
+          2,
+          6,
+          3,
+          5,
+          4
+        ]
+      },
+      "false_discovery_rate": 0.05,
+      "method": "spearman",
+      "minimum_absolute_correlation": 0.9,
+      "minimum_paired_samples": 8,
+      "mutated_samples": {
+        "ATM": [
+          "S1",
+          "S2"
+        ]
+      },
+      "sample_ids": [
+        "S1",
+        "S2",
+        "S3",
+        "S4",
+        "S5",
+        "S6",
+        "S7",
+        "S8"
+      ]
+    },
+    "output": {
+      "ddr_genes": [
+        "ATM",
+        "CHEK2"
+      ],
+      "edge_count": 1,
+      "edges": [
+        {
+          "adjusted_p_value": 0.0,
+          "correlation": 1.0,
+          "gene_a": "ATM",
+          "gene_b": "CHEK2",
+          "p_value": 0.0,
+          "paired_sample_count": 8
+        }
+      ],
+      "functional_dependency_hypotheses": [
+        {
+          "adjusted_p_value": 0.0,
+          "correlation": 1.0,
+          "gene_a": "ATM",
+          "gene_b": "CHEK2",
+          "interpretation": "functional_dependency_hypothesis_requires_independent_perturbation_evidence",
+          "mutation_context_genes": [
+            "ATM"
+          ]
+        }
+      ],
+      "gene_count": 3,
+      "limitations": [
+        "Coexpression is not synthetic lethality, causal regulation, physical interaction, or clinical actionability; hypotheses require independent perturbation and replication evidence."
+      ],
+      "method": "spearman correlation with pairwise-complete observations and Benjamini-Hochberg correction",
+      "mutation_frequencies": {
+        "ATM": 0.25
+      },
+      "node_degree": {
+        "ATM": 1,
+        "CHEK2": 1
+      },
+      "quality_gates": [
+        "Gene pairs are tested only with the declared minimum number of paired finite observations.",
+        "Network edges satisfy both an absolute-correlation threshold and BH-adjusted false-discovery threshold.",
+        "Mutation annotations add context but do not convert coexpression into genetic interaction evidence."
+      ],
+      "sample_count": 8,
+      "tested_pair_count": 3,
+      "thresholds": {
+        "false_discovery_rate": 0.05,
+        "minimum_absolute_correlation": 0.9,
+        "minimum_paired_samples": 8
+      }
+    }
+  },
   "differential-expression": {
     "input": {
       "genes": [
@@ -1677,6 +1790,193 @@
         "B00001",
         "B00003"
       ]
+    }
+  },
+  "multi-sample-variant-concordance": {
+    "input": {
+      "normalization": "split-left-normalized-biallelic",
+      "reference_build": "GRCh38",
+      "reference_sequence_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "samples": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "variants": [
+        {
+          "alt": "G",
+          "chrom": "1",
+          "phases": {
+            "S1": {
+              "haplotypes": [
+                1
+              ],
+              "phase_set": "PS1"
+            },
+            "S2": {
+              "haplotypes": [
+                1,
+                2
+              ],
+              "phase_set": "PS1"
+            }
+          },
+          "position": 100,
+          "ref": "A",
+          "states": {
+            "S1": "alternate",
+            "S2": "alternate",
+            "S3": "not_callable"
+          }
+        },
+        {
+          "alt": "T",
+          "chrom": "1",
+          "position": 120,
+          "ref": "C",
+          "states": {
+            "S1": "alternate",
+            "S2": "reference",
+            "S3": "reference"
+          }
+        }
+      ]
+    },
+    "output": {
+      "haplotype_signatures": [
+        {
+          "haplotype_1_alt_loci": [
+            "1:100:A:G"
+          ],
+          "haplotype_2_alt_loci": [],
+          "phase_set": "PS1",
+          "sample": "S1"
+        },
+        {
+          "haplotype_1_alt_loci": [
+            "1:100:A:G"
+          ],
+          "haplotype_2_alt_loci": [
+            "1:100:A:G"
+          ],
+          "phase_set": "PS1",
+          "sample": "S2"
+        }
+      ],
+      "limitations": [
+        "Set concordance does not establish variant-call accuracy, population structure, phylogeny, selection, pathogenicity, or causal effect."
+      ],
+      "loci": [
+        {
+          "alt": "G",
+          "chrom": "1",
+          "locus_id": "1:100:A:G",
+          "phases": {
+            "S1": {
+              "haplotypes": [
+                1
+              ],
+              "phase_set": "PS1"
+            },
+            "S2": {
+              "haplotypes": [
+                1,
+                2
+              ],
+              "phase_set": "PS1"
+            }
+          },
+          "position": 100,
+          "ref": "A",
+          "states": {
+            "S1": "alternate",
+            "S2": "alternate",
+            "S3": "not_callable"
+          }
+        },
+        {
+          "alt": "T",
+          "chrom": "1",
+          "locus_id": "1:120:C:T",
+          "phases": {},
+          "position": 120,
+          "ref": "C",
+          "states": {
+            "S1": "alternate",
+            "S2": "reference",
+            "S3": "reference"
+          }
+        }
+      ],
+      "normalization": "split-left-normalized-biallelic",
+      "pairwise": [
+        {
+          "alternate_jaccard": 0.5,
+          "concordant_reference_count": 0,
+          "genotype_state_concordance": 0.5,
+          "jointly_callable_count": 2,
+          "not_jointly_callable_count": 0,
+          "sample_a": "S1",
+          "sample_a_private_count": 1,
+          "sample_b": "S2",
+          "sample_b_private_count": 0,
+          "shared_alternate_count": 1
+        },
+        {
+          "alternate_jaccard": 0.0,
+          "concordant_reference_count": 0,
+          "genotype_state_concordance": 0.0,
+          "jointly_callable_count": 1,
+          "not_jointly_callable_count": 1,
+          "sample_a": "S1",
+          "sample_a_private_count": 1,
+          "sample_b": "S3",
+          "sample_b_private_count": 0,
+          "shared_alternate_count": 0
+        },
+        {
+          "alternate_jaccard": null,
+          "concordant_reference_count": 1,
+          "genotype_state_concordance": 1.0,
+          "jointly_callable_count": 1,
+          "not_jointly_callable_count": 1,
+          "sample_a": "S2",
+          "sample_a_private_count": 0,
+          "sample_b": "S3",
+          "sample_b_private_count": 0,
+          "shared_alternate_count": 0
+        }
+      ],
+      "quality_gates": [
+        "All samples share one declared reference build and exact reference sequence digest.",
+        "Every sample-locus state is explicit; not_callable is never treated as reference.",
+        "Only split, left-normalized, biallelic variants are accepted.",
+        "Haplotype signatures require explicit phase sets and do not estimate ancestry or divergence time."
+      ],
+      "reference_build": "GRCh38",
+      "reference_sequence_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "sample_count": 3,
+      "sample_summaries": [
+        {
+          "alternate_count": 2,
+          "not_callable_count": 0,
+          "reference_count": 0,
+          "sample": "S1"
+        },
+        {
+          "alternate_count": 1,
+          "not_callable_count": 0,
+          "reference_count": 1,
+          "sample": "S2"
+        },
+        {
+          "alternate_count": 0,
+          "not_callable_count": 1,
+          "reference_count": 1,
+          "sample": "S3"
+        }
+      ],
+      "variant_count": 2
     }
   },
   "network-analysis": {

@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "id": "ddr-coexpression-hypothesis-network",
+  "version": "1.0.0",
+  "title": "Build an FDR-controlled DDR coexpression hypothesis network",
+  "description": "Construct a pairwise-complete Pearson or Spearman coexpression network, enforce minimum sample size and BH false-discovery control, add mutation context, and emit explicitly noncausal functional-dependency hypotheses for independent perturbation testing.",
+  "module_type": "analysis",
+  "domains": ["omics", "statistics"],
+  "intents": ["DDR coexpression network", "DNA damage response network", "mutation informed coexpression hypotheses", "DNA损伤修复共表达假设网络"],
+  "questions": ["Which FDR-controlled coexpression relationships involving declared DDR genes merit independent functional perturbation, without claiming synthetic lethality from correlation alone?"],
+  "maturity": "validated",
+  "entrypoint": "biomed_workbench.capabilities.omics:ddr_coexpression_hypothesis_network",
+  "execution": {"kind": "python", "timeout_seconds": 60, "max_output_bytes": 20000000},
+  "input_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "sample_ids": {"type": "array", "minItems": 3, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+      "expression": {"type": "object", "minProperties": 2},
+      "ddr_genes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+      "mutated_samples": {"type": "object"},
+      "method": {"type": "string", "enum": ["pearson", "spearman"]},
+      "minimum_paired_samples": {"type": "integer", "minimum": 3},
+      "minimum_absolute_correlation": {"type": "number", "minimum": 0, "maximum": 1},
+      "false_discovery_rate": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
+    },
+    "required": ["sample_ids", "expression", "ddr_genes", "mutated_samples", "method", "minimum_paired_samples", "minimum_absolute_correlation", "false_discovery_rate"]
+  },
+  "output_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "method": {"type": "string"}, "sample_count": {"type": "integer"}, "gene_count": {"type": "integer"}, "ddr_genes": {"type": "array"},
+      "tested_pair_count": {"type": "integer"}, "edge_count": {"type": "integer"}, "thresholds": {"type": "object"}, "edges": {"type": "array"},
+      "node_degree": {"type": "object"}, "mutation_frequencies": {"type": "object"}, "functional_dependency_hypotheses": {"type": "array"},
+      "quality_gates": {"type": "array"}, "limitations": {"type": "array"}
+    },
+    "required": ["method", "sample_count", "gene_count", "ddr_genes", "tested_pair_count", "edge_count", "thresholds", "edges", "node_degree", "mutation_frequencies", "functional_dependency_hypotheses", "quality_gates", "limitations"]
+  },
+  "input_artifacts": [{"name": "expression_and_mutation_context", "artifact_type": "matched_expression_mutation_bundle", "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["genes-by-matched-samples"]}], "processing_levels": ["normalized", "quality-controlled"], "required_metadata": ["sample-manifest-digest", "experimental-unit", "expression-normalization", "gene-identifier-namespace", "annotation-release", "mutation-call-policy"]}],
+  "output_artifacts": [{"name": "ddr_hypothesis_network", "artifact_type": "statistical_hypothesis_network", "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-from-input"], "orientations": ["gene-pairs-by-statistical-evidence"]}], "processing_levels": ["derived"], "required_metadata": ["module_version", "compatibility_row_id", "sample-manifest-digest", "correlation-method", "multiplicity-method", "thresholds"]}],
+  "assumptions": ["Expression values are normalized and comparable across matched biological samples; missingness mechanisms and mutation calling policy are documented outside the compact payload."],
+  "preconditions": ["Sample identities align across expression and mutation context; declared DDR genes resolve in the expression namespace; the requested minimum paired sample size is scientifically defensible."],
+  "quality_gates": [
+    {"id": "ddr-network-sample-alignment", "severity": "fatal", "description": "Expression vectors and mutation annotations must align exactly to unique declared samples.", "blocks_interpretation": true},
+    {"id": "ddr-network-multiplicity", "severity": "fatal", "description": "Every retained edge must satisfy both the declared effect-size threshold and BH-adjusted false-discovery threshold.", "blocks_interpretation": true},
+    {"id": "ddr-network-inference-scope", "severity": "fatal", "description": "Coexpression plus mutation context may nominate a functional-dependency hypothesis but cannot establish synthetic lethality, regulation, causality, or actionability.", "blocks_interpretation": true}
+  ],
+  "evidence_effects": ["nominates_fdr_controlled_functional_dependency_hypotheses"],
+  "alternatives": [],
+  "complements": ["network-analysis", "differential-expression", "variant-summary", "claim-evidence-integrity-audit"],
+  "tool_requirements": [],
+  "dependencies": [{"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-13", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute deterministic rank, correlation, Student t, and BH calculations.", "conflicts": [], "platforms": ["any"]}],
+  "compatibility_matrix": [{"id": "python-3.14-inline-ddr-network-1", "module_version": "1.0.0", "tool_versions": {}, "dependency_versions": {"python": [">=3.14,<3.15"]}, "input_formats": {"expression_and_mutation_context": ["inline-json@1"]}, "output_formats": {"ddr_hypothesis_network": ["inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["ddr-coexpression-hypothesis-network-regression-v1"], "end_to_end_evidence_ids": ["ddr-coexpression-hypothesis-network-e2e-v1"], "verified_at": "2026-07-13"}],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "limitations": ["The module does not adjust for covariates, purity, cell composition, batch, repeated measures, population structure, or hidden confounding; confirmatory models and perturbation experiments remain required."],
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room reconstruction of DDR network purpose with multiplicity control and explicit rejection of correlation-to-synthetic-lethality overclaim."]}
+}

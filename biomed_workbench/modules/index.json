@@ -1,5 +1,5 @@
 {
-  "module_count": 72,
+  "module_count": 74,
   "modules": [
     {
       "access": "offline",
@@ -5570,6 +5570,350 @@
       ],
       "schema_version": 1,
       "title": "Profile structured scientific rows",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "Expression values are normalized and comparable across matched biological samples; missingness mechanisms and mutation calling policy are documented outside the compact payload."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "ddr-coexpression-hypothesis-network-e2e-v1"
+          ],
+          "id": "python-3.14-inline-ddr-network-1",
+          "input_formats": {
+            "expression_and_mutation_context": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "ddr_hypothesis_network": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "ddr-coexpression-hypothesis-network-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "network-analysis",
+        "differential-expression",
+        "variant-summary",
+        "claim-evidence-integrity-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic rank, correlation, Student t, and BH calculations.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Construct a pairwise-complete Pearson or Spearman coexpression network, enforce minimum sample size and BH false-discovery control, add mutation context, and emit explicitly noncausal functional-dependency hypotheses for independent perturbation testing.",
+      "domains": [
+        "omics",
+        "statistics"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.omics:ddr_coexpression_hypothesis_network",
+      "evidence_effects": [
+        "nominates_fdr_controlled_functional_dependency_hypotheses"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 60
+      },
+      "id": "ddr-coexpression-hypothesis-network",
+      "input_artifacts": [
+        {
+          "artifact_type": "matched_expression_mutation_bundle",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "genes-by-matched-samples"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "expression_and_mutation_context",
+          "processing_levels": [
+            "normalized",
+            "quality-controlled"
+          ],
+          "required_metadata": [
+            "sample-manifest-digest",
+            "experimental-unit",
+            "expression-normalization",
+            "gene-identifier-namespace",
+            "annotation-release",
+            "mutation-call-policy"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "ddr_genes": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "expression": {
+            "minProperties": 2,
+            "type": "object"
+          },
+          "false_discovery_rate": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "type": "number"
+          },
+          "method": {
+            "enum": [
+              "pearson",
+              "spearman"
+            ],
+            "type": "string"
+          },
+          "minimum_absolute_correlation": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "minimum_paired_samples": {
+            "minimum": 3,
+            "type": "integer"
+          },
+          "mutated_samples": {
+            "type": "object"
+          },
+          "sample_ids": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "sample_ids",
+          "expression",
+          "ddr_genes",
+          "mutated_samples",
+          "method",
+          "minimum_paired_samples",
+          "minimum_absolute_correlation",
+          "false_discovery_rate"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "DDR coexpression network",
+        "DNA damage response network",
+        "mutation informed coexpression hypotheses",
+        "DNA\u635f\u4f24\u4fee\u590d\u5171\u8868\u8fbe\u5047\u8bbe\u7f51\u7edc"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The module does not adjust for covariates, purity, cell composition, batch, repeated measures, population structure, or hidden confounding; confirmatory models and perturbation experiments remain required."
+      ],
+      "maturity": "validated",
+      "module_type": "analysis",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "statistical_hypothesis_network",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "gene-pairs-by-statistical-evidence"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "ddr_hypothesis_network",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "sample-manifest-digest",
+            "correlation-method",
+            "multiplicity-method",
+            "thresholds"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "ddr_genes": {
+            "type": "array"
+          },
+          "edge_count": {
+            "type": "integer"
+          },
+          "edges": {
+            "type": "array"
+          },
+          "functional_dependency_hypotheses": {
+            "type": "array"
+          },
+          "gene_count": {
+            "type": "integer"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "method": {
+            "type": "string"
+          },
+          "mutation_frequencies": {
+            "type": "object"
+          },
+          "node_degree": {
+            "type": "object"
+          },
+          "quality_gates": {
+            "type": "array"
+          },
+          "sample_count": {
+            "type": "integer"
+          },
+          "tested_pair_count": {
+            "type": "integer"
+          },
+          "thresholds": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "method",
+          "sample_count",
+          "gene_count",
+          "ddr_genes",
+          "tested_pair_count",
+          "edge_count",
+          "thresholds",
+          "edges",
+          "node_degree",
+          "mutation_frequencies",
+          "functional_dependency_hypotheses",
+          "quality_gates",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Sample identities align across expression and mutation context; declared DDR genes resolve in the expression namespace; the requested minimum paired sample size is scientifically defensible."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Independent clean-room reconstruction of DDR network purpose with multiplicity control and explicit rejection of correlation-to-synthetic-lethality overclaim."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Expression vectors and mutation annotations must align exactly to unique declared samples.",
+          "id": "ddr-network-sample-alignment",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every retained edge must satisfy both the declared effect-size threshold and BH-adjusted false-discovery threshold.",
+          "id": "ddr-network-multiplicity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Coexpression plus mutation context may nominate a functional-dependency hypothesis but cannot establish synthetic lethality, regulation, causality, or actionability.",
+          "id": "ddr-network-inference-scope",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Which FDR-controlled coexpression relationships involving declared DDR genes merit independent functional perturbation, without claiming synthetic lethality from correlation alone?"
+      ],
+      "schema_version": 1,
+      "title": "Build an FDR-controlled DDR coexpression hypothesis network",
       "tool_requirements": [],
       "version": "1.0.0"
     },
@@ -12688,6 +13032,325 @@
           "version_source": "https://www.python.org/downloads/release/python-3143/"
         }
       ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The caller has normalized variants against the declared exact reference and supplied an explicit state for every sample-locus combination."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "multi-sample-variant-concordance-e2e-v1"
+          ],
+          "id": "python-3.14-inline-variant-state-1",
+          "input_formats": {
+            "variant_state_matrix": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "concordance_report": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "multi-sample-variant-concordance-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "variant-filter-vcf",
+        "variant-region-query-tabix",
+        "variant-summary",
+        "variant-evidence"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic state validation and set-based concordance calculations.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Validate a shared reference and normalized biallelic variant matrix, distinguish alternate, reference, and not-callable states, calculate pairwise concordance on jointly callable loci, and emit deterministic phase-set haplotype signatures without simulated ancestry or divergence claims.",
+      "domains": [
+        "omics"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.omics:multi_sample_variant_concordance",
+      "evidence_effects": [
+        "compares_variant_observations_on_jointly_callable_loci"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 30
+      },
+      "id": "multi-sample-variant-concordance",
+      "input_artifacts": [
+        {
+          "artifact_type": "multi_sample_variant_state_matrix",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "declared-matching-reference-digest"
+              ],
+              "name": "inline-json",
+              "orientations": [
+                "variants-by-samples"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "variant_state_matrix",
+          "processing_levels": [
+            "split-left-normalized-biallelic"
+          ],
+          "required_metadata": [
+            "reference-build",
+            "reference-sequence-digest",
+            "sample-manifest-digest",
+            "callability-policy",
+            "normalization-method"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "normalization": {
+            "enum": [
+              "split-left-normalized-biallelic"
+            ],
+            "type": "string"
+          },
+          "reference_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_sequence_digest": {
+            "pattern": "^[0-9a-fA-F]{64}$",
+            "type": "string"
+          },
+          "samples": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 2,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "variants": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "samples",
+          "variants",
+          "reference_build",
+          "reference_sequence_digest",
+          "normalization"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "compare variants across samples",
+        "multi sample variant concordance",
+        "haplotype concordance",
+        "\u6bd4\u8f83\u591a\u6837\u672c\u53d8\u5f02\u548c\u5355\u500d\u578b"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The module does not call variants, infer callability, normalize alleles, estimate ancestry or divergence, reconstruct phylogeny, or interpret clinical significance."
+      ],
+      "maturity": "validated",
+      "module_type": "analysis",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "comparative_variant_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "one-based-inclusive"
+              ],
+              "genome_build_policy": "required",
+              "genome_builds": [
+                "inherited-matching-input-build"
+              ],
+              "name": "inline-json",
+              "orientations": [
+                "sample-pairs-by-jointly-callable-loci"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "concordance_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "reference-build",
+            "reference-sequence-digest",
+            "sample-manifest-digest",
+            "callability-policy",
+            "normalization-method"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "haplotype_signatures": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "loci": {
+            "type": "array"
+          },
+          "normalization": {
+            "type": "string"
+          },
+          "pairwise": {
+            "type": "array"
+          },
+          "quality_gates": {
+            "type": "array"
+          },
+          "reference_build": {
+            "type": "string"
+          },
+          "reference_sequence_digest": {
+            "type": "string"
+          },
+          "sample_count": {
+            "type": "integer"
+          },
+          "sample_summaries": {
+            "type": "array"
+          },
+          "variant_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reference_build",
+          "reference_sequence_digest",
+          "normalization",
+          "sample_count",
+          "variant_count",
+          "sample_summaries",
+          "pairwise",
+          "haplotype_signatures",
+          "loci",
+          "quality_gates",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "All samples share one reference sequence digest; variants are split, left-normalized, biallelic records; callability and phasing are declared rather than inferred from missing rows."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Independent clean-room replacement for comparative variant and haplotype purposes found during source assimilation; simulated and random source behaviors were explicitly rejected."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "A shared reference build and SHA-256 reference sequence digest are required before samples can be compared.",
+          "id": "variant-concordance-reference-identity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every sample-locus state must distinguish alternate, reference, and not callable; missingness is never converted to reference.",
+          "id": "variant-concordance-callability",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Haplotype summaries require explicit phase sets and ALT haplotype assignments and do not imply ancestry or evolutionary time.",
+          "id": "variant-concordance-phase",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Which normalized variants are shared or private among samples after preserving callability, reference identity, and explicit phasing semantics?"
+      ],
+      "schema_version": 1,
+      "title": "Compare multi-sample variant states without collapsing missingness",
+      "tool_requirements": [],
       "version": "1.0.0"
     },
     {
@@ -24254,6 +24917,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "f930bd5122ae0415390a756819422e3bec83aa88ef18e5a8bf56538dbcf841dd",
+  "registry_digest": "4495998192f74cc992400fa50a487440f499c57ad0cd67acdd27904f99b90c25",
   "schema_version": 1
 }
