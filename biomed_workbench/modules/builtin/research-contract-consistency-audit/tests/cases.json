@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "passes-independent-cross-artifact-contract",
+      "input": {
+        "artifacts": [
+          {
+            "id": "rubric",
+            "role": "Canonical rubric",
+            "media_type": "application/json",
+            "content": {"dimensions": [{"id": "rigor", "weight": 60}, {"id": "clarity", "weight": 40}]}
+          },
+          {
+            "id": "protocol",
+            "role": "Release protocol",
+            "media_type": "text/markdown",
+            "content": "# Release gate\nValidate evidence before release.\n"
+          }
+        ],
+        "rules": [
+          {"id": "dimension-ids", "kind": "json_unique_by", "severity": "major", "artifact_ids": ["rubric"], "parameters": {"path": "#/dimensions", "field": "id"}},
+          {"id": "weight-total", "kind": "numeric_sum", "severity": "major", "artifact_ids": ["rubric"], "parameters": {"path": "#/dimensions", "field": "weight", "expected": 100, "tolerance": 0}},
+          {"id": "release-evidence-gate", "kind": "text_contains", "severity": "major", "artifact_ids": ["protocol"], "parameters": {"tokens": ["Validate evidence before release"], "heading": "Release gate", "normalization": "whitespace"}}
+        ],
+        "contract_provenance": {
+          "contract_id": "release-contract",
+          "contract_version": "1.0.0",
+          "owner": "research quality lead",
+          "reviewed_at": "2026-07-13",
+          "intended_use": "Research release validation",
+          "rules_independent_from_artifacts": true,
+          "reviewed_for_completeness": true
+        }
+      },
+      "expected_subset": {
+        "contract_id": "release-contract",
+        "artifact_count": 2,
+        "rule_count": 3,
+        "failed_major_rule_ids": [],
+        "provenance_gate_ids": [],
+        "overall_status": "passed",
+        "semantic_validity_assessed": false
+      }
+    }
+  ]
+}

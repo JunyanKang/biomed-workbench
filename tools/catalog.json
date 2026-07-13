@@ -2049,6 +2049,173 @@
     },
     {
       "access": "offline",
+      "description": "Evaluate provenance-gated, scope-aware structural invariants across JSON, Markdown, and plain-text research artifacts without confusing structural consistency with scientific validity.",
+      "entrypoint": "biomed_workbench.capabilities.contracts:audit_research_contract",
+      "id": "research-contract-consistency-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifacts": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "content": {},
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "media_type": {
+                  "enum": [
+                    "application/json",
+                    "text/markdown",
+                    "text/plain"
+                  ],
+                  "type": "string"
+                },
+                "role": {
+                  "maxLength": 500,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "role",
+                "media_type",
+                "content"
+              ],
+              "type": "object"
+            },
+            "maxItems": 128,
+            "minItems": 1,
+            "type": "array"
+          },
+          "contract_provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "contract_id": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "contract_version": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "intended_use": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "owner": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "reviewed_at": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "reviewed_for_completeness": {
+                "type": "boolean"
+              },
+              "rules_independent_from_artifacts": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "contract_id",
+              "contract_version",
+              "owner",
+              "reviewed_at",
+              "intended_use",
+              "rules_independent_from_artifacts",
+              "reviewed_for_completeness"
+            ],
+            "type": "object"
+          },
+          "rules": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "artifact_ids": {
+                  "items": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "maxItems": 2,
+                  "minItems": 1,
+                  "type": "array"
+                },
+                "id": {
+                  "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$",
+                  "type": "string"
+                },
+                "kind": {
+                  "enum": [
+                    "json_path_exists",
+                    "json_path_absent",
+                    "json_value_in",
+                    "json_unique_by",
+                    "json_records_shape",
+                    "json_reference_integrity",
+                    "json_acyclic_relation",
+                    "json_conditional_required",
+                    "json_equal",
+                    "json_closed_set",
+                    "numeric_sum",
+                    "text_contains",
+                    "text_absent",
+                    "text_ordered",
+                    "text_mirror",
+                    "sha256_match"
+                  ],
+                  "type": "string"
+                },
+                "parameters": {
+                  "type": "object"
+                },
+                "severity": {
+                  "enum": [
+                    "warning",
+                    "major"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "severity",
+                "artifact_ids",
+                "parameters"
+              ],
+              "type": "object"
+            },
+            "maxItems": 512,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "artifacts",
+          "rules",
+          "contract_provenance"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit declared consistency contracts across research artifacts",
+      "workflow": "evidence"
+    },
+    {
+      "access": "offline",
       "description": "Preserve every reviewer comment, response, manuscript action, status, and unresolved item.",
       "entrypoint": "biomed_workbench.capabilities.publication:response_matrix",
       "id": "response-matrix",
@@ -2821,7 +2988,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 66,
+  "entry_count": 67,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "id": "research-contract-consistency-audit",
+  "version": "1.0.0",
+  "title": "Audit declared consistency contracts across research artifacts",
+  "description": "Evaluate provenance-gated, scope-aware structural invariants across JSON, Markdown, and plain-text research artifacts without confusing structural consistency with scientific validity.",
+  "module_type": "validation",
+  "domains": ["evidence", "research-quality", "delivery"],
+  "intents": [
+    "audit consistency across research artifacts",
+    "validate provenance schema policy rubric and release contracts",
+    "检查科研项目多份产物之间的字段、版本、规则和镜像一致性",
+    "在论文提交或分析交付前执行声明式契约审计"
+  ],
+  "questions": [
+    "Do the supplied research artifacts satisfy independently declared cross-artifact, scoped-text, provenance, uniqueness, closed-set, ordering, and digest invariants?"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.contracts:audit_research_contract",
+  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 10000000},
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "research_contract_bundle",
+      "artifact_type": "research_contract_bundle",
+      "formats": [
+        {
+          "name": "research-contract-bundle",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["request-object"]
+        }
+      ],
+      "processing_levels": ["declared"],
+      "required_metadata": ["contract_id", "contract_version", "owner", "reviewed_at", "intended_use", "rules_independent_from_artifacts", "reviewed_for_completeness"]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "research_contract_audit",
+      "artifact_type": "research_contract_audit_report",
+      "formats": [
+        {
+          "name": "research-contract-audit-report",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["module-output"]
+        }
+      ],
+      "processing_levels": ["validated"],
+      "required_metadata": ["module_version", "compatibility_row_id", "contract_version", "contract_digest"]
+    }
+  ],
+  "preconditions": [
+    "Artifacts are supplied as bounded in-memory JSON, Markdown, or plain text and rules are declared before interpreting the audit result."
+  ],
+  "assumptions": [
+    "The contract owner has chosen rules appropriate to the scientific workflow and has not derived acceptance rules from the artifacts being judged."
+  ],
+  "quality_gates": [
+    {"id": "contract-rule-independence", "severity": "major", "description": "Acceptance rules must be specified independently of the artifacts under audit.", "blocks_interpretation": true},
+    {"id": "contract-completeness-review", "severity": "major", "description": "A responsible owner must review whether the declared rules cover the intended scientific and delivery boundary.", "blocks_interpretation": true},
+    {"id": "contract-major-failures", "severity": "major", "description": "Any failed major invariant blocks downstream interpretation or release.", "blocks_interpretation": true},
+    {"id": "contract-semantic-boundary", "severity": "warning", "description": "Structural consistency never establishes scientific validity, evidentiary sufficiency, or correctness of conclusions.", "blocks_interpretation": false}
+  ],
+  "limitations": [
+    "The module validates declared structural contracts only. It does not infer missing rules, execute code, load external files, validate arbitrary JSON Schema dialects, or judge the scientific truth of artifact content."
+  ],
+  "evidence_effects": ["validates_cross_artifact_contract", "detects_specification_drift", "limits_release_readiness_claim"],
+  "alternatives": [],
+  "complements": ["classification-gold-set-evaluation", "source-freshness-audit", "citation-resolution-adjudication", "manuscript-audit", "reviewer-assessment", "response-matrix"],
+  "tool_requirements": [],
+  "dependencies": [
+    {
+      "name": "python",
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "required": true,
+      "tested_versions": ["3.14.3"],
+      "allowed_versions": [">=3.14,<3.15"],
+      "version_source": "https://www.python.org/downloads/release/python-3143/",
+      "verified_at": "2026-07-13",
+      "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Parse bounded artifacts, apply deterministic contract rules, and compute canonical provenance digests.",
+      "conflicts": [],
+      "platforms": ["any"]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-research-contract-bundle-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {"python": [">=3.14,<3.15"]},
+      "input_formats": {"research_contract_bundle": ["research-contract-bundle@1"]},
+      "output_formats": {"research_contract_audit": ["research-contract-audit-report@1"]},
+      "platforms": ["any"],
+      "regression_evidence_ids": ["research-contract-consistency-audit-regression-v1"],
+      "end_to_end_evidence_ids": ["research-contract-consistency-audit-e2e-v1"],
+      "verified_at": "2026-07-13"
+    }
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "artifacts": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 128,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "role": {"type": "string", "minLength": 1, "maxLength": 500},
+            "media_type": {"type": "string", "enum": ["application/json", "text/markdown", "text/plain"]},
+            "content": {}
+          },
+          "required": ["id", "role", "media_type", "content"]
+        }
+      },
+      "rules": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 512,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "pattern": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"},
+            "kind": {
+              "type": "string",
+              "enum": ["json_path_exists", "json_path_absent", "json_value_in", "json_unique_by", "json_records_shape", "json_reference_integrity", "json_acyclic_relation", "json_conditional_required", "json_equal", "json_closed_set", "numeric_sum", "text_contains", "text_absent", "text_ordered", "text_mirror", "sha256_match"]
+            },
+            "severity": {"type": "string", "enum": ["warning", "major"]},
+            "artifact_ids": {"type": "array", "minItems": 1, "maxItems": 2, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+            "parameters": {"type": "object"}
+          },
+          "required": ["id", "kind", "severity", "artifact_ids", "parameters"]
+        }
+      },
+      "contract_provenance": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contract_id": {"type": "string", "minLength": 1, "maxLength": 500},
+          "contract_version": {"type": "string", "minLength": 1, "maxLength": 500},
+          "owner": {"type": "string", "minLength": 1, "maxLength": 500},
+          "reviewed_at": {"type": "string", "minLength": 1, "maxLength": 500},
+          "intended_use": {"type": "string", "minLength": 1, "maxLength": 500},
+          "rules_independent_from_artifacts": {"type": "boolean"},
+          "reviewed_for_completeness": {"type": "boolean"}
+        },
+        "required": ["contract_id", "contract_version", "owner", "reviewed_at", "intended_use", "rules_independent_from_artifacts", "reviewed_for_completeness"]
+      }
+    },
+    "required": ["artifacts", "rules", "contract_provenance"]
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "contract_id": {"type": "string"},
+      "contract_version": {"type": "string"},
+      "contract_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+      "artifact_count": {"type": "integer", "minimum": 1},
+      "rule_count": {"type": "integer", "minimum": 1},
+      "artifacts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {"id": {"type": "string"}, "role": {"type": "string"}, "media_type": {"type": "string"}, "byte_count": {"type": "integer", "minimum": 0}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}},
+          "required": ["id", "role", "media_type", "byte_count", "sha256"]
+        }
+      },
+      "rule_results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string"}, "kind": {"type": "string"}, "severity": {"type": "string"}, "artifact_ids": {"type": "array", "items": {"type": "string"}},
+            "status": {"type": "string", "enum": ["passed", "failed"]}, "message": {"type": "string"}, "observed": {"type": "object"}
+          },
+          "required": ["id", "kind", "severity", "artifact_ids", "status", "message", "observed"]
+        }
+      },
+      "failed_major_rule_ids": {"type": "array", "items": {"type": "string"}},
+      "failed_warning_rule_ids": {"type": "array", "items": {"type": "string"}},
+      "provenance_gate_ids": {"type": "array", "items": {"type": "string"}},
+      "overall_status": {"type": "string", "enum": ["passed", "review_required", "blocked"]},
+      "semantic_validity_assessed": {"type": "boolean"},
+      "quality_gates": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["contract_id", "contract_version", "contract_digest", "artifact_count", "rule_count", "artifacts", "rule_results", "failed_major_rule_ids", "failed_warning_rule_ids", "provenance_gate_ids", "overall_status", "semantic_validity_assessed", "quality_gates"]
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned clean-room rewrite documented by the aggregate source-assimilation report."]}
+}

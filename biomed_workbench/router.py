@@ -89,6 +89,18 @@ def _domain_order(domains: Iterable[str]) -> list[str]:
 
 def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> list[str]:
     active = registry or _DEFAULT_REGISTRY
+    normalized_query = _normalize(query)
+    dominant_exact_domains = set()
+    for module in active.all():
+        exact_phrases = (
+            _phrase_matches(query, module.intents)
+            + _phrase_matches(query, module.questions)
+            + _phrase_matches(query, (module.title,))
+        )
+        if any(len(_normalize(phrase)) / len(normalized_query) >= 0.75 for phrase in exact_phrases):
+            dominant_exact_domains.add(module.domains[0])
+    if dominant_exact_domains:
+        return _domain_order(dominant_exact_domains)
     domain_scores: dict[str, float] = defaultdict(float)
     for module in active.all():
         score, reasons = _score_module(module, query)

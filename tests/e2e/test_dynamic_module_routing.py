@@ -50,6 +50,27 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         self.assertEqual(plan["matched_workflows"], ["ecology"])
         self.assertEqual(plan["steps"][0]["candidates"][0]["id"], "ecology-flux")
 
+    def test_exact_manifest_intent_suppresses_incidental_fuzzy_workflows(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            exact = valid_manifest_payload()
+            exact["id"] = "contract-audit"
+            exact["domains"] = ["evidence"]
+            exact["title"] = "Audit research contracts"
+            exact["intents"] = ["检查科研项目多份产物的一致性"]
+            write_manifest(root, exact)
+            fuzzy = valid_manifest_payload()
+            fuzzy["id"] = "generic-data-check"
+            fuzzy["domains"] = ["omics"]
+            fuzzy["title"] = "Check scientific data"
+            fuzzy["intents"] = ["检查科研数据"]
+            write_manifest(root, fuzzy)
+
+            plan = route("请检查科研项目多份产物的一致性", registry=ModuleRegistry.discover(root))
+
+        self.assertEqual(plan["matched_workflows"], ["evidence"])
+        self.assertEqual(plan["steps"][0]["candidates"][0]["id"], "contract-audit")
+
     def test_multi_domain_module_is_scheduled_once_without_a_central_special_case(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

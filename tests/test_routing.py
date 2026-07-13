@@ -63,6 +63,14 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(evaluation["matched_workflows"], ["evidence"])
         self.assertEqual(evaluation["plan_type"], "single")
 
+    def test_cross_artifact_contract_request_routes_to_consistency_audit(self):
+        plan = route("检查科研项目多份产物之间的字段、版本、规则和镜像一致性")
+
+        routed = [candidate["id"] for step in plan["steps"] for candidate in step["candidates"]]
+        self.assertEqual(routed[0], "research-contract-consistency-audit")
+        self.assertEqual(plan["matched_workflows"], ["evidence"])
+        self.assertEqual(plan["plan_type"], "single")
+
     def test_route_output_has_no_source_or_adapter_fields(self):
         plan = route("search TP53 gene evidence")
         serialized = repr(plan).lower()
