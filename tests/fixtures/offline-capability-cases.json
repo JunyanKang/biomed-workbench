@@ -4340,6 +4340,398 @@
       }
     }
   },
+  "single-cell-reference-annotation": {
+    "input": {
+      "declared_thresholds": {
+        "maximum_negative_marker_conflict": 0.25,
+        "minimum_delta_next": 0.05,
+        "minimum_group_consensus": 0.8,
+        "minimum_positive_marker_support": 0.75
+      },
+      "design_notes": "Reference labels are independently reviewed; query clusters were generated without reference-label leakage.",
+      "evaluation_label_key": "none",
+      "existing_label_key": "reviewed_cell_type",
+      "input_format": "h5ad",
+      "marker_contract_id": "artifact-marker-contract",
+      "objective": "Map query cells to a reviewed reference and retain unsupported populations as unknown.",
+      "ontology_contract_id": "artifact-cell-ontology-contract",
+      "query_artifact_id": "artifact-query-scrna",
+      "query_group_key": "leiden",
+      "query_raw_count_location": "layers.counts",
+      "reference_artifact_id": "artifact-reviewed-reference",
+      "reference_label_key": "reference_label",
+      "reference_raw_count_location": "layers.counts",
+      "unknown_label": "unknown"
+    },
+    "output": {
+      "code_plan": [
+        {
+          "id": "inspect-query-reference-contract",
+          "output_artifact_types": [
+            "single_cell_annotation_validation"
+          ],
+          "purpose": "Establish whether the query, reference, markers, and ontology are semantically compatible before mapping.",
+          "required_logic": [
+            "Inspect real h5ad count locations, cells, genes, group keys, existing labels, reference labels, feature namespaces, annotation releases, and provenance.",
+            "Validate exact gene overlap and reject guessed identifier conversion, duplicated features, missing labels, incomplete marker contracts, and undeclared ontology edges.",
+            "Declare thresholds and optional post hoc evaluation labels before viewing mapping outcomes."
+          ],
+          "template_files": [
+            "templates/annotate_reference.py",
+            "templates/run_singler.R"
+          ]
+        },
+        {
+          "id": "execute-reference-mapping",
+          "output_artifact_types": [
+            "single_cell_annotated_object",
+            "single_cell_annotation_validation"
+          ],
+          "purpose": "Run SingleR on aligned sparse log-normalized expression without modifying source objects.",
+          "required_logic": [
+            "Adapt the template to the observed query and reference structures and exchange genes-by-cells sparse matrices through a temporary workspace.",
+            "Run the detected SingleR API and retain forced labels, pruned labels, delta.next, maximum score, and per-label scores in exact query-cell order.",
+            "Treat SingleR labels as candidates rather than final annotations."
+          ],
+          "template_files": [
+            "templates/annotate_reference.py",
+            "templates/run_singler.R"
+          ]
+        },
+        {
+          "id": "adjudicate-marker-ontology-unknown",
+          "output_artifact_types": [
+            "single_cell_annotated_object",
+            "single_cell_annotation_validation"
+          ],
+          "purpose": "Accept only reference labels supported by independent biological and ontology constraints.",
+          "required_logic": [
+            "Compute group consensus from forced and pruned SingleR labels and evaluate declared positive and negative markers against the query-wide background.",
+            "Resolve candidate ontology identifiers through the declared parent graph and enforce group-level allowed ancestors.",
+            "Require cell-level pruning and delta thresholds after group acceptance; retain every conflict, low-confidence cell, or unsupported population as unknown with reason codes."
+          ],
+          "template_files": [
+            "templates/annotate_reference.py"
+          ]
+        },
+        {
+          "id": "reload-evaluate-and-admit",
+          "output_artifact_types": [
+            "single_cell_annotated_object",
+            "single_cell_annotation_validation"
+          ],
+          "purpose": "Bind annotations to a reloadable h5ad and optional independent evaluation.",
+          "required_logic": [
+            "Write candidate, pruned, delta, ontology, conservative label, status, and reason fields to a new h5ad without changing existing labels or raw counts.",
+            "Reload and reconcile cells, genes, source labels, counts, annotation fields, contracts, versions, thresholds, and digests.",
+            "If independent truth exists, calculate post hoc performance only after decisions are frozen; admit only observed annotations passing all source-preservation gates."
+          ],
+          "template_files": [
+            "templates/annotate_reference.py"
+          ]
+        }
+      ],
+      "dependency_profiles": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "identity": "python-runtime",
+          "name": "python",
+          "tested_versions": [
+            "3.14.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.11,<0.12"
+          ],
+          "conflicts": [],
+          "identity": "anndata",
+          "name": "anndata",
+          "tested_versions": [
+            "0.11.4"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.26,<1.27"
+          ],
+          "conflicts": [],
+          "identity": "numpy",
+          "name": "numpy",
+          "tested_versions": [
+            "1.26.4"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=2.3,<2.4"
+          ],
+          "conflicts": [],
+          "identity": "pandas",
+          "name": "pandas",
+          "tested_versions": [
+            "2.3.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.15,<1.16"
+          ],
+          "conflicts": [],
+          "identity": "scipy",
+          "name": "scipy",
+          "tested_versions": [
+            "1.15.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.7,<1.8"
+          ],
+          "conflicts": [],
+          "identity": "sklearn",
+          "name": "scikit-learn",
+          "tested_versions": [
+            "1.7.2"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=4.3,<4.4"
+          ],
+          "conflicts": [],
+          "identity": "r-runtime",
+          "name": "r",
+          "tested_versions": [
+            "4.3.2"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.6,<1.7"
+          ],
+          "conflicts": [],
+          "identity": "Matrix",
+          "name": "Matrix",
+          "tested_versions": [
+            "1.6.5"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.36,<1.37"
+          ],
+          "conflicts": [],
+          "identity": "BiocParallel",
+          "name": "BiocParallel",
+          "tested_versions": [
+            "1.36.0"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=2.0,<2.1"
+          ],
+          "conflicts": [],
+          "identity": "jsonlite",
+          "name": "jsonlite",
+          "tested_versions": [
+            "2.0.0"
+          ]
+        }
+      ],
+      "execution_policy": {
+        "execute_in_user_scientific_environment": true,
+        "generate_project_specific_code": true,
+        "inspect_before_execution": true,
+        "manage_environment_or_compute_infrastructure": false,
+        "observed_execution_required": true,
+        "planned_output_is_not_evidence": true
+      },
+      "forbidden_actions": [
+        "Do not install, update, activate, create, or manage Python, R, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.",
+        "Do not guess gene identifier mappings, ontology edges, reference scope, marker evidence, missing labels, or annotation releases.",
+        "Do not use existing labels, evaluation truth, expected markers, desired cell types, conditions, or conclusions to tune SingleR or thresholds.",
+        "Do not accept a maximum reference score without pruning, group consensus, marker support, ontology allowance, and cell-level confidence.",
+        "Do not overwrite raw counts, source h5ad objects, existing labels, unknown labels, cells, genes, or sample provenance.",
+        "Do not force transitional, novel, discordant, or unsupported populations into the nearest known reference class.",
+        "Do not report generated code, temporary matrix exchange, or an unreloaded h5ad as validated annotation evidence."
+      ],
+      "handoff_type": "codex_generated_project_analysis",
+      "languages": [
+        "python",
+        "r",
+        "notebook"
+      ],
+      "module": {
+        "id": "single-cell-reference-annotation",
+        "version": "1.0.0"
+      },
+      "parameter_rules": [
+        {
+          "decision_inputs": [
+            "species",
+            "tissue",
+            "developmental stage",
+            "disease state",
+            "assay",
+            "feature namespace",
+            "annotation release"
+          ],
+          "id": "reference-selection",
+          "parameter": "reviewed-reference",
+          "selection_rule": "Use a biologically matched, independently reviewed reference whose scope and missing populations are explicitly documented.",
+          "validation_rule": "An unmatched or uncertified atlas remains unavailable rather than silently substituted."
+        },
+        {
+          "decision_inputs": [
+            "query genes",
+            "reference genes",
+            "identifier namespace",
+            "reference markers"
+          ],
+          "id": "gene-overlap",
+          "parameter": "minimum-common-genes-and-fraction",
+          "selection_rule": "Declare both an absolute and query-relative overlap requirement before mapping.",
+          "validation_rule": "Block guessed identifier conversion and references missing required marker genes."
+        },
+        {
+          "decision_inputs": [
+            "cluster granularity",
+            "reference class similarity",
+            "pruning behavior",
+            "class balance"
+          ],
+          "id": "confidence-and-consensus",
+          "parameter": "delta-and-group-consensus-thresholds",
+          "selection_rule": "Require independent cell-level and group-level agreement rather than one maximum score.",
+          "validation_rule": "Retain pruned, discordant, or low-delta cells as unknown."
+        },
+        {
+          "decision_inputs": [
+            "positive markers",
+            "negative markers",
+            "query background",
+            "ontology release",
+            "group constraints"
+          ],
+          "id": "marker-and-ontology",
+          "parameter": "marker-support-conflict-and-ontology-allowance",
+          "selection_rule": "Predeclare minimum positive support, maximum negative conflict, and allowed ontology ancestors.",
+          "validation_rule": "Any marker or ontology conflict blocks acceptance regardless of SingleR score."
+        }
+      ],
+      "postflight_checks": [
+        "Reconcile every SingleR score and label to query-cell order and declared reference classes.",
+        "Inspect group consensus, positive marker support, negative conflicts, ontology ancestors, cell pruning, delta thresholds, accepted labels, unknowns, and reason codes.",
+        "Reload the annotated h5ad and verify all source cells, genes, existing labels, raw counts, annotations, contracts, tool versions, thresholds, and digests.",
+        "Compare optional independent truth only after annotation decisions are frozen and report unsupported reference populations explicitly."
+      ],
+      "preflight_checks": [
+        "Inspect query, reference, marker, ontology, feature, label, group, unknown, and optional evaluation semantics from the real artifacts.",
+        "Detect SingleR, Scanpy, AnnData, NumPy, pandas, SciPy, scikit-learn, R, Matrix, BiocParallel, and jsonlite versions in existing environments.",
+        "Verify unique identifiers, integer-like counts, exact label-contract coverage, ontology graph fields, query-reference overlap, source immutability, and new output paths.",
+        "Freeze normalization, SingleR API, thresholds, reference scope, marker evidence, ontology release, and post hoc evaluation policy before execution."
+      ],
+      "provenance_fields": [
+        "module-id",
+        "module-version",
+        "generated-code-sha256",
+        "query-h5ad-sha256",
+        "reference-h5ad-sha256",
+        "marker-contract-sha256",
+        "ontology-contract-sha256",
+        "feature-namespace",
+        "annotation-releases",
+        "query-and-reference-raw-count-locations",
+        "reference-label-key",
+        "query-group-key",
+        "existing-label-key",
+        "unknown-label",
+        "actual-tool-versions",
+        "actual-dependency-versions",
+        "normalization",
+        "SingleR-parameters",
+        "quality-thresholds",
+        "group-results",
+        "reason-codes",
+        "output-h5ad-sha256",
+        "quality-gate-results"
+      ],
+      "quality_gate_ids": [
+        "annotation-input-and-feature-semantics",
+        "annotation-reference-coverage",
+        "annotation-singler-reconciliation",
+        "annotation-marker-and-group-support",
+        "annotation-ontology-consistency",
+        "annotation-unknown-and-source-preservation",
+        "annotation-output-reload"
+      ],
+      "request_digest": "898a8ae4e76b85b749f63eb5d981f76bfdc4d3dc1e58381f713fd9417074e896",
+      "request_fields": [
+        "declared_thresholds",
+        "design_notes",
+        "evaluation_label_key",
+        "existing_label_key",
+        "input_format",
+        "marker_contract_id",
+        "objective",
+        "ontology_contract_id",
+        "query_artifact_id",
+        "query_group_key",
+        "query_raw_count_location",
+        "reference_artifact_id",
+        "reference_label_key",
+        "reference_raw_count_location",
+        "unknown_label"
+      ],
+      "tool_profiles": [
+        {
+          "allowed_versions": [
+            ">=2.4,<2.5"
+          ],
+          "identity": "SingleR",
+          "mismatch_policy": "block",
+          "name": "SingleR",
+          "tested_versions": [
+            "2.4.1"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2.4,<2.5"
+              ],
+              "id": "singler-score-prune-api",
+              "required_action": "Use the detected API, preserve exact cell order, parse all returned fields, and independently apply marker and ontology gates."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.11,<1.12"
+          ],
+          "identity": "scanpy",
+          "mismatch_policy": "block",
+          "name": "scanpy",
+          "tested_versions": [
+            "1.11.5"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.11,<1.12"
+              ],
+              "id": "scanpy-h5ad-read-write",
+              "required_action": "Reload the output and reconcile every source and annotation field before admission."
+            }
+          ]
+        }
+      ]
+    }
+  },
   "source-freshness-audit": {
     "input": {
       "as_of_date": "2026-07-13",

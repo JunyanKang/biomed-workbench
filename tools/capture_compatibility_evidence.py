@@ -77,6 +77,12 @@ AGENT_EVIDENCE = {
         "summary_flags": ("scvi_and_scanvi_trained", "models_and_h5ad_reloaded", "raw_counts_preserved", "reviewed_and_unknown_labels_preserved", "scanvi_evaluated_on_hidden_labels", "scanvi_predictions_are_reviewable_suggestions", "no_environment_or_compute_infrastructure_managed"),
         "live_dependency_keys": ("anndata", "numpy", "pandas", "scipy", "scikit-learn", "torch", "lightning"),
     },
+    "single-cell-reference-annotation": {
+        "path": "reports/single-cell-reference-annotation-live-verification.json",
+        "execution_flags": ("singler_completed",),
+        "summary_flags": ("singler_reference_mapping_executed", "marker_contracts_applied", "ontology_ancestor_constraints_applied", "unknown_population_retained", "existing_labels_and_raw_counts_preserved", "evaluation_labels_posthoc_only", "annotated_h5ad_reloaded", "no_environment_or_compute_infrastructure_managed"),
+        "live_dependency_keys": ("anndata", "numpy", "pandas", "scipy", "scikit-learn", "r", "Matrix", "BiocParallel", "jsonlite"),
+    },
 }
 
 

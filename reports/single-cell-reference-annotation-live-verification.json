@@ -1,0 +1,69 @@
+{
+  "compatibility_row_id": "agent-protocol-1-singler-241-scanpy-1115-r-432",
+  "dependency_versions": {
+    "BiocParallel": "1.36.0",
+    "Matrix": "1.6.5",
+    "anndata": "0.11.4",
+    "jsonlite": "2.0.0",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "r": "4.3.2",
+    "scikit-learn": "1.7.2",
+    "scipy": "1.15.3"
+  },
+  "execution": {
+    "analysis_report_sha256": "e9f780617b7b614c963b5b00eecd59deaa684a6065cbf0b30e938391fb977638",
+    "output_sha256": "b82e01a20acb2553a75b9867eaa42102ce7c99a2d72e9d8ae14a7905cb74de54",
+    "singler_completed": true
+  },
+  "fixture": {
+    "genes": 120,
+    "known_query_cells": 240,
+    "query_cells": 280,
+    "query_sha256": "e07ddbdfb354798b1aff64608daf2aa7bebbaee7ba721aadcef689adf1eaff30",
+    "reference_cells": 180,
+    "reference_sha256": "8ddeefb1c17195dbe72d7c668a67c9e10ca84c9caf0aaed054de39f8ffeafbf6",
+    "unknown_query_cells": 40
+  },
+  "module_id": "single-cell-reference-annotation",
+  "module_version": "1.0.0",
+  "passed": true,
+  "results": {
+    "accepted_cells": 240,
+    "known_cell_accuracy": 1.0,
+    "macro_f1": 1.0,
+    "unknown_cells": 40,
+    "unknown_group_blocking_gates": [
+      "forced_consensus",
+      "ontology_allowed",
+      "positive_marker_support",
+      "pruned_consensus"
+    ],
+    "unknown_retention_fraction": 1.0
+  },
+  "schema_version": 1,
+  "scientific_summary": {
+    "annotated_h5ad_reloaded": true,
+    "evaluation_labels_posthoc_only": true,
+    "existing_labels_and_raw_counts_preserved": true,
+    "marker_contracts_applied": true,
+    "no_environment_or_compute_infrastructure_managed": true,
+    "ontology_ancestor_constraints_applied": true,
+    "singler_reference_mapping_executed": true,
+    "unknown_population_retained": true
+  },
+  "templates": {
+    "annotate_reference": {
+      "name": "annotate_reference.py",
+      "sha256": "af248af77644fdbbe7d6c308f8a1b06bd0d5f783166712c199b28ed10d4bae47"
+    },
+    "run_singler": {
+      "name": "run_singler.R",
+      "sha256": "cb6e088a544396a8a17ad8895ab192b48b22f51cc1c3edf7794861c7c7a9c183"
+    }
+  },
+  "tool_versions": {
+    "SingleR": "2.4.1",
+    "scanpy": "1.11.5"
+  }
+}

@@ -170,6 +170,23 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         self.assertTrue(output["execution_policy"]["observed_execution_required"])
         self.assertTrue(any("Do not evaluate scANVI only" in item for item in output["forbidden_actions"]))
 
+    def test_single_cell_reference_annotation(self):
+        output = execute("single-cell-reference-annotation", {
+            "objective": "Map query cells to a reviewed reference and retain unsupported populations as unknown.",
+            "query_artifact_id": "artifact-query-scrna", "reference_artifact_id": "artifact-reviewed-reference",
+            "input_format": "h5ad", "query_raw_count_location": "layers.counts", "reference_raw_count_location": "layers.counts",
+            "reference_label_key": "reference_label", "query_group_key": "leiden", "existing_label_key": "reviewed_cell_type",
+            "evaluation_label_key": "none", "unknown_label": "unknown", "marker_contract_id": "artifact-marker-contract",
+            "ontology_contract_id": "artifact-cell-ontology-contract",
+            "declared_thresholds": {"minimum_delta_next": 0.05, "minimum_group_consensus": 0.8, "minimum_positive_marker_support": 0.75, "maximum_negative_marker_conflict": 0.25},
+            "design_notes": "Reference labels are independently reviewed; query clusters were generated without reference-label leakage."
+        })
+        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"SingleR", "scanpy"})
+        self.assertIn("annotation-ontology-consistency", output["quality_gate_ids"])
+        self.assertTrue(output["execution_policy"]["observed_execution_required"])
+        self.assertTrue(any("Do not force transitional" in item for item in output["forbidden_actions"]))
+
     def test_variant_summary(self):
         output = execute("variant-summary", {"variants": [{"chrom": "1", "ref": "A", "alt": "G", "filter": "PASS"}]})
         self.assertEqual(output["transition_count"], 1)
