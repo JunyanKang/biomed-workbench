@@ -109,6 +109,192 @@
     },
     {
       "access": "offline",
+      "description": "Detect external empirical, quantitative, comparative, and causal assertions lacking inventory-backed citations while binding current-study results to analysis or experiment artifacts and surfacing incomplete extraction.",
+      "entrypoint": "biomed_workbench.capabilities.assertion_citation:audit_assertion_citation_coverage",
+      "id": "assertion-citation-coverage-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_inventory": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100000,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "audit_provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "audit_id": {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              "audit_version": {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              "citation_extraction_complete": {
+                "type": "boolean"
+              },
+              "reviewed_at": {
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "type": "string"
+              },
+              "rules_independent_from_writer": {
+                "type": "boolean"
+              },
+              "segmentation_complete": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "audit_id",
+              "audit_version",
+              "reviewed_at",
+              "segmentation_complete",
+              "citation_extraction_complete",
+              "rules_independent_from_writer"
+            ],
+            "type": "object"
+          },
+          "citation_inventory": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100000,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "sentences": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "adjacent_citation_ids": {
+                  "items": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "adjacent_text": {
+                  "maxLength": 20000,
+                  "nullable": true,
+                  "type": "string"
+                },
+                "artifact_ids": {
+                  "items": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "citation_ids": {
+                  "items": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "claim_kind": {
+                  "enum": [
+                    "empirical",
+                    "quantitative",
+                    "causal",
+                    "comparative",
+                    "definitional",
+                    "procedural",
+                    "interpretive"
+                  ],
+                  "type": "string"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "manifest_claim_id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "nullable": true,
+                  "type": "string"
+                },
+                "origin": {
+                  "enum": [
+                    "external_evidence",
+                    "current_study",
+                    "author_interpretation",
+                    "definition",
+                    "method_description"
+                  ],
+                  "type": "string"
+                },
+                "section_path": {
+                  "maxLength": 1000,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "text": {
+                  "maxLength": 10000,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "text",
+                "section_path",
+                "adjacent_text",
+                "origin",
+                "claim_kind",
+                "citation_ids",
+                "adjacent_citation_ids",
+                "artifact_ids",
+                "manifest_claim_id"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100000,
+            "minItems": 1,
+            "type": "array"
+          },
+          "terminal_policy": {
+            "enum": [
+              "advisory",
+              "strict"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "sentences",
+          "citation_inventory",
+          "artifact_inventory",
+          "terminal_policy",
+          "audit_provenance"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit citation coverage of scientific assertions",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
       "description": "Calculate confusion metrics, predictive values, accuracy, and tie-aware rank ROC AUC.",
       "entrypoint": "biomed_workbench.capabilities.clinical:biomarker_performance",
       "id": "biomarker-performance",
@@ -3441,6 +3627,687 @@
     },
     {
       "access": "offline",
+      "description": "Verify source effective ranges, event chronology, version comparators, causal ordering, date precision, provenance confidence, supersession chains, and publication-safe temporal language from explicit research facts.",
+      "entrypoint": "biomed_workbench.capabilities.temporal_integrity:audit_temporal_integrity",
+      "id": "temporal-integrity-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "assertions": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "anchor_date": {
+                  "additionalProperties": false,
+                  "nullable": true,
+                  "properties": {
+                    "confidence": {
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low",
+                        "unverified"
+                      ],
+                      "type": "string"
+                    },
+                    "open_ended": {
+                      "type": "boolean"
+                    },
+                    "precision": {
+                      "enum": [
+                        "day",
+                        "month",
+                        "year",
+                        "interval",
+                        "unknown"
+                      ],
+                      "type": "string"
+                    },
+                    "provenance_method": {
+                      "enum": [
+                        "publisher_metadata",
+                        "original_document",
+                        "user_verified",
+                        "adapter_metadata",
+                        "unknown"
+                      ],
+                      "type": "string"
+                    },
+                    "source_record_id": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "value": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "precision",
+                    "open_ended",
+                    "provenance_method",
+                    "confidence",
+                    "source_record_id"
+                  ],
+                  "type": "object"
+                },
+                "assertion_kind": {
+                  "enum": [
+                    "future_as_past",
+                    "governance",
+                    "version_comparison",
+                    "causal_order",
+                    "narrative"
+                  ],
+                  "type": "string"
+                },
+                "comparator_year": {
+                  "maximum": 9999,
+                  "minimum": 1000,
+                  "nullable": true,
+                  "type": "integer"
+                },
+                "event_id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "left_binding": {
+                  "additionalProperties": false,
+                  "nullable": true,
+                  "properties": {
+                    "date": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "confidence": {
+                          "enum": [
+                            "high",
+                            "medium",
+                            "low",
+                            "unverified"
+                          ],
+                          "type": "string"
+                        },
+                        "open_ended": {
+                          "type": "boolean"
+                        },
+                        "precision": {
+                          "enum": [
+                            "day",
+                            "month",
+                            "year",
+                            "interval",
+                            "unknown"
+                          ],
+                          "type": "string"
+                        },
+                        "provenance_method": {
+                          "enum": [
+                            "publisher_metadata",
+                            "original_document",
+                            "user_verified",
+                            "adapter_metadata",
+                            "unknown"
+                          ],
+                          "type": "string"
+                        },
+                        "source_record_id": {
+                          "maxLength": 128,
+                          "minLength": 1,
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "value": {
+                          "nullable": true,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "precision",
+                        "open_ended",
+                        "provenance_method",
+                        "confidence",
+                        "source_record_id"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "kind": {
+                      "enum": [
+                        "source",
+                        "event",
+                        "direct"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "date"
+                  ],
+                  "type": "object"
+                },
+                "predicate": {
+                  "enum": [
+                    "already_completed",
+                    "forthcoming",
+                    "governed_by",
+                    "compares_with",
+                    "enabled",
+                    "caused",
+                    "led_to",
+                    "in_response_to",
+                    "superseded",
+                    "preceded",
+                    "followed_by",
+                    "followed",
+                    "narrative"
+                  ],
+                  "type": "string"
+                },
+                "right_binding": {
+                  "additionalProperties": false,
+                  "nullable": true,
+                  "properties": {
+                    "date": {
+                      "additionalProperties": false,
+                      "nullable": true,
+                      "properties": {
+                        "confidence": {
+                          "enum": [
+                            "high",
+                            "medium",
+                            "low",
+                            "unverified"
+                          ],
+                          "type": "string"
+                        },
+                        "open_ended": {
+                          "type": "boolean"
+                        },
+                        "precision": {
+                          "enum": [
+                            "day",
+                            "month",
+                            "year",
+                            "interval",
+                            "unknown"
+                          ],
+                          "type": "string"
+                        },
+                        "provenance_method": {
+                          "enum": [
+                            "publisher_metadata",
+                            "original_document",
+                            "user_verified",
+                            "adapter_metadata",
+                            "unknown"
+                          ],
+                          "type": "string"
+                        },
+                        "source_record_id": {
+                          "maxLength": 128,
+                          "minLength": 1,
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "value": {
+                          "nullable": true,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "value",
+                        "precision",
+                        "open_ended",
+                        "provenance_method",
+                        "confidence",
+                        "source_record_id"
+                      ],
+                      "type": "object"
+                    },
+                    "id": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "kind": {
+                      "enum": [
+                        "source",
+                        "event",
+                        "direct"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "id",
+                    "date"
+                  ],
+                  "type": "object"
+                },
+                "section_path": {
+                  "maxLength": 1000,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "source_id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "nullable": true,
+                  "type": "string"
+                },
+                "text": {
+                  "maxLength": 10000,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "text",
+                "section_path",
+                "assertion_kind",
+                "predicate",
+                "anchor_date",
+                "event_id",
+                "source_id",
+                "comparator_year",
+                "left_binding",
+                "right_binding"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100000,
+            "minItems": 1,
+            "type": "array"
+          },
+          "audit_provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "assertion_extraction_complete": {
+                "type": "boolean"
+              },
+              "audit_id": {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              "audit_version": {
+                "maxLength": 128,
+                "minLength": 1,
+                "type": "string"
+              },
+              "reviewed_at": {
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "type": "string"
+              },
+              "rules_independent_from_writer": {
+                "type": "boolean"
+              },
+              "timeline_complete": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "audit_id",
+              "audit_version",
+              "reviewed_at",
+              "timeline_complete",
+              "assertion_extraction_complete",
+              "rules_independent_from_writer"
+            ],
+            "type": "object"
+          },
+          "events": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "date": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "confidence": {
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low",
+                        "unverified"
+                      ],
+                      "type": "string"
+                    },
+                    "open_ended": {
+                      "type": "boolean"
+                    },
+                    "precision": {
+                      "enum": [
+                        "day",
+                        "month",
+                        "year",
+                        "interval",
+                        "unknown"
+                      ],
+                      "type": "string"
+                    },
+                    "provenance_method": {
+                      "enum": [
+                        "publisher_metadata",
+                        "original_document",
+                        "user_verified",
+                        "adapter_metadata",
+                        "unknown"
+                      ],
+                      "type": "string"
+                    },
+                    "source_record_id": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "value": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "precision",
+                    "open_ended",
+                    "provenance_method",
+                    "confidence",
+                    "source_record_id"
+                  ],
+                  "type": "object"
+                },
+                "description": {
+                  "maxLength": 4000,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "description",
+                "date"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100000,
+            "type": "array"
+          },
+          "report_reference_date": {
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "effective_end": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "confidence": {
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low",
+                        "unverified"
+                      ],
+                      "type": "string"
+                    },
+                    "open_ended": {
+                      "type": "boolean"
+                    },
+                    "precision": {
+                      "enum": [
+                        "day",
+                        "month",
+                        "year",
+                        "interval",
+                        "unknown"
+                      ],
+                      "type": "string"
+                    },
+                    "provenance_method": {
+                      "enum": [
+                        "publisher_metadata",
+                        "original_document",
+                        "user_verified",
+                        "adapter_metadata",
+                        "unknown"
+                      ],
+                      "type": "string"
+                    },
+                    "source_record_id": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "value": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "precision",
+                    "open_ended",
+                    "provenance_method",
+                    "confidence",
+                    "source_record_id"
+                  ],
+                  "type": "object"
+                },
+                "effective_start": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "confidence": {
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low",
+                        "unverified"
+                      ],
+                      "type": "string"
+                    },
+                    "open_ended": {
+                      "type": "boolean"
+                    },
+                    "precision": {
+                      "enum": [
+                        "day",
+                        "month",
+                        "year",
+                        "interval",
+                        "unknown"
+                      ],
+                      "type": "string"
+                    },
+                    "provenance_method": {
+                      "enum": [
+                        "publisher_metadata",
+                        "original_document",
+                        "user_verified",
+                        "adapter_metadata",
+                        "unknown"
+                      ],
+                      "type": "string"
+                    },
+                    "source_record_id": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "value": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "precision",
+                    "open_ended",
+                    "provenance_method",
+                    "confidence",
+                    "source_record_id"
+                  ],
+                  "type": "object"
+                },
+                "id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "published_date": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "confidence": {
+                      "enum": [
+                        "high",
+                        "medium",
+                        "low",
+                        "unverified"
+                      ],
+                      "type": "string"
+                    },
+                    "open_ended": {
+                      "type": "boolean"
+                    },
+                    "precision": {
+                      "enum": [
+                        "day",
+                        "month",
+                        "year",
+                        "interval",
+                        "unknown"
+                      ],
+                      "type": "string"
+                    },
+                    "provenance_method": {
+                      "enum": [
+                        "publisher_metadata",
+                        "original_document",
+                        "user_verified",
+                        "adapter_metadata",
+                        "unknown"
+                      ],
+                      "type": "string"
+                    },
+                    "source_record_id": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "value": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "value",
+                    "precision",
+                    "open_ended",
+                    "provenance_method",
+                    "confidence",
+                    "source_record_id"
+                  ],
+                  "type": "object"
+                },
+                "superseded_by": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "nullable": true,
+                  "type": "string"
+                },
+                "supersedes": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "nullable": true,
+                  "type": "string"
+                },
+                "version_catalog_completeness": {
+                  "enum": [
+                    "exhaustive",
+                    "partial",
+                    "unknown"
+                  ],
+                  "type": "string"
+                },
+                "version_family_id": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "nullable": true,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "published_date",
+                "effective_start",
+                "effective_end",
+                "version_family_id",
+                "version_catalog_completeness",
+                "supersedes",
+                "superseded_by"
+              ],
+              "type": "object"
+            },
+            "maxItems": 100000,
+            "type": "array"
+          },
+          "terminal_policy": {
+            "enum": [
+              "advisory",
+              "strict"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "report_reference_date",
+          "terminal_policy",
+          "sources",
+          "events",
+          "assertions",
+          "audit_provenance"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit temporal integrity of scientific assertions",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
       "description": "Apply declared somatic, filter, effect, and allele-fraction rules before dividing eligible mutations by explicit callable megabases.",
       "entrypoint": "biomed_workbench.capabilities.research_quality:calculate_tumor_mutation_burden",
       "id": "tumor-mutation-burden",
@@ -3680,7 +4547,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 68,
+  "entry_count": 70,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

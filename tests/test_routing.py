@@ -79,6 +79,28 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(plan["matched_workflows"], ["publication"])
         self.assertEqual(plan["plan_type"], "single")
 
+    def test_temporal_integrity_request_routes_to_temporal_audit(self):
+        plan = route("审计论文日期、事件顺序、来源版本、适用期和因果时间逻辑")
+
+        self.assertEqual(plan["selected_module_ids"], ["temporal-integrity-audit"])
+        self.assertEqual(plan["plan_type"], "single")
+
+    def test_uncited_assertion_request_routes_to_citation_coverage_audit(self):
+        plan = route("筛查论文中未引证的经验性、定量、比较和因果主张")
+
+        self.assertEqual(plan["selected_module_ids"], ["assertion-citation-coverage-audit"])
+        self.assertEqual(plan["plan_type"], "single")
+
+    def test_composite_review_selects_independent_audits_in_parallel(self):
+        plan = route("同时审查论文时间逻辑和未引证的经验性主张", per_workflow=5)
+
+        self.assertEqual(
+            plan["selected_module_ids"],
+            ["assertion-citation-coverage-audit", "temporal-integrity-audit"],
+        )
+        self.assertEqual(plan["plan_type"], "parallel")
+        self.assertEqual(plan["steps"][0]["mode"], "parallel")
+
     def test_route_output_has_no_source_or_adapter_fields(self):
         plan = route("search TP53 gene evidence")
         serialized = repr(plan).lower()

@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 68,
-  "module_count": 68,
+  "compatibility_complete": 70,
+  "module_count": 70,
   "modules": [
     {
       "compatibility_rows": [
@@ -462,6 +462,128 @@
           "version_source": "https://github.com/samtools/samtools/releases/tag/1.23"
         }
       ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "assertion-citation-coverage-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-assertion-evidence-binding-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "assertion-citation-coverage-audit-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate sentence records, citation and artifact bindings, bounded lexical triggers, audit provenance, and deterministic release gates.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "assertion-citation-coverage-audit",
+      "input_formats": [
+        {
+          "artifact_type": "assertion_evidence_binding_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "assertion-evidence-binding-bundle",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "assertion_evidence_binding_bundle",
+          "processing_levels": [
+            "sentence-segmented"
+          ],
+          "required_metadata": [
+            "citation_inventory",
+            "artifact_inventory",
+            "audit_id",
+            "audit_version",
+            "terminal_policy"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "assertion_citation_coverage_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "assertion-citation-coverage-report",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "assertion_citation_coverage_report",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "audit_digest",
+            "release_safe"
+          ]
+        }
+      ],
+      "tools": [],
       "validation_status": "complete"
     },
     {
@@ -8493,6 +8615,128 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "temporal-integrity-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-temporal-fact-bundle-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "temporal-integrity-audit-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate ISO calendar dates, interval arithmetic, source effective ranges, version chains, and temporal assertion gates with the standard library.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "temporal-integrity-audit",
+      "input_formats": [
+        {
+          "artifact_type": "temporal_fact_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "temporal-fact-bundle",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "temporal_fact_bundle",
+          "processing_levels": [
+            "provenance-qualified"
+          ],
+          "required_metadata": [
+            "report_reference_date",
+            "terminal_policy",
+            "audit_id",
+            "audit_version"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "temporal_integrity_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "temporal-integrity-report",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "temporal_integrity_report",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "audit_digest",
+            "report_reference_date",
+            "release_safe"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "tumor-mutation-burden-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -9720,6 +9964,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "4a78edffac13009396c334ab834de2816b01d73ca27cd8e9efe097dfd299c5bb",
+  "registry_digest": "768b638344fe3355cf0d19411544483262bfa02af2c9fda042b67cbf966abdf2",
   "schema_version": 1
 }

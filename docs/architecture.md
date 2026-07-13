@@ -8,7 +8,7 @@ Biomed Workbench exposes one Codex skill and discovers scientific capabilities f
 2. `biomed_workbench/modules/builtin/<module-id>/module.json` is the source of truth for every built-in capability.
 3. `biomed_workbench/modules/contract.py` validates scientific, execution, version, dependency, format, and provenance contracts.
 4. `biomed_workbench/modules/registry.py` discovers modules recursively and rejects duplicate IDs or unresolved relationships.
-5. `biomed_workbench/router.py` ranks intents, questions, artifact types, and the primary routing workflow read from manifests; later domain entries are descriptive tags and cannot create phantom workflow steps.
+5. `biomed_workbench/router.py` ranks intents, questions, artifact types, and the primary routing workflow read from manifests; it selects a compact nonredundant module set by incremental query-feature coverage, rejects declared alternatives, and derives serial versus parallel execution from artifact dependencies without module-specific IDs. Later domain entries are descriptive tags and cannot create phantom workflow steps.
 6. `biomed_workbench/runner.py` validates structured input and invokes resolved entrypoints.
 7. `biomed_workbench/catalog.py` provides the v0.2 compatibility projection; it does not define or load a second capability registry.
 8. `biomed_workbench/modules/index.json` and `tools/catalog.json` are generated release artifacts and are never edited manually.

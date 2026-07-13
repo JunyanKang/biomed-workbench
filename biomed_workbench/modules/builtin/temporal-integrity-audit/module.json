@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "id": "temporal-integrity-audit",
+  "version": "1.0.0",
+  "title": "Audit temporal integrity of scientific assertions",
+  "description": "Verify source effective ranges, event chronology, version comparators, causal ordering, date precision, provenance confidence, supersession chains, and publication-safe temporal language from explicit research facts.",
+  "module_type": "validation",
+  "domains": ["publication", "evidence", "research-quality"],
+  "intents": [
+    "audit temporal integrity of scientific claims",
+    "check dates chronology source versions and causal ordering in a manuscript",
+    "审计论文日期、事件顺序、来源版本、适用期和因果时间逻辑",
+    "检查未来事件被写成过去、过时或未来版本误引、虚构比较版本和时间炸弹措辞"
+  ],
+  "questions": [
+    "Do the manuscript's explicit temporal assertions agree with provenance-qualified source effective ranges, event intervals, version catalogs, and causal endpoint ordering?"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.temporal_integrity:audit_temporal_integrity",
+  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 10000000},
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "temporal_fact_bundle",
+      "artifact_type": "temporal_fact_bundle",
+      "formats": [{"name": "temporal-fact-bundle", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["request-object"]}],
+      "processing_levels": ["provenance-qualified"],
+      "required_metadata": ["report_reference_date", "terminal_policy", "audit_id", "audit_version"]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "temporal_integrity_report",
+      "artifact_type": "temporal_integrity_report",
+      "formats": [{"name": "temporal-integrity-report", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["module-output"]}],
+      "processing_levels": ["validated"],
+      "required_metadata": ["module_version", "compatibility_row_id", "audit_digest", "report_reference_date", "release_safe"]
+    }
+  ],
+  "preconditions": [
+    "Date-bearing source, event, and assertion records are explicitly bound and their precision, provenance method, confidence, and effective-range semantics are declared."
+  ],
+  "assumptions": [
+    "Structured assertion bindings faithfully identify the claims and source or event facts actually used in the research deliverable."
+  ],
+  "quality_gates": [
+    {"id": "temporal-effective-range", "severity": "major", "description": "Publication date must never be substituted for a source's effective date range when adjudicating governance or applicability.", "blocks_interpretation": true},
+    {"id": "temporal-ground-truth-confidence", "severity": "major", "description": "Missing, low-confidence, or unverified dates remain unresolved and cannot be used as arithmetic ground truth.", "blocks_interpretation": true},
+    {"id": "temporal-causal-order", "severity": "major", "description": "Causal temporal direction requires nonoverlapping verified intervals in the asserted order.", "blocks_interpretation": true},
+    {"id": "temporal-version-catalog", "severity": "major", "description": "Comparator nonexistence may be asserted only against an explicitly exhaustive version catalog.", "blocks_interpretation": true},
+    {"id": "temporal-audit-completeness", "severity": "major", "description": "Incomplete timeline extraction, assertion extraction, or independent rule review prevents a clean release result.", "blocks_interpretation": true}
+  ],
+  "limitations": [
+    "The deterministic reducer evaluates supplied structured bindings; it does not discover every implicit temporal relation in unrestricted prose or prove source provenance declarations."
+  ],
+  "evidence_effects": ["validates_temporal_claim_integrity", "detects_anachronistic_evidence", "detects_causal_order_inversion", "limits_release_readiness_claim"],
+  "alternatives": ["source-freshness-audit"],
+  "complements": ["assertion-citation-coverage-audit", "claim-evidence-integrity-audit", "source-freshness-audit", "citation-resolution-adjudication", "manuscript-audit", "reviewer-assessment"],
+  "tool_requirements": [],
+  "dependencies": [
+    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-13", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate ISO calendar dates, interval arithmetic, source effective ranges, version chains, and temporal assertion gates with the standard library.", "conflicts": [], "platforms": ["any"]}
+  ],
+  "compatibility_matrix": [
+    {"id": "python-3.14.3-temporal-fact-bundle-1", "module_version": "1.0.0", "tool_versions": {}, "dependency_versions": {"python": [">=3.14,<3.15"]}, "input_formats": {"temporal_fact_bundle": ["temporal-fact-bundle@1"]}, "output_formats": {"temporal_integrity_report": ["temporal-integrity-report@1"]}, "platforms": ["any"], "regression_evidence_ids": ["temporal-integrity-audit-regression-v1"], "end_to_end_evidence_ids": ["temporal-integrity-audit-e2e-v1"], "verified_at": "2026-07-13"}
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "report_reference_date": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+      "terminal_policy": {"type": "string", "enum": ["advisory", "strict"]},
+      "sources": {
+        "type": "array", "maxItems": 100000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "published_date": {"type": "object", "additionalProperties": false, "properties": {"value": {"type": "string", "nullable": true}, "precision": {"type": "string", "enum": ["day", "month", "year", "interval", "unknown"]}, "open_ended": {"type": "boolean"}, "provenance_method": {"type": "string", "enum": ["publisher_metadata", "original_document", "user_verified", "adapter_metadata", "unknown"]}, "confidence": {"type": "string", "enum": ["high", "medium", "low", "unverified"]}, "source_record_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}}, "required": ["value", "precision", "open_ended", "provenance_method", "confidence", "source_record_id"]},
+            "effective_start": {"type": "object", "additionalProperties": false, "properties": {"value": {"type": "string", "nullable": true}, "precision": {"type": "string", "enum": ["day", "month", "year", "interval", "unknown"]}, "open_ended": {"type": "boolean"}, "provenance_method": {"type": "string", "enum": ["publisher_metadata", "original_document", "user_verified", "adapter_metadata", "unknown"]}, "confidence": {"type": "string", "enum": ["high", "medium", "low", "unverified"]}, "source_record_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}}, "required": ["value", "precision", "open_ended", "provenance_method", "confidence", "source_record_id"]},
+            "effective_end": {"type": "object", "additionalProperties": false, "properties": {"value": {"type": "string", "nullable": true}, "precision": {"type": "string", "enum": ["day", "month", "year", "interval", "unknown"]}, "open_ended": {"type": "boolean"}, "provenance_method": {"type": "string", "enum": ["publisher_metadata", "original_document", "user_verified", "adapter_metadata", "unknown"]}, "confidence": {"type": "string", "enum": ["high", "medium", "low", "unverified"]}, "source_record_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}}, "required": ["value", "precision", "open_ended", "provenance_method", "confidence", "source_record_id"]},
+            "version_family_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true},
+            "version_catalog_completeness": {"type": "string", "enum": ["exhaustive", "partial", "unknown"]},
+            "supersedes": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true},
+            "superseded_by": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}
+          },
+          "required": ["id", "published_date", "effective_start", "effective_end", "version_family_id", "version_catalog_completeness", "supersedes", "superseded_by"]
+        }
+      },
+      "events": {
+        "type": "array", "maxItems": 100000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "description": {"type": "string", "minLength": 1, "maxLength": 4000},
+            "date": {"type": "object", "additionalProperties": false, "properties": {"value": {"type": "string", "nullable": true}, "precision": {"type": "string", "enum": ["day", "month", "year", "interval", "unknown"]}, "open_ended": {"type": "boolean"}, "provenance_method": {"type": "string", "enum": ["publisher_metadata", "original_document", "user_verified", "adapter_metadata", "unknown"]}, "confidence": {"type": "string", "enum": ["high", "medium", "low", "unverified"]}, "source_record_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}}, "required": ["value", "precision", "open_ended", "provenance_method", "confidence", "source_record_id"]}
+          },
+          "required": ["id", "description", "date"]
+        }
+      },
+      "assertions": {
+        "type": "array", "minItems": 1, "maxItems": 100000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "text": {"type": "string", "minLength": 1, "maxLength": 10000},
+            "section_path": {"type": "string", "minLength": 1, "maxLength": 1000},
+            "assertion_kind": {"type": "string", "enum": ["future_as_past", "governance", "version_comparison", "causal_order", "narrative"]},
+            "predicate": {"type": "string", "enum": ["already_completed", "forthcoming", "governed_by", "compares_with", "enabled", "caused", "led_to", "in_response_to", "superseded", "preceded", "followed_by", "followed", "narrative"]},
+            "anchor_date": {"type": "object", "nullable": true, "additionalProperties": false, "properties": {"value": {"type": "string", "nullable": true}, "precision": {"type": "string", "enum": ["day", "month", "year", "interval", "unknown"]}, "open_ended": {"type": "boolean"}, "provenance_method": {"type": "string", "enum": ["publisher_metadata", "original_document", "user_verified", "adapter_metadata", "unknown"]}, "confidence": {"type": "string", "enum": ["high", "medium", "low", "unverified"]}, "source_record_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}}, "required": ["value", "precision", "open_ended", "provenance_method", "confidence", "source_record_id"]},
+            "event_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true},
+            "source_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true},
+            "comparator_year": {"type": "integer", "minimum": 1000, "maximum": 9999, "nullable": true},
+            "left_binding": {"type": "object", "nullable": true, "additionalProperties": false, "properties": {"kind": {"type": "string", "enum": ["source", "event", "direct"]}, "id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}, "date": {"type": "object", "nullable": true, "additionalProperties": false, "properties": {"value": {"type": "string", "nullable": true}, "precision": {"type": "string", "enum": ["day", "month", "year", "interval", "unknown"]}, "open_ended": {"type": "boolean"}, "provenance_method": {"type": "string", "enum": ["publisher_metadata", "original_document", "user_verified", "adapter_metadata", "unknown"]}, "confidence": {"type": "string", "enum": ["high", "medium", "low", "unverified"]}, "source_record_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}}, "required": ["value", "precision", "open_ended", "provenance_method", "confidence", "source_record_id"]}}, "required": ["kind", "id", "date"]},
+            "right_binding": {"type": "object", "nullable": true, "additionalProperties": false, "properties": {"kind": {"type": "string", "enum": ["source", "event", "direct"]}, "id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}, "date": {"type": "object", "nullable": true, "additionalProperties": false, "properties": {"value": {"type": "string", "nullable": true}, "precision": {"type": "string", "enum": ["day", "month", "year", "interval", "unknown"]}, "open_ended": {"type": "boolean"}, "provenance_method": {"type": "string", "enum": ["publisher_metadata", "original_document", "user_verified", "adapter_metadata", "unknown"]}, "confidence": {"type": "string", "enum": ["high", "medium", "low", "unverified"]}, "source_record_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}}, "required": ["value", "precision", "open_ended", "provenance_method", "confidence", "source_record_id"]}}, "required": ["kind", "id", "date"]}
+          },
+          "required": ["id", "text", "section_path", "assertion_kind", "predicate", "anchor_date", "event_id", "source_id", "comparator_year", "left_binding", "right_binding"]
+        }
+      },
+      "audit_provenance": {
+        "type": "object", "additionalProperties": false,
+        "properties": {"audit_id": {"type": "string", "minLength": 1, "maxLength": 128}, "audit_version": {"type": "string", "minLength": 1, "maxLength": 128}, "reviewed_at": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"}, "timeline_complete": {"type": "boolean"}, "assertion_extraction_complete": {"type": "boolean"}, "rules_independent_from_writer": {"type": "boolean"}},
+        "required": ["audit_id", "audit_version", "reviewed_at", "timeline_complete", "assertion_extraction_complete", "rules_independent_from_writer"]
+      }
+    },
+    "required": ["report_reference_date", "terminal_policy", "sources", "events", "assertions", "audit_provenance"]
+  },
+  "output_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "audit_id": {"type": "string"}, "audit_version": {"type": "string"}, "audit_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+      "report_reference_date": {"type": "string"}, "terminal_policy": {"type": "string", "enum": ["advisory", "strict"]},
+      "source_count": {"type": "integer"}, "event_count": {"type": "integer"}, "assertion_count": {"type": "integer"},
+      "assertion_results": {"type": "array", "items": {"type": "object", "additionalProperties": false, "properties": {"assertion_id": {"type": "string"}, "assertion_kind": {"type": "string"}, "predicate": {"type": "string"}, "bound_ids": {"type": "array", "items": {"type": "string"}}, "bound_intervals": {"type": "object", "additionalProperties": false, "properties": {"left": {"type": "string", "nullable": true}, "right": {"type": "string", "nullable": true}}, "required": ["left", "right"]}, "issues": {"type": "array", "items": {"type": "object", "additionalProperties": false, "properties": {"code": {"type": "string"}, "severity": {"type": "string", "enum": ["major", "warning"]}, "subject_ids": {"type": "array", "items": {"type": "string"}}, "rationale": {"type": "string"}, "suggested_fix": {"type": "string", "nullable": true}}, "required": ["code", "severity", "subject_ids", "rationale", "suggested_fix"]}}, "gate": {"type": "string", "enum": ["passed", "review_required", "blocked"]}}, "required": ["assertion_id", "assertion_kind", "predicate", "bound_ids", "bound_intervals", "issues", "gate"]}},
+      "global_issues": {"type": "array", "items": {"type": "object", "additionalProperties": false, "properties": {"code": {"type": "string"}, "severity": {"type": "string", "enum": ["major", "warning"]}, "subject_ids": {"type": "array", "items": {"type": "string"}}, "rationale": {"type": "string"}, "suggested_fix": {"type": "string", "nullable": true}}, "required": ["code", "severity", "subject_ids", "rationale", "suggested_fix"]}},
+      "issue_counts": {"type": "object", "additionalProperties": false, "properties": {"major": {"type": "integer"}, "warning": {"type": "integer"}}, "required": ["major", "warning"]},
+      "provenance_gate_ids": {"type": "array", "items": {"type": "string"}}, "release_safe": {"type": "boolean"},
+      "overall_status": {"type": "string", "enum": ["passed", "review_required", "blocked"]},
+      "quality_gates": {"type": "array", "items": {"type": "string"}}, "limitations": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["audit_id", "audit_version", "audit_digest", "report_reference_date", "terminal_policy", "source_count", "event_count", "assertion_count", "assertion_results", "global_issues", "issue_counts", "provenance_gate_ids", "release_safe", "overall_status", "quality_gates", "limitations"]
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned clean-room rewrite documented by the aggregate source-assimilation report."]}
+}

@@ -87,6 +87,71 @@ def _domain_order(domains: Iterable[str]) -> list[str]:
     return ordered
 
 
+def _matched_features(module: ModuleManifest, query: str) -> set[str]:
+    query_features = _features(query)
+    searchable = (
+        *module.intents,
+        *module.questions,
+        module.title,
+        module.description,
+        *(port.artifact_type.replace("_", " ") for port in (*module.input_artifacts, *module.output_artifacts)),
+    )
+    return query_features & set().union(*(_features(value) for value in searchable))
+
+
+def _select_ranked_modules(
+    ranked: list[tuple[float, ModuleManifest, list[str]]], query: str
+) -> list[str]:
+    """Select a compact, nonredundant module set without module-specific rules."""
+    if not ranked:
+        return []
+    normalized = _normalize(query)
+    multi_intent = any(token in normalized for token in (" and ", " then ", "同时", "并行", "以及", "并且", "然后", "最后", "和"))
+    exact = [item for item in ranked if any(reason.startswith("exact intent:") or reason == "title matches the request" for reason in item[2])]
+    selected: list[tuple[float, ModuleManifest, list[str]]] = exact[:] if exact else [ranked[0]]
+    dominant_exact = [
+        item
+        for item in exact
+        if any(
+            len(_normalize(phrase)) / len(normalized) >= 0.75
+            for phrase in (*item[1].intents, *item[1].questions, item[1].title)
+            if _normalize(phrase) in normalized
+        )
+    ]
+    if dominant_exact:
+        return [item[1].id for item in dominant_exact]
+    if exact and not multi_intent:
+        return [item[1].id for item in selected]
+
+    top_score = ranked[0][0]
+    threshold = max(5.0, top_score * 0.25)
+    covered = set().union(*(_matched_features(item[1], query) for item in selected))
+    for item in ranked:
+        score, module, reasons = item
+        selected_ids = {chosen[1].id for chosen in selected}
+        if module.id in selected_ids or score < threshold or len(selected) >= 4:
+            continue
+        if not reasons or all(reason.startswith("available in matched workflow") for reason in reasons):
+            continue
+        if any(module.id in chosen[1].alternatives or chosen[1].id in module.alternatives for chosen in selected):
+            continue
+        features = _matched_features(module, query)
+        if not features - covered:
+            continue
+        selected.append(item)
+        covered.update(features)
+    return [item[1].id for item in selected]
+
+
+def _artifact_dependency(modules: list[ModuleManifest]) -> bool:
+    for producer in modules:
+        output_types = {port.artifact_type for port in producer.output_artifacts}
+        for consumer in modules:
+            if producer.id != consumer.id and output_types & {port.artifact_type for port in consumer.input_artifacts}:
+                return True
+    return False
+
+
 def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> list[str]:
     active = registry or _DEFAULT_REGISTRY
     normalized_query = _normalize(query)
@@ -150,10 +215,12 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
         if workflow in workflows:
             grouped[workflow].append((score + 2.0, module, reasons or [f"available in matched workflow: {workflow}"]))
     candidates = {}
+    selected_by_workflow: dict[str, list[str]] = {}
     assigned_modules = set()
     for workflow in workflows:
         ranked = sorted(grouped[workflow], key=lambda item: (-item[0], item[1].id))
         ranked = [item for item in ranked if item[1].id not in assigned_modules]
+        selected_by_workflow[workflow] = _select_ranked_modules(ranked, query)
         candidates[workflow] = [
             {
                 "id": module.id,
@@ -162,14 +229,20 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
                 "access": module.access,
                 "mutability": module.mutability,
                 "maturity": module.maturity,
+                "selected": module.id in selected_by_workflow[workflow],
                 "selection_reasons": reasons,
             }
             for score, module, reasons in ranked[:per_workflow]
         ]
         assigned_modules.update(item["id"] for item in candidates[workflow])
     parallel_requested = any(term in _normalize(query) for term in ("parallel", "并行", "同时"))
-    if len(workflows) == 1:
+    selected_module_ids = [module_id for workflow in workflows for module_id in selected_by_workflow[workflow]]
+    selected_modules = [active.get(module_id) for module_id in selected_module_ids]
+    dependency_present = _artifact_dependency(selected_modules)
+    if len(selected_module_ids) == 1 and len(workflows) == 1:
         plan_type = "single"
+    elif len(workflows) == 1:
+        plan_type = "serial" if dependency_present else "parallel"
     elif parallel_requested and not (SERIAL_DOMAINS & set(workflows)):
         plan_type = "parallel"
     elif parallel_requested:
@@ -178,6 +251,9 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
         plan_type = "serial"
     steps = []
     for workflow in workflows:
-        mode = "parallel" if plan_type in {"parallel", "mixed"} and workflow not in SERIAL_DOMAINS else "serial"
-        steps.append({"workflow": workflow, "mode": mode, "candidates": candidates[workflow]})
-    return {"objective": query, "matched_workflows": workflows, "plan_type": plan_type, "steps": steps}
+        if len(workflows) == 1 and plan_type == "parallel":
+            mode = "parallel"
+        else:
+            mode = "parallel" if plan_type in {"parallel", "mixed"} and workflow not in SERIAL_DOMAINS else "serial"
+        steps.append({"workflow": workflow, "mode": mode, "selected_module_ids": selected_by_workflow[workflow], "candidates": candidates[workflow]})
+    return {"objective": query, "matched_workflows": workflows, "plan_type": plan_type, "selected_module_ids": selected_module_ids, "steps": steps}

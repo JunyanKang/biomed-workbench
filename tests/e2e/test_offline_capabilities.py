@@ -23,6 +23,12 @@ def execute(capability_id, payload):
     return parsed["output"]
 
 
+def execute_first_module_case(capability_id):
+    case_path = ROOT / "biomed_workbench" / "modules" / "builtin" / capability_id / "tests" / "cases.json"
+    payload = json.loads(case_path.read_text(encoding="utf-8"))["cases"][0]["input"]
+    return execute(capability_id, payload)
+
+
 class OfflineCapabilityE2ETests(unittest.TestCase):
     def test_sequence_inspect(self):
         output = execute("sequence-inspect", {"sequence": "ATGCGC", "alphabet": "dna"})
@@ -151,6 +157,21 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
     def test_citation_audit(self):
         output = execute("citation-audit", {"references": [{"authors":"A","title":"T","year":2020,"journal":"J","doi":"10.1000/x"}]})
         self.assertEqual(output["complete_count"], 1)
+
+    def test_assertion_citation_coverage_audit(self):
+        output = execute_first_module_case("assertion-citation-coverage-audit")
+        self.assertEqual(output["uncovered_candidate_count"], 1)
+        self.assertEqual(output["overall_status"], "blocked")
+
+    def test_claim_evidence_integrity_audit(self):
+        output = execute_first_module_case("claim-evidence-integrity-audit")
+        self.assertEqual(output["overall_status"], "passed")
+        self.assertEqual(output["claim_results"][0]["claim_state"], "supported")
+
+    def test_temporal_integrity_audit(self):
+        output = execute_first_module_case("temporal-integrity-audit")
+        self.assertEqual(output["overall_status"], "blocked")
+        self.assertEqual(output["assertion_results"][0]["issues"][0]["code"], "TEMPORAL_ANACHRONISTIC_SOURCE")
 
     def test_response_matrix(self):
         output = execute("response-matrix", {"comments": [{"reviewer":"1","comment":"C","response":"R","action":"A","status":"completed"}]})

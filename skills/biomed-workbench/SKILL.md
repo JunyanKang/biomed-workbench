@@ -53,7 +53,7 @@ python3 "$WORKBENCH_ROOT/tools/run_tool.py" CAPABILITY_ID --input '{"field":"val
 python3 "$WORKBENCH_ROOT/tools/run_tool.py" CAPABILITY_ID --input-file INPUT.json
 ```
 
-Treat router candidates as recommendations. Verify the selected input schema, units, organism/build, identifiers, dependency readiness, and scientific compatibility before execution. Do not substitute a merely available capability for the analysis the question requires.
+Treat `selected_module_ids` as the router's compact execution set and the remaining candidates as alternatives for inspection. The selector uses manifest intent coverage, declared alternatives, and artifact input/output dependencies: independent selected modules may run in parallel, while a selected producer-consumer pair runs serially. Verify every selected input schema, unit, organism/build, identifier, dependency, and scientific compatibility before execution. Do not substitute a merely available capability for the analysis the question requires.
 
 ## Codex-Native Handoffs
 
@@ -71,6 +71,9 @@ Inspect every returned image at full resolution against the handoff gates. Gener
 - Keep retrieved evidence separate from Codex interpretation. Report database coverage, query constraints, dates when material, and negative or incomplete retrievals.
 - Route versioned guidelines, protocols, and database snapshots through `source-freshness-audit` when their review date or currentness matters. Treat its temporal status as scheduling evidence only: perform and record a separate upstream check before claiming that a source remains current or unchanged.
 - Use `citation-resolution-adjudication` only after collecting explicit resolver outcomes; a match still needs identity and claim-support review, while identifier misses and title-only gaps require different follow-up. Use `classification-gold-set-evaluation` for algorithm evaluation, and block broad performance claims when annotations are not independent, leakage was not reviewed, a declared class is empty, support is inadequate, or a baseline metric regressed or disappeared.
+- Use `assertion-citation-coverage-audit` before manuscript delivery to distinguish external claims that need inventory-backed citations from current-study results that need analysis or experiment artifact provenance. A citation marker is intent, not coverage, and manifest membership is never an exemption.
+- Use `temporal-integrity-audit` for future-as-past claims, source effective-range errors, version comparisons, causal ordering, and publication-unstable deictic language. Never substitute publication date for effective date, use low-confidence dates as arithmetic truth, or call a missing comparator nonexistent unless its version catalog is declared exhaustive.
+- Use `claim-evidence-integrity-audit` after citation/result bindings are available to adjudicate whether reviewed evidence supports, weakens, refutes, or leaves each emitted claim unresolved. Refutation, violated negative constraints, and insufficient causal designs override concurrent support.
 
 ## Guardrails
 

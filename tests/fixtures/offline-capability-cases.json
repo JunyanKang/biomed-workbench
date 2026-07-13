@@ -51,6 +51,89 @@
       "serious_event_count": 0
     }
   },
+  "assertion-citation-coverage-audit": {
+    "input": {
+      "artifact_inventory": [],
+      "audit_provenance": {
+        "audit_id": "citation-coverage-1",
+        "audit_version": "1.0.0",
+        "citation_extraction_complete": true,
+        "reviewed_at": "2026-07-13",
+        "rules_independent_from_writer": true,
+        "segmentation_complete": true
+      },
+      "citation_inventory": [],
+      "sentences": [
+        {
+          "adjacent_citation_ids": [],
+          "adjacent_text": null,
+          "artifact_ids": [],
+          "citation_ids": [],
+          "claim_kind": "empirical",
+          "id": "sentence-1",
+          "manifest_claim_id": "claim-1",
+          "origin": "external_evidence",
+          "section_path": "Results",
+          "text": "External studies showed that 67% of cells responded."
+        }
+      ],
+      "terminal_policy": "strict"
+    },
+    "output": {
+      "audit_digest": "190c4ab383fb65db59dab9e358c8d93aba26efb3559baffb4b1bcdea9e1d45b9",
+      "audit_id": "citation-coverage-1",
+      "audit_version": "1.0.0",
+      "candidate_count": 1,
+      "global_issues": [],
+      "issue_counts": {
+        "major": 1,
+        "warning": 0
+      },
+      "limitations": [
+        "Lexical triggers are a recall aid, not semantic entailment; explicit claim_kind and origin classifications remain review inputs.",
+        "The module checks evidence binding presence, while source-content support is adjudicated by claim-evidence-integrity-audit."
+      ],
+      "overall_status": "blocked",
+      "provenance_gate_ids": [],
+      "quality_gates": [
+        "Manifest membership never exempts an evidence-bearing assertion from citation or artifact coverage.",
+        "A citation marker is intent only; coverage requires a structured binding that resolves in the citation inventory.",
+        "Current-study results bind to project artifacts rather than requiring an external citation by default.",
+        "Audit extraction failures are surfaced and never converted into a false clean result."
+      ],
+      "release_safe": false,
+      "sentence_count": 1,
+      "sentence_results": [
+        {
+          "candidate": true,
+          "coverage_kind": "none",
+          "covered": false,
+          "gate": "blocked",
+          "issues": [
+            {
+              "action": "Add a claim-level citation binding or remove/qualify the assertion.",
+              "code": "UNCITED_EXTERNAL_ASSERTION",
+              "message": "An external empirical, quantitative, comparative, or causal assertion lacks a resolvable sentence or adjacent-clause citation.",
+              "severity": "major",
+              "subject_ids": [
+                "sentence-1"
+              ]
+            }
+          ],
+          "manifest_claim_id": "claim-1",
+          "resolved_artifact_ids": [],
+          "resolved_citation_ids": [],
+          "sentence_id": "sentence-1",
+          "trigger_terms": [
+            "showed",
+            "67%"
+          ]
+        }
+      ],
+      "terminal_policy": "strict",
+      "uncovered_candidate_count": 1
+    }
+  },
   "biomarker-performance": {
     "input": {
       "labels": [
@@ -118,79 +201,296 @@
   "citation-resolution-adjudication": {
     "input": {
       "resolver_outcomes": [
-        {"source": "resolver-a", "status": "unmatched", "queried_by": "identifier"},
-        {"source": "resolver-b", "status": "matched", "queried_by": "title"},
-        {"source": "resolver-c", "status": "skipped", "queried_by": null}
+        {
+          "queried_by": "identifier",
+          "source": "resolver-a",
+          "status": "unmatched"
+        },
+        {
+          "queried_by": "title",
+          "source": "resolver-b",
+          "status": "matched"
+        },
+        {
+          "queried_by": null,
+          "source": "resolver-c",
+          "status": "skipped"
+        }
       ]
     },
     "output": {
+      "identifier_unmatched_sources": [
+        "resolver-a"
+      ],
+      "matched_sources": [
+        "resolver-b"
+      ],
       "resolution_class": "verified_match",
       "resolver_count": 3,
-      "matched_sources": ["resolver-b"],
-      "identifier_unmatched_sources": ["resolver-a"],
       "title_only_unmatched_sources": []
     }
   },
   "claim-evidence-integrity-audit": {
     "input": {
-      "declared_claims": [
-        {"id": "claim-1", "text": "Perturbing regulator X causally reduces outcome Y.", "claim_strength": "causal", "intended_evidence_types": ["literature", "experiment"], "citation_ids": ["citation-1"], "experiment_ids": ["experiment-1"], "analysis_artifact_ids": [], "minimum_independent_supports": 2, "negative_constraints": [{"id": "constraint-1", "description": "Do not claim complete rescue."}], "partial_support_policy": "forbidden"}
-      ],
-      "emitted_claims": [
-        {"id": "emitted-1", "declared_claim_id": "claim-1", "text": "Perturbing regulator X causally reduces outcome Y.", "claim_strength": "causal", "citation_ids": ["citation-1"], "experiment_ids": ["experiment-1"], "analysis_artifact_ids": []}
-      ],
-      "citations": [
-        {"id": "citation-1", "identity_status": "verified_match", "source_acquired": true, "metadata_verified_against_original": true, "claim_content_reviewed": true, "retrieval_status": "completed", "verification_method": "original_source_review", "study_design": "observational-cohort", "independent_group": "published-cohort-1"}
-      ],
-      "experiments": [
-        {"id": "experiment-1", "study_design": "controlled-perturbation", "independent_group": "local-perturbation-1", "planned_units": [{"id": "unit-1", "planned": "Measure outcome Y after perturbation.", "executed": true, "skip_reason": null, "result_pointer": "artifact-result-1"}], "negative_results": [], "known_limitations": [{"id": "limitation-1", "description": "One biological system was tested."}], "results_reviewed": true, "reproducibility_record": {"input_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "parameter_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "software_recorded": true, "randomization_recorded": true}}
-      ],
       "analysis_artifacts": [],
-      "evidence_assessments": [
-        {"emitted_claim_id": "emitted-1", "evidence_kind": "citation", "evidence_id": "citation-1", "relation": "supports", "adjudication_status": "completed", "review_method": "original_source_review", "independent_from_writer": true, "rationale": "The original source directly supports the bounded association."},
-        {"emitted_claim_id": "emitted-1", "evidence_kind": "experiment", "evidence_id": "experiment-1", "relation": "supports", "adjudication_status": "completed", "review_method": "deterministic_result_check", "independent_from_writer": true, "rationale": "The reviewed perturbation result supports causal direction."}
+      "audit_provenance": {
+        "audit_id": "claim-audit-1",
+        "audit_version": "1.0.0",
+        "leakage_reviewed": true,
+        "review_owner": "independent evidence reviewer",
+        "reviewed_at": "2026-07-13",
+        "rules_independent_from_writer": true
+      },
+      "citations": [
+        {
+          "claim_content_reviewed": true,
+          "id": "citation-1",
+          "identity_status": "verified_match",
+          "independent_group": "published-cohort-1",
+          "metadata_verified_against_original": true,
+          "retrieval_status": "completed",
+          "source_acquired": true,
+          "study_design": "observational-cohort",
+          "verification_method": "original_source_review"
+        }
       ],
       "constraint_assessments": [
-        {"emitted_claim_id": "emitted-1", "constraint_id": "constraint-1", "verdict": "not_violated", "review_method": "manual_review", "independent_from_writer": true, "rationale": "The emitted claim does not assert complete rescue."}
+        {
+          "constraint_id": "constraint-1",
+          "emitted_claim_id": "emitted-1",
+          "independent_from_writer": true,
+          "rationale": "The emitted claim does not assert complete rescue.",
+          "review_method": "manual_review",
+          "verdict": "not_violated"
+        }
       ],
-      "audit_provenance": {"audit_id": "claim-audit-1", "audit_version": "1.0.0", "review_owner": "independent evidence reviewer", "reviewed_at": "2026-07-13", "rules_independent_from_writer": true, "leakage_reviewed": true}
+      "declared_claims": [
+        {
+          "analysis_artifact_ids": [],
+          "citation_ids": [
+            "citation-1"
+          ],
+          "claim_strength": "causal",
+          "experiment_ids": [
+            "experiment-1"
+          ],
+          "id": "claim-1",
+          "intended_evidence_types": [
+            "literature",
+            "experiment"
+          ],
+          "minimum_independent_supports": 2,
+          "negative_constraints": [
+            {
+              "description": "Do not claim complete rescue.",
+              "id": "constraint-1"
+            }
+          ],
+          "partial_support_policy": "forbidden",
+          "text": "Perturbing regulator X causally reduces outcome Y."
+        }
+      ],
+      "emitted_claims": [
+        {
+          "analysis_artifact_ids": [],
+          "citation_ids": [
+            "citation-1"
+          ],
+          "claim_strength": "causal",
+          "declared_claim_id": "claim-1",
+          "experiment_ids": [
+            "experiment-1"
+          ],
+          "id": "emitted-1",
+          "text": "Perturbing regulator X causally reduces outcome Y."
+        }
+      ],
+      "evidence_assessments": [
+        {
+          "adjudication_status": "completed",
+          "emitted_claim_id": "emitted-1",
+          "evidence_id": "citation-1",
+          "evidence_kind": "citation",
+          "independent_from_writer": true,
+          "rationale": "The original source directly supports the bounded association.",
+          "relation": "supports",
+          "review_method": "original_source_review"
+        },
+        {
+          "adjudication_status": "completed",
+          "emitted_claim_id": "emitted-1",
+          "evidence_id": "experiment-1",
+          "evidence_kind": "experiment",
+          "independent_from_writer": true,
+          "rationale": "The reviewed perturbation result supports causal direction.",
+          "relation": "supports",
+          "review_method": "deterministic_result_check"
+        }
+      ],
+      "experiments": [
+        {
+          "id": "experiment-1",
+          "independent_group": "local-perturbation-1",
+          "known_limitations": [
+            {
+              "description": "One biological system was tested.",
+              "id": "limitation-1"
+            }
+          ],
+          "negative_results": [],
+          "planned_units": [
+            {
+              "executed": true,
+              "id": "unit-1",
+              "planned": "Measure outcome Y after perturbation.",
+              "result_pointer": "artifact-result-1",
+              "skip_reason": null
+            }
+          ],
+          "reproducibility_record": {
+            "input_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "parameter_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "randomization_recorded": true,
+            "software_recorded": true
+          },
+          "results_reviewed": true,
+          "study_design": "controlled-perturbation"
+        }
+      ]
     },
     "output": {
-      "audit_id": "claim-audit-1",
-      "declared_claim_count": 1,
-      "emitted_claim_count": 1,
-      "citation_count": 1,
-      "experiment_count": 1,
       "analysis_artifact_count": 0,
+      "audit_digest": "e968b234ee4e5db8d0f7ba02f2ae4794cfb4d83a7bbe1ff1dd431a4eb713d604",
+      "audit_id": "claim-audit-1",
+      "audit_version": "1.0.0",
+      "citation_count": 1,
+      "claim_results": [
+        {
+          "claim_state": "supported",
+          "declared_claim_id": "claim-1",
+          "eligible_support_ids": [
+            "citation-1",
+            "experiment-1"
+          ],
+          "emission_gate": "passed",
+          "emitted_claim_id": "emitted-1",
+          "independent_support_groups": [
+            "local-perturbation-1",
+            "published-cohort-1"
+          ],
+          "issues": [],
+          "missing_evidence_types": [],
+          "refuting_ids": [],
+          "unresolved_constraint_ids": [],
+          "unresolved_evidence_ids": [],
+          "violated_constraint_ids": [],
+          "weakening_ids": []
+        }
+      ],
+      "declared_claim_count": 1,
       "declared_not_emitted_ids": [],
+      "emitted_claim_count": 1,
+      "experiment_count": 1,
+      "global_issues": [],
+      "issue_counts": {
+        "major": 0,
+        "warning": 0
+      },
+      "limitations": [
+        "The module audits supplied adjudications and provenance records; it does not itself read papers, inspect raw experiment files, or infer semantic entailment.",
+        "Independence and leakage fields are declarations that require governance outside this deterministic reducer."
+      ],
+      "overall_status": "passed",
       "provenance_gate_ids": [],
-      "overall_status": "passed"
+      "quality_gates": [
+        "Citation identity or metadata resolution alone never establishes claim support; original content must be reviewed.",
+        "Retrieval failure, resolver outage, and audit-tool failure remain unresolved and are never converted into negative scientific evidence.",
+        "Planned but unexecuted experiment units require reasons, and fully skipped or unreviewed experiments cannot support claims.",
+        "Refuting evidence and prespecified negative-constraint violations take precedence over concurrent support.",
+        "Causal claims require eligible support from causal study designs; observational support cannot silently escalate claim strength."
+      ]
     }
   },
   "classification-gold-set-evaluation": {
     "input": {
+      "baseline_metrics": [
+        {
+          "class_name": "aggregate",
+          "direction": "higher_is_better",
+          "metric": "accuracy",
+          "scope": "aggregate",
+          "value": 0.95
+        }
+      ],
       "cases": [
-        {"id": "v1", "expected_label": "verified", "observed_label": "verified", "expert_label": "verified"},
-        {"id": "v2", "expected_label": "verified", "observed_label": "verified"},
-        {"id": "u1", "expected_label": "unresolved", "observed_label": "unresolved"},
-        {"id": "u2", "expected_label": "unresolved", "observed_label": "unresolved"}
+        {
+          "expected_label": "verified",
+          "expert_label": "verified",
+          "id": "v1",
+          "observed_label": "verified"
+        },
+        {
+          "expected_label": "verified",
+          "id": "v2",
+          "observed_label": "verified"
+        },
+        {
+          "expected_label": "unresolved",
+          "id": "u1",
+          "observed_label": "unresolved"
+        },
+        {
+          "expected_label": "unresolved",
+          "id": "u2",
+          "observed_label": "unresolved"
+        }
       ],
-      "labels": ["verified", "unresolved"],
+      "gold_provenance": {
+        "adjudication_method": "consensus with arbitration",
+        "annotation_source": "independent dual review",
+        "gold_set_id": "citation-resolution-independent",
+        "gold_set_version": "1.0.0",
+        "independent_from_system": true,
+        "leakage_reviewed": true
+      },
+      "labels": [
+        "verified",
+        "unresolved"
+      ],
+      "regression_limit": 0.05,
       "thresholds": [
-        {"scope": "aggregate", "class_name": "aggregate", "metric": "accuracy", "comparison": ">=", "threshold_value": 0.9, "minimum_support": 4},
-        {"scope": "per_class", "class_name": "verified", "metric": "recall", "comparison": ">=", "threshold_value": 0.9, "minimum_support": 2},
-        {"scope": "per_class", "class_name": "unresolved", "metric": "precision", "comparison": ">=", "threshold_value": 0.9, "minimum_support": 2}
-      ],
-      "gold_provenance": {"gold_set_id": "citation-resolution-independent", "gold_set_version": "1.0.0", "annotation_source": "independent dual review", "adjudication_method": "consensus with arbitration", "independent_from_system": true, "leakage_reviewed": true},
-      "baseline_metrics": [{"scope": "aggregate", "class_name": "aggregate", "metric": "accuracy", "value": 0.95, "direction": "higher_is_better"}],
-      "regression_limit": 0.05
+        {
+          "class_name": "aggregate",
+          "comparison": ">=",
+          "metric": "accuracy",
+          "minimum_support": 4,
+          "scope": "aggregate",
+          "threshold_value": 0.9
+        },
+        {
+          "class_name": "verified",
+          "comparison": ">=",
+          "metric": "recall",
+          "minimum_support": 2,
+          "scope": "per_class",
+          "threshold_value": 0.9
+        },
+        {
+          "class_name": "unresolved",
+          "comparison": ">=",
+          "metric": "precision",
+          "minimum_support": 2,
+          "scope": "per_class",
+          "threshold_value": 0.9
+        }
+      ]
     },
     "output": {
-      "sample_count": 4,
-      "overall_status": "passed",
       "failed_gate_ids": [],
-      "regression_ids": [],
+      "overall_status": "passed",
       "provenance_gate_ids": [],
+      "regression_ids": [],
+      "sample_count": 4,
       "structural_gate_ids": []
     }
   },
@@ -1528,46 +1828,90 @@
     "input": {
       "artifacts": [
         {
-          "id": "rubric",
-          "role": "Canonical rubric",
-          "media_type": "application/json",
           "content": {
             "dimensions": [
-              {"id": "rigor", "weight": 60},
-              {"id": "clarity", "weight": 40}
+              {
+                "id": "rigor",
+                "weight": 60
+              },
+              {
+                "id": "clarity",
+                "weight": 40
+              }
             ]
-          }
+          },
+          "id": "rubric",
+          "media_type": "application/json",
+          "role": "Canonical rubric"
         },
         {
+          "content": "# Release gate\nValidate evidence before release.\n",
           "id": "protocol",
-          "role": "Release protocol",
           "media_type": "text/markdown",
-          "content": "# Release gate\nValidate evidence before release.\n"
+          "role": "Release protocol"
         }
-      ],
-      "rules": [
-        {"id": "dimension-ids", "kind": "json_unique_by", "severity": "major", "artifact_ids": ["rubric"], "parameters": {"path": "#/dimensions", "field": "id"}},
-        {"id": "weight-total", "kind": "numeric_sum", "severity": "major", "artifact_ids": ["rubric"], "parameters": {"path": "#/dimensions", "field": "weight", "expected": 100, "tolerance": 0}},
-        {"id": "release-evidence-gate", "kind": "text_contains", "severity": "major", "artifact_ids": ["protocol"], "parameters": {"tokens": ["Validate evidence before release"], "heading": "Release gate", "normalization": "whitespace"}}
       ],
       "contract_provenance": {
         "contract_id": "release-contract",
         "contract_version": "1.0.0",
+        "intended_use": "Research release validation",
         "owner": "research quality lead",
         "reviewed_at": "2026-07-13",
-        "intended_use": "Research release validation",
-        "rules_independent_from_artifacts": true,
-        "reviewed_for_completeness": true
-      }
+        "reviewed_for_completeness": true,
+        "rules_independent_from_artifacts": true
+      },
+      "rules": [
+        {
+          "artifact_ids": [
+            "rubric"
+          ],
+          "id": "dimension-ids",
+          "kind": "json_unique_by",
+          "parameters": {
+            "field": "id",
+            "path": "#/dimensions"
+          },
+          "severity": "major"
+        },
+        {
+          "artifact_ids": [
+            "rubric"
+          ],
+          "id": "weight-total",
+          "kind": "numeric_sum",
+          "parameters": {
+            "expected": 100,
+            "field": "weight",
+            "path": "#/dimensions",
+            "tolerance": 0
+          },
+          "severity": "major"
+        },
+        {
+          "artifact_ids": [
+            "protocol"
+          ],
+          "id": "release-evidence-gate",
+          "kind": "text_contains",
+          "parameters": {
+            "heading": "Release gate",
+            "normalization": "whitespace",
+            "tokens": [
+              "Validate evidence before release"
+            ]
+          },
+          "severity": "major"
+        }
+      ]
     },
     "output": {
-      "contract_id": "release-contract",
       "artifact_count": 2,
-      "rule_count": 3,
+      "contract_id": "release-contract",
       "failed_major_rule_ids": [],
       "failed_warning_rule_ids": [],
-      "provenance_gate_ids": [],
       "overall_status": "passed",
+      "provenance_gate_ids": [],
+      "rule_count": 3,
       "semantic_validity_assessed": false
     }
   },
@@ -1896,11 +2240,17 @@
       ]
     },
     "output": {
-      "blocked_record_ids": ["archival-taxonomy"],
-      "currentness_verification_record_ids": ["reporting-guideline"],
+      "blocked_record_ids": [
+        "archival-taxonomy"
+      ],
+      "currentness_verification_record_ids": [
+        "reporting-guideline"
+      ],
       "overall_status": "blocked",
       "record_count": 2,
-      "review_due_record_ids": ["archival-taxonomy"],
+      "review_due_record_ids": [
+        "archival-taxonomy"
+      ],
       "status_counts": {
         "review_due": 1,
         "within_review_window": 1
@@ -1954,6 +2304,140 @@
       "median_survival": 2.0,
       "method": "Kaplan-Meier product-limit estimate with Greenwood standard error",
       "n": 4
+    }
+  },
+  "temporal-integrity-audit": {
+    "input": {
+      "assertions": [
+        {
+          "anchor_date": null,
+          "assertion_kind": "governance",
+          "comparator_year": null,
+          "event_id": "event-2023",
+          "id": "assertion-1",
+          "left_binding": null,
+          "predicate": "governed_by",
+          "right_binding": null,
+          "section_path": "Results",
+          "source_id": "standard-2024",
+          "text": "The 2024 standard governed the 2023 review."
+        }
+      ],
+      "audit_provenance": {
+        "assertion_extraction_complete": true,
+        "audit_id": "temporal-audit-1",
+        "audit_version": "1.0.0",
+        "reviewed_at": "2026-07-13",
+        "rules_independent_from_writer": true,
+        "timeline_complete": true
+      },
+      "events": [
+        {
+          "date": {
+            "confidence": "high",
+            "open_ended": false,
+            "precision": "day",
+            "provenance_method": "original_document",
+            "source_record_id": "event-record",
+            "value": "2023-05-01"
+          },
+          "description": "A review conducted in 2023.",
+          "id": "event-2023"
+        }
+      ],
+      "report_reference_date": "2026-07-13",
+      "sources": [
+        {
+          "effective_end": {
+            "confidence": "high",
+            "open_ended": true,
+            "precision": "unknown",
+            "provenance_method": "original_document",
+            "source_record_id": "record-effective-end",
+            "value": null
+          },
+          "effective_start": {
+            "confidence": "high",
+            "open_ended": false,
+            "precision": "day",
+            "provenance_method": "original_document",
+            "source_record_id": "record-effective",
+            "value": "2024-01-01"
+          },
+          "id": "standard-2024",
+          "published_date": {
+            "confidence": "high",
+            "open_ended": false,
+            "precision": "day",
+            "provenance_method": "publisher_metadata",
+            "source_record_id": "record-published",
+            "value": "2024-01-01"
+          },
+          "superseded_by": null,
+          "supersedes": null,
+          "version_catalog_completeness": "partial",
+          "version_family_id": "standard-family"
+        }
+      ],
+      "terminal_policy": "strict"
+    },
+    "output": {
+      "assertion_count": 1,
+      "assertion_results": [
+        {
+          "assertion_id": "assertion-1",
+          "assertion_kind": "governance",
+          "bound_ids": [
+            "event-2023",
+            "standard-2024"
+          ],
+          "bound_intervals": {
+            "left": "2023-05-01..2023-05-01",
+            "right": "2024-01-01..+infinity"
+          },
+          "gate": "blocked",
+          "issues": [
+            {
+              "code": "TEMPORAL_ANACHRONISTIC_SOURCE",
+              "rationale": "The cited source was not effective during the asserted event interval.",
+              "severity": "major",
+              "subject_ids": [
+                "assertion-1",
+                "event-2023",
+                "standard-2024"
+              ],
+              "suggested_fix": "Use the version effective during the event or revise the governance claim."
+            }
+          ],
+          "predicate": "governed_by"
+        }
+      ],
+      "audit_digest": "07da24202d8f430ed24d6009df1545a065e529a420828715602b5eba882e50e4",
+      "audit_id": "temporal-audit-1",
+      "audit_version": "1.0.0",
+      "event_count": 1,
+      "global_issues": [],
+      "issue_counts": {
+        "major": 1,
+        "warning": 0
+      },
+      "limitations": [
+        "The module evaluates supplied structured bindings and does not infer every temporal relation from unrestricted prose.",
+        "Timeline completeness and provenance declarations still require project governance and source review."
+      ],
+      "overall_status": "blocked",
+      "provenance_gate_ids": [],
+      "quality_gates": [
+        "Publication date never substitutes for a source's effective date range.",
+        "Low-confidence or missing temporal facts remain unresolved and are never used as arithmetic ground truth.",
+        "Causal direction requires nonoverlapping verified intervals in the asserted order.",
+        "A missing comparator is called phantom only when the version catalog is explicitly exhaustive.",
+        "The reference date is supplied and recorded; wall-clock time never changes the audit result."
+      ],
+      "release_safe": false,
+      "report_reference_date": "2026-07-13",
+      "source_count": 1,
+      "terminal_policy": "strict"
     }
   },
   "tumor-mutation-burden": {

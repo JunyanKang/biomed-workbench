@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "id": "assertion-citation-coverage-audit",
+  "version": "1.0.0",
+  "title": "Audit citation coverage of scientific assertions",
+  "description": "Detect external empirical, quantitative, comparative, and causal assertions lacking inventory-backed citations while binding current-study results to analysis or experiment artifacts and surfacing incomplete extraction.",
+  "module_type": "validation",
+  "domains": ["publication", "evidence", "research-quality"],
+  "intents": [
+    "audit uncited empirical and quantitative assertions",
+    "check manuscript sentences for missing citations or result provenance",
+    "筛查论文中未引证的经验性、定量、比较和因果主张",
+    "检查外部结论是否缺文献以及本研究结果是否缺分析产物绑定"
+  ],
+  "questions": [
+    "Which evidence-bearing sentences lack a resolvable claim-level citation or a provenance link to the current study's registered result artifacts?"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.assertion_citation:audit_assertion_citation_coverage",
+  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 10000000},
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "assertion_evidence_binding_bundle",
+      "artifact_type": "assertion_evidence_binding_bundle",
+      "formats": [{"name": "assertion-evidence-binding-bundle", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["request-object"]}],
+      "processing_levels": ["sentence-segmented"],
+      "required_metadata": ["citation_inventory", "artifact_inventory", "audit_id", "audit_version", "terminal_policy"]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "assertion_citation_coverage_report",
+      "artifact_type": "assertion_citation_coverage_report",
+      "formats": [{"name": "assertion-citation-coverage-report", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["module-output"]}],
+      "processing_levels": ["validated"],
+      "required_metadata": ["module_version", "compatibility_row_id", "audit_digest", "release_safe"]
+    }
+  ],
+  "preconditions": [
+    "The document is segmented into stable sentence records and citation and current-study artifact inventories have been extracted without silently dropping failures."
+  ],
+  "assumptions": [
+    "Sentence origin and claim-kind labels accurately distinguish external evidence, current-study results, definitions, methods, and author interpretation."
+  ],
+  "quality_gates": [
+    {"id": "assertion-external-citation", "severity": "major", "description": "External empirical, quantitative, comparative, and causal assertions require a resolvable sentence or adjacent-clause citation binding.", "blocks_interpretation": true},
+    {"id": "assertion-current-study-provenance", "severity": "major", "description": "Current-study result claims require a provenance link to a registered analysis or experiment artifact rather than an arbitrary external citation.", "blocks_interpretation": true},
+    {"id": "assertion-marker-intent", "severity": "major", "description": "Citation-marker text is intent only and cannot establish coverage until it resolves to the citation inventory.", "blocks_interpretation": true},
+    {"id": "assertion-manifest-nonexemption", "severity": "major", "description": "Claim-manifest membership never exempts an evidence-bearing sentence from citation or artifact coverage.", "blocks_interpretation": true},
+    {"id": "assertion-audit-completeness", "severity": "major", "description": "Incomplete sentence segmentation, citation extraction, or independent rule review prevents a clean audit result.", "blocks_interpretation": true}
+  ],
+  "limitations": [
+    "Lexical triggers improve recall but do not establish semantic entailment; source-content support is adjudicated separately by claim-evidence-integrity-audit."
+  ],
+  "evidence_effects": ["detects_uncited_assertions", "validates_result_provenance_binding", "limits_release_readiness_claim"],
+  "alternatives": ["citation-audit"],
+  "complements": ["temporal-integrity-audit", "claim-evidence-integrity-audit", "citation-resolution-adjudication", "manuscript-audit", "reviewer-assessment"],
+  "tool_requirements": [],
+  "dependencies": [
+    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-13", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate sentence records, citation and artifact bindings, bounded lexical triggers, audit provenance, and deterministic release gates.", "conflicts": [], "platforms": ["any"]}
+  ],
+  "compatibility_matrix": [
+    {"id": "python-3.14.3-assertion-evidence-binding-1", "module_version": "1.0.0", "tool_versions": {}, "dependency_versions": {"python": [">=3.14,<3.15"]}, "input_formats": {"assertion_evidence_binding_bundle": ["assertion-evidence-binding-bundle@1"]}, "output_formats": {"assertion_citation_coverage_report": ["assertion-citation-coverage-report@1"]}, "platforms": ["any"], "regression_evidence_ids": ["assertion-citation-coverage-audit-regression-v1"], "end_to_end_evidence_ids": ["assertion-citation-coverage-audit-e2e-v1"], "verified_at": "2026-07-13"}
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "sentences": {
+        "type": "array", "minItems": 1, "maxItems": 100000,
+        "items": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "minLength": 1, "maxLength": 128},
+            "text": {"type": "string", "minLength": 1, "maxLength": 10000},
+            "section_path": {"type": "string", "minLength": 1, "maxLength": 1000},
+            "adjacent_text": {"type": "string", "maxLength": 20000, "nullable": true},
+            "origin": {"type": "string", "enum": ["external_evidence", "current_study", "author_interpretation", "definition", "method_description"]},
+            "claim_kind": {"type": "string", "enum": ["empirical", "quantitative", "causal", "comparative", "definitional", "procedural", "interpretive"]},
+            "citation_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+            "adjacent_citation_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+            "artifact_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+            "manifest_claim_id": {"type": "string", "minLength": 1, "maxLength": 128, "nullable": true}
+          },
+          "required": ["id", "text", "section_path", "adjacent_text", "origin", "claim_kind", "citation_ids", "adjacent_citation_ids", "artifact_ids", "manifest_claim_id"]
+        }
+      },
+      "citation_inventory": {"type": "array", "uniqueItems": true, "maxItems": 100000, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+      "artifact_inventory": {"type": "array", "uniqueItems": true, "maxItems": 100000, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+      "terminal_policy": {"type": "string", "enum": ["advisory", "strict"]},
+      "audit_provenance": {
+        "type": "object", "additionalProperties": false,
+        "properties": {"audit_id": {"type": "string", "minLength": 1, "maxLength": 128}, "audit_version": {"type": "string", "minLength": 1, "maxLength": 128}, "reviewed_at": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"}, "segmentation_complete": {"type": "boolean"}, "citation_extraction_complete": {"type": "boolean"}, "rules_independent_from_writer": {"type": "boolean"}},
+        "required": ["audit_id", "audit_version", "reviewed_at", "segmentation_complete", "citation_extraction_complete", "rules_independent_from_writer"]
+      }
+    },
+    "required": ["sentences", "citation_inventory", "artifact_inventory", "terminal_policy", "audit_provenance"]
+  },
+  "output_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "audit_id": {"type": "string"}, "audit_version": {"type": "string"}, "audit_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+      "terminal_policy": {"type": "string", "enum": ["advisory", "strict"]}, "sentence_count": {"type": "integer"}, "candidate_count": {"type": "integer"}, "uncovered_candidate_count": {"type": "integer"},
+      "sentence_results": {"type": "array", "items": {"type": "object", "additionalProperties": false, "properties": {"sentence_id": {"type": "string"}, "manifest_claim_id": {"type": "string", "nullable": true}, "candidate": {"type": "boolean"}, "trigger_terms": {"type": "array", "items": {"type": "string"}}, "coverage_kind": {"type": "string", "enum": ["not_required", "sentence_citation", "adjacent_citation", "current_study_artifact", "mixed_evidence", "method_description", "none"]}, "covered": {"type": "boolean"}, "resolved_citation_ids": {"type": "array", "items": {"type": "string"}}, "resolved_artifact_ids": {"type": "array", "items": {"type": "string"}}, "issues": {"type": "array", "items": {"type": "object", "additionalProperties": false, "properties": {"code": {"type": "string"}, "severity": {"type": "string", "enum": ["major", "warning"]}, "subject_ids": {"type": "array", "items": {"type": "string"}}, "message": {"type": "string"}, "action": {"type": "string"}}, "required": ["code", "severity", "subject_ids", "message", "action"]}}, "gate": {"type": "string", "enum": ["passed", "review_required", "blocked"]}}, "required": ["sentence_id", "manifest_claim_id", "candidate", "trigger_terms", "coverage_kind", "covered", "resolved_citation_ids", "resolved_artifact_ids", "issues", "gate"]}},
+      "global_issues": {"type": "array", "items": {"type": "object", "additionalProperties": false, "properties": {"code": {"type": "string"}, "severity": {"type": "string", "enum": ["major", "warning"]}, "subject_ids": {"type": "array", "items": {"type": "string"}}, "message": {"type": "string"}, "action": {"type": "string"}}, "required": ["code", "severity", "subject_ids", "message", "action"]}},
+      "issue_counts": {"type": "object", "additionalProperties": false, "properties": {"major": {"type": "integer"}, "warning": {"type": "integer"}}, "required": ["major", "warning"]},
+      "provenance_gate_ids": {"type": "array", "items": {"type": "string"}}, "release_safe": {"type": "boolean"},
+      "overall_status": {"type": "string", "enum": ["passed", "review_required", "blocked"]},
+      "quality_gates": {"type": "array", "items": {"type": "string"}}, "limitations": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["audit_id", "audit_version", "audit_digest", "terminal_policy", "sentence_count", "candidate_count", "uncovered_candidate_count", "sentence_results", "global_issues", "issue_counts", "provenance_gate_ids", "release_safe", "overall_status", "quality_gates", "limitations"]
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned clean-room rewrite documented by the aggregate source-assimilation report."]}
+}

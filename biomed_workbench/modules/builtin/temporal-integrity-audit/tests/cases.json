@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "blocks-anachronistic-governance-claim",
+      "input": {
+        "report_reference_date": "2026-07-13",
+        "terminal_policy": "strict",
+        "sources": [{"id": "standard-2024", "published_date": {"value": "2024-01-01", "precision": "day", "open_ended": false, "provenance_method": "publisher_metadata", "confidence": "high", "source_record_id": "record-published"}, "effective_start": {"value": "2024-01-01", "precision": "day", "open_ended": false, "provenance_method": "original_document", "confidence": "high", "source_record_id": "record-effective"}, "effective_end": {"value": null, "precision": "unknown", "open_ended": true, "provenance_method": "original_document", "confidence": "high", "source_record_id": "record-effective-end"}, "version_family_id": "standard-family", "version_catalog_completeness": "partial", "supersedes": null, "superseded_by": null}],
+        "events": [{"id": "event-2023", "description": "A review conducted in 2023.", "date": {"value": "2023-05-01", "precision": "day", "open_ended": false, "provenance_method": "original_document", "confidence": "high", "source_record_id": "event-record"}}],
+        "assertions": [{"id": "assertion-1", "text": "The 2024 standard governed the 2023 review.", "section_path": "Results", "assertion_kind": "governance", "predicate": "governed_by", "anchor_date": null, "event_id": "event-2023", "source_id": "standard-2024", "comparator_year": null, "left_binding": null, "right_binding": null}],
+        "audit_provenance": {"audit_id": "temporal-audit-1", "audit_version": "1.0.0", "reviewed_at": "2026-07-13", "timeline_complete": true, "assertion_extraction_complete": true, "rules_independent_from_writer": true}
+      },
+      "expected_subset": {"audit_id": "temporal-audit-1", "source_count": 1, "event_count": 1, "assertion_count": 1, "provenance_gate_ids": [], "release_safe": false, "overall_status": "blocked"}
+    }
+  ]
+}

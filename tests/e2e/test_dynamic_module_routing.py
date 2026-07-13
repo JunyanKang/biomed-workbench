@@ -16,6 +16,9 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         self.assertNotIn("WORKFLOW_KEYWORDS", source)
         self.assertNotIn('"crispr-design"', source)
         self.assertNotIn('"manuscript-audit"', source)
+        self.assertNotIn('"temporal-integrity-audit"', source)
+        self.assertNotIn('"assertion-citation-coverage-audit"', source)
+        self.assertIn("_select_ranked_modules", source)
 
     def test_new_fixture_module_routes_from_manifest_only(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -94,6 +97,34 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         routed = [item["id"] for step in plan["steps"] for item in step["candidates"]]
         self.assertEqual(routed.count("shared-visual"), 1)
         self.assertIn("publication-check", routed)
+
+    def test_artifact_contract_turns_independent_selection_into_serial_plan(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            producer = valid_manifest_payload()
+            producer["id"] = "neo-assay-preparation"
+            producer["domains"] = ["evidence"]
+            producer["title"] = "Prepare neo assay"
+            producer["intents"] = ["prepare neo assay"]
+            producer["output_artifacts"][0]["artifact_type"] = "neo_assay_result"
+            write_manifest(root, producer)
+
+            consumer = valid_manifest_payload()
+            consumer["id"] = "neo-conclusion-review"
+            consumer["domains"] = ["evidence"]
+            consumer["title"] = "Review neo conclusion"
+            consumer["intents"] = ["review neo conclusion"]
+            consumer["input_artifacts"][0]["artifact_type"] = "neo_assay_result"
+            write_manifest(root, consumer)
+
+            plan = route(
+                "prepare neo assay and review neo conclusion",
+                registry=ModuleRegistry.discover(root),
+            )
+
+        self.assertEqual(plan["selected_module_ids"], ["neo-assay-preparation", "neo-conclusion-review"])
+        self.assertEqual(plan["plan_type"], "serial")
+        self.assertEqual(plan["steps"][0]["mode"], "serial")
 
 
 if __name__ == "__main__":
