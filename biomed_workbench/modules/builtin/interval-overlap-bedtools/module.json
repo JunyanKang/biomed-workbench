@@ -1,38 +1,389 @@
 {
-  "schema_version": 1,
-  "id": "interval-overlap-bedtools",
-  "version": "1.0.0",
-  "title": "Intersect declared genomic interval sets",
-  "description": "Execute exact-version bedtools intersect on two content-addressed BED 1.0 artifacts and preserve pairwise overlaps under an explicit zero-based half-open and reference-build contract.",
-  "module_type": "analysis",
-  "domains": ["omics"],
-  "intents": ["intersect genomic intervals", "bedtools intersect", "compare peaks and regions", "基因组区间取交集"],
-  "questions": ["Which declared query and reference intervals overlap geometrically on the same reference assembly, and what is the bounded pairwise overlap extent?"],
-  "maturity": "validated",
-  "entrypoint": "scientific-command",
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {}, "required": []},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"payload_roles": {"type": "array", "items": {"type": "string"}, "minItems": 1, "maxItems": 1}}, "required": ["payload_roles"]},
-  "input_artifacts": [
-    {"name": "query_intervals", "artifact_type": "genomic_intervals", "formats": [{"name": "bed", "versions": ["1.0"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["zero-based-half-open"], "genome_build_policy": "required", "genome_builds": ["declared-in-project"], "annotation_releases": [], "orientations": ["interval-records"]}], "processing_levels": ["features", "peaks", "regions", "fragments"], "required_metadata": ["bed-field-count", "reference-build", "reference-sequence-digest", "sort-order", "sample-manifest-digest"]},
-    {"name": "reference_intervals", "artifact_type": "genomic_intervals", "formats": [{"name": "bed", "versions": ["1.0"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["zero-based-half-open"], "genome_build_policy": "required", "genome_builds": ["declared-in-project"], "annotation_releases": [], "orientations": ["interval-records"]}], "processing_levels": ["features", "peaks", "regions"], "required_metadata": ["bed-field-count", "reference-build", "reference-sequence-digest", "sort-order", "source-release"]}
-  ],
-  "output_artifacts": [{"name": "overlaps", "artifact_type": "interval_overlap_pairs", "formats": [{"name": "bedtools-intersect-tsv", "versions": ["2.31.1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["zero-based-half-open"], "genome_build_policy": "required", "genome_builds": ["inherited-matching-input-build"], "annotation_releases": [], "orientations": ["query-fields-then-reference-fields"]}], "processing_levels": ["derived"], "required_metadata": ["module_version", "compatibility_row_id", "query-bed-field-count", "reference-bed-field-count", "reference-build"]}],
-  "assumptions": ["Both BED payloads use the declared field counts and identical chromosome naming, reference assembly, sequence digest, and zero-based half-open coordinate convention."],
-  "preconditions": ["Query and reference BED records pass BED 1.0 validation; reference-build and sequence-digest identities match exactly before execution."],
-  "quality_gates": [
-    {"id": "interval-coordinate-identity", "severity": "fatal", "description": "Reference build, sequence digest, chromosome namespace, coordinate convention, field count, and interval bounds must reconcile across both inputs.", "blocks_interpretation": true},
-    {"id": "interval-overlap-row-validity", "severity": "fatal", "description": "Every output row must contain the exact declared query and reference widths and a positive same-reference half-open overlap.", "blocks_interpretation": true},
-    {"id": "interval-overlap-inference-scope", "severity": "major", "description": "Geometric overlap alone does not establish enrichment, regulatory assignment, causality, or biological relevance without explicit denominators and null models.", "blocks_interpretation": true}
-  ],
-  "evidence_effects": ["establishes_geometric_interval_overlap"],
+  "access": "offline",
   "alternatives": [],
-  "complements": ["alignment-quality-samtools", "enrichment-analysis"],
-  "tool_requirements": [{"name": "bedtools", "ecosystem": "system", "identity": "bedtools", "required": true, "tested_versions": ["2.31.1"], "allowed_versions": [">=2.31,<2.32"], "version_source": "https://github.com/arq5x/bedtools2/releases/tag/v2.31.1", "verified_at": "2026-07-12", "version_probe": ["bedtools", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "bedtools v([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "bedtools-2311-intersect-wa-wb", "affected_versions": [">=2.31,<2.32"], "category": "output-format", "description": "The validated release emits the tested query-then-reference field layout for intersect -wa -wb.", "compatibility_effect": "requires-parser", "required_action": "Parse only against explicit query and reference BED field counts under the 2.31.1 regression fixture.", "source": "https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html"}], "platforms": ["macos-arm64"]}],
-  "dependencies": [{"name": "xz", "ecosystem": "runtime", "identity": "xz-runtime", "required": true, "tested_versions": ["5.8.3"], "allowed_versions": [">=5.8,<5.9"], "version_source": "https://github.com/tukaani-project/xz/releases/tag/v5.8.3", "verified_at": "2026-07-12", "version_probe": ["xz", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "XZ Utils\\) ([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide the exact liblzma runtime declared by the validated Homebrew bedtools bottle.", "conflicts": [], "platforms": ["macos-arm64"]}],
-  "compatibility_matrix": [{"id": "bedtools-2.31.1-xz-5.8.3-bed-1.0-wa-wb", "module_version": "1.0.0", "tool_versions": {"bedtools": [">=2.31,<2.32"]}, "dependency_versions": {"xz": [">=5.8,<5.9"]}, "input_formats": {"query_intervals": ["bed@1.0"], "reference_intervals": ["bed@1.0"]}, "output_formats": {"overlaps": ["bedtools-intersect-tsv@2.31.1"]}, "platforms": ["macos-arm64"], "regression_evidence_ids": ["interval-overlap-bedtools-regression-v1"], "end_to_end_evidence_ids": ["interval-overlap-bedtools-e2e-v1"], "verified_at": "2026-07-12"}],
-  "execution": {"kind": "command", "timeout_seconds": 120, "max_output_bytes": 10000000, "command": {"tool_name": "bedtools", "executable": "bedtools", "arguments": ["intersect", "-a", "{input:query}", "-b", "{input:reference}", "-wa", "-wb"], "inputs": [{"name": "query", "port": "query_intervals", "role": "query", "filename": "query.bed"}, {"name": "reference", "port": "reference_intervals", "role": "reference", "filename": "reference.bed"}], "outputs": [{"name": "overlaps", "port": "overlaps", "role": "overlaps", "filename": "overlaps.tsv", "media_type": "text/tab-separated-values", "capture": "stdout"}], "parameter_names": [], "timeout_seconds": 120, "max_output_bytes": 10000000, "max_payload_bytes": 10000000}},
-  "access": "offline", "mutability": "read_only", "credentials": [],
-  "limitations": ["The validated row covers uncompressed BED 1.0 on macOS arm64 and emits all pairwise -wa -wb overlaps; it does not calculate enrichment, nearest features, reciprocal overlap thresholds, strand constraints, or biological assignments."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "GPL-2.0-only", "concept_sources": ["https://github.com/arq5x/bedtools2"]}
+  "assumptions": [
+    "Both BED payloads use the declared field counts and identical chromosome naming, reference assembly, sequence digest, and zero-based half-open coordinate convention."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_interval_overlap_bedtools.py",
+      "purpose": "Execute and validate intersect declared genomic interval sets against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "interval-coordinate-identity",
+        "interval-overlap-row-validity",
+        "interval-overlap-inference-scope"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "xz": [
+          ">=5.8,<5.9"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "interval-overlap-bedtools-e2e-v1"
+      ],
+      "id": "bedtools-2.31.1-xz-5.8.3-bed-1.0-wa-wb",
+      "input_formats": {
+        "query_intervals": [
+          "bed@1.0"
+        ],
+        "reference_intervals": [
+          "bed@1.0"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "overlaps": [
+          "bedtools-intersect-tsv@2.31.1"
+        ]
+      },
+      "platforms": [
+        "macos-arm64"
+      ],
+      "regression_evidence_ids": [
+        "interval-overlap-bedtools-regression-v1"
+      ],
+      "tool_versions": {
+        "bedtools": [
+          ">=2.31,<2.32"
+        ]
+      },
+      "verified_at": "2026-07-12"
+    }
+  ],
+  "complements": [
+    "alignment-quality-samtools",
+    "enrichment-analysis"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=5.8,<5.9"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "xz-runtime",
+      "name": "xz",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "purpose": "Provide the exact liblzma runtime declared by the validated Homebrew bedtools bottle.",
+      "required": true,
+      "tested_versions": [
+        "5.8.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "XZ Utils\\) ([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "xz",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://github.com/tukaani-project/xz/releases/tag/v5.8.3"
+    }
+  ],
+  "description": "Execute exact-version bedtools intersect on two content-addressed BED 1.0 artifacts and preserve pairwise overlaps under an explicit zero-based half-open and reference-build contract.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "scientific-command",
+  "evidence_effects": [
+    "establishes_geometric_interval_overlap"
+  ],
+  "execution": {
+    "command": {
+      "arguments": [
+        "intersect",
+        "-a",
+        "{input:query}",
+        "-b",
+        "{input:reference}",
+        "-wa",
+        "-wb"
+      ],
+      "executable": "bedtools",
+      "inputs": [
+        {
+          "filename": "query.bed",
+          "name": "query",
+          "port": "query_intervals",
+          "role": "query"
+        },
+        {
+          "filename": "reference.bed",
+          "name": "reference",
+          "port": "reference_intervals",
+          "role": "reference"
+        }
+      ],
+      "max_output_bytes": 10000000,
+      "max_payload_bytes": 10000000,
+      "outputs": [
+        {
+          "capture": "stdout",
+          "filename": "overlaps.tsv",
+          "media_type": "text/tab-separated-values",
+          "name": "overlaps",
+          "port": "overlaps",
+          "role": "overlaps"
+        }
+      ],
+      "parameter_names": [],
+      "timeout_seconds": 120,
+      "tool_name": "bedtools"
+    },
+    "kind": "command",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 120
+  },
+  "id": "interval-overlap-bedtools",
+  "input_artifacts": [
+    {
+      "artifact_type": "genomic_intervals",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "bed",
+          "orientations": [
+            "interval-records"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.0"
+          ]
+        }
+      ],
+      "name": "query_intervals",
+      "processing_levels": [
+        "features",
+        "peaks",
+        "regions",
+        "fragments"
+      ],
+      "required_metadata": [
+        "bed-field-count",
+        "reference-build",
+        "reference-sequence-digest",
+        "sort-order",
+        "sample-manifest-digest"
+      ]
+    },
+    {
+      "artifact_type": "genomic_intervals",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "bed",
+          "orientations": [
+            "interval-records"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.0"
+          ]
+        }
+      ],
+      "name": "reference_intervals",
+      "processing_levels": [
+        "features",
+        "peaks",
+        "regions"
+      ],
+      "required_metadata": [
+        "bed-field-count",
+        "reference-build",
+        "reference-sequence-digest",
+        "sort-order",
+        "source-release"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {},
+    "required": [],
+    "type": "object"
+  },
+  "intents": [
+    "intersect genomic intervals",
+    "bedtools intersect",
+    "compare peaks and regions",
+    "\u57fa\u56e0\u7ec4\u533a\u95f4\u53d6\u4ea4\u96c6"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "The validated row covers uncompressed BED 1.0 on macOS arm64 and emits all pairwise -wa -wb overlaps; it does not calculate enrichment, nearest features, reciprocal overlap thresholds, strand constraints, or biological assignments."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "interval_overlap_pairs",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "inherited-matching-input-build"
+          ],
+          "name": "bedtools-intersect-tsv",
+          "orientations": [
+            "query-fields-then-reference-fields"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "2.31.1"
+          ]
+        }
+      ],
+      "name": "overlaps",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "query-bed-field-count",
+        "reference-bed-field-count",
+        "reference-build"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "payload_roles": {
+        "items": {
+          "type": "string"
+        },
+        "maxItems": 1,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "payload_roles"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Query and reference BED records pass BED 1.0 validation; reference-build and sequence-digest identities match exactly before execution."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://github.com/arq5x/bedtools2"
+    ],
+    "license": "GPL-2.0-only"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Reference build, sequence digest, chromosome namespace, coordinate convention, field count, and interval bounds must reconcile across both inputs.",
+      "id": "interval-coordinate-identity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every output row must contain the exact declared query and reference widths and a positive same-reference half-open overlap.",
+      "id": "interval-overlap-row-validity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Geometric overlap alone does not establish enrichment, regulatory assignment, causality, or biological relevance without explicit denominators and null models.",
+      "id": "interval-overlap-inference-scope",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which declared query and reference intervals overlap geometrically on the same reference assembly, and what is the bounded pairwise overlap extent?"
+  ],
+  "schema_version": 1,
+  "title": "Intersect declared genomic interval sets",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=2.31,<2.32"
+      ],
+      "ecosystem": "system",
+      "identity": "bedtools",
+      "mismatch_policy": "block",
+      "name": "bedtools",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "2.31.1"
+      ],
+      "verified_at": "2026-07-12",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=2.31,<2.32"
+          ],
+          "category": "output-format",
+          "compatibility_effect": "requires-parser",
+          "description": "The validated release emits the tested query-then-reference field layout for intersect -wa -wb.",
+          "id": "bedtools-2311-intersect-wa-wb",
+          "required_action": "Parse only against explicit query and reference BED field counts under the 2.31.1 regression fixture.",
+          "source": "https://bedtools.readthedocs.io/en/latest/content/tools/intersect.html"
+        }
+      ],
+      "version_pattern": "bedtools v([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "bedtools",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://github.com/arq5x/bedtools2/releases/tag/v2.31.1"
+    }
+  ],
+  "version": "1.0.0"
 }

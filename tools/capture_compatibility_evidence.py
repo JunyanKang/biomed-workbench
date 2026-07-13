@@ -53,6 +53,12 @@ COMMAND_EVIDENCE = {
 }
 
 AGENT_EVIDENCE = {
+    "single-cell-communication": {
+        "path": "reports/single-cell-communication-live-verification.json",
+        "execution_flags": ("liana_completed", "cellphonedb_completed", "cellchat_completed", "nichenet_completed"),
+        "summary_flags": ("all_four_backends_executed", "biological_samples_used_as_replicates", "cells_not_used_as_condition_replicates", "method_specific_results_retained", "cross_sample_support_computed", "nichenet_receiver_evidence_used", "source_counts_and_identifiers_preserved", "outputs_reloaded", "no_environment_or_compute_infrastructure_managed"),
+        "live_dependency_keys": (),
+    },
     "single-cell-foundation-workflow": {
         "path": "reports/single-cell-foundation-live-verification.json",
         "execution_flags": ("scanpy_completed", "seurat_completed"),
@@ -151,7 +157,79 @@ def capture() -> dict[str, object]:
     records = []
     for manifest in registry.all():
         if len(manifest.compatibility_matrix) != 1:
-            raise RuntimeError(f"module requires explicit multi-row evidence handling: {manifest.id}")
+            if manifest.id != "single-cell-communication" or manifest.agent_protocol is None:
+                raise RuntimeError(f"module requires explicit multi-row evidence handling: {manifest.id}")
+            case = fixtures.get(manifest.id)
+            if not isinstance(case, dict):
+                packaged_cases = json.loads((BUILTIN_ROOT / manifest.id / "tests" / "cases.json").read_text(encoding="utf-8"))
+                first_case = packaged_cases.get("cases", [None])[0]
+                if not isinstance(first_case, dict):
+                    raise RuntimeError(f"agent-generated regression fixture is missing: {manifest.id}")
+                case = {"input": first_case["input"], "output": first_case["expected_subset"]}
+            entrypoint = registry.resolve_entrypoint(manifest.id)
+            implementation_path = Path(inspect.getsourcefile(entrypoint) or "").resolve()
+            try:
+                implementation_path.relative_to(ROOT.resolve())
+            except ValueError as exc:
+                raise RuntimeError(f"module implementation is outside the independent project: {manifest.id}") from exc
+            direct = json.loads(json.dumps(entrypoint(**case["input"]), sort_keys=True))
+            _assert_subset(case["output"], direct)
+            evidence_config = AGENT_EVIDENCE[manifest.id]
+            report_path = ROOT / evidence_config["path"]
+            live_report = json.loads(report_path.read_text(encoding="utf-8"))
+            template_hashes = {
+                path.name: _sha256(path)
+                for path in sorted((BUILTIN_ROOT / manifest.id / "templates").iterdir())
+                if path.is_file()
+            }
+            observed_templates = {item["name"]: item["sha256"] for item in live_report.get("templates", {}).values()}
+            expected_rows = [
+                {
+                    "id": item.id,
+                    "regression_evidence_ids": list(item.regression_evidence_ids),
+                    "end_to_end_evidence_ids": list(item.end_to_end_evidence_ids),
+                }
+                for item in manifest.compatibility_matrix
+            ]
+            if (
+                live_report.get("passed") is not True
+                or live_report.get("module_id") != manifest.id
+                or live_report.get("module_version") != manifest.version
+                or live_report.get("registry_digest") != registry.digest
+                or live_report.get("compatibility_rows") != expected_rows
+                or observed_templates != template_hashes
+                or any(live_report.get("execution", {}).get(flag) is not True for flag in evidence_config["execution_flags"])
+                or any(live_report.get("scientific_summary", {}).get(flag) is not True for flag in evidence_config["summary_flags"])
+            ):
+                raise RuntimeError(f"multi-row agent execution evidence differs from module contract: {manifest.id}")
+            plan = route(manifest.intents[0], registry=registry)
+            candidates = [item["id"] for step in plan["steps"] for item in step["candidates"]]
+            if manifest.id not in candidates:
+                raise RuntimeError(f"agent-generated module did not route through the unified entry: {manifest.id}")
+            for row in manifest.compatibility_matrix:
+                if any(not version_is_allowed(live_report.get("versions", {}).get(key, ""), rules) for key, rules in row.tool_versions.items()):
+                    raise RuntimeError(f"multi-row live tool versions differ from compatibility row: {row.id}")
+                context = {
+                    "module_id": manifest.id,
+                    "module_version": manifest.version,
+                    "row_id": row.id,
+                    "tool_versions": {key: list(value) for key, value in row.tool_versions.items()},
+                    "dependency_versions": {key: list(value) for key, value in row.dependency_versions.items()},
+                    "input_formats": {key: list(value) for key, value in row.input_formats.items()},
+                    "output_formats": {key: list(value) for key, value in row.output_formats.items()},
+                    "implementation_sha256": _sha256(implementation_path),
+                }
+                regression_digest = digest_value({**context, "kind": "regression", "input": case["input"], "handoff": direct, "templates": template_hashes})
+                e2e_digest = digest_value({**context, "kind": "end-to-end", "live_report_sha256": _sha256(report_path), "execution": live_report["execution"], "scientific_summary": live_report["scientific_summary"]})
+                records.append(
+                    {
+                        **context,
+                        "verified_at": row.verified_at,
+                        "regression": {"id": row.regression_evidence_ids[0], "passed": True, "digest": regression_digest},
+                        "end_to_end": {"id": row.end_to_end_evidence_ids[0], "passed": True, "digest": e2e_digest},
+                    }
+                )
+            continue
         row = manifest.compatibility_matrix[0]
         entrypoint = registry.resolve_entrypoint(manifest.id)
         implementation_path = Path(inspect.getsourcefile(entrypoint) or "").resolve()

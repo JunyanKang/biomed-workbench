@@ -65,7 +65,11 @@ class CreateModuleEndToEndTests(unittest.TestCase):
             self.assertEqual(registry.get("future-table-profile").version, "1.0.0")
             self.assertEqual(plan["steps"][0]["candidates"][0]["id"], "future-table-profile")
             self.assertEqual(output["row_count"], 2)
-            self.assertEqual({path.relative_to(module_path).as_posix() for path in module_path.rglob("*") if path.is_file()}, {"module.json", "tests/cases.json"})
+            self.assertEqual(
+                {path.relative_to(module_path).as_posix() for path in module_path.rglob("*") if path.is_file()},
+                {"module.json", "tests/cases.json", "templates/run_future_table_profile.py"},
+            )
+            self.assertEqual(registry.get("future-table-profile").code_templates[0].path, "templates/run_future_table_profile.py")
 
         self.assertEqual(ModuleRegistry.discover(BUILTIN_ROOT).digest, builtin_digest)
 

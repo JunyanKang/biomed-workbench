@@ -4,6 +4,17 @@
   "assumptions": [
     "The supplied sequence is unambiguous DNA and SpCas9 NGG context is the intended nuclease rule."
   ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_crispr_design.py",
+      "purpose": "Execute and validate discover crispr guide candidates against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "crispr-design-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
   "compatibility_matrix": [
     {
       "dependency_versions": {

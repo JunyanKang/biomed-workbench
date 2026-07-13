@@ -1,0 +1,529 @@
+{
+  "schema_version": 1,
+  "id": "single-cell-communication",
+  "version": "1.0.0",
+  "title": "Infer reproducible single-cell communication and ligand activity",
+  "description": "Direct Codex to inspect count-backed single-cell data and independent biological samples, adapt and execute LIANA, CellPhoneDB, CellChat, or NicheNet with versioned resources, retain method-specific evidence, standardize interactions, test cross-sample reproducibility, and block cell-level or visually selected communication claims.",
+  "module_type": "analysis",
+  "domains": ["omics", "statistics"],
+  "intents": [
+    "infer cell-cell communication with LIANA CellPhoneDB CellChat or NicheNet",
+    "compare ligand receptor interactions across biological samples",
+    "prioritize ligands with donor-aware receiver differential expression",
+    "单细胞细胞通讯配体受体和NicheNet配体活性分析"
+  ],
+  "questions": [
+    "Which sender-receiver ligand-receptor programs recur across independent biological samples and are supported by receiver-state evidence?"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "execution": {
+    "kind": "workflow",
+    "timeout_seconds": 30,
+    "max_output_bytes": 2000000
+  },
+  "maturity": "experimental",
+  "input_artifacts": [
+    {
+      "name": "single_cell_expression_object",
+      "artifact_type": "single_cell_expression_object",
+      "formats": [
+        {
+          "name": "h5ad",
+          "versions": ["0.1.0"],
+          "representations": ["container", "sparse"],
+          "compression": ["none", "gzip", "lzf"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": ["declared-in-project"],
+          "orientations": ["observations-by-variables"]
+        },
+        {
+          "name": "matrix-market",
+          "versions": ["1"],
+          "representations": ["sparse", "text"],
+          "compression": ["none", "gzip"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": ["declared-in-project"],
+          "orientations": ["features-by-observations"]
+        }
+      ],
+      "processing_levels": ["quality-controlled", "raw-count-preserved", "conservatively-annotated"],
+      "required_metadata": [
+        "input-artifact-digest",
+        "raw-count-location",
+        "cell-type-key",
+        "biological-sample-key",
+        "condition-key",
+        "species",
+        "gene-identifier-namespace",
+        "annotation-release",
+        "cell-accounting",
+        "quantification-provenance"
+      ]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "communication_evidence",
+      "artifact_type": "single_cell_communication_evidence",
+      "formats": [
+        {
+          "name": "tabular",
+          "versions": ["1"],
+          "representations": ["structured", "text"],
+          "compression": ["none", "gzip"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": ["inherited-from-input"],
+          "orientations": ["interaction-by-sample-and-method"]
+        }
+      ],
+      "processing_levels": ["sample-stratified", "method-preserved", "replicate-summarized"],
+      "required_metadata": [
+        "sender",
+        "receiver",
+        "ligand",
+        "receptor",
+        "method",
+        "biological-sample",
+        "condition",
+        "score",
+        "p-value-or-rank",
+        "sample-support",
+        "resource-release",
+        "quality-status"
+      ]
+    },
+    {
+      "name": "communication_validation",
+      "artifact_type": "single_cell_communication_validation",
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["method-by-sample-and-quality-gate"]
+        }
+      ],
+      "processing_levels": ["derived"],
+      "required_metadata": [
+        "method-parameters",
+        "tool-and-resource-versions",
+        "sample-cell-type-accounting",
+        "blocked-sample-reasons",
+        "replicate-support",
+        "source-preservation",
+        "artifact-digests",
+        "quality-gate-results"
+      ]
+    }
+  ],
+  "preconditions": [
+    "Codex can inspect immutable raw counts, gene identifiers, cell types including unknown labels, biological samples, conditions, species, quantification provenance, and the existing scientific environments; versioned interaction and ligand-target resources are locally available or explicitly fetched for the project; outputs are new; and no environment or compute-infrastructure management is required."
+  ],
+  "assumptions": [
+    "Cell types were established independently of the communication result; biological samples are independently prepared; each sample maps to one condition; raw counts and normalized expression semantics are known; gene identifiers match the declared species and resources; communication scores indicate compatible expression and prior knowledge rather than physical contact or causal signaling; and cells are not treated as condition-level replicates."
+  ],
+  "quality_gates": [
+    {
+      "id": "communication-input-semantics",
+      "severity": "fatal",
+      "description": "Block when raw counts, gene identifiers, species, cell types, samples, conditions, quantification provenance, or versioned communication resources cannot be established without guessing.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "communication-cell-sample-accounting",
+      "severity": "fatal",
+      "description": "Require reason-coded cell-type eligibility within each biological sample, at least two eligible populations for a sample run, and independent sample counts for any condition-level statement.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "communication-method-execution",
+      "severity": "fatal",
+      "description": "Require observed LIANA, CellPhoneDB, CellChat, or NicheNet execution with detected APIs, explicit parameters, fixed seeds, recognized result fields, and retained method-specific raw outputs.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "communication-replicate-support",
+      "severity": "fatal",
+      "description": "Require predeclared cross-sample support and multiple-testing control for replicated interactions; single-sample results remain descriptive and cannot establish a condition effect.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "communication-nichenet-receiver-evidence",
+      "severity": "fatal",
+      "description": "NicheNet ligand activity requires donor-aware receiver differential expression, an explicit background gene universe, sender expression, versioned ligand-receptor and ligand-target resources, and independent samples in both contrast levels.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "communication-source-output-integrity",
+      "severity": "fatal",
+      "description": "Source counts, cells, genes, labels, samples, and conditions remain immutable; outputs reload with parameters, versions, resources, sample runs, quality states, and artifact digests intact.",
+      "blocks_interpretation": true
+    }
+  ],
+  "limitations": [
+    "The templates support sample-aware LIANA 1.7, CellPhoneDB 5, CellChat 2.2, and NicheNet 2.2 analysis with explicit versioned resources. They do not infer physical contact or causal signaling, do not use cells as independent replicates, and do not permit a condition-level claim from one sample per condition. CellPhoneDB is restricted to human symbols in the validated template; NicheNet requires external project-pinned network matrices and donor-aware receiver DE rather than a cell-level contrast."
+  ],
+  "evidence_effects": [
+    "estimates_sample-specific-ligand-receptor-compatibility",
+    "summarizes-cross-sample-interaction-support",
+    "prioritizes-ligands-against-receiver-state-evidence",
+    "blocks-cell-pseudoreplication-and-single-method-overclaiming"
+  ],
+  "alternatives": [],
+  "complements": [
+    "single-cell-foundation-workflow",
+    "single-cell-reference-annotation",
+    "single-cell-donor-inference",
+    "single-cell-batch-integration"
+  ],
+  "tool_requirements": [
+    {
+      "name": "liana",
+      "ecosystem": "python",
+      "identity": "liana",
+      "required": false,
+      "tested_versions": ["1.7.3"],
+      "allowed_versions": [">=1.7,<1.8"],
+      "version_source": "https://pypi.org/project/liana/",
+      "verified_at": "2026-07-13",
+      "version_probe": ["python3", "-c", "from importlib.metadata import version; print(version('liana'))"],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [
+        {
+          "id": "liana-17-rank-aggregate",
+          "affected_versions": [">=1.7,<1.8"],
+          "category": "api",
+          "description": "Rank aggregation accepts AnnData, explicit grouping, resource, expression proportion, permutations, seed, jobs, and inplace behavior and returns method-dependent score columns.",
+          "compatibility_effect": "requires-parser",
+          "required_action": "Detect magnitude and specificity fields, retain raw columns, and standardize only recognized output semantics.",
+          "source": "https://liana-py.readthedocs.io/en/latest/"
+        }
+      ],
+      "platforms": ["any"]
+    },
+    {
+      "name": "cellphonedb",
+      "ecosystem": "python",
+      "identity": "cellphonedb",
+      "required": false,
+      "tested_versions": ["5.0.1"],
+      "allowed_versions": [">=5.0,<5.1"],
+      "version_source": "https://pypi.org/project/cellphonedb/",
+      "verified_at": "2026-07-13",
+      "version_probe": ["python3", "-c", "from importlib.metadata import version; print(version('cellphonedb'))"],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [
+        {
+          "id": "cellphonedb-5-statistical-api",
+          "affected_versions": [">=5.0,<5.1"],
+          "category": "api",
+          "description": "The Python statistical method consumes a database zip, metadata, counts, iterations, threshold, seed, and scoring option and returns wide means and p-value tables.",
+          "compatibility_effect": "requires-parser",
+          "required_action": "Pin a compatible database release, validate human symbols, and reshape wide cell-pair fields without discarding interaction identifiers.",
+          "source": "https://cellphonedb.readthedocs.io/en/stable/"
+        }
+      ],
+      "platforms": ["any"]
+    },
+    {
+      "name": "cellchat",
+      "ecosystem": "r",
+      "identity": "CellChat",
+      "required": false,
+      "tested_versions": ["2.2.0"],
+      "allowed_versions": [">=2.2,<2.3"],
+      "version_source": "https://github.com/jinworks/CellChat",
+      "verified_at": "2026-07-13",
+      "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('CellChat')))"],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [
+        {
+          "id": "cellchat-22-probability-api",
+          "affected_versions": [">=2.2,<2.3"],
+          "category": "api",
+          "description": "Communication probability exposes averaging, permutation, distance, population-size, and random-seed controls and CellChatDB species resources.",
+          "compatibility_effect": "requires-parameter",
+          "required_action": "Run each biological sample separately with explicit database, seed, permutations, minimum cells, and distance policy.",
+          "source": "https://github.com/jinworks/CellChat"
+        }
+      ],
+      "platforms": ["any"]
+    },
+    {
+      "name": "nichenetr",
+      "ecosystem": "r",
+      "identity": "nichenetr",
+      "required": false,
+      "tested_versions": ["2.2.1.1"],
+      "allowed_versions": [">=2.2,<2.3"],
+      "version_source": "https://github.com/saeyslab/nichenetr",
+      "verified_at": "2026-07-13",
+      "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('nichenetr')))"],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [
+        {
+          "id": "nichenetr-22-external-networks",
+          "affected_versions": [">=2.2,<2.3"],
+          "category": "input-format",
+          "description": "Ligand activity requires separately supplied ligand-target, ligand-receptor, and weighted network resources plus a receiver gene set and background.",
+          "compatibility_effect": "requires-format",
+          "required_action": "Pin resource files and digests, use donor-aware receiver DE, and declare sender and receiver expressed-gene universes.",
+          "source": "https://github.com/saeyslab/nichenetr"
+        }
+      ],
+      "platforms": ["any"]
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "python",
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "required": true,
+      "tested_versions": ["3.14.3"],
+      "allowed_versions": [">=3.14,<3.15"],
+      "version_source": "https://www.python.org/downloads/release/python-3143/",
+      "verified_at": "2026-07-13",
+      "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Validate the request and emit the Codex Agent protocol; scientific Python and R backends run only in an existing project environment.",
+      "conflicts": [],
+      "platforms": ["any"]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "agent-protocol-1-python-communication",
+      "module_version": "1.0.0",
+      "tool_versions": {
+        "liana": [">=1.7,<1.8"],
+        "cellphonedb": [">=5.0,<5.1"]
+      },
+      "dependency_versions": {"python": [">=3.14,<3.15"]},
+      "input_formats": {"single_cell_expression_object": ["h5ad@0.1.0", "matrix-market@1"]},
+      "output_formats": {"communication_evidence": ["tabular@1"], "communication_validation": ["inline-json@1"]},
+      "platforms": ["any"],
+      "regression_evidence_ids": ["single-cell-communication-python-regression-v1"],
+      "end_to_end_evidence_ids": ["single-cell-communication-python-e2e-v1"],
+      "verified_at": "2026-07-13"
+    },
+    {
+      "id": "agent-protocol-1-r-communication",
+      "module_version": "1.0.0",
+      "tool_versions": {
+        "cellchat": [">=2.2,<2.3"],
+        "nichenetr": [">=2.2,<2.3"]
+      },
+      "dependency_versions": {"python": [">=3.14,<3.15"]},
+      "input_formats": {"single_cell_expression_object": ["h5ad@0.1.0", "matrix-market@1"]},
+      "output_formats": {"communication_evidence": ["tabular@1"], "communication_validation": ["inline-json@1"]},
+      "platforms": ["any"],
+      "regression_evidence_ids": ["single-cell-communication-r-regression-v1"],
+      "end_to_end_evidence_ids": ["single-cell-communication-r-e2e-v1"],
+      "verified_at": "2026-07-13"
+    }
+  ],
+  "access": "agent_generated",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "objective": {"type": "string", "minLength": 12, "maxLength": 4000},
+      "input_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256},
+      "input_format": {"type": "string", "enum": ["h5ad", "matrix-market"]},
+      "raw_count_location": {"type": "string", "minLength": 1, "maxLength": 128},
+      "cell_type_key": {"type": "string", "minLength": 1, "maxLength": 128},
+      "biological_sample_key": {"type": "string", "minLength": 1, "maxLength": 128},
+      "condition_key": {"type": "string", "minLength": 1, "maxLength": 128},
+      "species": {"type": "string", "enum": ["human", "mouse"]},
+      "requested_methods": {"type": "array", "items": {"type": "string", "enum": ["liana", "cellphonedb", "cellchat", "nichenet"]}, "minItems": 1, "maxItems": 4},
+      "declared_thresholds": {"type": "object"},
+      "design_notes": {"type": "string", "minLength": 1, "maxLength": 8000}
+    },
+    "required": [
+      "objective",
+      "input_artifact_id",
+      "input_format",
+      "raw_count_location",
+      "cell_type_key",
+      "biological_sample_key",
+      "condition_key",
+      "species",
+      "requested_methods",
+      "declared_thresholds",
+      "design_notes"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]},
+      "module": {"type": "object"},
+      "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+      "request_fields": {"type": "array"},
+      "languages": {"type": "array"},
+      "code_plan": {"type": "array"},
+      "parameter_rules": {"type": "array"},
+      "preflight_checks": {"type": "array"},
+      "postflight_checks": {"type": "array"},
+      "provenance_fields": {"type": "array"},
+      "forbidden_actions": {"type": "array"},
+      "tool_profiles": {"type": "array"},
+      "dependency_profiles": {"type": "array"},
+      "quality_gate_ids": {"type": "array"},
+      "execution_policy": {"type": "object"}
+    },
+    "required": [
+      "handoff_type", "module", "request_digest", "request_fields", "languages",
+      "code_plan", "parameter_rules", "preflight_checks", "postflight_checks",
+      "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles",
+      "quality_gate_ids", "execution_policy"
+    ]
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {
+    "license": "Apache-2.0",
+    "concept_sources": [
+      "Project-owned Codex-native communication workflow synthesized from independently validated LIANA, CellPhoneDB, CellChat, and NicheNet APIs and biological-replicate requirements.",
+      "https://liana-py.readthedocs.io/en/latest/",
+      "https://cellphonedb.readthedocs.io/en/stable/",
+      "https://github.com/jinworks/CellChat",
+      "https://github.com/saeyslab/nichenetr"
+    ]
+  },
+  "agent_protocol": {
+    "schema_version": 1,
+    "mode": "codex_generated_project_code",
+    "languages": ["python", "r", "notebook"],
+    "template_sections": [
+      {
+        "id": "inspect-communication-design",
+        "purpose": "Establish whether communication and ligand-activity questions are identifiable from the real project design.",
+        "required_logic": [
+          "Inspect immutable raw counts, gene identifiers, species, cell types, unknown labels, samples, conditions, batches, quantification provenance, source digest, and resource releases.",
+          "Count every cell type within every biological sample and block sample runs with fewer than two adequately represented populations.",
+          "Freeze methods, resources, normalization, expression proportions, permutations, minimum cells, minimum sample support, multiple-testing control, contrasts, and outputs before execution."
+        ],
+        "output_artifact_types": ["single_cell_communication_validation"],
+        "template_files": ["templates/run_liana_cellphonedb.py", "templates/run_cellchat_nichenet.R"]
+      },
+      {
+        "id": "execute-ligand-receptor-methods",
+        "purpose": "Run selected communication methods within each biological sample and retain method-native evidence.",
+        "required_logic": [
+          "Adapt LIANA, CellPhoneDB, and CellChat templates to detected APIs and run each eligible biological sample independently with fixed seeds and explicit resources.",
+          "Preserve raw method tables and standardize sender, receiver, ligand, receptor, score, significance, sample, condition, and method without equating unlike score semantics.",
+          "Keep unknown cell labels if sufficiently represented and never select interactions from a desired condition pattern or visualization."
+        ],
+        "output_artifact_types": ["single_cell_communication_evidence", "single_cell_communication_validation"],
+        "template_files": ["templates/run_liana_cellphonedb.py", "templates/run_cellchat_nichenet.R"]
+      },
+      {
+        "id": "execute-nichenet-ligand-activity",
+        "purpose": "Prioritize ligands against independent receiver-state evidence without cell-level pseudoreplication.",
+        "required_logic": [
+          "Require donor-aware receiver differential expression with explicit contrast, background genes, independent samples, and reviewed receiver identity.",
+          "Load project-pinned ligand-target, ligand-receptor, and weighted network resources and record their digests and releases.",
+          "Rank ligand activities and retain ligand-target links while distinguishing prior-network support from causal signaling evidence."
+        ],
+        "output_artifact_types": ["single_cell_communication_evidence", "single_cell_communication_validation"],
+        "template_files": ["templates/run_cellchat_nichenet.R"]
+      },
+      {
+        "id": "replicate-reload-and-admit",
+        "purpose": "Admit only reloadable communication evidence with independent sample support and intact source data.",
+        "required_logic": [
+          "Summarize interaction support across biological samples within condition and control multiplicity without treating cells as replicates.",
+          "Compare method support as complementary evidence while retaining method disagreement and score semantics.",
+          "Reload tables, reports, and model objects; verify source dimensions and digests, parameters, versions, resources, sample runs, blocked reasons, and quality state before evidence admission."
+        ],
+        "output_artifact_types": ["single_cell_communication_evidence", "single_cell_communication_validation"],
+        "template_files": ["templates/run_liana_cellphonedb.py", "templates/run_cellchat_nichenet.R"]
+      }
+    ],
+    "parameter_rules": [
+      {
+        "id": "select-communication-methods",
+        "parameter": "requested-methods",
+        "decision_inputs": ["species", "question", "sample-counts", "resource-availability", "receiver-contrast", "tool-compatibility"],
+        "selection_rule": "Select only methods whose input, species, resource, design, and version assumptions are met; use multiple methods when their distinct score semantics answer the question.",
+        "validation_rule": "Every selected method must execute on observed sample data and retain method-specific results; unavailable or incompatible methods are blocked with reasons rather than simulated."
+      },
+      {
+        "id": "select-cell-and-sample-thresholds",
+        "parameter": "minimum-support",
+        "decision_inputs": ["cells-per-type-per-sample", "samples-per-condition", "method-minimums", "predeclared-fdr"],
+        "selection_rule": "Choose cell eligibility and sample reproducibility thresholds before viewing interaction rankings, respecting method requirements and the independent replicate design.",
+        "validation_rule": "Condition-level interpretation requires the declared independent-sample support and multiplicity control; otherwise results remain sample-specific or descriptive."
+      },
+      {
+        "id": "select-nichenet-contrast",
+        "parameter": "receiver-contrast",
+        "decision_inputs": ["reviewed-receiver-label", "condition-design", "donor-aware-de", "background-genes", "network-release"],
+        "selection_rule": "Define receiver, reference, contrast, donor-aware DE model, background genes, and network resources from the project hypothesis before ligand ranking.",
+        "validation_rule": "Block NicheNet when receiver DE is cell-level, sample counts are inadequate, resources are unpinned, or ligand and target universes cannot be reconciled."
+      }
+    ],
+    "preflight_checks": [
+      "Inspect the real h5ad or Matrix Market bundle and identify immutable integer-like raw counts without relying on a conventional layer name.",
+      "Cross-tabulate cell types, unknowns, samples, conditions, and batches and verify one condition per biological sample.",
+      "Reconcile gene identifiers and species with every selected resource and record resource release and digest.",
+      "Confirm requested tool APIs in the existing environment and freeze sample, method, permutation, threshold, and output contracts."
+    ],
+    "postflight_checks": [
+      "Reconcile all input cells, genes, samples, conditions, eligible and blocked populations, and sample runs.",
+      "Validate recognized method output fields, finite scores, p-value or rank semantics, and standardized interaction identities.",
+      "Require cross-sample support and multiplicity control for replicated interactions and donor-aware receiver evidence for NicheNet.",
+      "Reload all tables, reports, and objects and verify source preservation, versions, resources, parameters, quality states, and artifact digests."
+    ],
+    "provenance_fields": [
+      "module-version", "source-artifact-digest", "cell-and-gene-counts", "cell-type-key",
+      "biological-sample-key", "condition-key", "species", "raw-count-location",
+      "gene-identifier-namespace", "annotation-release", "quantification-provenance",
+      "methods-and-parameters", "tool-versions", "resource-releases-and-digests",
+      "sample-run-accounting", "blocked-reasons", "replicate-thresholds", "quality-gate-results",
+      "output-artifact-digests"
+    ],
+    "forbidden_actions": [
+      "Do not treat cells as independent condition-level replicates.",
+      "Do not install or manage environments, containers, accelerators, schedulers, or remote runtimes.",
+      "Do not guess raw counts, species, gene namespaces, cell types, samples, conditions, or resource versions.",
+      "Do not infer physical contact or causal signaling from ligand-receptor expression alone.",
+      "Do not use cell-level differential expression as NicheNet receiver evidence when biological samples define the contrast.",
+      "Do not overwrite source objects or previous outputs, and do not hide failed samples, methods, or interactions."
+    ],
+    "requires_observed_execution": true
+  }
+}

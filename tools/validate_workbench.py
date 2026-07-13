@@ -23,6 +23,7 @@ from biomed_workbench.services.credentials import ALLOWED_CREDENTIALS  # noqa: E
 from biomed_workbench.version import VERSION  # noqa: E402
 from tools.validate_module import validate_module  # noqa: E402
 from tools.build_format_contract_report import build as build_format_contract_report  # noqa: E402
+from tools.audit_bioinformatics_templates import build as build_bioinformatics_template_report  # noqa: E402
 
 CATALOG_FIELDS = {"id", "workflow", "kind", "title", "description", "entrypoint", "input_schema", "requirements", "access", "mutability"}
 SECRET_PATTERNS = [
@@ -226,6 +227,59 @@ def main() -> int:
                 or observed_evidence != expected_evidence
             ):
                 errors.append("compatibility rows are not bound to current passing regression and end-to-end evidence")
+        template_report_path = ROOT / "reports" / "bioinformatics-template-coverage.json"
+        try:
+            template_report = json.loads(template_report_path.read_text(encoding="utf-8"))
+            expected_template_report = build_bioinformatics_template_report()
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
+            errors.append(f"bioinformatics template coverage report is missing or invalid: {exc}")
+        else:
+            if template_report != expected_template_report or template_report.get("passed") is not True:
+                errors.append("bioinformatics template coverage differs from the registry or contains a failing template")
+            if (
+                template_report.get("bioinformatics_module_count") != template_report.get("covered_module_count")
+                or template_report.get("covered_module_count") != template_report.get("passing_module_count")
+                or any(item.get("template_count", 0) < 1 for item in template_report.get("records", ()))
+            ):
+                errors.append("every bioinformatics module must retain at least one passing code template")
+        communication_report_path = ROOT / "reports" / "single-cell-communication-live-verification.json"
+        try:
+            communication_report = json.loads(communication_report_path.read_text(encoding="utf-8"))
+            communication_manifest = registry.get("single-cell-communication")
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("single-cell communication live verification is missing or invalid")
+        else:
+            expected_rows = [
+                {
+                    "id": row.id,
+                    "regression_evidence_ids": list(row.regression_evidence_ids),
+                    "end_to_end_evidence_ids": list(row.end_to_end_evidence_ids),
+                }
+                for row in communication_manifest.compatibility_matrix
+            ]
+            versions = communication_report.get("versions", {})
+            if (
+                communication_report.get("passed") is not True
+                or communication_report.get("module_id") != communication_manifest.id
+                or communication_report.get("module_version") != communication_manifest.version
+                or communication_report.get("registry_digest") != registry.digest
+                or communication_report.get("compatibility_rows") != expected_rows
+                or communication_report.get("fixture", {}).get("cells") != 160
+                or communication_report.get("fixture", {}).get("biological_samples") != 4
+                or communication_report.get("fixture", {}).get("conditions") != 2
+                or set(communication_report.get("python_backends", {}).get("methods", ()))
+                != {"liana-rank-aggregate", "cellphonedb-statistical"}
+                or set(communication_report.get("r_backends", {}).get("methods", ())) != {"cellchat", "nichenet"}
+                or communication_report.get("python_backends", {}).get("sample_interaction_rows", 0) < 1
+                or communication_report.get("r_backends", {}).get("cellchat_interaction_rows", 0) < 1
+                or communication_report.get("r_backends", {}).get("nichenet_ligand_rows", 0) < 1
+                or versions.get("liana") != "1.7.3"
+                or versions.get("cellphonedb") != "5.0.1"
+                or versions.get("CellChat") != "2.2.0"
+                or versions.get("nichenetr") != "2.2.1.1"
+                or not re.fullmatch(r"[0-9a-f]{64}", communication_report.get("cellphonedb_database", {}).get("sha256", ""))
+            ):
+                errors.append("single-cell communication verification differs from its module, fixture, or four validated backends")
         command_source = (ROOT / "biomed_workbench" / "modules" / "scientific_command.py").read_text(encoding="utf-8")
         if "shell=True" in command_source or "os.system(" in command_source:
             errors.append("scientific command execution contains a shell invocation surface")
@@ -707,7 +761,7 @@ def main() -> int:
         if not root.exists():
             continue
         for path in root.rglob("*"):
-            if path.is_file() and ".source-audit" not in path.parts:
+            if path.is_file() and ".source-audit" not in path.parts and "__pycache__" not in path.parts:
                 text = path.read_text(errors="ignore")
                 credential_names.update(re.findall(r"\b[A-Z][A-Z0-9_]*(?:API_KEY|AUTH_TOKEN)\b", text))
     undeclared = sorted(credential_names - set(ALLOWED_CREDENTIALS))

@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "prepare-sample-aware-multi-method-communication-analysis",
+      "input": {
+        "objective": "Identify reproducible sender-receiver ligand programs across treatment and control samples and prioritize receiver-state ligands.",
+        "input_artifact_id": "artifact-single-cell-communication-001",
+        "input_format": "h5ad",
+        "raw_count_location": "layers.counts",
+        "cell_type_key": "cell_type_reviewed",
+        "biological_sample_key": "donor_id",
+        "condition_key": "condition",
+        "species": "human",
+        "requested_methods": ["liana", "cellphonedb", "cellchat", "nichenet"],
+        "declared_thresholds": {
+          "minimum_cells_per_type_per_sample": 20,
+          "minimum_biological_samples": 3,
+          "expression_proportion": 0.1,
+          "fdr": 0.05
+        },
+        "design_notes": "Four donors per condition; reviewed labels retain unknown populations; donor-aware receiver pseudobulk differential expression is available."
+      },
+      "expected_subset": {
+        "handoff_type": "codex_generated_project_analysis",
+        "module": {
+          "id": "single-cell-communication",
+          "version": "1.0.0"
+        },
+        "languages": ["python", "r", "notebook"]
+      }
+    }
+  ]
+}

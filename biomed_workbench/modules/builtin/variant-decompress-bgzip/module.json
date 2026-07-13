@@ -1,37 +1,358 @@
 {
-  "schema_version": 1,
-  "id": "variant-decompress-bgzip",
-  "version": "1.0.0",
-  "title": "Decompress indexed BGZF VCF without changing records",
-  "description": "Guide and execute HTSlib bgzip decompression of a digest-bound VCF 4.5 BGZF+TBI bundle and verify byte-exact recovery of the coordinate-sorted VCF document for downstream filtering and analysis.",
-  "module_type": "transform",
-  "domains": ["omics"],
-  "intents": ["decompress BGZF VCF", "convert vcf.gz to VCF", "prepare compressed variants for filtering", "解压BGZF格式VCF"],
-  "questions": ["How can an indexed BGZF VCF be converted to an uncompressed VCF without changing its header, contigs, samples, records, coordinates, or processing level?"],
-  "maturity": "validated",
-  "entrypoint": "scientific-command",
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {}, "required": []},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"payload_roles": {"type": "array", "items": {"type": "string"}, "minItems": 1, "maxItems": 1}}, "required": ["payload_roles"]},
-  "input_artifacts": [{"name": "variants", "artifact_type": "variant_bundle", "formats": [{"name": "vcf", "versions": ["4.5"], "representations": ["text"], "compression": ["bgzf"], "required_indexes": ["tbi"], "coordinate_systems": ["one-based-inclusive"], "genome_build_policy": "required", "genome_builds": ["declared-in-project"], "annotation_releases": ["declared-in-project"], "orientations": ["sites-by-samples"]}], "processing_levels": ["raw-calls", "filtered", "normalized", "annotated"], "required_metadata": ["fileformat", "contig", "sample-id", "sample-manifest-digest", "reference-build", "reference-sequence-digest", "sort-order", "index-type"]}],
-  "output_artifacts": [{"name": "decompressed_variants", "artifact_type": "variant_table", "formats": [{"name": "vcf", "versions": ["4.5"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["one-based-inclusive"], "genome_build_policy": "required", "genome_builds": ["inherited-matching-input-build"], "annotation_releases": ["inherited-from-input"], "orientations": ["sites-by-samples"]}], "processing_levels": ["raw-calls", "filtered", "normalized", "annotated"], "required_metadata": ["module_version", "compatibility_row_id", "fileformat", "contig", "sample-id", "sample-manifest-digest", "reference-build", "reference-sequence-digest", "sort-order"]}],
-  "assumptions": ["The BGZF payload and TBI are a matched digest-bound bundle and decompression is a representation change that must preserve all VCF content and processing semantics."],
-  "preconditions": ["Input is structurally valid VCF 4.5 in BGZF compression with a matching TBI, declared coordinate sorting, reference identity, and sample manifest."],
-  "quality_gates": [
-    {"id": "vcf-bgzf-input-bundle-integrity", "severity": "fatal", "description": "BGZF VCF and TBI roles, digests, fileformat, reference identity, samples, coordinates, sorting, and index type must reconcile before decompression.", "blocks_interpretation": true},
-    {"id": "vcf-bgzf-roundtrip-integrity", "severity": "fatal", "description": "Decompressed bytes, VCF header, contigs, sample order, records, and sorting must exactly match the validated source document.", "blocks_interpretation": true},
-    {"id": "vcf-bgzf-representation-scope", "severity": "major", "description": "Decompression changes storage representation only and provides no evidence about call validity, filtering, normalization, annotation, association, or clinical significance.", "blocks_interpretation": true}
-  ],
-  "evidence_effects": ["preserves_variant_observations_across_compression_representation"],
-  "alternatives": [],
-  "complements": ["variant-filter-vcf", "variant-region-query-tabix"],
-  "tool_requirements": [{"name": "bgzip", "ecosystem": "system", "identity": "bgzip", "required": true, "tested_versions": ["1.23"], "allowed_versions": [">=1.23,<1.24"], "version_source": "https://github.com/samtools/htslib/releases/tag/1.23", "verified_at": "2026-07-13", "version_probe": ["bgzip", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "bgzip \\(htslib\\) ([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "bgzip-123-decompress-stdout", "affected_versions": [">=1.23,<1.24"], "category": "behavior", "description": "The supported line validates -d -c decompression to stdout while leaving the source bundle unchanged.", "compatibility_effect": "requires-parser", "required_action": "Require byte-exact roundtrip identity and independently validate VCF document structure, samples, contigs, sorting, and records.", "source": "https://www.htslib.org/doc/1.23/bgzip.html"}], "platforms": ["macos-arm64"]}],
-  "dependencies": [{"name": "htslib", "ecosystem": "runtime", "identity": "htslib-runtime", "required": true, "tested_versions": ["1.23"], "allowed_versions": [">=1.23,<1.24"], "version_source": "https://github.com/samtools/htslib/releases/tag/1.23", "verified_at": "2026-07-13", "version_probe": ["bgzip", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "htslib\\) ([0-9]+(?:\\.[0-9]+)+)", "purpose": "Decode BGZF blocks and verify stream integrity for VCF representation conversion.", "conflicts": [], "platforms": ["macos-arm64"]}],
-  "compatibility_matrix": [{"id": "bgzip-1.23-vcf-4.5-bgzf-to-plain", "module_version": "1.0.0", "tool_versions": {"bgzip": [">=1.23,<1.24"]}, "dependency_versions": {"htslib": [">=1.23,<1.24"]}, "input_formats": {"variants": ["vcf@4.5"]}, "output_formats": {"decompressed_variants": ["vcf@4.5"]}, "platforms": ["macos-arm64"], "regression_evidence_ids": ["variant-decompress-bgzip-regression-v1"], "end_to_end_evidence_ids": ["variant-decompress-bgzip-e2e-v1"], "verified_at": "2026-07-13"}],
-  "execution": {"kind": "command", "timeout_seconds": 120, "max_output_bytes": 2000000, "command": {"tool_name": "bgzip", "executable": "bgzip", "arguments": ["-d", "-c", "{input:vcf}"], "inputs": [{"name": "vcf", "port": "variants", "role": "variants", "filename": "variants.vcf.gz"}, {"name": "index", "port": "variants", "role": "index", "filename": "variants.vcf.gz.tbi", "sidecar_for": "vcf"}], "outputs": [{"name": "vcf", "port": "decompressed_variants", "role": "variants", "filename": "variants.vcf", "media_type": "text/vcf", "capture": "stdout"}], "parameter_names": [], "timeout_seconds": 120, "max_output_bytes": 2000000, "max_payload_bytes": 100000000, "path_mode": "workdir-relative"}},
   "access": "offline",
-  "mutability": "read_only",
+  "alternatives": [],
+  "assumptions": [
+    "The BGZF payload and TBI are a matched digest-bound bundle and decompression is a representation change that must preserve all VCF content and processing semantics."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_variant_decompress_bgzip.py",
+      "purpose": "Execute and validate decompress indexed bgzf vcf without changing records against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "vcf-bgzf-input-bundle-integrity",
+        "vcf-bgzf-roundtrip-integrity",
+        "vcf-bgzf-representation-scope"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "htslib": [
+          ">=1.23,<1.24"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "variant-decompress-bgzip-e2e-v1"
+      ],
+      "id": "bgzip-1.23-vcf-4.5-bgzf-to-plain",
+      "input_formats": {
+        "variants": [
+          "vcf@4.5"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "decompressed_variants": [
+          "vcf@4.5"
+        ]
+      },
+      "platforms": [
+        "macos-arm64"
+      ],
+      "regression_evidence_ids": [
+        "variant-decompress-bgzip-regression-v1"
+      ],
+      "tool_versions": {
+        "bgzip": [
+          ">=1.23,<1.24"
+        ]
+      },
+      "verified_at": "2026-07-13"
+    }
+  ],
+  "complements": [
+    "variant-filter-vcf",
+    "variant-region-query-tabix"
+  ],
   "credentials": [],
-  "limitations": ["The validated row supports VCF 4.5 BGZF+TBI on macOS arm64. It does not repair corruption, convert BCF, create indexes, normalize alleles, filter records, or infer biological meaning."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "MIT", "concept_sources": ["https://github.com/samtools/htslib"]}
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=1.23,<1.24"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "htslib-runtime",
+      "name": "htslib",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "purpose": "Decode BGZF blocks and verify stream integrity for VCF representation conversion.",
+      "required": true,
+      "tested_versions": [
+        "1.23"
+      ],
+      "verified_at": "2026-07-13",
+      "version_pattern": "htslib\\) ([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "bgzip",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://github.com/samtools/htslib/releases/tag/1.23"
+    }
+  ],
+  "description": "Guide and execute HTSlib bgzip decompression of a digest-bound VCF 4.5 BGZF+TBI bundle and verify byte-exact recovery of the coordinate-sorted VCF document for downstream filtering and analysis.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "scientific-command",
+  "evidence_effects": [
+    "preserves_variant_observations_across_compression_representation"
+  ],
+  "execution": {
+    "command": {
+      "arguments": [
+        "-d",
+        "-c",
+        "{input:vcf}"
+      ],
+      "executable": "bgzip",
+      "inputs": [
+        {
+          "filename": "variants.vcf.gz",
+          "name": "vcf",
+          "port": "variants",
+          "role": "variants"
+        },
+        {
+          "filename": "variants.vcf.gz.tbi",
+          "name": "index",
+          "port": "variants",
+          "role": "index",
+          "sidecar_for": "vcf"
+        }
+      ],
+      "max_output_bytes": 2000000,
+      "max_payload_bytes": 100000000,
+      "outputs": [
+        {
+          "capture": "stdout",
+          "filename": "variants.vcf",
+          "media_type": "text/vcf",
+          "name": "vcf",
+          "port": "decompressed_variants",
+          "role": "variants"
+        }
+      ],
+      "parameter_names": [],
+      "path_mode": "workdir-relative",
+      "timeout_seconds": 120,
+      "tool_name": "bgzip"
+    },
+    "kind": "command",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 120
+  },
+  "id": "variant-decompress-bgzip",
+  "input_artifacts": [
+    {
+      "artifact_type": "variant_bundle",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "bgzf"
+          ],
+          "coordinate_systems": [
+            "one-based-inclusive"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "vcf",
+          "orientations": [
+            "sites-by-samples"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [
+            "tbi"
+          ],
+          "versions": [
+            "4.5"
+          ]
+        }
+      ],
+      "name": "variants",
+      "processing_levels": [
+        "raw-calls",
+        "filtered",
+        "normalized",
+        "annotated"
+      ],
+      "required_metadata": [
+        "fileformat",
+        "contig",
+        "sample-id",
+        "sample-manifest-digest",
+        "reference-build",
+        "reference-sequence-digest",
+        "sort-order",
+        "index-type"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {},
+    "required": [],
+    "type": "object"
+  },
+  "intents": [
+    "decompress BGZF VCF",
+    "convert vcf.gz to VCF",
+    "prepare compressed variants for filtering",
+    "\u89e3\u538bBGZF\u683c\u5f0fVCF"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "The validated row supports VCF 4.5 BGZF+TBI on macOS arm64. It does not repair corruption, convert BCF, create indexes, normalize alleles, filter records, or infer biological meaning."
+  ],
+  "maturity": "validated",
+  "module_type": "transform",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "variant_table",
+      "formats": [
+        {
+          "annotation_releases": [
+            "inherited-from-input"
+          ],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "one-based-inclusive"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "inherited-matching-input-build"
+          ],
+          "name": "vcf",
+          "orientations": [
+            "sites-by-samples"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "4.5"
+          ]
+        }
+      ],
+      "name": "decompressed_variants",
+      "processing_levels": [
+        "raw-calls",
+        "filtered",
+        "normalized",
+        "annotated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "fileformat",
+        "contig",
+        "sample-id",
+        "sample-manifest-digest",
+        "reference-build",
+        "reference-sequence-digest",
+        "sort-order"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "payload_roles": {
+        "items": {
+          "type": "string"
+        },
+        "maxItems": 1,
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "payload_roles"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Input is structurally valid VCF 4.5 in BGZF compression with a matching TBI, declared coordinate sorting, reference identity, and sample manifest."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://github.com/samtools/htslib"
+    ],
+    "license": "MIT"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "BGZF VCF and TBI roles, digests, fileformat, reference identity, samples, coordinates, sorting, and index type must reconcile before decompression.",
+      "id": "vcf-bgzf-input-bundle-integrity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Decompressed bytes, VCF header, contigs, sample order, records, and sorting must exactly match the validated source document.",
+      "id": "vcf-bgzf-roundtrip-integrity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Decompression changes storage representation only and provides no evidence about call validity, filtering, normalization, annotation, association, or clinical significance.",
+      "id": "vcf-bgzf-representation-scope",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "How can an indexed BGZF VCF be converted to an uncompressed VCF without changing its header, contigs, samples, records, coordinates, or processing level?"
+  ],
+  "schema_version": 1,
+  "title": "Decompress indexed BGZF VCF without changing records",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.23,<1.24"
+      ],
+      "ecosystem": "system",
+      "identity": "bgzip",
+      "mismatch_policy": "block",
+      "name": "bgzip",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.23"
+      ],
+      "verified_at": "2026-07-13",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.23,<1.24"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parser",
+          "description": "The supported line validates -d -c decompression to stdout while leaving the source bundle unchanged.",
+          "id": "bgzip-123-decompress-stdout",
+          "required_action": "Require byte-exact roundtrip identity and independently validate VCF document structure, samples, contigs, sorting, and records.",
+          "source": "https://www.htslib.org/doc/1.23/bgzip.html"
+        }
+      ],
+      "version_pattern": "bgzip \\(htslib\\) ([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "bgzip",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://github.com/samtools/htslib/releases/tag/1.23"
+    }
+  ],
+  "version": "1.0.0"
 }

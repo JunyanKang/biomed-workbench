@@ -1,132 +1,444 @@
 {
-  "schema_version": 1,
-  "id": "read-contamination-screen",
-  "version": "1.0.0",
-  "title": "Screen sequencing reads against declared references",
-  "description": "Execute FastQ Screen with Bowtie2 against a content-addressed reference bundle and quantify expected and unexpected reference mapping without claiming coverage beyond the supplied references.",
-  "module_type": "validation",
-  "domains": ["omics"],
-  "intents": ["screen FASTQ contamination", "run FastQ Screen", "reference contamination check", "测序污染筛查"],
-  "questions": ["What fraction of reads maps to each declared expected or unexpected reference, and do unexpected mappings exceed the project threshold?"],
-  "maturity": "validated",
-  "entrypoint": "scientific-command",
-  "input_schema": {
-    "type": "object", "additionalProperties": false,
-    "properties": {"threads": {"type": "integer", "minimum": 1, "maximum": 16}},
-    "required": ["threads"]
-  },
-  "output_schema": {
-    "type": "object", "additionalProperties": false,
-    "properties": {"payload_roles": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2}},
-    "required": ["payload_roles"]
-  },
-  "input_artifacts": [
-    {
-      "name": "reads", "artifact_type": "sequencing_reads",
-      "formats": [{
-        "name": "fastq", "versions": ["sanger-phred33"], "representations": ["text"], "compression": ["none", "gzip", "bgzf"],
-        "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [],
-        "orientations": ["single-end", "paired-end", "interleaved"]
-      }],
-      "processing_levels": ["raw", "adapter-trimmed", "quality-trimmed"],
-      "required_metadata": ["sample-id", "read-layout", "quality-encoding"]
-    },
-    {
-      "name": "references", "artifact_type": "screening_reference_bundle",
-      "formats": [{
-        "name": "fastq-screen-reference", "versions": ["1.0.0"], "representations": ["container", "binary"], "compression": ["zip"],
-        "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [],
-        "orientations": ["references-by-index-prefix"]
-      }],
-      "processing_levels": ["indexed-reference"],
-      "required_metadata": ["reference-count", "reference-manifest-digest", "bowtie2-version"]
-    }
-  ],
-  "output_artifacts": [
-    {
-      "name": "contamination_report", "artifact_type": "sequencing_contamination_report",
-      "formats": [{
-        "name": "fastq-screen-report", "versions": ["0.16.0"], "representations": ["text", "container"], "compression": ["none"],
-        "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [],
-        "orientations": ["references-by-mapping-category"]
-      }],
-      "processing_levels": ["derived"], "required_metadata": ["module_version", "compatibility_row_id"]
-    }
-  ],
-  "assumptions": ["Reference labels, expected-reference designation, sequence digests, and Bowtie2 indexes in the bundle are internally consistent."],
-  "preconditions": ["The reference bundle contains one root configuration file, a reference manifest, and complete Bowtie2 index files for every declared reference."],
-  "quality_gates": [
-    {"id": "screen-reference-integrity", "severity": "fatal", "description": "Reference manifest identities, sequence digests, index prefixes, and configured labels must reconcile before screening.", "blocks_interpretation": true},
-    {"id": "screen-scope-interpretation", "severity": "major", "description": "Unexpected mapping is interpreted only against declared references and cannot rule out contaminants absent from the bundle.", "blocks_interpretation": true}
-  ],
-  "evidence_effects": ["qualifies_sequencing_contamination_scope"],
+  "access": "offline",
   "alternatives": [],
-  "complements": ["read-quality-fastqc", "read-quality-fastp"],
-  "tool_requirements": [
-    {
-      "name": "fastq-screen", "ecosystem": "system", "identity": "fastq_screen", "required": true,
-      "tested_versions": ["0.16.0"], "allowed_versions": [">=0.16,<0.17"],
-      "version_source": "https://github.com/StevenWingett/FastQ-Screen/releases/tag/v0.16.0", "verified_at": "2026-07-12",
-      "version_probe": ["fastq_screen", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10,
-      "version_pattern": "FastQ Screen v([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block",
-      "version_differences": [{
-        "id": "fastq-screen-0160-summary-columns", "affected_versions": [">=0.16,<0.17"], "category": "output-format",
-        "description": "The validated release emits the tested reference mapping categories and summary headers.",
-        "compatibility_effect": "requires-parser", "required_action": "Use only the FastQ Screen 0.16.0 parser and exact reference-bundle regression fixtures.",
-        "source": "https://github.com/StevenWingett/FastQ-Screen/releases/tag/v0.16.0"
-      }],
-      "platforms": ["macos-arm64"]
-    }
+  "assumptions": [
+    "Reference labels, expected-reference designation, sequence digests, and Bowtie2 indexes in the bundle are internally consistent."
   ],
-  "dependencies": [
+  "code_templates": [
     {
-      "name": "bowtie2", "ecosystem": "system", "identity": "bowtie2", "required": true,
-      "tested_versions": ["2.5.5"], "allowed_versions": [">=2.5,<2.6"], "version_source": "https://github.com/BenLangmead/bowtie2/releases/tag/v2.5.5", "verified_at": "2026-07-12",
-      "version_probe": ["bowtie2", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10,
-      "version_pattern": "bowtie2-align-s version ([0-9]+(?:\\.[0-9]+)+)", "purpose": "Align reads to every declared screening reference.", "conflicts": [], "platforms": ["macos-arm64"]
-    },
-    {
-      "name": "bowtie2-bioconda-build", "ecosystem": "runtime", "identity": "bioconda-bowtie2-runtime", "required": true,
-      "tested_versions": ["2.5.5-h9e91881_0"], "allowed_versions": [">=2.5,<2.6"], "version_source": "https://anaconda.org/bioconda/bowtie2/files?version=2.5.5", "verified_at": "2026-07-12",
-      "version_probe": ["biomed_workbench.quality.fastq_screen:probe_bowtie2_bioconda_build"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 10,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+-[A-Za-z0-9_]+)", "purpose": "Bind Bowtie2 to the exact validated macOS-arm64 Bioconda build.", "conflicts": [], "platforms": ["macos-arm64"]
-    },
-    {
-      "name": "perl", "ecosystem": "runtime", "identity": "perl-runtime", "required": true,
-      "tested_versions": ["5.32.1"], "allowed_versions": [">=5.32,<6"], "version_source": "https://perldoc.perl.org/5.32.1/perldelta", "verified_at": "2026-07-12",
-      "version_probe": ["biomed_workbench.quality.fastq_screen:probe_fastq_screen_perl"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 10,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute the validated FastQ Screen Perl application.", "conflicts": [], "platforms": ["macos-arm64"]
+      "language": "python",
+      "path": "templates/run_read_contamination_screen.py",
+      "purpose": "Execute and validate screen sequencing reads against declared references against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "screen-reference-integrity",
+        "screen-scope-interpretation"
+      ],
+      "requires_adaptation": true
     }
   ],
   "compatibility_matrix": [
     {
+      "dependency_versions": {
+        "bowtie2": [
+          ">=2.5,<2.6"
+        ],
+        "bowtie2-bioconda-build": [
+          ">=2.5,<2.6"
+        ],
+        "perl": [
+          ">=5.32,<6"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "read-contamination-screen-e2e-v1"
+      ],
       "id": "fastq-screen-0.16.0-bowtie2-2.5.5-reference-1",
-      "module_version": "1.0.0", "tool_versions": {"fastq-screen": [">=0.16,<0.17"]},
-      "dependency_versions": {"bowtie2": [">=2.5,<2.6"], "bowtie2-bioconda-build": [">=2.5,<2.6"], "perl": [">=5.32,<6"]},
-      "input_formats": {"reads": ["fastq@sanger-phred33"], "references": ["fastq-screen-reference@1.0.0"]},
-      "output_formats": {"contamination_report": ["fastq-screen-report@0.16.0"]}, "platforms": ["macos-arm64"],
-      "regression_evidence_ids": ["read-contamination-screen-regression-v1"], "end_to_end_evidence_ids": ["read-contamination-screen-e2e-v1"], "verified_at": "2026-07-12"
+      "input_formats": {
+        "reads": [
+          "fastq@sanger-phred33"
+        ],
+        "references": [
+          "fastq-screen-reference@1.0.0"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "contamination_report": [
+          "fastq-screen-report@0.16.0"
+        ]
+      },
+      "platforms": [
+        "macos-arm64"
+      ],
+      "regression_evidence_ids": [
+        "read-contamination-screen-regression-v1"
+      ],
+      "tool_versions": {
+        "fastq-screen": [
+          ">=0.16,<0.17"
+        ]
+      },
+      "verified_at": "2026-07-12"
     }
   ],
-  "execution": {
-    "kind": "command", "timeout_seconds": 300, "max_output_bytes": 2000000,
-    "command": {
-      "tool_name": "fastq-screen", "executable": "fastq_screen",
-      "arguments": ["--conf", "{input:references}", "--outdir", "{output-directory}", "--force", "--subset", "0", "--threads", "{parameter:threads}", "{input:reads}"],
-      "inputs": [
-        {"name": "reads", "port": "reads", "role": "reads", "filename": "reads.fastq"},
-        {"name": "references", "port": "references", "role": "references", "filename": "reference-bundle", "materialization": "zip-directory", "member": "fastq_screen.conf"}
+  "complements": [
+    "read-quality-fastqc",
+    "read-quality-fastp"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=2.5,<2.6"
       ],
-      "outputs": [
-        {"name": "data", "port": "contamination_report", "role": "data", "filename": "reads_screen.txt", "media_type": "text/tab-separated-values"},
-        {"name": "report", "port": "contamination_report", "role": "report", "filename": "reads_screen.html", "media_type": "text/html"}
+      "conflicts": [],
+      "ecosystem": "system",
+      "identity": "bowtie2",
+      "name": "bowtie2",
+      "platforms": [
+        "macos-arm64"
       ],
-      "parameter_names": ["threads"], "timeout_seconds": 300, "max_output_bytes": 2000000, "max_payload_bytes": 100000000,
-      "working_directory_input": "references"
+      "purpose": "Align reads to every declared screening reference.",
+      "required": true,
+      "tested_versions": [
+        "2.5.5"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "bowtie2-align-s version ([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "bowtie2",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://github.com/BenLangmead/bowtie2/releases/tag/v2.5.5"
+    },
+    {
+      "allowed_versions": [
+        ">=2.5,<2.6"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "bioconda-bowtie2-runtime",
+      "name": "bowtie2-bioconda-build",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "purpose": "Bind Bowtie2 to the exact validated macOS-arm64 Bioconda build.",
+      "required": true,
+      "tested_versions": [
+        "2.5.5-h9e91881_0"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+-[A-Za-z0-9_]+)",
+      "version_probe": [
+        "biomed_workbench.quality.fastq_screen:probe_bowtie2_bioconda_build"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://anaconda.org/bioconda/bowtie2/files?version=2.5.5"
+    },
+    {
+      "allowed_versions": [
+        ">=5.32,<6"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "perl-runtime",
+      "name": "perl",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "purpose": "Execute the validated FastQ Screen Perl application.",
+      "required": true,
+      "tested_versions": [
+        "5.32.1"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.quality.fastq_screen:probe_fastq_screen_perl"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://perldoc.perl.org/5.32.1/perldelta"
     }
+  ],
+  "description": "Execute FastQ Screen with Bowtie2 against a content-addressed reference bundle and quantify expected and unexpected reference mapping without claiming coverage beyond the supplied references.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "scientific-command",
+  "evidence_effects": [
+    "qualifies_sequencing_contamination_scope"
+  ],
+  "execution": {
+    "command": {
+      "arguments": [
+        "--conf",
+        "{input:references}",
+        "--outdir",
+        "{output-directory}",
+        "--force",
+        "--subset",
+        "0",
+        "--threads",
+        "{parameter:threads}",
+        "{input:reads}"
+      ],
+      "executable": "fastq_screen",
+      "inputs": [
+        {
+          "filename": "reads.fastq",
+          "name": "reads",
+          "port": "reads",
+          "role": "reads"
+        },
+        {
+          "filename": "reference-bundle",
+          "materialization": "zip-directory",
+          "member": "fastq_screen.conf",
+          "name": "references",
+          "port": "references",
+          "role": "references"
+        }
+      ],
+      "max_output_bytes": 2000000,
+      "max_payload_bytes": 100000000,
+      "outputs": [
+        {
+          "filename": "reads_screen.txt",
+          "media_type": "text/tab-separated-values",
+          "name": "data",
+          "port": "contamination_report",
+          "role": "data"
+        },
+        {
+          "filename": "reads_screen.html",
+          "media_type": "text/html",
+          "name": "report",
+          "port": "contamination_report",
+          "role": "report"
+        }
+      ],
+      "parameter_names": [
+        "threads"
+      ],
+      "timeout_seconds": 300,
+      "tool_name": "fastq-screen",
+      "working_directory_input": "references"
+    },
+    "kind": "command",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 300
   },
-  "access": "offline", "mutability": "read_only", "credentials": [],
-  "limitations": ["The validated row covers only the named macOS-arm64 Bowtie2 build and detects only sequences represented by the user-supplied reference bundle."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "GPL-3.0-or-later", "concept_sources": ["https://github.com/StevenWingett/FastQ-Screen"]}
+  "id": "read-contamination-screen",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequencing_reads",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none",
+            "gzip",
+            "bgzf"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "fastq",
+          "orientations": [
+            "single-end",
+            "paired-end",
+            "interleaved"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "sanger-phred33"
+          ]
+        }
+      ],
+      "name": "reads",
+      "processing_levels": [
+        "raw",
+        "adapter-trimmed",
+        "quality-trimmed"
+      ],
+      "required_metadata": [
+        "sample-id",
+        "read-layout",
+        "quality-encoding"
+      ]
+    },
+    {
+      "artifact_type": "screening_reference_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "zip"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "fastq-screen-reference",
+          "orientations": [
+            "references-by-index-prefix"
+          ],
+          "representations": [
+            "container",
+            "binary"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.0.0"
+          ]
+        }
+      ],
+      "name": "references",
+      "processing_levels": [
+        "indexed-reference"
+      ],
+      "required_metadata": [
+        "reference-count",
+        "reference-manifest-digest",
+        "bowtie2-version"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "threads": {
+        "maximum": 16,
+        "minimum": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "threads"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "screen FASTQ contamination",
+    "run FastQ Screen",
+    "reference contamination check",
+    "\u6d4b\u5e8f\u6c61\u67d3\u7b5b\u67e5"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "The validated row covers only the named macOS-arm64 Bowtie2 build and detects only sequences represented by the user-supplied reference bundle."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "sequencing_contamination_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "fastq-screen-report",
+          "orientations": [
+            "references-by-mapping-category"
+          ],
+          "representations": [
+            "text",
+            "container"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.16.0"
+          ]
+        }
+      ],
+      "name": "contamination_report",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "payload_roles": {
+        "items": {
+          "type": "string"
+        },
+        "maxItems": 2,
+        "minItems": 2,
+        "type": "array"
+      }
+    },
+    "required": [
+      "payload_roles"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The reference bundle contains one root configuration file, a reference manifest, and complete Bowtie2 index files for every declared reference."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://github.com/StevenWingett/FastQ-Screen"
+    ],
+    "license": "GPL-3.0-or-later"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Reference manifest identities, sequence digests, index prefixes, and configured labels must reconcile before screening.",
+      "id": "screen-reference-integrity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Unexpected mapping is interpreted only against declared references and cannot rule out contaminants absent from the bundle.",
+      "id": "screen-scope-interpretation",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What fraction of reads maps to each declared expected or unexpected reference, and do unexpected mappings exceed the project threshold?"
+  ],
+  "schema_version": 1,
+  "title": "Screen sequencing reads against declared references",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=0.16,<0.17"
+      ],
+      "ecosystem": "system",
+      "identity": "fastq_screen",
+      "mismatch_policy": "block",
+      "name": "fastq-screen",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "0.16.0"
+      ],
+      "verified_at": "2026-07-12",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=0.16,<0.17"
+          ],
+          "category": "output-format",
+          "compatibility_effect": "requires-parser",
+          "description": "The validated release emits the tested reference mapping categories and summary headers.",
+          "id": "fastq-screen-0160-summary-columns",
+          "required_action": "Use only the FastQ Screen 0.16.0 parser and exact reference-bundle regression fixtures.",
+          "source": "https://github.com/StevenWingett/FastQ-Screen/releases/tag/v0.16.0"
+        }
+      ],
+      "version_pattern": "FastQ Screen v([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "fastq_screen",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://github.com/StevenWingett/FastQ-Screen/releases/tag/v0.16.0"
+    }
+  ],
+  "version": "1.0.0"
 }

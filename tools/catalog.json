@@ -3738,6 +3738,102 @@
     },
     {
       "access": "agent_generated",
+      "description": "Direct Codex to inspect count-backed single-cell data and independent biological samples, adapt and execute LIANA, CellPhoneDB, CellChat, or NicheNet with versioned resources, retain method-specific evidence, standardize interactions, test cross-sample reproducibility, and block cell-level or visually selected communication claims.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-communication",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "biological_sample_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "cell_type_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "condition_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad",
+              "matrix-market"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "raw_count_location": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_methods": {
+            "items": {
+              "enum": [
+                "liana",
+                "cellphonedb",
+                "cellchat",
+                "nichenet"
+              ],
+              "type": "string"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "type": "array"
+          },
+          "species": {
+            "enum": [
+              "human",
+              "mouse"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "raw_count_location",
+          "cell_type_key",
+          "biological_sample_key",
+          "condition_key",
+          "species",
+          "requested_methods",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Infer reproducible single-cell communication and ligand activity",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
       "description": "Direct Codex to inspect a real annotated single-cell count object and experimental design; generate project-specific code that aggregates immutable raw counts by biological sample and cell type; fit estimable edgeR, DESeq2, or limma-voom condition contrasts using biological replicates; diagnose confounding, low replication, sample outliers, and model sensitivity; execute the reviewed code in the user's existing scientific environment; and admit only observed, reloaded, quality-controlled statistical artifacts into project evidence.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-donor-inference",
@@ -5354,7 +5450,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 80,
+  "entry_count": 81,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

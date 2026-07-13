@@ -4,6 +4,17 @@
   "assumptions": [
     "The query is contained in the explicit background and gene-set membership is appropriate for the organism and identifier namespace."
   ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_enrichment_analysis.py",
+      "purpose": "Execute and validate run gene-set overrepresentation against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "enrichment-analysis-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
   "compatibility_matrix": [
     {
       "dependency_versions": {

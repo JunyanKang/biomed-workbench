@@ -4,6 +4,17 @@
   "assumptions": [
     "Template ends are intended primer regions and approximate melting-temperature formulas are adequate for candidate screening."
   ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_primer_design.py",
+      "purpose": "Execute and validate design pcr primer candidates against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "primer-design-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
   "compatibility_matrix": [
     {
       "dependency_versions": {

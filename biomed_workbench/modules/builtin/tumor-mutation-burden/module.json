@@ -4,6 +4,17 @@
   "assumptions": [
     "Callable territory and eligible somatic variant classes match the assay and intended research definition."
   ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_tumor_mutation_burden.py",
+      "purpose": "Execute and validate calculate auditable tumor mutation burden against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "tumor-mutation-burden-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
   "compatibility_matrix": [
     {
       "dependency_versions": {

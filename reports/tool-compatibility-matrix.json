@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 80,
-  "module_count": 80,
+  "compatibility_complete": 81,
+  "module_count": 81,
   "modules": [
     {
       "compatibility_rows": [
@@ -9360,6 +9360,385 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "single-cell-communication-python-e2e-v1"
+          ],
+          "id": "agent-protocol-1-python-communication",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "single-cell-communication-python-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        },
+        {
+          "end_to_end_evidence_ids": [
+            "single-cell-communication-r-e2e-v1"
+          ],
+          "id": "agent-protocol-1-r-communication",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "single-cell-communication-r-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate the request and emit the Codex Agent protocol; scientific Python and R backends run only in an existing project environment.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "single-cell-communication",
+      "input_formats": [
+        {
+          "artifact_type": "single_cell_expression_object",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none",
+                "gzip",
+                "lzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "h5ad",
+              "orientations": [
+                "observations-by-variables"
+              ],
+              "representations": [
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "0.1.0"
+              ]
+            },
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none",
+                "gzip"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "matrix-market",
+              "orientations": [
+                "features-by-observations"
+              ],
+              "representations": [
+                "sparse",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "single_cell_expression_object",
+          "processing_levels": [
+            "quality-controlled",
+            "raw-count-preserved",
+            "conservatively-annotated"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "raw-count-location",
+            "cell-type-key",
+            "biological-sample-key",
+            "condition-key",
+            "species",
+            "gene-identifier-namespace",
+            "annotation-release",
+            "cell-accounting",
+            "quantification-provenance"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "single_cell_communication_evidence",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none",
+                "gzip"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tabular",
+              "orientations": [
+                "interaction-by-sample-and-method"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "communication_evidence",
+          "processing_levels": [
+            "sample-stratified",
+            "method-preserved",
+            "replicate-summarized"
+          ],
+          "required_metadata": [
+            "sender",
+            "receiver",
+            "ligand",
+            "receptor",
+            "method",
+            "biological-sample",
+            "condition",
+            "score",
+            "p-value-or-rank",
+            "sample-support",
+            "resource-release",
+            "quality-status"
+          ]
+        },
+        {
+          "artifact_type": "single_cell_communication_validation",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "method-by-sample-and-quality-gate"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "communication_validation",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "method-parameters",
+            "tool-and-resource-versions",
+            "sample-cell-type-accounting",
+            "blocked-sample-reasons",
+            "replicate-support",
+            "source-preservation",
+            "artifact-digests",
+            "quality-gate-results"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=1.7,<1.8"
+          ],
+          "ecosystem": "python",
+          "identity": "liana",
+          "mismatch_policy": "block",
+          "name": "liana",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "1.7.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.7,<1.8"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Rank aggregation accepts AnnData, explicit grouping, resource, expression proportion, permutations, seed, jobs, and inplace behavior and returns method-dependent score columns.",
+              "id": "liana-17-rank-aggregate",
+              "required_action": "Detect magnitude and specificity fields, retain raw columns, and standardize only recognized output semantics.",
+              "source": "https://liana-py.readthedocs.io/en/latest/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "from importlib.metadata import version; print(version('liana'))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pypi.org/project/liana/"
+        },
+        {
+          "allowed_versions": [
+            ">=5.0,<5.1"
+          ],
+          "ecosystem": "python",
+          "identity": "cellphonedb",
+          "mismatch_policy": "block",
+          "name": "cellphonedb",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "5.0.1"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=5.0,<5.1"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "The Python statistical method consumes a database zip, metadata, counts, iterations, threshold, seed, and scoring option and returns wide means and p-value tables.",
+              "id": "cellphonedb-5-statistical-api",
+              "required_action": "Pin a compatible database release, validate human symbols, and reshape wide cell-pair fields without discarding interaction identifiers.",
+              "source": "https://cellphonedb.readthedocs.io/en/stable/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "from importlib.metadata import version; print(version('cellphonedb'))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pypi.org/project/cellphonedb/"
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "ecosystem": "r",
+          "identity": "CellChat",
+          "mismatch_policy": "block",
+          "name": "cellchat",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "2.2.0"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2.2,<2.3"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parameter",
+              "description": "Communication probability exposes averaging, permutation, distance, population-size, and random-seed controls and CellChatDB species resources.",
+              "id": "cellchat-22-probability-api",
+              "required_action": "Run each biological sample separately with explicit database, seed, permutations, minimum cells, and distance policy.",
+              "source": "https://github.com/jinworks/CellChat"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('CellChat')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/jinworks/CellChat"
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "ecosystem": "r",
+          "identity": "nichenetr",
+          "mismatch_policy": "block",
+          "name": "nichenetr",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "2.2.1.1"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2.2,<2.3"
+              ],
+              "category": "input-format",
+              "compatibility_effect": "requires-format",
+              "description": "Ligand activity requires separately supplied ligand-target, ligand-receptor, and weighted network resources plus a receiver gene set and background.",
+              "id": "nichenetr-22-external-networks",
+              "required_action": "Pin resource files and digests, use donor-aware receiver DE, and declare sender and receiver expressed-gene universes.",
+              "source": "https://github.com/saeyslab/nichenetr"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('nichenetr')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/saeyslab/nichenetr"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "single-cell-donor-inference-e2e-v1"
           ],
           "id": "agent-protocol-1-scanpy-110-edger-40-deseq2-142-limma-358",
@@ -13678,6 +14057,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "eaa5dccee4a40daddc4f37e4304d939322b6eda6c5d5683d615dfa7f5d3b97f5",
+  "registry_digest": "4c3912b5392dd6e05dd72330c0a1fea71fd29b4f9a61818eb19025d09010573e",
   "schema_version": 1
 }

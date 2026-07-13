@@ -1,35 +1,359 @@
 {
-  "schema_version": 1,
-  "id": "alignment-sort-index-samtools",
-  "version": "1.0.0",
-  "title": "Coordinate-sort and index SAM alignments",
-  "description": "Guide and execute samtools sort with automatic CSI generation, producing a content-addressed BAM plus index that can feed alignment QC, coverage, and variant modules.",
-  "module_type": "transform",
-  "domains": ["omics"],
-  "intents": ["sort and index SAM", "SAM to sorted BAM", "samtools sort write index", "SAM转坐标排序BAM并建立索引"],
-  "questions": ["How should an unsorted SAM artifact be converted into a coordinate-sorted, indexed BAM while preserving header, sample, reference, and command provenance?"],
-  "maturity": "validated",
-  "entrypoint": "scientific-command",
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {"threads": {"type": "integer", "minimum": 1, "maximum": 16}}, "required": ["threads"]},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"payload_roles": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2}}, "required": ["payload_roles"]},
-  "input_artifacts": [{"name": "alignments", "artifact_type": "sequence_alignments", "formats": [{"name": "sam", "versions": ["1.6"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["one-based-leftmost"], "genome_build_policy": "required", "genome_builds": ["declared-in-project"], "annotation_releases": [], "orientations": ["alignment-records"]}], "processing_levels": ["aligned"], "required_metadata": ["sample-id", "read-group", "reference-build", "reference-sequence-digest", "sort-order"]}],
-  "output_artifacts": [{"name": "alignment_bundle", "artifact_type": "alignment_bundle", "formats": [{"name": "bam", "versions": ["1.6"], "representations": ["binary", "container"], "compression": ["bgzf"], "required_indexes": ["csi"], "coordinate_systems": ["one-based-leftmost"], "genome_build_policy": "required", "genome_builds": ["inherited-matching-input-build"], "annotation_releases": [], "orientations": ["alignment-records"]}], "processing_levels": ["aligned"], "required_metadata": ["module_version", "compatibility_row_id", "sample-id", "read-group", "reference-build", "reference-sequence-digest", "sort-order", "index-type"]}],
-  "assumptions": ["The input SAM header, sequence dictionary, read groups, sample identity, reference build, and reference digest are complete and internally consistent."],
-  "preconditions": ["SAM records pass structural validation and the declared reference and sample metadata match the header before sorting."],
-  "quality_gates": [
-    {"id": "sam-sort-input-integrity", "severity": "fatal", "description": "SAM header, records, sample read group, reference dictionary, and declared artifact metadata must reconcile before conversion.", "blocks_interpretation": true},
-    {"id": "bam-sort-index-output-integrity", "severity": "fatal", "description": "Output BAM must pass samtools quickcheck, declare coordinate sorting, preserve sample and reference identity, and reconcile with its generated CSI.", "blocks_interpretation": true},
-    {"id": "bam-post-sort-quality-review", "severity": "major", "description": "Sorting and indexing do not establish alignment quality; mapping, pairing, duplication, coverage, contamination, and assay-specific thresholds require downstream modules.", "blocks_interpretation": true}
-  ],
-  "evidence_effects": ["produces_coordinate_sorted_indexed_alignments"],
+  "access": "offline",
   "alternatives": [],
-  "complements": ["dna-align-bwa-mem-single", "alignment-quality-samtools"],
-  "tool_requirements": [{"name": "samtools", "ecosystem": "system", "identity": "samtools", "required": true, "tested_versions": ["1.23"], "allowed_versions": [">=1.23,<1.24"], "version_source": "https://github.com/samtools/samtools/releases/tag/1.23", "verified_at": "2026-07-13", "version_probe": ["samtools", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "samtools ([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "samtools-sort-write-csi", "affected_versions": [">=1.23,<1.24"], "category": "behavior", "description": "The supported line validates coordinate-sort plus --write-index behavior and the derived BAM CSI filename contract.", "compatibility_effect": "requires-parser", "required_action": "Validate BAM header sort order, quickcheck, index readability, sample identity, reference dictionary, and portable @PG command record.", "source": "https://www.htslib.org/doc/samtools-sort.html"}], "platforms": ["macos-arm64"]}],
-  "dependencies": [{"name": "htslib", "ecosystem": "runtime", "identity": "htslib-runtime", "required": true, "tested_versions": ["1.23"], "allowed_versions": [">=1.23,<1.24"], "version_source": "https://github.com/samtools/htslib/releases/tag/1.23", "verified_at": "2026-07-13", "version_probe": ["samtools", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "Using htslib ([0-9]+(?:\\.[0-9]+)+)", "purpose": "Read SAM, encode BGZF BAM, and generate the coordinate index used by downstream random-access tools.", "conflicts": [], "platforms": ["macos-arm64"]}],
-  "compatibility_matrix": [{"id": "samtools-sort-1.23-sam-1.6-bam-csi", "module_version": "1.0.0", "tool_versions": {"samtools": [">=1.23,<1.24"]}, "dependency_versions": {"htslib": [">=1.23,<1.24"]}, "input_formats": {"alignments": ["sam@1.6"]}, "output_formats": {"alignment_bundle": ["bam@1.6"]}, "platforms": ["macos-arm64"], "regression_evidence_ids": ["alignment-sort-index-samtools-regression-v1"], "end_to_end_evidence_ids": ["alignment-sort-index-samtools-e2e-v1"], "verified_at": "2026-07-13"}],
-  "execution": {"kind": "command", "timeout_seconds": 300, "max_output_bytes": 2000000, "command": {"tool_name": "samtools", "executable": "samtools", "arguments": ["sort", "--write-index", "--threads", "{parameter:threads}", "-o", "{output:bam}", "{input:sam}"], "inputs": [{"name": "sam", "port": "alignments", "role": "alignments", "filename": "alignments.sam"}], "outputs": [{"name": "bam", "port": "alignment_bundle", "role": "alignments", "filename": "alignments.bam", "media_type": "application/bam"}, {"name": "csi", "port": "alignment_bundle", "role": "index", "filename": "alignments.bam.csi", "media_type": "application/octet-stream", "capture": "derived"}], "parameter_names": ["threads"], "timeout_seconds": 300, "max_output_bytes": 2000000, "max_payload_bytes": 100000000, "path_mode": "workdir-relative"}},
-  "access": "offline", "mutability": "read_only", "credentials": [],
-  "limitations": ["The supported module emits coordinate-sorted BAM plus CSI from SAM; CRAM conversion, reference-based compression, duplicate marking, base recalibration, read-name sorting, merging, and biological interpretation are separate capabilities."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "MIT", "concept_sources": ["https://github.com/samtools/samtools"]}
+  "assumptions": [
+    "The input SAM header, sequence dictionary, read groups, sample identity, reference build, and reference digest are complete and internally consistent."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_alignment_sort_index_samtools.py",
+      "purpose": "Execute and validate coordinate-sort and index sam alignments against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "sam-sort-input-integrity",
+        "bam-sort-index-output-integrity",
+        "bam-post-sort-quality-review"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "htslib": [
+          ">=1.23,<1.24"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "alignment-sort-index-samtools-e2e-v1"
+      ],
+      "id": "samtools-sort-1.23-sam-1.6-bam-csi",
+      "input_formats": {
+        "alignments": [
+          "sam@1.6"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "alignment_bundle": [
+          "bam@1.6"
+        ]
+      },
+      "platforms": [
+        "macos-arm64"
+      ],
+      "regression_evidence_ids": [
+        "alignment-sort-index-samtools-regression-v1"
+      ],
+      "tool_versions": {
+        "samtools": [
+          ">=1.23,<1.24"
+        ]
+      },
+      "verified_at": "2026-07-13"
+    }
+  ],
+  "complements": [
+    "dna-align-bwa-mem-single",
+    "alignment-quality-samtools"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=1.23,<1.24"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "htslib-runtime",
+      "name": "htslib",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "purpose": "Read SAM, encode BGZF BAM, and generate the coordinate index used by downstream random-access tools.",
+      "required": true,
+      "tested_versions": [
+        "1.23"
+      ],
+      "verified_at": "2026-07-13",
+      "version_pattern": "Using htslib ([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "samtools",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://github.com/samtools/htslib/releases/tag/1.23"
+    }
+  ],
+  "description": "Guide and execute samtools sort with automatic CSI generation, producing a content-addressed BAM plus index that can feed alignment QC, coverage, and variant modules.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "scientific-command",
+  "evidence_effects": [
+    "produces_coordinate_sorted_indexed_alignments"
+  ],
+  "execution": {
+    "command": {
+      "arguments": [
+        "sort",
+        "--write-index",
+        "--threads",
+        "{parameter:threads}",
+        "-o",
+        "{output:bam}",
+        "{input:sam}"
+      ],
+      "executable": "samtools",
+      "inputs": [
+        {
+          "filename": "alignments.sam",
+          "name": "sam",
+          "port": "alignments",
+          "role": "alignments"
+        }
+      ],
+      "max_output_bytes": 2000000,
+      "max_payload_bytes": 100000000,
+      "outputs": [
+        {
+          "filename": "alignments.bam",
+          "media_type": "application/bam",
+          "name": "bam",
+          "port": "alignment_bundle",
+          "role": "alignments"
+        },
+        {
+          "capture": "derived",
+          "filename": "alignments.bam.csi",
+          "media_type": "application/octet-stream",
+          "name": "csi",
+          "port": "alignment_bundle",
+          "role": "index"
+        }
+      ],
+      "parameter_names": [
+        "threads"
+      ],
+      "path_mode": "workdir-relative",
+      "timeout_seconds": 300,
+      "tool_name": "samtools"
+    },
+    "kind": "command",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 300
+  },
+  "id": "alignment-sort-index-samtools",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_alignments",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "one-based-leftmost"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "sam",
+          "orientations": [
+            "alignment-records"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.6"
+          ]
+        }
+      ],
+      "name": "alignments",
+      "processing_levels": [
+        "aligned"
+      ],
+      "required_metadata": [
+        "sample-id",
+        "read-group",
+        "reference-build",
+        "reference-sequence-digest",
+        "sort-order"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "threads": {
+        "maximum": 16,
+        "minimum": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "threads"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "sort and index SAM",
+    "SAM to sorted BAM",
+    "samtools sort write index",
+    "SAM\u8f6c\u5750\u6807\u6392\u5e8fBAM\u5e76\u5efa\u7acb\u7d22\u5f15"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "The supported module emits coordinate-sorted BAM plus CSI from SAM; CRAM conversion, reference-based compression, duplicate marking, base recalibration, read-name sorting, merging, and biological interpretation are separate capabilities."
+  ],
+  "maturity": "validated",
+  "module_type": "transform",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "alignment_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "bgzf"
+          ],
+          "coordinate_systems": [
+            "one-based-leftmost"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "inherited-matching-input-build"
+          ],
+          "name": "bam",
+          "orientations": [
+            "alignment-records"
+          ],
+          "representations": [
+            "binary",
+            "container"
+          ],
+          "required_indexes": [
+            "csi"
+          ],
+          "versions": [
+            "1.6"
+          ]
+        }
+      ],
+      "name": "alignment_bundle",
+      "processing_levels": [
+        "aligned"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "sample-id",
+        "read-group",
+        "reference-build",
+        "reference-sequence-digest",
+        "sort-order",
+        "index-type"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "payload_roles": {
+        "items": {
+          "type": "string"
+        },
+        "maxItems": 2,
+        "minItems": 2,
+        "type": "array"
+      }
+    },
+    "required": [
+      "payload_roles"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "SAM records pass structural validation and the declared reference and sample metadata match the header before sorting."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://github.com/samtools/samtools"
+    ],
+    "license": "MIT"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "SAM header, records, sample read group, reference dictionary, and declared artifact metadata must reconcile before conversion.",
+      "id": "sam-sort-input-integrity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Output BAM must pass samtools quickcheck, declare coordinate sorting, preserve sample and reference identity, and reconcile with its generated CSI.",
+      "id": "bam-sort-index-output-integrity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Sorting and indexing do not establish alignment quality; mapping, pairing, duplication, coverage, contamination, and assay-specific thresholds require downstream modules.",
+      "id": "bam-post-sort-quality-review",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "How should an unsorted SAM artifact be converted into a coordinate-sorted, indexed BAM while preserving header, sample, reference, and command provenance?"
+  ],
+  "schema_version": 1,
+  "title": "Coordinate-sort and index SAM alignments",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.23,<1.24"
+      ],
+      "ecosystem": "system",
+      "identity": "samtools",
+      "mismatch_policy": "block",
+      "name": "samtools",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.23"
+      ],
+      "verified_at": "2026-07-13",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.23,<1.24"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parser",
+          "description": "The supported line validates coordinate-sort plus --write-index behavior and the derived BAM CSI filename contract.",
+          "id": "samtools-sort-write-csi",
+          "required_action": "Validate BAM header sort order, quickcheck, index readability, sample identity, reference dictionary, and portable @PG command record.",
+          "source": "https://www.htslib.org/doc/samtools-sort.html"
+        }
+      ],
+      "version_pattern": "samtools ([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "samtools",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://github.com/samtools/samtools/releases/tag/1.23"
+    }
+  ],
+  "version": "1.0.0"
 }

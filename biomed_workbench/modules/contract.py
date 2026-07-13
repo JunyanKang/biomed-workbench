@@ -148,6 +148,15 @@ class ProvenanceContract:
 
 
 @dataclass(frozen=True)
+class CodeTemplate:
+    path: str
+    language: str
+    purpose: str
+    quality_gate_ids: tuple[str, ...]
+    requires_adaptation: bool
+
+
+@dataclass(frozen=True)
 class AgentTemplateSection:
     id: str
     purpose: str
@@ -212,6 +221,7 @@ class ModuleManifest:
     output_schema: dict[str, object]
     kernel_compatibility: tuple[str, ...]
     provenance: ProvenanceContract
+    code_templates: tuple[CodeTemplate, ...] = ()
     agent_protocol: AgentProtocol | None = None
 
 
@@ -226,10 +236,11 @@ _VERSION_DIFFERENCE_FIELDS = frozenset(VersionDifference.__dataclass_fields__)
 _DEPENDENCY_CONFLICT_FIELDS = frozenset(DependencyConflict.__dataclass_fields__)
 _COMPATIBILITY_FIELDS = frozenset(CompatibilityRow.__dataclass_fields__)
 _PROVENANCE_FIELDS = frozenset(ProvenanceContract.__dataclass_fields__)
+_CODE_TEMPLATE_FIELDS = frozenset(CodeTemplate.__dataclass_fields__)
 _AGENT_PROTOCOL_FIELDS = frozenset(AgentProtocol.__dataclass_fields__)
 _AGENT_SECTION_FIELDS = frozenset(AgentTemplateSection.__dataclass_fields__)
 _AGENT_PARAMETER_FIELDS = frozenset(AgentParameterRule.__dataclass_fields__)
-_OPTIONAL_MANIFEST_FIELDS = frozenset({"agent_protocol"})
+_OPTIONAL_MANIFEST_FIELDS = frozenset({"agent_protocol", "code_templates"})
 
 
 def _object(value: Any, location: str) -> dict[str, Any]:
@@ -652,6 +663,25 @@ def _provenance(value: Any) -> ProvenanceContract:
     )
 
 
+def _code_template(value: Any, location: str) -> CodeTemplate:
+    payload = _object(value, location)
+    _exact_fields(payload, _CODE_TEMPLATE_FIELDS, location)
+    path = _text(payload["path"], f"{location}.path")
+    if not re.fullmatch(r"templates/[a-z][a-z0-9_]*\.(?:py|R|ipynb)", path):
+        raise ValueError(f"{location}.path must name a packaged code template")
+    language = _text(payload["language"], f"{location}.language")
+    expected_language = {"py": "python", "R": "r", "ipynb": "notebook"}[path.rsplit(".", 1)[1]]
+    if language != expected_language:
+        raise ValueError(f"{location}.language differs from its file extension")
+    return CodeTemplate(
+        path=path,
+        language=language,
+        purpose=_text(payload["purpose"], f"{location}.purpose", minimum=24),
+        quality_gate_ids=_strings(payload["quality_gate_ids"], f"{location}.quality_gate_ids"),
+        requires_adaptation=_boolean(payload["requires_adaptation"], f"{location}.requires_adaptation"),
+    )
+
+
 def _agent_section(value: Any, location: str) -> AgentTemplateSection:
     payload = _object(value, location)
     _exact_fields(payload, _AGENT_SECTION_FIELDS, location)
@@ -826,6 +856,9 @@ def parse_manifest(value: Any) -> ModuleManifest:
     if not isinstance(tool_values, list) or not isinstance(dependency_values, list) or not isinstance(compatibility_values, list):
         raise ValueError("tools, dependencies, and compatibility_matrix must be lists")
     kernel_compatibility = _version_rules(payload["kernel_compatibility"], "manifest.kernel_compatibility")
+    code_template_values = payload.get("code_templates", [])
+    if not isinstance(code_template_values, list):
+        raise ValueError("manifest.code_templates must be a list")
     manifest = ModuleManifest(
         schema_version=1,
         id=identifier,
@@ -858,8 +891,19 @@ def parse_manifest(value: Any) -> ModuleManifest:
         output_schema=_closed_schema(payload["output_schema"], "manifest.output_schema"),
         kernel_compatibility=kernel_compatibility,
         provenance=_provenance(payload["provenance"]),
+        code_templates=tuple(
+            _code_template(item, f"manifest.code_templates[{index}]")
+            for index, item in enumerate(code_template_values)
+        ),
         agent_protocol=_agent_protocol(payload["agent_protocol"]) if "agent_protocol" in payload else None,
     )
+    if len({item.path for item in manifest.code_templates}) != len(manifest.code_templates):
+        raise ValueError("manifest.code_templates contains duplicate paths")
+    quality_gate_ids = {item.id for item in manifest.quality_gates}
+    for template in manifest.code_templates:
+        unknown = sorted(set(template.quality_gate_ids) - quality_gate_ids)
+        if unknown:
+            raise ValueError(f"code template references unknown quality gate: {unknown[0]}")
     if access == "agent_generated":
         if manifest.execution.kind != "workflow" or manifest.agent_protocol is None:
             raise ValueError("agent_generated modules require workflow execution and an agent_protocol")
@@ -940,6 +984,16 @@ def _agent_protocol_dict(value: AgentProtocol) -> dict[str, object]:
         "provenance_fields": list(value.provenance_fields),
         "forbidden_actions": list(value.forbidden_actions),
         "requires_observed_execution": value.requires_observed_execution,
+    }
+
+
+def _code_template_dict(value: CodeTemplate) -> dict[str, object]:
+    return {
+        "path": value.path,
+        "language": value.language,
+        "purpose": value.purpose,
+        "quality_gate_ids": list(value.quality_gate_ids),
+        "requires_adaptation": value.requires_adaptation,
     }
 
 
@@ -1060,6 +1114,8 @@ def manifest_to_dict(value: ModuleManifest) -> dict[str, object]:
         "kernel_compatibility": list(value.kernel_compatibility),
         "provenance": {"license": value.provenance.license, "concept_sources": list(value.provenance.concept_sources)},
     }
+    if value.code_templates:
+        payload["code_templates"] = [_code_template_dict(item) for item in value.code_templates]
     if value.agent_protocol is not None:
         payload["agent_protocol"] = _agent_protocol_dict(value.agent_protocol)
     return payload

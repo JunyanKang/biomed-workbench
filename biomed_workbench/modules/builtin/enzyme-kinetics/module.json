@@ -4,6 +4,17 @@
   "assumptions": [
     "Initial-rate observations follow the selected steady-state kinetic model and substrate concentrations are accurate."
   ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_enzyme_kinetics.py",
+      "purpose": "Execute and validate fit steady-state enzyme kinetics against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "enzyme-kinetics-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
   "compatibility_matrix": [
     {
       "dependency_versions": {

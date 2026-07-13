@@ -4,6 +4,17 @@
   "assumptions": [
     "Variants use one coordinate and reference system and ref/alt alleles are normalized sufficiently for descriptive counting."
   ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_variant_summary.py",
+      "purpose": "Execute and validate summarize structured variants against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "variant-summary-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
   "compatibility_matrix": [
     {
       "dependency_versions": {

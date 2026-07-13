@@ -1,84 +1,570 @@
 {
-  "schema_version": 1,
-  "id": "metagene-factorization-nmf",
-  "version": "1.0.0",
-  "title": "Discover stable metagene programs with multi-start NMF",
-  "description": "Factorize a declared nonnegative normalized feature-by-sample matrix across candidate ranks and deterministic restarts, select a stable parsimonious rank within an explicit reconstruction-error gap, and independently validate metagene loadings, sample exposures, assignments, reconstruction, convergence, stability, and component redundancy.",
-  "module_type": "analysis",
-  "domains": ["omics", "statistics"],
-  "intents": ["discover metagene programs with NMF", "stable nonnegative matrix factorization", "compare NMF ranks and sample programs", "用稳定NMF识别元基因表达程序"],
-  "questions": ["Which reproducible nonnegative feature programs explain the declared normalized measurements, which samples express each program, and is the selected factorization stable and nonredundant across candidate ranks and restarts?"],
-  "maturity": "validated",
-  "entrypoint": "scientific-command",
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {}, "required": []},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"payload_roles": {"type": "array", "items": {"type": "string"}, "minItems": 3, "maxItems": 3}}, "required": ["payload_roles"]},
-  "input_artifacts": [
+  "access": "offline",
+  "alternatives": [
+    "differential-expression"
+  ],
+  "assumptions": [
+    "Input values are biologically meaningful, nonnegative, finite, normalized measurements on comparable experimental units; candidate ranks and stability thresholds were declared before interpretation; feature and sample manifests preserve the exact matrix axes."
+  ],
+  "code_templates": [
     {
-      "name": "expression_matrix",
-      "artifact_type": "feature_matrix_bundle",
-      "formats": [{"name": "count-matrix", "versions": ["1.0.0"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["features-by-samples"]}],
-      "processing_levels": ["normalized"],
-      "required_metadata": ["feature-axis", "observation-axis", "value-semantics", "identifier-namespace", "annotation-release-or-not-applicable", "sample-manifest-digest", "experimental-unit", "normalization-method", "batch-correction-method", "missing-value-policy"]
+      "language": "python",
+      "path": "templates/run_metagene_factorization_nmf.py",
+      "purpose": "Execute and validate discover stable metagene programs with multi-start nmf against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "nmf-matrix-identity-and-semantics",
+        "nmf-multistart-rank-selection",
+        "nmf-independent-reconstruction",
+        "nmf-stability-and-redundancy",
+        "nmf-association-not-causation"
+      ],
+      "requires_adaptation": true
     }
-  ],
-  "output_artifacts": [
-    {"name": "metagene_loadings", "artifact_type": "factor_loadings", "formats": [{"name": "biomed-nmf-loadings", "versions": ["1.0.0"], "representations": ["text", "structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["features-by-components"]}], "processing_levels": ["derived"], "required_metadata": ["module-version", "compatibility-row-id", "feature-axis", "component-axis", "identifier-namespace", "annotation-release-or-not-applicable", "sample-manifest-digest", "normalization-method", "parameter-digest"]},
-    {"name": "sample_exposures", "artifact_type": "factor_exposures", "formats": [{"name": "biomed-nmf-exposures", "versions": ["1.0.0"], "representations": ["text", "structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["components-by-samples"]}], "processing_levels": ["derived"], "required_metadata": ["module-version", "compatibility-row-id", "component-axis", "observation-axis", "sample-manifest-digest", "parameter-digest"]},
-    {"name": "factorization_report", "artifact_type": "quality_report", "formats": [{"name": "biomed-nmf-report", "versions": ["1.0.0"], "representations": ["structured", "text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["candidate-ranks-by-stability-and-reconstruction"]}], "processing_levels": ["derived"], "required_metadata": ["module-version", "compatibility-row-id", "sample-manifest-digest", "parameter-digest", "implementation-digest"]}
-  ],
-  "assumptions": ["Input values are biologically meaningful, nonnegative, finite, normalized measurements on comparable experimental units; candidate ranks and stability thresholds were declared before interpretation; feature and sample manifests preserve the exact matrix axes."],
-  "preconditions": ["The matrix is uncompressed tab-delimited numeric data without headers, accompanied by unique newline-delimited feature and sample manifests; rows are features, columns are samples; values are nonnegative and contain no missing or infinite entries; at least the largest candidate rank of informative nonconstant features remains."],
-  "quality_gates": [
-    {"id": "nmf-matrix-identity-and-semantics", "severity": "fatal", "description": "Matrix dimensions, ordered feature and sample identities, value semantics, normalization, experimental unit, sample manifest, missing-value policy, and nonnegativity must be explicit and internally consistent; negative values are rejected rather than clipped.", "blocks_interpretation": true},
-    {"id": "nmf-multistart-rank-selection", "severity": "fatal", "description": "Every candidate rank requires the declared deterministic restarts; the selected rank must maximize aligned component then sample-assignment stability within the declared additive relative-reconstruction-error gap, with smaller rank as final tie breaker.", "blocks_interpretation": true},
-    {"id": "nmf-independent-reconstruction", "severity": "fatal", "description": "An independent parser must recompute the source matrix approximation, relative Frobenius error, MSE, loading normalization, top features, sample assignments, and component similarity from emitted factors.", "blocks_interpretation": true},
-    {"id": "nmf-stability-and-redundancy", "severity": "major", "description": "Nonconverged restarts, component or assignment stability below declared thresholds, or exposure cosine similarity above the declared redundancy threshold block biological naming and hypothesis claims pending sensitivity analysis.", "blocks_interpretation": true},
-    {"id": "nmf-association-not-causation", "severity": "major", "description": "Metagene factors are unsupervised associations and do not establish cell identity, pathway mechanism, causal regulation, clinical class, or generalization without orthogonal evidence and held-out validation.", "blocks_interpretation": true}
-  ],
-  "evidence_effects": ["identifies_reproducible_nonnegative_feature_programs", "quantifies_sample_program_exposures", "tests_factorization_stability_and_redundancy"],
-  "alternatives": ["differential-expression"],
-  "complements": ["data-profile", "expression-qc", "single-cell-qc", "differential-expression", "enrichment-analysis", "network-analysis", "manuscript-audit", "reviewer-assessment"],
-  "tool_requirements": [
-    {"name": "python3", "ecosystem": "system", "identity": "python3", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-13", "version_probe": ["python3", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "python-314-nmf-implementation-runtime", "affected_versions": [">=3.14,<3.15"], "category": "behavior", "description": "The validated runtime executes the digest-bound project implementation and strict factor/report serialization under Python 3.14 semantics.", "compatibility_effect": "requires-parser", "required_action": "Record the actual interpreter and implementation digest and independently validate all factor outputs before evidence ingestion.", "source": "https://docs.python.org/3.14/"}], "platforms": ["macos-arm64"]}
-  ],
-  "dependencies": [
-    {"name": "numpy", "ecosystem": "python", "identity": "numpy", "required": true, "tested_versions": ["2.4.4"], "allowed_versions": [">=2.4,<2.5"], "version_source": "https://numpy.org/doc/stable/release/2.4.4-notes.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import numpy; print(numpy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide finite nonnegative matrix arithmetic, deterministic factor normalization, reconstruction, and stable ranking.", "conflicts": [], "platforms": ["macos-arm64"]},
-    {"name": "scipy", "ecosystem": "python", "identity": "scipy", "required": true, "tested_versions": ["1.17.1"], "allowed_versions": [">=1.17,<1.18"], "version_source": "https://docs.scipy.org/doc/scipy/release/1.17.1-notes.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import scipy; print(scipy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Align components across independent NMF restarts with the Hungarian linear-sum assignment algorithm.", "conflicts": [], "platforms": ["macos-arm64"]},
-    {"name": "scikit-learn", "ecosystem": "python", "identity": "sklearn", "required": true, "tested_versions": ["1.8.0"], "allowed_versions": [">=1.8,<1.9"], "version_source": "https://scikit-learn.org/stable/whats_new/v1.8.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import sklearn; print(sklearn.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Fit coordinate-descent Frobenius NMF with explicit initialization, convergence tolerance, iteration limit, regularization, shuffle, and random-state settings.", "conflicts": [], "platforms": ["macos-arm64"]}
   ],
   "compatibility_matrix": [
-    {"id": "python-3.14-numpy-2.4-scipy-1.17-sklearn-1.8-count-matrix-1.0-nmf-v1", "module_version": "1.0.0", "tool_versions": {"python3": [">=3.14,<3.15"]}, "dependency_versions": {"numpy": [">=2.4,<2.5"], "scipy": [">=1.17,<1.18"], "scikit-learn": [">=1.8,<1.9"]}, "input_formats": {"expression_matrix": ["count-matrix@1.0.0"]}, "output_formats": {"metagene_loadings": ["biomed-nmf-loadings@1.0.0"], "sample_exposures": ["biomed-nmf-exposures@1.0.0"], "factorization_report": ["biomed-nmf-report@1.0.0"]}, "platforms": ["macos-arm64"], "regression_evidence_ids": ["metagene-factorization-nmf-regression-v1"], "end_to_end_evidence_ids": ["metagene-factorization-nmf-e2e-v1"], "verified_at": "2026-07-13"}
+    {
+      "dependency_versions": {
+        "numpy": [
+          ">=2.4,<2.5"
+        ],
+        "scikit-learn": [
+          ">=1.8,<1.9"
+        ],
+        "scipy": [
+          ">=1.17,<1.18"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "metagene-factorization-nmf-e2e-v1"
+      ],
+      "id": "python-3.14-numpy-2.4-scipy-1.17-sklearn-1.8-count-matrix-1.0-nmf-v1",
+      "input_formats": {
+        "expression_matrix": [
+          "count-matrix@1.0.0"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "factorization_report": [
+          "biomed-nmf-report@1.0.0"
+        ],
+        "metagene_loadings": [
+          "biomed-nmf-loadings@1.0.0"
+        ],
+        "sample_exposures": [
+          "biomed-nmf-exposures@1.0.0"
+        ]
+      },
+      "platforms": [
+        "macos-arm64"
+      ],
+      "regression_evidence_ids": [
+        "metagene-factorization-nmf-regression-v1"
+      ],
+      "tool_versions": {
+        "python3": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "verified_at": "2026-07-13"
+    }
+  ],
+  "complements": [
+    "data-profile",
+    "expression-qc",
+    "single-cell-qc",
+    "differential-expression",
+    "enrichment-analysis",
+    "network-analysis",
+    "manuscript-audit",
+    "reviewer-assessment"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=2.4,<2.5"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "numpy",
+      "name": "numpy",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "purpose": "Provide finite nonnegative matrix arithmetic, deterministic factor normalization, reconstruction, and stable ranking.",
+      "required": true,
+      "tested_versions": [
+        "2.4.4"
+      ],
+      "verified_at": "2026-07-13",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import numpy; print(numpy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://numpy.org/doc/stable/release/2.4.4-notes.html"
+    },
+    {
+      "allowed_versions": [
+        ">=1.17,<1.18"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scipy",
+      "name": "scipy",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "purpose": "Align components across independent NMF restarts with the Hungarian linear-sum assignment algorithm.",
+      "required": true,
+      "tested_versions": [
+        "1.17.1"
+      ],
+      "verified_at": "2026-07-13",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import scipy; print(scipy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://docs.scipy.org/doc/scipy/release/1.17.1-notes.html"
+    },
+    {
+      "allowed_versions": [
+        ">=1.8,<1.9"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "sklearn",
+      "name": "scikit-learn",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "purpose": "Fit coordinate-descent Frobenius NMF with explicit initialization, convergence tolerance, iteration limit, regularization, shuffle, and random-state settings.",
+      "required": true,
+      "tested_versions": [
+        "1.8.0"
+      ],
+      "verified_at": "2026-07-13",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import sklearn; print(sklearn.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://scikit-learn.org/stable/whats_new/v1.8.html"
+    }
+  ],
+  "description": "Factorize a declared nonnegative normalized feature-by-sample matrix across candidate ranks and deterministic restarts, select a stable parsimonious rank within an explicit reconstruction-error gap, and independently validate metagene loadings, sample exposures, assignments, reconstruction, convergence, stability, and component redundancy.",
+  "domains": [
+    "omics",
+    "statistics"
+  ],
+  "entrypoint": "scientific-command",
+  "evidence_effects": [
+    "identifies_reproducible_nonnegative_feature_programs",
+    "quantifies_sample_program_exposures",
+    "tests_factorization_stability_and_redundancy"
   ],
   "execution": {
-    "kind": "command",
-    "timeout_seconds": 600,
-    "max_output_bytes": 100000000,
     "command": {
-      "tool_name": "python3",
+      "arguments": [
+        "{implementation}",
+        "--matrix",
+        "{input:matrix}",
+        "--features",
+        "{input:features}",
+        "--samples",
+        "{input:samples}",
+        "--loadings",
+        "{output:loadings}",
+        "--exposures",
+        "{output:exposures}",
+        "--report",
+        "{output:report}",
+        "--ranks",
+        "{parameter:ranks}",
+        "--restarts",
+        "{parameter:restarts}",
+        "--max-iter",
+        "{parameter:max-iter}",
+        "--tolerance",
+        "{parameter:tolerance}",
+        "--top-genes",
+        "{parameter:top-genes}",
+        "--selection-error-gap",
+        "{parameter:selection-error-gap}",
+        "--minimum-component-stability",
+        "{parameter:minimum-component-stability}",
+        "--minimum-assignment-stability",
+        "{parameter:minimum-assignment-stability}",
+        "--maximum-component-similarity",
+        "{parameter:maximum-component-similarity}",
+        "--seed",
+        "{parameter:seed}"
+      ],
       "executable": "python3",
       "implementation_module": "biomed_workbench.implementations.nmf_metagenes",
-      "arguments": ["{implementation}", "--matrix", "{input:matrix}", "--features", "{input:features}", "--samples", "{input:samples}", "--loadings", "{output:loadings}", "--exposures", "{output:exposures}", "--report", "{output:report}", "--ranks", "{parameter:ranks}", "--restarts", "{parameter:restarts}", "--max-iter", "{parameter:max-iter}", "--tolerance", "{parameter:tolerance}", "--top-genes", "{parameter:top-genes}", "--selection-error-gap", "{parameter:selection-error-gap}", "--minimum-component-stability", "{parameter:minimum-component-stability}", "--minimum-assignment-stability", "{parameter:minimum-assignment-stability}", "--maximum-component-similarity", "{parameter:maximum-component-similarity}", "--seed", "{parameter:seed}"],
       "inputs": [
-        {"name": "matrix", "port": "expression_matrix", "role": "matrix", "filename": "matrix.tsv"},
-        {"name": "features", "port": "expression_matrix", "role": "features", "filename": "features.txt"},
-        {"name": "samples", "port": "expression_matrix", "role": "observations", "filename": "samples.txt"}
+        {
+          "filename": "matrix.tsv",
+          "name": "matrix",
+          "port": "expression_matrix",
+          "role": "matrix"
+        },
+        {
+          "filename": "features.txt",
+          "name": "features",
+          "port": "expression_matrix",
+          "role": "features"
+        },
+        {
+          "filename": "samples.txt",
+          "name": "samples",
+          "port": "expression_matrix",
+          "role": "observations"
+        }
       ],
-      "outputs": [
-        {"name": "loadings", "port": "metagene_loadings", "role": "loadings", "filename": "metagene-loadings.tsv", "media_type": "text/tab-separated-values"},
-        {"name": "exposures", "port": "sample_exposures", "role": "exposures", "filename": "sample-exposures.tsv", "media_type": "text/tab-separated-values"},
-        {"name": "report", "port": "factorization_report", "role": "report", "filename": "nmf-report.json", "media_type": "application/json"}
-      ],
-      "parameter_names": ["ranks", "restarts", "max-iter", "tolerance", "top-genes", "selection-error-gap", "minimum-component-stability", "minimum-assignment-stability", "maximum-component-similarity", "seed"],
-      "timeout_seconds": 600,
       "max_output_bytes": 100000000,
       "max_payload_bytes": 1000000000,
-      "path_mode": "workdir-relative"
-    }
+      "outputs": [
+        {
+          "filename": "metagene-loadings.tsv",
+          "media_type": "text/tab-separated-values",
+          "name": "loadings",
+          "port": "metagene_loadings",
+          "role": "loadings"
+        },
+        {
+          "filename": "sample-exposures.tsv",
+          "media_type": "text/tab-separated-values",
+          "name": "exposures",
+          "port": "sample_exposures",
+          "role": "exposures"
+        },
+        {
+          "filename": "nmf-report.json",
+          "media_type": "application/json",
+          "name": "report",
+          "port": "factorization_report",
+          "role": "report"
+        }
+      ],
+      "parameter_names": [
+        "ranks",
+        "restarts",
+        "max-iter",
+        "tolerance",
+        "top-genes",
+        "selection-error-gap",
+        "minimum-component-stability",
+        "minimum-assignment-stability",
+        "maximum-component-similarity",
+        "seed"
+      ],
+      "path_mode": "workdir-relative",
+      "timeout_seconds": 600,
+      "tool_name": "python3"
+    },
+    "kind": "command",
+    "max_output_bytes": 100000000,
+    "timeout_seconds": 600
   },
-  "access": "offline",
+  "id": "metagene-factorization-nmf",
+  "input_artifacts": [
+    {
+      "artifact_type": "feature_matrix_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "count-matrix",
+          "orientations": [
+            "features-by-samples"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.0.0"
+          ]
+        }
+      ],
+      "name": "expression_matrix",
+      "processing_levels": [
+        "normalized"
+      ],
+      "required_metadata": [
+        "feature-axis",
+        "observation-axis",
+        "value-semantics",
+        "identifier-namespace",
+        "annotation-release-or-not-applicable",
+        "sample-manifest-digest",
+        "experimental-unit",
+        "normalization-method",
+        "batch-correction-method",
+        "missing-value-policy"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {},
+    "required": [],
+    "type": "object"
+  },
+  "intents": [
+    "discover metagene programs with NMF",
+    "stable nonnegative matrix factorization",
+    "compare NMF ranks and sample programs",
+    "\u7528\u7a33\u5b9aNMF\u8bc6\u522b\u5143\u57fa\u56e0\u8868\u8fbe\u7a0b\u5e8f"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "The validated row covers dense, uncompressed, normalized, nonnegative feature-by-sample matrices on macOS arm64. It removes all-zero and zero-variance features, but does not impute missing values, transform negative values, choose normalization, correct batches, infer supervised classes, estimate uncertainty across biological resampling, or assign biological names. Runtime and memory scale with matrix size, candidate ranks, and restarts; resource provisioning remains outside plugin scope."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
   "mutability": "read_only",
-  "credentials": [],
-  "limitations": ["The validated row covers dense, uncompressed, normalized, nonnegative feature-by-sample matrices on macOS arm64. It removes all-zero and zero-variance features, but does not impute missing values, transform negative values, choose normalization, correct batches, infer supervised classes, estimate uncertainty across biological resampling, or assign biological names. Runtime and memory scale with matrix size, candidate ranks, and restarts; resource provisioning remains outside plugin scope."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room implementation informed by general nonnegative matrix factorization and consensus stability principles.", "https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html", "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linear_sum_assignment.html"]}
+  "output_artifacts": [
+    {
+      "artifact_type": "factor_loadings",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "biomed-nmf-loadings",
+          "orientations": [
+            "features-by-components"
+          ],
+          "representations": [
+            "text",
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.0.0"
+          ]
+        }
+      ],
+      "name": "metagene_loadings",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module-version",
+        "compatibility-row-id",
+        "feature-axis",
+        "component-axis",
+        "identifier-namespace",
+        "annotation-release-or-not-applicable",
+        "sample-manifest-digest",
+        "normalization-method",
+        "parameter-digest"
+      ]
+    },
+    {
+      "artifact_type": "factor_exposures",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "biomed-nmf-exposures",
+          "orientations": [
+            "components-by-samples"
+          ],
+          "representations": [
+            "text",
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.0.0"
+          ]
+        }
+      ],
+      "name": "sample_exposures",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module-version",
+        "compatibility-row-id",
+        "component-axis",
+        "observation-axis",
+        "sample-manifest-digest",
+        "parameter-digest"
+      ]
+    },
+    {
+      "artifact_type": "quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "biomed-nmf-report",
+          "orientations": [
+            "candidate-ranks-by-stability-and-reconstruction"
+          ],
+          "representations": [
+            "structured",
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.0.0"
+          ]
+        }
+      ],
+      "name": "factorization_report",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module-version",
+        "compatibility-row-id",
+        "sample-manifest-digest",
+        "parameter-digest",
+        "implementation-digest"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "payload_roles": {
+        "items": {
+          "type": "string"
+        },
+        "maxItems": 3,
+        "minItems": 3,
+        "type": "array"
+      }
+    },
+    "required": [
+      "payload_roles"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The matrix is uncompressed tab-delimited numeric data without headers, accompanied by unique newline-delimited feature and sample manifests; rows are features, columns are samples; values are nonnegative and contain no missing or infinite entries; at least the largest candidate rank of informative nonconstant features remains."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room implementation informed by general nonnegative matrix factorization and consensus stability principles.",
+      "https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.NMF.html",
+      "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linear_sum_assignment.html"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Matrix dimensions, ordered feature and sample identities, value semantics, normalization, experimental unit, sample manifest, missing-value policy, and nonnegativity must be explicit and internally consistent; negative values are rejected rather than clipped.",
+      "id": "nmf-matrix-identity-and-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every candidate rank requires the declared deterministic restarts; the selected rank must maximize aligned component then sample-assignment stability within the declared additive relative-reconstruction-error gap, with smaller rank as final tie breaker.",
+      "id": "nmf-multistart-rank-selection",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "An independent parser must recompute the source matrix approximation, relative Frobenius error, MSE, loading normalization, top features, sample assignments, and component similarity from emitted factors.",
+      "id": "nmf-independent-reconstruction",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Nonconverged restarts, component or assignment stability below declared thresholds, or exposure cosine similarity above the declared redundancy threshold block biological naming and hypothesis claims pending sensitivity analysis.",
+      "id": "nmf-stability-and-redundancy",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Metagene factors are unsupervised associations and do not establish cell identity, pathway mechanism, causal regulation, clinical class, or generalization without orthogonal evidence and held-out validation.",
+      "id": "nmf-association-not-causation",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which reproducible nonnegative feature programs explain the declared normalized measurements, which samples express each program, and is the selected factorization stable and nonredundant across candidate ranks and restarts?"
+  ],
+  "schema_version": 1,
+  "title": "Discover stable metagene programs with multi-start NMF",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "ecosystem": "system",
+      "identity": "python3",
+      "mismatch_policy": "block",
+      "name": "python3",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-13",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=3.14,<3.15"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parser",
+          "description": "The validated runtime executes the digest-bound project implementation and strict factor/report serialization under Python 3.14 semantics.",
+          "id": "python-314-nmf-implementation-runtime",
+          "required_action": "Record the actual interpreter and implementation digest and independently validate all factor outputs before evidence ingestion.",
+          "source": "https://docs.python.org/3.14/"
+        }
+      ],
+      "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "version": "1.0.0"
 }

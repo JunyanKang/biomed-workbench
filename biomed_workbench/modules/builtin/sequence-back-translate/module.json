@@ -4,6 +4,17 @@
   "assumptions": [
     "Preferred-codon substitution is sufficient for deterministic screening and is not full expression optimization."
   ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_sequence_back_translate.py",
+      "purpose": "Execute and validate back-translate a protein sequence against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "sequence-back-translate-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
   "compatibility_matrix": [
     {
       "dependency_versions": {

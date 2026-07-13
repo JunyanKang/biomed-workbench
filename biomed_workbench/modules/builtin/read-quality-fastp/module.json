@@ -1,115 +1,355 @@
 {
-  "schema_version": 1,
-  "id": "read-quality-fastp",
-  "version": "1.0.0",
-  "title": "Run independent FASTQ quality metrics with fastp",
-  "description": "Execute fastp in a non-filtering QC-only mode and preserve its JSON and HTML reports as a validated alternative read-quality evidence path.",
-  "module_type": "validation",
-  "domains": ["omics"],
-  "intents": ["FASTQ quality metrics with fastp", "run fastp QC", "alternative read QC", "fastp原始数据质控"],
-  "questions": ["Do independent fastp quality, GC, length, duplication, and read-accounting metrics support downstream use of the declared FASTQ?"],
-  "maturity": "validated",
-  "entrypoint": "scientific-command",
-  "input_schema": {
-    "type": "object", "additionalProperties": false,
-    "properties": {"threads": {"type": "integer", "minimum": 1, "maximum": 16}},
-    "required": ["threads"]
-  },
-  "output_schema": {
-    "type": "object", "additionalProperties": false,
-    "properties": {"payload_roles": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2}},
-    "required": ["payload_roles"]
-  },
-  "input_artifacts": [
-    {
-      "name": "reads", "artifact_type": "sequencing_reads",
-      "formats": [{
-        "name": "fastq", "versions": ["sanger-phred33"], "representations": ["text"], "compression": ["none", "gzip", "bgzf"],
-        "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [],
-        "orientations": ["single-end", "paired-end", "interleaved"]
-      }],
-      "processing_levels": ["raw", "adapter-trimmed", "quality-trimmed"],
-      "required_metadata": ["sample-id", "read-layout", "quality-encoding"]
-    }
+  "access": "offline",
+  "alternatives": [
+    "read-quality-fastqc"
   ],
-  "output_artifacts": [
-    {
-      "name": "read_quality_report", "artifact_type": "sequencing_quality_report",
-      "formats": [{
-        "name": "fastp-report", "versions": ["1.3.6"], "representations": ["structured", "container"], "compression": ["none"],
-        "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [],
-        "orientations": ["report-bundle"]
-      }],
-      "processing_levels": ["derived"], "required_metadata": ["module_version", "compatibility_row_id"]
-    }
+  "assumptions": [
+    "The FASTQ quality encoding and read layout are correctly declared and QC-only mode must not alter read or base counts."
   ],
-  "assumptions": ["The FASTQ quality encoding and read layout are correctly declared and QC-only mode must not alter read or base counts."],
-  "preconditions": ["The FASTQ payload and required sample metadata pass the shared exact-version format profile."],
-  "quality_gates": [
-    {"id": "fastp-qc-only-accounting", "severity": "fatal", "description": "Before and after read and base counts must be identical under the validated non-filtering QC-only command.", "blocks_interpretation": true},
-    {"id": "fastp-metric-review", "severity": "major", "description": "Quality, GC, length, duplication, and overrepresentation metrics require assay-aware interpretation and cannot establish taxonomic contamination.", "blocks_interpretation": true}
-  ],
-  "evidence_effects": ["qualifies_sequencing_input"],
-  "alternatives": ["read-quality-fastqc"],
-  "complements": ["quality-report-multiqc", "read-contamination-screen"],
-  "tool_requirements": [
+  "code_templates": [
     {
-      "name": "fastp", "ecosystem": "system", "identity": "fastp", "required": true,
-      "tested_versions": ["1.3.6"], "allowed_versions": [">=1.3,<1.4"],
-      "version_source": "https://github.com/OpenGene/fastp/releases/tag/v1.3.6", "verified_at": "2026-07-12",
-      "version_probe": ["fastp", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10,
-      "version_pattern": "fastp ([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "alternative",
-      "version_differences": [{
-        "id": "fastp-136-json-schema", "affected_versions": [">=1.3,<1.4"], "category": "output-format",
-        "description": "The validated release emits the tested summary, filtering, duplication, and per-read JSON structures.",
-        "compatibility_effect": "requires-parser", "required_action": "Use only the fastp 1.3.6 parser and QC-only command regression fixtures.",
-        "source": "https://github.com/OpenGene/fastp/releases/tag/v1.3.6"
-      }],
-      "platforms": ["macos-arm64"]
-    }
-  ],
-  "dependencies": [
-    {
-      "name": "fastp-bioconda-build", "ecosystem": "runtime", "identity": "bioconda-fastp-runtime", "required": true,
-      "tested_versions": ["1.3.6-ha1d0559_0"], "allowed_versions": [">=1.3,<1.4"],
-      "version_source": "https://anaconda.org/bioconda/fastp/files?version=1.3.6", "verified_at": "2026-07-12",
-      "version_probe": ["biomed_workbench.quality.fastp:probe_fastp_bioconda_build"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 10,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+-[A-Za-z0-9_]+)",
-      "purpose": "Bind fastp to the exact validated Bioconda package build and dynamic-library environment.",
-      "conflicts": [{
-        "dependency": "fastp-bioconda-build", "versions": ["!=1.3.6-ha1d0559_0"],
-        "reason": "Other package builds may link different compression and SIMD libraries and are not covered by this row.",
-        "required_action": "Block execution until a build-specific compatibility row and end-to-end evidence are added.",
-        "source": "https://anaconda.org/bioconda/fastp/files?version=1.3.6"
-      }],
-      "platforms": ["macos-arm64"]
+      "language": "python",
+      "path": "templates/run_read_quality_fastp.py",
+      "purpose": "Execute and validate run independent fastq quality metrics with fastp against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "fastp-qc-only-accounting",
+        "fastp-metric-review"
+      ],
+      "requires_adaptation": true
     }
   ],
   "compatibility_matrix": [
     {
+      "dependency_versions": {
+        "fastp-bioconda-build": [
+          ">=1.3,<1.4"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "read-quality-fastp-e2e-v1"
+      ],
       "id": "fastp-1.3.6-bioconda-ha1d0559_0-fastq-sanger",
-      "module_version": "1.0.0", "tool_versions": {"fastp": [">=1.3,<1.4"]},
-      "dependency_versions": {"fastp-bioconda-build": [">=1.3,<1.4"]},
-      "input_formats": {"reads": ["fastq@sanger-phred33"]}, "output_formats": {"read_quality_report": ["fastp-report@1.3.6"]},
-      "platforms": ["macos-arm64"], "regression_evidence_ids": ["read-quality-fastp-regression-v1"],
-      "end_to_end_evidence_ids": ["read-quality-fastp-e2e-v1"], "verified_at": "2026-07-12"
+      "input_formats": {
+        "reads": [
+          "fastq@sanger-phred33"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "read_quality_report": [
+          "fastp-report@1.3.6"
+        ]
+      },
+      "platforms": [
+        "macos-arm64"
+      ],
+      "regression_evidence_ids": [
+        "read-quality-fastp-regression-v1"
+      ],
+      "tool_versions": {
+        "fastp": [
+          ">=1.3,<1.4"
+        ]
+      },
+      "verified_at": "2026-07-12"
     }
   ],
-  "execution": {
-    "kind": "command", "timeout_seconds": 300, "max_output_bytes": 1000000,
-    "command": {
-      "tool_name": "fastp", "executable": "fastp",
-      "arguments": ["--in1", "{input:reads}", "--json", "{output:data}", "--html", "{output:report}", "--thread", "{parameter:threads}", "--disable_adapter_trimming", "--disable_quality_filtering", "--disable_length_filtering", "--disable_trim_poly_g", "--overrepresentation_analysis"],
-      "inputs": [{"name": "reads", "port": "reads", "role": "reads", "filename": "reads.fastq"}],
-      "outputs": [
-        {"name": "data", "port": "read_quality_report", "role": "data", "filename": "fastp.json", "media_type": "application/json"},
-        {"name": "report", "port": "read_quality_report", "role": "report", "filename": "fastp.html", "media_type": "text/html"}
+  "complements": [
+    "quality-report-multiqc",
+    "read-contamination-screen"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=1.3,<1.4"
       ],
-      "parameter_names": ["threads"], "timeout_seconds": 300, "max_output_bytes": 1000000, "max_payload_bytes": 50000000
+      "conflicts": [
+        {
+          "dependency": "fastp-bioconda-build",
+          "reason": "Other package builds may link different compression and SIMD libraries and are not covered by this row.",
+          "required_action": "Block execution until a build-specific compatibility row and end-to-end evidence are added.",
+          "source": "https://anaconda.org/bioconda/fastp/files?version=1.3.6",
+          "versions": [
+            "!=1.3.6-ha1d0559_0"
+          ]
+        }
+      ],
+      "ecosystem": "runtime",
+      "identity": "bioconda-fastp-runtime",
+      "name": "fastp-bioconda-build",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "purpose": "Bind fastp to the exact validated Bioconda package build and dynamic-library environment.",
+      "required": true,
+      "tested_versions": [
+        "1.3.6-ha1d0559_0"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+-[A-Za-z0-9_]+)",
+      "version_probe": [
+        "biomed_workbench.quality.fastp:probe_fastp_bioconda_build"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://anaconda.org/bioconda/fastp/files?version=1.3.6"
     }
+  ],
+  "description": "Execute fastp in a non-filtering QC-only mode and preserve its JSON and HTML reports as a validated alternative read-quality evidence path.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "scientific-command",
+  "evidence_effects": [
+    "qualifies_sequencing_input"
+  ],
+  "execution": {
+    "command": {
+      "arguments": [
+        "--in1",
+        "{input:reads}",
+        "--json",
+        "{output:data}",
+        "--html",
+        "{output:report}",
+        "--thread",
+        "{parameter:threads}",
+        "--disable_adapter_trimming",
+        "--disable_quality_filtering",
+        "--disable_length_filtering",
+        "--disable_trim_poly_g",
+        "--overrepresentation_analysis"
+      ],
+      "executable": "fastp",
+      "inputs": [
+        {
+          "filename": "reads.fastq",
+          "name": "reads",
+          "port": "reads",
+          "role": "reads"
+        }
+      ],
+      "max_output_bytes": 1000000,
+      "max_payload_bytes": 50000000,
+      "outputs": [
+        {
+          "filename": "fastp.json",
+          "media_type": "application/json",
+          "name": "data",
+          "port": "read_quality_report",
+          "role": "data"
+        },
+        {
+          "filename": "fastp.html",
+          "media_type": "text/html",
+          "name": "report",
+          "port": "read_quality_report",
+          "role": "report"
+        }
+      ],
+      "parameter_names": [
+        "threads"
+      ],
+      "timeout_seconds": 300,
+      "tool_name": "fastp"
+    },
+    "kind": "command",
+    "max_output_bytes": 1000000,
+    "timeout_seconds": 300
   },
-  "access": "offline", "mutability": "read_only", "credentials": [],
-  "limitations": ["This validated row supports only the named macOS-arm64 Bioconda build; fastp does not provide taxonomic contamination screening."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "MIT", "concept_sources": ["https://github.com/OpenGene/fastp"]}
+  "id": "read-quality-fastp",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequencing_reads",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none",
+            "gzip",
+            "bgzf"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "fastq",
+          "orientations": [
+            "single-end",
+            "paired-end",
+            "interleaved"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "sanger-phred33"
+          ]
+        }
+      ],
+      "name": "reads",
+      "processing_levels": [
+        "raw",
+        "adapter-trimmed",
+        "quality-trimmed"
+      ],
+      "required_metadata": [
+        "sample-id",
+        "read-layout",
+        "quality-encoding"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "threads": {
+        "maximum": 16,
+        "minimum": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "threads"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "FASTQ quality metrics with fastp",
+    "run fastp QC",
+    "alternative read QC",
+    "fastp\u539f\u59cb\u6570\u636e\u8d28\u63a7"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This validated row supports only the named macOS-arm64 Bioconda build; fastp does not provide taxonomic contamination screening."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "sequencing_quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "fastp-report",
+          "orientations": [
+            "report-bundle"
+          ],
+          "representations": [
+            "structured",
+            "container"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.3.6"
+          ]
+        }
+      ],
+      "name": "read_quality_report",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "payload_roles": {
+        "items": {
+          "type": "string"
+        },
+        "maxItems": 2,
+        "minItems": 2,
+        "type": "array"
+      }
+    },
+    "required": [
+      "payload_roles"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The FASTQ payload and required sample metadata pass the shared exact-version format profile."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://github.com/OpenGene/fastp"
+    ],
+    "license": "MIT"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Before and after read and base counts must be identical under the validated non-filtering QC-only command.",
+      "id": "fastp-qc-only-accounting",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Quality, GC, length, duplication, and overrepresentation metrics require assay-aware interpretation and cannot establish taxonomic contamination.",
+      "id": "fastp-metric-review",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Do independent fastp quality, GC, length, duplication, and read-accounting metrics support downstream use of the declared FASTQ?"
+  ],
+  "schema_version": 1,
+  "title": "Run independent FASTQ quality metrics with fastp",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.3,<1.4"
+      ],
+      "ecosystem": "system",
+      "identity": "fastp",
+      "mismatch_policy": "alternative",
+      "name": "fastp",
+      "platforms": [
+        "macos-arm64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.3.6"
+      ],
+      "verified_at": "2026-07-12",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.3,<1.4"
+          ],
+          "category": "output-format",
+          "compatibility_effect": "requires-parser",
+          "description": "The validated release emits the tested summary, filtering, duplication, and per-read JSON structures.",
+          "id": "fastp-136-json-schema",
+          "required_action": "Use only the fastp 1.3.6 parser and QC-only command regression fixtures.",
+          "source": "https://github.com/OpenGene/fastp/releases/tag/v1.3.6"
+        }
+      ],
+      "version_pattern": "fastp ([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "fastp",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://github.com/OpenGene/fastp/releases/tag/v1.3.6"
+    }
+  ],
+  "version": "1.0.0"
 }

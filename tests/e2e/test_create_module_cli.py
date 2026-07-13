@@ -30,6 +30,7 @@ class CreateModuleCliEndToEndTests(unittest.TestCase):
             self.assertEqual(Path(payload["created"]).name, "future-table-profile")
             self.assertTrue((registry_root / "future-table-profile" / "module.json").is_file())
             self.assertTrue((registry_root / "future-table-profile" / "tests" / "cases.json").is_file())
+            self.assertTrue((registry_root / "future-table-profile" / "templates" / "run_future_table_profile.py").is_file())
 
 
 if __name__ == "__main__":

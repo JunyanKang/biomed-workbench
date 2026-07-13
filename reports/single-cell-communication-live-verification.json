@@ -1,0 +1,98 @@
+{
+  "cellphonedb_database": {
+    "sha256": "b726745421b6c8f091f9b464e1d20fc676908d18a6669a969eb08877f6dff07f"
+  },
+  "compatibility_rows": [
+    {
+      "end_to_end_evidence_ids": [
+        "single-cell-communication-python-e2e-v1"
+      ],
+      "id": "agent-protocol-1-python-communication",
+      "regression_evidence_ids": [
+        "single-cell-communication-python-regression-v1"
+      ]
+    },
+    {
+      "end_to_end_evidence_ids": [
+        "single-cell-communication-r-e2e-v1"
+      ],
+      "id": "agent-protocol-1-r-communication",
+      "regression_evidence_ids": [
+        "single-cell-communication-r-regression-v1"
+      ]
+    }
+  ],
+  "execution": {
+    "cellchat_completed": true,
+    "cellphonedb_completed": true,
+    "liana_completed": true,
+    "nichenet_completed": true,
+    "python_report_sha256": "dd4dd1e8cf33968bc29a6ca38b86f5b642e86e705fc70ed6bfe9364d00f75bfe",
+    "r_report_sha256": "1e129ff1d1c5b231724afe3307318fc3219d4449e57942387cea8674b4b39fcd"
+  },
+  "fixture": {
+    "biological_samples": 4,
+    "cells": 160,
+    "conditions": 2,
+    "genes": 132,
+    "sha256": "53b1ef9939829e0b3a25a62c5626b7dcaa7beba4ce5423be755e84908b36fafb"
+  },
+  "module_id": "single-cell-communication",
+  "module_version": "1.0.0",
+  "passed": true,
+  "python_backends": {
+    "methods": [
+      "cellphonedb-statistical",
+      "liana-rank-aggregate"
+    ],
+    "quality_status": "passed",
+    "replicate_summary_rows": 1672,
+    "replicated_interactions": 241,
+    "report_sha256": "dd4dd1e8cf33968bc29a6ca38b86f5b642e86e705fc70ed6bfe9364d00f75bfe",
+    "sample_interaction_rows": 3408
+  },
+  "r_backends": {
+    "cellchat_interaction_rows": 54,
+    "methods": [
+      "cellchat",
+      "nichenet"
+    ],
+    "nichenet_ligand_rows": 2,
+    "nichenet_target_link_rows": 16,
+    "quality_status": "observed",
+    "report_sha256": "1e129ff1d1c5b231724afe3307318fc3219d4449e57942387cea8674b4b39fcd"
+  },
+  "registry_digest": "4c3912b5392dd6e05dd72330c0a1fea71fd29b4f9a61818eb19025d09010573e",
+  "schema_version": 1,
+  "scientific_summary": {
+    "all_four_backends_executed": true,
+    "biological_samples_used_as_replicates": true,
+    "cells_not_used_as_condition_replicates": true,
+    "cross_sample_support_computed": true,
+    "method_specific_results_retained": true,
+    "nichenet_receiver_evidence_used": true,
+    "no_environment_or_compute_infrastructure_managed": true,
+    "outputs_reloaded": true,
+    "source_counts_and_identifiers_preserved": true
+  },
+  "templates": {
+    "run_cellchat_nichenet": {
+      "name": "run_cellchat_nichenet.R",
+      "sha256": "1baf05b6ec3adb8efff1fa6f64dc21d9bac9984711f46994ae9ec591d07bce30"
+    },
+    "run_liana_cellphonedb": {
+      "name": "run_liana_cellphonedb.py",
+      "sha256": "ebb9c2fa9ffb66ffa34dc7987d6ed61dfbbe8cc3a22aefd5cd804020d70d512e"
+    }
+  },
+  "versions": {
+    "CellChat": "2.2.0",
+    "anndata": "0.11.4",
+    "cellchat": "2.2.0",
+    "cellphonedb": "5.0.1",
+    "liana": "1.7.3",
+    "nichenetr": "2.2.1.1",
+    "python": "3.10.20",
+    "scanpy": "1.11.5"
+  }
+}

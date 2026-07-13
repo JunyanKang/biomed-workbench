@@ -1,5 +1,5 @@
 {
-  "module_count": 80,
+  "module_count": 81,
   "modules": [
     {
       "access": "offline",
@@ -293,6 +293,19 @@
       "alternatives": [],
       "assumptions": [
         "The BAM header, declared sample identity, read groups, reference build, and reference sequence digest describe the same alignment payload."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_alignment_quality_samtools.py",
+          "purpose": "Execute and validate qualify alignment mechanics with samtools flagstat against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "alignment-bundle-integrity",
+            "flagstat-count-conservation",
+            "alignment-assay-context"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -626,6 +639,19 @@
       "alternatives": [],
       "assumptions": [
         "The input SAM header, sequence dictionary, read groups, sample identity, reference build, and reference digest are complete and internally consistent."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_alignment_sort_index_samtools.py",
+          "purpose": "Execute and validate coordinate-sort and index sam alignments against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "sam-sort-input-integrity",
+            "bam-sort-index-output-integrity",
+            "bam-post-sort-quality-review"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -5116,6 +5142,17 @@
       "assumptions": [
         "The supplied sequence is unambiguous DNA and SpCas9 NGG context is the intended nuclease rule."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_crispr_design.py",
+          "purpose": "Execute and validate discover crispr guide candidates against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "crispr-design-validity"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -5353,6 +5390,17 @@
       "assumptions": [
         "Rows are comparable observations and each column has a consistent scientific meaning."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_data_profile.py",
+          "purpose": "Execute and validate profile structured scientific rows against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "data-profile-validity"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -5578,6 +5626,19 @@
       "alternatives": [],
       "assumptions": [
         "Expression values are normalized and comparable across matched biological samples; missingness mechanisms and mutation calling policy are documented outside the compact payload."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_ddr_coexpression_hypothesis_network.py",
+          "purpose": "Execute and validate build an fdr-controlled ddr coexpression hypothesis network against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "ddr-network-sample-alignment",
+            "ddr-network-multiplicity",
+            "ddr-network-inference-scope"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -5922,6 +5983,17 @@
       "alternatives": [],
       "assumptions": [
         "Groups are independent, features are approximately suitable for Welch testing, and samples are biological replicates."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_differential_expression.py",
+          "purpose": "Execute and validate run compact differential expression against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "differential-expression-validity"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -6405,6 +6477,19 @@
       "alternatives": [],
       "assumptions": [
         "Reads are single-end DNA short reads with Sanger Phred+33 qualities, and the reference FASTA plus all BWA index files were generated from the same declared sequence payload."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_dna_align_bwa_mem_single.py",
+          "purpose": "Execute and validate align single-end dna reads with bwa-mem against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "bwa-reference-bundle-integrity",
+            "bwa-sample-read-group-identity",
+            "bwa-alignment-not-interpretation"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -7061,6 +7146,17 @@
       "assumptions": [
         "The query is contained in the explicit background and gene-set membership is appropriate for the organism and identifier namespace."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_enrichment_analysis.py",
+          "purpose": "Execute and validate run gene-set overrepresentation against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "enrichment-analysis-validity"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -7304,6 +7400,17 @@
       "alternatives": [],
       "assumptions": [
         "Initial-rate observations follow the selected steady-state kinetic model and substrate concentrations are accurate."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_enzyme_kinetics.py",
+          "purpose": "Execute and validate fit steady-state enzyme kinetics against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "enzyme-kinetics-validity"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -7562,6 +7669,17 @@
       "alternatives": [],
       "assumptions": [
         "Matrix values are comparable non-negative expression measurements with correctly oriented genes and samples."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_expression_qc.py",
+          "purpose": "Execute and validate quality-control an expression matrix against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "expression-qc-validity"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -8611,6 +8729,17 @@
       "assumptions": [
         "Sequence motifs indicate potential contexts but do not establish site occupancy."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_glycosylation_scan.py",
+          "purpose": "Execute and validate scan protein glycosylation contexts against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "glycosylation-scan-validity"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -8851,6 +8980,17 @@
       "alternatives": [],
       "assumptions": [
         "Fragment sequences and four-base overhang orientations are declared in assembly order."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_golden_gate_plan.py",
+          "purpose": "Execute and validate audit a golden gate assembly plan against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "golden-gate-plan-validity"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -10903,6 +11043,19 @@
       "assumptions": [
         "Both BED payloads use the declared field counts and identical chromosome naming, reference assembly, sequence digest, and zero-based half-open coordinate convention."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_interval_overlap_bedtools.py",
+          "purpose": "Execute and validate intersect declared genomic interval sets against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "interval-coordinate-identity",
+            "interval-overlap-row-validity",
+            "interval-overlap-inference-scope"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -12487,6 +12640,21 @@
       "assumptions": [
         "Input values are biologically meaningful, nonnegative, finite, normalized measurements on comparable experimental units; candidate ranks and stability thresholds were declared before interpretation; feature and sample manifests preserve the exact matrix axes."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_metagene_factorization_nmf.py",
+          "purpose": "Execute and validate discover stable metagene programs with multi-start nmf against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "nmf-matrix-identity-and-semantics",
+            "nmf-multistart-rank-selection",
+            "nmf-independent-reconstruction",
+            "nmf-stability-and-redundancy",
+            "nmf-association-not-causation"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -13039,6 +13207,19 @@
       "alternatives": [],
       "assumptions": [
         "The caller has normalized variants against the declared exact reference and supplied an explicit state for every sample-locus combination."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_multi_sample_variant_concordance.py",
+          "purpose": "Execute and validate compare multi-sample variant states without collapsing missingness against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "variant-concordance-reference-identity",
+            "variant-concordance-callability",
+            "variant-concordance-phase"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -15099,6 +15280,17 @@
       "assumptions": [
         "Edges represent comparable relationships and duplicate or directional semantics are declared correctly."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_network_analysis.py",
+          "purpose": "Execute and validate summarize a biological network against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "network-analysis-validity"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -16100,6 +16292,17 @@
       "assumptions": [
         "Template ends are intended primer regions and approximate melting-temperature formulas are adequate for candidate screening."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_primer_design.py",
+          "purpose": "Execute and validate design pcr primer candidates against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "primer-design-validity"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -16641,6 +16844,18 @@
       "assumptions": [
         "Every collected FastQC archive belongs to one declared sample and was produced by a version recorded in collection metadata."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_quality_report_multiqc.py",
+          "purpose": "Execute and validate aggregate sequencing quality reports across samples against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "multiqc-sample-accounting",
+            "multiqc-outlier-review"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -17125,6 +17340,18 @@
       "assumptions": [
         "Reference labels, expected-reference designation, sequence digests, and Bowtie2 indexes in the bundle are internally consistent."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_read_contamination_screen.py",
+          "purpose": "Execute and validate screen sequencing reads against declared references against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "screen-reference-integrity",
+            "screen-scope-interpretation"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -17559,6 +17786,18 @@
       "assumptions": [
         "The FASTQ quality encoding and read layout are correctly declared and QC-only mode must not alter read or base counts."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_read_quality_fastp.py",
+          "purpose": "Execute and validate run independent fastq quality metrics with fastp against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "fastp-qc-only-accounting",
+            "fastp-metric-review"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -17901,6 +18140,18 @@
       ],
       "assumptions": [
         "FASTQ records are complete and the declared quality encoding and read layout match the payload."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_read_quality_fastqc.py",
+          "purpose": "Execute and validate run read-level sequencing quality control against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "fastqc-report-completeness",
+            "fastqc-module-status-review"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -18995,6 +19246,17 @@
       "assumptions": [
         "The enzyme motif library and supplied DNA strand are appropriate for sequence-site mapping."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_restriction_plan.py",
+          "purpose": "Execute and validate map restriction enzyme sites against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "restriction-plan-validity"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -19929,6 +20191,17 @@
       "assumptions": [
         "Preferred-codon substitution is sufficient for deterministic screening and is not full expression optimization."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_sequence_back_translate.py",
+          "purpose": "Execute and validate back-translate a protein sequence against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "sequence-back-translate-validity"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -20167,6 +20440,17 @@
       "alternatives": [],
       "assumptions": [
         "The declared alphabet is correct and non-canonical symbols should be retained as ambiguity rather than guessed."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_sequence_inspect.py",
+          "purpose": "Execute and validate inspect a biological sequence against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "sequence-inspect-validity"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -21486,6 +21770,860 @@
           "version_probe_kind": "command",
           "version_probe_timeout_seconds": 30,
           "version_source": "https://pypi.org/project/bbknn/1.6.0/"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "agent_generated",
+      "agent_protocol": {
+        "forbidden_actions": [
+          "Do not treat cells as independent condition-level replicates.",
+          "Do not install or manage environments, containers, accelerators, schedulers, or remote runtimes.",
+          "Do not guess raw counts, species, gene namespaces, cell types, samples, conditions, or resource versions.",
+          "Do not infer physical contact or causal signaling from ligand-receptor expression alone.",
+          "Do not use cell-level differential expression as NicheNet receiver evidence when biological samples define the contrast.",
+          "Do not overwrite source objects or previous outputs, and do not hide failed samples, methods, or interactions."
+        ],
+        "languages": [
+          "python",
+          "r",
+          "notebook"
+        ],
+        "mode": "codex_generated_project_code",
+        "parameter_rules": [
+          {
+            "decision_inputs": [
+              "species",
+              "question",
+              "sample-counts",
+              "resource-availability",
+              "receiver-contrast",
+              "tool-compatibility"
+            ],
+            "id": "select-communication-methods",
+            "parameter": "requested-methods",
+            "selection_rule": "Select only methods whose input, species, resource, design, and version assumptions are met; use multiple methods when their distinct score semantics answer the question.",
+            "validation_rule": "Every selected method must execute on observed sample data and retain method-specific results; unavailable or incompatible methods are blocked with reasons rather than simulated."
+          },
+          {
+            "decision_inputs": [
+              "cells-per-type-per-sample",
+              "samples-per-condition",
+              "method-minimums",
+              "predeclared-fdr"
+            ],
+            "id": "select-cell-and-sample-thresholds",
+            "parameter": "minimum-support",
+            "selection_rule": "Choose cell eligibility and sample reproducibility thresholds before viewing interaction rankings, respecting method requirements and the independent replicate design.",
+            "validation_rule": "Condition-level interpretation requires the declared independent-sample support and multiplicity control; otherwise results remain sample-specific or descriptive."
+          },
+          {
+            "decision_inputs": [
+              "reviewed-receiver-label",
+              "condition-design",
+              "donor-aware-de",
+              "background-genes",
+              "network-release"
+            ],
+            "id": "select-nichenet-contrast",
+            "parameter": "receiver-contrast",
+            "selection_rule": "Define receiver, reference, contrast, donor-aware DE model, background genes, and network resources from the project hypothesis before ligand ranking.",
+            "validation_rule": "Block NicheNet when receiver DE is cell-level, sample counts are inadequate, resources are unpinned, or ligand and target universes cannot be reconciled."
+          }
+        ],
+        "postflight_checks": [
+          "Reconcile all input cells, genes, samples, conditions, eligible and blocked populations, and sample runs.",
+          "Validate recognized method output fields, finite scores, p-value or rank semantics, and standardized interaction identities.",
+          "Require cross-sample support and multiplicity control for replicated interactions and donor-aware receiver evidence for NicheNet.",
+          "Reload all tables, reports, and objects and verify source preservation, versions, resources, parameters, quality states, and artifact digests."
+        ],
+        "preflight_checks": [
+          "Inspect the real h5ad or Matrix Market bundle and identify immutable integer-like raw counts without relying on a conventional layer name.",
+          "Cross-tabulate cell types, unknowns, samples, conditions, and batches and verify one condition per biological sample.",
+          "Reconcile gene identifiers and species with every selected resource and record resource release and digest.",
+          "Confirm requested tool APIs in the existing environment and freeze sample, method, permutation, threshold, and output contracts."
+        ],
+        "provenance_fields": [
+          "module-version",
+          "source-artifact-digest",
+          "cell-and-gene-counts",
+          "cell-type-key",
+          "biological-sample-key",
+          "condition-key",
+          "species",
+          "raw-count-location",
+          "gene-identifier-namespace",
+          "annotation-release",
+          "quantification-provenance",
+          "methods-and-parameters",
+          "tool-versions",
+          "resource-releases-and-digests",
+          "sample-run-accounting",
+          "blocked-reasons",
+          "replicate-thresholds",
+          "quality-gate-results",
+          "output-artifact-digests"
+        ],
+        "requires_observed_execution": true,
+        "schema_version": 1,
+        "template_sections": [
+          {
+            "id": "inspect-communication-design",
+            "output_artifact_types": [
+              "single_cell_communication_validation"
+            ],
+            "purpose": "Establish whether communication and ligand-activity questions are identifiable from the real project design.",
+            "required_logic": [
+              "Inspect immutable raw counts, gene identifiers, species, cell types, unknown labels, samples, conditions, batches, quantification provenance, source digest, and resource releases.",
+              "Count every cell type within every biological sample and block sample runs with fewer than two adequately represented populations.",
+              "Freeze methods, resources, normalization, expression proportions, permutations, minimum cells, minimum sample support, multiple-testing control, contrasts, and outputs before execution."
+            ],
+            "template_files": [
+              "templates/run_liana_cellphonedb.py",
+              "templates/run_cellchat_nichenet.R"
+            ]
+          },
+          {
+            "id": "execute-ligand-receptor-methods",
+            "output_artifact_types": [
+              "single_cell_communication_evidence",
+              "single_cell_communication_validation"
+            ],
+            "purpose": "Run selected communication methods within each biological sample and retain method-native evidence.",
+            "required_logic": [
+              "Adapt LIANA, CellPhoneDB, and CellChat templates to detected APIs and run each eligible biological sample independently with fixed seeds and explicit resources.",
+              "Preserve raw method tables and standardize sender, receiver, ligand, receptor, score, significance, sample, condition, and method without equating unlike score semantics.",
+              "Keep unknown cell labels if sufficiently represented and never select interactions from a desired condition pattern or visualization."
+            ],
+            "template_files": [
+              "templates/run_liana_cellphonedb.py",
+              "templates/run_cellchat_nichenet.R"
+            ]
+          },
+          {
+            "id": "execute-nichenet-ligand-activity",
+            "output_artifact_types": [
+              "single_cell_communication_evidence",
+              "single_cell_communication_validation"
+            ],
+            "purpose": "Prioritize ligands against independent receiver-state evidence without cell-level pseudoreplication.",
+            "required_logic": [
+              "Require donor-aware receiver differential expression with explicit contrast, background genes, independent samples, and reviewed receiver identity.",
+              "Load project-pinned ligand-target, ligand-receptor, and weighted network resources and record their digests and releases.",
+              "Rank ligand activities and retain ligand-target links while distinguishing prior-network support from causal signaling evidence."
+            ],
+            "template_files": [
+              "templates/run_cellchat_nichenet.R"
+            ]
+          },
+          {
+            "id": "replicate-reload-and-admit",
+            "output_artifact_types": [
+              "single_cell_communication_evidence",
+              "single_cell_communication_validation"
+            ],
+            "purpose": "Admit only reloadable communication evidence with independent sample support and intact source data.",
+            "required_logic": [
+              "Summarize interaction support across biological samples within condition and control multiplicity without treating cells as replicates.",
+              "Compare method support as complementary evidence while retaining method disagreement and score semantics.",
+              "Reload tables, reports, and model objects; verify source dimensions and digests, parameters, versions, resources, sample runs, blocked reasons, and quality state before evidence admission."
+            ],
+            "template_files": [
+              "templates/run_liana_cellphonedb.py",
+              "templates/run_cellchat_nichenet.R"
+            ]
+          }
+        ]
+      },
+      "alternatives": [],
+      "assumptions": [
+        "Cell types were established independently of the communication result; biological samples are independently prepared; each sample maps to one condition; raw counts and normalized expression semantics are known; gene identifiers match the declared species and resources; communication scores indicate compatible expression and prior knowledge rather than physical contact or causal signaling; and cells are not treated as condition-level replicates."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "single-cell-communication-python-e2e-v1"
+          ],
+          "id": "agent-protocol-1-python-communication",
+          "input_formats": {
+            "single_cell_expression_object": [
+              "h5ad@0.1.0",
+              "matrix-market@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "communication_evidence": [
+              "tabular@1"
+            ],
+            "communication_validation": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "single-cell-communication-python-regression-v1"
+          ],
+          "tool_versions": {
+            "cellphonedb": [
+              ">=5.0,<5.1"
+            ],
+            "liana": [
+              ">=1.7,<1.8"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        },
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "single-cell-communication-r-e2e-v1"
+          ],
+          "id": "agent-protocol-1-r-communication",
+          "input_formats": {
+            "single_cell_expression_object": [
+              "h5ad@0.1.0",
+              "matrix-market@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "communication_evidence": [
+              "tabular@1"
+            ],
+            "communication_validation": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "single-cell-communication-r-regression-v1"
+          ],
+          "tool_versions": {
+            "cellchat": [
+              ">=2.2,<2.3"
+            ],
+            "nichenetr": [
+              ">=2.2,<2.3"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "single-cell-foundation-workflow",
+        "single-cell-reference-annotation",
+        "single-cell-donor-inference",
+        "single-cell-batch-integration"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate the request and emit the Codex Agent protocol; scientific Python and R backends run only in an existing project environment.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Direct Codex to inspect count-backed single-cell data and independent biological samples, adapt and execute LIANA, CellPhoneDB, CellChat, or NicheNet with versioned resources, retain method-specific evidence, standardize interactions, test cross-sample reproducibility, and block cell-level or visually selected communication claims.",
+      "domains": [
+        "omics",
+        "statistics"
+      ],
+      "entrypoint": "agent-generated-analysis",
+      "evidence_effects": [
+        "estimates_sample-specific-ligand-receptor-compatibility",
+        "summarizes-cross-sample-interaction-support",
+        "prioritizes-ligands-against-receiver-state-evidence",
+        "blocks-cell-pseudoreplication-and-single-method-overclaiming"
+      ],
+      "execution": {
+        "kind": "workflow",
+        "max_output_bytes": 2000000,
+        "timeout_seconds": 30
+      },
+      "id": "single-cell-communication",
+      "input_artifacts": [
+        {
+          "artifact_type": "single_cell_expression_object",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none",
+                "gzip",
+                "lzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "h5ad",
+              "orientations": [
+                "observations-by-variables"
+              ],
+              "representations": [
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "0.1.0"
+              ]
+            },
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none",
+                "gzip"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "matrix-market",
+              "orientations": [
+                "features-by-observations"
+              ],
+              "representations": [
+                "sparse",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "single_cell_expression_object",
+          "processing_levels": [
+            "quality-controlled",
+            "raw-count-preserved",
+            "conservatively-annotated"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "raw-count-location",
+            "cell-type-key",
+            "biological-sample-key",
+            "condition-key",
+            "species",
+            "gene-identifier-namespace",
+            "annotation-release",
+            "cell-accounting",
+            "quantification-provenance"
+          ]
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "biological_sample_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "cell_type_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "condition_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad",
+              "matrix-market"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "raw_count_location": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_methods": {
+            "items": {
+              "enum": [
+                "liana",
+                "cellphonedb",
+                "cellchat",
+                "nichenet"
+              ],
+              "type": "string"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "type": "array"
+          },
+          "species": {
+            "enum": [
+              "human",
+              "mouse"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "raw_count_location",
+          "cell_type_key",
+          "biological_sample_key",
+          "condition_key",
+          "species",
+          "requested_methods",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "infer cell-cell communication with LIANA CellPhoneDB CellChat or NicheNet",
+        "compare ligand receptor interactions across biological samples",
+        "prioritize ligands with donor-aware receiver differential expression",
+        "\u5355\u7ec6\u80de\u7ec6\u80de\u901a\u8baf\u914d\u4f53\u53d7\u4f53\u548cNicheNet\u914d\u4f53\u6d3b\u6027\u5206\u6790"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The templates support sample-aware LIANA 1.7, CellPhoneDB 5, CellChat 2.2, and NicheNet 2.2 analysis with explicit versioned resources. They do not infer physical contact or causal signaling, do not use cells as independent replicates, and do not permit a condition-level claim from one sample per condition. CellPhoneDB is restricted to human symbols in the validated template; NicheNet requires external project-pinned network matrices and donor-aware receiver DE rather than a cell-level contrast."
+      ],
+      "maturity": "experimental",
+      "module_type": "analysis",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "single_cell_communication_evidence",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none",
+                "gzip"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tabular",
+              "orientations": [
+                "interaction-by-sample-and-method"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "communication_evidence",
+          "processing_levels": [
+            "sample-stratified",
+            "method-preserved",
+            "replicate-summarized"
+          ],
+          "required_metadata": [
+            "sender",
+            "receiver",
+            "ligand",
+            "receptor",
+            "method",
+            "biological-sample",
+            "condition",
+            "score",
+            "p-value-or-rank",
+            "sample-support",
+            "resource-release",
+            "quality-status"
+          ]
+        },
+        {
+          "artifact_type": "single_cell_communication_validation",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "method-by-sample-and-quality-gate"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "communication_validation",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "method-parameters",
+            "tool-and-resource-versions",
+            "sample-cell-type-accounting",
+            "blocked-sample-reasons",
+            "replicate-support",
+            "source-preservation",
+            "artifact-digests",
+            "quality-gate-results"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "code_plan": {
+            "type": "array"
+          },
+          "dependency_profiles": {
+            "type": "array"
+          },
+          "execution_policy": {
+            "type": "object"
+          },
+          "forbidden_actions": {
+            "type": "array"
+          },
+          "handoff_type": {
+            "enum": [
+              "codex_generated_project_analysis"
+            ],
+            "type": "string"
+          },
+          "languages": {
+            "type": "array"
+          },
+          "module": {
+            "type": "object"
+          },
+          "parameter_rules": {
+            "type": "array"
+          },
+          "postflight_checks": {
+            "type": "array"
+          },
+          "preflight_checks": {
+            "type": "array"
+          },
+          "provenance_fields": {
+            "type": "array"
+          },
+          "quality_gate_ids": {
+            "type": "array"
+          },
+          "request_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "request_fields": {
+            "type": "array"
+          },
+          "tool_profiles": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "handoff_type",
+          "module",
+          "request_digest",
+          "request_fields",
+          "languages",
+          "code_plan",
+          "parameter_rules",
+          "preflight_checks",
+          "postflight_checks",
+          "provenance_fields",
+          "forbidden_actions",
+          "tool_profiles",
+          "dependency_profiles",
+          "quality_gate_ids",
+          "execution_policy"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Codex can inspect immutable raw counts, gene identifiers, cell types including unknown labels, biological samples, conditions, species, quantification provenance, and the existing scientific environments; versioned interaction and ligand-target resources are locally available or explicitly fetched for the project; outputs are new; and no environment or compute-infrastructure management is required."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned Codex-native communication workflow synthesized from independently validated LIANA, CellPhoneDB, CellChat, and NicheNet APIs and biological-replicate requirements.",
+          "https://liana-py.readthedocs.io/en/latest/",
+          "https://cellphonedb.readthedocs.io/en/stable/",
+          "https://github.com/jinworks/CellChat",
+          "https://github.com/saeyslab/nichenetr"
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Block when raw counts, gene identifiers, species, cell types, samples, conditions, quantification provenance, or versioned communication resources cannot be established without guessing.",
+          "id": "communication-input-semantics",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Require reason-coded cell-type eligibility within each biological sample, at least two eligible populations for a sample run, and independent sample counts for any condition-level statement.",
+          "id": "communication-cell-sample-accounting",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Require observed LIANA, CellPhoneDB, CellChat, or NicheNet execution with detected APIs, explicit parameters, fixed seeds, recognized result fields, and retained method-specific raw outputs.",
+          "id": "communication-method-execution",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Require predeclared cross-sample support and multiple-testing control for replicated interactions; single-sample results remain descriptive and cannot establish a condition effect.",
+          "id": "communication-replicate-support",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "NicheNet ligand activity requires donor-aware receiver differential expression, an explicit background gene universe, sender expression, versioned ligand-receptor and ligand-target resources, and independent samples in both contrast levels.",
+          "id": "communication-nichenet-receiver-evidence",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Source counts, cells, genes, labels, samples, and conditions remain immutable; outputs reload with parameters, versions, resources, sample runs, quality states, and artifact digests intact.",
+          "id": "communication-source-output-integrity",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Which sender-receiver ligand-receptor programs recur across independent biological samples and are supported by receiver-state evidence?"
+      ],
+      "schema_version": 1,
+      "title": "Infer reproducible single-cell communication and ligand activity",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            ">=1.7,<1.8"
+          ],
+          "ecosystem": "python",
+          "identity": "liana",
+          "mismatch_policy": "block",
+          "name": "liana",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "1.7.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.7,<1.8"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Rank aggregation accepts AnnData, explicit grouping, resource, expression proportion, permutations, seed, jobs, and inplace behavior and returns method-dependent score columns.",
+              "id": "liana-17-rank-aggregate",
+              "required_action": "Detect magnitude and specificity fields, retain raw columns, and standardize only recognized output semantics.",
+              "source": "https://liana-py.readthedocs.io/en/latest/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "from importlib.metadata import version; print(version('liana'))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pypi.org/project/liana/"
+        },
+        {
+          "allowed_versions": [
+            ">=5.0,<5.1"
+          ],
+          "ecosystem": "python",
+          "identity": "cellphonedb",
+          "mismatch_policy": "block",
+          "name": "cellphonedb",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "5.0.1"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=5.0,<5.1"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "The Python statistical method consumes a database zip, metadata, counts, iterations, threshold, seed, and scoring option and returns wide means and p-value tables.",
+              "id": "cellphonedb-5-statistical-api",
+              "required_action": "Pin a compatible database release, validate human symbols, and reshape wide cell-pair fields without discarding interaction identifiers.",
+              "source": "https://cellphonedb.readthedocs.io/en/stable/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "from importlib.metadata import version; print(version('cellphonedb'))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pypi.org/project/cellphonedb/"
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "ecosystem": "r",
+          "identity": "CellChat",
+          "mismatch_policy": "block",
+          "name": "cellchat",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "2.2.0"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2.2,<2.3"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parameter",
+              "description": "Communication probability exposes averaging, permutation, distance, population-size, and random-seed controls and CellChatDB species resources.",
+              "id": "cellchat-22-probability-api",
+              "required_action": "Run each biological sample separately with explicit database, seed, permutations, minimum cells, and distance policy.",
+              "source": "https://github.com/jinworks/CellChat"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('CellChat')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/jinworks/CellChat"
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "ecosystem": "r",
+          "identity": "nichenetr",
+          "mismatch_policy": "block",
+          "name": "nichenetr",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "2.2.1.1"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2.2,<2.3"
+              ],
+              "category": "input-format",
+              "compatibility_effect": "requires-format",
+              "description": "Ligand activity requires separately supplied ligand-target, ligand-receptor, and weighted network resources plus a receiver gene set and background.",
+              "id": "nichenetr-22-external-networks",
+              "required_action": "Pin resource files and digests, use donor-aware receiver DE, and declare sender and receiver expressed-gene universes.",
+              "source": "https://github.com/saeyslab/nichenetr"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('nichenetr')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/saeyslab/nichenetr"
         }
       ],
       "version": "1.0.0"
@@ -24613,6 +25751,17 @@
       "alternatives": [],
       "assumptions": [
         "Genes are rows, cells are columns, counts are non-negative, and thresholds are exploratory rather than universal."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_single_cell_qc.py",
+          "purpose": "Execute and validate quality-control single-cell count data against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "single-cell-qc-validity"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -28784,6 +29933,17 @@
       "assumptions": [
         "Callable territory and eligible somatic variant classes match the assay and intended research definition."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_tumor_mutation_burden.py",
+          "purpose": "Execute and validate calculate auditable tumor mutation burden against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "tumor-mutation-burden-validity"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -29084,6 +30244,20 @@
       ],
       "assumptions": [
         "The VCF is a somatic, upstream-filtered, ALT-specific ANN-annotated call set; BED intervals represent assay-specific callable territory rather than nominal targets; VCF and BED share reference build, sequence digest, chromosome namespace, sample, and assay identity."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_tumor_mutation_burden_vcf.py",
+          "purpose": "Execute and validate calculate tmb from filtered vcf and callable bed territory against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "tmb-vcf-bed-identity",
+            "tmb-callable-union-denominator",
+            "tmb-ann-alt-consequence",
+            "tmb-clinical-scope"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -29484,6 +30658,19 @@
       "alternatives": [],
       "assumptions": [
         "The BGZF payload and TBI are a matched digest-bound bundle and decompression is a representation change that must preserve all VCF content and processing semantics."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_variant_decompress_bgzip.py",
+          "purpose": "Execute and validate decompress indexed bgzf vcf without changing records against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "vcf-bgzf-input-bundle-integrity",
+            "vcf-bgzf-roundtrip-integrity",
+            "vcf-bgzf-representation-scope"
+          ],
+          "requires_adaptation": true
+        }
       ],
       "compatibility_matrix": [
         {
@@ -30136,6 +31323,20 @@
       "assumptions": [
         "The input contains sites only or exactly one sample; INFO/DP and INFO/AF or single-sample FORMAT/DP and FORMAT/AD represent the intended record-level depth and allele fraction; ANN follows the allele|annotation|impact|gene convention."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_variant_filter_vcf.py",
+          "purpose": "Execute and validate filter biallelic vcf records with explicit evidence rules against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "vcf-filter-input-integrity",
+            "vcf-filter-missing-metric-policy",
+            "vcf-filter-output-accounting",
+            "vcf-filter-inference-scope"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -30590,6 +31791,19 @@
       "assumptions": [
         "The BGZF VCF and TBI are a matched pair; contig names, coordinate convention, reference build, reference sequence digest, sample order, and processing level are correctly declared."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_variant_region_query_tabix.py",
+          "purpose": "Execute and validate retrieve indexed vcf records by genomic region against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "tabix-vcf-bundle-integrity",
+            "tabix-vcf-region-output-integrity",
+            "tabix-vcf-inference-scope"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -30948,6 +32162,17 @@
       "assumptions": [
         "Variants use one coordinate and reference system and ref/alt alleles are normalized sufficiently for descriptive counting."
       ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_variant_summary.py",
+          "purpose": "Execute and validate summarize structured variants against real project inputs and the module compatibility contract.",
+          "quality_gate_ids": [
+            "variant-summary-validity"
+          ],
+          "requires_adaptation": true
+        }
+      ],
       "compatibility_matrix": [
         {
           "dependency_versions": {
@@ -31182,6 +32407,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "eaa5dccee4a40daddc4f37e4304d939322b6eda6c5d5683d615dfa7f5d3b97f5",
+  "registry_digest": "4c3912b5392dd6e05dd72330c0a1fea71fd29b4f9a61818eb19025d09010573e",
   "schema_version": 1
 }

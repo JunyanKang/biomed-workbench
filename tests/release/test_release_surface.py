@@ -32,8 +32,22 @@ class IndependentModuleReleaseSurfaceTests(unittest.TestCase):
                 self.assertEqual({item.name for item in (path / "tests").iterdir()}, {"cases.json"})
             if "templates" in children or "validators" in children:
                 manifest = json.loads((path / "module.json").read_text(encoding="utf-8"))
-                self.assertEqual(manifest["access"], "agent_generated")
-                self.assertIn("agent_protocol", manifest)
+                packaged_templates = {
+                    item.relative_to(path).as_posix()
+                    for item in (path / "templates").glob("*")
+                    if item.is_file()
+                } if "templates" in children else set()
+                if manifest["access"] == "agent_generated":
+                    self.assertIn("agent_protocol", manifest)
+                    referenced = {
+                        template
+                        for section in manifest["agent_protocol"]["template_sections"]
+                        for template in section["template_files"]
+                    }
+                else:
+                    self.assertNotIn("agent_protocol", manifest)
+                    referenced = {item["path"] for item in manifest.get("code_templates", [])}
+                self.assertEqual(packaged_templates, referenced)
             self.assertEqual(path.name, path.name.lower())
             self.assertNotIn(path.name, {"evidence", "omics", "molecular-design", "imaging", "clinical", "wetlab", "publication"})
         self.assertTrue((BUILTIN_ROOT / "source-freshness-audit" / "tests" / "cases.json").is_file())

@@ -1,56 +1,332 @@
 {
-  "schema_version": 1,
-  "id": "multi-sample-variant-concordance",
-  "version": "1.0.0",
-  "title": "Compare multi-sample variant states without collapsing missingness",
-  "description": "Validate a shared reference and normalized biallelic variant matrix, distinguish alternate, reference, and not-callable states, calculate pairwise concordance on jointly callable loci, and emit deterministic phase-set haplotype signatures without simulated ancestry or divergence claims.",
-  "module_type": "analysis",
-  "domains": ["omics"],
-  "intents": ["compare variants across samples", "multi sample variant concordance", "haplotype concordance", "比较多样本变异和单倍型"],
-  "questions": ["Which normalized variants are shared or private among samples after preserving callability, reference identity, and explicit phasing semantics?"],
-  "maturity": "validated",
-  "entrypoint": "biomed_workbench.capabilities.omics:multi_sample_variant_concordance",
-  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 20000000},
-  "input_schema": {
-    "type": "object", "additionalProperties": false,
-    "properties": {
-      "samples": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-      "variants": {"type": "array", "minItems": 1, "items": {"type": "object"}},
-      "reference_build": {"type": "string", "minLength": 1},
-      "reference_sequence_digest": {"type": "string", "pattern": "^[0-9a-fA-F]{64}$"},
-      "normalization": {"type": "string", "enum": ["split-left-normalized-biallelic"]}
-    },
-    "required": ["samples", "variants", "reference_build", "reference_sequence_digest", "normalization"]
-  },
-  "output_schema": {
-    "type": "object", "additionalProperties": false,
-    "properties": {
-      "reference_build": {"type": "string"}, "reference_sequence_digest": {"type": "string"}, "normalization": {"type": "string"},
-      "sample_count": {"type": "integer"}, "variant_count": {"type": "integer"}, "sample_summaries": {"type": "array"},
-      "pairwise": {"type": "array"}, "haplotype_signatures": {"type": "array"}, "loci": {"type": "array"},
-      "quality_gates": {"type": "array"}, "limitations": {"type": "array"}
-    },
-    "required": ["reference_build", "reference_sequence_digest", "normalization", "sample_count", "variant_count", "sample_summaries", "pairwise", "haplotype_signatures", "loci", "quality_gates", "limitations"]
-  },
-  "input_artifacts": [{"name": "variant_state_matrix", "artifact_type": "multi_sample_variant_state_matrix", "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["one-based-inclusive"], "genome_build_policy": "required", "genome_builds": ["declared-matching-reference-digest"], "annotation_releases": [], "orientations": ["variants-by-samples"]}], "processing_levels": ["split-left-normalized-biallelic"], "required_metadata": ["reference-build", "reference-sequence-digest", "sample-manifest-digest", "callability-policy", "normalization-method"]}],
-  "output_artifacts": [{"name": "concordance_report", "artifact_type": "comparative_variant_report", "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["one-based-inclusive"], "genome_build_policy": "required", "genome_builds": ["inherited-matching-input-build"], "annotation_releases": [], "orientations": ["sample-pairs-by-jointly-callable-loci"]}], "processing_levels": ["derived"], "required_metadata": ["module_version", "compatibility_row_id", "reference-build", "reference-sequence-digest", "sample-manifest-digest", "callability-policy", "normalization-method"]}],
-  "assumptions": ["The caller has normalized variants against the declared exact reference and supplied an explicit state for every sample-locus combination."],
-  "preconditions": ["All samples share one reference sequence digest; variants are split, left-normalized, biallelic records; callability and phasing are declared rather than inferred from missing rows."],
-  "quality_gates": [
-    {"id": "variant-concordance-reference-identity", "severity": "fatal", "description": "A shared reference build and SHA-256 reference sequence digest are required before samples can be compared.", "blocks_interpretation": true},
-    {"id": "variant-concordance-callability", "severity": "fatal", "description": "Every sample-locus state must distinguish alternate, reference, and not callable; missingness is never converted to reference.", "blocks_interpretation": true},
-    {"id": "variant-concordance-phase", "severity": "major", "description": "Haplotype summaries require explicit phase sets and ALT haplotype assignments and do not imply ancestry or evolutionary time.", "blocks_interpretation": true}
-  ],
-  "evidence_effects": ["compares_variant_observations_on_jointly_callable_loci"],
-  "alternatives": [],
-  "complements": ["variant-filter-vcf", "variant-region-query-tabix", "variant-summary", "variant-evidence"],
-  "tool_requirements": [],
-  "dependencies": [{"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-13", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute deterministic state validation and set-based concordance calculations.", "conflicts": [], "platforms": ["any"]}],
-  "compatibility_matrix": [{"id": "python-3.14-inline-variant-state-1", "module_version": "1.0.0", "tool_versions": {}, "dependency_versions": {"python": [">=3.14,<3.15"]}, "input_formats": {"variant_state_matrix": ["inline-json@1"]}, "output_formats": {"concordance_report": ["inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["multi-sample-variant-concordance-regression-v1"], "end_to_end_evidence_ids": ["multi-sample-variant-concordance-e2e-v1"], "verified_at": "2026-07-13"}],
   "access": "offline",
-  "mutability": "read_only",
+  "alternatives": [],
+  "assumptions": [
+    "The caller has normalized variants against the declared exact reference and supplied an explicit state for every sample-locus combination."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_multi_sample_variant_concordance.py",
+      "purpose": "Execute and validate compare multi-sample variant states without collapsing missingness against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "variant-concordance-reference-identity",
+        "variant-concordance-callability",
+        "variant-concordance-phase"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "multi-sample-variant-concordance-e2e-v1"
+      ],
+      "id": "python-3.14-inline-variant-state-1",
+      "input_formats": {
+        "variant_state_matrix": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "concordance_report": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "multi-sample-variant-concordance-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-13"
+    }
+  ],
+  "complements": [
+    "variant-filter-vcf",
+    "variant-region-query-tabix",
+    "variant-summary",
+    "variant-evidence"
+  ],
   "credentials": [],
-  "limitations": ["The module does not call variants, infer callability, normalize alleles, estimate ancestry or divergence, reconstruct phylogeny, or interpret clinical significance."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room replacement for comparative variant and haplotype purposes found during source assimilation; simulated and random source behaviors were explicitly rejected."]}
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic state validation and set-based concordance calculations.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-13",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Validate a shared reference and normalized biallelic variant matrix, distinguish alternate, reference, and not-callable states, calculate pairwise concordance on jointly callable loci, and emit deterministic phase-set haplotype signatures without simulated ancestry or divergence claims.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.omics:multi_sample_variant_concordance",
+  "evidence_effects": [
+    "compares_variant_observations_on_jointly_callable_loci"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 20000000,
+    "timeout_seconds": 30
+  },
+  "id": "multi-sample-variant-concordance",
+  "input_artifacts": [
+    {
+      "artifact_type": "multi_sample_variant_state_matrix",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "one-based-inclusive"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "declared-matching-reference-digest"
+          ],
+          "name": "inline-json",
+          "orientations": [
+            "variants-by-samples"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "variant_state_matrix",
+      "processing_levels": [
+        "split-left-normalized-biallelic"
+      ],
+      "required_metadata": [
+        "reference-build",
+        "reference-sequence-digest",
+        "sample-manifest-digest",
+        "callability-policy",
+        "normalization-method"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "normalization": {
+        "enum": [
+          "split-left-normalized-biallelic"
+        ],
+        "type": "string"
+      },
+      "reference_build": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "reference_sequence_digest": {
+        "pattern": "^[0-9a-fA-F]{64}$",
+        "type": "string"
+      },
+      "samples": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "minItems": 2,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "variants": {
+        "items": {
+          "type": "object"
+        },
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "samples",
+      "variants",
+      "reference_build",
+      "reference_sequence_digest",
+      "normalization"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "compare variants across samples",
+    "multi sample variant concordance",
+    "haplotype concordance",
+    "\u6bd4\u8f83\u591a\u6837\u672c\u53d8\u5f02\u548c\u5355\u500d\u578b"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "The module does not call variants, infer callability, normalize alleles, estimate ancestry or divergence, reconstruct phylogeny, or interpret clinical significance."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "comparative_variant_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "one-based-inclusive"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "inherited-matching-input-build"
+          ],
+          "name": "inline-json",
+          "orientations": [
+            "sample-pairs-by-jointly-callable-loci"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "concordance_report",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "reference-build",
+        "reference-sequence-digest",
+        "sample-manifest-digest",
+        "callability-policy",
+        "normalization-method"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "haplotype_signatures": {
+        "type": "array"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "loci": {
+        "type": "array"
+      },
+      "normalization": {
+        "type": "string"
+      },
+      "pairwise": {
+        "type": "array"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "reference_build": {
+        "type": "string"
+      },
+      "reference_sequence_digest": {
+        "type": "string"
+      },
+      "sample_count": {
+        "type": "integer"
+      },
+      "sample_summaries": {
+        "type": "array"
+      },
+      "variant_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "reference_build",
+      "reference_sequence_digest",
+      "normalization",
+      "sample_count",
+      "variant_count",
+      "sample_summaries",
+      "pairwise",
+      "haplotype_signatures",
+      "loci",
+      "quality_gates",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "All samples share one reference sequence digest; variants are split, left-normalized, biallelic records; callability and phasing are declared rather than inferred from missing rows."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room replacement for comparative variant and haplotype purposes found during source assimilation; simulated and random source behaviors were explicitly rejected."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "A shared reference build and SHA-256 reference sequence digest are required before samples can be compared.",
+      "id": "variant-concordance-reference-identity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every sample-locus state must distinguish alternate, reference, and not callable; missingness is never converted to reference.",
+      "id": "variant-concordance-callability",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Haplotype summaries require explicit phase sets and ALT haplotype assignments and do not imply ancestry or evolutionary time.",
+      "id": "variant-concordance-phase",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which normalized variants are shared or private among samples after preserving callability, reference identity, and explicit phasing semantics?"
+  ],
+  "schema_version": 1,
+  "title": "Compare multi-sample variant states without collapsing missingness",
+  "tool_requirements": [],
+  "version": "1.0.0"
 }

@@ -4,6 +4,17 @@
   "assumptions": [
     "Matrix values are comparable non-negative expression measurements with correctly oriented genes and samples."
   ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_expression_qc.py",
+      "purpose": "Execute and validate quality-control an expression matrix against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "expression-qc-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
   "compatibility_matrix": [
     {
       "dependency_versions": {

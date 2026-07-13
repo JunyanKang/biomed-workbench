@@ -4,6 +4,17 @@
   "assumptions": [
     "Fragment sequences and four-base overhang orientations are declared in assembly order."
   ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_golden_gate_plan.py",
+      "purpose": "Execute and validate audit a golden gate assembly plan against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "golden-gate-plan-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
   "compatibility_matrix": [
     {
       "dependency_versions": {

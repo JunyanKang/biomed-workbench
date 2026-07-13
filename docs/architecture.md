@@ -41,12 +41,15 @@ Every `module.json` is closed and versioned. It declares:
 - input/output format names and versions, representation, compression, required indexes, coordinate systems, genome builds, annotation releases, and orientations;
 - explicit compatibility rows joining one module version to validated tool, dependency, platform, and input/output format combinations;
 - access, mutation, credential, timeout, output-size, license, and clean-room provenance boundaries.
+- optional module-local `code_templates` with language, purpose, blocking quality-gate binding, and adaptation policy.
 
 The first `domains[]` value is the module's routing workflow. It may introduce a future scientific workflow without router edits. Additional values describe cross-cutting scientific scope, but routing and the compatibility catalog never treat them as separate required workflow branches.
 
 `access: codex_native` is reserved for a validated handoff to a Codex-managed built-in tool. Such a module must request no user provider credential, invoke no provider SDK or CLI, emit a recognized operation plus post-result quality gates, and keep the handoff distinct from an observed artifact. The single Skill performs the host-native call and may record an artifact only after Codex returns and inspects it.
 
 Tested versions are reproducibility evidence, while allowed-version rules are execution policy. A detected version inside a row's policy may execute even when it is not the exact tested baseline, but provenance must preserve that distinction. Missing tools, versions outside every declared policy, known breaking changes, incompatible formats, genome-build or coordinate mismatches, and failed output validation block scientific evidence ingestion. Routing and usage guidance remain available so the assistant can explain remediation or choose a validated alternative. Release validation resolves every row against `reports/compatibility-execution-evidence.json` and rejects missing, stale, failed, path-bearing, or credential-bearing evidence.
+
+Bioinformatics modules are derived from manifest semantics rather than a central module-ID list: an `omics` or `molecular_design` module of type analysis, validation, transform, or design must expose at least one passing code template. Deterministic modules retain their executable entrypoint and add `code_templates`; `agent_generated` modules retain `agent_protocol.template_sections`. Packaged files must exactly match manifest references. Static validation requires substantive Python or R source with input and output handling, bounded failure behavior, version provenance, and scientific checks, and rejects placeholders, dependency provisioning, infrastructure control, unsafe shell execution, and local paths. `biomed_workbench/project_templates.py` supplies compatibility evaluation, closed-schema checks, finite-output checks, content-addressed command inputs, source immutability, provenance, and atomic no-overwrite result writing.
 
 Tool version behavior is structured rather than free text. Each affected surface declares an ID, exact supported version rules, category (`parameter`, `api`, `field`, `default`, `behavior`, `input-format`, or `output-format`), compatibility effect, required action, and authoritative source. Dependencies declare their own identity, typed bounded version probe, parse pattern, tested and allowed versions, platform scope, and structured conflict records. Python runtime, Python/R packages, Java or system commands, services, and databases therefore enter the compatibility decision through declared evidence rather than implicit package discovery.
 
@@ -76,13 +79,15 @@ python3 tools/create_module.py request.json --registry-root /path/to/module-regi
 python3 tools/validate_module.py /path/to/module-registry/new-analysis
 ```
 
-Creation occurs in a temporary same-filesystem directory. The validator checks package shape, permissions, symbolic links, local path traces, manifest closure, current kernel compatibility, entrypoint resolution, dependency and format evidence, compatibility rows, test schemas, execution timeout, output size, output schema, and expected results. Only a fully valid package is atomically renamed into the registry; failure leaves no partial module.
+Creation occurs in a temporary same-filesystem directory. For a bioinformatics module without an explicit Agent protocol, the creator also generates one module-local project template and binds every blocking quality gate before validation. The validator checks package shape, permissions, symbolic links, local path traces, manifest closure, current kernel compatibility, entrypoint resolution, template source quality, dependency and format evidence, compatibility rows, test schemas, execution timeout, output size, output schema, and expected results. Only a fully valid package is atomically renamed into the registry; failure leaves no partial module.
 
 Adding a module must not require edits to `catalog.py`, `router.py`, `runner.py`, the assistant, or the generated indexes. Built-in development places the validated package under `biomed_workbench/modules/builtin/`, then rebuilds generated projections:
 
 ```bash
 python3 tools/build_module_index.py
 python3 tools/build_catalog.py
+python3 tools/audit_bioinformatics_templates.py --output reports/bioinformatics-template-coverage.json
+python3 tools/scaffold_bioinformatics_templates.py --check
 python3 tools/validate_workbench.py --release
 python3 -m unittest discover -s tests -p 'test*.py'
 ```

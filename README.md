@@ -111,9 +111,18 @@ External scientific engines remain user-managed dependencies; the plugin guides,
 | `variant-decompress-bgzip` | bgzip `1.23` | htslib `1.23` | coordinate-sorted `vcf@4.5` BGZF plus TBI | byte-preserved uncompressed `vcf@4.5` |
 | `tumor-mutation-burden-vcf` | Python `3.14.3` | Python standard library `3.14.3` | filtered ANN `vcf@4.5` plus build-matched callable `bed@1.0` | auditable nonsynonymous mutations per callable union Mb |
 | `metagene-factorization-nmf` | Python `3.14.3` | NumPy `2.4.4`, SciPy `1.17.1`, scikit-learn `1.8.0` | normalized nonnegative `count-matrix@1.0.0` plus ordered feature/sample manifests | stable rank-selected metagene loadings, sample exposures, and independently reconstructed quality report |
+| `single-cell-communication` | LIANA `1.7.3`, CellPhoneDB `5.0.1`, CellChat `2.2.0`, NicheNet `2.2.1.1` | Python `3.10.20`, Scanpy `1.11.5`, AnnData `0.11.4`, R package runtimes | count-backed H5AD or Matrix Market plus cell type, biological sample, condition, species, and versioned resources | method-native and standardized sample interactions, replicate support, ligand activities, links, and validation report |
 | `image-chroma-key-remove` | Python `3.14.3` | Pillow `10.4.0` | one static untagged-sRGB PNG `3.0`, JPEG `T.81`, or WebP `riff-container-2025` communication asset | canonical RGBA PNG plus independently recomputed matte-quality report |
 
 Tool-use guidance and routing remain available regardless of the installed version. For scientific execution, versions inside the declared compatibility policy may run and are recorded verbatim; provenance also states whether each version is an exact tested baseline. Missing tools, versions outside the policy, known breaking changes, or invalid output structures prevent the result from entering the evidence ledger until the environment is corrected or a validated alternative is selected. The `reports/*-live-verification.json` files preserve the concrete versions used for FastQC, fastp, MultiQC, FastQ Screen, samtools, bedtools, VCF processing, TMB, and NMF regression evidence.
+
+## Bioinformatics Code Templates
+
+Every built-in `omics` or `molecular_design` analysis, validation, transform, or design module packages at least one substantive Python or R template for Codex to inspect and adapt. The current release covers 38/38 bioinformatics modules with 42 templates. A template must expose real parameterization, input validation, output serialization, failure handling, version provenance, and scientific quality checks; placeholders, dependency installation, infrastructure management, unsafe shell execution, local paths, and unbound blocking quality gates fail release validation.
+
+Deterministic modules declare `code_templates`; Agent-generated workflows reference templates through `agent_protocol.template_sections`. Both routes use module-local source, exact manifest references, the shared compatibility and artifact contracts, and observed output checks. `tools/create_module.py` automatically scaffolds and validates a template when a future bioinformatics module is created, while `tools/scaffold_bioinformatics_templates.py --check` detects drift. See `reports/bioinformatics-template-coverage.json` for the complete inventory.
+
+`single-cell-communication` is the first multi-backend template module under this contract. Its live fixture contains 160 cells from four independent samples and two conditions. LIANA and CellPhoneDB produce sample-stratified interactions and cross-sample support; CellChat runs each biological sample separately; NicheNet requires donor-aware receiver differential expression and project-pinned network resources. The verified run executes all four backends and is recorded in `reports/single-cell-communication-live-verification.json`. Cells are never treated as condition-level replicates.
 
 `scientific-illustration-generation` uses a separate `codex_native` contract. It validates a non-evidentiary scientific illustration brief and returns a machine-readable handoff to Codex `image_gen`; the unified Skill invokes the native tool and checks the observed bitmap. It never asks the user for a provider image API key, runs a provider SDK/CLI, or claims that a handoff alone created an image. See `reports/codex-native-handoff-verification.json` for the exact covered and retired source behaviors.
 
@@ -138,6 +147,8 @@ Tool-use guidance and routing remain available regardless of the installed versi
 - `tools/validate_workbench.py`: release validation for single-entry skill, catalog consistency, source coverage, and publish-safe paths.
 - `tools/reconcile_sources.py`: development-only one-to-one reconciliation of ignored source/design ledgers into a path-free release receipt root.
 - `reports/compatibility-execution-evidence.json`: path-free regression and end-to-end evidence bound to every supported compatibility row.
+- `reports/bioinformatics-template-coverage.json`: complete bioinformatics module-to-template coverage and source-quality results.
+- `reports/single-cell-communication-live-verification.json`: four-backend LIANA, CellPhoneDB, CellChat, and NicheNet execution evidence.
 - `reports/chroma-key-live-verification.json`: real command-boundary execution, synthetic edge fixture, output digests, alpha-class checks, and non-quantitative-use evidence for chroma keying.
 - `reports/source-reconciliation-summary.json`: public counts, pending capability decisions, current module/project-contract evidence binding, and an irreversible digest over all private per-file receipts.
 - `reports/plugin-contract-verification.json`: path-free official Codex plugin and Skill validation bound to the current manifest, single Skill entry, generated registry, and isolated snapshot.
@@ -148,6 +159,7 @@ Tool-use guidance and routing remain available regardless of the installed versi
 - `biomed_workbench/kernel/`: immutable project context, content-addressed artifacts, hypotheses, evidence, decisions, DAG state, and replay.
 - `biomed_workbench/orchestration/`: manifest-derived graph planning, compatibility-gated execution, quality checks, interpretation, and revision control.
 - `biomed_workbench/modules/scientific_command.py`: shell-free, bounded, compatibility-guided execution for payload-backed scientific tools.
+- `biomed_workbench/project_templates.py`: compatibility-gated execution and atomic result support shared by module-local project templates.
 - `biomed_workbench/formats/`: shared exact-version omics format profiles and pre-execution metadata validation.
 - `biomed_workbench/services/`: bounded public scientific database clients and credential policy.
 - `tests/`: unit, contract, end-to-end, and release checks.

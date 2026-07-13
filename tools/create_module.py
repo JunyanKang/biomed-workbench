@@ -18,6 +18,8 @@ if str(ROOT) not in sys.path:
 
 from biomed_workbench.modules.contract import parse_manifest  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry, ModuleRegistryError  # noqa: E402
+from biomed_workbench.modules.template_quality import is_bioinformatics_module  # noqa: E402
+from tools.scaffold_bioinformatics_templates import _identifier, _template_source  # noqa: E402
 from tools.validate_module import validate_module  # noqa: E402
 
 
@@ -30,11 +32,27 @@ def _validate_request(request: Any) -> tuple[dict[str, Any], list[dict[str, Any]
         raise ModuleCreationError("creation request must contain exactly manifest and tests")
     if not isinstance(request["manifest"], dict) or not isinstance(request["tests"], list) or not request["tests"]:
         raise ModuleCreationError("creation request requires a manifest and at least one executable test")
+    payload = dict(request["manifest"])
     try:
-        manifest = parse_manifest(request["manifest"])
+        manifest = parse_manifest(payload)
     except ValueError as exc:
         raise ModuleCreationError(f"manifest contract failed: {exc}") from exc
-    return dict(request["manifest"]), list(request["tests"])
+    if is_bioinformatics_module(manifest) and manifest.agent_protocol is None and not manifest.code_templates:
+        relative = f"templates/run_{_identifier(manifest.id)}.py"
+        payload["code_templates"] = [
+            {
+                "path": relative,
+                "language": "python",
+                "purpose": f"Execute and validate {manifest.title.lower()} against real project inputs and the module compatibility contract.",
+                "quality_gate_ids": [gate.id for gate in manifest.quality_gates if gate.blocks_interpretation],
+                "requires_adaptation": True,
+            }
+        ]
+        try:
+            parse_manifest(payload)
+        except ValueError as exc:
+            raise ModuleCreationError(f"generated template contract failed: {exc}") from exc
+    return payload, list(request["tests"])
 
 
 def _write_json(path: Path, payload: Any) -> None:
@@ -61,6 +79,11 @@ def create_module(request: dict[str, Any], registry_root: Path | str) -> Path:
         temporary_module.mkdir(mode=0o755)
         _write_json(temporary_module / "module.json", manifest_payload)
         _write_json(temporary_module / "tests" / "cases.json", {"schema_version": 1, "cases": cases})
+        for template in manifest_payload.get("code_templates", []):
+            template_path = temporary_module / template["path"]
+            template_path.parent.mkdir(parents=True, exist_ok=True, mode=0o755)
+            template_path.write_text(_template_source(manifest_payload, template["path"]), encoding="utf-8")
+            template_path.chmod(0o644)
         report = validate_module(temporary_module)
         if not report["valid"]:
             raise ModuleCreationError("; ".join(report["errors"]))

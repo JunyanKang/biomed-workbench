@@ -4,6 +4,17 @@
   "assumptions": [
     "Groups are independent, features are approximately suitable for Welch testing, and samples are biological replicates."
   ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_differential_expression.py",
+      "purpose": "Execute and validate run compact differential expression against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "differential-expression-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
   "compatibility_matrix": [
     {
       "dependency_versions": {

@@ -19,6 +19,7 @@ if str(ROOT) not in sys.path:
 
 from biomed_workbench.modules.contract import ModuleManifest, parse_manifest, version_is_allowed  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry, ModuleRegistryError  # noqa: E402
+from biomed_workbench.modules.template_quality import referenced_template_paths, validate_module_templates  # noqa: E402
 from biomed_workbench.runner import InputValidationError, _validate  # noqa: E402
 from biomed_workbench.version import VERSION  # noqa: E402
 
@@ -221,12 +222,10 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
         if not compatibility_complete:
             errors.append("compatibility regression or end-to-end evidence is incomplete")
         agent_assets = {path for path in files if _AGENT_ASSET_RE.fullmatch(path)}
-        if manifest.agent_protocol is not None:
-            referenced = {path for section in manifest.agent_protocol.template_sections for path in section.template_files}
-            if referenced != agent_assets or not referenced or any(not path.startswith("templates/") for path in referenced):
-                errors.append("agent protocol template references must exactly match packaged template assets")
-        elif agent_assets:
-            errors.append("only agent-generated modules may package templates or validators")
+        referenced = set(referenced_template_paths(manifest))
+        if referenced != agent_assets or any(not path.startswith("templates/") for path in referenced):
+            errors.append("manifest template references must exactly match packaged template assets")
+        errors.extend(validate_module_templates(module_path, manifest))
 
     if (module_path / "tests" / "cases.json").is_file():
         try:

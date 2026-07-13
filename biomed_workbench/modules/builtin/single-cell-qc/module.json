@@ -4,6 +4,17 @@
   "assumptions": [
     "Genes are rows, cells are columns, counts are non-negative, and thresholds are exploratory rather than universal."
   ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_single_cell_qc.py",
+      "purpose": "Execute and validate quality-control single-cell count data against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "single-cell-qc-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
   "compatibility_matrix": [
     {
       "dependency_versions": {
