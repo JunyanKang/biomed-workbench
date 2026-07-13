@@ -2324,6 +2324,82 @@
     },
     {
       "access": "offline",
+      "description": "Assign stable block identifiers after a full-document scan and mechanically derive exact-content block and document SHA-256 digests for downstream revision lineage.",
+      "entrypoint": "biomed_workbench.capabilities.revision:build_revision_base",
+      "id": "manuscript-revision-base",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "blocks": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "document_id": {
+            "type": "string"
+          },
+          "version_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "document_id",
+          "version_id",
+          "blocks"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Build a hash-bound manuscript revision base",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Validate manuscript and block digests, reviewer commitments, structural-change policy, evidence bindings, and response locations before atomically deriving a revision with complete lineage.",
+      "entrypoint": "biomed_workbench.capabilities.revision:apply_manuscript_revision",
+      "id": "manuscript-revision-lineage",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "audit_provenance": {
+            "type": "object"
+          },
+          "base_document": {
+            "type": "object"
+          },
+          "patch": {
+            "type": "object"
+          },
+          "policy": {
+            "type": "object"
+          },
+          "review_items": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "base_document",
+          "patch",
+          "review_items",
+          "policy",
+          "audit_provenance"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Apply an auditable manuscript revision patch",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
       "description": "Factorize a declared nonnegative normalized feature-by-sample matrix across candidate ranks and deterministic restarts, select a stable parsimonious rank within an explicit reconstruction-error gap, and independently validate metagene loadings, sample exposures, assignments, reconstruction, convergence, stability, and component redundancy.",
       "entrypoint": "scientific-command",
       "id": "metagene-factorization-nmf",
@@ -4547,7 +4623,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 70,
+  "entry_count": 72,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

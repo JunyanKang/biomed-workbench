@@ -18,6 +18,8 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         self.assertNotIn('"manuscript-audit"', source)
         self.assertNotIn('"temporal-integrity-audit"', source)
         self.assertNotIn('"assertion-citation-coverage-audit"', source)
+        self.assertNotIn('"manuscript-revision-lineage"', source)
+        self.assertNotIn('"manuscript-revision-base"', source)
         self.assertIn("_select_ranked_modules", source)
 
     def test_new_fixture_module_routes_from_manifest_only(self):

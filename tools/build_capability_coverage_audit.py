@@ -62,9 +62,13 @@ def refresh(path: Path) -> dict[str, object]:
         },
     )
     audit["family_signal_summary"]["covered"] = len(ids)
-    expansion = "independently_verified_static_raster_chroma_key_and_despill"
-    if expansion not in audit["implemented_expansion"]:
-        audit["implemented_expansion"].insert(5, expansion)
+    expansions = (
+        "independently_verified_static_raster_chroma_key_and_despill",
+        "hash_bound_manuscript_revision_lineage_and_reviewer_commitment_gates",
+    )
+    for expansion in reversed(expansions):
+        if expansion not in audit["implemented_expansion"]:
+            audit["implemented_expansion"].insert(5, expansion)
     basis = {key: audit[key] for key in DIGEST_FIELDS}
     audit["reassessment_digest"] = hashlib.sha256(
         json.dumps(basis, sort_keys=True, separators=(",", ":")).encode("utf-8")

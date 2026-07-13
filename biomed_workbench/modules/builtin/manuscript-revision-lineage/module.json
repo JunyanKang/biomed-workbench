@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "id": "manuscript-revision-lineage",
+  "version": "1.0.0",
+  "title": "Apply an auditable manuscript revision patch",
+  "description": "Validate manuscript and block digests, reviewer commitments, structural-change policy, evidence bindings, and response locations before atomically deriving a revision with complete lineage.",
+  "module_type": "transform",
+  "domains": ["publication", "peer review", "research integrity"],
+  "intents": ["apply manuscript revision", "audit revision patch", "revise from reviewer comments", "apply reviewer response changes", "稿件修订", "审稿意见修改", "修订谱系"],
+  "questions": ["Can this reviewer-driven manuscript patch be applied without silent rewriting, stale anchors, fabricated completion, or unresolved submission risks?"],
+  "entrypoint": "biomed_workbench.capabilities.revision:apply_manuscript_revision",
+  "execution": {"kind": "python", "timeout_seconds": 60, "max_output_bytes": 50000000},
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "base_document",
+      "artifact_type": "manuscript_revision_base",
+      "formats": [{"name": "manuscript-revision-base", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["revision-artifact"]}],
+      "processing_levels": ["declared", "hash-bound"],
+      "required_metadata": ["document_hash", "document_id", "version_id"]
+    },
+    {
+      "name": "revision_controls",
+      "artifact_type": "reviewer_revision_controls",
+      "formats": [{"name": "reviewer-revision-controls", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["request-object"]}],
+      "processing_levels": ["declared", "reviewed"],
+      "required_metadata": ["revision_round", "audit_id", "comment_extraction_complete"]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "revision_lineage_report",
+      "artifact_type": "manuscript_revision_lineage",
+      "formats": [{"name": "manuscript-revision-lineage", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["module-output"]}],
+      "processing_levels": ["validated", "derived"],
+      "required_metadata": ["module_version", "compatibility_row_id", "audit_digest", "parent_document_hash"]
+    }
+  ],
+  "preconditions": [
+    "The manuscript is represented as ordered machine-anchored blocks with mechanically generated full SHA-256 digests.",
+    "Reviewer and editor comments have stable identifiers and the extraction-completeness state is declared.",
+    "Every patch operation is bound to the current base digest, expected target digest, roadmap item, and reviewer comment."
+  ],
+  "assumptions": [
+    "A revision is a new lineage artifact; the base manuscript remains immutable.",
+    "Unchanged blocks must remain byte-content equivalent and retain their identifiers and digests.",
+    "Claiming a completed analysis, experiment, figure, or citation requires a real evidence artifact identifier.",
+    "Conflicting reviewer requests require an explicit editor-priority reconciliation rather than incompatible promises."
+  ],
+  "quality_gates": [
+    {"id": "revision-base-integrity", "severity": "fatal", "description": "Reject stale, fabricated, malformed, or mismatched base and target digests before mutation.", "blocks_interpretation": true},
+    {"id": "revision-all-or-none", "severity": "fatal", "description": "Validate all operations and reviewer commitments before deriving any revised artifact.", "blocks_interpretation": true},
+    {"id": "revision-structural-checkpoint", "severity": "major", "description": "Require explicit acknowledgment for heading changes or touched-block ratios above the declared threshold.", "blocks_interpretation": true},
+    {"id": "revision-response-traceability", "severity": "major", "description": "Block unsupported completion, unresolved placeholders, missing response locations, incomplete extraction, and unresolved reviewer conflicts.", "blocks_interpretation": true}
+  ],
+  "limitations": [
+    "The module operates on a structured block contract and does not itself parse or redline DOCX or LaTeX files.",
+    "Scientific sufficiency of bound evidence requires complementary claim, statistics, ethics, and editorial audits.",
+    "A structural acknowledgment records a reviewed decision; it does not prove that the revised scientific argument is correct."
+  ],
+  "evidence_effects": ["creates_traceable_revision_artifact", "validates_delivery_readiness", "blocks_unsupported_revision_claims"],
+  "alternatives": [],
+  "complements": ["manuscript-revision-base", "response-matrix", "manuscript-audit", "reviewer-assessment", "assertion-citation-coverage-audit", "claim-evidence-integrity-audit"],
+  "tool_requirements": [],
+  "dependencies": [
+    {
+      "name": "python",
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "required": true,
+      "tested_versions": ["3.14.3"],
+      "allowed_versions": [">=3.14,<3.15"],
+      "version_source": "https://www.python.org/downloads/release/python-3143/",
+      "verified_at": "2026-07-13",
+      "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Execute the deterministic validation and in-memory revision reducer.",
+      "conflicts": [],
+      "platforms": ["any"]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-manuscript-revision-bundle-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {"python": [">=3.14,<3.15"]},
+      "input_formats": {"base_document": ["manuscript-revision-base@1"], "revision_controls": ["reviewer-revision-controls@1"]},
+      "output_formats": {"revision_lineage_report": ["manuscript-revision-lineage@1"]},
+      "platforms": ["any"],
+      "regression_evidence_ids": ["manuscript-revision-lineage-regression-v1"],
+      "end_to_end_evidence_ids": ["manuscript-revision-lineage-e2e-v1"],
+      "verified_at": "2026-07-13"
+    }
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["base_document", "patch", "review_items", "policy", "audit_provenance"],
+    "properties": {
+      "base_document": {"type": "object"},
+      "patch": {"type": "object"},
+      "review_items": {"type": "array", "items": {"type": "object"}},
+      "policy": {"type": "object"},
+      "audit_provenance": {"type": "object"}
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["apply_status", "release_safe", "base_document_hash", "revised_document", "operations_applied", "fresh_block_ids", "untouched_block_ids", "pure_move_pairs", "structural_flags", "review_coverage", "issues", "issue_counts", "audit_digest", "quality_gates", "limitations"],
+    "properties": {
+      "apply_status": {"type": "string"},
+      "release_safe": {"type": "boolean"},
+      "base_document_hash": {"type": "string"},
+      "revised_document": {"nullable": true},
+      "operations_applied": {"type": "array"},
+      "fresh_block_ids": {"type": "array"},
+      "untouched_block_ids": {"type": "array"},
+      "pure_move_pairs": {"type": "array"},
+      "structural_flags": {"type": "object"},
+      "review_coverage": {"type": "object"},
+      "issues": {"type": "array"},
+      "issue_counts": {"type": "object"},
+      "audit_digest": {"type": "string"},
+      "quality_gates": {"type": "array"},
+      "limitations": {"type": "array"}
+    }
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned clean-room rewrite documented by the aggregate source-assimilation report."]}
+}

@@ -1455,6 +1455,230 @@
       }
     }
   },
+  "manuscript-revision-base": {
+    "input": {
+      "blocks": [
+        {
+          "id": null,
+          "kind": "heading",
+          "text": "Results"
+        },
+        {
+          "id": "B00009",
+          "kind": "paragraph",
+          "text": "Existing result."
+        },
+        {
+          "id": null,
+          "kind": "paragraph",
+          "text": "Validation result.\n"
+        }
+      ],
+      "document_id": "paper-base-e2e",
+      "version_id": "v1"
+    },
+    "output": {
+      "blocks": [
+        {
+          "hash": "dfafe20c1075b79c512bcf389a9bdbb40327782b666872fa8996b1ac0e2f9d89",
+          "id": "B00010",
+          "kind": "heading",
+          "text": "Results"
+        },
+        {
+          "hash": "e292d4278d80856857a2d84ff753ed8675fdbabe8b196005f8182a5e5b5c9097",
+          "id": "B00009",
+          "kind": "paragraph",
+          "text": "Existing result."
+        },
+        {
+          "hash": "c0e5411d0eee608b1b6f001859e198e2f6edec7d4518d9ff81c79fed9107623b",
+          "id": "B00011",
+          "kind": "paragraph",
+          "text": "Validation result.\n"
+        }
+      ],
+      "document_hash": "efe544cdb2b41a349cbe8db768ebf66c0efc0a074316fc4f09730a50f266c161",
+      "document_id": "paper-base-e2e",
+      "version_id": "v1"
+    }
+  },
+  "manuscript-revision-lineage": {
+    "input": {
+      "audit_provenance": {
+        "audit_id": "audit-e2e",
+        "audit_version": "1.0.0",
+        "comment_extraction_complete": true,
+        "independent_from_writer": true,
+        "reviewed_at": "2026-07-13"
+      },
+      "base_document": {
+        "blocks": [
+          {
+            "hash": "dfafe20c1075b79c512bcf389a9bdbb40327782b666872fa8996b1ac0e2f9d89",
+            "id": "B00001",
+            "kind": "heading",
+            "text": "Results"
+          },
+          {
+            "hash": "0230f8f879340cb01d8626d6b27e03509d3a94b7ac50a960f9c116088c4f5d20",
+            "id": "B00002",
+            "kind": "paragraph",
+            "text": "The marker caused the phenotype."
+          },
+          {
+            "hash": "d2d3c93f75f47ab24a61ce0e884413ca5a5df4cde4b37434c6f3374037ab91bc",
+            "id": "B00003",
+            "kind": "paragraph",
+            "text": "An independent analysis was performed."
+          }
+        ],
+        "document_hash": "a400864037380f6dbbad393690dd1078b305820bd6c3deeb490f805e3388aa0d",
+        "document_id": "paper-e2e",
+        "version_id": "v1"
+      },
+      "patch": {
+        "base_document_hash": "a400864037380f6dbbad393690dd1078b305820bd6c3deeb490f805e3388aa0d",
+        "emitted_by": "revision-writer",
+        "operations": [
+          {
+            "comment_ids": [
+              "R1.1"
+            ],
+            "expected_block_hash": "0230f8f879340cb01d8626d6b27e03509d3a94b7ac50a960f9c116088c4f5d20",
+            "new_blocks": [
+              {
+                "kind": "paragraph",
+                "text": "The marker was associated with the phenotype."
+              }
+            ],
+            "op": "replace_block",
+            "op_id": "op-e2e",
+            "rationale": "Match claim strength to the supplied independent analysis.",
+            "roadmap_item_ids": [
+              "roadmap-1"
+            ],
+            "target_block_id": "B00002"
+          }
+        ],
+        "patch_id": "patch-e2e",
+        "revision_round": 1
+      },
+      "policy": {
+        "editor_priority_comment_ids": [],
+        "structural_acknowledged": false,
+        "terminal_policy": "strict",
+        "touched_ratio_threshold": 0.6
+      },
+      "review_items": [
+        {
+          "action": "ACCEPT_ANALYSIS",
+          "comment": "Validate or soften the causal claim.",
+          "conflicting_with": [],
+          "evidence_ids": [
+            "analysis-e2e"
+          ],
+          "id": "R1.1",
+          "manuscript_block_ids": [
+            "B00002"
+          ],
+          "readiness": "ready_to_submit",
+          "response_text": "We added the independent analysis and revised the statement to describe an association.",
+          "reviewer": "Reviewer 1",
+          "risk_level": "high",
+          "status": "completed"
+        }
+      ]
+    },
+    "output": {
+      "apply_status": "applied",
+      "audit_digest": "cb50ffb972c42a5dcb49094e05634749cb5d11505145fad33bd66f9225691dc2",
+      "base_document_hash": "a400864037380f6dbbad393690dd1078b305820bd6c3deeb490f805e3388aa0d",
+      "fresh_block_ids": [],
+      "issue_counts": {},
+      "issues": [],
+      "limitations": [
+        "This structured reducer does not parse or redline DOCX or LaTeX files; an importer and exporter must preserve the same block and lineage contracts.",
+        "Scientific sufficiency of supplied evidence remains subject to claim-evidence, statistical, ethical, and editorial review modules."
+      ],
+      "operations_applied": [
+        {
+          "comment_ids": [
+            "R1.1"
+          ],
+          "op": "replace_block",
+          "op_id": "op-e2e",
+          "result_block_ids": [
+            "B00002"
+          ],
+          "roadmap_item_ids": [
+            "roadmap-1"
+          ],
+          "target_block_id": "B00002"
+        }
+      ],
+      "pure_move_pairs": [],
+      "quality_gates": [
+        "Base and block hashes are mechanically recomputed before any patch operation is applied.",
+        "All operations validate before an in-memory all-or-none reduction; the base artifact is never modified.",
+        "Unchanged blocks retain exact text, kind, ID, and digest across the revision lineage.",
+        "Reviewer completion requires traceable manuscript locations and real evidence for claimed analyses, experiments, figures, and citations.",
+        "Structural revisions require an explicit checkpoint and unresolved author input can never be labelled ready to submit."
+      ],
+      "release_safe": true,
+      "review_coverage": {
+        "comment_count": 1,
+        "patch_bound_comment_ids": [
+          "R1.1"
+        ],
+        "status_counts": {
+          "completed": 1
+        },
+        "unbound_comment_ids": []
+      },
+      "revised_document": {
+        "blocks": [
+          {
+            "hash": "dfafe20c1075b79c512bcf389a9bdbb40327782b666872fa8996b1ac0e2f9d89",
+            "id": "B00001",
+            "kind": "heading",
+            "text": "Results"
+          },
+          {
+            "hash": "a96e77b2ded78c30ee8743d7cec61a8cc7ddd728b1b48e654d0f3f654291bb08",
+            "id": "B00002",
+            "kind": "paragraph",
+            "text": "The marker was associated with the phenotype."
+          },
+          {
+            "hash": "d2d3c93f75f47ab24a61ce0e884413ca5a5df4cde4b37434c6f3374037ab91bc",
+            "id": "B00003",
+            "kind": "paragraph",
+            "text": "An independent analysis was performed."
+          }
+        ],
+        "document_hash": "f5e9bcba18da4f32c64cb1cbe52feb4dbed713149493c4e58c13dd25225b2d4a",
+        "document_id": "paper-e2e",
+        "parent_document_hash": "a400864037380f6dbbad393690dd1078b305820bd6c3deeb490f805e3388aa0d",
+        "patch_id": "patch-e2e",
+        "revision_round": 1,
+        "version_id": "v1.r1"
+      },
+      "structural_flags": {
+        "acknowledged": false,
+        "any": false,
+        "heading_count_delta": 0,
+        "heading_operation_ids": [],
+        "touched_ratio": 0.333333,
+        "touched_ratio_exceeded": false,
+        "touched_ratio_threshold": 0.6
+      },
+      "untouched_block_ids": [
+        "B00001",
+        "B00003"
+      ]
+    }
+  },
   "network-analysis": {
     "input": {
       "edges": [

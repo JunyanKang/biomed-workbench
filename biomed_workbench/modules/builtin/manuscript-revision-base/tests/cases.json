@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "cases": [{
+    "name": "assigns-after-global-maximum-and-hashes-exact-content",
+    "input": {
+      "document_id": "paper-base-e2e",
+      "version_id": "v1",
+      "blocks": [
+        {"id": null, "kind": "heading", "text": "Results"},
+        {"id": "B00009", "kind": "paragraph", "text": "Existing result."},
+        {"id": null, "kind": "paragraph", "text": "Validation result.\n"}
+      ]
+    },
+    "expected_subset": {
+      "document_id": "paper-base-e2e",
+      "version_id": "v1",
+      "blocks": [
+        {"id": "B00010", "kind": "heading", "text": "Results", "hash": "dfafe20c1075b79c512bcf389a9bdbb40327782b666872fa8996b1ac0e2f9d89"},
+        {"id": "B00009", "kind": "paragraph", "text": "Existing result.", "hash": "e292d4278d80856857a2d84ff753ed8675fdbabe8b196005f8182a5e5b5c9097"},
+        {"id": "B00011", "kind": "paragraph", "text": "Validation result.\n", "hash": "c0e5411d0eee608b1b6f001859e198e2f6edec7d4518d9ff81c79fed9107623b"}
+      ]
+    }
+  }]
+}

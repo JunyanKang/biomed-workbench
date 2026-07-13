@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import inspect
 import json
 import subprocess
 import sys
@@ -113,6 +114,12 @@ def capture() -> dict[str, object]:
         if len(manifest.compatibility_matrix) != 1:
             raise RuntimeError(f"module requires explicit multi-row evidence handling: {manifest.id}")
         row = manifest.compatibility_matrix[0]
+        entrypoint = registry.resolve_entrypoint(manifest.id)
+        implementation_path = Path(inspect.getsourcefile(entrypoint) or "").resolve()
+        try:
+            implementation_path.relative_to(ROOT.resolve())
+        except ValueError as exc:
+            raise RuntimeError(f"module implementation is outside the independent project: {manifest.id}") from exc
         context = {
             "module_id": manifest.id,
             "module_version": manifest.version,
@@ -121,6 +128,7 @@ def capture() -> dict[str, object]:
             "dependency_versions": {key: list(value) for key, value in row.dependency_versions.items()},
             "input_formats": {key: list(value) for key, value in row.input_formats.items()},
             "output_formats": {key: list(value) for key, value in row.output_formats.items()},
+            "implementation_sha256": _sha256(implementation_path),
         }
         if manifest.execution.kind == "command":
             try:
@@ -167,7 +175,7 @@ def capture() -> dict[str, object]:
             case = fixtures.get(manifest.id)
             if not isinstance(case, dict):
                 raise RuntimeError(f"offline regression fixture is missing: {manifest.id}")
-            direct = json.loads(json.dumps(registry.resolve_entrypoint(manifest.id)(**case["input"]), sort_keys=True))
+            direct = json.loads(json.dumps(entrypoint(**case["input"]), sort_keys=True))
             _assert_subset(case["output"], direct)
             regression_digest = digest_value({**context, "kind": "regression", "input": case["input"], "output": direct})
             plan = route(manifest.intents[0], registry=registry)

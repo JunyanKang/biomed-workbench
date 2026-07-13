@@ -39,6 +39,12 @@ class CompatibilityExecutionEvidenceTests(unittest.TestCase):
         for marker in ("/Users/", "/private/", "file://", "NCBI_API_KEY", "api_key=", "nvapi-"):
             self.assertNotIn(marker, serialized)
 
+    def test_every_record_is_bound_to_current_project_implementation_bytes(self):
+        report = json.loads(REPORT.read_text(encoding="utf-8"))
+
+        self.assertTrue(all(len(record["implementation_sha256"]) == 64 for record in report["records"]))
+        self.assertTrue(all(set(record["implementation_sha256"]) <= set("0123456789abcdef") for record in report["records"]))
+
 
 if __name__ == "__main__":
     unittest.main()

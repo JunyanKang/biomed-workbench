@@ -5,6 +5,8 @@ import sys
 import unittest
 from pathlib import Path
 
+from biomed_workbench.capabilities.revision import build_revision_base
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -176,6 +178,51 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
     def test_response_matrix(self):
         output = execute("response-matrix", {"comments": [{"reviewer":"1","comment":"C","response":"R","action":"A","status":"completed"}]})
         self.assertEqual(output["unresolved_indices"], [])
+
+    def test_manuscript_revision_base(self):
+        output = execute("manuscript-revision-base", {
+            "document_id": "paper-base-e2e", "version_id": "v1",
+            "blocks": [
+                {"id": None, "kind": "heading", "text": "Results"},
+                {"id": "B00009", "kind": "paragraph", "text": "Existing result."},
+                {"id": None, "kind": "paragraph", "text": "Validation result.\n"},
+            ],
+        })
+        self.assertEqual([block["id"] for block in output["blocks"]], ["B00010", "B00009", "B00011"])
+        self.assertRegex(output["document_hash"], r"^[0-9a-f]{64}$")
+
+    def test_manuscript_revision_lineage(self):
+        base = build_revision_base("paper-e2e", "v1", [
+            {"id": "B00001", "kind": "heading", "text": "Results"},
+            {"id": "B00002", "kind": "paragraph", "text": "The marker caused the phenotype."},
+            {"id": "B00003", "kind": "paragraph", "text": "An independent analysis was performed."},
+        ])
+        payload = {
+            "base_document": base,
+            "patch": {
+                "patch_id": "patch-e2e", "revision_round": 1, "base_document_hash": base["document_hash"],
+                "emitted_by": "revision-writer", "operations": [{
+                    "op_id": "op-e2e", "op": "replace_block", "target_block_id": "B00002",
+                    "expected_block_hash": base["blocks"][1]["hash"],
+                    "new_blocks": [{"kind": "paragraph", "text": "The marker was associated with the phenotype."}],
+                    "comment_ids": ["R1.1"], "roadmap_item_ids": ["roadmap-1"],
+                    "rationale": "Match claim strength to the supplied independent analysis."
+                }]
+            },
+            "review_items": [{
+                "id": "R1.1", "reviewer": "Reviewer 1", "comment": "Validate or soften the causal claim.",
+                "action": "ACCEPT_ANALYSIS", "readiness": "ready_to_submit", "risk_level": "high",
+                "manuscript_block_ids": ["B00002"], "evidence_ids": ["analysis-e2e"],
+                "response_text": "We added the independent analysis and revised the statement to describe an association.",
+                "status": "completed", "conflicting_with": []
+            }],
+            "policy": {"structural_acknowledged": False, "touched_ratio_threshold": 0.6, "terminal_policy": "strict", "editor_priority_comment_ids": []},
+            "audit_provenance": {"audit_id": "audit-e2e", "audit_version": "1.0.0", "reviewed_at": "2026-07-13", "independent_from_writer": True, "comment_extraction_complete": True}
+        }
+        output = execute("manuscript-revision-lineage", payload)
+        self.assertEqual(output["apply_status"], "applied")
+        self.assertTrue(output["release_safe"])
+        self.assertEqual(output["revised_document"]["parent_document_hash"], base["document_hash"])
 
     def test_figure_specification(self):
         output = execute("figure-specification", {"title":"F","panels":[{"label":"a","claim":"C","data_source":"D","plot":"scatter"}]})

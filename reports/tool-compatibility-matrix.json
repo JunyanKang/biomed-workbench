@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 70,
-  "module_count": 70,
+  "compatibility_complete": 72,
+  "module_count": 72,
   "modules": [
     {
       "compatibility_rows": [
@@ -4575,6 +4575,285 @@
           "required_metadata": [
             "module_version",
             "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "manuscript-revision-base-e2e-v1"
+          ],
+          "id": "python-3.14.3-ordered-manuscript-blocks-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "manuscript-revision-base-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Generate deterministic identifiers and SHA-256 revision manifests.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "manuscript-revision-base",
+      "input_formats": [
+        {
+          "artifact_type": "ordered_manuscript_blocks",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "ordered-manuscript-blocks",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "manuscript_blocks",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [
+            "document_id",
+            "version_id",
+            "block_kind"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "manuscript_revision_base",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "manuscript-revision-base",
+              "orientations": [
+                "revision-artifact"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "base_document",
+          "processing_levels": [
+            "hash-bound",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "document_hash",
+            "document_id",
+            "version_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "manuscript-revision-lineage-e2e-v1"
+          ],
+          "id": "python-3.14.3-manuscript-revision-bundle-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "manuscript-revision-lineage-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the deterministic validation and in-memory revision reducer.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "manuscript-revision-lineage",
+      "input_formats": [
+        {
+          "artifact_type": "manuscript_revision_base",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "manuscript-revision-base",
+              "orientations": [
+                "revision-artifact"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "base_document",
+          "processing_levels": [
+            "declared",
+            "hash-bound"
+          ],
+          "required_metadata": [
+            "document_hash",
+            "document_id",
+            "version_id"
+          ]
+        },
+        {
+          "artifact_type": "reviewer_revision_controls",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "reviewer-revision-controls",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "revision_controls",
+          "processing_levels": [
+            "declared",
+            "reviewed"
+          ],
+          "required_metadata": [
+            "revision_round",
+            "audit_id",
+            "comment_extraction_complete"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "manuscript_revision_lineage",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "manuscript-revision-lineage",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "revision_lineage_report",
+          "processing_levels": [
+            "validated",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "audit_digest",
+            "parent_document_hash"
           ]
         }
       ],
@@ -9964,6 +10243,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "768b638344fe3355cf0d19411544483262bfa02af2c9fda042b67cbf966abdf2",
+  "registry_digest": "f930bd5122ae0415390a756819422e3bec83aa88ef18e5a8bf56538dbcf841dd",
   "schema_version": 1
 }

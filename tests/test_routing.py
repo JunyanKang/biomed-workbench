@@ -91,6 +91,20 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(plan["selected_module_ids"], ["assertion-citation-coverage-audit"])
         self.assertEqual(plan["plan_type"], "single")
 
+    def test_reviewer_patch_request_routes_to_revision_lineage(self):
+        plan = route("根据审稿意见应用稿件修订补丁并检查修订谱系")
+
+        self.assertEqual(plan["selected_module_ids"], ["manuscript-revision-lineage"])
+        self.assertEqual(plan["matched_workflows"], ["publication"])
+        self.assertEqual(plan["plan_type"], "single")
+
+    def test_revision_from_raw_blocks_selects_base_and_apply_modules_serially(self):
+        plan = route("先为稿件建立修订基稿，再根据审稿意见应用修订补丁", per_workflow=5)
+
+        self.assertEqual(plan["selected_module_ids"], ["manuscript-revision-base", "manuscript-revision-lineage"])
+        self.assertEqual(plan["matched_workflows"], ["publication"])
+        self.assertEqual(plan["plan_type"], "serial")
+
     def test_composite_review_selects_independent_audits_in_parallel(self):
         plan = route("同时审查论文时间逻辑和未引证的经验性主张", per_workflow=5)
 

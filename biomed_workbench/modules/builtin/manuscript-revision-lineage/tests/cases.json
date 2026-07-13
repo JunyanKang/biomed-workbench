@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "applies-hash-bound-reviewer-revision",
+      "input": {
+        "base_document": {
+          "document_id": "paper-e2e",
+          "version_id": "v1",
+          "document_hash": "a400864037380f6dbbad393690dd1078b305820bd6c3deeb490f805e3388aa0d",
+          "blocks": [
+            {"id": "B00001", "kind": "heading", "text": "Results", "hash": "dfafe20c1075b79c512bcf389a9bdbb40327782b666872fa8996b1ac0e2f9d89"},
+            {"id": "B00002", "kind": "paragraph", "text": "The marker caused the phenotype.", "hash": "0230f8f879340cb01d8626d6b27e03509d3a94b7ac50a960f9c116088c4f5d20"},
+            {"id": "B00003", "kind": "paragraph", "text": "An independent analysis was performed.", "hash": "d2d3c93f75f47ab24a61ce0e884413ca5a5df4cde4b37434c6f3374037ab91bc"}
+          ]
+        },
+        "patch": {
+          "patch_id": "patch-e2e",
+          "revision_round": 1,
+          "base_document_hash": "a400864037380f6dbbad393690dd1078b305820bd6c3deeb490f805e3388aa0d",
+          "emitted_by": "revision-writer",
+          "operations": [{
+            "op_id": "op-e2e",
+            "op": "replace_block",
+            "target_block_id": "B00002",
+            "expected_block_hash": "0230f8f879340cb01d8626d6b27e03509d3a94b7ac50a960f9c116088c4f5d20",
+            "new_blocks": [{"kind": "paragraph", "text": "The marker was associated with the phenotype."}],
+            "comment_ids": ["R1.1"],
+            "roadmap_item_ids": ["roadmap-1"],
+            "rationale": "Match claim strength to the supplied independent analysis."
+          }]
+        },
+        "review_items": [{
+          "id": "R1.1",
+          "reviewer": "Reviewer 1",
+          "comment": "Validate or soften the causal claim.",
+          "action": "ACCEPT_ANALYSIS",
+          "readiness": "ready_to_submit",
+          "risk_level": "high",
+          "manuscript_block_ids": ["B00002"],
+          "evidence_ids": ["analysis-e2e"],
+          "response_text": "We added the independent analysis and revised the statement to describe an association.",
+          "status": "completed",
+          "conflicting_with": []
+        }],
+        "policy": {"structural_acknowledged": false, "touched_ratio_threshold": 0.6, "terminal_policy": "strict", "editor_priority_comment_ids": []},
+        "audit_provenance": {"audit_id": "audit-e2e", "audit_version": "1.0.0", "reviewed_at": "2026-07-13", "independent_from_writer": true, "comment_extraction_complete": true}
+      },
+      "expected_subset": {
+        "apply_status": "applied",
+        "release_safe": true,
+        "base_document_hash": "a400864037380f6dbbad393690dd1078b305820bd6c3deeb490f805e3388aa0d",
+        "issues": [],
+        "issue_counts": {}
+      }
+    }
+  ]
+}
