@@ -187,6 +187,21 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         self.assertTrue(output["execution_policy"]["observed_execution_required"])
         self.assertTrue(any("Do not force transitional" in item for item in output["forbidden_actions"]))
 
+    def test_single_cell_trajectory_velocity(self):
+        output = execute("single-cell-trajectory-velocity", {
+            "objective": "Infer RNA velocity and validate direction against independent time and root-terminal evidence.",
+            "input_artifact_id": "artifact-splicing-kinetics", "input_format": "h5ad",
+            "spliced_layer": "spliced", "unspliced_layer": "unspliced", "biological_sample_key": "sample_id",
+            "experimental_time_key": "collection_time", "root_score_key": "root_score", "terminal_score_key": "terminal_score",
+            "declared_thresholds": {"minimum_modeled_genes": 20, "minimum_latent_time_correlation": 0.65, "minimum_velocity_pseudotime_correlation": 0.25, "minimum_root_terminal_separation": 0.05, "minimum_median_velocity_confidence": 0.7},
+            "design_notes": "Four independent samples span the process; experimental time is withheld from fitting."
+        })
+        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"scvelo", "scanpy"})
+        self.assertIn("velocity-independent-direction", output["quality_gate_ids"])
+        self.assertTrue(output["execution_policy"]["observed_execution_required"])
+        self.assertTrue(any("Do not infer direction from UMAP" in item for item in output["forbidden_actions"]))
+
     def test_variant_summary(self):
         output = execute("variant-summary", {"variants": [{"chrom": "1", "ref": "A", "alt": "G", "filter": "PASS"}]})
         self.assertEqual(output["transition_count"], 1)

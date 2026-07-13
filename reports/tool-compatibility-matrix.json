@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 79,
-  "module_count": 79,
+  "compatibility_complete": 80,
+  "module_count": 80,
   "modules": [
     {
       "compatibility_rows": [
@@ -11639,6 +11639,463 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "single-cell-trajectory-velocity-e2e-v1"
+          ],
+          "id": "agent-protocol-1-scvelo-034-scanpy-1115",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "single-cell-trajectory-velocity-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate the request and emit the Agent protocol; this is not the scientific velocity runtime.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        },
+        {
+          "allowed_versions": [
+            ">=0.11,<0.12"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "anndata",
+          "name": "anndata",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Preserve h5ad layers, graphs, trajectories, fit fields, and source identities.",
+          "required": true,
+          "tested_versions": [
+            "0.11.4"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import anndata; print(anndata.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://anndata.readthedocs.io/en/stable/release-notes/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.26,<1.27"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "numpy",
+          "name": "numpy",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate count, fit, velocity, confidence, and direction arrays.",
+          "required": true,
+          "tested_versions": [
+            "1.26.4"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import numpy; print(numpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://numpy.org/doc/1.26/release.html"
+        },
+        {
+          "allowed_versions": [
+            ">=2.3,<2.4"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "pandas",
+          "name": "pandas",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate sample, time, root, terminal, and fit metadata.",
+          "required": true,
+          "tested_versions": [
+            "2.3.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import pandas; print(pandas.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pandas.pydata.org/docs/whatsnew/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.15,<1.16"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "scipy",
+          "name": "scipy",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Preserve sparse layers and compute temporal rank correlations.",
+          "required": true,
+          "tested_versions": [
+            "1.15.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import scipy; print(scipy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://docs.scipy.org/doc/scipy/release.html"
+        },
+        {
+          "allowed_versions": [
+            ">=1.7,<1.8"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "sklearn",
+          "name": "scikit-learn",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Support validated PCA and neighborhood dependencies.",
+          "required": true,
+          "tested_versions": [
+            "1.7.2"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import sklearn; print(sklearn.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://scikit-learn.org/stable/whats_new/v1.7.html"
+        },
+        {
+          "allowed_versions": [
+            ">=0.65,<0.66"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "numba",
+          "name": "numba",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute detected Scanpy and scVelo compiled numerical kernels.",
+          "required": true,
+          "tested_versions": [
+            "0.65.1"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import numba; print(numba.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://numba.readthedocs.io/en/stable/release-notes.html"
+        },
+        {
+          "allowed_versions": [
+            ">=0.5.12,<0.6"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "umap",
+          "name": "umap-learn",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Create the descriptive embedding on which velocity vectors are serialized; it is not a direction gate.",
+          "required": true,
+          "tested_versions": [
+            "0.5.12"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import umap; print(umap.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pypi.org/project/umap-learn/0.5.12/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "single-cell-trajectory-velocity",
+      "input_formats": [
+        {
+          "artifact_type": "single_cell_splicing_object",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none",
+                "gzip",
+                "lzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "h5ad",
+              "orientations": [
+                "observations-by-variables"
+              ],
+              "representations": [
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "0.1.0"
+              ]
+            }
+          ],
+          "name": "splicing_kinetics_object",
+          "processing_levels": [
+            "quality-controlled",
+            "spliced-unspliced-counted",
+            "root-terminal-anchored"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "spliced-layer",
+            "unspliced-layer",
+            "biological-sample-key",
+            "experimental-time-key",
+            "root-score-key",
+            "terminal-score-key",
+            "feature-identifier-namespace",
+            "annotation-release",
+            "cell-accounting",
+            "quantification-provenance"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "single_cell_trajectory_object",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none",
+                "gzip",
+                "lzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "h5ad",
+              "orientations": [
+                "observations-by-variables"
+              ],
+              "representations": [
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "0.1.0"
+              ]
+            }
+          ],
+          "name": "trajectory_velocity_object",
+          "processing_levels": [
+            "dynamical-velocity-modeled",
+            "direction-validated",
+            "reload-validated"
+          ],
+          "required_metadata": [
+            "velocity-layer",
+            "velocity-graph",
+            "velocity-umap",
+            "velocity-pseudotime",
+            "latent-time",
+            "velocity-confidence",
+            "modeled-genes",
+            "root-and-terminal-validation",
+            "experimental-time-withheld-from-fitting",
+            "raw-layer-checks",
+            "quality-status"
+          ]
+        },
+        {
+          "artifact_type": "single_cell_trajectory_validation",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "model-by-direction-confidence-and-quality"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "trajectory_velocity_validation",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "model-parameters",
+            "modeled-and-finite-fit-genes",
+            "time-correlations",
+            "root-terminal-separation",
+            "velocity-confidence",
+            "source-preservation",
+            "reload-validation",
+            "quality-gate-results",
+            "artifact-digests"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=0.3.4,<0.4"
+          ],
+          "ecosystem": "python",
+          "identity": "scvelo",
+          "mismatch_policy": "block",
+          "name": "scvelo",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "0.3.4"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=0.3.4,<0.4"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "filter_and_normalize no longer accepts the legacy n_top_genes shortcut; moments, recover_dynamics, velocity graph, pseudotime, latent time, and embedding fields are tied to this release.",
+              "id": "scvelo-034-preprocessing-and-dynamics-api",
+              "required_action": "Call normalization, log transform, HVG selection, PCA, neighbors, moments, dynamics, and direction methods separately and reload all fields.",
+              "source": "https://scvelo.readthedocs.io/en/stable/release_notes/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import scvelo; print(scvelo.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://scvelo.readthedocs.io/en/stable/release_notes/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.11,<1.12"
+          ],
+          "ecosystem": "python",
+          "identity": "scanpy",
+          "mismatch_policy": "block",
+          "name": "scanpy",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.11.5"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.11,<1.12"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parameter",
+              "description": "HVG, PCA, neighbor, UMAP, and h5ad serialization behavior are version-coupled.",
+              "id": "scanpy-neighbor-umap-h5ad",
+              "required_action": "Record parameters and reload representation, graph, and output fields.",
+              "source": "https://scanpy.readthedocs.io/en/stable/release-notes/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import scanpy; print(scanpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "source-freshness-audit-e2e-v1"
           ],
           "id": "python-3.14.3-source-freshness-1",
@@ -13221,6 +13678,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "15e235de7d1be231a42f416fba3e71ae9855f34a566f94f2bf595483370974e7",
+  "registry_digest": "eaa5dccee4a40daddc4f37e4304d939322b6eda6c5d5683d615dfa7f5d3b97f5",
   "schema_version": 1
 }

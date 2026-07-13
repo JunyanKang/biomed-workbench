@@ -4228,6 +4228,90 @@
       "workflow": "omics"
     },
     {
+      "access": "agent_generated",
+      "description": "Direct Codex to inspect a real count-backed h5ad with spliced and unspliced layers, biological samples, independent experimental time, and root and terminal anchors; adapt and execute scVelo dynamical modeling in the user's existing environment; generate velocity, velocity graph, UMAP vectors, velocity pseudotime, and latent time; validate direction against withheld time and anchors; preserve source counts and identifiers; and block unsupported temporal interpretation.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-trajectory-velocity",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "biological_sample_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "experimental_time_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "root_score_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "spliced_layer": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "terminal_score_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "unspliced_layer": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "spliced_layer",
+          "unspliced_layer",
+          "biological_sample_key",
+          "experimental_time_key",
+          "root_score_key",
+          "terminal_score_key",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Infer and validate RNA velocity, pseudotime, and latent time",
+      "workflow": "omics"
+    },
+    {
       "access": "offline",
       "description": "Compute deterministic source-snapshot review dates, block future-dated or policy-expired use, and keep temporal review status distinct from unassessed upstream drift.",
       "entrypoint": "biomed_workbench.capabilities.research_quality:audit_source_freshness",
@@ -5270,7 +5354,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 79,
+  "entry_count": 80,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

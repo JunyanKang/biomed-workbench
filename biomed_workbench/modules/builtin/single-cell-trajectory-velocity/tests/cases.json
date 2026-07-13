@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "cases": [{
+    "name": "prepare-direction-validated-rna-velocity",
+    "input": {
+      "objective": "Infer RNA velocity and pseudotime and validate direction against independent experimental time and root and terminal evidence.",
+      "input_artifact_id": "artifact-splicing-kinetics",
+      "input_format": "h5ad",
+      "spliced_layer": "spliced",
+      "unspliced_layer": "unspliced",
+      "biological_sample_key": "sample_id",
+      "experimental_time_key": "collection_time",
+      "root_score_key": "root_score",
+      "terminal_score_key": "terminal_score",
+      "declared_thresholds": {"minimum_modeled_genes": 20, "minimum_latent_time_correlation": 0.65, "minimum_velocity_pseudotime_correlation": 0.25, "minimum_root_terminal_separation": 0.05, "minimum_median_velocity_confidence": 0.7},
+      "design_notes": "Four independent samples span the process; experimental time is withheld from fitting; root and terminal evidence is externally defined."
+    },
+    "expected_subset": {
+      "handoff_type": "codex_generated_project_analysis",
+      "module": {"id": "single-cell-trajectory-velocity", "version": "1.0.0"},
+      "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}
+    }
+  }]
+}

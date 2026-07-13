@@ -43,6 +43,12 @@ class DynamicModuleRoutingTests(unittest.TestCase):
 
         self.assertIn("single-cell-reference-annotation", routed)
 
+    def test_single_cell_trajectory_velocity_routes_from_manifest(self):
+        plan = route("Run scVelo RNA velocity latent time and direction-validated pseudotime")
+        routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}
+
+        self.assertIn("single-cell-trajectory-velocity", routed)
+
     def test_router_contains_no_module_specific_intent_table(self):
         source = (Path(__file__).resolve().parents[2] / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
 

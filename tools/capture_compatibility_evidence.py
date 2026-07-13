@@ -83,6 +83,12 @@ AGENT_EVIDENCE = {
         "summary_flags": ("singler_reference_mapping_executed", "marker_contracts_applied", "ontology_ancestor_constraints_applied", "unknown_population_retained", "existing_labels_and_raw_counts_preserved", "evaluation_labels_posthoc_only", "annotated_h5ad_reloaded", "no_environment_or_compute_infrastructure_managed"),
         "live_dependency_keys": ("anndata", "numpy", "pandas", "scipy", "scikit-learn", "r", "Matrix", "BiocParallel", "jsonlite"),
     },
+    "single-cell-trajectory-velocity": {
+        "path": "reports/single-cell-trajectory-velocity-live-verification.json",
+        "execution_flags": ("dynamical_model_completed", "velocity_graph_completed"),
+        "summary_flags": ("spliced_unspliced_layers_validated", "dynamical_rna_velocity_executed", "velocity_graph_and_pseudotime_executed", "latent_time_direction_validated_against_known_time", "root_and_terminal_direction_validated", "experimental_time_withheld_from_model_fitting", "source_counts_and_identifiers_preserved", "velocity_h5ad_reloaded", "no_environment_or_compute_infrastructure_managed"),
+        "live_dependency_keys": ("anndata", "numpy", "pandas", "scipy", "scikit-learn", "numba", "umap-learn"),
+    },
 }
 
 
