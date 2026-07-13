@@ -121,6 +121,24 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         self.assertTrue(output["execution_policy"]["planned_output_is_not_evidence"])
         self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"scanpy", "seurat"})
 
+    def test_single_cell_donor_inference(self):
+        output = execute("single-cell-donor-inference", {
+            "objective": "Test treatment-associated expression changes within reviewed cell types using donor-level biological replication.",
+            "input_artifact_id": "artifact-scrna-annotated", "input_format": "h5ad", "raw_count_location": "layers.counts",
+            "biological_sample_key": "sample_id", "cell_type_key": "cell_type", "condition_key": "condition",
+            "reference_level": "control", "contrast_level": "treated", "categorical_covariates": ["sex"], "continuous_covariates": [], "subject_key": "none",
+            "requested_engines": ["edger", "deseq2", "limma-voom"],
+            "declared_thresholds": {"min_cells_per_pseudobulk": 20, "min_library_size": 10000, "min_replicates_per_group": 3},
+            "design_notes": "Eight independent donors, four per condition; sex is not confounded with treatment."
+        })
+        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertTrue(output["execution_policy"]["observed_execution_required"])
+        self.assertTrue(output["execution_policy"]["planned_output_is_not_evidence"])
+        self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"scanpy", "edgeR", "DESeq2", "limma"})
+        self.assertEqual({item["name"] for item in output["dependency_profiles"]}, {"python", "anndata", "numpy", "pandas", "scipy", "r", "jsonlite", "digest"})
+        self.assertIn("donor-design-estimability", output["quality_gate_ids"])
+        self.assertTrue(any("Do not use cells" in item for item in output["forbidden_actions"]))
+
     def test_variant_summary(self):
         output = execute("variant-summary", {"variants": [{"chrom": "1", "ref": "A", "alt": "G", "filter": "PASS"}]})
         self.assertEqual(output["transition_count"], 1)

@@ -3646,6 +3646,130 @@
     },
     {
       "access": "agent_generated",
+      "description": "Direct Codex to inspect a real annotated single-cell count object and experimental design; generate project-specific code that aggregates immutable raw counts by biological sample and cell type; fit estimable edgeR, DESeq2, or limma-voom condition contrasts using biological replicates; diagnose confounding, low replication, sample outliers, and model sensitivity; execute the reviewed code in the user's existing scientific environment; and admit only observed, reloaded, quality-controlled statistical artifacts into project evidence.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-donor-inference",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "biological_sample_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "categorical_covariates": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "cell_type_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "condition_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "continuous_covariates": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "contrast_level": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "raw_count_location": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_level": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_engines": {
+            "items": {
+              "enum": [
+                "edger",
+                "deseq2",
+                "limma-voom"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "subject_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "raw_count_location",
+          "biological_sample_key",
+          "cell_type_key",
+          "condition_key",
+          "reference_level",
+          "contrast_level",
+          "categorical_covariates",
+          "continuous_covariates",
+          "subject_key",
+          "requested_engines",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Generate and validate donor-aware single-cell pseudobulk inference",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
       "description": "Direct Codex to inspect a real h5ad, 10x HDF5, Matrix Market, or Seurat v5 object; generate project-specific Scanpy or Seurat code for input validation, QC, raw-count preservation, normalization, feature selection, scaling, dimensionality reduction, neighborhood construction, clustering, and stability review; execute it in the user's existing scientific environment; and admit only observed, validated artifacts into project evidence.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-foundation-workflow",
@@ -4860,7 +4984,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 75,
+  "entry_count": 76,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

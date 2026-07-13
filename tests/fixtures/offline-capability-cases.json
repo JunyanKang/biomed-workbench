@@ -2693,6 +2693,491 @@
       "reverse_complement": "GCGCAT"
     }
   },
+  "single-cell-donor-inference": {
+    "input": {
+      "biological_sample_key": "sample_id",
+      "categorical_covariates": [
+        "sex"
+      ],
+      "cell_type_key": "cell_type",
+      "condition_key": "condition",
+      "continuous_covariates": [],
+      "contrast_level": "treated",
+      "declared_thresholds": {
+        "min_cells_per_pseudobulk": 20,
+        "min_library_size": 10000,
+        "min_replicates_per_group": 3
+      },
+      "design_notes": "Eight independent donors, four per condition; sex is not confounded with treatment.",
+      "input_artifact_id": "artifact-scrna-annotated",
+      "input_format": "h5ad",
+      "objective": "Test treatment-associated expression changes within reviewed cell types using donor-level biological replication.",
+      "raw_count_location": "layers.counts",
+      "reference_level": "control",
+      "requested_engines": [
+        "edger",
+        "deseq2",
+        "limma-voom"
+      ],
+      "subject_key": "none"
+    },
+    "output": {
+      "code_plan": [
+        {
+          "id": "inspect-counts-annotations-and-design",
+          "output_artifact_types": [
+            "donor_aware_inference_report"
+          ],
+          "purpose": "Establish raw-count, annotation, experimental-unit, pairing, covariate, and contrast semantics from the real object before aggregation or modeling.",
+          "required_logic": [
+            "Read the declared h5ad without mutation and report shape, layers, raw-count evidence, observation fields, unique biological samples, cell types, conditions, subjects, covariates, feature namespace, and annotation provenance.",
+            "Reject normalized or fractional count matrices, duplicate identities, missing design values, within-sample condition or covariate inconsistency, unstable annotation fields, and ambiguous experimental units.",
+            "Cross-tabulate condition, biological sample, subject, batch, and cell type to identify confounding, structural missingness, pairing, and expected power before generating a model."
+          ],
+          "template_files": [
+            "templates/pseudobulk_aggregate.py"
+          ]
+        },
+        {
+          "id": "aggregate-biological-pseudobulks",
+          "output_artifact_types": [
+            "pseudobulk_count_matrix",
+            "pseudobulk_sample_manifest",
+            "donor_aware_inference_report"
+          ],
+          "purpose": "Aggregate immutable raw counts by biological sample and reviewed cell type with exact cell and count conservation.",
+          "required_logic": [
+            "Use a sparse group-incidence operation over biological-sample-by-cell-type groups and never aggregate normalized, integrated, scaled, imputed, or batch-corrected values.",
+            "Preserve every pseudobulk, its cell count, library size, condition, covariates, subject, eligibility state, and exclusion reason; do not silently drop rare or failed groups.",
+            "Reconcile every input cell and raw count with the aggregate matrix and write separate count, metadata, and machine-readable accounting artifacts."
+          ],
+          "template_files": [
+            "templates/pseudobulk_aggregate.py"
+          ]
+        },
+        {
+          "id": "fit-donor-aware-count-models",
+          "output_artifact_types": [
+            "donor_aware_differential_result",
+            "donor_aware_inference_report"
+          ],
+          "purpose": "Fit cell-type-stratified condition contrasts with biological samples as replicates and an inspected full-rank design.",
+          "required_logic": [
+            "Construct each design matrix from actual pseudobulk metadata, place condition after justified subject and covariate terms, verify full rank and coefficient direction, and skip rather than fabricate non-estimable cell types.",
+            "Use validated engine-native filtering, normalization, dispersion or mean-variance estimation, effect sizes, tests, and BH correction; record every engine and parameter choice.",
+            "For repeated measures, include a validated subject effect or separately implemented mixed model and verify that condition remains estimable; never use cells, clusters, or technical libraries as biological replicates."
+          ],
+          "template_files": [
+            "templates/donor_differential.R"
+          ]
+        },
+        {
+          "id": "diagnose-sensitivity-and-hypothesis-impact",
+          "output_artifact_types": [
+            "donor_aware_differential_result",
+            "donor_aware_inference_report"
+          ],
+          "purpose": "Evaluate sample quality, model dependence, and consequences for the project hypothesis before evidence admission.",
+          "required_logic": [
+            "Inspect library sizes, sample-level PCA or MDS, influential samples, condition and batch structure, replicate counts, filtered genes, dispersion, p-value behavior, effect-size distribution, and cell-type missingness.",
+            "Repeat consequential contrasts across justified filtering thresholds, covariate specifications, influential-sample sensitivity, and alternative validated engines; distinguish stable, method-sensitive, underpowered, and non-estimable findings.",
+            "Map validated effects to support, weakening, refutation, or unresolved evidence states and trigger annotation review, redesign, complementary pathway analysis, or hypothesis revision when gates fail."
+          ],
+          "template_files": [
+            "templates/donor_differential.R"
+          ]
+        },
+        {
+          "id": "reload-validate-and-export",
+          "output_artifact_types": [
+            "pseudobulk_count_matrix",
+            "pseudobulk_sample_manifest",
+            "donor_aware_differential_result",
+            "donor_aware_inference_report"
+          ],
+          "purpose": "Independently reload and reconcile all statistical artifacts before downstream enrichment, figures, writing, or evidence-ledger updates.",
+          "required_logic": [
+            "Reload count, metadata, result, and diagnostic outputs and verify ordered identifiers, dimensions, digests, required fields, finite statistics, p-value bounds, BH correction, contrast direction, skipped analyses, and tool versions.",
+            "Require exact agreement between completed cell types, design diagnostics, result rows, sample counts, and aggregate eligibility records; retain all exclusions and warnings.",
+            "Block downstream claims until fatal gates pass and major sensitivity findings are resolved or explicitly represented as uncertainty."
+          ],
+          "template_files": [
+            "templates/pseudobulk_aggregate.py",
+            "templates/donor_differential.R"
+          ]
+        }
+      ],
+      "dependency_profiles": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "identity": "python-runtime",
+          "name": "python",
+          "tested_versions": [
+            "3.14.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.11,<0.12"
+          ],
+          "conflicts": [],
+          "identity": "anndata",
+          "name": "anndata",
+          "tested_versions": [
+            "0.11.4"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "conflicts": [],
+          "identity": "numpy",
+          "name": "numpy",
+          "tested_versions": [
+            "2.2.5"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "conflicts": [],
+          "identity": "pandas",
+          "name": "pandas",
+          "tested_versions": [
+            "2.2.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.15,<1.16"
+          ],
+          "conflicts": [],
+          "identity": "scipy",
+          "name": "scipy",
+          "tested_versions": [
+            "1.15.2"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=4.3,<4.4"
+          ],
+          "conflicts": [],
+          "identity": "R",
+          "name": "r",
+          "tested_versions": [
+            "4.3.2"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=2.0,<2.1"
+          ],
+          "conflicts": [],
+          "identity": "jsonlite",
+          "name": "jsonlite",
+          "tested_versions": [
+            "2.0.0"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.6.39,<0.7"
+          ],
+          "conflicts": [],
+          "identity": "digest",
+          "name": "digest",
+          "tested_versions": [
+            "0.6.39"
+          ]
+        }
+      ],
+      "execution_policy": {
+        "execute_in_user_scientific_environment": true,
+        "generate_project_specific_code": true,
+        "inspect_before_execution": true,
+        "manage_environment_or_compute_infrastructure": false,
+        "observed_execution_required": true,
+        "planned_output_is_not_evidence": true
+      },
+      "forbidden_actions": [
+        "Do not install, update, activate, create, or otherwise manage Python, R, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.",
+        "Do not guess raw-count layers, transpose matrices, repair identifiers, impute design metadata, relabel cell types, merge technical libraries, or convert unsupported formats silently.",
+        "Do not aggregate normalized, integrated, scaled, imputed, corrected, or residual values as counts.",
+        "Do not use cells, clusters, technical libraries, or duplicated pseudobulks as independent biological replicates.",
+        "Do not fit or interpret rank-deficient, confounded, under-replicated, direction-ambiguous, or failed-diagnostic contrasts.",
+        "Do not remove samples solely to improve significance, select filters after seeing differential results, or report nominal p-values as multiplicity-controlled evidence.",
+        "Do not present generated scripts, successful process exits, unexecuted alternative engines, or unreloaded files as scientific evidence."
+      ],
+      "handoff_type": "codex_generated_project_analysis",
+      "languages": [
+        "python",
+        "r",
+        "notebook"
+      ],
+      "module": {
+        "id": "single-cell-donor-inference",
+        "version": "1.0.0"
+      },
+      "parameter_rules": [
+        {
+          "decision_inputs": [
+            "biological experimental unit",
+            "reviewed cell-type hierarchy",
+            "condition structure",
+            "technical library nesting",
+            "annotation uncertainty"
+          ],
+          "id": "pseudobulk-granularity",
+          "parameter": "aggregation-keys",
+          "selection_rule": "Aggregate by the true biological sample and the most specific reviewed cell-type level supported across samples; merge technical libraries only when their biological identity and count semantics are identical.",
+          "validation_rule": "Require one condition and covariate profile per biological sample, exact cell and count conservation, and no duplicate biological sample within a tested cell type."
+        },
+        {
+          "decision_inputs": [
+            "cell-type abundance",
+            "sample depth",
+            "count sparsity",
+            "replicate balance",
+            "expected expression"
+          ],
+          "id": "pseudobulk-eligibility",
+          "parameter": "pseudobulk-eligibility-thresholds",
+          "selection_rule": "Set cell-count and library-size thresholds from observed distributions and model stability before testing, retaining reason-coded excluded groups in the manifest.",
+          "validation_rule": "Compare retention by condition and cell type and block contrasts whose exclusions create structural imbalance or inadequate biological replication."
+        },
+        {
+          "decision_inputs": [
+            "randomization",
+            "pairing",
+            "subject repeats",
+            "batch structure",
+            "categorical covariates",
+            "continuous covariates",
+            "known confounders",
+            "sample count",
+            "causal estimand"
+          ],
+          "id": "design-formula",
+          "parameter": "design-formula",
+          "selection_rule": "Include terms justified by the experimental design and estimand; explicitly classify categorical and continuous covariates; encode subject for paired or repeated data only when condition remains estimable; and avoid adjustment for mediators or perfectly confounded variables.",
+          "validation_rule": "Require finite numeric continuous covariates, reviewed factor levels, a full-rank matrix, one explicit coefficient with verified direction, sufficient residual degrees of freedom, and a documented confounding table for every tested cell type."
+        },
+        {
+          "decision_inputs": [
+            "count distribution",
+            "replicate number",
+            "mean-variance behavior",
+            "outliers",
+            "design complexity",
+            "validated installed versions"
+          ],
+          "id": "inference-engine",
+          "parameter": "inference-engine",
+          "selection_rule": "Choose a validated engine whose model and robust options fit the observed data; use an independently validated alternative for consequential method-sensitive claims.",
+          "validation_rule": "Verify engine-native filtering, normalization, dispersion or precision weights, coefficient identity, result fields, p-value bounds, and concordance of effect direction across sensitivity runs."
+        },
+        {
+          "decision_inputs": [
+            "library sizes",
+            "replicate counts",
+            "cell-type abundance",
+            "engine defaults",
+            "gene universe"
+          ],
+          "id": "expression-filter",
+          "parameter": "expression-filter",
+          "selection_rule": "Declare an engine-appropriate pre-test expression rule from eligible biological samples without conditioning on observed differential significance.",
+          "validation_rule": "Report retained genes and sensitivity near the threshold; preserve the tested gene universe for multiplicity and enrichment background."
+        },
+        {
+          "decision_inputs": [
+            "number of cell types",
+            "number of genes",
+            "confirmatory versus exploratory scope",
+            "predeclared hypotheses"
+          ],
+          "id": "multiplicity-scope",
+          "parameter": "multiplicity-scope",
+          "selection_rule": "Record BH adjustment within each tested cell type and across the combined tested family; use the scope matching the stated inferential claim.",
+          "validation_rule": "Recompute adjusted values independently, verify monotonic bounds and tested-family size, and do not promote nominal p-values as discoveries."
+        },
+        {
+          "decision_inputs": [
+            "sample PCA or MDS",
+            "library-size ratio",
+            "Cook-like influence diagnostics",
+            "batch association",
+            "engine disagreement",
+            "replicate count"
+          ],
+          "id": "sample-sensitivity",
+          "parameter": "sample-sensitivity",
+          "selection_rule": "Investigate flagged samples using technical and biological metadata; retain the primary analysis and add justified sensitivity analyses without deleting samples solely to improve significance.",
+          "validation_rule": "Classify findings as stable, attenuated, reversed, or unresolved and update the hypothesis ledger accordingly."
+        }
+      ],
+      "postflight_checks": [
+        "Reconcile every input cell and raw count with exactly one sample-by-cell-type pseudobulk and reason-code every ineligible aggregate.",
+        "Reload pseudobulk counts and metadata, verify ordered identifiers, integer counts, count conservation, sample uniqueness, condition consistency, and digest agreement.",
+        "For every completed cell type, verify biological replicate counts, design formula, full rank, condition coefficient direction, residual information, filtering, normalization, model fit, effect fields, p-value bounds, BH correction, and actual tool versions.",
+        "Inspect sample-level PCA or MDS, library sizes, condition and batch structure, influential observations, p-value and effect distributions, cell-type missingness, and skipped analyses.",
+        "Run and compare declared sensitivity analyses for consequential findings; record stable, weakened, reversed, underpowered, and non-estimable outcomes without significance-driven sample removal.",
+        "Reload result and diagnostic artifacts and require all fatal gates to pass before enrichment, figures, writing, or hypothesis-ledger admission."
+      ],
+      "preflight_checks": [
+        "Inspect the actual h5ad, raw-count layer, annotation provenance, feature namespace, cell accounting, and design metadata before code generation.",
+        "Detect actual Scanpy, AnnData, NumPy, pandas, SciPy, R, edgeR, DESeq2, limma, jsonlite, and digest versions; use only declared compatible combinations or stop for an explicit compatibility experiment.",
+        "Explicitly classify every adjusted variable as categorical or continuous, verify factor levels and finite numeric values, and reject overlap or undeclared coercion.",
+        "Verify biological sample, cell type, condition, subject, covariate, batch, and technical-library cross-tabs; identify nesting, pairing, missingness, confounding, and available residual degrees of freedom.",
+        "Confirm the reference and contrast levels, experimental estimand, planned tested family, aggregation thresholds, filtering rule, primary engine, sensitivity engines, and output paths before execution.",
+        "Confirm outputs are new project-owned files and that neither source objects nor raw counts will be modified."
+      ],
+      "provenance_fields": [
+        "module-id",
+        "module-version",
+        "generated-code-sha256",
+        "input-artifact-sha256",
+        "sample-manifest-sha256",
+        "annotation-provenance",
+        "feature-namespace",
+        "raw-count-location",
+        "aggregation-keys",
+        "aggregation-thresholds",
+        "cell-and-count-accounting",
+        "actual-tool-versions",
+        "actual-dependency-versions",
+        "design-formula-by-cell-type",
+        "contrast",
+        "engine-parameters",
+        "filtering-rule",
+        "normalization",
+        "dispersion-or-weight-model",
+        "multiple-testing-scope",
+        "sensitivity-runs",
+        "output-artifact-sha256",
+        "quality-gate-results",
+        "execution-started-at",
+        "execution-completed-at"
+      ],
+      "quality_gate_ids": [
+        "pseudobulk-raw-count-and-axis-identity",
+        "pseudobulk-experimental-unit-semantics",
+        "pseudobulk-count-conservation-and-eligibility",
+        "donor-design-estimability",
+        "donor-model-and-filter-validity",
+        "donor-sample-diagnostics",
+        "donor-engine-sensitivity",
+        "donor-result-reload-and-claim-scope"
+      ],
+      "request_digest": "c72a2e04d52dfed0cb49cf6619638b003e2da15526e825b290bba9560b37cb46",
+      "request_fields": [
+        "biological_sample_key",
+        "categorical_covariates",
+        "cell_type_key",
+        "condition_key",
+        "continuous_covariates",
+        "contrast_level",
+        "declared_thresholds",
+        "design_notes",
+        "input_artifact_id",
+        "input_format",
+        "objective",
+        "raw_count_location",
+        "reference_level",
+        "requested_engines",
+        "subject_key"
+      ],
+      "tool_profiles": [
+        {
+          "allowed_versions": [
+            ">=1.10,<1.12"
+          ],
+          "identity": "scanpy",
+          "mismatch_policy": "block",
+          "name": "scanpy",
+          "tested_versions": [
+            "1.10.4",
+            "1.11.5"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.10,<1.12"
+              ],
+              "id": "scanpy-h5ad-layer-and-sparse-aggregation",
+              "required_action": "Inspect the detected Scanpy, AnnData, NumPy, pandas, and SciPy combination and rerun count-conservation and output-reload tests before support."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=4.0,<4.1"
+          ],
+          "identity": "edgeR",
+          "mismatch_policy": "alternative",
+          "name": "edgeR",
+          "tested_versions": [
+            "4.0.16"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=4.0,<4.1"
+              ],
+              "id": "edger-ql-filter-and-dispersion-api",
+              "required_action": "Use DGEList, filterByExpr, TMM normalization, robust estimateDisp and glmQLFit, and independently validate coefficient identity and output fields."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.42,<1.43"
+          ],
+          "identity": "DESeq2",
+          "mismatch_policy": "alternative",
+          "name": "DESeq2",
+          "tested_versions": [
+            "1.42.1"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.42,<1.43"
+              ],
+              "id": "deseq2-design-contrast-and-result-fields",
+              "required_action": "Construct the design from inspected metadata, use an explicit condition contrast, record independent filtering and shrinkage choices, and validate result names and coefficient direction."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=3.58,<3.59"
+          ],
+          "identity": "limma",
+          "mismatch_policy": "alternative",
+          "name": "limma",
+          "tested_versions": [
+            "3.58.1"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.58,<3.59"
+              ],
+              "id": "limma-voom-weight-and-ebayes-behavior",
+              "required_action": "Record TMM and voom settings, use the inspected full-rank design, verify coefficient direction, and reload standardized result fields."
+            }
+          ]
+        }
+      ]
+    }
+  },
   "single-cell-foundation-workflow": {
     "input": {
       "assay_type": "sc-rna",

@@ -159,6 +159,7 @@ def verify(scientific_python: Path, rscript: Path) -> dict[str, object]:
                 "scanpy": {"name": TEMPLATE.name, "sha256": sha256(TEMPLATE)},
                 "seurat": {"name": SEURAT_TEMPLATE.name, "sha256": sha256(SEURAT_TEMPLATE)},
             },
+            "tool_versions": {"scanpy": qc_payload["versions"]["scanpy"], "seurat": r_qc_payload["versions"]["Seurat"]},
             "scientific_runtime": {"scanpy": qc_payload["versions"], "seurat": r_qc_payload.get("versions", {"Seurat": "5.2.1"})},
             "fixtures": {
                 "scanpy": {"sha256": sha256(fixture), "cells": 48, "features": 36, "biological_samples": 4},

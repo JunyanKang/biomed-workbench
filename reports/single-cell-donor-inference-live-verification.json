@@ -1,0 +1,137 @@
+{
+  "compatibility_row_id": "agent-protocol-1-scanpy-110-edger-40-deseq2-142-limma-358",
+  "dependency_versions": {
+    "anndata": "0.11.4",
+    "digest": "0.6.39",
+    "jsonlite": "2.0.0",
+    "numpy": "2.2.5",
+    "pandas": "2.2.3",
+    "r": "4.3.2",
+    "scipy": "1.15.2"
+  },
+  "execution": {
+    "aggregation_completed": true,
+    "aggregation_report_sha256": "9fc0818fa90d8c3499a61ef92f284220fab1a0ae58bb74f918154434d5511df8",
+    "deseq2_completed": true,
+    "edger_completed": true,
+    "engine_outputs": {
+      "deseq2": {
+        "diagnostics_sha256": "608756da0d0778e552130d16553e2256af878057d715400b26736bd5dd387984",
+        "results_sha256": "bb0394efb0cf6370ab40fad5d000ade264cbffbef65fc5d0590dd837cc6424ca"
+      },
+      "edger": {
+        "diagnostics_sha256": "c86c4acafd9c372b815163c7bbc1c2be8960b53b4376913b3e7ec29a3f92a285",
+        "results_sha256": "27c11df6094097163b8d3eb9bf590b7c38dde1e59a38688e0c84b90444a147e5"
+      },
+      "limma-voom": {
+        "diagnostics_sha256": "ac99574c277aa31a5020ea813f46727433d0bd7d7fd770dd088241e7f01c602d",
+        "results_sha256": "ce4acaf81bf96eeea72af4135c5505d123714c22d73ecb245e2907f6eb839976"
+      }
+    },
+    "limma_voom_completed": true,
+    "pseudobulk_counts_sha256": "9bbf4c0047d6853900e32a846b31b1ae51ef9eea1cd762e9df27938c1881f13f",
+    "pseudobulk_metadata_sha256": "fb8651b6b26384fe34b35f94e801f17d848216fe7debcd6e8e846fb0e29af92e"
+  },
+  "fixture": {
+    "biological_samples": 8,
+    "cell_types": 2,
+    "cells": 480,
+    "features": 80,
+    "groups_per_condition": 4,
+    "sha256": "b5325a377e2b975a221e66bdeccdccdcb45a7abf0bc8c5636b1b1b8439c200d9"
+  },
+  "module_id": "single-cell-donor-inference",
+  "module_version": "1.0.0",
+  "passed": true,
+  "result_summaries": {
+    "deseq2": {
+      "bh_recomputed": true,
+      "planted_effects": {
+        "B_cell": {
+          "median_planted_log2_fold_change": 2.106138,
+          "significant_planted_genes": 8
+        },
+        "T_cell": {
+          "median_planted_log2_fold_change": 2.077499,
+          "significant_planted_genes": 8
+        }
+      },
+      "rows": 160
+    },
+    "edger": {
+      "bh_recomputed": true,
+      "planted_effects": {
+        "B_cell": {
+          "median_planted_log2_fold_change": 2.117023,
+          "significant_planted_genes": 8
+        },
+        "T_cell": {
+          "median_planted_log2_fold_change": 2.09441,
+          "significant_planted_genes": 8
+        }
+      },
+      "rows": 160
+    },
+    "limma-voom": {
+      "bh_recomputed": true,
+      "planted_effects": {
+        "B_cell": {
+          "median_planted_log2_fold_change": 2.108403,
+          "significant_planted_genes": 8
+        },
+        "T_cell": {
+          "median_planted_log2_fold_change": 2.090725,
+          "significant_planted_genes": 8
+        }
+      },
+      "rows": 160
+    }
+  },
+  "schema_version": 1,
+  "scientific_runtime": {
+    "aggregation": {
+      "anndata": "0.11.4",
+      "numpy": "2.2.5",
+      "pandas": "2.2.3",
+      "python": "3.10.17",
+      "scanpy": "1.10.4",
+      "scipy": "1.15.2"
+    },
+    "inference": {
+      "DESeq2": "1.42.1",
+      "R": "4.3.2",
+      "digest": "0.6.39",
+      "edgeR": "4.0.16",
+      "jsonlite": "2.0.0",
+      "limma": "3.58.1"
+    }
+  },
+  "scientific_summary": {
+    "all_cells_accounted": true,
+    "all_designs_full_rank": true,
+    "all_result_files_reloaded": true,
+    "biological_replicates_per_condition": 4,
+    "categorical_and_continuous_covariates_validated": true,
+    "cells_used_as_replicates": false,
+    "edger_deseq2_limma_voom_passed": true,
+    "global_bh_independently_recomputed": true,
+    "planted_effect_direction_recovered_by_all_engines": true,
+    "raw_counts_conserved": true
+  },
+  "templates": {
+    "donor_differential": {
+      "name": "donor_differential.R",
+      "sha256": "1ffda21e0b16da3e5f688dc7dbce8ad39d11303549a5c191df97cb08fb17d117"
+    },
+    "pseudobulk_aggregate": {
+      "name": "pseudobulk_aggregate.py",
+      "sha256": "9644d8d7c8f04365cdba5842f692c2da87b0a4e956704845c5260a3fd6ead3d6"
+    }
+  },
+  "tool_versions": {
+    "DESeq2": "1.42.1",
+    "edgeR": "4.0.16",
+    "limma": "3.58.1",
+    "scanpy": "1.10.4"
+  }
+}

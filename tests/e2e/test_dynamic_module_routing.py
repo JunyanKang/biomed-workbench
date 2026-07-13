@@ -18,6 +18,13 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         self.assertNotIn("qpcr-relative-expression", routed)
         self.assertNotIn("claim-evidence-integrity-audit", routed)
 
+    def test_donor_aware_single_cell_inference_routes_from_manifest(self):
+        plan = route("Run donor-aware single-cell pseudobulk differential expression with edgeR")
+        routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}
+
+        self.assertIn("single-cell-donor-inference", routed)
+        self.assertIn("omics", plan["matched_workflows"])
+
     def test_router_contains_no_module_specific_intent_table(self):
         source = (Path(__file__).resolve().parents[2] / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
 

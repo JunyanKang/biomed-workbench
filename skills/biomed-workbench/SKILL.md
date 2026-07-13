@@ -71,6 +71,8 @@ For each such module:
 
 For single-cell analysis, keep cells as observations and donors, specimens, animals, organoids, or independently prepared samples as the experimental units for condition-level inference. Preserve raw counts before normalization or integration. Do not infer absence of empty droplets, ambient RNA, doublets, batch effects, or unknown cell types when the corresponding validated method was not run.
 
+For cell-type-stratified condition inference, aggregate immutable raw counts by biological sample and reviewed cell type, preserve every eligible or reason-coded excluded pseudobulk, and reconcile all cells and counts. Explicitly distinguish categorical from continuous covariates, verify replicate counts and full-rank coefficient direction per cell type, run engine-native filtering and count modeling, inspect sample-level diagnostics, and compare justified sensitivity engines before updating a hypothesis. Never use cells as condition-level replicates or choose exclusions and filters to improve significance.
+
 ## Codex-Native Handoffs
 
 Some modules validate a scientific brief and return an `execution_handoff` for a Codex-managed native tool. Accept a handoff only when the module contract declares `access: codex_native`, no user credential, a recognized tool and operation, explicit quality gates, and a passing deterministic module result.

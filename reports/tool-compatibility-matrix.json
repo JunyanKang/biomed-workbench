@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 75,
-  "module_count": 75,
+  "compatibility_complete": 76,
+  "module_count": 76,
   "modules": [
     {
       "compatibility_rows": [
@@ -8810,6 +8810,630 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "single-cell-donor-inference-e2e-v1"
+          ],
+          "id": "agent-protocol-1-scanpy-110-edger-40-deseq2-142-limma-358",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "single-cell-donor-inference-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate the request and emit the deterministic Agent code-generation protocol; this runtime is not the user scientific analysis environment.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        },
+        {
+          "allowed_versions": [
+            ">=0.11,<0.12"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "anndata",
+          "name": "anndata",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Read h5ad structure and preserve observation, feature, layer, and sparse-matrix semantics during aggregation.",
+          "required": true,
+          "tested_versions": [
+            "0.11.4"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import anndata; print(anndata.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://anndata.readthedocs.io/en/stable/release-notes/0.11.4.html"
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "numpy",
+          "name": "numpy",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate finite integer-like counts, construct deterministic group assignments, and calculate exact accounting summaries.",
+          "required": true,
+          "tested_versions": [
+            "2.2.5"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import numpy; print(numpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://numpy.org/doc/2.2/release/2.2.5-notes.html"
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "pandas",
+          "name": "pandas",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate design metadata and serialize ordered pseudobulk count and sample tables.",
+          "required": true,
+          "tested_versions": [
+            "2.2.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import pandas; print(pandas.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pandas.pydata.org/docs/whatsnew/v2.2.3.html"
+        },
+        {
+          "allowed_versions": [
+            ">=1.15,<1.16"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "scipy",
+          "name": "scipy",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Perform sparse biological-sample-by-cell-type incidence multiplication without densifying the cell-by-gene matrix.",
+          "required": true,
+          "tested_versions": [
+            "1.15.2"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import scipy; print(scipy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://docs.scipy.org/doc/scipy/release/1.15.2-notes.html"
+        },
+        {
+          "allowed_versions": [
+            ">=4.3,<4.4"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "R",
+          "name": "r",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute inspected design-matrix construction, count-model engines, diagnostics, and result reload validation.",
+          "required": true,
+          "tested_versions": [
+            "4.3.2"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "R scripting front-end version ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://cran.r-project.org/src/base/R-4/"
+        },
+        {
+          "allowed_versions": [
+            ">=2.0,<2.1"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "jsonlite",
+          "name": "jsonlite",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Serialize closed machine-readable design, model, diagnostic, and quality reports.",
+          "required": true,
+          "tested_versions": [
+            "2.0.0"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('jsonlite')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://cran.r-project.org/package=jsonlite"
+        },
+        {
+          "allowed_versions": [
+            ">=0.6.39,<0.7"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "digest",
+          "name": "digest",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Bind pseudobulk inputs and statistical outputs to SHA-256 provenance records.",
+          "required": true,
+          "tested_versions": [
+            "0.6.39"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('digest')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://cran.r-project.org/package=digest"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "single-cell-donor-inference",
+      "input_formats": [
+        {
+          "artifact_type": "single_cell_analysis_object",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none",
+                "gzip",
+                "lzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "h5ad",
+              "orientations": [
+                "observations-by-variables"
+              ],
+              "representations": [
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "0.1.0"
+              ]
+            }
+          ],
+          "name": "annotated_single_cell_object",
+          "processing_levels": [
+            "quality-controlled",
+            "annotated"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "raw-count-location",
+            "biological-sample-key",
+            "cell-type-key",
+            "condition-key",
+            "sample-manifest-digest",
+            "feature-identifier-namespace",
+            "annotation-release-or-not-applicable",
+            "cell-accounting",
+            "annotation-provenance"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "pseudobulk_count_matrix",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "count-matrix",
+              "orientations": [
+                "features-by-samples"
+              ],
+              "representations": [
+                "structured",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "pseudobulk_counts",
+          "processing_levels": [
+            "raw-counts",
+            "aggregated"
+          ],
+          "required_metadata": [
+            "module-version",
+            "generated-code-sha256",
+            "input-artifact-digest",
+            "sample-manifest-digest",
+            "feature-axis",
+            "pseudobulk-axis",
+            "aggregation-keys",
+            "raw-count-location",
+            "cell-accounting",
+            "count-conservation",
+            "eligibility-thresholds"
+          ]
+        },
+        {
+          "artifact_type": "pseudobulk_sample_manifest",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tabular",
+              "orientations": [
+                "records-by-fields"
+              ],
+              "representations": [
+                "text",
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "pseudobulk_metadata",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "delimiter",
+            "header",
+            "column-schema",
+            "missing-value-policy",
+            "biological-sample-field",
+            "cell-type-field",
+            "condition-field",
+            "covariate-fields",
+            "subject-field-or-none",
+            "eligibility-status",
+            "exclusion-reason"
+          ]
+        },
+        {
+          "artifact_type": "donor_aware_differential_result",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tabular",
+              "orientations": [
+                "records-by-fields"
+              ],
+              "representations": [
+                "text",
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.0.0"
+              ]
+            }
+          ],
+          "name": "differential_results",
+          "processing_levels": [
+            "derived",
+            "statistically-tested"
+          ],
+          "required_metadata": [
+            "module-version",
+            "generated-code-sha256",
+            "pseudobulk-count-digest",
+            "pseudobulk-metadata-digest",
+            "engine",
+            "actual-tool-versions",
+            "design-formula-by-cell-type",
+            "contrast",
+            "filtering-rule",
+            "normalization",
+            "dispersion-model",
+            "effect-size-definition",
+            "multiple-testing-scope",
+            "quality-gate-results"
+          ]
+        },
+        {
+          "artifact_type": "donor_aware_inference_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "cell-types-by-design-and-quality"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "inference_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "generated-code-sha256",
+            "input-and-output-digests",
+            "aggregation-accounting",
+            "replicate-counts",
+            "design-rank",
+            "confounding-findings",
+            "sample-level-diagnostics",
+            "model-sensitivity",
+            "skipped-cell-types-and-reasons",
+            "result-reload-validation"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=1.10,<1.12"
+          ],
+          "ecosystem": "python",
+          "identity": "scanpy",
+          "mismatch_policy": "block",
+          "name": "scanpy",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.10.4",
+            "1.11.5"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.10,<1.12"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Scanpy and AnnData releases differ in backed access, sparse array behavior, categorical metadata, and h5ad serialization details used during pseudobulk extraction.",
+              "id": "scanpy-h5ad-layer-and-sparse-aggregation",
+              "required_action": "Inspect the detected Scanpy, AnnData, NumPy, pandas, and SciPy combination and rerun count-conservation and output-reload tests before support.",
+              "source": "https://scanpy.readthedocs.io/en/stable/release-notes/index.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import scanpy; print(scanpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/index.html"
+        },
+        {
+          "allowed_versions": [
+            ">=4.0,<4.1"
+          ],
+          "ecosystem": "r",
+          "identity": "edgeR",
+          "mismatch_policy": "alternative",
+          "name": "edgeR",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "4.0.16"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=4.0,<4.1"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parameter",
+              "description": "Filtering, robust dispersion estimation, quasi-likelihood fitting, and result fields are version-coupled and must remain bound to the tested edgeR API.",
+              "id": "edger-ql-filter-and-dispersion-api",
+              "required_action": "Use DGEList, filterByExpr, TMM normalization, robust estimateDisp and glmQLFit, and independently validate coefficient identity and output fields.",
+              "source": "https://bioconductor.org/packages/3.18/bioc/vignettes/edgeR/inst/doc/edgeRUsersGuide.pdf"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('edgeR')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://bioconductor.org/packages/3.18/bioc/html/edgeR.html"
+        },
+        {
+          "allowed_versions": [
+            ">=1.42,<1.43"
+          ],
+          "ecosystem": "r",
+          "identity": "DESeq2",
+          "mismatch_policy": "alternative",
+          "name": "DESeq2",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "1.42.1"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.42,<1.43"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parameter",
+              "description": "Design construction, contrast naming, independent filtering, shrinkage options, and result field semantics are tied to the tested DESeq2 release.",
+              "id": "deseq2-design-contrast-and-result-fields",
+              "required_action": "Construct the design from inspected metadata, use an explicit condition contrast, record independent filtering and shrinkage choices, and validate result names and coefficient direction.",
+              "source": "https://bioconductor.org/packages/3.18/bioc/vignettes/DESeq2/inst/doc/DESeq2.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('DESeq2')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://bioconductor.org/packages/3.18/bioc/html/DESeq2.html"
+        },
+        {
+          "allowed_versions": [
+            ">=3.58,<3.59"
+          ],
+          "ecosystem": "r",
+          "identity": "limma",
+          "mismatch_policy": "alternative",
+          "name": "limma",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "3.58.1"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.58,<3.59"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parameter",
+              "description": "voom precision weights, robust empirical Bayes moderation, coefficient extraction, and result fields are coupled to limma and edgeR versions.",
+              "id": "limma-voom-weight-and-ebayes-behavior",
+              "required_action": "Record TMM and voom settings, use the inspected full-rank design, verify coefficient direction, and reload standardized result fields.",
+              "source": "https://bioconductor.org/packages/3.18/bioc/vignettes/limma/inst/doc/usersguide.pdf"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('limma')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://bioconductor.org/packages/3.18/bioc/html/limma.html"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "single-cell-foundation-workflow-e2e-v1"
           ],
           "id": "agent-protocol-1-scanpy-110-or-seurat-52",
@@ -10909,6 +11533,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "ed2d594434e9953e9af7b91f87914efb00c7429398d4edc36a3e14ba27abd922",
+  "registry_digest": "bc71fdd895f96912d8170e2854b071fe810085514ac1dda83001006f931c7651",
   "schema_version": 1
 }

@@ -53,7 +53,18 @@ COMMAND_EVIDENCE = {
 }
 
 AGENT_EVIDENCE = {
-    "single-cell-foundation-workflow": "reports/single-cell-foundation-live-verification.json",
+    "single-cell-foundation-workflow": {
+        "path": "reports/single-cell-foundation-live-verification.json",
+        "execution_flags": ("scanpy_completed", "seurat_completed"),
+        "summary_flags": ("scanpy_and_seurat_backends_passed",),
+        "live_dependency_keys": (),
+    },
+    "single-cell-donor-inference": {
+        "path": "reports/single-cell-donor-inference-live-verification.json",
+        "execution_flags": ("aggregation_completed", "edger_completed", "deseq2_completed", "limma_voom_completed"),
+        "summary_flags": ("edger_deseq2_limma_voom_passed", "global_bh_independently_recomputed", "planted_effect_direction_recovered_by_all_engines"),
+        "live_dependency_keys": ("anndata", "numpy", "pandas", "scipy", "r", "jsonlite", "digest"),
+    },
 }
 
 
@@ -175,7 +186,11 @@ def capture() -> dict[str, object]:
                 raise RuntimeError(f"agent-generated regression fixture is missing: {manifest.id}")
             direct = json.loads(json.dumps(entrypoint(**case["input"]), sort_keys=True))
             _assert_subset(case["output"], direct)
-            report_path = ROOT / AGENT_EVIDENCE[manifest.id]
+            try:
+                evidence_config = AGENT_EVIDENCE[manifest.id]
+            except KeyError:
+                raise RuntimeError(f"agent-generated execution evidence is not configured: {manifest.id}") from None
+            report_path = ROOT / evidence_config["path"]
             live_report = json.loads(report_path.read_text(encoding="utf-8"))
             template_hashes = {
                 path.name: _sha256(path)
@@ -192,9 +207,10 @@ def capture() -> dict[str, object]:
                 or live_report.get("module_version") != manifest.version
                 or live_report.get("compatibility_row_id") != row.id
                 or observed_templates != template_hashes
-                or live_report.get("execution", {}).get("scanpy_completed") is not True
-                or live_report.get("execution", {}).get("seurat_completed") is not True
-                or live_report.get("scientific_summary", {}).get("scanpy_and_seurat_backends_passed") is not True
+                or any(not version_is_allowed(live_report.get("tool_versions", {}).get(key, ""), rules) for key, rules in row.tool_versions.items())
+                or any(not version_is_allowed(live_report.get("dependency_versions", {}).get(key, ""), row.dependency_versions[key]) for key in evidence_config["live_dependency_keys"])
+                or any(live_report.get("execution", {}).get(flag) is not True for flag in evidence_config["execution_flags"])
+                or any(live_report.get("scientific_summary", {}).get(flag) is not True for flag in evidence_config["summary_flags"])
             ):
                 raise RuntimeError(f"agent-generated live execution evidence differs from module contract: {manifest.id}")
             plan = route(manifest.intents[0], registry=registry)

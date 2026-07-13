@@ -4,6 +4,7 @@ from pathlib import Path
 
 from biomed_workbench.modules.index import BUILTIN_ROOT
 from biomed_workbench.modules.registry import ModuleRegistry
+from tools.build_research_engine_report import build
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -12,6 +13,9 @@ FIXTURES = ROOT / "tests" / "fixtures" / "research-cycles"
 
 
 class ResearchEngineEvidenceTests(unittest.TestCase):
+    def test_report_is_exactly_rebuildable_from_current_engine(self):
+        self.assertEqual(json.loads(REPORT.read_text(encoding="utf-8")), build())
+
     def test_report_covers_all_plan_types_gates_revisions_transitions_and_replays(self):
         report = json.loads(REPORT.read_text(encoding="utf-8"))
         scenarios = report["scenarios"]
