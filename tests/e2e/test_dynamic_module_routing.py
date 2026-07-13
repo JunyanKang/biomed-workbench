@@ -25,6 +25,12 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         self.assertIn("single-cell-donor-inference", routed)
         self.assertIn("omics", plan["matched_workflows"])
 
+    def test_single_cell_integration_benchmark_routes_from_manifest(self):
+        plan = route("Benchmark Harmony Scanorama and BBKNN integration without biological overcorrection")
+        routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}
+
+        self.assertIn("single-cell-batch-integration", routed)
+
     def test_router_contains_no_module_specific_intent_table(self):
         source = (Path(__file__).resolve().parents[2] / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
 
@@ -70,6 +76,34 @@ class DynamicModuleRoutingTests(unittest.TestCase):
 
         self.assertEqual(plan["matched_workflows"], ["ecology"])
         self.assertEqual(plan["steps"][0]["candidates"][0]["id"], "ecology-flux")
+
+    def test_domain_concept_remains_routable_as_modules_expand(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            for index, suffix in enumerate(("quality control", "batch integration", "donor inference")):
+                payload = valid_manifest_payload()
+                payload["id"] = f"single-cell-{index}"
+                payload["domains"] = ["omics"]
+                payload["title"] = f"Single-cell {suffix}"
+                payload["intents"] = [f"single-cell {suffix}", f"单细胞{index}流程"]
+                write_manifest(root, payload)
+            for identifier, domain, intent in (
+                ("image-segment", "imaging", "图像分割"),
+                ("paper-write", "publication", "写论文"),
+            ):
+                payload = valid_manifest_payload()
+                payload["id"] = identifier
+                payload["domains"] = [domain]
+                payload["title"] = intent
+                payload["intents"] = [intent]
+                write_manifest(root, payload)
+
+            plan = route(
+                "并行做单细胞和图像分割，最后写论文",
+                registry=ModuleRegistry.discover(root),
+            )
+
+        self.assertEqual(plan["matched_workflows"], ["omics", "imaging", "publication"])
 
     def test_exact_manifest_intent_suppresses_incidental_fuzzy_workflows(self):
         with tempfile.TemporaryDirectory() as temporary:

@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "cases": [{
+    "name": "prepare-classical-integration-benchmark",
+    "input": {
+      "objective": "Compare classical integration methods while preserving reviewed cell identities and unknown populations.",
+      "input_artifact_id": "artifact-scrna-qc-annotated",
+      "input_format": "h5ad",
+      "raw_count_location": "layers.counts",
+      "batch_key": "chemistry_batch",
+      "biological_sample_key": "sample_id",
+      "evaluation_label_key": "reviewed_cell_type",
+      "unknown_label": "unknown",
+      "requested_methods": ["harmony", "scanorama", "bbknn"],
+      "declared_thresholds": {"maximum_label_purity_loss": 0.15, "minimum_batch_entropy_gain": 0.05, "minimum_label_connectivity": 0.8},
+      "design_notes": "Four independent samples cross two chemistry batches; every reviewed type occurs in both batches; labels are withheld from integration fitting."
+    },
+    "expected_subset": {
+      "handoff_type": "codex_generated_project_analysis",
+      "module": {"id": "single-cell-batch-integration", "version": "1.0.0"},
+      "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}
+    }
+  }]
+}

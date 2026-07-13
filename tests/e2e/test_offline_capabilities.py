@@ -139,6 +139,22 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         self.assertIn("donor-design-estimability", output["quality_gate_ids"])
         self.assertTrue(any("Do not use cells" in item for item in output["forbidden_actions"]))
 
+    def test_single_cell_batch_integration(self):
+        output = execute("single-cell-batch-integration", {
+            "objective": "Compare classical integration methods while preserving reviewed cell identities and unknown populations.",
+            "input_artifact_id": "artifact-scrna-qc-annotated", "input_format": "h5ad", "raw_count_location": "layers.counts",
+            "batch_key": "chemistry_batch", "biological_sample_key": "sample_id",
+            "evaluation_label_key": "reviewed_cell_type", "unknown_label": "unknown",
+            "requested_methods": ["harmony", "scanorama", "bbknn"],
+            "declared_thresholds": {"maximum_label_purity_loss": 0.15, "minimum_batch_entropy_gain": 0.05, "minimum_label_connectivity": 0.8},
+            "design_notes": "Four independent samples cross two batches; labels are withheld from integration fitting."
+        })
+        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"scanpy", "harmonypy", "scanorama", "bbknn"})
+        self.assertIn("integration-no-label-leakage", output["quality_gate_ids"])
+        self.assertTrue(output["execution_policy"]["observed_execution_required"])
+        self.assertTrue(any("Do not select a method from UMAP" in item for item in output["forbidden_actions"]))
+
     def test_variant_summary(self):
         output = execute("variant-summary", {"variants": [{"chrom": "1", "ref": "A", "alt": "G", "filter": "PASS"}]})
         self.assertEqual(output["transition_count"], 1)

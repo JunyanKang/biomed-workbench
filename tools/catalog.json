@@ -3646,6 +3646,98 @@
     },
     {
       "access": "agent_generated",
+      "description": "Direct Codex to inspect a real quality-controlled h5ad and crossed biological design; generate project-specific Harmony, Scanorama, and BBKNN runs from the same batch-aware feature and PCA foundation; execute each method in the user's existing scientific environment; compare batch mixing against label-neighborhood purity, label graph connectivity, silhouettes, unknown-label retention, and raw-count preservation; reject overcorrection and label leakage; and admit only a method whose observed outputs pass declared scientific gates.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-batch-integration",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "batch_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "biological_sample_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "evaluation_label_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "raw_count_location": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_methods": {
+            "items": {
+              "enum": [
+                "harmony",
+                "scanorama",
+                "bbknn"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "unknown_label": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "raw_count_location",
+          "batch_key",
+          "biological_sample_key",
+          "evaluation_label_key",
+          "unknown_label",
+          "requested_methods",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Benchmark classical single-cell batch integration without erasing biology",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
       "description": "Direct Codex to inspect a real annotated single-cell count object and experimental design; generate project-specific code that aggregates immutable raw counts by biological sample and cell type; fit estimable edgeR, DESeq2, or limma-voom condition contrasts using biological replicates; diagnose confounding, low replication, sample outliers, and model sensitivity; execute the reviewed code in the user's existing scientific environment; and admit only observed, reloaded, quality-controlled statistical artifacts into project evidence.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-donor-inference",
@@ -4984,7 +5076,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 76,
+  "entry_count": 77,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

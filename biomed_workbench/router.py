@@ -198,6 +198,10 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
         for module in active.all()
     }
     feature_frequency = Counter(feature for features in module_features.values() for feature in features)
+    feature_domain_frequency: dict[str, Counter[str]] = defaultdict(Counter)
+    for module in active.all():
+        for feature in module_features[module.id]:
+            feature_domain_frequency[feature][module.domains[0]] += 1
     specificity_limit = max(2, len(module_features) // 20)
     specific_feature_domains = {
         module.domains[0]
@@ -205,6 +209,17 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
         if _score_module(module, query)[0] >= 5.0
         and any(feature_frequency[feature] <= specificity_limit for feature in query_features & module_features[module.id])
     }
+    domain_concentrated_feature_domains = set()
+    for feature in query_features:
+        counts = feature_domain_frequency.get(feature)
+        if not counts:
+            continue
+        dominant_domain, dominant_count = counts.most_common(1)[0]
+        tied = sum(count == dominant_count for count in counts.values()) > 1
+        concentration = dominant_count / sum(counts.values())
+        if not tied and (len(counts) == 1 or concentration >= 0.8):
+            if domain_scores.get(dominant_domain, 0.0) >= 5.0:
+                domain_concentrated_feature_domains.add(dominant_domain)
     explicit_primary_domains = {
         module.domains[0]
         for module in active.all()
@@ -214,7 +229,7 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
         domain
         for domain, score in domain_scores.items()
         if score >= max(5.0, strongest * 0.35)
-    } | exact_domains | explicit_primary_domains | specific_feature_domains
+    } | exact_domains | explicit_primary_domains | specific_feature_domains | domain_concentrated_feature_domains
     if matched:
         return _domain_order(matched)
     fallback = [module for module in active.all() if module.module_type == "data_source"]

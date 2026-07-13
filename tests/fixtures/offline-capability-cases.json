@@ -2693,6 +2693,441 @@
       "reverse_complement": "GCGCAT"
     }
   },
+  "single-cell-batch-integration": {
+    "input": {
+      "batch_key": "chemistry_batch",
+      "biological_sample_key": "sample_id",
+      "declared_thresholds": {
+        "maximum_label_purity_loss": 0.15,
+        "minimum_batch_entropy_gain": 0.05,
+        "minimum_label_connectivity": 0.8
+      },
+      "design_notes": "Four independent samples cross two batches; labels are withheld from integration fitting.",
+      "evaluation_label_key": "reviewed_cell_type",
+      "input_artifact_id": "artifact-scrna-qc-annotated",
+      "input_format": "h5ad",
+      "objective": "Compare classical integration methods while preserving reviewed cell identities and unknown populations.",
+      "raw_count_location": "layers.counts",
+      "requested_methods": [
+        "harmony",
+        "scanorama",
+        "bbknn"
+      ],
+      "unknown_label": "unknown"
+    },
+    "output": {
+      "code_plan": [
+        {
+          "id": "inspect-integration-design",
+          "output_artifact_types": [
+            "single_cell_integration_benchmark",
+            "single_cell_integration_decision"
+          ],
+          "purpose": "Establish whether integration is scientifically identifiable and necessary before invoking a correction method.",
+          "required_logic": [
+            "Inspect raw counts, source reductions, sample and batch nesting, condition, known technical factors, reviewed labels, unknown labels, and feature namespace from the actual object.",
+            "Cross-tabulate biological samples, batches, conditions, and evaluation labels; block perfect confounding and labels confined to one batch.",
+            "Define the unintegrated PCA baseline and predeclare technical-mixing and biological-conservation metrics without inspecting method outcomes."
+          ],
+          "template_files": [
+            "templates/benchmark_integration.py"
+          ]
+        },
+        {
+          "id": "run-comparable-candidates",
+          "output_artifact_types": [
+            "single_cell_integrated_object",
+            "single_cell_integration_benchmark"
+          ],
+          "purpose": "Generate and execute method-specific integration branches from one frozen preprocessing foundation.",
+          "required_logic": [
+            "Use the same immutable raw counts, normalization, batch-aware HVGs, scaled HVG matrix, PCA basis, random seed, and evaluation neighborhood size for every candidate unless a documented method constraint requires a sensitivity branch.",
+            "Run Harmony and Scanorama as embedding corrections and BBKNN as graph correction using their detected validated APIs.",
+            "Never expose evaluation labels, desired annotations, condition outcomes, or expected conclusions to candidate fitting."
+          ],
+          "template_files": [
+            "templates/benchmark_integration.py"
+          ]
+        },
+        {
+          "id": "evaluate-mixing-and-conservation",
+          "output_artifact_types": [
+            "single_cell_integration_benchmark",
+            "single_cell_integration_decision"
+          ],
+          "purpose": "Quantify technical mixing and independent biological conservation against the unchanged baseline.",
+          "required_logic": [
+            "Compute normalized batch-neighbor entropy, batch silhouette, known-label neighbor purity, label silhouette, and per-label graph connectivity using fixed post hoc labels and retain unknown cells.",
+            "Compare integrated values with baseline deltas and inspect sample composition; UMAP appearance is descriptive only.",
+            "Block overcorrection, label fragmentation, unknown-cell loss, raw-count mutation, or improvement driven by a confounded design."
+          ],
+          "template_files": [
+            "templates/benchmark_integration.py"
+          ]
+        },
+        {
+          "id": "select-with-sensitivity",
+          "output_artifact_types": [
+            "single_cell_integration_decision",
+            "single_cell_integrated_object"
+          ],
+          "purpose": "Select an eligible representation only after method and parameter sensitivity review.",
+          "required_logic": [
+            "Repeat eligible candidates across justified HVG, PCA, neighbor, and seed perturbations and preserve all candidate reports.",
+            "Choose no method when integration is unnecessary or every candidate fails; do not force a winner.",
+            "Declare whether downstream tasks may use the selected embedding or graph and preserve raw counts for count-level inference."
+          ],
+          "template_files": [
+            "templates/benchmark_integration.py"
+          ]
+        },
+        {
+          "id": "reload-and-admit",
+          "output_artifact_types": [
+            "single_cell_integrated_object",
+            "single_cell_integration_benchmark",
+            "single_cell_integration_decision"
+          ],
+          "purpose": "Reload every candidate object and bind the selected decision to observed artifacts and quality gates.",
+          "required_logic": [
+            "Reload cells, features, raw counts, integrated representation or graph, UMAP, method metadata, and benchmark reports.",
+            "Verify template, input, output, sample-manifest, tool-version, dependency-version, parameter, and quality-gate provenance.",
+            "Admit only the selected observed artifact; preserve blocked candidates and reasons as non-evidentiary execution history."
+          ],
+          "template_files": [
+            "templates/benchmark_integration.py"
+          ]
+        }
+      ],
+      "dependency_profiles": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "identity": "python-runtime",
+          "name": "python",
+          "tested_versions": [
+            "3.14.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.10,<0.11"
+          ],
+          "conflicts": [],
+          "identity": "anndata",
+          "name": "anndata",
+          "tested_versions": [
+            "0.10.8"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.23,<1.24"
+          ],
+          "conflicts": [],
+          "identity": "numpy",
+          "name": "numpy",
+          "tested_versions": [
+            "1.23.5"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.5,<1.6"
+          ],
+          "conflicts": [],
+          "identity": "pandas",
+          "name": "pandas",
+          "tested_versions": [
+            "1.5.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.14,<1.15"
+          ],
+          "conflicts": [],
+          "identity": "scipy",
+          "name": "scipy",
+          "tested_versions": [
+            "1.14.1"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.7,<1.8"
+          ],
+          "conflicts": [],
+          "identity": "sklearn",
+          "name": "scikit-learn",
+          "tested_versions": [
+            "1.7.2"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.5.12,<0.6"
+          ],
+          "conflicts": [],
+          "identity": "umap",
+          "name": "umap-learn",
+          "tested_versions": [
+            "0.5.12"
+          ]
+        }
+      ],
+      "execution_policy": {
+        "execute_in_user_scientific_environment": true,
+        "generate_project_specific_code": true,
+        "inspect_before_execution": true,
+        "manage_environment_or_compute_infrastructure": false,
+        "observed_execution_required": true,
+        "planned_output_is_not_evidence": true
+      },
+      "forbidden_actions": [
+        "Do not install, update, activate, create, or manage Python, R, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.",
+        "Do not integrate a perfectly confounded design or treat integration as a repair for missing biological replication.",
+        "Do not use evaluation labels, desired annotations, conditions, expected markers, or desired conclusions during fitting or parameter tuning.",
+        "Do not select a method from UMAP appearance, batch mixing alone, or one aggregate score.",
+        "Do not overwrite raw counts, source objects, cell identities, unknown labels, or sample provenance.",
+        "Do not use corrected embeddings or graphs as count matrices for differential expression.",
+        "Do not report generated code, an unreloaded h5ad, or an ineligible candidate as validated integration evidence."
+      ],
+      "handoff_type": "codex_generated_project_analysis",
+      "languages": [
+        "python",
+        "notebook"
+      ],
+      "module": {
+        "id": "single-cell-batch-integration",
+        "version": "1.0.0"
+      },
+      "parameter_rules": [
+        {
+          "decision_inputs": [
+            "batch association",
+            "sample nesting",
+            "unintegrated PCA",
+            "technical covariates",
+            "downstream objective"
+          ],
+          "id": "integration-necessity",
+          "parameter": "integration-necessity",
+          "selection_rule": "Run integration only when a declared technical factor materially distorts the representation used by the downstream task and the design permits correction.",
+          "validation_rule": "Retain the unintegrated baseline and allow no-integration as a valid selected decision."
+        },
+        {
+          "decision_inputs": [
+            "batch-aware HVG overlap",
+            "feature namespace",
+            "variance ratios",
+            "technical association",
+            "cell count"
+          ],
+          "id": "feature-and-pca-foundation",
+          "parameter": "hvg-and-pca",
+          "selection_rule": "Freeze a batch-aware HVG and PCA foundation from log-normalized counts and test neighboring choices without using labels.",
+          "validation_rule": "Require finite components, adequate HVGs, raw-count separation, and comparable candidate inputs."
+        },
+        {
+          "decision_inputs": [
+            "cell count",
+            "batch count",
+            "population granularity",
+            "rare population objective"
+          ],
+          "id": "evaluation-neighborhood",
+          "parameter": "evaluation-neighbors",
+          "selection_rule": "Declare one evaluation neighborhood size and use it for baseline and candidate metrics; separately record BBKNN per-batch neighbor construction.",
+          "validation_rule": "Repeat conclusions over a defensible neighboring range and block candidates whose ranking is unstable."
+        },
+        {
+          "decision_inputs": [
+            "baseline entropy",
+            "batch count",
+            "sample balance",
+            "integration objective"
+          ],
+          "id": "mixing-threshold",
+          "parameter": "minimum-batch-entropy-gain",
+          "selection_rule": "Require a predeclared improvement over baseline rather than an absolute visual target.",
+          "validation_rule": "Interpret mixing only alongside sample composition, confounding review, and biological-conservation gates."
+        },
+        {
+          "decision_inputs": [
+            "label provenance",
+            "unknown labels",
+            "baseline purity",
+            "label connectivity",
+            "expected continua"
+          ],
+          "id": "conservation-thresholds",
+          "parameter": "biological-conservation-thresholds",
+          "selection_rule": "Declare maximum purity loss and minimum connectivity from label reliability and biological granularity before candidate comparison.",
+          "validation_rule": "Block any candidate that erases, fragments, or forcibly absorbs reviewed or unknown populations even when technical mixing improves."
+        },
+        {
+          "decision_inputs": [
+            "all quality gates",
+            "metric deltas",
+            "sensitivity runs",
+            "method output semantics",
+            "downstream task"
+          ],
+          "id": "candidate-selection",
+          "parameter": "selected-integration-method",
+          "selection_rule": "Select among eligible methods by the downstream representation needed and conservation robustness, not by one aggregate score.",
+          "validation_rule": "Require explicit no-selection when no candidate remains eligible and prohibit corrected embeddings as count matrices."
+        }
+      ],
+      "postflight_checks": [
+        "Reconcile cell, feature, metadata, unknown-label, and raw-count identities before and after every candidate.",
+        "Reload each integrated h5ad and verify representation or graph semantics, UMAP presence, parameters, versions, and quality status.",
+        "Recompute baseline and candidate batch entropy, label purity, label connectivity, and silhouettes independently using the fixed evaluation labels.",
+        "Compare candidate sensitivity across HVGs, PCs, neighbors, and seeds; inspect sample composition and retain all blocked methods and reasons.",
+        "Create a selected-method-or-none decision with an explicit downstream-use contract and update evidence only for observed eligible artifacts."
+      ],
+      "preflight_checks": [
+        "Inspect the actual h5ad and establish raw-count, batch, biological-sample, evaluation-label, unknown-label, feature, and annotation semantics.",
+        "Detect Scanpy, harmonypy, Scanorama, BBKNN, AnnData, NumPy, pandas, SciPy, scikit-learn, UMAP, Numba, and neighbor-search versions in the existing scientific environment.",
+        "Verify every biological sample maps to one batch and every known evaluation label spans at least two batches; identify batch-condition and batch-label confounding.",
+        "Freeze common preprocessing, candidate methods, metric definitions, quality thresholds, sensitivity grid, random seeds, and new output paths before execution.",
+        "Confirm labels are inaccessible to integration fitting and that source objects will not be modified."
+      ],
+      "provenance_fields": [
+        "module-id",
+        "module-version",
+        "generated-code-sha256",
+        "input-artifact-sha256",
+        "sample-manifest-sha256",
+        "raw-count-location",
+        "feature-namespace",
+        "batch-key",
+        "biological-sample-key",
+        "evaluation-label-key",
+        "unknown-label",
+        "labels-used-for-training-false",
+        "actual-tool-versions",
+        "actual-dependency-versions",
+        "candidate-method",
+        "preprocessing-parameters",
+        "method-parameters",
+        "metric-definitions",
+        "quality-thresholds",
+        "random-seed",
+        "sensitivity-runs",
+        "output-artifact-sha256",
+        "quality-gate-results"
+      ],
+      "quality_gate_ids": [
+        "integration-input-and-design-semantics",
+        "integration-identifiability",
+        "integration-no-label-leakage",
+        "integration-batch-mixing",
+        "integration-biological-conservation",
+        "integration-raw-count-and-reload",
+        "integration-selection-sensitivity"
+      ],
+      "request_digest": "0a33b20223a45811b044f8897426aa421b1c0c62c81123d5c3dcd83494488359",
+      "request_fields": [
+        "batch_key",
+        "biological_sample_key",
+        "declared_thresholds",
+        "design_notes",
+        "evaluation_label_key",
+        "input_artifact_id",
+        "input_format",
+        "objective",
+        "raw_count_location",
+        "requested_methods",
+        "unknown_label"
+      ],
+      "tool_profiles": [
+        {
+          "allowed_versions": [
+            ">=1.10,<1.11"
+          ],
+          "identity": "scanpy",
+          "mismatch_policy": "block",
+          "name": "scanpy",
+          "tested_versions": [
+            "1.10.4"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.10,<1.11"
+              ],
+              "id": "scanpy-external-integration-api",
+              "required_action": "Use only detected wrapper signatures and independently reload representations, graphs, embeddings, and raw counts."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.2,<0.3"
+          ],
+          "identity": "harmonypy",
+          "mismatch_policy": "alternative",
+          "name": "harmonypy",
+          "tested_versions": [
+            "0.2.0"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=0.2,<0.3"
+              ],
+              "id": "harmony-pca-adjustment",
+              "required_action": "Call the detected Harmony API, validate both possible orientations against the frozen PCA shape, normalize to cells by components, and compare corrected neighborhoods with the unchanged PCA baseline."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.7,<1.8"
+          ],
+          "identity": "scanorama",
+          "mismatch_policy": "alternative",
+          "name": "scanorama",
+          "tested_versions": [
+            "1.7.4"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.7,<1.8"
+              ],
+              "id": "scanorama-embedding-integration",
+              "required_action": "Record exact versus approximate matching and independently evaluate integrated neighbors and conservation metrics."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.6,<1.7"
+          ],
+          "identity": "bbknn",
+          "mismatch_policy": "alternative",
+          "name": "bbknn",
+          "tested_versions": [
+            "1.6.0"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.6,<1.7"
+              ],
+              "id": "bbknn-balanced-neighbor-graph",
+              "required_action": "Record per-batch neighbors and search mode and evaluate the graph rather than treating baseline PCA as a corrected embedding."
+            }
+          ]
+        }
+      ]
+    }
+  },
   "single-cell-donor-inference": {
     "input": {
       "biological_sample_key": "sample_id",

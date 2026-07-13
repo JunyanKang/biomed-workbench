@@ -65,6 +65,12 @@ AGENT_EVIDENCE = {
         "summary_flags": ("edger_deseq2_limma_voom_passed", "global_bh_independently_recomputed", "planted_effect_direction_recovered_by_all_engines"),
         "live_dependency_keys": ("anndata", "numpy", "pandas", "scipy", "r", "jsonlite", "digest"),
     },
+    "single-cell-batch-integration": {
+        "path": "reports/single-cell-batch-integration-live-verification.json",
+        "execution_flags": ("harmony_completed", "scanorama_completed", "bbknn_completed"),
+        "summary_flags": ("harmony_scanorama_bbknn_executed", "one_frozen_baseline_used", "labels_used_only_for_posthoc_evaluation", "unknown_cells_retained", "raw_counts_preserved", "biological_conservation_gates_passed", "eligible_method_selected_without_umap_scoring"),
+        "live_dependency_keys": ("anndata", "numpy", "pandas", "scipy", "scikit-learn", "umap-learn"),
+    },
 }
 
 
