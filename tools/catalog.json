@@ -3971,6 +3971,92 @@
       "workflow": "omics"
     },
     {
+      "access": "agent_generated",
+      "description": "Direct Codex to inspect a real count-backed h5ad and biological design, adapt and execute a project-specific scVI or scANVI model in the user's existing scientific environment, compare the latent space with an unchanged PCA baseline, validate scANVI by stratified label holdout, retain reviewed and unknown labels, save and reload both model and h5ad artifacts, and block models that mix batches by erasing biology or cannot generalize to withheld labels.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-generative-modeling",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "batch_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "biological_sample_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "raw_count_location": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_mode": {
+            "enum": [
+              "scvi",
+              "scanvi"
+            ],
+            "type": "string"
+          },
+          "reviewed_label_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "unknown_label": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "raw_count_location",
+          "batch_key",
+          "biological_sample_key",
+          "reviewed_label_key",
+          "unknown_label",
+          "requested_mode",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Train and validate scVI or scANVI single-cell models",
+      "workflow": "omics"
+    },
+    {
       "access": "offline",
       "description": "Compute per-cell counts, detected genes, mitochondrial fraction, and transparent threshold flags.",
       "entrypoint": "biomed_workbench.capabilities.omics:single_cell_qc",
@@ -5076,7 +5162,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 77,
+  "entry_count": 78,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

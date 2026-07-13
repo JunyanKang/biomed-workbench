@@ -71,6 +71,12 @@ AGENT_EVIDENCE = {
         "summary_flags": ("harmony_scanorama_bbknn_executed", "one_frozen_baseline_used", "labels_used_only_for_posthoc_evaluation", "unknown_cells_retained", "raw_counts_preserved", "biological_conservation_gates_passed", "eligible_method_selected_without_umap_scoring"),
         "live_dependency_keys": ("anndata", "numpy", "pandas", "scipy", "scikit-learn", "umap-learn"),
     },
+    "single-cell-generative-modeling": {
+        "path": "reports/single-cell-generative-modeling-live-verification.json",
+        "execution_flags": ("scvi_completed", "scanvi_completed"),
+        "summary_flags": ("scvi_and_scanvi_trained", "models_and_h5ad_reloaded", "raw_counts_preserved", "reviewed_and_unknown_labels_preserved", "scanvi_evaluated_on_hidden_labels", "scanvi_predictions_are_reviewable_suggestions", "no_environment_or_compute_infrastructure_managed"),
+        "live_dependency_keys": ("anndata", "numpy", "pandas", "scipy", "scikit-learn", "torch", "lightning"),
+    },
 }
 
 

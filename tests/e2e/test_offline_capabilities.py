@@ -155,6 +155,21 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         self.assertTrue(output["execution_policy"]["observed_execution_required"])
         self.assertTrue(any("Do not select a method from UMAP" in item for item in output["forbidden_actions"]))
 
+    def test_single_cell_generative_modeling(self):
+        output = execute("single-cell-generative-modeling", {
+            "objective": "Train and validate a count-aware scANVI model while retaining reviewed labels and unknown cells.",
+            "input_artifact_id": "artifact-scrna-qc-reviewed", "input_format": "h5ad", "raw_count_location": "layers.counts",
+            "batch_key": "chemistry_batch", "biological_sample_key": "sample_id",
+            "reviewed_label_key": "reviewed_cell_type", "unknown_label": "unknown", "requested_mode": "scanvi",
+            "declared_thresholds": {"minimum_heldout_macro_f1": 0.8, "maximum_label_purity_loss": 0.15, "minimum_label_connectivity": 0.8},
+            "design_notes": "Independent samples span two batches; every reviewed class occurs in both; unknown cells remain unpromoted."
+        })
+        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"scvi-tools", "scanpy"})
+        self.assertIn("scanvi-heldout-generalization", output["quality_gate_ids"])
+        self.assertTrue(output["execution_policy"]["observed_execution_required"])
+        self.assertTrue(any("Do not evaluate scANVI only" in item for item in output["forbidden_actions"]))
+
     def test_variant_summary(self):
         output = execute("variant-summary", {"variants": [{"chrom": "1", "ref": "A", "alt": "G", "filter": "PASS"}]})
         self.assertEqual(output["transition_count"], 1)

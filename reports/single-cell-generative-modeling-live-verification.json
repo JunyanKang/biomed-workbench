@@ -1,0 +1,102 @@
+{
+  "compatibility_row_id": "agent-protocol-1-scvi-120-scanpy-1115-torch-251",
+  "decision": {
+    "blocked_modes": {
+      "scvi": [
+        "batch_mixing_gain",
+        "label_graph_connected"
+      ]
+    },
+    "eligible_modes": [
+      "scanvi"
+    ],
+    "selected_mode": "scanvi"
+  },
+  "dependency_versions": {
+    "anndata": "0.11.4",
+    "lightning": "2.6.4",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "scikit-learn": "1.7.2",
+    "scipy": "1.15.3",
+    "torch": "2.5.1"
+  },
+  "execution": {
+    "scanvi_completed": true,
+    "scanvi_model_sha256": "aa2c8b4bc5d1cadb63c8e38f71bdb47c4df95dc424910e66eb3def6b29ae86c8",
+    "scanvi_output_sha256": "fb0645a52e93245020e8eaa4b686e8967c5c7efd9bdf5a18d92e0e427144eb21",
+    "scanvi_report_sha256": "6ebbdbab62af0bffdf54d30e0bc6bb1962da17df894606881f38a58272bdfff9",
+    "scvi_completed": true,
+    "scvi_model_sha256": "8d77b8755a90ff7102f8b4bf515853b3e33183cac5a4110cd628ff9473269d30",
+    "scvi_output_sha256": "c07b5dd7cb2305988f008345fd4accac487fbe53a1e90de68f48236f7b0f492b",
+    "scvi_report_sha256": "70be2f2100d8c1c76bdf29c84672cb0871e0ba9a8a56db30dfd6fc948225993f"
+  },
+  "fixture": {
+    "batches": 2,
+    "biological_samples": 4,
+    "cells": 384,
+    "features": 120,
+    "known_labels": 3,
+    "sha256": "8e0428da027713dbaa26290ea8855d907c73c266b38ecdfbfe708ad002fd92f1",
+    "unknown_cells": 48
+  },
+  "module_id": "single-cell-generative-modeling",
+  "module_version": "1.0.0",
+  "passed": true,
+  "results": {
+    "scanvi": {
+      "batch_neighbor_entropy_gain": 0.542799171001948,
+      "heldout_macro_f1": 1.0,
+      "known_label_neighbor_purity_loss": -0.006547619047619024,
+      "quality_gates": {
+        "batch_mixing_gain": true,
+        "h5ad_reload_valid": true,
+        "heldout_annotation_valid": true,
+        "label_graph_connected": true,
+        "label_purity_preserved": true,
+        "latent_finite": true,
+        "model_reload_valid": true,
+        "raw_counts_preserved": true,
+        "reviewed_and_unknown_labels_preserved": true
+      },
+      "quality_status": "passed"
+    },
+    "scvi": {
+      "batch_neighbor_entropy_gain": -0.27646031486152933,
+      "heldout_macro_f1": null,
+      "known_label_neighbor_purity_loss": -0.006547619047619024,
+      "quality_gates": {
+        "batch_mixing_gain": false,
+        "h5ad_reload_valid": true,
+        "heldout_annotation_valid": true,
+        "label_graph_connected": false,
+        "label_purity_preserved": true,
+        "latent_finite": true,
+        "model_reload_valid": true,
+        "raw_counts_preserved": true,
+        "reviewed_and_unknown_labels_preserved": true
+      },
+      "quality_status": "blocked"
+    }
+  },
+  "schema_version": 1,
+  "scientific_summary": {
+    "models_and_h5ad_reloaded": true,
+    "no_environment_or_compute_infrastructure_managed": true,
+    "raw_counts_preserved": true,
+    "reviewed_and_unknown_labels_preserved": true,
+    "scanvi_evaluated_on_hidden_labels": true,
+    "scanvi_predictions_are_reviewable_suggestions": true,
+    "scvi_and_scanvi_trained": true
+  },
+  "templates": {
+    "train_scvi_scanvi": {
+      "name": "train_scvi_scanvi.py",
+      "sha256": "8a3c7e50089965ce02e728f5bd538b5bf7e7ef18623c6298c0b423c030bba18b"
+    }
+  },
+  "tool_versions": {
+    "scanpy": "1.11.5",
+    "scvi-tools": "1.2.0"
+  }
+}

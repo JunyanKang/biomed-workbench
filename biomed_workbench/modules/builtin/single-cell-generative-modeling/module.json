@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "id": "single-cell-generative-modeling",
+  "version": "1.0.0",
+  "title": "Train and validate scVI or scANVI single-cell models",
+  "description": "Direct Codex to inspect a real count-backed h5ad and biological design, adapt and execute a project-specific scVI or scANVI model in the user's existing scientific environment, compare the latent space with an unchanged PCA baseline, validate scANVI by stratified label holdout, retain reviewed and unknown labels, save and reload both model and h5ad artifacts, and block models that mix batches by erasing biology or cannot generalize to withheld labels.",
+  "module_type": "analysis",
+  "domains": ["omics", "statistics"],
+  "intents": ["train scVI single-cell latent model", "validate scANVI semi-supervised annotation", "generative single-cell integration with unknown retention", "scVI scANVI 单细胞生成模型与留出验证"],
+  "questions": ["Can a count-aware scVI or scANVI model improve the required representation while preserving reviewed biology, unknown cells, raw counts, and held-out annotation performance?"],
+  "maturity": "experimental",
+  "entrypoint": "agent-generated-analysis",
+  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
+  "input_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "objective": {"type": "string", "minLength": 12, "maxLength": 4000},
+      "input_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256},
+      "input_format": {"type": "string", "enum": ["h5ad"]},
+      "raw_count_location": {"type": "string", "minLength": 1, "maxLength": 256},
+      "batch_key": {"type": "string", "minLength": 1, "maxLength": 128},
+      "biological_sample_key": {"type": "string", "minLength": 1, "maxLength": 128},
+      "reviewed_label_key": {"type": "string", "minLength": 1, "maxLength": 128},
+      "unknown_label": {"type": "string", "minLength": 1, "maxLength": 256},
+      "requested_mode": {"type": "string", "enum": ["scvi", "scanvi"]},
+      "declared_thresholds": {"type": "object"},
+      "design_notes": {"type": "string", "minLength": 1, "maxLength": 8000}
+    },
+    "required": ["objective", "input_artifact_id", "input_format", "raw_count_location", "batch_key", "biological_sample_key", "reviewed_label_key", "unknown_label", "requested_mode", "declared_thresholds", "design_notes"]
+  },
+  "output_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]},
+      "module": {"type": "object"}, "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "request_fields": {"type": "array"},
+      "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"},
+      "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"},
+      "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"},
+      "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}
+    },
+    "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]
+  },
+  "input_artifacts": [{
+    "name": "quality_controlled_single_cell_object", "artifact_type": "single_cell_analysis_object",
+    "formats": [{"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["observations-by-variables"]}],
+    "processing_levels": ["quality-controlled", "count-backed", "annotated"],
+    "required_metadata": ["input-artifact-digest", "raw-count-location", "biological-sample-key", "batch-key", "reviewed-label-key", "unknown-label", "sample-manifest-digest", "feature-identifier-namespace", "cell-accounting", "label-provenance"]
+  }],
+  "output_artifacts": [
+    {
+      "name": "generative_model_object", "artifact_type": "single_cell_generative_model",
+      "formats": [{"name": "scvi-model-directory", "versions": ["1"], "representations": ["container", "binary"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-from-input"], "orientations": ["model"]}],
+      "processing_levels": ["trained", "reload-validated"],
+      "required_metadata": ["module-version", "generated-code-sha256", "input-artifact-digest", "mode", "actual-tool-versions", "model-parameters", "training-parameters", "random-seed", "model-directory-digest", "reload-validation", "quality-status"]
+    },
+    {
+      "name": "modeled_single_cell_object", "artifact_type": "single_cell_integrated_object",
+      "formats": [{"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-from-input"], "orientations": ["observations-by-variables"]}],
+      "processing_levels": ["modeled", "quality-controlled"],
+      "required_metadata": ["raw-count-location", "latent-key", "reviewed-label-key", "unknown-label", "reviewed-labels-overwritten-false", "suggestion-confidence", "model-digest", "h5ad-digest", "reload-validation", "quality-status"]
+    },
+    {
+      "name": "generative_model_validation", "artifact_type": "single_cell_model_validation",
+      "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["model-by-quality-gates"]}],
+      "processing_levels": ["derived"],
+      "required_metadata": ["baseline-metrics", "modeled-metrics", "metric-deltas", "heldout-annotation-metrics", "unknown-cell-accounting", "raw-count-check", "model-reload-check", "h5ad-reload-check", "quality-gate-results"]
+    }
+  ],
+  "assumptions": ["Raw counts, cells, features, biological samples, batches, and reviewed labels are valid and immutable; the unknown label is explicit; known reviewed classes span technical batches; scANVI labels are trusted only after stratified holdout validation; and model suggestions never overwrite reviewed or unknown identities."],
+  "preconditions": ["Codex can inspect the actual h5ad and sample design; the existing scientific environment already contains a compatible scvi-tools runtime; raw counts and label provenance are declared; and no environment or compute-infrastructure management is required."],
+  "quality_gates": [
+    {"id": "generative-input-semantics", "severity": "fatal", "description": "Block when raw counts, cell or feature identities, sample, batch, reviewed label, unknown label, or source provenance cannot be established without guessing.", "blocks_interpretation": true},
+    {"id": "generative-design-identifiability", "severity": "fatal", "description": "Block when samples map ambiguously to batches, reviewed classes are confined to one batch, unknown cells are absent, or technical and target biology are inseparable.", "blocks_interpretation": true},
+    {"id": "generative-latent-conservation", "severity": "fatal", "description": "The learned latent space must be finite and must satisfy predeclared batch-mixing, reviewed-label purity, and label-connectivity constraints relative to the frozen PCA baseline.", "blocks_interpretation": true},
+    {"id": "scanvi-heldout-generalization", "severity": "fatal", "description": "scANVI must meet predeclared macro-F1 and balanced-accuracy expectations on stratified reviewed labels hidden from semi-supervised training.", "blocks_interpretation": true},
+    {"id": "generative-unknown-retention", "severity": "fatal", "description": "Reviewed labels and original unknown identities remain immutable; scANVI predictions are suggestions with confidence and review flags, never silent replacements.", "blocks_interpretation": true},
+    {"id": "generative-artifact-reload", "severity": "fatal", "description": "The saved model and output h5ad must both reload with raw counts, latent representation, cells, features, labels, graph, embedding, parameters, and quality state intact.", "blocks_interpretation": true}
+  ],
+  "evidence_effects": ["trains_count_aware_single_cell_latent_models", "validates_scanvi_on_hidden_reviewed_labels", "preserves_unknown_cells_and_reviewed_identity", "binds_reloadable_model_and_h5ad_artifacts_to_quality_gates"],
+  "alternatives": ["single-cell-batch-integration"],
+  "complements": ["single-cell-foundation-workflow", "single-cell-donor-inference", "classification-gold-set-evaluation", "claim-evidence-integrity-audit"],
+  "tool_requirements": [
+    {"name": "scvi-tools", "ecosystem": "python", "identity": "scvi-tools", "required": true, "tested_versions": ["1.2.0"], "allowed_versions": [">=1.2,<1.3"], "version_source": "https://docs.scvi-tools.org/en/1.2.0/", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import scvi; print(scvi.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "scvi-scanvi-training-and-save-api", "affected_versions": [">=1.2,<1.3"], "category": "api", "description": "AnnData registration, training arguments, SCANVI.from_scvi_model, probability output, and model save/load semantics are tied to the tested release.", "compatibility_effect": "requires-parser", "required_action": "Inspect detected signatures, preserve the registered count layer, and reload model and h5ad before admitting results.", "source": "https://docs.scvi-tools.org/en/1.2.0/"}], "platforms": ["any"]},
+    {"name": "scanpy", "ecosystem": "python", "identity": "scanpy", "required": true, "tested_versions": ["1.11.5"], "allowed_versions": [">=1.11,<1.12"], "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import scanpy; print(scanpy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "scanpy-pca-neighbor-umap-api", "affected_versions": [">=1.11,<1.12"], "category": "behavior", "description": "PCA, neighbor graph, UMAP, and h5ad serialization behavior are version-coupled.", "compatibility_effect": "requires-parameter", "required_action": "Record the actual version and reload all representation and graph keys.", "source": "https://scanpy.readthedocs.io/en/stable/release-notes/"}], "platforms": ["any"]}
+  ],
+  "dependencies": [
+    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-13", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate the request and emit the Agent protocol; this is not the scientific model runtime.", "conflicts": [], "platforms": ["any"]},
+    {"name": "anndata", "ecosystem": "python", "identity": "anndata", "required": true, "tested_versions": ["0.11.4"], "allowed_versions": [">=0.11,<0.12"], "version_source": "https://anndata.readthedocs.io/en/stable/release-notes/", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import anndata; print(anndata.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Preserve h5ad matrices, metadata, latent representations, graphs, and model registration.", "conflicts": [], "platforms": ["any"]},
+    {"name": "numpy", "ecosystem": "python", "identity": "numpy", "required": true, "tested_versions": ["1.26.4"], "allowed_versions": [">=1.26,<1.27"], "version_source": "https://numpy.org/doc/1.26/release.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import numpy; print(numpy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate counts, latent matrices, probabilities, and deterministic splits.", "conflicts": [], "platforms": ["any"]},
+    {"name": "pandas", "ecosystem": "python", "identity": "pandas", "required": true, "tested_versions": ["2.3.3"], "allowed_versions": [">=2.3,<2.4"], "version_source": "https://pandas.pydata.org/docs/whatsnew/", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import pandas; print(pandas.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate design metadata, labels, holdouts, and probability tables.", "conflicts": [], "platforms": ["any"]},
+    {"name": "scipy", "ecosystem": "python", "identity": "scipy", "required": true, "tested_versions": ["1.15.3"], "allowed_versions": [">=1.15,<1.16"], "version_source": "https://docs.scipy.org/doc/scipy/release.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import scipy; print(scipy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Preserve sparse counts and compute label graph connectivity.", "conflicts": [], "platforms": ["any"]},
+    {"name": "scikit-learn", "ecosystem": "python", "identity": "sklearn", "required": true, "tested_versions": ["1.7.2"], "allowed_versions": [">=1.7,<1.8"], "version_source": "https://scikit-learn.org/stable/whats_new/v1.7.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import sklearn; print(sklearn.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Compute neighborhoods, macro-F1, and balanced accuracy.", "conflicts": [], "platforms": ["any"]},
+    {"name": "torch", "ecosystem": "python", "identity": "torch", "required": true, "tested_versions": ["2.5.1"], "allowed_versions": [">=2.5,<2.6"], "version_source": "https://pytorch.org/blog/pytorch2-5/", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import torch; print(torch.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute the detected scvi-tools model implementation in the existing environment.", "conflicts": [], "platforms": ["any"]},
+    {"name": "lightning", "ecosystem": "python", "identity": "lightning", "required": true, "tested_versions": ["2.6.4"], "allowed_versions": [">=2.6,<2.7"], "version_source": "https://lightning.ai/docs/pytorch/stable/generated/CHANGELOG.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import lightning; print(lightning.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide the detected scvi-tools training loop and data splitting semantics.", "conflicts": [], "platforms": ["any"]}
+  ],
+  "compatibility_matrix": [{
+    "id": "agent-protocol-1-scvi-120-scanpy-1115-torch-251",
+    "module_version": "1.0.0",
+    "tool_versions": {"scvi-tools": [">=1.2,<1.3"], "scanpy": [">=1.11,<1.12"]},
+    "dependency_versions": {"python": [">=3.14,<3.15"], "anndata": [">=0.11,<0.12"], "numpy": [">=1.26,<1.27"], "pandas": [">=2.3,<2.4"], "scipy": [">=1.15,<1.16"], "scikit-learn": [">=1.7,<1.8"], "torch": [">=2.5,<2.6"], "lightning": [">=2.6,<2.7"]},
+    "input_formats": {"quality_controlled_single_cell_object": ["h5ad@0.1.0"]},
+    "output_formats": {"generative_model_object": ["scvi-model-directory@1"], "modeled_single_cell_object": ["h5ad@0.1.0"], "generative_model_validation": ["inline-json@1"]},
+    "platforms": ["any"], "regression_evidence_ids": ["single-cell-generative-modeling-regression-v1"], "end_to_end_evidence_ids": ["single-cell-generative-modeling-e2e-v1"], "verified_at": "2026-07-13"
+  }],
+  "access": "agent_generated",
+  "mutability": "read_only",
+  "credentials": [],
+  "limitations": ["The validated row covers count-backed h5ad inputs and scvi-tools 1.2.x APIs. It does not prove that a generative model is preferable to no integration or classical integration, repair confounded designs, replace donor-aware inference, automatically promote unknown cells, manage execution infrastructure, or validate reference atlases. scANVI suggestions remain review candidates until a separate annotation and marker-validation module accepts them."],
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned Codex-native generative single-cell workflow synthesized from validated model APIs and conservative annotation principles.", "https://docs.scvi-tools.org/en/1.2.0/api/reference/scvi.model.SCVI.html", "https://docs.scvi-tools.org/en/1.2.0/api/reference/scvi.model.SCANVI.html"]},
+  "agent_protocol": {
+    "schema_version": 1, "mode": "codex_generated_project_code", "languages": ["python", "notebook"],
+    "template_sections": [
+      {"id": "inspect-model-design", "purpose": "Establish count, sample, batch, label, unknown, and model-use semantics before training.", "required_logic": ["Inspect the real h5ad and sample manifest; validate immutable integer-like counts and unique identifiers.", "Cross-tabulate samples, batches, reviewed labels, conditions, and unknown cells; block confounding or batch-confined classes.", "Declare whether scVI latent modeling or scANVI semi-supervision answers the project question and keep no-model as an eligible decision."], "output_artifact_types": ["single_cell_model_validation"], "template_files": ["templates/train_scvi_scanvi.py"]},
+      {"id": "train-count-aware-model", "purpose": "Train a project-specific model from raw counts in the detected existing runtime.", "required_logic": ["Register the declared raw-count layer and batch key without altering the source object.", "Freeze model architecture, likelihood, train split, epochs, seed, neighborhood metrics, and output paths before execution.", "Train scVI unsupervised; for scANVI derive semi-supervised models from the same scVI foundation and never overwrite reviewed labels."], "output_artifact_types": ["single_cell_generative_model", "single_cell_integrated_object"], "template_files": ["templates/train_scvi_scanvi.py"]},
+      {"id": "validate-generalization-and-conservation", "purpose": "Test the latent space and scANVI labels on independent gates.", "required_logic": ["Compare batch entropy, known-label purity, and label connectivity with a frozen unintegrated PCA baseline.", "For scANVI hide a stratified subset of every reviewed class during training and compute macro-F1 and balanced accuracy on held-out cells.", "Store predictions, confidence, and review flags separately while retaining every original reviewed and unknown label."], "output_artifact_types": ["single_cell_model_validation", "single_cell_integrated_object"], "template_files": ["templates/train_scvi_scanvi.py"]},
+      {"id": "save-reload-and-admit", "purpose": "Bind scientific claims to reloadable model and h5ad artifacts.", "required_logic": ["Save model state and registry plus an h5ad containing latent representation, graph, UMAP, suggestions, and unchanged counts and labels.", "Reload model and h5ad independently and verify shapes, finite latent values, raw counts, labels, graph keys, parameters, versions, digests, and quality state.", "Admit only observed artifacts passing every declared gate; preserve blocked runs and reasons."], "output_artifact_types": ["single_cell_generative_model", "single_cell_integrated_object", "single_cell_model_validation"], "template_files": ["templates/train_scvi_scanvi.py"]}
+    ],
+    "parameter_rules": [
+      {"id": "model-mode", "parameter": "scvi-or-scanvi", "decision_inputs": ["project objective", "reviewed label provenance", "unknown population", "reference coverage"], "selection_rule": "Use scVI for unsupervised representation and scANVI only when reviewed labels are suitable for semi-supervision and holdout testing.", "validation_rule": "Do not use scANVI as an annotation oracle or force unknown cells into known classes."},
+      {"id": "architecture-and-likelihood", "parameter": "architecture-and-gene-likelihood", "decision_inputs": ["cell count", "gene count", "count distribution", "sparsity", "replicate structure"], "selection_rule": "Choose a conservative architecture and count likelihood before outcomes are inspected.", "validation_rule": "Repeat justified neighboring architectures and block unstable biological conclusions."},
+      {"id": "training-and-holdout", "parameter": "epochs-train-split-holdout", "decision_inputs": ["class counts", "sample structure", "learning curves", "validation loss"], "selection_rule": "Use sample-aware diagnostics and stratified label holdout with enough training and evaluation cells per class.", "validation_rule": "Report failed convergence, class collapse, and weak held-out performance rather than extending training until a desired result appears."},
+      {"id": "unknown-policy", "parameter": "suggestion-confidence-and-review", "decision_inputs": ["probability calibration", "heldout errors", "marker evidence", "ontology constraints"], "selection_rule": "Emit confidence-bearing suggestions while preserving original unknown labels for separate review.", "validation_rule": "No unknown cell is promoted automatically by this module."}
+    ],
+    "preflight_checks": ["Inspect raw-count, sample, batch, reviewed-label, unknown-label, feature, condition, and source-object semantics.", "Detect scvi-tools, Scanpy, AnnData, NumPy, pandas, SciPy, scikit-learn, torch, Lightning, and Python versions in the existing scientific environment.", "Verify sample-to-batch mapping, cross-batch class support, unknown-cell presence, class counts, source immutability, and new output paths.", "Freeze mode, architecture, likelihood, train split, holdout fraction, epochs, thresholds, seed, and reload checks before training."],
+    "postflight_checks": ["Inspect learning histories, finite latent values, batch mixing, reviewed-label purity, label connectivity, and held-out scANVI metrics.", "Reconcile cells, features, raw counts, reviewed labels, unknown labels, suggestions, confidences, and review flags.", "Reload model and h5ad independently and verify digests, versions, parameters, graph, UMAP, quality state, and downstream representation contract.", "Compare against no model and classical integration when the project requires method selection."],
+    "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-artifact-sha256", "sample-manifest-sha256", "raw-count-location", "feature-namespace", "batch-key", "biological-sample-key", "reviewed-label-key", "unknown-label", "actual-tool-versions", "actual-dependency-versions", "model-mode", "architecture", "gene-likelihood", "training-parameters", "holdout-indices-digest", "random-seed", "metric-definitions", "quality-thresholds", "model-directory-sha256", "output-h5ad-sha256", "quality-gate-results"],
+    "forbidden_actions": ["Do not install, update, activate, create, or manage Python, R, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.", "Do not train on normalized values when the declared model requires raw counts.", "Do not repair confounding with a latent model or tune against desired UMAP, labels, markers, conditions, or conclusions.", "Do not evaluate scANVI only on labels used for training.", "Do not overwrite raw counts, source objects, reviewed labels, unknown labels, cell identities, or sample provenance.", "Do not treat normalized expression or a latent representation as count-level evidence for differential expression.", "Do not report a generated script, trained but unreloaded model, or blocked artifact as validated evidence."],
+    "requires_observed_execution": true
+  }
+}
