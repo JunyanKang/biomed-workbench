@@ -9,7 +9,7 @@ from typing import Any
 
 WORKFLOWS = frozenset({"evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication"})
 KINDS = frozenset({"python", "command", "service", "workflow"})
-ACCESS_MODES = frozenset({"offline", "public_api", "optional_api", "codex_native"})
+ACCESS_MODES = frozenset({"offline", "public_api", "optional_api", "codex_native", "agent_generated"})
 MUTABILITY_MODES = frozenset({"read_only", "writes_output"})
 RESULT_STATUSES = frozenset({"completed", "failed", "blocked", "skipped"})
 _ID_RE = re.compile(r"^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$")

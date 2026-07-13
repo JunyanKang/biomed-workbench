@@ -55,6 +55,22 @@ python3 "$WORKBENCH_ROOT/tools/run_tool.py" CAPABILITY_ID --input-file INPUT.jso
 
 Treat `selected_module_ids` as the router's compact execution set and the remaining candidates as alternatives for inspection. The selector uses manifest intent coverage, declared alternatives, and artifact input/output dependencies: independent selected modules may run in parallel, while a selected producer-consumer pair runs serially. Verify every selected input schema, unit, organism/build, identifier, dependency, and scientific compatibility before execution. Do not substitute a merely available capability for the analysis the question requires.
 
+## Agent-Generated Analyses
+
+Modules with `access: agent_generated` are executable scientific protocols, not checklist deliverables. Their deterministic output defines the code sections, parameter decisions, tool profiles, preflight checks, postflight checks, provenance, and forbidden actions that Codex must apply to the current project.
+
+For each such module:
+
+1. Inspect the actual project artifacts and experimental design before choosing a backend or parameter. Do not generate code from filenames or the request alone.
+2. Resolve every packaged `template_files` path relative to that module directory. Read the template, then create a project-owned implementation adapted to the observed object structure, tool APIs, design, and requested outputs. Do not edit the packaged template in place.
+3. Detect the user's existing scientific tool and dependency versions. Use a declared compatible profile, or run a bounded compatibility experiment and keep the branch blocked until its input/output regression is reviewed. Never install, activate, update, or manage the environment.
+4. Record each consequential parameter with its observed decision inputs and validation rule. A default is a candidate value, not a scientific justification.
+5. Review the generated code before execution, execute it in the user's scientific environment, inspect process errors and every output, and revise the implementation when gates fail.
+6. Run all postflight checks, reload serialized objects, reconcile input and output observations, and record actual versions, parameters, code and artifact hashes, random seeds, failed methods, and gate outcomes.
+7. Treat the protocol handoff and generated code as non-evidentiary. Add an artifact or evidence record only after observed execution and output validation; preserve failed, skipped, and not-run analyses explicitly.
+
+For single-cell analysis, keep cells as observations and donors, specimens, animals, organoids, or independently prepared samples as the experimental units for condition-level inference. Preserve raw counts before normalization or integration. Do not infer absence of empty droplets, ambient RNA, doublets, batch effects, or unknown cell types when the corresponding validated method was not run.
+
 ## Codex-Native Handoffs
 
 Some modules validate a scientific brief and return an `execution_handoff` for a Codex-managed native tool. Accept a handoff only when the module contract declares `access: codex_native`, no user credential, a recognized tool and operation, explicit quality gates, and a passing deterministic module result.

@@ -148,6 +148,38 @@ class ProvenanceContract:
 
 
 @dataclass(frozen=True)
+class AgentTemplateSection:
+    id: str
+    purpose: str
+    required_logic: tuple[str, ...]
+    output_artifact_types: tuple[str, ...]
+    template_files: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class AgentParameterRule:
+    id: str
+    parameter: str
+    decision_inputs: tuple[str, ...]
+    selection_rule: str
+    validation_rule: str
+
+
+@dataclass(frozen=True)
+class AgentProtocol:
+    schema_version: int
+    mode: str
+    languages: tuple[str, ...]
+    template_sections: tuple[AgentTemplateSection, ...]
+    parameter_rules: tuple[AgentParameterRule, ...]
+    preflight_checks: tuple[str, ...]
+    postflight_checks: tuple[str, ...]
+    provenance_fields: tuple[str, ...]
+    forbidden_actions: tuple[str, ...]
+    requires_observed_execution: bool
+
+
+@dataclass(frozen=True)
 class ModuleManifest:
     schema_version: int
     id: str
@@ -180,6 +212,7 @@ class ModuleManifest:
     output_schema: dict[str, object]
     kernel_compatibility: tuple[str, ...]
     provenance: ProvenanceContract
+    agent_protocol: AgentProtocol | None = None
 
 
 _MANIFEST_FIELDS = frozenset(ModuleManifest.__dataclass_fields__)
@@ -193,6 +226,10 @@ _VERSION_DIFFERENCE_FIELDS = frozenset(VersionDifference.__dataclass_fields__)
 _DEPENDENCY_CONFLICT_FIELDS = frozenset(DependencyConflict.__dataclass_fields__)
 _COMPATIBILITY_FIELDS = frozenset(CompatibilityRow.__dataclass_fields__)
 _PROVENANCE_FIELDS = frozenset(ProvenanceContract.__dataclass_fields__)
+_AGENT_PROTOCOL_FIELDS = frozenset(AgentProtocol.__dataclass_fields__)
+_AGENT_SECTION_FIELDS = frozenset(AgentTemplateSection.__dataclass_fields__)
+_AGENT_PARAMETER_FIELDS = frozenset(AgentParameterRule.__dataclass_fields__)
+_OPTIONAL_MANIFEST_FIELDS = frozenset({"agent_protocol"})
 
 
 def _object(value: Any, location: str) -> dict[str, Any]:
@@ -615,6 +652,64 @@ def _provenance(value: Any) -> ProvenanceContract:
     )
 
 
+def _agent_section(value: Any, location: str) -> AgentTemplateSection:
+    payload = _object(value, location)
+    _exact_fields(payload, _AGENT_SECTION_FIELDS, location)
+    identifier = _text(payload["id"], f"{location}.id")
+    if not _ID_RE.fullmatch(identifier):
+        raise ValueError(f"{location}.id is invalid")
+    return AgentTemplateSection(
+        id=identifier,
+        purpose=_text(payload["purpose"], f"{location}.purpose", minimum=12),
+        required_logic=_strings(payload["required_logic"], f"{location}.required_logic"),
+        output_artifact_types=_strings(payload["output_artifact_types"], f"{location}.output_artifact_types"),
+        template_files=_strings(payload["template_files"], f"{location}.template_files"),
+    )
+
+
+def _agent_parameter(value: Any, location: str) -> AgentParameterRule:
+    payload = _object(value, location)
+    _exact_fields(payload, _AGENT_PARAMETER_FIELDS, location)
+    identifier = _text(payload["id"], f"{location}.id")
+    parameter = _text(payload["parameter"], f"{location}.parameter")
+    if not _ID_RE.fullmatch(identifier) or not _NAME_RE.fullmatch(parameter):
+        raise ValueError(f"{location} has an invalid id or parameter")
+    return AgentParameterRule(
+        id=identifier,
+        parameter=parameter,
+        decision_inputs=_strings(payload["decision_inputs"], f"{location}.decision_inputs"),
+        selection_rule=_text(payload["selection_rule"], f"{location}.selection_rule", minimum=12),
+        validation_rule=_text(payload["validation_rule"], f"{location}.validation_rule", minimum=12),
+    )
+
+
+def _agent_protocol(value: Any) -> AgentProtocol:
+    payload = _object(value, "manifest.agent_protocol")
+    _exact_fields(payload, _AGENT_PROTOCOL_FIELDS, "manifest.agent_protocol")
+    if payload["schema_version"] != 1 or payload["mode"] != "codex_generated_project_code":
+        raise ValueError("manifest.agent_protocol version or mode is unsupported")
+    sections = payload["template_sections"]
+    parameters = payload["parameter_rules"]
+    if not isinstance(sections, list) or not sections or not isinstance(parameters, list) or not parameters:
+        raise ValueError("manifest.agent_protocol sections and parameter rules must be nonempty lists")
+    parsed_sections = tuple(_agent_section(item, f"manifest.agent_protocol.template_sections[{index}]") for index, item in enumerate(sections))
+    parsed_parameters = tuple(_agent_parameter(item, f"manifest.agent_protocol.parameter_rules[{index}]") for index, item in enumerate(parameters))
+    if len({item.id for item in parsed_sections}) != len(parsed_sections) or len({item.id for item in parsed_parameters}) != len(parsed_parameters):
+        raise ValueError("manifest.agent_protocol contains duplicate section or parameter rule ids")
+    return AgentProtocol(
+        schema_version=1,
+        mode="codex_generated_project_code",
+        languages=_strings(payload["languages"], "manifest.agent_protocol.languages"),
+        template_sections=parsed_sections,
+        parameter_rules=parsed_parameters,
+        preflight_checks=_strings(payload["preflight_checks"], "manifest.agent_protocol.preflight_checks"),
+        postflight_checks=_strings(payload["postflight_checks"], "manifest.agent_protocol.postflight_checks"),
+        provenance_fields=_strings(payload["provenance_fields"], "manifest.agent_protocol.provenance_fields"),
+        forbidden_actions=_strings(payload["forbidden_actions"], "manifest.agent_protocol.forbidden_actions"),
+        requires_observed_execution=_boolean(payload["requires_observed_execution"], "manifest.agent_protocol.requires_observed_execution"),
+    )
+
+
 def _validate_compatibility(manifest: ModuleManifest) -> None:
     tools = {item.name: item for item in manifest.tool_requirements}
     dependencies = {item.name: item for item in manifest.dependencies}
@@ -698,7 +793,12 @@ def _validate_command_execution(manifest: ModuleManifest) -> None:
 
 def parse_manifest(value: Any) -> ModuleManifest:
     payload = _object(value, "manifest")
-    _exact_fields(payload, _MANIFEST_FIELDS, "manifest")
+    extra = sorted(set(payload) - _MANIFEST_FIELDS)
+    missing = sorted((_MANIFEST_FIELDS - _OPTIONAL_MANIFEST_FIELDS) - set(payload))
+    if extra:
+        raise ValueError(f"unsupported manifest fields: {', '.join(extra)}")
+    if missing:
+        raise ValueError(f"missing manifest fields: {', '.join(missing)}")
     if payload["schema_version"] != 1:
         raise ValueError("unsupported manifest schema_version")
     identifier = _text(payload["id"], "manifest.id")
@@ -758,7 +858,19 @@ def parse_manifest(value: Any) -> ModuleManifest:
         output_schema=_closed_schema(payload["output_schema"], "manifest.output_schema"),
         kernel_compatibility=kernel_compatibility,
         provenance=_provenance(payload["provenance"]),
+        agent_protocol=_agent_protocol(payload["agent_protocol"]) if "agent_protocol" in payload else None,
     )
+    if access == "agent_generated":
+        if manifest.execution.kind != "workflow" or manifest.agent_protocol is None:
+            raise ValueError("agent_generated modules require workflow execution and an agent_protocol")
+        if not manifest.agent_protocol.requires_observed_execution:
+            raise ValueError("agent_generated modules must require observed execution")
+        produced_types = {port.artifact_type for port in manifest.output_artifacts}
+        declared_types = {artifact_type for section in manifest.agent_protocol.template_sections for artifact_type in section.output_artifact_types}
+        if not declared_types <= produced_types:
+            raise ValueError("agent_protocol template sections reference undeclared output artifact types")
+    elif manifest.agent_protocol is not None:
+        raise ValueError("agent_protocol is only valid for agent_generated modules")
     _validate_compatibility(manifest)
     _validate_command_execution(manifest)
     return manifest
@@ -795,6 +907,39 @@ def _quality_dict(value: QualityGate) -> dict[str, object]:
         "severity": value.severity,
         "description": value.description,
         "blocks_interpretation": value.blocks_interpretation,
+    }
+
+
+def _agent_protocol_dict(value: AgentProtocol) -> dict[str, object]:
+    return {
+        "schema_version": value.schema_version,
+        "mode": value.mode,
+        "languages": list(value.languages),
+        "template_sections": [
+            {
+                "id": item.id,
+                "purpose": item.purpose,
+                "required_logic": list(item.required_logic),
+                "output_artifact_types": list(item.output_artifact_types),
+                "template_files": list(item.template_files),
+            }
+            for item in value.template_sections
+        ],
+        "parameter_rules": [
+            {
+                "id": item.id,
+                "parameter": item.parameter,
+                "decision_inputs": list(item.decision_inputs),
+                "selection_rule": item.selection_rule,
+                "validation_rule": item.validation_rule,
+            }
+            for item in value.parameter_rules
+        ],
+        "preflight_checks": list(value.preflight_checks),
+        "postflight_checks": list(value.postflight_checks),
+        "provenance_fields": list(value.provenance_fields),
+        "forbidden_actions": list(value.forbidden_actions),
+        "requires_observed_execution": value.requires_observed_execution,
     }
 
 
@@ -882,7 +1027,7 @@ def manifest_to_dict(value: ModuleManifest) -> dict[str, object]:
     }
     if value.execution.command is not None:
         execution["command"] = value.execution.command.to_dict()
-    return {
+    payload = {
         "schema_version": value.schema_version,
         "id": value.id,
         "version": value.version,
@@ -915,3 +1060,6 @@ def manifest_to_dict(value: ModuleManifest) -> dict[str, object]:
         "kernel_compatibility": list(value.kernel_compatibility),
         "provenance": {"license": value.provenance.license, "concept_sources": list(value.provenance.concept_sources)},
     }
+    if value.agent_protocol is not None:
+        payload["agent_protocol"] = _agent_protocol_dict(value.agent_protocol)
+    return payload

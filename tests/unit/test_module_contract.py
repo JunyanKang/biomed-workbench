@@ -175,7 +175,64 @@ def command_manifest_payload():
     return payload
 
 
+def agent_manifest_payload():
+    payload = valid_manifest_payload()
+    payload["access"] = "agent_generated"
+    payload["entrypoint"] = "agent-generated-analysis"
+    payload["execution"] = {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 1000000}
+    payload["agent_protocol"] = {
+        "schema_version": 1,
+        "mode": "codex_generated_project_code",
+        "languages": ["python", "r"],
+        "template_sections": [{
+            "id": "validate-input",
+            "purpose": "Generate project-specific input validation code before analysis.",
+            "required_logic": ["Inspect the actual project artifact and fail on an ambiguous orientation."],
+            "output_artifact_types": ["quality_report"],
+            "template_files": ["templates/fixture.py"],
+        }],
+        "parameter_rules": [{
+            "id": "select-threshold",
+            "parameter": "minimum-count",
+            "decision_inputs": ["assay chemistry", "count distribution"],
+            "selection_rule": "Choose the threshold from the observed distribution and declared assay context.",
+            "validation_rule": "Record the selected value and verify retained observations across biological samples.",
+        }],
+        "preflight_checks": ["Detect and record the actual scientific tool versions before generating API-specific code."],
+        "postflight_checks": ["Validate every declared output artifact before scientific interpretation."],
+        "provenance_fields": ["generated-code-sha256", "input-sha256", "actual-tool-versions", "parameters"],
+        "forbidden_actions": ["Do not install or manage the user scientific environment."],
+        "requires_observed_execution": True,
+    }
+    payload["output_schema"] = closed_schema(
+        {
+            "handoff_type": {"type": "string"}, "module": {"type": "object"}, "request_digest": {"type": "string"},
+            "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"},
+            "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"},
+            "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"},
+            "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"},
+        },
+        ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"],
+    )
+    return payload
+
+
 class ModuleContractTests(unittest.TestCase):
+    def test_agent_generated_manifest_round_trips_structured_code_protocol(self):
+        manifest = parse_manifest(agent_manifest_payload())
+
+        self.assertEqual(manifest.access, "agent_generated")
+        self.assertEqual(manifest.execution.kind, "workflow")
+        self.assertEqual(manifest.agent_protocol.template_sections[0].id, "validate-input")
+        self.assertTrue(manifest.agent_protocol.requires_observed_execution)
+        self.assertEqual(parse_manifest(manifest_to_dict(manifest)), manifest)
+
+    def test_agent_protocol_is_rejected_without_agent_generated_workflow_boundary(self):
+        payload = agent_manifest_payload()
+        payload["access"] = "offline"
+        with self.assertRaisesRegex(ValueError, "only valid"):
+            parse_manifest(payload)
+
     def test_manifest_requires_complete_scientific_and_version_contracts(self):
         manifest = parse_manifest(valid_manifest_payload())
 

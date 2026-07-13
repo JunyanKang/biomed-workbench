@@ -9,6 +9,15 @@ from tests.unit.test_module_registry import write_manifest
 
 
 class DynamicModuleRoutingTests(unittest.TestCase):
+    def test_connective_words_do_not_create_cross_domain_routes(self):
+        plan = route("single-cell RNA-seq QC and differential expression")
+        self.assertEqual(plan["matched_workflows"], ["omics"])
+        routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}
+        self.assertIn("single-cell-foundation-workflow", routed)
+        self.assertIn("differential-expression", routed)
+        self.assertNotIn("qpcr-relative-expression", routed)
+        self.assertNotIn("claim-evidence-integrity-audit", routed)
+
     def test_router_contains_no_module_specific_intent_table(self):
         source = (Path(__file__).resolve().parents[2] / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
 

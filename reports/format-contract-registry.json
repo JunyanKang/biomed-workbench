@@ -17,11 +17,13 @@
     "matrix-market",
     "png",
     "sam",
+    "seurat-rds",
     "tabular",
+    "tenx-hdf5",
     "vcf",
     "webp"
   ],
-  "profile_count": 20,
+  "profile_count": 22,
   "profiles": [
     {
       "annotation_policy": "declared",
@@ -812,6 +814,51 @@
     },
     {
       "annotation_policy": "declared",
+      "authority": "Seurat",
+      "compression": [
+        "rds"
+      ],
+      "coordinate_systems": [],
+      "id": "seurat-rds-v5",
+      "identifier_namespace_policy": "required",
+      "index_requirements": [],
+      "name": "seurat-rds",
+      "orientations": [
+        "features-by-cells"
+      ],
+      "processing_levels": [
+        "raw-counts",
+        "filtered-counts",
+        "normalized",
+        "integrated",
+        "annotated"
+      ],
+      "reference_policy": "declared",
+      "representations": [
+        "binary",
+        "container",
+        "sparse"
+      ],
+      "required_metadata": [
+        "seurat-object-version",
+        "assays",
+        "default-assay",
+        "layers",
+        "cell-index",
+        "feature-index"
+      ],
+      "required_payload_roles": [
+        "matrix"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "matrix-index-order"
+      ],
+      "specification_source": "https://satijalab.org/seurat/articles/seurat5_essential_commands.html",
+      "specification_version": "5.0.0"
+    },
+    {
+      "annotation_policy": "declared",
       "authority": "Biomed-Workbench",
       "compression": [
         "none",
@@ -853,6 +900,48 @@
       ],
       "specification_source": "docs/format-contracts.md",
       "specification_version": "1.0.0"
+    },
+    {
+      "annotation_policy": "required",
+      "authority": "10x-Genomics",
+      "compression": [
+        "internal"
+      ],
+      "coordinate_systems": [],
+      "id": "tenx-hdf5-v3",
+      "identifier_namespace_policy": "required",
+      "index_requirements": [],
+      "name": "tenx-hdf5",
+      "orientations": [
+        "features-by-barcodes"
+      ],
+      "processing_levels": [
+        "raw-counts",
+        "filtered-counts"
+      ],
+      "reference_policy": "declared",
+      "representations": [
+        "binary",
+        "container",
+        "sparse"
+      ],
+      "required_metadata": [
+        "matrix-group",
+        "shape",
+        "feature-id",
+        "feature-name",
+        "feature-type",
+        "barcodes"
+      ],
+      "required_payload_roles": [
+        "matrix"
+      ],
+      "sample_manifest_policy": "required",
+      "sort_orders": [
+        "matrix-index-order"
+      ],
+      "specification_source": "https://www.10xgenomics.com/support/software/cell-ranger/latest/analysis/outputs/cr-outputs-h5-matrices",
+      "specification_version": "3.0.0"
     },
     {
       "annotation_policy": "declared",
@@ -949,15 +1038,15 @@
       "specification_version": "riff-container-2025"
     }
   ],
-  "registry_digest": "82bb115f4725de208a540dc63dd23fef386cac68a1d744d9dcaddbec73c20f49",
+  "registry_digest": "8328a3a1ee552698daa26a9f04ecd8e3a7be8cd787b21095a649aa770c1584f7",
   "requirement_coverage": {
-    "annotation_required": 2,
+    "annotation_required": 3,
     "coordinate_aware": 10,
-    "identifier_namespace_required": 8,
+    "identifier_namespace_required": 10,
     "indexed": 10,
     "multi_payload": 2,
     "reference_required": 10,
-    "sample_manifest_required": 13
+    "sample_manifest_required": 15
   },
   "schema_version": 1
 }

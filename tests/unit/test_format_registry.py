@@ -45,12 +45,12 @@ class FormatRegistryTests(unittest.TestCase):
     def test_catalog_covers_foundational_omics_formats_with_exact_profiles(self):
         expected = {
             "fastq", "fasta", "sam", "bam", "cram", "vcf", "bcf", "bed", "gtf", "gff3",
-            "count-matrix", "h5ad", "loom", "matrix-market", "fragments", "bigwig", "tabular",
+            "count-matrix", "h5ad", "tenx-hdf5", "seurat-rds", "loom", "matrix-market", "fragments", "bigwig", "tabular",
             "png", "jpeg", "webp",
         }
 
         self.assertEqual({profile.name for profile in self.registry.all()}, expected)
-        self.assertEqual(len(self.registry.all()), 20)
+        self.assertEqual(len(self.registry.all()), 22)
         self.assertTrue(all(profile.specification_version and profile.specification_source for profile in self.registry.all()))
 
     def test_every_builtin_profile_accepts_a_complete_snapshot(self):

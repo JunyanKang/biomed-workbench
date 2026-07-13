@@ -3645,6 +3645,116 @@
       "workflow": "omics"
     },
     {
+      "access": "agent_generated",
+      "description": "Direct Codex to inspect a real h5ad, 10x HDF5, Matrix Market, or Seurat v5 object; generate project-specific Scanpy or Seurat code for input validation, QC, raw-count preservation, normalization, feature selection, scaling, dimensionality reduction, neighborhood construction, clustering, and stability review; execute it in the user's existing scientific environment; and admit only observed, validated artifacts into project evidence.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-foundation-workflow",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "assay_type": {
+            "enum": [
+              "sc-rna",
+              "sn-rna",
+              "cite-seq-rna"
+            ],
+            "type": "string"
+          },
+          "batch_keys": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "biological_sample_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "expected_modalities": {
+            "items": {
+              "enum": [
+                "rna",
+                "adt"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "input_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad",
+              "10x-hdf5",
+              "matrix-market",
+              "seurat-rds"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "raw_count_location": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_backend": {
+            "enum": [
+              "auto",
+              "scanpy",
+              "seurat"
+            ],
+            "type": "string"
+          },
+          "species": {
+            "maxLength": 128,
+            "minLength": 2,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "assay_type",
+          "species",
+          "biological_sample_key",
+          "batch_keys",
+          "raw_count_location",
+          "requested_backend",
+          "expected_modalities",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Generate and validate a project-specific single-cell foundation workflow",
+      "workflow": "omics"
+    },
+    {
       "access": "offline",
       "description": "Compute per-cell counts, detected genes, mitochondrial fraction, and transparent threshold flags.",
       "entrypoint": "biomed_workbench.capabilities.omics:single_cell_qc",
@@ -4750,7 +4860,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 74,
+  "entry_count": 75,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

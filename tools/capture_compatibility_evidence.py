@@ -52,6 +52,10 @@ COMMAND_EVIDENCE = {
     "tumor-mutation-burden-vcf": ("reports/tmb-vcf-live-verification.json", "tests.unit.quality.test_tmb"),
 }
 
+AGENT_EVIDENCE = {
+    "single-cell-foundation-workflow": "reports/single-cell-foundation-live-verification.json",
+}
+
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -165,6 +169,40 @@ def capture() -> dict[str, object]:
             e2e_digest = digest_value(
                 {**context, "kind": "end-to-end", "source": source_digest, "execution": live_report["execution"], "html_validated": live_report["html_report_validated"]}
             )
+        elif manifest.agent_protocol is not None:
+            case = fixtures.get(manifest.id)
+            if not isinstance(case, dict):
+                raise RuntimeError(f"agent-generated regression fixture is missing: {manifest.id}")
+            direct = json.loads(json.dumps(entrypoint(**case["input"]), sort_keys=True))
+            _assert_subset(case["output"], direct)
+            report_path = ROOT / AGENT_EVIDENCE[manifest.id]
+            live_report = json.loads(report_path.read_text(encoding="utf-8"))
+            template_hashes = {
+                path.name: _sha256(path)
+                for path in sorted((BUILTIN_ROOT / manifest.id / "templates").iterdir())
+                if path.is_file()
+            }
+            observed_templates = {
+                item["name"]: item["sha256"]
+                for item in live_report.get("templates", {}).values()
+            }
+            if (
+                live_report.get("passed") is not True
+                or live_report.get("module_id") != manifest.id
+                or live_report.get("module_version") != manifest.version
+                or live_report.get("compatibility_row_id") != row.id
+                or observed_templates != template_hashes
+                or live_report.get("execution", {}).get("scanpy_completed") is not True
+                or live_report.get("execution", {}).get("seurat_completed") is not True
+                or live_report.get("scientific_summary", {}).get("scanpy_and_seurat_backends_passed") is not True
+            ):
+                raise RuntimeError(f"agent-generated live execution evidence differs from module contract: {manifest.id}")
+            plan = route(manifest.intents[0], registry=registry)
+            candidates = [item["id"] for step in plan["steps"] for item in step["candidates"]]
+            if manifest.id not in candidates:
+                raise RuntimeError(f"agent-generated module did not route through the unified entry: {manifest.id}")
+            regression_digest = digest_value({**context, "kind": "regression", "input": case["input"], "handoff": direct, "templates": template_hashes})
+            e2e_digest = digest_value({**context, "kind": "end-to-end", "live_report_sha256": _sha256(report_path), "execution": live_report["execution"], "scientific_summary": live_report["scientific_summary"]})
         elif manifest.tool_requirements:
             required = set(SERVICE_COVERAGE[manifest.id])
             if not required <= service_coverage:

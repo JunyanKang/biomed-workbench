@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 74,
-  "module_count": 74,
+  "compatibility_complete": 75,
+  "module_count": 75,
   "modules": [
     {
       "compatibility_rows": [
@@ -8810,6 +8810,409 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "single-cell-foundation-workflow-e2e-v1"
+          ],
+          "id": "agent-protocol-1-scanpy-110-or-seurat-52",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "single-cell-foundation-workflow-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate the request and emit the deterministic Agent code-generation protocol; it is not the scientific analysis runtime.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-13",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "single-cell-foundation-workflow",
+      "input_formats": [
+        {
+          "artifact_type": "single_cell_source_bundle",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none",
+                "gzip",
+                "lzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "h5ad",
+              "orientations": [
+                "observations-by-variables"
+              ],
+              "representations": [
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "0.1.0"
+              ]
+            },
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "internal"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tenx-hdf5",
+              "orientations": [
+                "features-by-barcodes"
+              ],
+              "representations": [
+                "binary",
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.0.0"
+              ]
+            },
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none",
+                "gzip"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "matrix-market",
+              "orientations": [
+                "genes-by-cells",
+                "cells-by-genes"
+              ],
+              "representations": [
+                "text",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "2.0"
+              ]
+            },
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "rds"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "seurat-rds",
+              "orientations": [
+                "features-by-cells"
+              ],
+              "representations": [
+                "binary",
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5.0.0"
+              ]
+            }
+          ],
+          "name": "single_cell_source",
+          "processing_levels": [
+            "raw-counts",
+            "filtered-counts",
+            "normalized",
+            "integrated",
+            "annotated"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "biological-sample-key",
+            "sample-manifest-digest",
+            "assay-type",
+            "species",
+            "raw-count-location",
+            "feature-identifier-namespace",
+            "annotation-release-or-not-applicable"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "single_cell_analysis_object",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none",
+                "gzip",
+                "lzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "h5ad",
+              "orientations": [
+                "observations-by-variables"
+              ],
+              "representations": [
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "0.1.0"
+              ]
+            },
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "rds"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "seurat-rds",
+              "orientations": [
+                "features-by-cells"
+              ],
+              "representations": [
+                "binary",
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5.0.0"
+              ]
+            }
+          ],
+          "name": "analysis_object",
+          "processing_levels": [
+            "quality-controlled",
+            "normalized",
+            "clustered"
+          ],
+          "required_metadata": [
+            "module-version",
+            "generated-code-sha256",
+            "input-artifact-digest",
+            "sample-manifest-digest",
+            "actual-tool-versions",
+            "raw-count-location",
+            "normalization-method",
+            "hvg-method",
+            "scaling-method",
+            "pca-parameters",
+            "neighbor-parameters",
+            "cluster-parameters",
+            "random-seeds"
+          ]
+        },
+        {
+          "artifact_type": "single_cell_qc_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "metrics-by-cells-and-samples"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "qc_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "generated-code-sha256",
+            "input-artifact-digest",
+            "sample-manifest-digest",
+            "threshold-rationale",
+            "cell-accounting",
+            "sample-stratified-retention"
+          ]
+        },
+        {
+          "artifact_type": "single_cell_cluster_model",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "clusters-by-stability-and-composition"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "cluster_model",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "generated-code-sha256",
+            "sample-manifest-digest",
+            "resolution-grid",
+            "stability-metrics",
+            "sample-composition",
+            "cluster-size-distribution"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=1.10,<1.12"
+          ],
+          "ecosystem": "python",
+          "identity": "scanpy",
+          "mismatch_policy": "block",
+          "name": "scanpy",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "1.10.4",
+            "1.11.5"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.10,<1.12"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parameter",
+              "description": "Scanpy 1.10 and 1.11 differ across dependency integrations, warnings, and graph or clustering implementation options used by generated workflows.",
+              "id": "scanpy-neighbor-cluster-api",
+              "required_action": "Inspect the detected Scanpy, anndata, igraph, leidenalg, umap-learn, and scikit-learn APIs and generate calls only for the observed compatible combination.",
+              "source": "https://scanpy.readthedocs.io/en/stable/release-notes/index.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import scanpy; print(scanpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/index.html"
+        },
+        {
+          "allowed_versions": [
+            ">=5.2,<5.3"
+          ],
+          "ecosystem": "r",
+          "identity": "Seurat",
+          "mismatch_policy": "block",
+          "name": "seurat",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "5.2.1"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=5.2,<5.3"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Seurat v5 assays use layer-aware access and joined or split layers that must not be treated as legacy slots.",
+              "id": "seurat-v5-layer-semantics",
+              "required_action": "Inspect assay layers and generate Seurat v5 layer-aware code without silently coercing or joining biologically distinct samples.",
+              "source": "https://satijalab.org/seurat/articles/seurat5_essential_commands.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('Seurat')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://satijalab.org/seurat/articles/seurat5_essential_commands.html"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "single-cell-qc-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -10506,6 +10909,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "4495998192f74cc992400fa50a487440f499c57ad0cd67acdd27904f99b90c25",
+  "registry_digest": "ed2d594434e9953e9af7b91f87914efb00c7429398d4edc36a3e14ba27abd922",
   "schema_version": 1
 }

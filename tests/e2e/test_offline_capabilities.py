@@ -108,6 +108,19 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         output = execute("single-cell-qc", {"genes": ["MT-A", "B"], "cells": ["c1"], "matrix": [[5], [5]], "min_counts": 1, "min_genes": 1, "max_mito_percent": 40})
         self.assertIn("high_mitochondrial_fraction", output["cells"][0]["flags"])
 
+    def test_single_cell_foundation_workflow(self):
+        output = execute("single-cell-foundation-workflow", {
+            "objective": "Establish a quality-controlled single-cell RNA-seq object for donor-aware analysis.",
+            "input_artifact_id": "artifact-scrna-raw", "input_format": "h5ad", "assay_type": "sc-rna",
+            "species": "Homo sapiens", "biological_sample_key": "donor_id", "batch_keys": ["library_id"],
+            "raw_count_location": "layers.counts", "requested_backend": "auto", "expected_modalities": ["rna"],
+            "declared_thresholds": {}, "design_notes": "Four donors per condition; library is nested within donor."
+        })
+        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertTrue(output["execution_policy"]["observed_execution_required"])
+        self.assertTrue(output["execution_policy"]["planned_output_is_not_evidence"])
+        self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"scanpy", "seurat"})
+
     def test_variant_summary(self):
         output = execute("variant-summary", {"variants": [{"chrom": "1", "ref": "A", "alt": "G", "filter": "PASS"}]})
         self.assertEqual(output["transition_count"], 1)

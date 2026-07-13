@@ -18,7 +18,7 @@ class FormatContractEvidenceTests(unittest.TestCase):
         report = json.loads(REPORT.read_text(encoding="utf-8"))
         expected = {
             "fastq", "fasta", "sam", "bam", "cram", "vcf", "bcf", "bed", "gtf", "gff3",
-            "count-matrix", "h5ad", "loom", "matrix-market", "fragments", "bigwig", "tabular",
+            "count-matrix", "h5ad", "tenx-hdf5", "seurat-rds", "loom", "matrix-market", "fragments", "bigwig", "tabular",
             "png", "jpeg", "webp",
         }
 

@@ -1,3 +1,4 @@
+import json
 import unittest
 from pathlib import Path
 
@@ -26,9 +27,13 @@ class IndependentModuleReleaseSurfaceTests(unittest.TestCase):
         for path in directories:
             children = {item.name for item in path.iterdir()}
             self.assertIn("module.json", children)
-            self.assertLessEqual(children, {"module.json", "tests"})
+            self.assertLessEqual(children, {"module.json", "tests", "templates", "validators"})
             if "tests" in children:
                 self.assertEqual({item.name for item in (path / "tests").iterdir()}, {"cases.json"})
+            if "templates" in children or "validators" in children:
+                manifest = json.loads((path / "module.json").read_text(encoding="utf-8"))
+                self.assertEqual(manifest["access"], "agent_generated")
+                self.assertIn("agent_protocol", manifest)
             self.assertEqual(path.name, path.name.lower())
             self.assertNotIn(path.name, {"evidence", "omics", "molecular-design", "imaging", "clinical", "wetlab", "publication"})
         self.assertTrue((BUILTIN_ROOT / "source-freshness-audit" / "tests" / "cases.json").is_file())

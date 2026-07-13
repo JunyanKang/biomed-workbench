@@ -78,6 +78,10 @@ class ModuleRegistry:
 
     def resolve_entrypoint(self, module_id: str) -> Callable[..., object]:
         manifest = self.get(module_id)
+        if manifest.agent_protocol is not None:
+            from ..capabilities.agent_analysis import prepare_agent_analysis
+
+            return lambda **inputs: prepare_agent_analysis(manifest, inputs)
         if manifest.execution.kind == "command" and manifest.entrypoint == "scientific-command":
             from .scientific_command import execute_scientific_command
 

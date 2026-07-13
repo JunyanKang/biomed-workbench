@@ -34,6 +34,7 @@ _LOCAL_PATH_PATTERNS = (
     re.compile(r"[A-Za-z]:\\\\Users\\\\"),
 )
 _CASE_FIELDS = frozenset({"name", "input", "expected_subset"})
+_AGENT_ASSET_RE = re.compile(r"^(?:templates|validators)/[a-z][a-z0-9_]*(?:\.(?:py|R|md|ipynb))$")
 
 
 def _relative_files(module_path: Path) -> set[str]:
@@ -178,7 +179,7 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
         errors.append("module path must be a directory")
     files = _relative_files(module_path) if module_path.is_dir() else set()
     missing = sorted(expected_files - files)
-    extra = sorted(files - allowed_files)
+    extra = sorted(path for path in files - allowed_files if not _AGENT_ASSET_RE.fullmatch(path))
     if missing:
         errors.append(f"module package is missing required files: {', '.join(missing)}")
     if extra:
@@ -219,6 +220,13 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
             errors.append("input or output format evidence is incomplete")
         if not compatibility_complete:
             errors.append("compatibility regression or end-to-end evidence is incomplete")
+        agent_assets = {path for path in files if _AGENT_ASSET_RE.fullmatch(path)}
+        if manifest.agent_protocol is not None:
+            referenced = {path for section in manifest.agent_protocol.template_sections for path in section.template_files}
+            if referenced != agent_assets or not referenced or any(not path.startswith("templates/") for path in referenced):
+                errors.append("agent protocol template references must exactly match packaged template assets")
+        elif agent_assets:
+            errors.append("only agent-generated modules may package templates or validators")
 
     if (module_path / "tests" / "cases.json").is_file():
         try:

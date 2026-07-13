@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from collections import defaultdict
+from collections import Counter, defaultdict
 from typing import Any, Iterable
 
 from .models import Capability
@@ -16,7 +16,12 @@ from .modules.registry import ModuleRegistry, ModuleRegistryError
 PREFERRED_DOMAIN_ORDER = ("evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication")
 SERIAL_DOMAINS = frozenset({"evidence", "publication"})
 _DEFAULT_REGISTRY = ModuleRegistry.discover(BUILTIN_ROOT)
-_ASCII_STOP = frozenset({"analyze", "analysis", "assess", "data", "result", "results", "run", "scientific", "summary", "test", "tool"})
+_ASCII_STOP = frozenset(
+    {
+        "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of", "on", "or", "the", "then", "to", "with",
+        "analyze", "analysis", "assess", "data", "result", "results", "run", "scientific", "summary", "test", "tool",
+    }
+)
 _CJK_STOP = frozenset({"分析", "数据", "结果", "进行", "检查", "评估", "科研", "汇总", "工具"})
 
 
@@ -156,12 +161,15 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
     active = registry or _DEFAULT_REGISTRY
     normalized_query = _normalize(query)
     dominant_exact_domains = set()
+    exact_domains = set()
     for module in active.all():
         exact_phrases = (
             _phrase_matches(query, module.intents)
             + _phrase_matches(query, module.questions)
             + _phrase_matches(query, (module.title,))
         )
+        if exact_phrases:
+            exact_domains.add(module.domains[0])
         if any(len(_normalize(phrase)) / len(normalized_query) >= 0.75 for phrase in exact_phrases):
             dominant_exact_domains.add(module.domains[0])
     if dominant_exact_domains:
@@ -172,7 +180,41 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
         if reasons:
             workflow = module.domains[0]
             domain_scores[workflow] = max(domain_scores[workflow], score)
-    matched = {domain for domain, score in domain_scores.items() if score >= 5.0}
+    strongest = max(domain_scores.values(), default=0.0)
+    query_features = _features(query)
+    module_features = {
+        module.id: set().union(
+            *(
+                _features(value)
+                for value in (
+                    *module.intents,
+                    *module.questions,
+                    module.title,
+                    module.description,
+                    *(port.artifact_type.replace("_", " ") for port in (*module.input_artifacts, *module.output_artifacts)),
+                )
+            )
+        )
+        for module in active.all()
+    }
+    feature_frequency = Counter(feature for features in module_features.values() for feature in features)
+    specificity_limit = max(2, len(module_features) // 20)
+    specific_feature_domains = {
+        module.domains[0]
+        for module in active.all()
+        if _score_module(module, query)[0] >= 5.0
+        and any(feature_frequency[feature] <= specificity_limit for feature in query_features & module_features[module.id])
+    }
+    explicit_primary_domains = {
+        module.domains[0]
+        for module in active.all()
+        if _features(module.domains[0].replace("_", " ")) & query_features
+    }
+    matched = {
+        domain
+        for domain, score in domain_scores.items()
+        if score >= max(5.0, strongest * 0.35)
+    } | exact_domains | explicit_primary_domains | specific_feature_domains
     if matched:
         return _domain_order(matched)
     fallback = [module for module in active.all() if module.module_type == "data_source"]

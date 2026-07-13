@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "cases": [{
+    "name": "prepare-scanpy-or-seurat-foundation",
+    "input": {
+      "objective": "Establish a quality-controlled single-cell RNA-seq object for donor-aware downstream analysis.",
+      "input_artifact_id": "artifact-scrna-raw",
+      "input_format": "h5ad",
+      "assay_type": "sc-rna",
+      "species": "Homo sapiens",
+      "biological_sample_key": "donor_id",
+      "batch_keys": ["library_id"],
+      "raw_count_location": "layers.counts",
+      "requested_backend": "auto",
+      "expected_modalities": ["rna"],
+      "declared_thresholds": {},
+      "design_notes": "Four donors per condition; library is nested within donor."
+    },
+    "expected_subset": {
+      "handoff_type": "codex_generated_project_analysis",
+      "module": {"id": "single-cell-foundation-workflow", "version": "1.0.0"},
+      "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}
+    }
+  }]
+}

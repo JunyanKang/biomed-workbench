@@ -2693,6 +2693,332 @@
       "reverse_complement": "GCGCAT"
     }
   },
+  "single-cell-foundation-workflow": {
+    "input": {
+      "assay_type": "sc-rna",
+      "batch_keys": [
+        "library_id"
+      ],
+      "biological_sample_key": "donor_id",
+      "declared_thresholds": {},
+      "design_notes": "Four donors per condition; library is nested within donor.",
+      "expected_modalities": [
+        "rna"
+      ],
+      "input_artifact_id": "artifact-scrna-raw",
+      "input_format": "h5ad",
+      "objective": "Establish a quality-controlled single-cell RNA-seq object for donor-aware analysis.",
+      "raw_count_location": "layers.counts",
+      "requested_backend": "auto",
+      "species": "Homo sapiens"
+    },
+    "output": {
+      "code_plan": [
+        {
+          "id": "inspect-input-object",
+          "output_artifact_types": [
+            "single_cell_qc_report"
+          ],
+          "purpose": "Generate a read-only inspection stage that establishes object format and scientific semantics before transformation.",
+          "required_logic": [
+            "Read only the declared format with its format-native API and report object, matrix, layer, assay, feature, observation, and metadata structure.",
+            "Reject duplicate or empty cell and feature identifiers, nonfinite values, ambiguous matrix orientation, missing biological sample identity, and undeclared modalities.",
+            "Locate raw counts by evidence from value distribution and object metadata; never infer raw counts from a conventional layer name alone."
+          ],
+          "template_files": [
+            "templates/scanpy_foundation.py",
+            "templates/seurat_foundation.R"
+          ]
+        },
+        {
+          "id": "quality-control",
+          "output_artifact_types": [
+            "single_cell_analysis_object",
+            "single_cell_qc_report"
+          ],
+          "purpose": "Generate assay-aware per-cell, per-sample, and per-feature QC with explicit accounting and optional contamination diagnostics.",
+          "required_logic": [
+            "Calculate counts, detected features, mitochondrial and ribosomal fractions, complexity, and sample-stratified distributions before filtering.",
+            "Separate empty-droplet, ambient-RNA, and doublet evidence; execute only methods available in a separately validated environment and preserve method-specific scores.",
+            "Assign every cell one retained or reason-coded excluded state and compare retention across biological samples and batches."
+          ],
+          "template_files": [
+            "templates/scanpy_foundation.py",
+            "templates/seurat_foundation.R"
+          ]
+        },
+        {
+          "id": "normalize-select-scale",
+          "output_artifact_types": [
+            "single_cell_analysis_object"
+          ],
+          "purpose": "Generate backend-appropriate normalization, highly variable feature selection, and scaling while preserving immutable raw counts.",
+          "required_logic": [
+            "Copy raw counts to a declared immutable layer or assay before any transformation.",
+            "Choose normalization and HVG strategy from assay type, depth, model assumptions, batch design, and downstream tools rather than a universal default.",
+            "Regress covariates only when scientifically justified and record each regressed variable; do not regress away the biological contrast."
+          ],
+          "template_files": [
+            "templates/scanpy_foundation.py",
+            "templates/seurat_foundation.R"
+          ]
+        },
+        {
+          "id": "reduce-neighbor-cluster",
+          "output_artifact_types": [
+            "single_cell_analysis_object",
+            "single_cell_cluster_model"
+          ],
+          "purpose": "Generate deterministic PCA, neighborhood, embedding, and graph-clustering code with explicit sensitivity parameters.",
+          "required_logic": [
+            "Select principal components from variance structure, technical association, and sensitivity analysis rather than one fixed count.",
+            "Construct the neighbor graph on the declared representation and generate UMAP or t-SNE only as visualization embeddings.",
+            "Run Leiden or Louvain across a declared resolution grid with fixed random seeds and preserve every tested cluster assignment."
+          ],
+          "template_files": [
+            "templates/scanpy_foundation.py",
+            "templates/seurat_foundation.R"
+          ]
+        },
+        {
+          "id": "validate-and-export",
+          "output_artifact_types": [
+            "single_cell_analysis_object",
+            "single_cell_qc_report",
+            "single_cell_cluster_model"
+          ],
+          "purpose": "Generate independent structural and scientific validation code before artifacts enter the research state.",
+          "required_logic": [
+            "Reload every output object and verify raw counts, identifiers, metadata, reductions, graph, embeddings, cluster labels, and parameter records.",
+            "Quantify cluster stability, minimum cluster size, sample and batch composition, technical covariate association, and sensitivity to resolution or neighbor choices.",
+            "Write machine-readable QC and cluster-model reports and block biological labels when major or fatal gates remain."
+          ],
+          "template_files": [
+            "templates/scanpy_foundation.py",
+            "templates/seurat_foundation.R"
+          ]
+        }
+      ],
+      "dependency_profiles": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "identity": "python-runtime",
+          "name": "python",
+          "tested_versions": [
+            "3.14.3"
+          ]
+        }
+      ],
+      "execution_policy": {
+        "execute_in_user_scientific_environment": true,
+        "generate_project_specific_code": true,
+        "inspect_before_execution": true,
+        "manage_environment_or_compute_infrastructure": false,
+        "observed_execution_required": true,
+        "planned_output_is_not_evidence": true
+      },
+      "forbidden_actions": [
+        "Do not install, update, activate, create, or otherwise manage Python, R, Conda, container, GPU, Slurm, remote, or local-model infrastructure.",
+        "Do not silently convert formats, transpose matrices, guess raw-count layers, merge feature namespaces, rename cells, or join Seurat layers with different sample semantics.",
+        "Do not overwrite source artifacts or raw counts.",
+        "Do not use cells as independent biological replicates for condition-level inference.",
+        "Do not hard-code universal QC, PCA, neighbor, or clustering parameters without project evidence and sensitivity checks.",
+        "Do not report an unexecuted method, a generated script, a UMAP separation, or a cluster assignment as validated biological evidence."
+      ],
+      "handoff_type": "codex_generated_project_analysis",
+      "languages": [
+        "python",
+        "r",
+        "notebook"
+      ],
+      "module": {
+        "id": "single-cell-foundation-workflow",
+        "version": "1.0.0"
+      },
+      "parameter_rules": [
+        {
+          "decision_inputs": [
+            "assay chemistry",
+            "per-sample count distributions",
+            "mitochondrial distributions",
+            "expected cell or nucleus biology",
+            "empty-droplet evidence",
+            "doublet-rate prior"
+          ],
+          "id": "qc-threshold-selection",
+          "parameter": "qc-thresholds",
+          "selection_rule": "Derive thresholds per biological sample when distributions or chemistry differ, document the rationale, and preserve a sensitivity comparison around each consequential threshold.",
+          "validation_rule": "Require complete cell accounting and flag sample-specific retention shifts that could alter the biological comparison."
+        },
+        {
+          "decision_inputs": [
+            "raw count availability",
+            "assay type",
+            "depth distribution",
+            "downstream differential model",
+            "integration strategy"
+          ],
+          "id": "normalization-selection",
+          "parameter": "normalization-method",
+          "selection_rule": "Choose log normalization, variance-stabilizing transformation, or model-native raw-count handling only when its assumptions match the downstream analysis.",
+          "validation_rule": "Verify that transformed values and raw counts occupy distinct declared locations and that library-size effects are reduced without erasing the intended contrast."
+        },
+        {
+          "decision_inputs": [
+            "backend version",
+            "batch key",
+            "feature namespace",
+            "assay type",
+            "cell count"
+          ],
+          "id": "hvg-selection",
+          "parameter": "hvg-method",
+          "selection_rule": "Select a version-supported HVG method and batch-aware option when batches are being jointly modeled; retain the complete feature universe for later reporting.",
+          "validation_rule": "Report HVG count and overlap across samples or batches and block when one batch dominates selected features."
+        },
+        {
+          "decision_inputs": [
+            "variance ratios",
+            "technical covariate associations",
+            "neighbor stability",
+            "cell count",
+            "HVG count"
+          ],
+          "id": "principal-component-selection",
+          "parameter": "n-pcs",
+          "selection_rule": "Choose a bounded principal-component range from observed structure and test neighboring values rather than using a universal fixed number.",
+          "validation_rule": "Require stable broad neighborhoods and document PCs strongly associated with technical variables."
+        },
+        {
+          "decision_inputs": [
+            "retained cell count",
+            "expected population granularity",
+            "PC sensitivity",
+            "rare population objective"
+          ],
+          "id": "neighbor-selection",
+          "parameter": "n-neighbors",
+          "selection_rule": "Choose and compare a biologically defensible neighborhood range scaled to retained observations and the target granularity.",
+          "validation_rule": "Report neighborhood connectivity, isolated cells, and cluster sensitivity across the tested range."
+        },
+        {
+          "decision_inputs": [
+            "resolution grid",
+            "cluster stability",
+            "minimum cluster size",
+            "sample composition",
+            "marker coherence",
+            "technical covariates"
+          ],
+          "id": "cluster-resolution-selection",
+          "parameter": "cluster-resolution",
+          "selection_rule": "Select a resolution only after comparing the full declared grid; do not optimize solely for visual separation or expected labels.",
+          "validation_rule": "Block interpretation of clusters that are unstable, sample-exclusive without biological justification, too small for inference, or driven by technical covariates."
+        }
+      ],
+      "postflight_checks": [
+        "Reload outputs with the same detected backend and prove structural validity rather than trusting a successful process exit.",
+        "Reconcile input, retained, and reason-coded excluded cell counts globally and by biological sample and batch.",
+        "Verify raw counts are byte- or value-equivalent at retained indices and were not overwritten by normalization, scaling, or integration.",
+        "Check finite transformed matrices, HVG accounting, PCA variance, graph connectivity, embedding completeness, cluster size, resolution stability, sample composition, and technical associations.",
+        "Record methods that were not run; never translate missing empty-droplet, ambient-RNA, or doublet evidence into a negative finding.",
+        "Require an explicit gate decision before cluster labels or downstream biological claims are admitted to the evidence ledger."
+      ],
+      "preflight_checks": [
+        "Inspect the actual artifact before code generation and verify it matches the declared h5ad, 10x HDF5, Matrix Market, or Seurat v5 format contract.",
+        "Detect actual Scanpy or Seurat and dependency versions in the user scientific environment; select only a declared compatible profile or stop for a compatibility experiment.",
+        "Verify raw count location, integer-like nonnegative values, matrix orientation, unique identifiers, species, assay type, feature namespace, annotation release, sample manifest, biological sample key, batch keys, and modality set.",
+        "Assess whether sample, condition, batch, chemistry, donor, sex, age, tissue, and other design fields are complete and confounded before constructing a joint object.",
+        "Confirm requested writes are scoped to the user project and do not modify the source artifact."
+      ],
+      "provenance_fields": [
+        "module-id",
+        "module-version",
+        "generated-code-sha256",
+        "input-artifact-sha256",
+        "input-format",
+        "sample-manifest-sha256",
+        "actual-tool-versions",
+        "actual-dependency-versions",
+        "parameter-values",
+        "parameter-rationales",
+        "random-seeds",
+        "raw-count-location",
+        "output-artifact-sha256",
+        "quality-gate-results",
+        "execution-started-at",
+        "execution-completed-at"
+      ],
+      "quality_gate_ids": [
+        "single-cell-input-semantics",
+        "single-cell-cell-accounting",
+        "single-cell-raw-count-preservation",
+        "single-cell-qc-context",
+        "single-cell-cluster-stability"
+      ],
+      "request_digest": "79372c526bc514fd979ce05ec0d36bca3f9b24517e409845d0ce4309b564762f",
+      "request_fields": [
+        "assay_type",
+        "batch_keys",
+        "biological_sample_key",
+        "declared_thresholds",
+        "design_notes",
+        "expected_modalities",
+        "input_artifact_id",
+        "input_format",
+        "objective",
+        "raw_count_location",
+        "requested_backend",
+        "species"
+      ],
+      "tool_profiles": [
+        {
+          "allowed_versions": [
+            ">=1.10,<1.12"
+          ],
+          "identity": "scanpy",
+          "mismatch_policy": "block",
+          "name": "scanpy",
+          "tested_versions": [
+            "1.10.4",
+            "1.11.5"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.10,<1.12"
+              ],
+              "id": "scanpy-neighbor-cluster-api",
+              "required_action": "Inspect the detected Scanpy, anndata, igraph, leidenalg, umap-learn, and scikit-learn APIs and generate calls only for the observed compatible combination."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=5.2,<5.3"
+          ],
+          "identity": "Seurat",
+          "mismatch_policy": "block",
+          "name": "seurat",
+          "tested_versions": [
+            "5.2.1"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=5.2,<5.3"
+              ],
+              "id": "seurat-v5-layer-semantics",
+              "required_action": "Inspect assay layers and generate Seurat v5 layer-aware code without silently coercing or joining biologically distinct samples."
+            }
+          ]
+        }
+      ]
+    }
+  },
   "single-cell-qc": {
     "input": {
       "cells": [
