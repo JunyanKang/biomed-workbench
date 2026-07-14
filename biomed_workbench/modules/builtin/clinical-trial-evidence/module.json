@@ -1,0 +1,463 @@
+{
+  "access": "public_api",
+  "alternatives": [
+    "literature-evidence"
+  ],
+  "assumptions": [
+    "The search expression identifies a scientifically meaningful cohort, intervention, condition, or study identifier."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "clinical-trial-evidence-e2e-v1"
+      ],
+      "id": "public-database-contract-2026-07-13-clinical-trial-evidence",
+      "input_formats": {
+        "clinical-trial-evidence-query": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.1.0",
+      "output_formats": {
+        "clinical-trial-evidence-result": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "clinical-trial-evidence-regression-v1"
+      ],
+      "tool_versions": {
+        "clinicaltrials-gov-api": [
+          "==api-v2-observed-2026-07-13"
+        ]
+      },
+      "verified_at": "2026-07-13"
+    }
+  ],
+  "complements": [
+    "cohort-summary",
+    "survival-analysis",
+    "clinical-report-audit",
+    "literature-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Retrieve count-verified ClinicalTrials.gov API v2 cohorts with declarative server-side filters, complete bounded pagination, deterministic NCT ordering, request provenance, protocol design, enrollment, outcomes, locations, and results state.",
+  "domains": [
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.evidence:clinical_trial_evidence",
+  "evidence_effects": [
+    "grounds-clinical-trial-registry-evidence"
+  ],
+  "execution": {
+    "kind": "service",
+    "max_output_bytes": 20000000,
+    "timeout_seconds": 90
+  },
+  "id": "clinical-trial-evidence",
+  "input_artifacts": [
+    {
+      "artifact_type": "database_query",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "clinical-trial-evidence-query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "advanced_query": {
+        "maxLength": 4000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "filters": {
+        "additionalProperties": false,
+        "properties": {
+          "condition": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "eligibility_keywords": {
+            "items": {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "type": "array"
+          },
+          "enrollment_max": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "enrollment_min": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "first_posted_end": {
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "type": "string"
+          },
+          "first_posted_start": {
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "type": "string"
+          },
+          "healthy_volunteers": {
+            "type": "boolean"
+          },
+          "intervention": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "investigator": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "investigator_role": {
+            "enum": [
+              "any",
+              "official",
+              "responsible_party"
+            ],
+            "type": "string"
+          },
+          "lead_sponsor_class": {
+            "type": "string"
+          },
+          "location_city": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "location_country": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "location_recruiting_only": {
+            "type": "boolean"
+          },
+          "location_state": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maximum_age": {
+            "maxLength": 40,
+            "minLength": 1,
+            "type": "string"
+          },
+          "minimum_age": {
+            "maxLength": 40,
+            "minLength": 1,
+            "type": "string"
+          },
+          "overall_status": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 16,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "phase": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 6,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "primary_completion_end": {
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "type": "string"
+          },
+          "primary_completion_start": {
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+            "type": "string"
+          },
+          "sex": {
+            "type": "string"
+          },
+          "sponsor_name": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "sponsor_scope": {
+            "enum": [
+              "lead",
+              "any"
+            ],
+            "type": "string"
+          },
+          "study_type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "include_full_record": {
+        "type": "boolean"
+      },
+      "max_records": {
+        "maximum": 10000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "page_size": {
+        "maximum": 1000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "query": {
+        "maxLength": 2000,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [],
+    "type": "object"
+  },
+  "intents": [
+    "search ClinicalTrials.gov",
+    "retrieve trial design and results status",
+    "\u68c0\u7d22\u4e34\u5e8a\u8bd5\u9a8c\u6ce8\u518c\u8bbe\u8ba1\u548c\u7ed3\u679c\u72b6\u6001"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Registry records are sponsor-submitted; registration or completion is not evidence of efficacy, missing results remain explicit, and truncated cohorts cannot support exhaustive-review claims."
+  ],
+  "maturity": "validated",
+  "module_type": "data_source",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "evidence_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "clinical-trial-evidence-result",
+      "processing_levels": [
+        "source-preserved",
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "service_contract",
+        "retrieval_time"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "api_total_count": {
+        "type": "integer"
+      },
+      "duplicate_nct_ids": {
+        "type": "array"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "local_post_filters_applied": {
+        "type": "array"
+      },
+      "nct_ids": {
+        "type": "array"
+      },
+      "next_page_token_present": {
+        "type": "boolean"
+      },
+      "provenance": {
+        "type": "object"
+      },
+      "query": {
+        "type": "object"
+      },
+      "records_truncated": {
+        "type": "boolean"
+      },
+      "returned_count": {
+        "type": "integer"
+      },
+      "studies": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "query",
+      "api_total_count",
+      "returned_count",
+      "nct_ids",
+      "studies",
+      "records_truncated",
+      "next_page_token_present",
+      "duplicate_nct_ids",
+      "local_post_filters_applied",
+      "provenance",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://clinicaltrials.gov/data-api/about-api",
+      "Project-owned clean-room implementation and scientific validation contract."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Every study must preserve a valid unique NCT identifier and protocol context; declared dimensions execute server-side; page tokens are walked to the cap; totalCount, returned IDs, duplicates, truncation, and every request reconcile before cohort interpretation.",
+      "id": "clinical-trial-evidence-validity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which registered studies match the question, and what do their protocol, status, enrollment, results, and amendment context permit us to conclude?"
+  ],
+  "schema_version": 1,
+  "title": "Retrieve design-aware ClinicalTrials.gov evidence",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        "==api-v2-observed-2026-07-13"
+      ],
+      "ecosystem": "service",
+      "identity": "clinicaltrials.gov/api/v2",
+      "mismatch_policy": "block",
+      "name": "clinicaltrials-gov-api",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "api-v2-observed-2026-07-13"
+      ],
+      "verified_at": "2026-07-13",
+      "version_differences": [
+        {
+          "affected_versions": [
+            "==api-v2-observed-2026-07-13"
+          ],
+          "category": "api",
+          "compatibility_effect": "breaking",
+          "description": "API v2 uses nested protocol and results modules and differs from the retired classic API field layout.",
+          "id": "clinical-trials-v2-data-model",
+          "required_action": "Parse API v2 protocol and results sections, retain status and amendment context, and reject legacy-field assumptions.",
+          "source": "https://clinicaltrials.gov/data-api/about-api/api-migration"
+        },
+        {
+          "affected_versions": [
+            "==api-v2-observed-2026-07-13"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parameter",
+          "description": "API v2 uses opaque page tokens, first-page totalCount, field-specific parameters, and Essie expressions for ranges and same-site location constraints.",
+          "id": "clinical-trials-v2-pagination-and-essie",
+          "required_action": "Walk page tokens to the declared cap, verify unique NCT IDs against totalCount, preserve every request, and mark capped cohorts as truncated.",
+          "source": "https://clinicaltrials.gov/data-api/about-api"
+        }
+      ],
+      "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "version_probe": [
+        "biomed_workbench.services.public_databases:probe_clinical_trials_contract"
+      ],
+      "version_probe_kind": "service_contract",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://clinicaltrials.gov/data-api/about-api"
+    }
+  ],
+  "version": "1.1.0"
+}

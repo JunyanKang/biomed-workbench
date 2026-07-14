@@ -1,0 +1,54 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "nct_ids": [
+          "NCT00000102"
+        ],
+        "query": {
+          "page_size": 1,
+          "term": "NCT00000102"
+        },
+        "records_truncated": false
+      },
+      "http_fixtures": [
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "studies": [
+              {
+                "hasResults": false,
+                "protocolSection": {
+                  "designModule": {
+                    "phases": [
+                      "PHASE1"
+                    ],
+                    "studyType": "INTERVENTIONAL"
+                  },
+                  "identificationModule": {
+                    "briefTitle": "Congenital adrenal hyperplasia trial",
+                    "nctId": "NCT00000102"
+                  },
+                  "statusModule": {
+                    "overallStatus": "COMPLETED"
+                  }
+                }
+              }
+            ],
+            "totalCount": 1
+          },
+          "status": 200,
+          "url": "https://clinicaltrials.gov/api/v2/studies?query.term=NCT00000102&pageSize=1&format=json&countTotal=true"
+        }
+      ],
+      "input": {
+        "page_size": 1,
+        "query": "NCT00000102"
+      },
+      "name": "resolve-one-nct-record-with-design-context"
+    }
+  ],
+  "schema_version": 1
+}

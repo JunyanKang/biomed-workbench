@@ -1,0 +1,71 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "agreement": {
+          "doi_confirmed_by_crossref": true
+        },
+        "query": {
+          "doi": "10.1038/s41586-020-2649-2"
+        }
+      },
+      "http_fixtures": [
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "message": {
+              "DOI": "10.1038/s41586-020-2649-2",
+              "author": [],
+              "container-title": [
+                "Nature"
+              ],
+              "is-referenced-by-count": 0,
+              "published": {
+                "date-parts": [
+                  [
+                    2020,
+                    9,
+                    16
+                  ]
+                ]
+              },
+              "publisher": "Springer Science and Business Media LLC",
+              "relation": {},
+              "title": [
+                "Array programming with NumPy"
+              ],
+              "type": "journal-article",
+              "update-to": []
+            }
+          },
+          "status": 200,
+          "url": "https://api.crossref.org/v1/works/10.1038%2Fs41586-020-2649-2"
+        },
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "resultList": {
+              "result": [
+                {
+                  "doi": "10.1038/s41586-020-2649-2",
+                  "title": "Array programming with NumPy"
+                }
+              ]
+            }
+          },
+          "status": 200,
+          "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI%3A%2210.1038%2Fs41586-020-2649-2%22&format=json&resultType=core&pageSize=25"
+        }
+      ],
+      "input": {
+        "doi": "10.1038/s41586-020-2649-2"
+      },
+      "name": "resolve-nature-doi-across-two-services"
+    }
+  ],
+  "schema_version": 1
+}

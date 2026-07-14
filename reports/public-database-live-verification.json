@@ -1,0 +1,173 @@
+{
+  "checks": [
+    {
+      "database": "crossref-europe-pmc",
+      "europe_pmc_exact_matches": 1,
+      "name": "citation_record_resolution",
+      "output_sha256": "84e7047a9b4c7a7af680c4d409c84aac690fcae5af27fd864e9b3e50dcfc049c",
+      "passed": true,
+      "requested_id": "10.1038/s41586-020-2649-2"
+    },
+    {
+      "database": "biorxiv",
+      "name": "preprint_version_history",
+      "output_sha256": "e63a2fbadb457a3d6ad8c2ca6b88bd47ccfb85e2af7ad3d7ae40a69189d43ec0",
+      "passed": true,
+      "published_doi_count": 0,
+      "requested_id": "10.1101/339747",
+      "version_count": 4
+    },
+    {
+      "database": "pubchem",
+      "matched_cids": [
+        2244
+      ],
+      "name": "compound_identity",
+      "output_sha256": "0f5bcfba9ede860fb8ca29a6c02a4a81d1a3e8aa83f5fe4bba1b686cf5fd03aa",
+      "passed": true,
+      "requested_name": "aspirin"
+    },
+    {
+      "database": "clinicaltrials-gov",
+      "has_results": false,
+      "name": "trial_design_record",
+      "output_sha256": "4964d75878a7e83591f7691a6d070bb7412535054beec5d7de2b45afa7f6e833",
+      "passed": true,
+      "quality_assertions": {
+        "api_total_reconciled": true,
+        "design_fields_retained": true,
+        "nct_id_preserved": true,
+        "no_duplicates": true,
+        "no_local_post_filters": true,
+        "not_truncated": true,
+        "one_record_returned": true,
+        "outcome_counts_retained": true,
+        "record_present": true,
+        "request_provenance_present": true,
+        "study_type_present": true,
+        "unique_ids_reconciled": true
+      },
+      "requested_id": "NCT00000102",
+      "returned_count": 1
+    },
+    {
+      "database": "rcsb-pdb",
+      "experimental_methods": [
+        "X-RAY DIFFRACTION"
+      ],
+      "name": "structure_entry_context",
+      "output_sha256": "58052f798f3a1e1401176851ef00ec623b56a6a31795816e7a60ac79f7be9a11",
+      "passed": true,
+      "requested_id": "4HHB",
+      "resolution_combined": [
+        1.74
+      ]
+    }
+  ],
+  "contracts": {
+    "biorxiv-details": "details-v1-observed-2026-07-13",
+    "clinicaltrials-gov-api": "api-v2-observed-2026-07-13",
+    "crossref-rest": "rest-v1-observed-2026-07-13",
+    "europe-pmc-rest": "rest-observed-2026-07-13",
+    "pubchem-pug-rest": "pug-rest-observed-2026-07-13",
+    "rcsb-pdb-data-api": "data-rest-v1-observed-2026-07-13"
+  },
+  "module_ids": [
+    "citation-record-resolution",
+    "preprint-evidence",
+    "chemical-evidence",
+    "clinical-trial-evidence",
+    "structure-evidence"
+  ],
+  "module_package_validation": {
+    "chemical-evidence": {
+      "compatibility_evidence_complete": true,
+      "compatibility_rows": 1,
+      "dependency_evidence_complete": true,
+      "entrypoint_resolved": true,
+      "errors": [],
+      "executed_test_cases": 1,
+      "format_evidence_complete": true,
+      "kernel_version": "0.2.0-dev",
+      "module_id": "chemical-evidence",
+      "module_version": "1.0.0",
+      "schema_version": 1,
+      "tool_evidence_complete": true,
+      "valid": true
+    },
+    "citation-record-resolution": {
+      "compatibility_evidence_complete": true,
+      "compatibility_rows": 1,
+      "dependency_evidence_complete": true,
+      "entrypoint_resolved": true,
+      "errors": [],
+      "executed_test_cases": 1,
+      "format_evidence_complete": true,
+      "kernel_version": "0.2.0-dev",
+      "module_id": "citation-record-resolution",
+      "module_version": "1.0.0",
+      "schema_version": 1,
+      "tool_evidence_complete": true,
+      "valid": true
+    },
+    "clinical-trial-evidence": {
+      "compatibility_evidence_complete": true,
+      "compatibility_rows": 1,
+      "dependency_evidence_complete": true,
+      "entrypoint_resolved": true,
+      "errors": [],
+      "executed_test_cases": 1,
+      "format_evidence_complete": true,
+      "kernel_version": "0.2.0-dev",
+      "module_id": "clinical-trial-evidence",
+      "module_version": "1.1.0",
+      "schema_version": 1,
+      "tool_evidence_complete": true,
+      "valid": true
+    },
+    "preprint-evidence": {
+      "compatibility_evidence_complete": true,
+      "compatibility_rows": 1,
+      "dependency_evidence_complete": true,
+      "entrypoint_resolved": true,
+      "errors": [],
+      "executed_test_cases": 1,
+      "format_evidence_complete": true,
+      "kernel_version": "0.2.0-dev",
+      "module_id": "preprint-evidence",
+      "module_version": "1.0.0",
+      "schema_version": 1,
+      "tool_evidence_complete": true,
+      "valid": true
+    },
+    "structure-evidence": {
+      "compatibility_evidence_complete": true,
+      "compatibility_rows": 1,
+      "dependency_evidence_complete": true,
+      "entrypoint_resolved": true,
+      "errors": [],
+      "executed_test_cases": 1,
+      "format_evidence_complete": true,
+      "kernel_version": "0.2.0-dev",
+      "module_id": "structure-evidence",
+      "module_version": "1.0.0",
+      "schema_version": 1,
+      "tool_evidence_complete": true,
+      "valid": true
+    }
+  },
+  "passed": true,
+  "registry_digest": "6d05d007cb8a54ac6a56db6576fdd6ec21f839016c8150af4b55b257f4c4e7e0",
+  "schema_version": 1,
+  "scientific_summary": {
+    "chemical_stereochemistry_context_retained": true,
+    "cross_source_disagreement_not_silently_merged": true,
+    "identifiers_preserved": true,
+    "no_new_credentials_required": true,
+    "preprint_versions_not_collapsed": true,
+    "source_specific_schemas_retained": true,
+    "structure_method_and_resolution_context_retained": true,
+    "trial_protocol_and_results_context_retained": true
+  },
+  "verified_at": "2026-07-14T03:16:16.635131+00:00"
+}

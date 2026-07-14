@@ -1,0 +1,254 @@
+import json
+import unittest
+
+from biomed_workbench.services.public_databases import (
+    HTTPResponse,
+    PublicDatabaseError,
+    PublicJSONClient,
+    clinical_trial_records,
+    preprint_record,
+    pubchem_compound,
+    rcsb_structure_records,
+    resolve_citation_record,
+)
+
+
+class FixtureTransport:
+    def __init__(self, routes):
+        self.routes = routes
+        self.urls = []
+
+    def __call__(self, url, _headers, _timeout):
+        self.urls.append(url)
+        for fragment, response in self.routes:
+            if fragment in url:
+                payload = response() if callable(response) else response
+                if isinstance(payload, HTTPResponse):
+                    return payload
+                return HTTPResponse(200, {"Content-Type": "application/json"}, json.dumps(payload).encode())
+        raise AssertionError(f"unmatched fixture URL: {url}")
+
+
+class PublicDatabaseTests(unittest.TestCase):
+    def client(self, routes):
+        return PublicJSONClient(transport=FixtureTransport(routes), retries=0, sleeper=lambda _: None)
+
+    def test_citation_resolution_preserves_cross_source_disagreement(self):
+        client = self.client(
+            [
+                (
+                    "api.crossref.org/v1/works/10.1000%2Ftest",
+                    {
+                        "message": {
+                            "DOI": "10.1000/test",
+                            "title": ["Registered title"],
+                            "type": "journal-article",
+                            "publisher": "Example Publisher",
+                            "container-title": ["Example Journal"],
+                            "published": {"date-parts": [[2025, 1, 2]]},
+                            "author": [{"given": "A", "family": "Author"}],
+                            "is-referenced-by-count": 4,
+                            "relation": {},
+                            "update-to": [],
+                        }
+                    },
+                ),
+                (
+                    "europepmc/webservices/rest/search",
+                    {
+                        "resultList": {
+                            "result": [
+                                {"doi": "10.1000/test", "title": "Repository title", "pmid": "123"},
+                                {"doi": "10.1000/other", "title": "Wrong DOI"},
+                            ]
+                        }
+                    },
+                ),
+            ]
+        )
+        result = resolve_citation_record("https://doi.org/10.1000/TEST", client=client)
+        self.assertEqual(result["query"]["doi"], "10.1000/test")
+        self.assertEqual(result["crossref"]["title"], "Registered title")
+        self.assertEqual([record["pmid"] for record in result["europe_pmc_records"]], ["123"])
+        self.assertEqual(result["agreement"]["europe_pmc_exact_doi_matches"], 1)
+        self.assertIn("disagree", result["limitations"][0])
+
+    def test_preprint_versions_are_retained_and_sorted(self):
+        client = self.client(
+            [
+                (
+                    "api.biorxiv.org/details/biorxiv/10.1101/2024.01.01.123456/na/json",
+                    {
+                        "collection": [
+                            {"doi": "10.1101/2024.01.01.123456", "version": "2", "date": "2024-02-01", "published": "10.1000/final"},
+                            {"doi": "10.1101/2024.01.01.123456", "version": "1", "date": "2024-01-01", "published": "NA"},
+                        ]
+                    },
+                )
+            ]
+        )
+        result = preprint_record("10.1101/2024.01.01.123456", "biorxiv", client=client)
+        self.assertEqual([record["version"] for record in result["versions"]], ["1", "2"])
+        self.assertEqual(result["latest_version"]["version"], "2")
+        self.assertEqual(result["published_dois"], ["10.1000/final"])
+
+    def test_pubchem_retains_identity_and_stereochemistry(self):
+        properties = {
+            "PropertyTable": {
+                "Properties": [
+                    {
+                        "CID": 2244,
+                        "Title": "Aspirin",
+                        "MolecularFormula": "C9H8O4",
+                        "SMILES": "CC(=O)OC1=CC=CC=C1C(=O)O",
+                        "ConnectivitySMILES": "CC(=O)OC1=CC=CC=C1C(=O)O",
+                        "InChIKey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+                    }
+                ]
+            }
+        }
+        synonyms = {"InformationList": {"Information": [{"CID": 2244, "Synonym": ["Aspirin", "Acetylsalicylic acid"]}]}}
+        client = self.client([("/property/", properties), ("/cid/2244/synonyms/", synonyms)])
+        result = pubchem_compound("aspirin", client=client)
+        self.assertEqual(result["identity_checks"]["unique_cids"], [2244])
+        self.assertTrue(result["identity_checks"]["stereochemistry_fields_retained"])
+        self.assertEqual(result["synonyms"][1], "Acetylsalicylic acid")
+
+    def test_clinical_trial_parser_retains_protocol_and_results_state(self):
+        study = {
+            "protocolSection": {
+                "identificationModule": {"nctId": "NCT00000001", "briefTitle": "Trial", "officialTitle": "A Trial"},
+                "designModule": {
+                    "studyType": "INTERVENTIONAL",
+                    "phases": ["PHASE2"],
+                    "enrollmentInfo": {"count": 120, "type": "ACTUAL"},
+                    "designInfo": {"allocation": "RANDOMIZED", "interventionModel": "PARALLEL"},
+                },
+                "statusModule": {"overallStatus": "COMPLETED"},
+            },
+            "hasResults": True,
+            "resultsSection": {"participantFlowModule": {}},
+        }
+        client = self.client([("/api/v2/studies", {"studies": [study], "totalCount": 1})])
+        result = clinical_trial_records("retina", client=client)
+        self.assertEqual(result["studies"][0]["nct_id"], "NCT00000001")
+        self.assertEqual(result["studies"][0]["enrollment"]["count"], 120)
+        self.assertTrue(result["studies"][0]["has_results"])
+        self.assertEqual(result["api_total_count"], 1)
+        self.assertFalse(result["records_truncated"])
+        self.assertEqual(result["local_post_filters_applied"], [])
+
+    def test_clinical_trial_filters_paginate_and_reconcile_total(self):
+        def study(nct_id):
+            return {
+                "protocolSection": {
+                    "identificationModule": {"nctId": nct_id, "briefTitle": nct_id},
+                    "designModule": {"studyType": "INTERVENTIONAL", "phases": ["PHASE2"]},
+                    "statusModule": {"overallStatus": "COMPLETED"},
+                },
+                "hasResults": False,
+            }
+
+        class PagingTransport:
+            def __init__(self):
+                self.urls = []
+
+            def __call__(self, url, _headers, _timeout):
+                self.urls.append(url)
+                payload = (
+                    {"studies": [study("NCT00000002")], "totalCount": 2, "nextPageToken": "next-token"}
+                    if "pageToken=" not in url
+                    else {"studies": [study("NCT00000001")]}
+                )
+                return HTTPResponse(200, {}, json.dumps(payload).encode())
+
+        transport = PagingTransport()
+        client = PublicJSONClient(transport=transport, retries=0, sleeper=lambda _: None)
+        result = clinical_trial_records(
+            filters={
+                "condition": "retinal degeneration",
+                "overall_status": ["COMPLETED"],
+                "phase": ["PHASE2", "PHASE3"],
+                "enrollment_min": 10,
+                "first_posted_end": "2025-12-31",
+                "location_city": "Boston",
+                "location_country": "United States",
+                "location_recruiting_only": True,
+                "investigator": "Jane Smith",
+                "investigator_role": "official",
+                "sponsor_name": "National Institutes of Health",
+                "sponsor_scope": "any",
+                "eligibility_keywords": ["confirmed diagnosis"],
+            },
+            page_size=1,
+            max_records=10,
+            client=client,
+        )
+        self.assertEqual(result["nct_ids"], ["NCT00000001", "NCT00000002"])
+        self.assertEqual(result["api_total_count"], 2)
+        self.assertEqual(len(result["provenance"]["requests"]), 2)
+        self.assertFalse(result["records_truncated"])
+        first_url = transport.urls[0]
+        self.assertIn("query.cond=retinal+degeneration", first_url)
+        self.assertIn("filter.overallStatus=COMPLETED", first_url)
+        self.assertIn("SEARCH%5BLocation%5D", first_url)
+        self.assertIn("LocationCountry", first_url)
+        self.assertIn("OverallOfficialName", first_url)
+        self.assertIn("CollaboratorName", first_url)
+        self.assertIn("EligibilityCriteria", first_url)
+
+    def test_clinical_trial_truncation_and_invalid_filters_are_explicit(self):
+        study = {
+            "protocolSection": {
+                "identificationModule": {"nctId": "NCT00000001"},
+                "designModule": {"studyType": "OBSERVATIONAL"},
+                "statusModule": {"overallStatus": "COMPLETED"},
+            }
+        }
+        client = self.client([("/api/v2/studies", {"studies": [study], "totalCount": 20, "nextPageToken": "more"})])
+        result = clinical_trial_records("retina", page_size=1, max_records=1, client=client)
+        self.assertTrue(result["records_truncated"])
+        self.assertTrue(result["next_page_token_present"])
+        with self.assertRaises(ValueError):
+            clinical_trial_records(filters={"unknown": "value"}, client=client)
+        with self.assertRaises(ValueError):
+            clinical_trial_records(filters={"phase": ["PHASE9"]}, client=client)
+
+    def test_rcsb_parser_validates_identifier_and_retains_quality_context(self):
+        payload = {
+            "rcsb_id": "4HHB",
+            "struct": {"title": "Hemoglobin"},
+            "exptl": [{"method": "X-RAY DIFFRACTION"}],
+            "rcsb_entry_info": {"resolution_combined": [1.74]},
+            "rcsb_accession_info": {"initial_release_date": "1984-07-17"},
+            "rcsb_primary_citation": {"pdbx_database_id_DOI": "10.1000/example"},
+            "rcsb_entry_container_identifiers": {"polymer_entity_ids": ["1", "2"]},
+            "pdbx_database_status": {"status_code": "REL"},
+        }
+        client = self.client([("/rest/v1/core/entry/4HHB", payload)])
+        result = rcsb_structure_records(["4hhb"], client=client)
+        self.assertEqual(result["structures"][0]["resolution_combined"], [1.74])
+        self.assertEqual(result["structures"][0]["experimental_methods"], ["X-RAY DIFFRACTION"])
+
+    def test_transport_blocks_unapproved_hosts_and_invalid_responses(self):
+        client = self.client([])
+        with self.assertRaises(ValueError):
+            client.get("https://example.com", "/data")
+        invalid = PublicJSONClient(
+            transport=lambda *_: HTTPResponse(200, {}, b"not-json"),
+            retries=0,
+            sleeper=lambda _: None,
+        )
+        with self.assertRaises(PublicDatabaseError):
+            invalid.get("https://api.crossref.org", "/v1/works")
+        failed = PublicJSONClient(
+            transport=lambda *_: HTTPResponse(503, {}, b"{}"),
+            retries=0,
+            sleeper=lambda _: None,
+        )
+        with self.assertRaisesRegex(PublicDatabaseError, "HTTP 503"):
+            failed.get("https://api.crossref.org", "/v1/works")
+
+
+if __name__ == "__main__":
+    unittest.main()

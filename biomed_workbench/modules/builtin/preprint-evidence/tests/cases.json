@@ -1,0 +1,37 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "query": {
+          "doi": "10.1101/339747",
+          "server": "biorxiv"
+        }
+      },
+      "http_fixtures": [
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "collection": [
+              {
+                "date": "2018-06-06",
+                "doi": "10.1101/339747",
+                "published": "NA",
+                "version": "1"
+              }
+            ]
+          },
+          "status": 200,
+          "url": "https://api.biorxiv.org/details/biorxiv/10.1101/339747/na/json"
+        }
+      ],
+      "input": {
+        "doi": "10.1101/339747",
+        "server": "biorxiv"
+      },
+      "name": "retain-biorxiv-version-history"
+    }
+  ],
+  "schema_version": 1
+}

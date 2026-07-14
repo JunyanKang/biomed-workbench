@@ -19,6 +19,14 @@ from biomed_workbench.formats import FormatRegistry  # noqa: E402
 from biomed_workbench.modules.index import BUILTIN_ROOT, MODULE_INDEX, build_index  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry, ModuleRegistryError  # noqa: E402
 from biomed_workbench.orchestration.graph import build_capability_graph  # noqa: E402
+from biomed_workbench.services.public_databases import (  # noqa: E402
+    BIORXIV_CONTRACT_VERSION,
+    CLINICAL_TRIALS_CONTRACT_VERSION,
+    CROSSREF_CONTRACT_VERSION,
+    EUROPE_PMC_CONTRACT_VERSION,
+    PUBCHEM_CONTRACT_VERSION,
+    RCSB_CONTRACT_VERSION,
+)
 from biomed_workbench.services.credentials import ALLOWED_CREDENTIALS  # noqa: E402
 from biomed_workbench.version import VERSION  # noqa: E402
 from tools.validate_module import validate_module  # noqa: E402
@@ -280,6 +288,55 @@ def main() -> int:
                 or not re.fullmatch(r"[0-9a-f]{64}", communication_report.get("cellphonedb_database", {}).get("sha256", ""))
             ):
                 errors.append("single-cell communication verification differs from its module, fixture, or four validated backends")
+        public_database_report_path = ROOT / "reports" / "public-database-live-verification.json"
+        public_database_module_ids = {
+            "citation-record-resolution",
+            "preprint-evidence",
+            "chemical-evidence",
+            "clinical-trial-evidence",
+            "structure-evidence",
+        }
+        expected_public_database_contracts = {
+            "biorxiv-details": BIORXIV_CONTRACT_VERSION,
+            "clinicaltrials-gov-api": CLINICAL_TRIALS_CONTRACT_VERSION,
+            "crossref-rest": CROSSREF_CONTRACT_VERSION,
+            "europe-pmc-rest": EUROPE_PMC_CONTRACT_VERSION,
+            "pubchem-pug-rest": PUBCHEM_CONTRACT_VERSION,
+            "rcsb-pdb-data-api": RCSB_CONTRACT_VERSION,
+        }
+        try:
+            public_database_report = json.loads(public_database_report_path.read_text(encoding="utf-8"))
+            public_database_manifests = {module_id: registry.get(module_id) for module_id in public_database_module_ids}
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("public database live verification is missing or invalid")
+        else:
+            package_validation = public_database_report.get("module_package_validation", {})
+            check_names = {item.get("name") for item in public_database_report.get("checks", ())}
+            expected_check_names = {
+                "citation_record_resolution",
+                "preprint_version_history",
+                "compound_identity",
+                "trial_design_record",
+                "structure_entry_context",
+            }
+            scientific_summary = public_database_report.get("scientific_summary", {})
+            if (
+                public_database_report.get("passed") is not True
+                or public_database_report.get("registry_digest") != registry.digest
+                or set(public_database_report.get("module_ids", ())) != public_database_module_ids
+                or public_database_report.get("contracts") != expected_public_database_contracts
+                or check_names != expected_check_names
+                or any(item.get("passed") is not True for item in public_database_report.get("checks", ()))
+                or set(package_validation) != public_database_module_ids
+                or any(
+                    validation.get("valid") is not True
+                    or validation.get("executed_test_cases") != 1
+                    or validation.get("module_version") != public_database_manifests[module_id].version
+                    for module_id, validation in package_validation.items()
+                )
+                or set(scientific_summary.values()) != {True}
+            ):
+                errors.append("public database evidence differs from its modules, service contracts, live checks, or scientific quality gates")
         command_source = (ROOT / "biomed_workbench" / "modules" / "scientific_command.py").read_text(encoding="utf-8")
         if "shell=True" in command_source or "os.system(" in command_source:
             errors.append("scientific command execution contains a shell invocation surface")
@@ -710,10 +767,14 @@ def main() -> int:
         reconciliation_path = ROOT / "reports" / "source-reconciliation-summary.json"
         assimilation_path = ROOT / "reports" / "source-assimilation-summary.json"
         design_path = ROOT / "reports" / "rewrite-design-summary.json"
+        scope_policy_path = ROOT / "reports" / "source-scope-policy.json"
+        source_bindings_path = ROOT / "reports" / "source-capability-bindings.json"
         try:
             reconciliation = json.loads(reconciliation_path.read_text(encoding="utf-8"))
             assimilation = json.loads(assimilation_path.read_text(encoding="utf-8"))
             design = json.loads(design_path.read_text(encoding="utf-8"))
+            scope_policy = json.loads(scope_policy_path.read_text(encoding="utf-8"))
+            source_bindings = json.loads(source_bindings_path.read_text(encoding="utf-8"))
             source_file_count = sum(source["file_count"] for source in assimilation["sources"])
             skill_digest = hashlib.sha256((ROOT / "skills" / "biomed-workbench" / "SKILL.md").read_bytes()).hexdigest()
         except (OSError, json.JSONDecodeError, KeyError, TypeError):
@@ -740,6 +801,21 @@ def main() -> int:
                 or any(marker.lower() in serialized.lower() for marker in ("/Users/", "/private/", '"path"', '"private_path"', "Biomni", "openscience", "claude"))
             ):
                 errors.append("source reconciliation is stale, incomplete, path-bearing, or overclaims source-union coverage")
+            public_source_reports = scope_policy_path.read_text(encoding="utf-8") + source_bindings_path.read_text(encoding="utf-8")
+            if (
+                scope_policy.get("row_count") != source_file_count
+                or scope_policy.get("changed_count") != 414
+                or scope_policy.get("transitions") != {"redesign_schema->retire": 25, "rewrite_capability->retire": 389}
+                or scope_policy.get("policy_rules") != ["compute-infrastructure-explicitly-excluded"]
+                or source_bindings.get("rule_count") != 2
+                or source_bindings.get("added_binding_count") != 17
+                or source_bindings.get("matched_receipt_count") != 17
+                or source_bindings.get("total_binding_count") != reconciliation.get("binding_count")
+                or source_bindings.get("added_by_rule") != source_bindings.get("matches_by_rule")
+                or reconciliation.get("action_counts", {}).get("retire") != 441
+                or any(marker.lower() in public_source_reports.lower() for marker in ("/Users/", "/private/", '"path"', '"private_path"'))
+            ):
+                errors.append("source scope policy or capability binding evidence is stale, path-bearing, or inconsistent with reconciliation")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

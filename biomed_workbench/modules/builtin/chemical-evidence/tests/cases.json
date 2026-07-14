@@ -1,0 +1,61 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "query": {
+          "identifier": "aspirin",
+          "namespace": "name"
+        }
+      },
+      "http_fixtures": [
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "PropertyTable": {
+              "Properties": [
+                {
+                  "CID": 2244,
+                  "ConnectivitySMILES": "CC(=O)OC1=CC=CC=C1C(=O)O",
+                  "InChIKey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+                  "MolecularFormula": "C9H8O4",
+                  "SMILES": "CC(=O)OC1=CC=CC=C1C(=O)O",
+                  "Title": "Aspirin"
+                }
+              ]
+            }
+          },
+          "status": 200,
+          "url": "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/aspirin/property/Title,IUPACName,MolecularFormula,MolecularWeight,SMILES,ConnectivitySMILES,InChI,InChIKey,XLogP,TPSA,Charge/JSON"
+        },
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "InformationList": {
+              "Information": [
+                {
+                  "CID": 2244,
+                  "Synonym": [
+                    "Aspirin",
+                    "Acetylsalicylic acid"
+                  ]
+                }
+              ]
+            }
+          },
+          "status": 200,
+          "url": "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/2244/synonyms/JSON"
+        }
+      ],
+      "input": {
+        "identifier": "aspirin",
+        "namespace": "name"
+      },
+      "name": "resolve-aspirin-with-structure-identity"
+    }
+  ],
+  "schema_version": 1
+}

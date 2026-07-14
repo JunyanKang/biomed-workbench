@@ -1,0 +1,572 @@
+#!/usr/bin/env python3
+"""Generate the reviewed public-database module manifests deterministically."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from copy import deepcopy
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from biomed_workbench.modules.contract import parse_manifest  # noqa: E402
+from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
+
+
+VERIFIED_AT = "2026-07-13"
+
+
+def _tool(name: str, identity: str, contract: str, probe: str, source: str, differences: list[dict[str, object]]) -> dict[str, object]:
+    return {
+        "name": name,
+        "ecosystem": "service",
+        "identity": identity,
+        "required": True,
+        "tested_versions": [contract],
+        "allowed_versions": [f"=={contract}"],
+        "version_source": source,
+        "verified_at": VERIFIED_AT,
+        "version_probe": [probe],
+        "version_probe_kind": "service_contract",
+        "version_probe_timeout_seconds": 10,
+        "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+        "mismatch_policy": "block",
+        "version_differences": differences,
+        "platforms": ["any"],
+    }
+
+
+TOOLS = {
+    "crossref": _tool(
+        "crossref-rest",
+        "api.crossref.org/v1",
+        "rest-v1-observed-2026-07-13",
+        "biomed_workbench.services.public_databases:probe_crossref_contract",
+        "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+        [
+            {
+                "id": "crossref-depositor-metadata",
+                "affected_versions": ["==rest-v1-observed-2026-07-13"],
+                "category": "field",
+                "description": "Crossref fields are depositor supplied and title, relation, update, abstract, and author completeness vary by record.",
+                "compatibility_effect": "requires-parser",
+                "required_action": "Retain absent and conflicting metadata and never infer retraction or claim validity from DOI resolution alone.",
+                "source": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+            }
+        ],
+    ),
+    "europe-pmc": _tool(
+        "europe-pmc-rest",
+        "www.ebi.ac.uk/europepmc/webservices/rest",
+        "rest-observed-2026-07-13",
+        "biomed_workbench.services.public_databases:probe_europe_pmc_contract",
+        "https://europepmc.org/RestfulWebService",
+        [
+            {
+                "id": "europe-pmc-result-types",
+                "affected_versions": ["==rest-observed-2026-07-13"],
+                "category": "output-format",
+                "description": "Europe PMC search fields differ between lite and core result types and identifiers vary by source database.",
+                "compatibility_effect": "requires-parameter",
+                "required_action": "Request JSON core results and match the normalized DOI explicitly before cross-source comparison.",
+                "source": "https://europepmc.org/RestfulWebService",
+            }
+        ],
+    ),
+    "biorxiv": _tool(
+        "biorxiv-details",
+        "api.biorxiv.org/details",
+        "details-v1-observed-2026-07-13",
+        "biomed_workbench.services.public_databases:probe_biorxiv_contract",
+        "https://api.biorxiv.org/",
+        [
+            {
+                "id": "biorxiv-versioned-records",
+                "affected_versions": ["==details-v1-observed-2026-07-13"],
+                "category": "field",
+                "description": "The details endpoint returns one row per preprint version and a published DOI may be absent or reported as NA.",
+                "compatibility_effect": "requires-parser",
+                "required_action": "Retain all versions, sort them explicitly, and never treat a preprint as peer reviewed without independent publication evidence.",
+                "source": "https://api.biorxiv.org/",
+            }
+        ],
+    ),
+    "pubchem": _tool(
+        "pubchem-pug-rest",
+        "pubchem.ncbi.nlm.nih.gov/rest/pug",
+        "pug-rest-observed-2026-07-13",
+        "biomed_workbench.services.public_databases:probe_pubchem_contract",
+        "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest",
+        [
+            {
+                "id": "pubchem-namespace-and-structure",
+                "affected_versions": ["==pug-rest-observed-2026-07-13"],
+                "category": "input-format",
+                "description": "PUG REST namespaces can resolve one name to multiple compounds and structure identity depends on charge, isotope, stereochemistry, and salt form.",
+                "compatibility_effect": "requires-format",
+                "required_action": "Declare the namespace and retain CID, InChIKey, isomeric representation, formula, charge, and all ambiguous hits.",
+                "source": "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest",
+            },
+            {
+                "id": "pubchem-smiles-field-names",
+                "affected_versions": ["==pug-rest-observed-2026-07-13"],
+                "category": "field",
+                "description": "The observed property response uses SMILES and ConnectivitySMILES rather than historical IsomericSMILES and CanonicalSMILES keys.",
+                "compatibility_effect": "breaking",
+                "required_action": "Request and validate the observed SMILES and ConnectivitySMILES fields while retaining InChI and InChIKey for identity review.",
+                "source": "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest",
+            }
+        ],
+    ),
+    "clinical-trials": _tool(
+        "clinicaltrials-gov-api",
+        "clinicaltrials.gov/api/v2",
+        "api-v2-observed-2026-07-13",
+        "biomed_workbench.services.public_databases:probe_clinical_trials_contract",
+        "https://clinicaltrials.gov/data-api/about-api",
+        [
+            {
+                "id": "clinical-trials-v2-data-model",
+                "affected_versions": ["==api-v2-observed-2026-07-13"],
+                "category": "api",
+                "description": "API v2 uses nested protocol and results modules and differs from the retired classic API field layout.",
+                "compatibility_effect": "breaking",
+                "required_action": "Parse API v2 protocol and results sections, retain status and amendment context, and reject legacy-field assumptions.",
+                "source": "https://clinicaltrials.gov/data-api/about-api/api-migration",
+            },
+            {
+                "id": "clinical-trials-v2-pagination-and-essie",
+                "affected_versions": ["==api-v2-observed-2026-07-13"],
+                "category": "behavior",
+                "description": "API v2 uses opaque page tokens, first-page totalCount, field-specific parameters, and Essie expressions for ranges and same-site location constraints.",
+                "compatibility_effect": "requires-parameter",
+                "required_action": "Walk page tokens to the declared cap, verify unique NCT IDs against totalCount, preserve every request, and mark capped cohorts as truncated.",
+                "source": "https://clinicaltrials.gov/data-api/about-api",
+            }
+        ],
+    ),
+    "rcsb": _tool(
+        "rcsb-pdb-data-api",
+        "data.rcsb.org/rest/v1/core",
+        "data-rest-v1-observed-2026-07-13",
+        "biomed_workbench.services.public_databases:probe_rcsb_contract",
+        "https://data.rcsb.org/",
+        [
+            {
+                "id": "rcsb-pdbx-derived-json",
+                "affected_versions": ["==data-rest-v1-observed-2026-07-13"],
+                "category": "output-format",
+                "description": "RCSB Data API JSON follows PDBx/mmCIF-derived object schemas augmented by RCSB annotations and core object identifiers.",
+                "compatibility_effect": "requires-parser",
+                "required_action": "Validate the returned entry identifier and retain experimental method, resolution, release, citation, entity, and status context.",
+                "source": "https://data.rcsb.org/",
+            }
+        ],
+    ),
+}
+
+
+SPECS = {
+    "citation-record-resolution": {
+        "title": "Resolve and cross-check a scholarly citation record",
+        "description": "Resolve one DOI against Crossref and Europe PMC while retaining missing fields, source disagreement, updates, and repository identifiers.",
+        "entrypoint": "biomed_workbench.capabilities.evidence:citation_record_resolution",
+        "intents": ["resolve DOI metadata", "verify citation record across Crossref and Europe PMC", "核验DOI与文献元数据"],
+        "questions": ["Do independent bibliographic services resolve the same DOI, and which metadata conflicts remain?"],
+        "input_properties": {"doi": {"type": "string", "minLength": 7, "maxLength": 500}},
+        "input_required": ["doi"],
+        "output_properties": {
+            "query": {"type": "object"}, "crossref": {"type": "object"}, "europe_pmc_records": {"type": "array"},
+            "agreement": {"type": "object"}, "provenance": {"type": "object"}, "limitations": {"type": "array"},
+        },
+        "output_required": ["query", "crossref", "europe_pmc_records", "agreement", "provenance", "limitations"],
+        "tools": ["crossref", "europe-pmc"],
+        "quality": "The requested DOI must be preserved by Crossref; exact DOI matches from Europe PMC and all cross-source disagreements remain explicit before citation use.",
+        "assumption": "The DOI identifies the intended work, while bibliographic deposits may be incomplete or inconsistent.",
+        "limitations": ["Identifier resolution does not establish retraction status, methodological validity, or support for a claim."],
+        "complements": ["citation-resolution-adjudication", "assertion-citation-coverage-audit", "source-freshness-audit"],
+        "effect": "grounds-cross-source-citation-identity",
+    },
+    "preprint-evidence": {
+        "title": "Retrieve version-aware bioRxiv or medRxiv evidence",
+        "description": "Retrieve every API-visible version of one preprint DOI and preserve any separately reported publication DOI.",
+        "entrypoint": "biomed_workbench.capabilities.evidence:preprint_evidence",
+        "intents": ["retrieve bioRxiv preprint versions", "find medRxiv publication link", "检索预印本版本与正式发表记录"],
+        "questions": ["Which preprint versions exist, and is a later peer-reviewed publication identifier independently reported?"],
+        "input_properties": {"doi": {"type": "string", "minLength": 7, "maxLength": 500}, "server": {"type": "string", "enum": ["biorxiv", "medrxiv"]}},
+        "input_required": ["doi"],
+        "output_properties": {
+            "query": {"type": "object"}, "versions": {"type": "array"}, "latest_version": {"type": "object"},
+            "published_dois": {"type": "array"}, "version_count": {"type": "integer"}, "provenance": {"type": "object"}, "limitations": {"type": "array"},
+        },
+        "output_required": ["query", "versions", "latest_version", "published_dois", "version_count", "provenance", "limitations"],
+        "tools": ["biorxiv"],
+        "quality": "All returned versions must preserve the requested DOI, remain distinct, and be ordered without upgrading a preprint to peer-reviewed evidence.",
+        "assumption": "The DOI and selected server identify the intended preprint record.",
+        "limitations": ["Preprint metadata and reported publication links require independent citation resolution before synthesis."],
+        "complements": ["citation-record-resolution", "literature-evidence", "source-freshness-audit"],
+        "effect": "grounds-versioned-preprint-evidence",
+    },
+    "chemical-evidence": {
+        "title": "Resolve PubChem compound identity and descriptors",
+        "description": "Resolve a compound by declared namespace and retain all matched CIDs, structure identifiers, stereochemistry-sensitive fields, synonyms, and ambiguity.",
+        "entrypoint": "biomed_workbench.capabilities.evidence:chemical_evidence",
+        "intents": ["resolve PubChem compound", "retrieve CID InChIKey SMILES and formula", "核验化合物身份和立体化学"],
+        "questions": ["Which PubChem compound identities match the declared identifier, and is chemical form ambiguity resolved?"],
+        "input_properties": {"identifier": {"type": "string", "minLength": 1, "maxLength": 500}, "namespace": {"type": "string", "enum": ["name", "cid", "inchikey"]}},
+        "input_required": ["identifier"],
+        "output_properties": {
+            "query": {"type": "object"}, "compounds": {"type": "array"}, "synonyms": {"type": "array"},
+            "identity_checks": {"type": "object"}, "provenance": {"type": "object"}, "limitations": {"type": "array"},
+        },
+        "output_required": ["query", "compounds", "synonyms", "identity_checks", "provenance", "limitations"],
+        "tools": ["pubchem"],
+        "quality": "CID, structure identifiers, formula, charge, stereochemistry fields, query namespace, and ambiguity must be reviewed before chemical evidence is admitted.",
+        "assumption": "The supplied identifier and namespace describe the intended compound search rather than a mixture, formulation, or class.",
+        "limitations": ["Compound identity and computed descriptors do not establish target binding, activity, safety, or efficacy."],
+        "complements": ["gene-evidence", "literature-evidence", "structure-evidence"],
+        "effect": "grounds-chemical-identity-evidence",
+    },
+    "clinical-trial-evidence": {
+        "version": "1.1.0",
+        "title": "Retrieve design-aware ClinicalTrials.gov evidence",
+        "description": "Retrieve count-verified ClinicalTrials.gov API v2 cohorts with declarative server-side filters, complete bounded pagination, deterministic NCT ordering, request provenance, protocol design, enrollment, outcomes, locations, and results state.",
+        "entrypoint": "biomed_workbench.capabilities.evidence:clinical_trial_evidence",
+        "intents": ["search ClinicalTrials.gov", "retrieve trial design and results status", "检索临床试验注册设计和结果状态"],
+        "questions": ["Which registered studies match the question, and what do their protocol, status, enrollment, results, and amendment context permit us to conclude?"],
+        "input_properties": {
+            "query": {"type": "string", "minLength": 1, "maxLength": 2000},
+            "page_size": {"type": "integer", "minimum": 1, "maximum": 1000},
+            "max_records": {"type": "integer", "minimum": 1, "maximum": 10000},
+            "advanced_query": {"type": "string", "minLength": 1, "maxLength": 4000},
+            "include_full_record": {"type": "boolean"},
+            "filters": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "condition": {"type": "string", "minLength": 1, "maxLength": 500},
+                    "intervention": {"type": "string", "minLength": 1, "maxLength": 500},
+                    "overall_status": {"type": "array", "items": {"type": "string"}, "maxItems": 16, "uniqueItems": True},
+                    "phase": {"type": "array", "items": {"type": "string"}, "maxItems": 6, "uniqueItems": True},
+                    "study_type": {"type": "string"},
+                    "enrollment_min": {"type": "integer", "minimum": 0},
+                    "enrollment_max": {"type": "integer", "minimum": 0},
+                    "primary_completion_start": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+                    "primary_completion_end": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+                    "first_posted_start": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+                    "first_posted_end": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+                    "location_country": {"type": "string", "minLength": 1, "maxLength": 200},
+                    "lead_sponsor_class": {"type": "string"},
+                    "investigator": {"type": "string", "minLength": 1, "maxLength": 300},
+                    "investigator_role": {"type": "string", "enum": ["any", "official", "responsible_party"]},
+                    "sponsor_name": {"type": "string", "minLength": 1, "maxLength": 300},
+                    "sponsor_scope": {"type": "string", "enum": ["lead", "any"]},
+                    "eligibility_keywords": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 300}, "maxItems": 20},
+                    "sex": {"type": "string"},
+                    "healthy_volunteers": {"type": "boolean"},
+                    "minimum_age": {"type": "string", "minLength": 1, "maxLength": 40},
+                    "maximum_age": {"type": "string", "minLength": 1, "maxLength": 40},
+                    "location_city": {"type": "string", "minLength": 1, "maxLength": 200},
+                    "location_state": {"type": "string", "minLength": 1, "maxLength": 200},
+                    "location_recruiting_only": {"type": "boolean"}
+                }
+            }
+        },
+        "input_required": [],
+        "output_properties": {
+            "query": {"type": "object"}, "api_total_count": {"type": "integer"}, "returned_count": {"type": "integer"},
+            "nct_ids": {"type": "array"}, "studies": {"type": "array"}, "records_truncated": {"type": "boolean"},
+            "next_page_token_present": {"type": "boolean"}, "duplicate_nct_ids": {"type": "array"},
+            "local_post_filters_applied": {"type": "array"}, "provenance": {"type": "object"}, "limitations": {"type": "array"},
+        },
+        "output_required": ["query", "api_total_count", "returned_count", "nct_ids", "studies", "records_truncated", "next_page_token_present", "duplicate_nct_ids", "local_post_filters_applied", "provenance", "limitations"],
+        "tools": ["clinical-trials"],
+        "quality": "Every study must preserve a valid unique NCT identifier and protocol context; declared dimensions execute server-side; page tokens are walked to the cap; totalCount, returned IDs, duplicates, truncation, and every request reconcile before cohort interpretation.",
+        "assumption": "The search expression identifies a scientifically meaningful cohort, intervention, condition, or study identifier.",
+        "limitations": ["Registry records are sponsor-submitted; registration or completion is not evidence of efficacy, missing results remain explicit, and truncated cohorts cannot support exhaustive-review claims."],
+        "complements": ["cohort-summary", "survival-analysis", "clinical-report-audit", "literature-evidence"],
+        "effect": "grounds-clinical-trial-registry-evidence",
+    },
+    "structure-evidence": {
+        "title": "Retrieve RCSB PDB structure evidence",
+        "description": "Retrieve entry-level RCSB PDB metadata for explicit identifiers and retain experimental method, resolution, release, citation, entity, and deposition context.",
+        "entrypoint": "biomed_workbench.capabilities.evidence:structure_evidence",
+        "intents": ["retrieve RCSB PDB metadata", "inspect structure method resolution and release", "核验PDB结构方法分辨率和实体信息"],
+        "questions": ["Which deposited structures correspond to the requested identifiers, and are their method and quality context suitable for the scientific use?"],
+        "input_properties": {"pdb_ids": {"type": "array", "items": {"type": "string", "pattern": "^[0-9][A-Za-z0-9]{3}$"}, "minItems": 1, "maxItems": 25, "uniqueItems": True}},
+        "input_required": ["pdb_ids"],
+        "output_properties": {
+            "query": {"type": "object"}, "structures": {"type": "array"}, "returned_count": {"type": "integer"},
+            "provenance": {"type": "object"}, "limitations": {"type": "array"},
+        },
+        "output_required": ["query", "structures", "returned_count", "provenance", "limitations"],
+        "tools": ["rcsb"],
+        "quality": "Every response must preserve its requested PDB identifier and expose method, resolution, release, citation, entity, and deposition state before structural interpretation.",
+        "assumption": "The supplied PDB identifiers refer to structures relevant to the intended construct, assembly, state, and biological question.",
+        "limitations": ["Entry metadata alone does not validate assembly, construct relevance, local model quality, ligand pose, affinity, or design suitability."],
+        "complements": ["chemical-evidence", "gene-evidence", "literature-evidence"],
+        "effect": "grounds-macromolecular-structure-evidence",
+    },
+}
+
+
+CASES = {
+    "citation-record-resolution": {
+        "name": "resolve-nature-doi-across-two-services",
+        "input": {"doi": "10.1038/s41586-020-2649-2"},
+        "expected_subset": {"query": {"doi": "10.1038/s41586-020-2649-2"}, "agreement": {"doi_confirmed_by_crossref": True}},
+        "http_fixtures": [
+            {
+                "url": "https://api.crossref.org/v1/works/10.1038%2Fs41586-020-2649-2",
+                "status": 200,
+                "headers": {"Content-Type": "application/json"},
+                "json": {
+                    "message": {
+                        "DOI": "10.1038/s41586-020-2649-2",
+                        "title": ["Array programming with NumPy"],
+                        "type": "journal-article",
+                        "publisher": "Springer Science and Business Media LLC",
+                        "container-title": ["Nature"],
+                        "published": {"date-parts": [[2020, 9, 16]]},
+                        "author": [],
+                        "is-referenced-by-count": 0,
+                        "relation": {},
+                        "update-to": [],
+                    }
+                },
+            },
+            {
+                "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=DOI%3A%2210.1038%2Fs41586-020-2649-2%22&format=json&resultType=core&pageSize=25",
+                "status": 200,
+                "headers": {"Content-Type": "application/json"},
+                "json": {"resultList": {"result": [{"doi": "10.1038/s41586-020-2649-2", "title": "Array programming with NumPy"}]}},
+            },
+        ],
+    },
+    "preprint-evidence": {
+        "name": "retain-biorxiv-version-history",
+        "input": {"doi": "10.1101/339747", "server": "biorxiv"},
+        "expected_subset": {"query": {"doi": "10.1101/339747", "server": "biorxiv"}},
+        "http_fixtures": [
+            {
+                "url": "https://api.biorxiv.org/details/biorxiv/10.1101/339747/na/json",
+                "status": 200,
+                "headers": {"Content-Type": "application/json"},
+                "json": {"collection": [{"doi": "10.1101/339747", "version": "1", "date": "2018-06-06", "published": "NA"}]},
+            }
+        ],
+    },
+    "chemical-evidence": {
+        "name": "resolve-aspirin-with-structure-identity",
+        "input": {"identifier": "aspirin", "namespace": "name"},
+        "expected_subset": {"query": {"identifier": "aspirin", "namespace": "name"}},
+        "http_fixtures": [
+            {
+                "url": "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/aspirin/property/Title,IUPACName,MolecularFormula,MolecularWeight,SMILES,ConnectivitySMILES,InChI,InChIKey,XLogP,TPSA,Charge/JSON",
+                "status": 200,
+                "headers": {"Content-Type": "application/json"},
+                "json": {
+                    "PropertyTable": {
+                        "Properties": [
+                            {
+                                "CID": 2244,
+                                "Title": "Aspirin",
+                                "MolecularFormula": "C9H8O4",
+                                "SMILES": "CC(=O)OC1=CC=CC=C1C(=O)O",
+                                "ConnectivitySMILES": "CC(=O)OC1=CC=CC=C1C(=O)O",
+                                "InChIKey": "BSYNRYMUTXBXSQ-UHFFFAOYSA-N",
+                            }
+                        ]
+                    }
+                },
+            },
+            {
+                "url": "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/2244/synonyms/JSON",
+                "status": 200,
+                "headers": {"Content-Type": "application/json"},
+                "json": {"InformationList": {"Information": [{"CID": 2244, "Synonym": ["Aspirin", "Acetylsalicylic acid"]}]}},
+            },
+        ],
+    },
+    "clinical-trial-evidence": {
+        "name": "resolve-one-nct-record-with-design-context",
+        "input": {"query": "NCT00000102", "page_size": 1},
+        "expected_subset": {"query": {"term": "NCT00000102", "page_size": 1}, "nct_ids": ["NCT00000102"], "records_truncated": False},
+        "http_fixtures": [
+            {
+                "url": "https://clinicaltrials.gov/api/v2/studies?query.term=NCT00000102&pageSize=1&format=json&countTotal=true",
+                "status": 200,
+                "headers": {"Content-Type": "application/json"},
+                "json": {
+                    "totalCount": 1,
+                    "studies": [
+                        {
+                            "protocolSection": {
+                                "identificationModule": {"nctId": "NCT00000102", "briefTitle": "Congenital adrenal hyperplasia trial"},
+                                "designModule": {"studyType": "INTERVENTIONAL", "phases": ["PHASE1"]},
+                                "statusModule": {"overallStatus": "COMPLETED"},
+                            },
+                            "hasResults": False,
+                        }
+                    ],
+                },
+            }
+        ],
+    },
+    "structure-evidence": {
+        "name": "resolve-hemoglobin-structure-context",
+        "input": {"pdb_ids": ["4HHB"]},
+        "expected_subset": {"query": {"pdb_ids": ["4HHB"]}, "returned_count": 1},
+        "http_fixtures": [
+            {
+                "url": "https://data.rcsb.org/rest/v1/core/entry/4HHB",
+                "status": 200,
+                "headers": {"Content-Type": "application/json"},
+                "json": {
+                    "rcsb_id": "4HHB",
+                    "struct": {"title": "The crystal structure of human deoxyhaemoglobin"},
+                    "exptl": [{"method": "X-RAY DIFFRACTION"}],
+                    "rcsb_entry_info": {"resolution_combined": [1.74]},
+                    "rcsb_accession_info": {"initial_release_date": "1984-07-17"},
+                    "rcsb_primary_citation": {},
+                    "rcsb_entry_container_identifiers": {"polymer_entity_ids": ["1", "2"]},
+                    "pdbx_database_status": {"status_code": "REL"},
+                },
+            }
+        ],
+    },
+}
+
+
+def _format(name: str, orientation: str) -> dict[str, object]:
+    return {
+        "name": name,
+        "versions": ["1"],
+        "representations": ["structured"],
+        "compression": ["none"],
+        "required_indexes": [],
+        "coordinate_systems": [],
+        "genome_build_policy": "not_applicable",
+        "genome_builds": [],
+        "annotation_releases": [],
+        "orientations": [orientation],
+    }
+
+
+def _manifest(module_id: str, spec: dict[str, object], python_dependency: dict[str, object]) -> dict[str, object]:
+    tools = [deepcopy(TOOLS[name]) for name in spec["tools"]]
+    tool_versions = {tool["name"]: [f"=={tool['tested_versions'][0]}"] for tool in tools}
+    module_version = str(spec.get("version", "1.0.0"))
+    gate_id = f"{module_id}-validity"
+    input_name = f"{module_id}-query"
+    output_name = f"{module_id}-result"
+    return {
+        "schema_version": 1,
+        "id": module_id,
+        "version": module_version,
+        "title": spec["title"],
+        "description": spec["description"],
+        "module_type": "data_source",
+        "domains": ["evidence"],
+        "intents": spec["intents"],
+        "questions": spec["questions"],
+        "entrypoint": spec["entrypoint"],
+        "execution": {"kind": "service", "timeout_seconds": 90, "max_output_bytes": 20_000_000},
+        "maturity": "validated",
+        "input_artifacts": [
+            {
+                "name": input_name,
+                "artifact_type": "database_query",
+                "formats": [_format("inline-json", "request-object")],
+                "processing_levels": ["declared"],
+                "required_metadata": [],
+            }
+        ],
+        "output_artifacts": [
+            {
+                "name": output_name,
+                "artifact_type": "evidence_bundle",
+                "formats": [_format("normalized-json", "module-output")],
+                "processing_levels": ["source-preserved", "derived"],
+                "required_metadata": ["module_version", "compatibility_row_id", "service_contract", "retrieval_time"],
+            }
+        ],
+        "preconditions": ["A schema-valid, bounded database query is available and public HTTPS access is permitted."],
+        "assumptions": [spec["assumption"]],
+        "quality_gates": [{"id": gate_id, "severity": "fatal", "description": spec["quality"], "blocks_interpretation": True}],
+        "limitations": spec["limitations"],
+        "evidence_effects": [spec["effect"]],
+        "alternatives": ["literature-evidence"],
+        "complements": spec["complements"],
+        "tool_requirements": tools,
+        "dependencies": [deepcopy(python_dependency)],
+        "compatibility_matrix": [
+            {
+                "id": f"public-database-contract-2026-07-13-{module_id}",
+                "module_version": module_version,
+                "tool_versions": tool_versions,
+                "dependency_versions": {"python": [">=3.14,<3.15"]},
+                "input_formats": {input_name: ["inline-json@1"]},
+                "output_formats": {output_name: ["normalized-json@1"]},
+                "platforms": ["any"],
+                "regression_evidence_ids": [f"{module_id}-regression-v1"],
+                "end_to_end_evidence_ids": [f"{module_id}-e2e-v1"],
+                "verified_at": VERIFIED_AT,
+            }
+        ],
+        "access": "public_api",
+        "mutability": "read_only",
+        "credentials": [],
+        "input_schema": {"type": "object", "additionalProperties": False, "properties": spec["input_properties"], "required": spec["input_required"]},
+        "output_schema": {"type": "object", "additionalProperties": False, "properties": spec["output_properties"], "required": spec["output_required"]},
+        "kernel_compatibility": [">=0.2.0,<0.3.0"],
+        "provenance": {
+            "license": "Apache-2.0",
+            "concept_sources": [tool["version_source"] for tool in tools] + ["Project-owned clean-room implementation and scientific validation contract."],
+        },
+    }
+
+
+def generate(*, check: bool = False) -> list[str]:
+    base = json.loads((BUILTIN_ROOT / "gene-evidence" / "module.json").read_text(encoding="utf-8"))
+    python_dependency = base["dependencies"][0]
+    changed = []
+    for module_id, spec in SPECS.items():
+        payload = _manifest(module_id, spec, python_dependency)
+        parse_manifest(payload)
+        text = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+        path = BUILTIN_ROOT / module_id / "module.json"
+        current = path.read_text(encoding="utf-8") if path.exists() else None
+        if current != text:
+            changed.append(module_id)
+            if not check:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(text, encoding="utf-8")
+        cases_text = json.dumps({"schema_version": 1, "cases": [CASES[module_id]]}, indent=2, sort_keys=True) + "\n"
+        cases_path = BUILTIN_ROOT / module_id / "tests" / "cases.json"
+        current_cases = cases_path.read_text(encoding="utf-8") if cases_path.exists() else None
+        if current_cases != cases_text:
+            if module_id not in changed:
+                changed.append(module_id)
+            if not check:
+                cases_path.parent.mkdir(parents=True, exist_ok=True)
+                cases_path.write_text(cases_text, encoding="utf-8")
+    return changed
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true")
+    args = parser.parse_args()
+    changed = generate(check=args.check)
+    print(json.dumps({"changed_modules": changed, "count": len(changed)}, sort_keys=True))
+    return 1 if args.check and changed else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

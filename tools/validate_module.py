@@ -34,7 +34,9 @@ _LOCAL_PATH_PATTERNS = (
     re.compile(r"file://"),
     re.compile(r"[A-Za-z]:\\\\Users\\\\"),
 )
-_CASE_FIELDS = frozenset({"name", "input", "expected_subset"})
+_CASE_REQUIRED_FIELDS = frozenset({"name", "input", "expected_subset"})
+_CASE_OPTIONAL_FIELDS = frozenset({"http_fixtures"})
+_HTTP_FIXTURE_FIELDS = frozenset({"url", "status", "headers", "json"})
 _AGENT_ASSET_RE = re.compile(r"^(?:templates|validators)/[a-z][a-z0-9_]*(?:\.(?:py|R|md|ipynb))$")
 
 
@@ -83,12 +85,40 @@ def _load_cases(path: Path) -> list[dict[str, Any]]:
         raise ModuleValidationError("tests/cases.json must contain at least one executable case")
     names = set()
     for index, case in enumerate(cases):
-        if not isinstance(case, dict) or set(case) != _CASE_FIELDS:
-            raise ModuleValidationError(f"test case {index} must contain exactly name, input, and expected_subset")
+        if (
+            not isinstance(case, dict)
+            or not _CASE_REQUIRED_FIELDS <= set(case)
+            or set(case) - _CASE_REQUIRED_FIELDS - _CASE_OPTIONAL_FIELDS
+        ):
+            raise ModuleValidationError(
+                f"test case {index} must contain name, input, expected_subset, and only supported optional fields"
+            )
         if not isinstance(case["name"], str) or not case["name"].strip() or case["name"] in names:
             raise ModuleValidationError(f"test case {index} has an invalid or duplicate name")
         if not isinstance(case["input"], dict) or not isinstance(case["expected_subset"], dict):
             raise ModuleValidationError(f"test case {case['name']} input and expected_subset must be objects")
+        fixtures = case.get("http_fixtures", [])
+        if not isinstance(fixtures, list):
+            raise ModuleValidationError(f"test case {case['name']} http_fixtures must be an array")
+        fixture_urls = set()
+        for fixture_index, fixture in enumerate(fixtures):
+            if not isinstance(fixture, dict) or set(fixture) != _HTTP_FIXTURE_FIELDS:
+                raise ModuleValidationError(
+                    f"test case {case['name']} HTTP fixture {fixture_index} must contain exactly url, status, headers, and json"
+                )
+            url = fixture["url"]
+            headers = fixture["headers"]
+            if not isinstance(url, str) or not url.startswith("https://") or url in fixture_urls:
+                raise ModuleValidationError(f"test case {case['name']} HTTP fixture URLs must be unique HTTPS URLs")
+            if not isinstance(fixture["status"], int) or not 200 <= fixture["status"] <= 599:
+                raise ModuleValidationError(f"test case {case['name']} HTTP fixture status must be 200..599")
+            if (
+                not isinstance(headers, dict)
+                or not all(isinstance(key, str) and isinstance(value, str) for key, value in headers.items())
+                or not isinstance(fixture["json"], dict)
+            ):
+                raise ModuleValidationError(f"test case {case['name']} HTTP fixture headers and JSON body are invalid")
+            fixture_urls.add(url)
         names.add(case["name"])
     return cases
 
@@ -115,7 +145,36 @@ def _execute_case(module_path: Path, case_index: int) -> dict[str, Any]:
     cases = _load_cases(module_path / "tests" / "cases.json")
     case = cases[case_index]
     _validate(manifest.input_schema, case["input"], "input")
-    raw = _resolve_entrypoint(manifest)(**case["input"])
+    fixtures = case.get("http_fixtures", [])
+    public_databases = None
+    original_transport = None
+    pending_urls = {fixture["url"] for fixture in fixtures}
+    if fixtures:
+        if manifest.execution.kind != "service":
+            raise ModuleValidationError("HTTP fixtures are allowed only for service modules")
+        from biomed_workbench.services import public_databases
+
+        from biomed_workbench.services.public_databases import HTTPResponse
+
+        fixture_by_url = {fixture["url"]: fixture for fixture in fixtures}
+
+        def fixture_transport(url: str, _headers: dict[str, str], _timeout: float) -> HTTPResponse:
+            fixture = fixture_by_url.get(url)
+            if fixture is None:
+                raise ModuleValidationError(f"service test attempted an undeclared URL: {url}")
+            pending_urls.discard(url)
+            body = json.dumps(fixture["json"], separators=(",", ":"), sort_keys=True).encode("utf-8")
+            return HTTPResponse(fixture["status"], fixture["headers"], body)
+
+        original_transport = public_databases._default_transport
+        public_databases._default_transport = fixture_transport
+    try:
+        raw = _resolve_entrypoint(manifest)(**case["input"])
+    finally:
+        if public_databases is not None and original_transport is not None:
+            public_databases._default_transport = original_transport
+    if pending_urls:
+        raise ModuleValidationError(f"service test did not consume declared HTTP fixtures: {', '.join(sorted(pending_urls))}")
     if not isinstance(raw, dict):
         raise ModuleValidationError("module test output must be a JSON object")
     _validate(manifest.output_schema, raw, "output")

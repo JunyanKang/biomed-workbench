@@ -1,0 +1,304 @@
+{
+  "access": "public_api",
+  "alternatives": [
+    "literature-evidence"
+  ],
+  "assumptions": [
+    "The supplied identifier and namespace describe the intended compound search rather than a mixture, formulation, or class."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "chemical-evidence-e2e-v1"
+      ],
+      "id": "public-database-contract-2026-07-13-chemical-evidence",
+      "input_formats": {
+        "chemical-evidence-query": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "chemical-evidence-result": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "chemical-evidence-regression-v1"
+      ],
+      "tool_versions": {
+        "pubchem-pug-rest": [
+          "==pug-rest-observed-2026-07-13"
+        ]
+      },
+      "verified_at": "2026-07-13"
+    }
+  ],
+  "complements": [
+    "gene-evidence",
+    "literature-evidence",
+    "structure-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Resolve a compound by declared namespace and retain all matched CIDs, structure identifiers, stereochemistry-sensitive fields, synonyms, and ambiguity.",
+  "domains": [
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.evidence:chemical_evidence",
+  "evidence_effects": [
+    "grounds-chemical-identity-evidence"
+  ],
+  "execution": {
+    "kind": "service",
+    "max_output_bytes": 20000000,
+    "timeout_seconds": 90
+  },
+  "id": "chemical-evidence",
+  "input_artifacts": [
+    {
+      "artifact_type": "database_query",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "chemical-evidence-query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "identifier": {
+        "maxLength": 500,
+        "minLength": 1,
+        "type": "string"
+      },
+      "namespace": {
+        "enum": [
+          "name",
+          "cid",
+          "inchikey"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "identifier"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "resolve PubChem compound",
+    "retrieve CID InChIKey SMILES and formula",
+    "\u6838\u9a8c\u5316\u5408\u7269\u8eab\u4efd\u548c\u7acb\u4f53\u5316\u5b66"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Compound identity and computed descriptors do not establish target binding, activity, safety, or efficacy."
+  ],
+  "maturity": "validated",
+  "module_type": "data_source",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "evidence_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "chemical-evidence-result",
+      "processing_levels": [
+        "source-preserved",
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "service_contract",
+        "retrieval_time"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "compounds": {
+        "type": "array"
+      },
+      "identity_checks": {
+        "type": "object"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "provenance": {
+        "type": "object"
+      },
+      "query": {
+        "type": "object"
+      },
+      "synonyms": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "query",
+      "compounds",
+      "synonyms",
+      "identity_checks",
+      "provenance",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest",
+      "Project-owned clean-room implementation and scientific validation contract."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "CID, structure identifiers, formula, charge, stereochemistry fields, query namespace, and ambiguity must be reviewed before chemical evidence is admitted.",
+      "id": "chemical-evidence-validity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which PubChem compound identities match the declared identifier, and is chemical form ambiguity resolved?"
+  ],
+  "schema_version": 1,
+  "title": "Resolve PubChem compound identity and descriptors",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        "==pug-rest-observed-2026-07-13"
+      ],
+      "ecosystem": "service",
+      "identity": "pubchem.ncbi.nlm.nih.gov/rest/pug",
+      "mismatch_policy": "block",
+      "name": "pubchem-pug-rest",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "pug-rest-observed-2026-07-13"
+      ],
+      "verified_at": "2026-07-13",
+      "version_differences": [
+        {
+          "affected_versions": [
+            "==pug-rest-observed-2026-07-13"
+          ],
+          "category": "input-format",
+          "compatibility_effect": "requires-format",
+          "description": "PUG REST namespaces can resolve one name to multiple compounds and structure identity depends on charge, isotope, stereochemistry, and salt form.",
+          "id": "pubchem-namespace-and-structure",
+          "required_action": "Declare the namespace and retain CID, InChIKey, isomeric representation, formula, charge, and all ambiguous hits.",
+          "source": "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest"
+        },
+        {
+          "affected_versions": [
+            "==pug-rest-observed-2026-07-13"
+          ],
+          "category": "field",
+          "compatibility_effect": "breaking",
+          "description": "The observed property response uses SMILES and ConnectivitySMILES rather than historical IsomericSMILES and CanonicalSMILES keys.",
+          "id": "pubchem-smiles-field-names",
+          "required_action": "Request and validate the observed SMILES and ConnectivitySMILES fields while retaining InChI and InChIKey for identity review.",
+          "source": "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest"
+        }
+      ],
+      "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "version_probe": [
+        "biomed_workbench.services.public_databases:probe_pubchem_contract"
+      ],
+      "version_probe_kind": "service_contract",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest"
+    }
+  ],
+  "version": "1.0.0"
+}

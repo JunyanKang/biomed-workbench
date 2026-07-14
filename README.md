@@ -8,6 +8,8 @@ This project exposes one Codex skill:
 
 Use that single entry for biomedical evidence search, omics, single-cell analysis, molecular design, imaging, clinical translation, experimental planning, manuscript work, citation auditing, peer review, patents, and presentation planning. The workbench decides whether a task needs one analysis, independent parallel analyses, or a dependent scientific pipeline.
 
+The current registry contains 86 dynamically discovered modules and 87 fully evidenced compatibility rows. The release suite discovers 563 tests; these counts are observations of this revision, not monotonic quality targets.
+
 The operational catalog is source-neutral. Provenance is kept separately from routing and execution.
 
 ## Install From GitHub
@@ -112,9 +114,16 @@ External scientific engines remain user-managed dependencies; the plugin guides,
 | `tumor-mutation-burden-vcf` | Python `3.14.3` | Python standard library `3.14.3` | filtered ANN `vcf@4.5` plus build-matched callable `bed@1.0` | auditable nonsynonymous mutations per callable union Mb |
 | `metagene-factorization-nmf` | Python `3.14.3` | NumPy `2.4.4`, SciPy `1.17.1`, scikit-learn `1.8.0` | normalized nonnegative `count-matrix@1.0.0` plus ordered feature/sample manifests | stable rank-selected metagene loadings, sample exposures, and independently reconstructed quality report |
 | `single-cell-communication` | LIANA `1.7.3`, CellPhoneDB `5.0.1`, CellChat `2.2.0`, NicheNet `2.2.1.1` | Python `3.10.20`, Scanpy `1.11.5`, AnnData `0.11.4`, R package runtimes | count-backed H5AD or Matrix Market plus cell type, biological sample, condition, species, and versioned resources | method-native and standardized sample interactions, replicate support, ligand activities, links, and validation report |
+| `citation-record-resolution` | Crossref REST v1 and Europe PMC REST contracts observed `2026-07-13` | Python `3.14.3` standard-library HTTPS client | one DOI | source-preserved Crossref and Europe PMC records plus explicit agreement fields |
+| `preprint-evidence` | bioRxiv details API contract observed `2026-07-13` | Python `3.14.3` standard-library HTTPS client | bioRxiv or medRxiv DOI and server | ordered, uncollapsed version history and separately reported publication DOIs |
+| `chemical-evidence` | PubChem PUG REST contract observed `2026-07-13` | Python `3.14.3` standard-library HTTPS client | declared name, CID, or InChIKey namespace | all matched CIDs, SMILES/connectivity, InChIKey, formula, charge, synonyms, and ambiguity checks |
+| `clinical-trial-evidence` | ClinicalTrials.gov API v2 contract observed `2026-07-13` | Python `3.14.3` standard-library HTTPS client | free query, closed declarative filters, or bounded Essie expression | count-verified, deterministically ordered cohort with complete bounded pageToken traversal, truncation state, design/results context, and per-request provenance |
+| `structure-evidence` | RCSB PDB Data REST v1 contract observed `2026-07-13` | Python `3.14.3` standard-library HTTPS client | one to 25 explicit PDB IDs | identifier-preserved entry method, resolution, release, citation, entity, and deposition context |
 | `image-chroma-key-remove` | Python `3.14.3` | Pillow `10.4.0` | one static untagged-sRGB PNG `3.0`, JPEG `T.81`, or WebP `riff-container-2025` communication asset | canonical RGBA PNG plus independently recomputed matte-quality report |
 
 Tool-use guidance and routing remain available regardless of the installed version. For scientific execution, versions inside the declared compatibility policy may run and are recorded verbatim; provenance also states whether each version is an exact tested baseline. Missing tools, versions outside the policy, known breaking changes, or invalid output structures prevent the result from entering the evidence ledger until the environment is corrected or a validated alternative is selected. The `reports/*-live-verification.json` files preserve the concrete versions used for FastQC, fastp, MultiQC, FastQ Screen, samtools, bedtools, VCF processing, TMB, and NMF regression evidence.
+
+The public evidence clients require no new credentials. They use HTTPS host allow-listing, bounded response sizes, retries only for transient failures, closed request schemas, identifier preservation, source-specific parsers, and explicit truncation or disagreement states. `clinical-trial-evidence` 1.1 translates condition, intervention, status, phase, study type, enrollment, dates, sponsor, investigator, eligibility, age, sex, and same-site location constraints into API v2 server-side parameters; it walks opaque page tokens to the declared cap and refuses an exhaustive-cohort claim when `records_truncated` is true. See `reports/public-database-live-verification.json` for five live database checks and independent package-case execution.
 
 ## Bioinformatics Code Templates
 
@@ -146,9 +155,12 @@ Deterministic modules declare `code_templates`; Agent-generated workflows refere
 - `tools/run_tool.py`: generic runner for direct, bounded tools.
 - `tools/validate_workbench.py`: release validation for single-entry skill, catalog consistency, source coverage, and publish-safe paths.
 - `tools/reconcile_sources.py`: development-only one-to-one reconciliation of ignored source/design ledgers into a path-free release receipt root.
+- `tools/refine_source_design_ledger.py`: deterministic product-boundary policy that retires compute-infrastructure responsibilities without touching scientific pending records.
+- `tools/apply_source_capability_bindings.py`: generic private-rule binder; source paths remain ignored while the public report exposes only rule and receipt counts.
 - `reports/compatibility-execution-evidence.json`: path-free regression and end-to-end evidence bound to every supported compatibility row.
 - `reports/bioinformatics-template-coverage.json`: complete bioinformatics module-to-template coverage and source-quality results.
 - `reports/single-cell-communication-live-verification.json`: four-backend LIANA, CellPhoneDB, CellChat, and NicheNet execution evidence.
+- `reports/public-database-live-verification.json`: live Crossref, Europe PMC, bioRxiv, PubChem, ClinicalTrials.gov v2, and RCSB PDB evidence plus isolated module-package validation.
 - `reports/chroma-key-live-verification.json`: real command-boundary execution, synthetic edge fixture, output digests, alpha-class checks, and non-quantitative-use evidence for chroma keying.
 - `reports/source-reconciliation-summary.json`: public counts, pending capability decisions, current module/project-contract evidence binding, and an irreversible digest over all private per-file receipts.
 - `reports/plugin-contract-verification.json`: path-free official Codex plugin and Skill validation bound to the current manifest, single Skill entry, generated registry, and isolated snapshot.
@@ -177,5 +189,7 @@ Foundational FASTQ, FASTA, SAM/BAM/CRAM, VCF/BCF, BED, GTF/GFF3, count-matrix, H
 This workbench is an independent clean-room implementation informed by inspected biomedical research projects and installed research skills. It does not route through those projects or vendor their source trees.
 
 Every inspected source file has one private content-identified design receipt. The release reconciler rejects missing or duplicate receipts, then classifies each as implemented, superseded, guidance, excluded, provenance, or pending. Executable capability and schema decisions remain pending until a path-free private receipt binding resolves them to current passing module compatibility, regression, and representative execution evidence; therefore reading a source file is never presented as functional implementation.
+
+The current reconciliation accounts for all 89,314 inspected files, with 88,073 resolved and 1,241 still pending specific scientific module or project-contract evidence. Nonzero pending records deliberately prevent a source-union completeness or overall-superiority claim; they are the maintained backlog for deeper capability absorption rather than a hidden bridge to source code.
 
 The ignored `.source-audit/` ledgers are development evidence and are neither runtime inputs nor published path bridges. The repository publishes only source-neutral aggregate reports and a SHA-256 receipt root. See `NOTICE.md` for attribution and `reports/` for the releasable evidence.

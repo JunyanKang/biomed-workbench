@@ -28,6 +28,14 @@ DIGEST_FIELDS = (
     "product_exclusions",
 )
 
+MODULE_GAP_COVERAGE = {
+    "citation-record-resolution": ("evidence", "citation_verification"),
+    "preprint-evidence": ("evidence", "preprint_discovery"),
+    "chemical-evidence": ("evidence", "chemical_database_query"),
+    "clinical-trial-evidence": ("evidence", "clinical_trial_registry"),
+    "structure-evidence": ("evidence", "structure_database_query"),
+}
+
 
 def refresh(path: Path) -> dict[str, object]:
     audit = json.loads(path.read_text(encoding="utf-8"))
@@ -58,11 +66,17 @@ def refresh(path: Path) -> dict[str, object]:
             "bound_module_count": reconciliation["bound_module_count"],
             "bound_project_evidence_count": reconciliation["bound_project_evidence_count"],
             "receipt_root_digest": reconciliation["receipt_root_digest"],
-            "completeness_claim_allowed": False,
+            "completeness_claim_allowed": reconciliation["pending_count"] == 0,
         },
     )
     audit["family_signal_summary"]["covered"] = len(ids)
+    covered_gap_keys = {MODULE_GAP_COVERAGE[module_id] for module_id in ids if module_id in MODULE_GAP_COVERAGE}
+    audit["priority_gaps"] = [
+        gap for gap in audit["priority_gaps"] if (gap["domain"], gap["family"]) not in covered_gap_keys
+    ]
     expansions = (
+        "count_verified_clinicaltrials_v2_with_declarative_filters_and_request_provenance",
+        "cross_source_citation_preprint_chemical_and_structure_database_evidence",
         "independently_verified_static_raster_chroma_key_and_despill",
         "hash_bound_manuscript_revision_lineage_and_reviewer_commitment_gates",
     )

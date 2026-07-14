@@ -1,5 +1,5 @@
 {
-  "module_count": 81,
+  "module_count": 86,
   "modules": [
     {
       "access": "offline",
@@ -1904,6 +1904,310 @@
       "version": "1.0.0"
     },
     {
+      "access": "public_api",
+      "alternatives": [
+        "literature-evidence"
+      ],
+      "assumptions": [
+        "The supplied identifier and namespace describe the intended compound search rather than a mixture, formulation, or class."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "chemical-evidence-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-13-chemical-evidence",
+          "input_formats": {
+            "chemical-evidence-query": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "chemical-evidence-result": [
+              "normalized-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "chemical-evidence-regression-v1"
+          ],
+          "tool_versions": {
+            "pubchem-pug-rest": [
+              "==pug-rest-observed-2026-07-13"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "gene-evidence",
+        "literature-evidence",
+        "structure-evidence"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Resolve a compound by declared namespace and retain all matched CIDs, structure identifiers, stereochemistry-sensitive fields, synonyms, and ambiguity.",
+      "domains": [
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evidence:chemical_evidence",
+      "evidence_effects": [
+        "grounds-chemical-identity-evidence"
+      ],
+      "execution": {
+        "kind": "service",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 90
+      },
+      "id": "chemical-evidence",
+      "input_artifacts": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "chemical-evidence-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "identifier": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "namespace": {
+            "enum": [
+              "name",
+              "cid",
+              "inchikey"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifier"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "resolve PubChem compound",
+        "retrieve CID InChIKey SMILES and formula",
+        "\u6838\u9a8c\u5316\u5408\u7269\u8eab\u4efd\u548c\u7acb\u4f53\u5316\u5b66"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Compound identity and computed descriptors do not establish target binding, activity, safety, or efficacy."
+      ],
+      "maturity": "validated",
+      "module_type": "data_source",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "chemical-evidence-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "compounds": {
+            "type": "array"
+          },
+          "identity_checks": {
+            "type": "object"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "query": {
+            "type": "object"
+          },
+          "synonyms": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "query",
+          "compounds",
+          "synonyms",
+          "identity_checks",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest",
+          "Project-owned clean-room implementation and scientific validation contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "CID, structure identifiers, formula, charge, stereochemistry fields, query namespace, and ambiguity must be reviewed before chemical evidence is admitted.",
+          "id": "chemical-evidence-validity",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Which PubChem compound identities match the declared identifier, and is chemical form ambiguity resolved?"
+      ],
+      "schema_version": 1,
+      "title": "Resolve PubChem compound identity and descriptors",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==pug-rest-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "pubchem.ncbi.nlm.nih.gov/rest/pug",
+          "mismatch_policy": "block",
+          "name": "pubchem-pug-rest",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "pug-rest-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==pug-rest-observed-2026-07-13"
+              ],
+              "category": "input-format",
+              "compatibility_effect": "requires-format",
+              "description": "PUG REST namespaces can resolve one name to multiple compounds and structure identity depends on charge, isotope, stereochemistry, and salt form.",
+              "id": "pubchem-namespace-and-structure",
+              "required_action": "Declare the namespace and retain CID, InChIKey, isomeric representation, formula, charge, and all ambiguous hits.",
+              "source": "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest"
+            },
+            {
+              "affected_versions": [
+                "==pug-rest-observed-2026-07-13"
+              ],
+              "category": "field",
+              "compatibility_effect": "breaking",
+              "description": "The observed property response uses SMILES and ConnectivitySMILES rather than historical IsomericSMILES and CanonicalSMILES keys.",
+              "id": "pubchem-smiles-field-names",
+              "required_action": "Request and validate the observed SMILES and ConnectivitySMILES fields while retaining InChI and InChIKey for identity review.",
+              "source": "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_pubchem_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
       "access": "offline",
       "alternatives": [],
       "assumptions": [
@@ -2132,6 +2436,332 @@
       "schema_version": 1,
       "title": "Audit reference metadata",
       "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "public_api",
+      "alternatives": [
+        "literature-evidence"
+      ],
+      "assumptions": [
+        "The DOI identifies the intended work, while bibliographic deposits may be incomplete or inconsistent."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "citation-record-resolution-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-13-citation-record-resolution",
+          "input_formats": {
+            "citation-record-resolution-query": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "citation-record-resolution-result": [
+              "normalized-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "citation-record-resolution-regression-v1"
+          ],
+          "tool_versions": {
+            "crossref-rest": [
+              "==rest-v1-observed-2026-07-13"
+            ],
+            "europe-pmc-rest": [
+              "==rest-observed-2026-07-13"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "citation-resolution-adjudication",
+        "assertion-citation-coverage-audit",
+        "source-freshness-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Resolve one DOI against Crossref and Europe PMC while retaining missing fields, source disagreement, updates, and repository identifiers.",
+      "domains": [
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evidence:citation_record_resolution",
+      "evidence_effects": [
+        "grounds-cross-source-citation-identity"
+      ],
+      "execution": {
+        "kind": "service",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 90
+      },
+      "id": "citation-record-resolution",
+      "input_artifacts": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "citation-record-resolution-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "doi": {
+            "maxLength": 500,
+            "minLength": 7,
+            "type": "string"
+          }
+        },
+        "required": [
+          "doi"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "resolve DOI metadata",
+        "verify citation record across Crossref and Europe PMC",
+        "\u6838\u9a8cDOI\u4e0e\u6587\u732e\u5143\u6570\u636e"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Identifier resolution does not establish retraction status, methodological validity, or support for a claim."
+      ],
+      "maturity": "validated",
+      "module_type": "data_source",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "citation-record-resolution-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "agreement": {
+            "type": "object"
+          },
+          "crossref": {
+            "type": "object"
+          },
+          "europe_pmc_records": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "query": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "query",
+          "crossref",
+          "europe_pmc_records",
+          "agreement",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://www.crossref.org/documentation/retrieve-metadata/rest-api/",
+          "https://europepmc.org/RestfulWebService",
+          "Project-owned clean-room implementation and scientific validation contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "The requested DOI must be preserved by Crossref; exact DOI matches from Europe PMC and all cross-source disagreements remain explicit before citation use.",
+          "id": "citation-record-resolution-validity",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Do independent bibliographic services resolve the same DOI, and which metadata conflicts remain?"
+      ],
+      "schema_version": 1,
+      "title": "Resolve and cross-check a scholarly citation record",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==rest-v1-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "api.crossref.org/v1",
+          "mismatch_policy": "block",
+          "name": "crossref-rest",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "rest-v1-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==rest-v1-observed-2026-07-13"
+              ],
+              "category": "field",
+              "compatibility_effect": "requires-parser",
+              "description": "Crossref fields are depositor supplied and title, relation, update, abstract, and author completeness vary by record.",
+              "id": "crossref-depositor-metadata",
+              "required_action": "Retain absent and conflicting metadata and never infer retraction or claim validity from DOI resolution alone.",
+              "source": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_crossref_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.crossref.org/documentation/retrieve-metadata/rest-api/"
+        },
+        {
+          "allowed_versions": [
+            "==rest-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "www.ebi.ac.uk/europepmc/webservices/rest",
+          "mismatch_policy": "block",
+          "name": "europe-pmc-rest",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "rest-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==rest-observed-2026-07-13"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parameter",
+              "description": "Europe PMC search fields differ between lite and core result types and identifiers vary by source database.",
+              "id": "europe-pmc-result-types",
+              "required_action": "Request JSON core results and match the normalized DOI explicitly before cross-source comparison.",
+              "source": "https://europepmc.org/RestfulWebService"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_europe_pmc_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://europepmc.org/RestfulWebService"
+        }
+      ],
       "version": "1.0.0"
     },
     {
@@ -4899,6 +5529,469 @@
       "title": "Audit clinical report structure",
       "tool_requirements": [],
       "version": "1.0.0"
+    },
+    {
+      "access": "public_api",
+      "alternatives": [
+        "literature-evidence"
+      ],
+      "assumptions": [
+        "The search expression identifies a scientifically meaningful cohort, intervention, condition, or study identifier."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "clinical-trial-evidence-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-13-clinical-trial-evidence",
+          "input_formats": {
+            "clinical-trial-evidence-query": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.1.0",
+          "output_formats": {
+            "clinical-trial-evidence-result": [
+              "normalized-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "clinical-trial-evidence-regression-v1"
+          ],
+          "tool_versions": {
+            "clinicaltrials-gov-api": [
+              "==api-v2-observed-2026-07-13"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "cohort-summary",
+        "survival-analysis",
+        "clinical-report-audit",
+        "literature-evidence"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Retrieve count-verified ClinicalTrials.gov API v2 cohorts with declarative server-side filters, complete bounded pagination, deterministic NCT ordering, request provenance, protocol design, enrollment, outcomes, locations, and results state.",
+      "domains": [
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evidence:clinical_trial_evidence",
+      "evidence_effects": [
+        "grounds-clinical-trial-registry-evidence"
+      ],
+      "execution": {
+        "kind": "service",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 90
+      },
+      "id": "clinical-trial-evidence",
+      "input_artifacts": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "clinical-trial-evidence-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "advanced_query": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "filters": {
+            "additionalProperties": false,
+            "properties": {
+              "condition": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "eligibility_keywords": {
+                "items": {
+                  "maxLength": 300,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              "enrollment_max": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "enrollment_min": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "first_posted_end": {
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "type": "string"
+              },
+              "first_posted_start": {
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "type": "string"
+              },
+              "healthy_volunteers": {
+                "type": "boolean"
+              },
+              "intervention": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "investigator": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "investigator_role": {
+                "enum": [
+                  "any",
+                  "official",
+                  "responsible_party"
+                ],
+                "type": "string"
+              },
+              "lead_sponsor_class": {
+                "type": "string"
+              },
+              "location_city": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "location_country": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "location_recruiting_only": {
+                "type": "boolean"
+              },
+              "location_state": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maximum_age": {
+                "maxLength": 40,
+                "minLength": 1,
+                "type": "string"
+              },
+              "minimum_age": {
+                "maxLength": 40,
+                "minLength": 1,
+                "type": "string"
+              },
+              "overall_status": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 16,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "phase": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 6,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "primary_completion_end": {
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "type": "string"
+              },
+              "primary_completion_start": {
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "type": "string"
+              },
+              "sex": {
+                "type": "string"
+              },
+              "sponsor_name": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "sponsor_scope": {
+                "enum": [
+                  "lead",
+                  "any"
+                ],
+                "type": "string"
+              },
+              "study_type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "include_full_record": {
+            "type": "boolean"
+          },
+          "max_records": {
+            "maximum": 10000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "page_size": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "query": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "intents": [
+        "search ClinicalTrials.gov",
+        "retrieve trial design and results status",
+        "\u68c0\u7d22\u4e34\u5e8a\u8bd5\u9a8c\u6ce8\u518c\u8bbe\u8ba1\u548c\u7ed3\u679c\u72b6\u6001"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Registry records are sponsor-submitted; registration or completion is not evidence of efficacy, missing results remain explicit, and truncated cohorts cannot support exhaustive-review claims."
+      ],
+      "maturity": "validated",
+      "module_type": "data_source",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "clinical-trial-evidence-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "api_total_count": {
+            "type": "integer"
+          },
+          "duplicate_nct_ids": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "local_post_filters_applied": {
+            "type": "array"
+          },
+          "nct_ids": {
+            "type": "array"
+          },
+          "next_page_token_present": {
+            "type": "boolean"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "query": {
+            "type": "object"
+          },
+          "records_truncated": {
+            "type": "boolean"
+          },
+          "returned_count": {
+            "type": "integer"
+          },
+          "studies": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "query",
+          "api_total_count",
+          "returned_count",
+          "nct_ids",
+          "studies",
+          "records_truncated",
+          "next_page_token_present",
+          "duplicate_nct_ids",
+          "local_post_filters_applied",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://clinicaltrials.gov/data-api/about-api",
+          "Project-owned clean-room implementation and scientific validation contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Every study must preserve a valid unique NCT identifier and protocol context; declared dimensions execute server-side; page tokens are walked to the cap; totalCount, returned IDs, duplicates, truncation, and every request reconcile before cohort interpretation.",
+          "id": "clinical-trial-evidence-validity",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Which registered studies match the question, and what do their protocol, status, enrollment, results, and amendment context permit us to conclude?"
+      ],
+      "schema_version": 1,
+      "title": "Retrieve design-aware ClinicalTrials.gov evidence",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==api-v2-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "clinicaltrials.gov/api/v2",
+          "mismatch_policy": "block",
+          "name": "clinicaltrials-gov-api",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "api-v2-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==api-v2-observed-2026-07-13"
+              ],
+              "category": "api",
+              "compatibility_effect": "breaking",
+              "description": "API v2 uses nested protocol and results modules and differs from the retired classic API field layout.",
+              "id": "clinical-trials-v2-data-model",
+              "required_action": "Parse API v2 protocol and results sections, retain status and amendment context, and reject legacy-field assumptions.",
+              "source": "https://clinicaltrials.gov/data-api/about-api/api-migration"
+            },
+            {
+              "affected_versions": [
+                "==api-v2-observed-2026-07-13"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parameter",
+              "description": "API v2 uses opaque page tokens, first-page totalCount, field-specific parameters, and Essie expressions for ranges and same-site location constraints.",
+              "id": "clinical-trials-v2-pagination-and-essie",
+              "required_action": "Walk page tokens to the declared cap, verify unique NCT IDs against totalCount, preserve every request, and mark capped cohorts as truncated.",
+              "source": "https://clinicaltrials.gov/data-api/about-api"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_clinical_trials_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://clinicaltrials.gov/data-api/about-api"
+        }
+      ],
+      "version": "1.1.0"
     },
     {
       "access": "offline",
@@ -16284,6 +17377,302 @@
       "schema_version": 1,
       "title": "Track points across frames",
       "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "public_api",
+      "alternatives": [
+        "literature-evidence"
+      ],
+      "assumptions": [
+        "The DOI and selected server identify the intended preprint record."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "preprint-evidence-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-13-preprint-evidence",
+          "input_formats": {
+            "preprint-evidence-query": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "preprint-evidence-result": [
+              "normalized-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "preprint-evidence-regression-v1"
+          ],
+          "tool_versions": {
+            "biorxiv-details": [
+              "==details-v1-observed-2026-07-13"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "citation-record-resolution",
+        "literature-evidence",
+        "source-freshness-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Retrieve every API-visible version of one preprint DOI and preserve any separately reported publication DOI.",
+      "domains": [
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evidence:preprint_evidence",
+      "evidence_effects": [
+        "grounds-versioned-preprint-evidence"
+      ],
+      "execution": {
+        "kind": "service",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 90
+      },
+      "id": "preprint-evidence",
+      "input_artifacts": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "preprint-evidence-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "doi": {
+            "maxLength": 500,
+            "minLength": 7,
+            "type": "string"
+          },
+          "server": {
+            "enum": [
+              "biorxiv",
+              "medrxiv"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "doi"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "retrieve bioRxiv preprint versions",
+        "find medRxiv publication link",
+        "\u68c0\u7d22\u9884\u5370\u672c\u7248\u672c\u4e0e\u6b63\u5f0f\u53d1\u8868\u8bb0\u5f55"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Preprint metadata and reported publication links require independent citation resolution before synthesis."
+      ],
+      "maturity": "validated",
+      "module_type": "data_source",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "preprint-evidence-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "latest_version": {
+            "type": "object"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "published_dois": {
+            "type": "array"
+          },
+          "query": {
+            "type": "object"
+          },
+          "version_count": {
+            "type": "integer"
+          },
+          "versions": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "query",
+          "versions",
+          "latest_version",
+          "published_dois",
+          "version_count",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://api.biorxiv.org/",
+          "Project-owned clean-room implementation and scientific validation contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "All returned versions must preserve the requested DOI, remain distinct, and be ordered without upgrading a preprint to peer-reviewed evidence.",
+          "id": "preprint-evidence-validity",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Which preprint versions exist, and is a later peer-reviewed publication identifier independently reported?"
+      ],
+      "schema_version": 1,
+      "title": "Retrieve version-aware bioRxiv or medRxiv evidence",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==details-v1-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "api.biorxiv.org/details",
+          "mismatch_policy": "block",
+          "name": "biorxiv-details",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "details-v1-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==details-v1-observed-2026-07-13"
+              ],
+              "category": "field",
+              "compatibility_effect": "requires-parser",
+              "description": "The details endpoint returns one row per preprint version and a published DOI may be absent or reported as NA.",
+              "id": "biorxiv-versioned-records",
+              "required_action": "Retain all versions, sort them explicitly, and never treat a preprint as peer reviewed without independent publication evidence.",
+              "source": "https://api.biorxiv.org/"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_biorxiv_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://api.biorxiv.org/"
+        }
+      ],
       "version": "1.0.0"
     },
     {
@@ -28547,6 +29936,292 @@
       "version": "1.0.0"
     },
     {
+      "access": "public_api",
+      "alternatives": [
+        "literature-evidence"
+      ],
+      "assumptions": [
+        "The supplied PDB identifiers refer to structures relevant to the intended construct, assembly, state, and biological question."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "structure-evidence-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-13-structure-evidence",
+          "input_formats": {
+            "structure-evidence-query": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "structure-evidence-result": [
+              "normalized-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "structure-evidence-regression-v1"
+          ],
+          "tool_versions": {
+            "rcsb-pdb-data-api": [
+              "==data-rest-v1-observed-2026-07-13"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "chemical-evidence",
+        "gene-evidence",
+        "literature-evidence"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Retrieve entry-level RCSB PDB metadata for explicit identifiers and retain experimental method, resolution, release, citation, entity, and deposition context.",
+      "domains": [
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evidence:structure_evidence",
+      "evidence_effects": [
+        "grounds-macromolecular-structure-evidence"
+      ],
+      "execution": {
+        "kind": "service",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 90
+      },
+      "id": "structure-evidence",
+      "input_artifacts": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-evidence-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "pdb_ids": {
+            "items": {
+              "pattern": "^[0-9][A-Za-z0-9]{3}$",
+              "type": "string"
+            },
+            "maxItems": 25,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "pdb_ids"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "retrieve RCSB PDB metadata",
+        "inspect structure method resolution and release",
+        "\u6838\u9a8cPDB\u7ed3\u6784\u65b9\u6cd5\u5206\u8fa8\u7387\u548c\u5b9e\u4f53\u4fe1\u606f"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Entry metadata alone does not validate assembly, construct relevance, local model quality, ligand pose, affinity, or design suitability."
+      ],
+      "maturity": "validated",
+      "module_type": "data_source",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-evidence-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "limitations": {
+            "type": "array"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "query": {
+            "type": "object"
+          },
+          "returned_count": {
+            "type": "integer"
+          },
+          "structures": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "query",
+          "structures",
+          "returned_count",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://data.rcsb.org/",
+          "Project-owned clean-room implementation and scientific validation contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Every response must preserve its requested PDB identifier and expose method, resolution, release, citation, entity, and deposition state before structural interpretation.",
+          "id": "structure-evidence-validity",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Which deposited structures correspond to the requested identifiers, and are their method and quality context suitable for the scientific use?"
+      ],
+      "schema_version": 1,
+      "title": "Retrieve RCSB PDB structure evidence",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==data-rest-v1-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "data.rcsb.org/rest/v1/core",
+          "mismatch_policy": "block",
+          "name": "rcsb-pdb-data-api",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "data-rest-v1-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==data-rest-v1-observed-2026-07-13"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "RCSB Data API JSON follows PDBx/mmCIF-derived object schemas augmented by RCSB annotations and core object identifiers.",
+              "id": "rcsb-pdbx-derived-json",
+              "required_action": "Validate the returned entry identifier and retain experimental method, resolution, release, citation, entity, and status context.",
+              "source": "https://data.rcsb.org/"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_rcsb_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://data.rcsb.org/"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
       "access": "offline",
       "alternatives": [],
       "assumptions": [
@@ -32407,6 +34082,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "4c3912b5392dd6e05dd72330c0a1fea71fd29b4f9a61818eb19025d09010573e",
+  "registry_digest": "6d05d007cb8a54ac6a56db6576fdd6ec21f839016c8150af4b55b257f4c4e7e0",
   "schema_version": 1
 }

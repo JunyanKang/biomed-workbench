@@ -5,6 +5,45 @@ from __future__ import annotations
 from typing import Any
 
 from biomed_workbench.services.eutils import EUtilitiesClient, EUtilitiesError
+from biomed_workbench.services.public_databases import (
+    clinical_trial_records,
+    preprint_record,
+    pubchem_compound,
+    rcsb_structure_records,
+    resolve_citation_record,
+)
+
+
+def citation_record_resolution(doi: str) -> dict[str, Any]:
+    """Resolve a DOI across independent bibliographic services."""
+    return resolve_citation_record(doi)
+
+
+def preprint_evidence(doi: str, server: str = "biorxiv") -> dict[str, Any]:
+    """Retrieve all known versions of one bioRxiv or medRxiv preprint."""
+    return preprint_record(doi, server)
+
+
+def chemical_evidence(identifier: str, namespace: str = "name") -> dict[str, Any]:
+    """Retrieve identity-critical PubChem compound records."""
+    return pubchem_compound(identifier, namespace)
+
+
+def clinical_trial_evidence(
+    query: str | None = None,
+    page_size: int = 100,
+    filters: dict[str, Any] | None = None,
+    max_records: int = 1000,
+    advanced_query: str | None = None,
+    include_full_record: bool = False,
+) -> dict[str, Any]:
+    """Retrieve design-aware ClinicalTrials.gov study records."""
+    return clinical_trial_records(query, page_size, filters, max_records, advanced_query, include_full_record)
+
+
+def structure_evidence(pdb_ids: list[str]) -> dict[str, Any]:
+    """Retrieve entry-level RCSB PDB evidence for explicit identifiers."""
+    return rcsb_structure_records(pdb_ids)
 
 
 def _bounded_links(client: EUtilitiesClient, source: str, target: str, ids: tuple[str, ...], limit: int) -> tuple[dict[str, Any], str | None]:

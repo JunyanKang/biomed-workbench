@@ -24,6 +24,9 @@ from biomed_workbench.router import route  # noqa: E402
 
 
 SERVICE_COVERAGE = {
+    "chemical-evidence": (("compound_identity", "pubchem"),),
+    "citation-record-resolution": (("citation_record_resolution", "crossref-europe-pmc"),),
+    "clinical-trial-evidence": (("trial_design_record", "clinicaltrials-gov"),),
     "gene-evidence": (("composed_workflow", "gene_evidence_bundle"),),
     "literature-evidence": (("composed_workflow", "literature_evidence_bundle"),),
     "ncbi-fetch": (("fetch", "protein"), ("fetch", "nuccore")),
@@ -32,6 +35,8 @@ SERVICE_COVERAGE = {
     "ncbi-search": (("search", "pubmed"),),
     "ncbi-search-summary": (("search", "pubmed"), ("summary", "pubmed")),
     "ncbi-summary": (("summary", "pubmed"),),
+    "preprint-evidence": (("preprint_version_history", "biorxiv"),),
+    "structure-evidence": (("structure_entry_context", "rcsb-pdb"),),
     "variant-evidence": (("composed_workflow", "variant_evidence_bundle"),),
 }
 
@@ -119,6 +124,7 @@ def _service_sources() -> tuple[dict[str, object], set[tuple[str, str]], tuple[s
     reports = [
         json.loads((ROOT / "reports" / "eutils-live-verification.json").read_text(encoding="utf-8")),
         json.loads((ROOT / "reports" / "eutils-live-zero-key-verification.json").read_text(encoding="utf-8")),
+        json.loads((ROOT / "reports" / "public-database-live-verification.json").read_text(encoding="utf-8")),
     ]
     if not all(report.get("passed") is True for report in reports):
         raise RuntimeError("E-utilities live evidence is not passing")
@@ -129,7 +135,14 @@ def _service_sources() -> tuple[dict[str, object], set[tuple[str, str]], tuple[s
         if check.get("passed") is True
     }
     result = subprocess.run(
-        [sys.executable, "-m", "unittest", "tests.contract.test_eutils", "tests.contract.test_service_version_probe"],
+        [
+            sys.executable,
+            "-m",
+            "unittest",
+            "tests.contract.test_eutils",
+            "tests.contract.test_service_version_probe",
+            "tests.unit.test_public_databases",
+        ],
         cwd=ROOT,
         capture_output=True,
         text=True,
@@ -145,6 +158,7 @@ def _service_sources() -> tuple[dict[str, object], set[tuple[str, str]], tuple[s
             "tests/contract/test_service_version_probe.py",
             "reports/eutils-live-verification.json",
             "reports/eutils-live-zero-key-verification.json",
+            "reports/public-database-live-verification.json",
         )
     )
     return {"contract_tests_passed": True, "live_reports_passed": True}, coverage, sources

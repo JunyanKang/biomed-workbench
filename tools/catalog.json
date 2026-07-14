@@ -333,6 +333,39 @@
       "workflow": "clinical"
     },
     {
+      "access": "public_api",
+      "description": "Resolve a compound by declared namespace and retain all matched CIDs, structure identifiers, stereochemistry-sensitive fields, synonyms, and ambiguity.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:chemical_evidence",
+      "id": "chemical-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "identifier": {
+            "maxLength": 500,
+            "minLength": 1,
+            "type": "string"
+          },
+          "namespace": {
+            "enum": [
+              "name",
+              "cid",
+              "inchikey"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "identifier"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Resolve PubChem compound identity and descriptors",
+      "workflow": "evidence"
+    },
+    {
       "access": "offline",
       "description": "Normalize DOI values, detect duplicates, and report missing citation metadata without asserting validity.",
       "entrypoint": "biomed_workbench.capabilities.publication:citation_audit",
@@ -357,6 +390,31 @@
       "requirements": [],
       "title": "Audit reference metadata",
       "workflow": "publication"
+    },
+    {
+      "access": "public_api",
+      "description": "Resolve one DOI against Crossref and Europe PMC while retaining missing fields, source disagreement, updates, and repository identifiers.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:citation_record_resolution",
+      "id": "citation-record-resolution",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "doi": {
+            "maxLength": 500,
+            "minLength": 7,
+            "type": "string"
+          }
+        },
+        "required": [
+          "doi"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Resolve and cross-check a scholarly citation record",
+      "workflow": "evidence"
     },
     {
       "access": "offline",
@@ -1381,6 +1439,177 @@
       "requirements": [],
       "title": "Audit clinical report structure",
       "workflow": "clinical"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve count-verified ClinicalTrials.gov API v2 cohorts with declarative server-side filters, complete bounded pagination, deterministic NCT ordering, request provenance, protocol design, enrollment, outcomes, locations, and results state.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:clinical_trial_evidence",
+      "id": "clinical-trial-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "advanced_query": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "filters": {
+            "additionalProperties": false,
+            "properties": {
+              "condition": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "eligibility_keywords": {
+                "items": {
+                  "maxLength": 300,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              "enrollment_max": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "enrollment_min": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "first_posted_end": {
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "type": "string"
+              },
+              "first_posted_start": {
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "type": "string"
+              },
+              "healthy_volunteers": {
+                "type": "boolean"
+              },
+              "intervention": {
+                "maxLength": 500,
+                "minLength": 1,
+                "type": "string"
+              },
+              "investigator": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "investigator_role": {
+                "enum": [
+                  "any",
+                  "official",
+                  "responsible_party"
+                ],
+                "type": "string"
+              },
+              "lead_sponsor_class": {
+                "type": "string"
+              },
+              "location_city": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "location_country": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "location_recruiting_only": {
+                "type": "boolean"
+              },
+              "location_state": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maximum_age": {
+                "maxLength": 40,
+                "minLength": 1,
+                "type": "string"
+              },
+              "minimum_age": {
+                "maxLength": 40,
+                "minLength": 1,
+                "type": "string"
+              },
+              "overall_status": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 16,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "phase": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 6,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "primary_completion_end": {
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "type": "string"
+              },
+              "primary_completion_start": {
+                "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+                "type": "string"
+              },
+              "sex": {
+                "type": "string"
+              },
+              "sponsor_name": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "sponsor_scope": {
+                "enum": [
+                  "lead",
+                  "any"
+                ],
+                "type": "string"
+              },
+              "study_type": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "include_full_record": {
+            "type": "boolean"
+          },
+          "max_records": {
+            "maximum": 10000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "page_size": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "query": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve design-aware ClinicalTrials.gov evidence",
+      "workflow": "evidence"
     },
     {
       "access": "offline",
@@ -2918,6 +3147,38 @@
       "requirements": [],
       "title": "Track points across frames",
       "workflow": "imaging"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve every API-visible version of one preprint DOI and preserve any separately reported publication DOI.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:preprint_evidence",
+      "id": "preprint-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "doi": {
+            "maxLength": 500,
+            "minLength": 7,
+            "type": "string"
+          },
+          "server": {
+            "enum": [
+              "biorxiv",
+              "medrxiv"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "doi"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve version-aware bioRxiv or medRxiv evidence",
+      "workflow": "evidence"
     },
     {
       "access": "offline",
@@ -4494,6 +4755,36 @@
       "workflow": "evidence"
     },
     {
+      "access": "public_api",
+      "description": "Retrieve entry-level RCSB PDB metadata for explicit identifiers and retain experimental method, resolution, release, citation, entity, and deposition context.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:structure_evidence",
+      "id": "structure-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "pdb_ids": {
+            "items": {
+              "pattern": "^[0-9][A-Za-z0-9]{3}$",
+              "type": "string"
+            },
+            "maxItems": 25,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "pdb_ids"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve RCSB PDB structure evidence",
+      "workflow": "evidence"
+    },
+    {
       "access": "offline",
       "description": "Calculate a product-limit survival curve, censoring counts, Greenwood error, and median survival.",
       "entrypoint": "biomed_workbench.capabilities.clinical:kaplan_meier",
@@ -5450,7 +5741,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 81,
+  "entry_count": 86,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }
