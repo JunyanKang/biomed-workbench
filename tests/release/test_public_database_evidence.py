@@ -11,6 +11,7 @@ from biomed_workbench.services.public_databases import (
     EUROPE_PMC_CONTRACT_VERSION,
     PUBCHEM_CONTRACT_VERSION,
     RCSB_CONTRACT_VERSION,
+    RCSB_SEARCH_CONTRACT_VERSION,
 )
 
 
@@ -22,6 +23,9 @@ MODULE_IDS = {
     "chemical-evidence",
     "clinical-trial-evidence",
     "structure-evidence",
+    "structure-search",
+    "structure-polymer-entities",
+    "structure-ligands",
 }
 
 
@@ -39,6 +43,7 @@ class PublicDatabaseEvidenceTests(unittest.TestCase):
             "europe-pmc-rest": EUROPE_PMC_CONTRACT_VERSION,
             "pubchem-pug-rest": PUBCHEM_CONTRACT_VERSION,
             "rcsb-pdb-data-api": RCSB_CONTRACT_VERSION,
+            "rcsb-pdb-search-api": RCSB_SEARCH_CONTRACT_VERSION,
         }
 
         self.assertTrue(self.report["passed"])
@@ -53,6 +58,9 @@ class PublicDatabaseEvidenceTests(unittest.TestCase):
             "compound_identity",
             "trial_design_record",
             "structure_entry_context",
+            "structure_attribute_search",
+            "structure_polymer_entities",
+            "structure_bound_ligands",
         }
         packages = self.report["module_package_validation"]
 

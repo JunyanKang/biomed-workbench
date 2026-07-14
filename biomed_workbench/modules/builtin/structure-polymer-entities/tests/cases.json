@@ -1,0 +1,54 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "not_found": [],
+        "returned_count": 1
+      },
+      "http_fixtures": [
+        {
+          "headers": {},
+          "json": {
+            "rcsb_entry_container_identifiers": {
+              "non_polymer_entity_ids": [
+                "1"
+              ],
+              "polymer_entity_ids": [
+                "1"
+              ]
+            }
+          },
+          "status": 200,
+          "url": "https://data.rcsb.org/rest/v1/core/entry/4HHB"
+        },
+        {
+          "headers": {},
+          "json": {
+            "entity_poly": {
+              "rcsb_entity_polymer_type": "Protein",
+              "rcsb_sample_sequence_length": 141
+            },
+            "rcsb_id": "4HHB_1",
+            "rcsb_polymer_entity": {
+              "pdbx_description": "Hemoglobin subunit alpha"
+            },
+            "rcsb_polymer_entity_container_identifiers": {
+              "entity_id": "1",
+              "entry_id": "4HHB",
+              "uniprot_ids": [
+                "P69905"
+              ]
+            }
+          },
+          "status": 200,
+          "url": "https://data.rcsb.org/rest/v1/core/polymer_entity/4HHB/1"
+        }
+      ],
+      "input": {
+        "pdb_id": "4HHB"
+      },
+      "name": "retrieve-one-polymer-entity"
+    }
+  ],
+  "schema_version": 1
+}

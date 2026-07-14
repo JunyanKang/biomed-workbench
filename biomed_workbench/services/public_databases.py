@@ -23,8 +23,10 @@ BIORXIV_CONTRACT_VERSION = "details-v1-observed-2026-07-13"
 PUBCHEM_CONTRACT_VERSION = "pug-rest-observed-2026-07-13"
 CLINICAL_TRIALS_CONTRACT_VERSION = "api-v2-observed-2026-07-13"
 RCSB_CONTRACT_VERSION = "data-rest-v1-observed-2026-07-13"
+RCSB_SEARCH_CONTRACT_VERSION = "search-v2-observed-2026-07-13"
 
 _MAX_RESPONSE_BYTES = 20 * 1024 * 1024
+_MAX_REQUEST_BYTES = 1024 * 1024
 _DOI_RE = re.compile(r"^10\.\d{4,9}/[-._;()/:A-Z0-9]+$", re.IGNORECASE)
 _PDB_RE = re.compile(r"^[0-9][A-Za-z0-9]{3}$")
 _NCT_RE = re.compile(r"^NCT\d{8}$", re.IGNORECASE)
@@ -39,6 +41,14 @@ _CT_STATUSES = frozenset(
 )
 _CT_STUDY_TYPES = frozenset({"INTERVENTIONAL", "OBSERVATIONAL", "EXPANDED_ACCESS"})
 _CT_SPONSOR_CLASSES = frozenset({"NIH", "FED", "OTHER_GOV", "INDIV", "INDUSTRY", "NETWORK", "AMBIG", "OTHER", "UNKNOWN"})
+_RCSB_EXPERIMENTAL_METHODS = frozenset(
+    {
+        "ELECTRON CRYSTALLOGRAPHY", "ELECTRON MICROSCOPY", "EPR", "FIBER DIFFRACTION",
+        "FLUORESCENCE TRANSFER", "INFRARED SPECTROSCOPY", "NEUTRON DIFFRACTION",
+        "POWDER DIFFRACTION", "SOLID-STATE NMR", "SOLUTION NMR", "SOLUTION SCATTERING",
+        "THEORETICAL MODEL", "X-RAY DIFFRACTION",
+    }
+)
 _ALLOWED_HOSTS = frozenset(
     {
         "api.crossref.org",
@@ -47,6 +57,7 @@ _ALLOWED_HOSTS = frozenset(
         "pubchem.ncbi.nlm.nih.gov",
         "clinicaltrials.gov",
         "data.rcsb.org",
+        "search.rcsb.org",
     }
 )
 
@@ -63,6 +74,7 @@ class HTTPResponse:
 
 
 Transport = Callable[[str, Mapping[str, str], float], HTTPResponse]
+PostTransport = Callable[[str, Mapping[str, str], bytes, float], HTTPResponse]
 
 
 def _default_transport(url: str, headers: Mapping[str, str], timeout: float) -> HTTPResponse:
@@ -73,6 +85,20 @@ def _default_transport(url: str, headers: Mapping[str, str], timeout: float) -> 
             if len(body) > _MAX_RESPONSE_BYTES:
                 raise PublicDatabaseError("public database response exceeded the 20 MiB safety limit")
             return HTTPResponse(response.status, dict(response.headers.items()), body)
+    except HTTPError as exc:
+        return HTTPResponse(exc.code, dict(exc.headers.items()), exc.read(64 * 1024))
+    except (URLError, TimeoutError, OSError) as exc:
+        raise PublicDatabaseError(f"public database request failed: {type(exc).__name__}") from None
+
+
+def _default_post_transport(url: str, headers: Mapping[str, str], body: bytes, timeout: float) -> HTTPResponse:
+    request = Request(url, data=body, headers=dict(headers), method="POST")
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            response_body = response.read(_MAX_RESPONSE_BYTES + 1)
+            if len(response_body) > _MAX_RESPONSE_BYTES:
+                raise PublicDatabaseError("public database response exceeded the 20 MiB safety limit")
+            return HTTPResponse(response.status, dict(response.headers.items()), response_body)
     except HTTPError as exc:
         return HTTPResponse(exc.code, dict(exc.headers.items()), exc.read(64 * 1024))
     except (URLError, TimeoutError, OSError) as exc:
@@ -109,6 +135,7 @@ class PublicJSONClient:
         self,
         *,
         transport: Transport | None = None,
+        post_transport: PostTransport | None = None,
         timeout: float = 20.0,
         retries: int = 2,
         sleeper: Callable[[float], None] = time.sleep,
@@ -116,6 +143,7 @@ class PublicJSONClient:
         if timeout <= 0 or retries < 0:
             raise ValueError("timeout must be positive and retries non-negative")
         self._transport = transport or _default_transport
+        self._post_transport = post_transport or _default_post_transport
         self._timeout = timeout
         self._retries = retries
         self._sleeper = sleeper
@@ -172,6 +200,64 @@ class PublicJSONClient:
     def get(self, base_url: str, path: str, params: Mapping[str, Any] | None = None) -> dict[str, Any]:
         payload, _metadata = self.get_with_metadata(base_url, path, params)
         return payload
+
+    def post_with_metadata(
+        self,
+        base_url: str,
+        path: str,
+        payload: Mapping[str, Any],
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        if not path.startswith("/") or ".." in path:
+            raise ValueError("database path must be absolute and traversal-free")
+        parsed = urlsplit(base_url)
+        if parsed.scheme != "https" or parsed.hostname not in _ALLOWED_HOSTS or parsed.path or parsed.query:
+            raise ValueError("database base URL is not approved")
+        if not isinstance(payload, Mapping):
+            raise ValueError("database POST payload must be an object")
+        body = json.dumps(dict(payload), separators=(",", ":"), sort_keys=True).encode("utf-8")
+        if len(body) > _MAX_REQUEST_BYTES:
+            raise ValueError("public database request exceeded the 1 MiB safety limit")
+        url = f"{base_url}{path}"
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "User-Agent": "biomed-workbench/0.2 (+https://github.com/JunyanKang/biomed-workbench)",
+        }
+        response: HTTPResponse | None = None
+        attempts = 0
+        for attempt in range(self._retries + 1):
+            attempts = attempt + 1
+            try:
+                response = self._post_transport(url, headers, body, self._timeout)
+            except PublicDatabaseError:
+                if attempt >= self._retries:
+                    raise
+                self._sleeper(min(2**attempt, 4))
+                continue
+            if response.status not in {429, 500, 502, 503, 504} or attempt >= self._retries:
+                break
+            self._sleeper(min(2**attempt, 4))
+        assert response is not None
+        if response.status < 200 or response.status >= 300:
+            raise PublicDatabaseError(f"public database request failed with HTTP {response.status}")
+        if len(response.body) > _MAX_RESPONSE_BYTES:
+            raise PublicDatabaseError("public database response exceeded the 20 MiB safety limit")
+        if response.status == 204 and not response.body:
+            decoded = {}
+        else:
+            try:
+                decoded = json.loads(response.body)
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                raise PublicDatabaseError("public database returned invalid JSON") from None
+        if not isinstance(decoded, dict):
+            raise PublicDatabaseError("public database JSON root must be an object")
+        return decoded, {
+            "url": url,
+            "status_code": response.status,
+            "request_bytes": len(body),
+            "response_bytes": len(response.body),
+            "attempts": attempts,
+        }
 
 
 def resolve_citation_record(doi: str, *, client: PublicJSONClient | None = None) -> dict[str, Any]:
@@ -650,6 +736,248 @@ def rcsb_structure_records(pdb_ids: list[str], *, client: PublicJSONClient | Non
     }
 
 
+def _rcsb_text_node(attribute: str, operator: str, value: Any) -> dict[str, Any]:
+    return {"type": "terminal", "service": "text", "parameters": {"attribute": attribute, "operator": operator, "value": value}}
+
+
+def rcsb_structure_search(
+    text: str | None = None,
+    organism: str | None = None,
+    taxonomy_id: int | None = None,
+    uniprot_accession: str | None = None,
+    experimental_method: str | None = None,
+    max_resolution: float | None = None,
+    ligand_comp_id: str | None = None,
+    include_computed_models: bool = False,
+    max_records: int = 100,
+    *,
+    client: PublicJSONClient | None = None,
+) -> dict[str, Any]:
+    """Run a bounded, count-verified RCSB attribute search."""
+    if not 1 <= max_records <= 1_000:
+        raise ValueError("max_records must be 1..1000")
+    if taxonomy_id is not None and taxonomy_id <= 0:
+        raise ValueError("taxonomy_id must be positive")
+    if max_resolution is not None and max_resolution <= 0:
+        raise ValueError("max_resolution must be positive")
+    nodes = []
+    if text:
+        nodes.append({"type": "terminal", "service": "full_text", "parameters": {"value": _clean_text(text, limit=1000)}})
+    if organism:
+        nodes.append(_rcsb_text_node("rcsb_entity_source_organism.taxonomy_lineage.name", "exact_match", _clean_text(organism, limit=300)))
+    if taxonomy_id is not None:
+        nodes.append(_rcsb_text_node("rcsb_entity_source_organism.ncbi_taxonomy_id", "equals", taxonomy_id))
+    if uniprot_accession:
+        nodes.extend(
+            [
+                _rcsb_text_node("rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_accession", "exact_match", _clean_text(uniprot_accession, limit=100)),
+                _rcsb_text_node("rcsb_polymer_entity_container_identifiers.reference_sequence_identifiers.database_name", "exact_match", "UniProt"),
+            ]
+        )
+    if experimental_method:
+        method = experimental_method.strip().upper()
+        if method not in _RCSB_EXPERIMENTAL_METHODS:
+            raise ValueError("experimental_method is not in the supported RCSB vocabulary")
+        nodes.append(_rcsb_text_node("exptl.method", "exact_match", method))
+    if max_resolution is not None:
+        nodes.append(_rcsb_text_node("rcsb_entry_info.resolution_combined", "less_or_equal", float(max_resolution)))
+    if ligand_comp_id:
+        nodes.append(_rcsb_text_node("rcsb_nonpolymer_entity_container_identifiers.nonpolymer_comp_id", "exact_match", ligand_comp_id.strip().upper()))
+    if not nodes:
+        raise ValueError("at least one RCSB search criterion is required")
+    query = nodes[0] if len(nodes) == 1 else {"type": "group", "logical_operator": "and", "nodes": nodes}
+    client = client or PublicJSONClient()
+    records = []
+    requests = []
+    total_count: int | None = None
+    start = 0
+    while len(records) < max_records:
+        rows = min(100, max_records - len(records))
+        request_payload = {
+            "query": query,
+            "return_type": "entry",
+            "request_options": {
+                "paginate": {"start": start, "rows": rows},
+                "results_content_type": ["experimental", "computational"] if include_computed_models else ["experimental"],
+            },
+        }
+        response, metadata = client.post_with_metadata("https://search.rcsb.org", "/rcsbsearch/v2/query", request_payload)
+        if metadata["status_code"] == 204:
+            if start != 0:
+                raise PublicDatabaseError("RCSB search returned HTTP 204 after pagination began")
+            total_count = 0
+            requests.append({"start": start, "rows": rows, "results_in_page": 0, "request": metadata})
+            break
+        try:
+            page_total = int(response["total_count"])
+        except (KeyError, TypeError, ValueError):
+            raise PublicDatabaseError("RCSB search response lacks a valid total_count") from None
+        if total_count is None:
+            total_count = page_total
+        elif page_total != total_count:
+            raise PublicDatabaseError("RCSB search total_count changed during pagination")
+        page = response.get("result_set", [])
+        if not isinstance(page, list):
+            raise PublicDatabaseError("RCSB search result_set schema is not recognized")
+        requests.append({"start": start, "rows": rows, "results_in_page": len(page), "request": metadata})
+        for item in page:
+            if not isinstance(item, Mapping) or not _PDB_RE.fullmatch(str(item.get("identifier", ""))):
+                raise PublicDatabaseError("RCSB search returned an invalid entry identifier")
+            records.append({"pdb_id": str(item["identifier"]).upper(), "score": item.get("score")})
+        start += len(page)
+        if len(records) >= min(total_count, max_records):
+            break
+        if not page:
+            raise PublicDatabaseError("RCSB search returned an empty page before total_count was reached")
+    assert total_count is not None
+    duplicate_ids = sorted({item["pdb_id"] for item in records if sum(row["pdb_id"] == item["pdb_id"] for row in records) > 1})
+    if duplicate_ids:
+        raise PublicDatabaseError("RCSB search returned duplicate entry identifiers")
+    truncated = total_count > len(records)
+    if not truncated and len(records) != total_count:
+        raise PublicDatabaseError("RCSB search pagination does not reconcile with total_count")
+    return {
+        "query": {
+            "text": text, "organism": organism, "taxonomy_id": taxonomy_id, "uniprot_accession": uniprot_accession,
+            "experimental_method": experimental_method, "max_resolution": max_resolution, "ligand_comp_id": ligand_comp_id,
+            "include_computed_models": include_computed_models, "max_records": max_records,
+        },
+        "total_count": total_count,
+        "returned_count": len(records),
+        "records_truncated": truncated,
+        "records": records,
+        "provenance": {"service": "RCSB PDB Search API", "contract": RCSB_SEARCH_CONTRACT_VERSION, "requests": requests},
+        "limitations": [
+            "Search relevance and metadata are discovery signals, not validation of biological assembly or model quality.",
+            "A truncated result set cannot support exhaustive structure availability claims.",
+        ],
+    }
+
+
+def rcsb_polymer_entity_records(
+    pdb_id: str,
+    entity_ids: list[str] | None = None,
+    include_sequences: bool = False,
+    *,
+    client: PublicJSONClient | None = None,
+) -> dict[str, Any]:
+    """Retrieve polymer entity metadata with explicit truncation and not-found state."""
+    pdb_id = _require_pdb_id(pdb_id)
+    if not isinstance(include_sequences, bool):
+        raise ValueError("include_sequences must be boolean")
+    client = client or PublicJSONClient()
+    if entity_ids is None:
+        entry = client.get("https://data.rcsb.org", f"/rest/v1/core/entry/{pdb_id}")
+        all_ids = (entry.get("rcsb_entry_container_identifiers") or {}).get("polymer_entity_ids") or []
+    else:
+        if not 1 <= len(entity_ids) <= 25 or any(not str(value).strip() for value in entity_ids):
+            raise ValueError("entity_ids must contain one to 25 nonempty identifiers")
+        all_ids = list(dict.fromkeys(str(value).strip() for value in entity_ids))
+    selected = all_ids[:25]
+    records = []
+    not_found = []
+    for entity_id in selected:
+        try:
+            raw = client.get("https://data.rcsb.org", f"/rest/v1/core/polymer_entity/{pdb_id}/{quote(str(entity_id), safe='')}")
+        except PublicDatabaseError as exc:
+            if "HTTP 404" not in str(exc):
+                raise
+            not_found.append(str(entity_id))
+            continue
+        entity = raw.get("rcsb_polymer_entity", {}) or {}
+        identifiers = raw.get("rcsb_polymer_entity_container_identifiers", {}) or {}
+        polymer = raw.get("entity_poly", {}) or {}
+        record = {
+            "rcsb_id": raw.get("rcsb_id"), "entry_id": identifiers.get("entry_id"), "entity_id": identifiers.get("entity_id"),
+            "description": entity.get("pdbx_description"), "polymer_type": polymer.get("rcsb_entity_polymer_type"),
+            "sequence_length": polymer.get("rcsb_sample_sequence_length"), "mutation_count": polymer.get("rcsb_mutation_count"),
+            "uniprot_ids": identifiers.get("uniprot_ids") or [], "source_organisms": raw.get("rcsb_entity_source_organism", []) or [],
+        }
+        if include_sequences:
+            record["sequence"] = polymer.get("pdbx_seq_one_letter_code_can")
+        records.append(record)
+    return {
+        "pdb_id": pdb_id, "requested_entity_ids": selected, "entry_polymer_entity_count": len(all_ids) if entity_ids is None else None,
+        "returned_count": len(records), "records_truncated": len(all_ids) > len(selected), "not_found": not_found, "entities": records,
+        "provenance": {"service": "RCSB PDB Data API", "contract": RCSB_CONTRACT_VERSION},
+        "limitations": ["Entity metadata and canonical sequence do not establish construct completeness, assembly state, or experimental relevance."],
+    }
+
+
+def rcsb_ligand_records(
+    pdb_id: str,
+    max_ligands: int = 25,
+    *,
+    client: PublicJSONClient | None = None,
+) -> dict[str, Any]:
+    """Walk entry, nonpolymer entities, and chemical components for bound ligands."""
+    pdb_id = _require_pdb_id(pdb_id)
+    if not 1 <= max_ligands <= 25:
+        raise ValueError("max_ligands must be 1..25")
+    client = client or PublicJSONClient()
+    entry = client.get("https://data.rcsb.org", f"/rest/v1/core/entry/{pdb_id}")
+    all_entity_ids = (entry.get("rcsb_entry_container_identifiers") or {}).get("non_polymer_entity_ids") or []
+    selected = all_entity_ids[:max_ligands]
+    entities = []
+    not_found_entities = []
+    for entity_id in selected:
+        try:
+            raw = client.get("https://data.rcsb.org", f"/rest/v1/core/nonpolymer_entity/{pdb_id}/{quote(str(entity_id), safe='')}")
+        except PublicDatabaseError as exc:
+            if "HTTP 404" not in str(exc):
+                raise
+            not_found_entities.append(str(entity_id))
+            continue
+        identifiers = raw.get("rcsb_nonpolymer_entity_container_identifiers", {}) or {}
+        entity = raw.get("rcsb_nonpolymer_entity", {}) or {}
+        entities.append(
+            {
+                "entity_id": identifiers.get("entity_id") or str(entity_id),
+                "comp_id": identifiers.get("nonpolymer_comp_id"),
+                "description": entity.get("pdbx_description"),
+                "copy_count": entity.get("pdbx_number_of_molecules"),
+                "auth_asym_ids": identifiers.get("auth_asym_ids") or [],
+            }
+        )
+    component_records = {}
+    missing_components = []
+    for comp_id in sorted({str(item["comp_id"]).upper() for item in entities if item.get("comp_id")}):
+        try:
+            raw = client.get("https://data.rcsb.org", f"/rest/v1/core/chemcomp/{quote(comp_id, safe='')}")
+        except PublicDatabaseError as exc:
+            if "HTTP 404" not in str(exc):
+                raise
+            missing_components.append(comp_id)
+            continue
+        component = raw.get("chem_comp", {}) or {}
+        descriptors = raw.get("rcsb_chem_comp_descriptor", {}) or {}
+        component_records[comp_id] = {
+            "comp_id": component.get("id") or comp_id,
+            "name": component.get("name"),
+            "formula": component.get("formula"),
+            "formula_weight": component.get("formula_weight"),
+            "formal_charge": component.get("pdbx_formal_charge"),
+            "type": component.get("type"),
+            "inchikey": descriptors.get("InChIKey"),
+            "smiles": descriptors.get("SMILES_stereo") or descriptors.get("SMILES"),
+        }
+    ligands = [{**entity, "chemical_component": component_records.get(str(entity.get("comp_id", "")).upper())} for entity in entities]
+    return {
+        "pdb_id": pdb_id,
+        "entry_nonpolymer_entity_count": len(all_entity_ids),
+        "returned_count": len(ligands),
+        "records_truncated": len(all_entity_ids) > len(selected),
+        "not_found_entity_ids": not_found_entities,
+        "not_found_component_ids": missing_components,
+        "ligands": ligands,
+        "provenance": {"service": "RCSB PDB Data API", "contract": RCSB_CONTRACT_VERSION},
+        "limitations": [
+            "A deposited bound component does not establish physiological binding, affinity, occupancy, or a design-ready pose.",
+            "Chemical-component identity must be reconciled with protonation, charge, stereochemistry, covalent state, and experimental density.",
+        ],
+    }
+
+
 def probe_crossref_contract() -> str:
     return CROSSREF_CONTRACT_VERSION
 
@@ -672,3 +1000,7 @@ def probe_clinical_trials_contract() -> str:
 
 def probe_rcsb_contract() -> str:
     return RCSB_CONTRACT_VERSION
+
+
+def probe_rcsb_search_contract() -> str:
+    return RCSB_SEARCH_CONTRACT_VERSION

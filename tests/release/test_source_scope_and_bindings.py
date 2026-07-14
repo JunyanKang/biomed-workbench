@@ -26,14 +26,15 @@ class SourceScopeAndBindingEvidenceTests(unittest.TestCase):
         )
         self.assertEqual(self.reconciliation["action_counts"]["retire"], 441)
 
-    def test_clinical_trial_sources_are_bound_to_current_evidence(self):
-        self.assertEqual(self.bindings["rule_count"], 2)
-        self.assertEqual(self.bindings["added_binding_count"], 17)
-        self.assertEqual(self.bindings["matched_receipt_count"], 17)
-        self.assertEqual(self.bindings["added_by_rule"], self.bindings["matches_by_rule"])
+    def test_public_database_sources_are_bound_to_current_evidence(self):
+        self.assertEqual(self.bindings["rule_count"], 5)
+        self.assertEqual(self.bindings["added_binding_count"], 3)
+        self.assertEqual(self.bindings["matched_receipt_count"], 20)
+        self.assertEqual(sum(self.bindings["added_by_rule"].values()), 3)
+        self.assertEqual(sum(self.bindings["matches_by_rule"].values()), 20)
         self.assertEqual(self.bindings["total_binding_count"], self.reconciliation["binding_count"])
-        self.assertEqual(self.reconciliation["reconciled_count"], 88073)
-        self.assertEqual(self.reconciliation["pending_count"], 1241)
+        self.assertEqual(self.reconciliation["reconciled_count"], 88076)
+        self.assertEqual(self.reconciliation["pending_count"], 1238)
 
     def test_public_policy_reports_are_path_free(self):
         serialized = SCOPE_REPORT.read_text(encoding="utf-8") + BINDING_REPORT.read_text(encoding="utf-8")

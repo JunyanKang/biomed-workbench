@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 86,
-  "module_count": 86,
+  "compatibility_complete": 89,
+  "module_count": 89,
   "modules": [
     {
       "compatibility_rows": [
@@ -13428,6 +13428,471 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "structure-ligands-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-13-structure-ligands",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "structure-ligands-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "structure-ligands",
+      "input_formats": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-ligands-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-ligands-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            "==data-rest-v1-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "data.rcsb.org/rest/v1/core",
+          "mismatch_policy": "block",
+          "name": "rcsb-pdb-data-api",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "data-rest-v1-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==data-rest-v1-observed-2026-07-13"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "RCSB Data API JSON follows PDBx/mmCIF-derived object schemas augmented by RCSB annotations and core object identifiers.",
+              "id": "rcsb-pdbx-derived-json",
+              "required_action": "Validate the returned entry identifier and retain experimental method, resolution, release, citation, entity, and status context.",
+              "source": "https://data.rcsb.org/"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_rcsb_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://data.rcsb.org/"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "structure-polymer-entities-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-13-structure-polymer-entities",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "structure-polymer-entities-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "structure-polymer-entities",
+      "input_formats": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-polymer-entities-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-polymer-entities-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            "==data-rest-v1-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "data.rcsb.org/rest/v1/core",
+          "mismatch_policy": "block",
+          "name": "rcsb-pdb-data-api",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "data-rest-v1-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==data-rest-v1-observed-2026-07-13"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "RCSB Data API JSON follows PDBx/mmCIF-derived object schemas augmented by RCSB annotations and core object identifiers.",
+              "id": "rcsb-pdbx-derived-json",
+              "required_action": "Validate the returned entry identifier and retain experimental method, resolution, release, citation, entity, and status context.",
+              "source": "https://data.rcsb.org/"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_rcsb_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://data.rcsb.org/"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "structure-search-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-13-structure-search",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "structure-search-regression-v1"
+          ],
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "structure-search",
+      "input_formats": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-search-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-search-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            "==search-v2-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "search.rcsb.org/rcsbsearch/v2/query",
+          "mismatch_policy": "block",
+          "name": "rcsb-pdb-search-api",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "search-v2-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==search-v2-observed-2026-07-13"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "RCSB Search API v2 uses JSON POST queries, count-bearing result pages, and may return HTTP 204 for a valid query with no matches.",
+              "id": "rcsb-search-post-and-zero-result",
+              "required_action": "Submit a bounded JSON query, reconcile total_count and unique entry identifiers across pages, and interpret first-page HTTP 204 only as an explicit zero-result set.",
+              "source": "https://search.rcsb.org/"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_rcsb_search_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://search.rcsb.org/"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "survival-analysis-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -14891,6 +15356,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "6d05d007cb8a54ac6a56db6576fdd6ec21f839016c8150af4b55b257f4c4e7e0",
+  "registry_digest": "b07cd7373780eacacd88270956375f050e0c4de0cc51f9aa543f833cd73856bb",
   "schema_version": 1
 }

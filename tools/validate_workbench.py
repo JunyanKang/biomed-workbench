@@ -26,6 +26,7 @@ from biomed_workbench.services.public_databases import (  # noqa: E402
     EUROPE_PMC_CONTRACT_VERSION,
     PUBCHEM_CONTRACT_VERSION,
     RCSB_CONTRACT_VERSION,
+    RCSB_SEARCH_CONTRACT_VERSION,
 )
 from biomed_workbench.services.credentials import ALLOWED_CREDENTIALS  # noqa: E402
 from biomed_workbench.version import VERSION  # noqa: E402
@@ -295,6 +296,9 @@ def main() -> int:
             "chemical-evidence",
             "clinical-trial-evidence",
             "structure-evidence",
+            "structure-search",
+            "structure-polymer-entities",
+            "structure-ligands",
         }
         expected_public_database_contracts = {
             "biorxiv-details": BIORXIV_CONTRACT_VERSION,
@@ -303,6 +307,7 @@ def main() -> int:
             "europe-pmc-rest": EUROPE_PMC_CONTRACT_VERSION,
             "pubchem-pug-rest": PUBCHEM_CONTRACT_VERSION,
             "rcsb-pdb-data-api": RCSB_CONTRACT_VERSION,
+            "rcsb-pdb-search-api": RCSB_SEARCH_CONTRACT_VERSION,
         }
         try:
             public_database_report = json.loads(public_database_report_path.read_text(encoding="utf-8"))
@@ -318,6 +323,9 @@ def main() -> int:
                 "compound_identity",
                 "trial_design_record",
                 "structure_entry_context",
+                "structure_attribute_search",
+                "structure_polymer_entities",
+                "structure_bound_ligands",
             }
             scientific_summary = public_database_report.get("scientific_summary", {})
             if (
@@ -807,11 +815,12 @@ def main() -> int:
                 or scope_policy.get("changed_count") != 414
                 or scope_policy.get("transitions") != {"redesign_schema->retire": 25, "rewrite_capability->retire": 389}
                 or scope_policy.get("policy_rules") != ["compute-infrastructure-explicitly-excluded"]
-                or source_bindings.get("rule_count") != 2
-                or source_bindings.get("added_binding_count") != 17
-                or source_bindings.get("matched_receipt_count") != 17
+                or source_bindings.get("rule_count") != 5
+                or source_bindings.get("added_binding_count") != 3
+                or source_bindings.get("matched_receipt_count") != 20
                 or source_bindings.get("total_binding_count") != reconciliation.get("binding_count")
-                or source_bindings.get("added_by_rule") != source_bindings.get("matches_by_rule")
+                or sum(source_bindings.get("added_by_rule", {}).values()) != 3
+                or sum(source_bindings.get("matches_by_rule", {}).values()) != 20
                 or reconciliation.get("action_counts", {}).get("retire") != 441
                 or any(marker.lower() in public_source_reports.lower() for marker in ("/Users/", "/private/", '"path"', '"private_path"'))
             ):

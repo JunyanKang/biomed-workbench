@@ -1,0 +1,311 @@
+{
+  "access": "public_api",
+  "alternatives": [
+    "literature-evidence"
+  ],
+  "assumptions": [
+    "The requested identifiers and filters describe structures relevant to the intended construct, state, and biological question."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "structure-polymer-entities-e2e-v1"
+      ],
+      "id": "public-database-contract-2026-07-13-structure-polymer-entities",
+      "input_formats": {
+        "structure-polymer-entities-query": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "structure-polymer-entities-result": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "structure-polymer-entities-regression-v1"
+      ],
+      "tool_versions": {
+        "rcsb-pdb-data-api": [
+          "==data-rest-v1-observed-2026-07-13"
+        ]
+      },
+      "verified_at": "2026-07-13"
+    }
+  ],
+  "complements": [
+    "structure-evidence",
+    "chemical-evidence",
+    "literature-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Retrieve bounded polymer entities, source organisms, UniProt links, sequence lengths, mutations, and optional canonical sequences for one PDB entry.",
+  "domains": [
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.evidence:structure_polymer_entities",
+  "evidence_effects": [
+    "grounds-polymer-entity-identity"
+  ],
+  "execution": {
+    "kind": "service",
+    "max_output_bytes": 20000000,
+    "timeout_seconds": 90
+  },
+  "id": "structure-polymer-entities",
+  "input_artifacts": [
+    {
+      "artifact_type": "database_query",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "structure-polymer-entities-query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "entity_ids": {
+        "items": {
+          "maxLength": 40,
+          "minLength": 1,
+          "type": "string"
+        },
+        "maxItems": 25,
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "include_sequences": {
+        "type": "boolean"
+      },
+      "pdb_id": {
+        "pattern": "^[0-9][A-Za-z0-9]{3}$",
+        "type": "string"
+      }
+    },
+    "required": [
+      "pdb_id"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "retrieve PDB polymer entities",
+    "inspect structure chains sequences organisms and UniProt",
+    "\u68c0\u7d22PDB\u805a\u5408\u7269\u5b9e\u4f53\u5e8f\u5217\u7269\u79cd\u548cUniProt"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Deposited entity metadata does not establish construct completeness, assembly state, or experimental relevance."
+  ],
+  "maturity": "validated",
+  "module_type": "data_source",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "evidence_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "structure-polymer-entities-result",
+      "processing_levels": [
+        "source-preserved",
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "service_contract",
+        "retrieval_time"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "entities": {
+        "type": "array"
+      },
+      "entry_polymer_entity_count": {
+        "nullable": true,
+        "type": "integer"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "not_found": {
+        "type": "array"
+      },
+      "pdb_id": {
+        "type": "string"
+      },
+      "provenance": {
+        "type": "object"
+      },
+      "records_truncated": {
+        "type": "boolean"
+      },
+      "requested_entity_ids": {
+        "type": "array"
+      },
+      "returned_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "pdb_id",
+      "requested_entity_ids",
+      "entry_polymer_entity_count",
+      "returned_count",
+      "records_truncated",
+      "not_found",
+      "entities",
+      "provenance",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://data.rcsb.org/",
+      "Project-owned clean-room implementation and scientific validation contract."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Entity identifiers, entry membership, missing entities, sequence inclusion, source organism, UniProt links, and truncation must remain explicit.",
+      "id": "structure-polymer-entities-validity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which polymer entities and sequence identities are represented in the deposited entry?"
+  ],
+  "schema_version": 1,
+  "title": "Retrieve RCSB polymer entity evidence",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        "==data-rest-v1-observed-2026-07-13"
+      ],
+      "ecosystem": "service",
+      "identity": "data.rcsb.org/rest/v1/core",
+      "mismatch_policy": "block",
+      "name": "rcsb-pdb-data-api",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "data-rest-v1-observed-2026-07-13"
+      ],
+      "verified_at": "2026-07-13",
+      "version_differences": [
+        {
+          "affected_versions": [
+            "==data-rest-v1-observed-2026-07-13"
+          ],
+          "category": "output-format",
+          "compatibility_effect": "requires-parser",
+          "description": "RCSB Data API JSON follows PDBx/mmCIF-derived object schemas augmented by RCSB annotations and core object identifiers.",
+          "id": "rcsb-pdbx-derived-json",
+          "required_action": "Validate the returned entry identifier and retain experimental method, resolution, release, citation, entity, and status context.",
+          "source": "https://data.rcsb.org/"
+        }
+      ],
+      "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "version_probe": [
+        "biomed_workbench.services.public_databases:probe_rcsb_contract"
+      ],
+      "version_probe_kind": "service_contract",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://data.rcsb.org/"
+    }
+  ],
+  "version": "1.0.0"
+}

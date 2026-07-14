@@ -1,0 +1,59 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "records": [
+          {
+            "pdb_id": "4HHB",
+            "score": 1.0
+          }
+        ],
+        "total_count": 1
+      },
+      "http_fixtures": [
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "result_set": [
+              {
+                "identifier": "4HHB",
+                "score": 1.0
+              }
+            ],
+            "total_count": 1
+          },
+          "method": "POST",
+          "request_json": {
+            "query": {
+              "parameters": {
+                "value": "hemoglobin"
+              },
+              "service": "full_text",
+              "type": "terminal"
+            },
+            "request_options": {
+              "paginate": {
+                "rows": 1,
+                "start": 0
+              },
+              "results_content_type": [
+                "experimental"
+              ]
+            },
+            "return_type": "entry"
+          },
+          "status": 200,
+          "url": "https://search.rcsb.org/rcsbsearch/v2/query"
+        }
+      ],
+      "input": {
+        "max_records": 1,
+        "text": "hemoglobin"
+      },
+      "name": "search-one-entry"
+    }
+  ],
+  "schema_version": 1
+}

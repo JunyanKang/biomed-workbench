@@ -36,7 +36,8 @@ _LOCAL_PATH_PATTERNS = (
 )
 _CASE_REQUIRED_FIELDS = frozenset({"name", "input", "expected_subset"})
 _CASE_OPTIONAL_FIELDS = frozenset({"http_fixtures"})
-_HTTP_FIXTURE_FIELDS = frozenset({"url", "status", "headers", "json"})
+_HTTP_FIXTURE_REQUIRED_FIELDS = frozenset({"url", "status", "headers", "json"})
+_HTTP_FIXTURE_OPTIONAL_FIELDS = frozenset({"method", "request_json"})
 _AGENT_ASSET_RE = re.compile(r"^(?:templates|validators)/[a-z][a-z0-9_]*(?:\.(?:py|R|md|ipynb))$")
 
 
@@ -102,14 +103,22 @@ def _load_cases(path: Path) -> list[dict[str, Any]]:
             raise ModuleValidationError(f"test case {case['name']} http_fixtures must be an array")
         fixture_urls = set()
         for fixture_index, fixture in enumerate(fixtures):
-            if not isinstance(fixture, dict) or set(fixture) != _HTTP_FIXTURE_FIELDS:
+            if (
+                not isinstance(fixture, dict)
+                or not _HTTP_FIXTURE_REQUIRED_FIELDS <= set(fixture)
+                or set(fixture) - _HTTP_FIXTURE_REQUIRED_FIELDS - _HTTP_FIXTURE_OPTIONAL_FIELDS
+            ):
                 raise ModuleValidationError(
-                    f"test case {case['name']} HTTP fixture {fixture_index} must contain exactly url, status, headers, and json"
+                    f"test case {case['name']} HTTP fixture {fixture_index} has an invalid field set"
                 )
             url = fixture["url"]
             headers = fixture["headers"]
-            if not isinstance(url, str) or not url.startswith("https://") or url in fixture_urls:
-                raise ModuleValidationError(f"test case {case['name']} HTTP fixture URLs must be unique HTTPS URLs")
+            method = fixture.get("method", "GET")
+            fixture_key = (method, url)
+            if method not in {"GET", "POST"}:
+                raise ModuleValidationError(f"test case {case['name']} HTTP fixture method must be GET or POST")
+            if not isinstance(url, str) or not url.startswith("https://") or fixture_key in fixture_urls:
+                raise ModuleValidationError(f"test case {case['name']} HTTP fixture method/URL pairs must be unique HTTPS targets")
             if not isinstance(fixture["status"], int) or not 200 <= fixture["status"] <= 599:
                 raise ModuleValidationError(f"test case {case['name']} HTTP fixture status must be 200..599")
             if (
@@ -118,7 +127,11 @@ def _load_cases(path: Path) -> list[dict[str, Any]]:
                 or not isinstance(fixture["json"], dict)
             ):
                 raise ModuleValidationError(f"test case {case['name']} HTTP fixture headers and JSON body are invalid")
-            fixture_urls.add(url)
+            if method == "GET" and "request_json" in fixture:
+                raise ModuleValidationError(f"test case {case['name']} GET fixture cannot declare request_json")
+            if method == "POST" and not isinstance(fixture.get("request_json"), dict):
+                raise ModuleValidationError(f"test case {case['name']} POST fixture requires an object request_json")
+            fixture_urls.add(fixture_key)
         names.add(case["name"])
     return cases
 
@@ -148,7 +161,7 @@ def _execute_case(module_path: Path, case_index: int) -> dict[str, Any]:
     fixtures = case.get("http_fixtures", [])
     public_databases = None
     original_transport = None
-    pending_urls = {fixture["url"] for fixture in fixtures}
+    pending_urls = {(fixture.get("method", "GET"), fixture["url"]) for fixture in fixtures}
     if fixtures:
         if manifest.execution.kind != "service":
             raise ModuleValidationError("HTTP fixtures are allowed only for service modules")
@@ -156,25 +169,43 @@ def _execute_case(module_path: Path, case_index: int) -> dict[str, Any]:
 
         from biomed_workbench.services.public_databases import HTTPResponse
 
-        fixture_by_url = {fixture["url"]: fixture for fixture in fixtures}
+        fixture_by_url = {(fixture.get("method", "GET"), fixture["url"]): fixture for fixture in fixtures}
 
         def fixture_transport(url: str, _headers: dict[str, str], _timeout: float) -> HTTPResponse:
-            fixture = fixture_by_url.get(url)
+            fixture = fixture_by_url.get(("GET", url))
             if fixture is None:
                 raise ModuleValidationError(f"service test attempted an undeclared URL: {url}")
-            pending_urls.discard(url)
+            pending_urls.discard(("GET", url))
+            body = json.dumps(fixture["json"], separators=(",", ":"), sort_keys=True).encode("utf-8")
+            return HTTPResponse(fixture["status"], fixture["headers"], body)
+
+        def fixture_post_transport(url: str, _headers: dict[str, str], request_body: bytes, _timeout: float) -> HTTPResponse:
+            fixture = fixture_by_url.get(("POST", url))
+            if fixture is None:
+                raise ModuleValidationError(f"service test attempted an undeclared POST URL: {url}")
+            try:
+                request_json = json.loads(request_body)
+            except json.JSONDecodeError:
+                raise ModuleValidationError("service test emitted a non-JSON POST body") from None
+            if request_json != fixture["request_json"]:
+                raise ModuleValidationError(f"service test POST body differs from the declared fixture: {url}")
+            pending_urls.discard(("POST", url))
             body = json.dumps(fixture["json"], separators=(",", ":"), sort_keys=True).encode("utf-8")
             return HTTPResponse(fixture["status"], fixture["headers"], body)
 
         original_transport = public_databases._default_transport
+        original_post_transport = public_databases._default_post_transport
         public_databases._default_transport = fixture_transport
+        public_databases._default_post_transport = fixture_post_transport
     try:
         raw = _resolve_entrypoint(manifest)(**case["input"])
     finally:
         if public_databases is not None and original_transport is not None:
             public_databases._default_transport = original_transport
+            public_databases._default_post_transport = original_post_transport
     if pending_urls:
-        raise ModuleValidationError(f"service test did not consume declared HTTP fixtures: {', '.join(sorted(pending_urls))}")
+        remaining = ", ".join(f"{method} {url}" for method, url in sorted(pending_urls))
+        raise ModuleValidationError(f"service test did not consume declared HTTP fixtures: {remaining}")
     if not isinstance(raw, dict):
         raise ModuleValidationError("module test output must be a JSON object")
     _validate(manifest.output_schema, raw, "output")

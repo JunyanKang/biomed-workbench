@@ -48,7 +48,7 @@ class ServiceModuleFixtureTests(unittest.TestCase):
         report = validate_module(module_path)
 
         self.assertFalse(report["valid"])
-        self.assertTrue(any("unique HTTPS URLs" in error for error in report["errors"]))
+        self.assertTrue(any("unique HTTPS targets" in error for error in report["errors"]))
 
     def test_http_fixtures_are_rejected_for_non_service_modules(self):
         module_path = self.copied_module("source-freshness-audit")

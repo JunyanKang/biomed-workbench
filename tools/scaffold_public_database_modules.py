@@ -168,6 +168,24 @@ TOOLS = {
             }
         ],
     ),
+    "rcsb-search": _tool(
+        "rcsb-pdb-search-api",
+        "search.rcsb.org/rcsbsearch/v2/query",
+        "search-v2-observed-2026-07-13",
+        "biomed_workbench.services.public_databases:probe_rcsb_search_contract",
+        "https://search.rcsb.org/",
+        [
+            {
+                "id": "rcsb-search-post-and-zero-result",
+                "affected_versions": ["==search-v2-observed-2026-07-13"],
+                "category": "api",
+                "description": "RCSB Search API v2 uses JSON POST queries, count-bearing result pages, and may return HTTP 204 for a valid query with no matches.",
+                "compatibility_effect": "requires-parser",
+                "required_action": "Submit a bounded JSON query, reconcile total_count and unique entry identifiers across pages, and interpret first-page HTTP 204 only as an explicit zero-result set.",
+                "source": "https://search.rcsb.org/",
+            }
+        ],
+    ),
 }
 
 

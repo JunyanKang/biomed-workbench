@@ -1,5 +1,5 @@
 {
-  "module_count": 86,
+  "module_count": 89,
   "modules": [
     {
       "access": "offline",
@@ -30222,6 +30222,941 @@
       "version": "1.0.0"
     },
     {
+      "access": "public_api",
+      "alternatives": [
+        "literature-evidence"
+      ],
+      "assumptions": [
+        "The requested identifiers and filters describe structures relevant to the intended construct, state, and biological question."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "structure-ligands-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-13-structure-ligands",
+          "input_formats": {
+            "structure-ligands-query": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "structure-ligands-result": [
+              "normalized-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "structure-ligands-regression-v1"
+          ],
+          "tool_versions": {
+            "rcsb-pdb-data-api": [
+              "==data-rest-v1-observed-2026-07-13"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "structure-evidence",
+        "chemical-evidence",
+        "literature-evidence"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Walk one PDB entry through nonpolymer entities to chemical components while retaining missing records, charge, formula, InChIKey, and stereochemical SMILES.",
+      "domains": [
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evidence:structure_ligands",
+      "evidence_effects": [
+        "grounds-bound-ligand-identity"
+      ],
+      "execution": {
+        "kind": "service",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 90
+      },
+      "id": "structure-ligands",
+      "input_artifacts": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-ligands-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "max_ligands": {
+            "maximum": 25,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "pdb_id": {
+            "pattern": "^[0-9][A-Za-z0-9]{3}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pdb_id"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "retrieve PDB bound ligands",
+        "inspect structure chemical components and ligand identity",
+        "\u68c0\u7d22PDB\u7ed3\u5408\u914d\u4f53\u548c\u5316\u5b66\u7ec4\u5206\u8eab\u4efd"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "A deposited component does not establish physiological binding, affinity, occupancy, or a design-ready pose."
+      ],
+      "maturity": "validated",
+      "module_type": "data_source",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-ligands-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "entry_nonpolymer_entity_count": {
+            "type": "integer"
+          },
+          "ligands": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "not_found_component_ids": {
+            "type": "array"
+          },
+          "not_found_entity_ids": {
+            "type": "array"
+          },
+          "pdb_id": {
+            "type": "string"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "records_truncated": {
+            "type": "boolean"
+          },
+          "returned_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pdb_id",
+          "entry_nonpolymer_entity_count",
+          "returned_count",
+          "records_truncated",
+          "not_found_entity_ids",
+          "not_found_component_ids",
+          "ligands",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://data.rcsb.org/",
+          "Project-owned clean-room implementation and scientific validation contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Entry nonpolymer counts, entity-to-component links, missing records, charge, formula, InChIKey, SMILES, and truncation must remain explicit.",
+          "id": "structure-ligands-validity",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Which nonpolymer components are deposited in the entry, and is their chemical identity sufficiently explicit?"
+      ],
+      "schema_version": 1,
+      "title": "Retrieve RCSB bound-ligand evidence",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==data-rest-v1-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "data.rcsb.org/rest/v1/core",
+          "mismatch_policy": "block",
+          "name": "rcsb-pdb-data-api",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "data-rest-v1-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==data-rest-v1-observed-2026-07-13"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "RCSB Data API JSON follows PDBx/mmCIF-derived object schemas augmented by RCSB annotations and core object identifiers.",
+              "id": "rcsb-pdbx-derived-json",
+              "required_action": "Validate the returned entry identifier and retain experimental method, resolution, release, citation, entity, and status context.",
+              "source": "https://data.rcsb.org/"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_rcsb_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://data.rcsb.org/"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "public_api",
+      "alternatives": [
+        "literature-evidence"
+      ],
+      "assumptions": [
+        "The requested identifiers and filters describe structures relevant to the intended construct, state, and biological question."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "structure-polymer-entities-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-13-structure-polymer-entities",
+          "input_formats": {
+            "structure-polymer-entities-query": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "structure-polymer-entities-result": [
+              "normalized-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "structure-polymer-entities-regression-v1"
+          ],
+          "tool_versions": {
+            "rcsb-pdb-data-api": [
+              "==data-rest-v1-observed-2026-07-13"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "structure-evidence",
+        "chemical-evidence",
+        "literature-evidence"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Retrieve bounded polymer entities, source organisms, UniProt links, sequence lengths, mutations, and optional canonical sequences for one PDB entry.",
+      "domains": [
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evidence:structure_polymer_entities",
+      "evidence_effects": [
+        "grounds-polymer-entity-identity"
+      ],
+      "execution": {
+        "kind": "service",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 90
+      },
+      "id": "structure-polymer-entities",
+      "input_artifacts": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-polymer-entities-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "entity_ids": {
+            "items": {
+              "maxLength": 40,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 25,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "include_sequences": {
+            "type": "boolean"
+          },
+          "pdb_id": {
+            "pattern": "^[0-9][A-Za-z0-9]{3}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pdb_id"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "retrieve PDB polymer entities",
+        "inspect structure chains sequences organisms and UniProt",
+        "\u68c0\u7d22PDB\u805a\u5408\u7269\u5b9e\u4f53\u5e8f\u5217\u7269\u79cd\u548cUniProt"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Deposited entity metadata does not establish construct completeness, assembly state, or experimental relevance."
+      ],
+      "maturity": "validated",
+      "module_type": "data_source",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-polymer-entities-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "entities": {
+            "type": "array"
+          },
+          "entry_polymer_entity_count": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "not_found": {
+            "type": "array"
+          },
+          "pdb_id": {
+            "type": "string"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "records_truncated": {
+            "type": "boolean"
+          },
+          "requested_entity_ids": {
+            "type": "array"
+          },
+          "returned_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "pdb_id",
+          "requested_entity_ids",
+          "entry_polymer_entity_count",
+          "returned_count",
+          "records_truncated",
+          "not_found",
+          "entities",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://data.rcsb.org/",
+          "Project-owned clean-room implementation and scientific validation contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Entity identifiers, entry membership, missing entities, sequence inclusion, source organism, UniProt links, and truncation must remain explicit.",
+          "id": "structure-polymer-entities-validity",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Which polymer entities and sequence identities are represented in the deposited entry?"
+      ],
+      "schema_version": 1,
+      "title": "Retrieve RCSB polymer entity evidence",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==data-rest-v1-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "data.rcsb.org/rest/v1/core",
+          "mismatch_policy": "block",
+          "name": "rcsb-pdb-data-api",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "data-rest-v1-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==data-rest-v1-observed-2026-07-13"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "RCSB Data API JSON follows PDBx/mmCIF-derived object schemas augmented by RCSB annotations and core object identifiers.",
+              "id": "rcsb-pdbx-derived-json",
+              "required_action": "Validate the returned entry identifier and retain experimental method, resolution, release, citation, entity, and status context.",
+              "source": "https://data.rcsb.org/"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_rcsb_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://data.rcsb.org/"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "public_api",
+      "alternatives": [
+        "literature-evidence"
+      ],
+      "assumptions": [
+        "The requested identifiers and filters describe structures relevant to the intended construct, state, and biological question."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "structure-search-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-13-structure-search",
+          "input_formats": {
+            "structure-search-query": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "structure-search-result": [
+              "normalized-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "structure-search-regression-v1"
+          ],
+          "tool_versions": {
+            "rcsb-pdb-search-api": [
+              "==search-v2-observed-2026-07-13"
+            ]
+          },
+          "verified_at": "2026-07-13"
+        }
+      ],
+      "complements": [
+        "structure-evidence",
+        "chemical-evidence",
+        "literature-evidence"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Search experimental or computed RCSB entries by text, organism, taxonomy, UniProt, method, resolution, or ligand with count-verified pagination.",
+      "domains": [
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evidence:structure_search",
+      "evidence_effects": [
+        "grounds-structure-discovery-evidence"
+      ],
+      "execution": {
+        "kind": "service",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 90
+      },
+      "id": "structure-search",
+      "input_artifacts": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-search-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "experimental_method": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "include_computed_models": {
+            "type": "boolean"
+          },
+          "ligand_comp_id": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string"
+          },
+          "max_records": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "max_resolution": {
+            "minimum": 1e-06,
+            "type": "number"
+          },
+          "organism": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "taxonomy_id": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "text": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "uniprot_accession": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "intents": [
+        "search RCSB structures",
+        "find PDB entries by organism method resolution or ligand",
+        "\u6309\u7269\u79cd\u65b9\u6cd5\u5206\u8fa8\u7387\u6216\u914d\u4f53\u68c0\u7d22PDB\u7ed3\u6784"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Search relevance is not validation of assembly, construct, local model quality, or biological relevance."
+      ],
+      "maturity": "validated",
+      "module_type": "data_source",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure-search-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "limitations": {
+            "type": "array"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "query": {
+            "type": "object"
+          },
+          "records": {
+            "type": "array"
+          },
+          "records_truncated": {
+            "type": "boolean"
+          },
+          "returned_count": {
+            "type": "integer"
+          },
+          "total_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query",
+          "total_count",
+          "returned_count",
+          "records_truncated",
+          "records",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://search.rcsb.org/",
+          "Project-owned clean-room implementation and scientific validation contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Every result must preserve a valid unique PDB identifier; page offsets, total_count, returned count, model scope, and truncation must reconcile.",
+          "id": "structure-search-validity",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Which RCSB entries satisfy the declared structural criteria, and is the returned set complete?"
+      ],
+      "schema_version": 1,
+      "title": "Search RCSB structures with scientific filters",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==search-v2-observed-2026-07-13"
+          ],
+          "ecosystem": "service",
+          "identity": "search.rcsb.org/rcsbsearch/v2/query",
+          "mismatch_policy": "block",
+          "name": "rcsb-pdb-search-api",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "search-v2-observed-2026-07-13"
+          ],
+          "verified_at": "2026-07-13",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==search-v2-observed-2026-07-13"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "RCSB Search API v2 uses JSON POST queries, count-bearing result pages, and may return HTTP 204 for a valid query with no matches.",
+              "id": "rcsb-search-post-and-zero-result",
+              "required_action": "Submit a bounded JSON query, reconcile total_count and unique entry identifiers across pages, and interpret first-page HTTP 204 only as an explicit zero-result set.",
+              "source": "https://search.rcsb.org/"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_rcsb_search_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://search.rcsb.org/"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
       "access": "offline",
       "alternatives": [],
       "assumptions": [
@@ -34082,6 +35017,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "6d05d007cb8a54ac6a56db6576fdd6ec21f839016c8150af4b55b257f4c4e7e0",
+  "registry_digest": "b07cd7373780eacacd88270956375f050e0c4de0cc51f9aa543f833cd73856bb",
   "schema_version": 1
 }

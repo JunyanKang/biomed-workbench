@@ -37,6 +37,9 @@ SERVICE_COVERAGE = {
     "ncbi-summary": (("summary", "pubmed"),),
     "preprint-evidence": (("preprint_version_history", "biorxiv"),),
     "structure-evidence": (("structure_entry_context", "rcsb-pdb"),),
+    "structure-search": (("structure_attribute_search", "rcsb-pdb-search"),),
+    "structure-polymer-entities": (("structure_polymer_entities", "rcsb-pdb"),),
+    "structure-ligands": (("structure_bound_ligands", "rcsb-pdb"),),
     "variant-evidence": (("composed_workflow", "variant_evidence_bundle"),),
 }
 

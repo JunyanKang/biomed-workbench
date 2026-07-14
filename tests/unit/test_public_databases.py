@@ -8,6 +8,9 @@ from biomed_workbench.services.public_databases import (
     clinical_trial_records,
     preprint_record,
     pubchem_compound,
+    rcsb_ligand_records,
+    rcsb_polymer_entity_records,
+    rcsb_structure_search,
     rcsb_structure_records,
     resolve_citation_record,
 )
@@ -229,6 +232,101 @@ class PublicDatabaseTests(unittest.TestCase):
         result = rcsb_structure_records(["4hhb"], client=client)
         self.assertEqual(result["structures"][0]["resolution_combined"], [1.74])
         self.assertEqual(result["structures"][0]["experimental_methods"], ["X-RAY DIFFRACTION"])
+
+    def test_rcsb_search_pages_and_reconciles_api_total(self):
+        class SearchTransport:
+            def __init__(self):
+                self.payloads = []
+
+            def __call__(self, _url, _headers, body, _timeout):
+                request = json.loads(body)
+                self.payloads.append(request)
+                start = request["request_options"]["paginate"]["start"]
+                page = (
+                    [{"identifier": "4HHB", "score": 1.0}, {"identifier": "1TUP", "score": 0.9}]
+                    if start == 0
+                    else [{"identifier": "1CRN", "score": 0.8}]
+                )
+                return HTTPResponse(200, {}, json.dumps({"total_count": 3, "result_set": page}).encode())
+
+        transport = SearchTransport()
+        client = PublicJSONClient(post_transport=transport, retries=0, sleeper=lambda _: None)
+        result = rcsb_structure_search(
+            organism="Homo sapiens",
+            experimental_method="X-RAY DIFFRACTION",
+            max_resolution=2.5,
+            max_records=3,
+            client=client,
+        )
+        self.assertEqual([record["pdb_id"] for record in result["records"]], ["4HHB", "1TUP", "1CRN"])
+        self.assertEqual(result["total_count"], 3)
+        self.assertFalse(result["records_truncated"])
+        self.assertEqual(len(transport.payloads), 2)
+        self.assertEqual(transport.payloads[1]["request_options"]["paginate"]["start"], 2)
+
+    def test_rcsb_search_treats_first_page_204_as_explicit_zero_results(self):
+        class EmptySearchTransport:
+            def __call__(self, _url, _headers, _body, _timeout):
+                return HTTPResponse(204, {}, b"")
+
+        client = PublicJSONClient(post_transport=EmptySearchTransport(), retries=0, sleeper=lambda _: None)
+        result = rcsb_structure_search(text="no-such-structure-query", client=client)
+        self.assertEqual(result["total_count"], 0)
+        self.assertEqual(result["returned_count"], 0)
+        self.assertEqual(result["records"], [])
+        self.assertFalse(result["records_truncated"])
+        self.assertEqual(result["provenance"]["requests"][0]["request"]["status_code"], 204)
+
+    def test_rcsb_polymer_entities_preserve_sequence_and_not_found(self):
+        entry = {"rcsb_entry_container_identifiers": {"polymer_entity_ids": ["1", "2"]}}
+        entity = {
+            "rcsb_id": "4HHB_1",
+            "rcsb_polymer_entity": {"pdbx_description": "Hemoglobin subunit alpha"},
+            "rcsb_polymer_entity_container_identifiers": {"entry_id": "4HHB", "entity_id": "1", "uniprot_ids": ["P69905"]},
+            "entity_poly": {"rcsb_entity_polymer_type": "Protein", "rcsb_sample_sequence_length": 141, "pdbx_seq_one_letter_code_can": "VLSPADKT"},
+            "rcsb_entity_source_organism": [{"scientific_name": "Homo sapiens", "ncbi_taxonomy_id": 9606}],
+        }
+        client = self.client(
+            [
+                ("/entry/4HHB", entry),
+                ("/polymer_entity/4HHB/1", entity),
+                ("/polymer_entity/4HHB/2", HTTPResponse(404, {}, b"{}")),
+            ]
+        )
+        result = rcsb_polymer_entity_records("4hhb", include_sequences=True, client=client)
+        self.assertEqual(result["entry_polymer_entity_count"], 2)
+        self.assertEqual(result["entities"][0]["sequence"], "VLSPADKT")
+        self.assertEqual(result["not_found"], ["2"])
+
+    def test_rcsb_ligand_chain_retains_component_identity_and_missing_state(self):
+        entry = {"rcsb_entry_container_identifiers": {"non_polymer_entity_ids": ["1", "2"]}}
+        entity = {
+            "rcsb_nonpolymer_entity_container_identifiers": {"entity_id": "1", "nonpolymer_comp_id": "HEM", "auth_asym_ids": ["A"]},
+            "rcsb_nonpolymer_entity": {"pdbx_description": "Heme", "pdbx_number_of_molecules": 1},
+        }
+        component = {
+            "chem_comp": {"id": "HEM", "name": "PROTOPORPHYRIN IX CONTAINING FE", "formula": "C34 H32 Fe N4 O4", "pdbx_formal_charge": 0},
+            "rcsb_chem_comp_descriptor": {"InChIKey": "KABFMIBPWCXCRK-RGGAHWMASA-L", "SMILES_stereo": "[Fe]"},
+        }
+        client = self.client(
+            [
+                ("/entry/4HHB", entry),
+                ("/nonpolymer_entity/4HHB/1", entity),
+                ("/nonpolymer_entity/4HHB/2", HTTPResponse(404, {}, b"{}")),
+                ("/chemcomp/HEM", component),
+            ]
+        )
+        result = rcsb_ligand_records("4HHB", client=client)
+        self.assertEqual(result["ligands"][0]["chemical_component"]["comp_id"], "HEM")
+        self.assertEqual(result["not_found_entity_ids"], ["2"])
+        self.assertFalse(result["records_truncated"])
+
+    def test_post_transport_rejects_unapproved_hosts_and_oversized_payloads(self):
+        client = PublicJSONClient(post_transport=lambda *_: HTTPResponse(200, {}, b"{}"), retries=0)
+        with self.assertRaises(ValueError):
+            client.post_with_metadata("https://example.com", "/query", {})
+        with self.assertRaises(ValueError):
+            client.post_with_metadata("https://search.rcsb.org", "/rcsbsearch/v2/query", {"value": "x" * (1024 * 1024)})
 
     def test_transport_blocks_unapproved_hosts_and_invalid_responses(self):
         client = self.client([])

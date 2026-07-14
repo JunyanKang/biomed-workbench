@@ -9,6 +9,9 @@ from biomed_workbench.services.public_databases import (
     clinical_trial_records,
     preprint_record,
     pubchem_compound,
+    rcsb_ligand_records,
+    rcsb_polymer_entity_records,
+    rcsb_structure_search,
     rcsb_structure_records,
     resolve_citation_record,
 )
@@ -44,6 +47,38 @@ def clinical_trial_evidence(
 def structure_evidence(pdb_ids: list[str]) -> dict[str, Any]:
     """Retrieve entry-level RCSB PDB evidence for explicit identifiers."""
     return rcsb_structure_records(pdb_ids)
+
+
+def structure_search(
+    text: str | None = None,
+    organism: str | None = None,
+    taxonomy_id: int | None = None,
+    uniprot_accession: str | None = None,
+    experimental_method: str | None = None,
+    max_resolution: float | None = None,
+    ligand_comp_id: str | None = None,
+    include_computed_models: bool = False,
+    max_records: int = 100,
+) -> dict[str, Any]:
+    """Search RCSB entries with count-verified scientific filters."""
+    return rcsb_structure_search(
+        text, organism, taxonomy_id, uniprot_accession, experimental_method,
+        max_resolution, ligand_comp_id, include_computed_models, max_records,
+    )
+
+
+def structure_polymer_entities(
+    pdb_id: str,
+    entity_ids: list[str] | None = None,
+    include_sequences: bool = False,
+) -> dict[str, Any]:
+    """Retrieve RCSB polymer entities and optional canonical sequences."""
+    return rcsb_polymer_entity_records(pdb_id, entity_ids, include_sequences)
+
+
+def structure_ligands(pdb_id: str, max_ligands: int = 25) -> dict[str, Any]:
+    """Retrieve bound nonpolymer entities and chemical-component identity."""
+    return rcsb_ligand_records(pdb_id, max_ligands)
 
 
 def _bounded_links(client: EUtilitiesClient, source: str, target: str, ids: tuple[str, ...], limit: int) -> tuple[dict[str, Any], str | None]:

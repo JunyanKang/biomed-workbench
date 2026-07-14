@@ -26,7 +26,11 @@ from biomed_workbench.services.public_databases import (  # noqa: E402
     probe_europe_pmc_contract,
     probe_pubchem_contract,
     probe_rcsb_contract,
+    probe_rcsb_search_contract,
     pubchem_compound,
+    rcsb_ligand_records,
+    rcsb_polymer_entity_records,
+    rcsb_structure_search,
     rcsb_structure_records,
     resolve_citation_record,
 )
@@ -46,12 +50,18 @@ def verify() -> dict[str, object]:
         "chemical-evidence",
         "clinical-trial-evidence",
         "structure-evidence",
+        "structure-search",
+        "structure-polymer-entities",
+        "structure-ligands",
     ]
     citation = resolve_citation_record("10.1038/s41586-020-2649-2")
     preprint = preprint_record("10.1101/339747", "biorxiv")
     chemical = pubchem_compound("aspirin", "name")
     trial = clinical_trial_records("NCT00000102", 1)
     structure = rcsb_structure_records(["4HHB"])
+    structure_search = rcsb_structure_search(text="hemoglobin", experimental_method="X-RAY DIFFRACTION", max_records=3)
+    polymer_entities = rcsb_polymer_entity_records("4HHB", ["1"], include_sequences=True)
+    ligands = rcsb_ligand_records("4HHB", max_ligands=1)
 
     citation_passed = (
         citation["query"]["doi"] == "10.1038/s41586-020-2649-2"
@@ -91,6 +101,9 @@ def verify() -> dict[str, object]:
         and bool(structure["structures"][0]["experimental_methods"])
         and bool(structure["structures"][0]["resolution_combined"])
     )
+    structure_search_passed = structure_search["returned_count"] >= 1 and all(record["pdb_id"] for record in structure_search["records"])
+    polymer_entities_passed = polymer_entities["returned_count"] == 1 and polymer_entities["entities"][0]["entry_id"] == "4HHB"
+    ligands_passed = ligands["returned_count"] == 1 and bool(ligands["ligands"][0].get("comp_id"))
     checks = [
         {
             "name": "citation_record_resolution",
@@ -136,6 +149,9 @@ def verify() -> dict[str, object]:
             "resolution_combined": structure["structures"][0]["resolution_combined"],
             "output_sha256": _digest(structure),
         },
+        {"name": "structure_attribute_search", "database": "rcsb-pdb-search", "passed": structure_search_passed, "requested_query": structure_search["query"], "returned_count": structure_search["returned_count"], "records_truncated": structure_search["records_truncated"], "output_sha256": _digest(structure_search)},
+        {"name": "structure_polymer_entities", "database": "rcsb-pdb", "passed": polymer_entities_passed, "requested_id": "4HHB", "returned_count": polymer_entities["returned_count"], "output_sha256": _digest(polymer_entities)},
+        {"name": "structure_bound_ligands", "database": "rcsb-pdb", "passed": ligands_passed, "requested_id": "4HHB", "returned_count": ligands["returned_count"], "output_sha256": _digest(ligands)},
     ]
     contracts = {
         "crossref-rest": probe_crossref_contract(),
@@ -144,6 +160,7 @@ def verify() -> dict[str, object]:
         "pubchem-pug-rest": probe_pubchem_contract(),
         "clinicaltrials-gov-api": probe_clinical_trials_contract(),
         "rcsb-pdb-data-api": probe_rcsb_contract(),
+        "rcsb-pdb-search-api": probe_rcsb_search_contract(),
     }
     module_validation = {
         module_id: validate_module(BUILTIN_ROOT / module_id, require_tests=True, execute_tests=True)
@@ -159,13 +176,19 @@ def verify() -> dict[str, object]:
         "checks": checks,
         "module_package_validation": module_validation,
         "scientific_summary": {
-            "identifiers_preserved": all(check.get("requested_id") or check.get("requested_name") for check in checks),
+            "identifiers_preserved": all(
+                check.get("requested_id") or check.get("requested_name") or check.get("requested_query")
+                for check in checks
+            ),
             "source_specific_schemas_retained": True,
             "cross_source_disagreement_not_silently_merged": True,
             "preprint_versions_not_collapsed": True,
             "chemical_stereochemistry_context_retained": True,
             "trial_protocol_and_results_context_retained": True,
             "structure_method_and_resolution_context_retained": True,
+            "structure_search_counts_and_truncation_reconciled": structure_search_passed,
+            "polymer_entity_identity_and_sequence_context_retained": polymer_entities_passed,
+            "bound_ligand_component_identity_retained": ligands_passed,
             "no_new_credentials_required": True,
         },
     }

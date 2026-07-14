@@ -4,7 +4,7 @@
       "database": "crossref-europe-pmc",
       "europe_pmc_exact_matches": 1,
       "name": "citation_record_resolution",
-      "output_sha256": "84e7047a9b4c7a7af680c4d409c84aac690fcae5af27fd864e9b3e50dcfc049c",
+      "output_sha256": "1d0e6f23e3b86297feaa07806406862b2fff06f676c555d7dc1746e7137251d0",
       "passed": true,
       "requested_id": "10.1038/s41586-020-2649-2"
     },
@@ -31,7 +31,7 @@
       "database": "clinicaltrials-gov",
       "has_results": false,
       "name": "trial_design_record",
-      "output_sha256": "4964d75878a7e83591f7691a6d070bb7412535054beec5d7de2b45afa7f6e833",
+      "output_sha256": "1dd2b9c56f7674e02c1a9c68342bd271755cf4fe3264eb0cb40df31ddd4a8e24",
       "passed": true,
       "quality_assertions": {
         "api_total_reconciled": true,
@@ -62,6 +62,41 @@
       "resolution_combined": [
         1.74
       ]
+    },
+    {
+      "database": "rcsb-pdb-search",
+      "name": "structure_attribute_search",
+      "output_sha256": "9b8eeaa12c37c86aa927547e31846bb45cc495be7ce2b5d90b7a050bff6533a4",
+      "passed": true,
+      "records_truncated": true,
+      "requested_query": {
+        "experimental_method": "X-RAY DIFFRACTION",
+        "include_computed_models": false,
+        "ligand_comp_id": null,
+        "max_records": 3,
+        "max_resolution": null,
+        "organism": null,
+        "taxonomy_id": null,
+        "text": "hemoglobin",
+        "uniprot_accession": null
+      },
+      "returned_count": 3
+    },
+    {
+      "database": "rcsb-pdb",
+      "name": "structure_polymer_entities",
+      "output_sha256": "bd240d4d5f5f361bc2f149a0654674afc7ec0d9221e9edbd18c9e06235d069b2",
+      "passed": true,
+      "requested_id": "4HHB",
+      "returned_count": 1
+    },
+    {
+      "database": "rcsb-pdb",
+      "name": "structure_bound_ligands",
+      "output_sha256": "0eca5098638c808a0b2a6b73d828135984cb20d939602f4c0168d361f8841a66",
+      "passed": true,
+      "requested_id": "4HHB",
+      "returned_count": 1
     }
   ],
   "contracts": {
@@ -70,14 +105,18 @@
     "crossref-rest": "rest-v1-observed-2026-07-13",
     "europe-pmc-rest": "rest-observed-2026-07-13",
     "pubchem-pug-rest": "pug-rest-observed-2026-07-13",
-    "rcsb-pdb-data-api": "data-rest-v1-observed-2026-07-13"
+    "rcsb-pdb-data-api": "data-rest-v1-observed-2026-07-13",
+    "rcsb-pdb-search-api": "search-v2-observed-2026-07-13"
   },
   "module_ids": [
     "citation-record-resolution",
     "preprint-evidence",
     "chemical-evidence",
     "clinical-trial-evidence",
-    "structure-evidence"
+    "structure-evidence",
+    "structure-search",
+    "structure-polymer-entities",
+    "structure-ligands"
   ],
   "module_package_validation": {
     "chemical-evidence": {
@@ -154,20 +193,68 @@
       "schema_version": 1,
       "tool_evidence_complete": true,
       "valid": true
+    },
+    "structure-ligands": {
+      "compatibility_evidence_complete": true,
+      "compatibility_rows": 1,
+      "dependency_evidence_complete": true,
+      "entrypoint_resolved": true,
+      "errors": [],
+      "executed_test_cases": 1,
+      "format_evidence_complete": true,
+      "kernel_version": "0.2.0-dev",
+      "module_id": "structure-ligands",
+      "module_version": "1.0.0",
+      "schema_version": 1,
+      "tool_evidence_complete": true,
+      "valid": true
+    },
+    "structure-polymer-entities": {
+      "compatibility_evidence_complete": true,
+      "compatibility_rows": 1,
+      "dependency_evidence_complete": true,
+      "entrypoint_resolved": true,
+      "errors": [],
+      "executed_test_cases": 1,
+      "format_evidence_complete": true,
+      "kernel_version": "0.2.0-dev",
+      "module_id": "structure-polymer-entities",
+      "module_version": "1.0.0",
+      "schema_version": 1,
+      "tool_evidence_complete": true,
+      "valid": true
+    },
+    "structure-search": {
+      "compatibility_evidence_complete": true,
+      "compatibility_rows": 1,
+      "dependency_evidence_complete": true,
+      "entrypoint_resolved": true,
+      "errors": [],
+      "executed_test_cases": 1,
+      "format_evidence_complete": true,
+      "kernel_version": "0.2.0-dev",
+      "module_id": "structure-search",
+      "module_version": "1.0.0",
+      "schema_version": 1,
+      "tool_evidence_complete": true,
+      "valid": true
     }
   },
   "passed": true,
-  "registry_digest": "6d05d007cb8a54ac6a56db6576fdd6ec21f839016c8150af4b55b257f4c4e7e0",
+  "registry_digest": "b07cd7373780eacacd88270956375f050e0c4de0cc51f9aa543f833cd73856bb",
   "schema_version": 1,
   "scientific_summary": {
+    "bound_ligand_component_identity_retained": true,
     "chemical_stereochemistry_context_retained": true,
     "cross_source_disagreement_not_silently_merged": true,
     "identifiers_preserved": true,
     "no_new_credentials_required": true,
+    "polymer_entity_identity_and_sequence_context_retained": true,
     "preprint_versions_not_collapsed": true,
     "source_specific_schemas_retained": true,
     "structure_method_and_resolution_context_retained": true,
+    "structure_search_counts_and_truncation_reconciled": true,
     "trial_protocol_and_results_context_retained": true
   },
-  "verified_at": "2026-07-14T03:16:16.635131+00:00"
+  "verified_at": "2026-07-14T14:18:23.164441+00:00"
 }

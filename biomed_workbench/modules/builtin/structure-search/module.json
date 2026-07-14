@@ -1,0 +1,323 @@
+{
+  "access": "public_api",
+  "alternatives": [
+    "literature-evidence"
+  ],
+  "assumptions": [
+    "The requested identifiers and filters describe structures relevant to the intended construct, state, and biological question."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "structure-search-e2e-v1"
+      ],
+      "id": "public-database-contract-2026-07-13-structure-search",
+      "input_formats": {
+        "structure-search-query": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "structure-search-result": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "structure-search-regression-v1"
+      ],
+      "tool_versions": {
+        "rcsb-pdb-search-api": [
+          "==search-v2-observed-2026-07-13"
+        ]
+      },
+      "verified_at": "2026-07-13"
+    }
+  ],
+  "complements": [
+    "structure-evidence",
+    "chemical-evidence",
+    "literature-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Search experimental or computed RCSB entries by text, organism, taxonomy, UniProt, method, resolution, or ligand with count-verified pagination.",
+  "domains": [
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.evidence:structure_search",
+  "evidence_effects": [
+    "grounds-structure-discovery-evidence"
+  ],
+  "execution": {
+    "kind": "service",
+    "max_output_bytes": 20000000,
+    "timeout_seconds": 90
+  },
+  "id": "structure-search",
+  "input_artifacts": [
+    {
+      "artifact_type": "database_query",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "structure-search-query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "experimental_method": {
+        "maxLength": 100,
+        "minLength": 1,
+        "type": "string"
+      },
+      "include_computed_models": {
+        "type": "boolean"
+      },
+      "ligand_comp_id": {
+        "maxLength": 20,
+        "minLength": 1,
+        "type": "string"
+      },
+      "max_records": {
+        "maximum": 1000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "max_resolution": {
+        "minimum": 1e-06,
+        "type": "number"
+      },
+      "organism": {
+        "maxLength": 300,
+        "minLength": 1,
+        "type": "string"
+      },
+      "taxonomy_id": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "text": {
+        "maxLength": 1000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "uniprot_accession": {
+        "maxLength": 100,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [],
+    "type": "object"
+  },
+  "intents": [
+    "search RCSB structures",
+    "find PDB entries by organism method resolution or ligand",
+    "\u6309\u7269\u79cd\u65b9\u6cd5\u5206\u8fa8\u7387\u6216\u914d\u4f53\u68c0\u7d22PDB\u7ed3\u6784"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Search relevance is not validation of assembly, construct, local model quality, or biological relevance."
+  ],
+  "maturity": "validated",
+  "module_type": "data_source",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "evidence_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "structure-search-result",
+      "processing_levels": [
+        "source-preserved",
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "service_contract",
+        "retrieval_time"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "limitations": {
+        "type": "array"
+      },
+      "provenance": {
+        "type": "object"
+      },
+      "query": {
+        "type": "object"
+      },
+      "records": {
+        "type": "array"
+      },
+      "records_truncated": {
+        "type": "boolean"
+      },
+      "returned_count": {
+        "type": "integer"
+      },
+      "total_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "query",
+      "total_count",
+      "returned_count",
+      "records_truncated",
+      "records",
+      "provenance",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://search.rcsb.org/",
+      "Project-owned clean-room implementation and scientific validation contract."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Every result must preserve a valid unique PDB identifier; page offsets, total_count, returned count, model scope, and truncation must reconcile.",
+      "id": "structure-search-validity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which RCSB entries satisfy the declared structural criteria, and is the returned set complete?"
+  ],
+  "schema_version": 1,
+  "title": "Search RCSB structures with scientific filters",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        "==search-v2-observed-2026-07-13"
+      ],
+      "ecosystem": "service",
+      "identity": "search.rcsb.org/rcsbsearch/v2/query",
+      "mismatch_policy": "block",
+      "name": "rcsb-pdb-search-api",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "search-v2-observed-2026-07-13"
+      ],
+      "verified_at": "2026-07-13",
+      "version_differences": [
+        {
+          "affected_versions": [
+            "==search-v2-observed-2026-07-13"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "RCSB Search API v2 uses JSON POST queries, count-bearing result pages, and may return HTTP 204 for a valid query with no matches.",
+          "id": "rcsb-search-post-and-zero-result",
+          "required_action": "Submit a bounded JSON query, reconcile total_count and unique entry identifiers across pages, and interpret first-page HTTP 204 only as an explicit zero-result set.",
+          "source": "https://search.rcsb.org/"
+        }
+      ],
+      "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "version_probe": [
+        "biomed_workbench.services.public_databases:probe_rcsb_search_contract"
+      ],
+      "version_probe_kind": "service_contract",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://search.rcsb.org/"
+    }
+  ],
+  "version": "1.0.0"
+}

@@ -4785,6 +4785,132 @@
       "workflow": "evidence"
     },
     {
+      "access": "public_api",
+      "description": "Walk one PDB entry through nonpolymer entities to chemical components while retaining missing records, charge, formula, InChIKey, and stereochemical SMILES.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:structure_ligands",
+      "id": "structure-ligands",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "max_ligands": {
+            "maximum": 25,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "pdb_id": {
+            "pattern": "^[0-9][A-Za-z0-9]{3}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pdb_id"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve RCSB bound-ligand evidence",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve bounded polymer entities, source organisms, UniProt links, sequence lengths, mutations, and optional canonical sequences for one PDB entry.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:structure_polymer_entities",
+      "id": "structure-polymer-entities",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "entity_ids": {
+            "items": {
+              "maxLength": 40,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 25,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "include_sequences": {
+            "type": "boolean"
+          },
+          "pdb_id": {
+            "pattern": "^[0-9][A-Za-z0-9]{3}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pdb_id"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve RCSB polymer entity evidence",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Search experimental or computed RCSB entries by text, organism, taxonomy, UniProt, method, resolution, or ligand with count-verified pagination.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:structure_search",
+      "id": "structure-search",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "experimental_method": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "include_computed_models": {
+            "type": "boolean"
+          },
+          "ligand_comp_id": {
+            "maxLength": 20,
+            "minLength": 1,
+            "type": "string"
+          },
+          "max_records": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "max_resolution": {
+            "minimum": 1e-06,
+            "type": "number"
+          },
+          "organism": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "taxonomy_id": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "text": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "uniprot_accession": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Search RCSB structures with scientific filters",
+      "workflow": "evidence"
+    },
+    {
       "access": "offline",
       "description": "Calculate a product-limit survival curve, censoring counts, Greenwood error, and median survival.",
       "entrypoint": "biomed_workbench.capabilities.clinical:kaplan_meier",
@@ -5741,7 +5867,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 86,
+  "entry_count": 89,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }
