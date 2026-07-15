@@ -1,0 +1,44 @@
+# Professional Capability Map
+
+Biomed Workbench is organized around scientific decisions, not a menu of unrelated tools. A user supplies a research question and available data; the workbench combines the modules needed to move from framing and evidence gathering to analysis, challenge, revision, and delivery.
+
+## Capability Areas
+
+| Area | Primary scientific role | Detailed guide |
+| --- | --- | --- |
+| Evidence and literature | Establish what is known, disputed, missing, and current | [Read guide](evidence-and-literature.md) |
+| Omics and single-cell | Turn sequencing and molecular measurements into validated biological conclusions | [Read guide](omics-and-single-cell.md) |
+| Molecular and structural biology | Connect sequence, chemical, and structural evidence to testable molecular hypotheses | [Read guide](molecular-and-structural.md) |
+| Imaging and visualization | Quantify images and create faithful scientific communication assets | [Read guide](imaging-and-visualization.md) |
+| Clinical and experimental research | Connect cohorts, assays, and experimental measurements to interpretable decisions | [Read guide](clinical-and-experimental.md) |
+| Publication and translation | Convert the evidence trail into reviewable manuscripts, responses, patents, and research packages | [Read guide](publication-and-translation.md) |
+
+## Orchestration Model
+
+Every project is represented as a dependency-aware research graph. Independent evidence sources can be explored in parallel; analyses that consume another module's artifact are ordered serially; mixed programs combine both patterns. The workbench records hypotheses, evidence, artifacts, decisions, quality checks, and revisions so an agent can continue a project without losing the scientific rationale.
+
+Routing is dynamic. A literature question may require one database module, while a translational omics project may combine study-design checks, multiple analysis branches, mechanistic evidence, figure production, manuscript drafting, and adversarial review. The user invokes the same `biomed-workbench` skill in both cases.
+
+## Scientific Quality Boundaries
+
+The workbench is designed to refuse false confidence. It distinguishes:
+
+- data availability from data adequacy;
+- technical replicates from independent biological samples;
+- association from causal evidence;
+- database retrieval from biological interpretation;
+- prediction confidence from experimental validation;
+- citation presence from claim support;
+- a completed computation from a scientifically acceptable result.
+
+When a required input, compatible backend, quality threshold, or evidence link is missing, the affected claim remains unresolved. A failed quality gate can revise the hypothesis and plan instead of being hidden in a final report.
+
+## Current Scope
+
+The registry currently contains 96 independently discoverable modules. Modules cover literature and public databases, omics, single-cell analysis, molecular design, structural biology, imaging, clinical analysis, wet-lab calculations, scientific quality control, and publication workflows.
+
+The workbench does not claim that every named third-party method is installed in every user environment. It provides routing, contracts, templates, compatibility guidance, and quality criteria; consequential execution is accepted only when the required backend and output checks succeed. See [reproducibility and compatibility](../reproducibility.md) for the evidence model.
+
+## Extending The Workbench
+
+A new method is added as an independent scientific module with declared inputs, outputs, compatibility policy, quality gates, and at least one substantive code template when the capability performs bioinformatics analysis. The central registry discovers valid modules automatically, so adding a method does not require creating another user-facing skill. See [architecture and module extension](../architecture.md).

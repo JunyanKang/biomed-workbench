@@ -41,13 +41,15 @@ class ReleaseSurfaceTests(unittest.TestCase):
         self.assertFalse((ROOT / "tools" / "add_capability.py").exists())
         self.assertFalse((ROOT / "references").exists())
 
-    def test_readme_documents_verified_install_and_test_commands(self):
-        text = (ROOT / "README.md").read_text()
+    def test_public_readme_keeps_user_install_separate_from_maintainer_commands(self):
+        readme = (ROOT / "README.md").read_text()
+        development = (ROOT / "docs" / "development.md").read_text()
 
-        self.assertIn("codex plugin marketplace add JunyanKang/biomed-workbench --ref main", text)
-        self.assertIn("codex plugin add biomed-workbench@biomed-workbench", text)
-        self.assertIn("python3 -m unittest discover -s tests -v", text)
-        self.assertIn("new Codex task", text)
+        self.assertIn("codex plugin marketplace add JunyanKang/biomed-workbench --ref main", readme)
+        self.assertIn("codex plugin add biomed-workbench@biomed-workbench", readme)
+        self.assertIn("new Codex task", readme)
+        self.assertNotIn("python3 ", readme)
+        self.assertIn("python3 -m unittest discover -s tests -v", development)
 
 
 if __name__ == "__main__":

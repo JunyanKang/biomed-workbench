@@ -7,7 +7,7 @@ from biomed_workbench.modules.contract import version_is_allowed
 
 ROOT = Path(__file__).resolve().parents[2]
 REPORT = ROOT / "reports" / "tool-compatibility-matrix.json"
-README = ROOT / "README.md"
+REPRODUCIBILITY_GUIDE = ROOT / "docs" / "reproducibility.md"
 
 
 class VersionGuidancePolicyTests(unittest.TestCase):
@@ -27,11 +27,11 @@ class VersionGuidancePolicyTests(unittest.TestCase):
                 self.assertTrue(any(not rule.startswith("==") for rule in requirement["allowed_versions"]))
 
     def test_public_guidance_separates_actual_versions_baselines_and_execution_policy(self):
-        readme = README.read_text(encoding="utf-8")
-        self.assertIn("reproducibility baselines", readme)
-        self.assertIn("not installation pins", readme)
-        self.assertIn("actual detected versions", readme)
-        self.assertIn("guidance and routing remain available", readme)
+        guide = REPRODUCIBILITY_GUIDE.read_text(encoding="utf-8")
+        self.assertIn("reproducibility baselines", guide)
+        self.assertIn("not installation pins", guide)
+        self.assertIn("actual detected versions", guide)
+        self.assertIn("guidance and routing remain available", guide)
 
 
 if __name__ == "__main__":
