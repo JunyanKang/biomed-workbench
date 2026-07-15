@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 90,
-  "module_count": 90,
+  "compatibility_complete": 96,
+  "module_count": 96,
   "modules": [
     {
       "compatibility_rows": [
@@ -1017,6 +1017,228 @@
           "version_probe_kind": "service_contract",
           "version_probe_timeout_seconds": 10,
           "version_source": "https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "chemical-substructure-filter-e2e-v1"
+          ],
+          "id": "structure-analysis-2026-07-15-chemical-substructure-filter",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "chemical-substructure-filter-regression-v1"
+          ],
+          "verified_at": "2026-07-15"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.11,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-adapted structural-analysis template and emit versioned provenance.",
+          "required": true,
+          "tested_versions": [
+            "3.11.15"
+          ],
+          "verified_at": "2026-07-15",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "chemical-substructure-filter",
+      "input_formats": [
+        {
+          "artifact_type": "chemical_record_collection",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "smi",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "sdf",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "v2000"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "csv",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "chemical_records",
+          "processing_levels": [
+            "declared",
+            "source-preserved"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "format-version",
+            "producer-version"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "substructure_filter_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tabular",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "substructure_filter_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=2025.9,<2026"
+          ],
+          "ecosystem": "python",
+          "identity": "rdkit",
+          "mismatch_policy": "block",
+          "name": "rdkit",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "2025.09.6"
+          ],
+          "verified_at": "2026-07-15",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2025.9,<2026"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "RDKit molecule parsing, sanitization, SMARTS matching, stereochemical identity, conformer, and distance APIs are version-sensitive.",
+              "id": "rdkit-validated-api",
+              "required_action": "Retain every invalid molecule, query, match, stereochemical identity, and coordinate-quality state instead of silently dropping records.",
+              "source": "https://www.rdkit.org/docs/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import rdkit; print(rdkit.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://www.rdkit.org/docs/"
         }
       ],
       "validation_status": "complete"
@@ -2997,6 +3219,436 @@
           "version_probe_kind": "python_callable",
           "version_probe_timeout_seconds": 10,
           "version_source": "https://github.com/lh3/bwa/releases/tag/v0.7.19"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "docking-pose-review-e2e-v1"
+          ],
+          "id": "structure-analysis-2026-07-15-docking-pose-review",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "docking-pose-review-regression-v1"
+          ],
+          "verified_at": "2026-07-15"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.11,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-adapted structural-analysis template and emit versioned provenance.",
+          "required": true,
+          "tested_versions": [
+            "3.11.15"
+          ],
+          "verified_at": "2026-07-15",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "docking-pose-review",
+      "input_formats": [
+        {
+          "artifact_type": "docking_batch_manifest",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "csv",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "docking_batch_manifest",
+          "processing_levels": [
+            "declared",
+            "source-preserved"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "format-version",
+            "producer-version"
+          ]
+        },
+        {
+          "artifact_type": "docking_inference_config",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "json",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "RFC8259"
+              ]
+            }
+          ],
+          "name": "docking_inference_config",
+          "processing_levels": [
+            "declared",
+            "source-preserved"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "format-version",
+            "producer-version"
+          ]
+        },
+        {
+          "artifact_type": "structure_coordinates",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "pdb",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.3"
+              ]
+            }
+          ],
+          "name": "receptor_coordinates",
+          "processing_levels": [
+            "declared",
+            "source-preserved"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "format-version",
+            "producer-version"
+          ]
+        },
+        {
+          "artifact_type": "docking_pose_collection",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "sdf",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "v2000"
+              ]
+            }
+          ],
+          "name": "docking_results",
+          "processing_levels": [
+            "declared",
+            "source-preserved"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "format-version",
+            "producer-version"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "docking_batch_manifest",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "csv",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "validated_docking_batch",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        },
+        {
+          "artifact_type": "docking_inference_config",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "yaml",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.2"
+              ]
+            }
+          ],
+          "name": "validated_docking_config",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        },
+        {
+          "artifact_type": "docking_preparation_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "docking_preparation_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        },
+        {
+          "artifact_type": "docking_review_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tabular",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "docking_review_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=2025.9,<2026"
+          ],
+          "ecosystem": "python",
+          "identity": "rdkit",
+          "mismatch_policy": "block",
+          "name": "rdkit",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "2025.09.6"
+          ],
+          "verified_at": "2026-07-15",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2025.9,<2026"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "RDKit molecule parsing, sanitization, SMARTS matching, stereochemical identity, conformer, and distance APIs are version-sensitive.",
+              "id": "rdkit-validated-api",
+              "required_action": "Retain every invalid molecule, query, match, stereochemical identity, and coordinate-quality state instead of silently dropping records.",
+              "source": "https://www.rdkit.org/docs/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import rdkit; print(rdkit.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://www.rdkit.org/docs/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.87,<1.88"
+          ],
+          "ecosystem": "python",
+          "identity": "Bio.PDB",
+          "mismatch_policy": "block",
+          "name": "biopython",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.87"
+          ],
+          "verified_at": "2026-07-15",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.87,<1.88"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Bio.PDB parser, aligner, superposition, DSSP adapter, and writer APIs are used with explicit model and chain selection.",
+              "id": "biopython-validated-api",
+              "required_action": "Validate parser behavior, residue identity, chain mapping, coordinate counts, and serialized outputs before admitting results.",
+              "source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import Bio; print(Bio.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
         }
       ],
       "validation_status": "complete"
@@ -7806,6 +8458,390 @@
         }
       ],
       "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "protein-secondary-structure-e2e-v1"
+          ],
+          "id": "structure-analysis-2026-07-15-protein-secondary-structure",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "protein-secondary-structure-regression-v1"
+          ],
+          "verified_at": "2026-07-15"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.11,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-adapted structural-analysis template and emit versioned provenance.",
+          "required": true,
+          "tested_versions": [
+            "3.11.15"
+          ],
+          "verified_at": "2026-07-15",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "protein-secondary-structure",
+      "input_formats": [
+        {
+          "artifact_type": "structure_coordinates",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "pdb",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.3"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "mmcif",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            }
+          ],
+          "name": "structure_coordinates",
+          "processing_levels": [
+            "declared",
+            "source-preserved"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "format-version",
+            "producer-version"
+          ]
+        },
+        {
+          "artifact_type": "secondary_structure_rows",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tabular",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "secondary_structure_rows",
+          "processing_levels": [
+            "declared",
+            "source-preserved"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "format-version",
+            "producer-version"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "secondary_structure_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tabular",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "secondary_structure_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        },
+        {
+          "artifact_type": "secondary_structure_diagram",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "svg",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "2"
+              ]
+            }
+          ],
+          "name": "secondary_structure_diagram",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        },
+        {
+          "artifact_type": "secondary_structure_diagram_manifest",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "secondary_structure_diagram_manifest",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=1.87,<1.88"
+          ],
+          "ecosystem": "python",
+          "identity": "Bio.PDB",
+          "mismatch_policy": "block",
+          "name": "biopython",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.87"
+          ],
+          "verified_at": "2026-07-15",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.87,<1.88"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Bio.PDB parser, aligner, superposition, DSSP adapter, and writer APIs are used with explicit model and chain selection.",
+              "id": "biopython-validated-api",
+              "required_action": "Validate parser behavior, residue identity, chain mapping, coordinate counts, and serialized outputs before admitting results.",
+              "source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import Bio; print(Bio.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
+        },
+        {
+          "allowed_versions": [
+            ">=4.6,<4.7"
+          ],
+          "ecosystem": "system",
+          "identity": "mkdssp",
+          "mismatch_policy": "block",
+          "name": "mkdssp",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "4.6.1"
+          ],
+          "verified_at": "2026-07-15",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=4.6,<4.7"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "DSSP 4.6 emits residue-level secondary structure and accessibility from an explicit coordinate model through the mkdssp executable.",
+              "id": "mkdssp-validated-api",
+              "required_action": "Require observed mkdssp execution, preserve DSSP codes, reconcile chain and residue identifiers, and block invented fallback assignments.",
+              "source": "https://github.com/PDB-REDO/dssp"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "mkdssp",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/PDB-REDO/dssp"
+        },
+        {
+          "allowed_versions": [
+            ">=3.11,<3.12"
+          ],
+          "ecosystem": "python",
+          "identity": "matplotlib",
+          "mismatch_policy": "block",
+          "name": "matplotlib",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.11.0"
+          ],
+          "verified_at": "2026-07-15",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.11,<3.12"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Matplotlib SVG rendering and patch geometry create a deterministic secondary-structure track from validated DSSP rows.",
+              "id": "matplotlib-validated-api",
+              "required_action": "Require complete residue accounting, explicit segment boundaries, a nonblank parseable SVG, and a digest-bound diagram manifest.",
+              "source": "https://matplotlib.org/stable/api/index.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import matplotlib; print(matplotlib.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://matplotlib.org/stable/api/index.html"
+        }
+      ],
       "validation_status": "complete"
     },
     {
@@ -13428,6 +14464,307 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "structure-chain-comparison-e2e-v1"
+          ],
+          "id": "structure-analysis-2026-07-15-structure-chain-comparison",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "structure-chain-comparison-regression-v1"
+          ],
+          "verified_at": "2026-07-15"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.11,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-adapted structural-analysis template and emit versioned provenance.",
+          "required": true,
+          "tested_versions": [
+            "3.11.15"
+          ],
+          "verified_at": "2026-07-15",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "structure-chain-comparison",
+      "input_formats": [
+        {
+          "artifact_type": "structure_coordinates",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "pdb",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.3"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "mmcif",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            }
+          ],
+          "name": "reference_coordinates",
+          "processing_levels": [
+            "declared",
+            "source-preserved"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "format-version",
+            "producer-version"
+          ]
+        },
+        {
+          "artifact_type": "structure_coordinates",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "pdb",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.3"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "mmcif",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            }
+          ],
+          "name": "moving_coordinates",
+          "processing_levels": [
+            "declared",
+            "source-preserved"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "format-version",
+            "producer-version"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "structure_comparison_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure_comparison_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        },
+        {
+          "artifact_type": "structure_coordinates",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "pdb",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.3"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "mmcif",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            }
+          ],
+          "name": "superposed_coordinates",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=1.87,<1.88"
+          ],
+          "ecosystem": "python",
+          "identity": "Bio.PDB",
+          "mismatch_policy": "block",
+          "name": "biopython",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.87"
+          ],
+          "verified_at": "2026-07-15",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.87,<1.88"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Bio.PDB parser, aligner, superposition, DSSP adapter, and writer APIs are used with explicit model and chain selection.",
+              "id": "biopython-validated-api",
+              "required_action": "Validate parser behavior, residue identity, chain mapping, coordinate counts, and serialized outputs before admitting results.",
+              "source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import Bio; print(Bio.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "structure-evidence-e2e-v1"
           ],
           "id": "public-database-contract-2026-07-13-structure-evidence",
@@ -13575,6 +14912,263 @@
           "version_probe_kind": "service_contract",
           "version_probe_timeout_seconds": 10,
           "version_source": "https://data.rcsb.org/"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "structure-interactive-visualization-e2e-v1"
+          ],
+          "id": "structure-analysis-2026-07-15-structure-interactive-visualization",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "structure-interactive-visualization-regression-v1"
+          ],
+          "verified_at": "2026-07-15"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.11,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-adapted structural-analysis template and emit versioned provenance.",
+          "required": true,
+          "tested_versions": [
+            "3.11.15"
+          ],
+          "verified_at": "2026-07-15",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "structure-interactive-visualization",
+      "input_formats": [
+        {
+          "artifact_type": "structure_coordinates",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "pdb",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.3"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "mmcif",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            }
+          ],
+          "name": "structure_coordinates",
+          "processing_levels": [
+            "declared",
+            "source-preserved"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "format-version",
+            "producer-version"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "interactive_structure_view",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "html",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            }
+          ],
+          "name": "interactive_structure_view",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        },
+        {
+          "artifact_type": "visualization_manifest",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "visualization_manifest",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=2.5,<2.6"
+          ],
+          "ecosystem": "python",
+          "identity": "py3Dmol",
+          "mismatch_policy": "block",
+          "name": "py3dmol",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "2.5.3"
+          ],
+          "verified_at": "2026-07-15",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2.5,<2.6"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "py3Dmol serializes molecular coordinates, selections, styles, colors, and views into an interactive HTML representation.",
+              "id": "py3dmol-validated-api",
+              "required_action": "Validate structure format, selection scope, confidence semantics, nonblank HTML, and source and output digests; do not treat rendering as analysis.",
+              "source": "https://3dmol.csb.pitt.edu/doc/py3Dmol.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import py3Dmol; print(py3Dmol.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://3dmol.csb.pitt.edu/doc/py3Dmol.html"
+        },
+        {
+          "allowed_versions": [
+            ">=1.87,<1.88"
+          ],
+          "ecosystem": "python",
+          "identity": "Bio.PDB",
+          "mismatch_policy": "block",
+          "name": "biopython",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.87"
+          ],
+          "verified_at": "2026-07-15",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.87,<1.88"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Bio.PDB parser, aligner, superposition, DSSP adapter, and writer APIs are used with explicit model and chain selection.",
+              "id": "biopython-validated-api",
+              "required_action": "Validate parser behavior, residue identity, chain mapping, coordinate counts, and serialized outputs before admitting results.",
+              "source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import Bio; print(Bio.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
         }
       ],
       "validation_status": "complete"
@@ -13885,6 +15479,210 @@
           "version_probe_kind": "service_contract",
           "version_probe_timeout_seconds": 10,
           "version_source": "https://data.rcsb.org/"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "structure-quality-assessment-e2e-v1"
+          ],
+          "id": "structure-analysis-2026-07-15-structure-quality-assessment",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "structure-quality-assessment-regression-v1"
+          ],
+          "verified_at": "2026-07-15"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.11,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-adapted structural-analysis template and emit versioned provenance.",
+          "required": true,
+          "tested_versions": [
+            "3.11.15"
+          ],
+          "verified_at": "2026-07-15",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "structure-quality-assessment",
+      "input_formats": [
+        {
+          "artifact_type": "structure_coordinates",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "pdb",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.3"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "mmcif",
+              "orientations": [
+                "coordinate-or-record-input"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            }
+          ],
+          "name": "structure_coordinates",
+          "processing_levels": [
+            "declared",
+            "source-preserved"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "format-version",
+            "producer-version"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "structure_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tabular",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure_quality_report",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=1.87,<1.88"
+          ],
+          "ecosystem": "python",
+          "identity": "Bio.PDB",
+          "mismatch_policy": "block",
+          "name": "biopython",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.87"
+          ],
+          "verified_at": "2026-07-15",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.87,<1.88"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Bio.PDB parser, aligner, superposition, DSSP adapter, and writer APIs are used with explicit model and chain selection.",
+              "id": "biopython-validated-api",
+              "required_action": "Validate parser behavior, residue identity, chain mapping, coordinate counts, and serialized outputs before admitting results.",
+              "source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import Bio; print(Bio.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
         }
       ],
       "validation_status": "complete"
@@ -15511,6 +17309,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "87f32dd15346331a7a27acb19f7097a3d582a2052c0ececd5ac3ef71cb159589",
+  "registry_digest": "59a57189d49943baf5e5a09974fb92d930441c3f634d0813fb6af6b9999a0300",
   "schema_version": 1
 }

@@ -85,7 +85,6 @@ def apply_binding_rules(
             raise SourceBindingError("existing binding receipt is invalid or duplicated")
         bindings[receipt] = binding
     matches_by_rule = {rule["id"]: 0 for rule in validated_rules}
-    added_by_rule = {rule["id"]: 0 for rule in validated_rules}
     matched_receipts: dict[str, str] = {}
     for row in design_rows:
         matched = [rule for rule in validated_rules if _matches(row, rule["criteria"])]
@@ -110,18 +109,15 @@ def apply_binding_rules(
                 raise SourceBindingError("binding rule conflicts with an existing receipt binding")
             continue
         bindings[receipt] = candidate
-        added_by_rule[rule["id"]] += 1
     if any(count == 0 for count in matches_by_rule.values()):
         raise SourceBindingError("every binding rule must match at least one current design row")
     ordered = [bindings[receipt] for receipt in sorted(bindings)]
     return ordered, {
-        "schema_version": 1,
+        "schema_version": 2,
         "rule_count": len(validated_rules),
         "matched_receipt_count": len(matched_receipts),
-        "added_binding_count": sum(added_by_rule.values()),
         "total_binding_count": len(ordered),
-        "matches_by_rule": matches_by_rule,
-        "added_by_rule": added_by_rule,
+        "bindings_by_rule": matches_by_rule,
     }
 
 

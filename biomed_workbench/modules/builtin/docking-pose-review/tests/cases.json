@@ -1,0 +1,35 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "handoff_type": "codex_generated_project_analysis",
+        "languages": [
+          "python"
+        ],
+        "module": {
+          "id": "docking-pose-review",
+          "version": "1.0.0"
+        }
+      },
+      "input": {
+        "batch_manifest_path": "inputs/diffdock_batch.csv",
+        "contact_distance": 2.0,
+        "diffdock_version": "declared-project-version",
+        "inference_config": {
+          "actual_steps": 19,
+          "inference_steps": 20,
+          "no_final_step_noise": true,
+          "samples_per_complex": 10,
+          "sigma_schedule": "expbeta"
+        },
+        "ligand_identity": "CC(=O)OC1=CC=CC=C1C(=O)O",
+        "objective": "Prepare a bounded docking batch and review all generated poses before experimental follow-up.",
+        "receptor_path": "inputs/receptor.pdb",
+        "results_directory": "results/diffdock/complex_001",
+        "severe_clash_distance": 1.2
+      },
+      "name": "prepare-docking-pose-review"
+    }
+  ],
+  "schema_version": 1
+}

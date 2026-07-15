@@ -816,16 +816,15 @@ def main() -> int:
             public_source_reports = scope_policy_path.read_text(encoding="utf-8") + source_bindings_path.read_text(encoding="utf-8")
             if (
                 scope_policy.get("row_count") != source_file_count
-                or scope_policy.get("changed_count") != 414
-                or scope_policy.get("transitions") != {"redesign_schema->retire": 25, "rewrite_capability->retire": 389}
-                or scope_policy.get("policy_rules") != ["compute-infrastructure-explicitly-excluded"]
-                or source_bindings.get("rule_count") != 5
-                or source_bindings.get("added_binding_count") != 3
-                or source_bindings.get("matched_receipt_count") != 20
+                or scope_policy.get("changed_count") != 418
+                or scope_policy.get("transitions") != {"redesign_schema->retire": 25, "rewrite_capability->retire": 393}
+                or scope_policy.get("policy_rules") != ["compute-infrastructure-explicitly-excluded", "materials-science-explicitly-excluded", "local-model-inference-explicitly-excluded"]
+                or source_bindings.get("schema_version") != 2
+                or source_bindings.get("rule_count") != 16
+                or source_bindings.get("matched_receipt_count") != 39
                 or source_bindings.get("total_binding_count") != reconciliation.get("binding_count")
-                or sum(source_bindings.get("added_by_rule", {}).values()) != 3
-                or sum(source_bindings.get("matches_by_rule", {}).values()) != 20
-                or reconciliation.get("action_counts", {}).get("retire") != 441
+                or sum(source_bindings.get("bindings_by_rule", {}).values()) != 39
+                or reconciliation.get("action_counts", {}).get("retire") != 445
                 or any(marker.lower() in public_source_reports.lower() for marker in ("/Users/", "/private/", '"path"', '"private_path"'))
             ):
                 errors.append("source scope policy or capability binding evidence is stale, path-bearing, or inconsistent with reconciliation")

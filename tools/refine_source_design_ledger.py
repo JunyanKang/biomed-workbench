@@ -19,10 +19,11 @@ from biomed_workbench.audit import SourcePolicyError, refine_ledger  # noqa: E40
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--design-ledger", type=Path, required=True)
+    parser.add_argument("--rules", type=Path)
     parser.add_argument("--report", type=Path, default=ROOT / "reports" / "source-scope-policy.json")
     args = parser.parse_args()
     try:
-        report = refine_ledger(args.design_ledger)
+        report = refine_ledger(args.design_ledger, args.rules)
     except SourcePolicyError as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
         return 1

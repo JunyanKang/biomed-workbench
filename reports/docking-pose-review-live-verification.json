@@ -1,0 +1,79 @@
+{
+  "compatibility_row_id": "structure-analysis-2026-07-15-docking-pose-review",
+  "dependency_versions": {
+    "python": "3.11.15"
+  },
+  "execution": {
+    "output_artifacts": {
+      "preparation_report": {
+        "bytes": 3398,
+        "sha256": "b3d872f849c6a60201c0627806ee3d7114302c2d6f34fbe6a36efbbddc46f2e0"
+      },
+      "preparation_validated_batch": {
+        "bytes": 161,
+        "sha256": "71a580e6258530815f010f7388a8c5a81e0c20a58cf1b8c4342bf8b1f097b834"
+      },
+      "preparation_validated_config": {
+        "bytes": 570,
+        "sha256": "1d33c067bf2efdea4b516df865ed63e2e5518e6caff4a9d6c73765d74869d3b9"
+      },
+      "review_poses": {
+        "bytes": 958,
+        "sha256": "63cf1ecbfd2b37d1b46f2479c8350be1a699ba24eab07181fcb0c330f5a8571c"
+      },
+      "review_report": {
+        "bytes": 1373,
+        "sha256": "e14960ce9bb36c8bb1e21daf1b7fdc66a2d808647da174806482efef095f4cc5"
+      }
+    },
+    "outputs_reloaded": true,
+    "template_completed": true
+  },
+  "fixtures": {
+    "experimental_structure": {
+      "id": "1CRN",
+      "sha256": "42199a30a0701864a2a5cc76cd7f35cc544cd0e65fbcf63e03c166543249b811",
+      "source": "https://files.rcsb.org/download/1CRN.pdb"
+    },
+    "predicted_structure": {
+      "id": "AF-P04637-F1-model_v6",
+      "sha256": "5a7051e8f97848d43b3747268825b29cafb5fa99d2e3fff6f58efcdb74e74cc3",
+      "source": "https://alphafold.ebi.ac.uk/files/AF-P04637-F1-model_v6.pdb"
+    }
+  },
+  "module_id": "docking-pose-review",
+  "module_package_validation": {
+    "executed_test_cases": 1,
+    "module_version": "1.0.0",
+    "valid": true
+  },
+  "module_version": "1.0.0",
+  "no_environment_or_compute_infrastructure_managed": true,
+  "passed": true,
+  "registry_digest": "59a57189d49943baf5e5a09974fb92d930441c3f634d0813fb6af6b9999a0300",
+  "schema_version": 1,
+  "scientific_summary": {
+    "all_pose_files_accounted": true,
+    "batch_rows_accounted": true,
+    "confidence_not_affinity": true,
+    "inference_config_bounded": true,
+    "invalid_sdf_retained": true,
+    "ligand_sources_validated": true,
+    "protein_sources_exclusive": true,
+    "receptor_clashes_computed": true
+  },
+  "templates": {
+    "preparation": {
+      "name": "prepare_docking_batch.py",
+      "sha256": "de19688d47908a972f23dd9fa0d50b8d0ae842c750177fa0e621d042392a361e"
+    },
+    "review": {
+      "name": "review_docking_poses.py",
+      "sha256": "70df94b503bd6f273f0f0c27707bec8103c5e6c08d21274711f0be802ef0f160"
+    }
+  },
+  "tool_versions": {
+    "biopython": "1.87",
+    "rdkit": "2025.9.6"
+  }
+}

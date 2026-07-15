@@ -400,6 +400,78 @@
       "workflow": "evidence"
     },
     {
+      "access": "agent_generated",
+      "description": "Load SMILES, CSV, or SDF molecules, preserve record identity and failures, validate inclusion and exclusion SMARTS, retain atom-level matches and stereochemical canonical identity, and emit complete accepted and rejected ledgers.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "chemical-substructure-filter",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "exclude_smarts": {
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "identifier_column": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "include_smarts": {
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "input_format": {
+            "enum": [
+              "smi",
+              "sdf",
+              "csv"
+            ],
+            "type": "string"
+          },
+          "input_path": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "smiles_column": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_path",
+          "input_format",
+          "include_smarts",
+          "exclude_smarts",
+          "smiles_column",
+          "identifier_column"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "writes_output",
+      "requirements": [],
+      "title": "Filter chemical records with validated SMARTS and complete record accounting",
+      "workflow": "molecular_design"
+    },
+    {
       "access": "offline",
       "description": "Normalize DOI values, detect duplicates, and report missing citation metadata without asserting validity.",
       "entrypoint": "biomed_workbench.capabilities.publication:citation_audit",
@@ -1937,6 +2009,75 @@
       "workflow": "omics"
     },
     {
+      "access": "agent_generated",
+      "description": "Validate and serialize DiffDock-style batch inputs and bounded inference parameters, then inventory pose outputs, preserve producer version and rank/confidence semantics, sanitize every ligand with RDKit, verify identity and 3D coordinates, quantify receptor clashes and pose diversity, and retain invalid or missing poses instead of ranking them away.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "docking-pose-review",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "batch_manifest_path": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "contact_distance": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "diffdock_version": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "inference_config": {
+            "type": "object"
+          },
+          "ligand_identity": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "receptor_path": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "results_directory": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "severe_clash_distance": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "objective",
+          "receptor_path",
+          "results_directory",
+          "diffdock_version",
+          "ligand_identity",
+          "severe_clash_distance",
+          "contact_distance",
+          "batch_manifest_path",
+          "inference_config"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "writes_output",
+      "requirements": [],
+      "title": "Prepare and review docking workflows with complete chemical and coordinate checks",
+      "workflow": "molecular_design"
+    },
+    {
       "access": "offline",
       "description": "Check monotonicity and estimate an empirical half-range concentration on a log scale.",
       "entrypoint": "biomed_workbench.capabilities.experiment:dose_response_summary",
@@ -3256,6 +3397,88 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Design PCR primer candidates",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Run mkdssp through Biopython on an explicit coordinate model, retain the full DSSP alphabet, residue identifiers, amino acids and accessibility, reconcile selected chains, and refuse to invent assignments when DSSP is unavailable or residues are unresolved.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "protein-secondary-structure",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "chain_ids": {
+            "items": {
+              "maxLength": 8,
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "diagram_chain_id": {
+            "maxLength": 8,
+            "minLength": 1,
+            "type": "string"
+          },
+          "diagram_title": {
+            "maxLength": 256,
+            "type": "string"
+          },
+          "dssp_data_directory": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "dssp_executable": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "model_index": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "show_residue_numbers": {
+            "type": "boolean"
+          },
+          "structure_format": {
+            "enum": [
+              "pdb",
+              "mmcif"
+            ],
+            "type": "string"
+          },
+          "structure_path": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "structure_path",
+          "structure_format",
+          "model_index",
+          "chain_ids",
+          "dssp_executable",
+          "dssp_data_directory",
+          "diagram_chain_id",
+          "diagram_title",
+          "show_residue_numbers"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "writes_output",
+      "requirements": [],
+      "title": "Assign residue-level protein secondary structure with observed DSSP execution",
       "workflow": "molecular_design"
     },
     {
@@ -4789,6 +5012,71 @@
       "workflow": "evidence"
     },
     {
+      "access": "agent_generated",
+      "description": "Align declared chain pairs by sequence, map residue correspondence, superpose matched C-alpha coordinates, report identity, coverage and RMSD, and leave TM-score explicitly uncomputed unless an independently validated TM-align result is supplied.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "structure-chain-comparison",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "chain_map": {
+            "minProperties": 1,
+            "type": "object"
+          },
+          "minimum_aligned_residues": {
+            "minimum": 3,
+            "type": "integer"
+          },
+          "moving_model_index": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "moving_path": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "reference_model_index": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "reference_path": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "structure_format": {
+            "enum": [
+              "pdb",
+              "mmcif"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "reference_path",
+          "moving_path",
+          "structure_format",
+          "chain_map",
+          "reference_model_index",
+          "moving_model_index",
+          "minimum_aligned_residues"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "writes_output",
+      "requirements": [],
+      "title": "Compare protein structures with explicit chain and sequence correspondence",
+      "workflow": "molecular_design"
+    },
+    {
       "access": "public_api",
       "description": "Retrieve entry-level RCSB PDB metadata for explicit identifiers and retain experimental method, resolution, release, citation, entity, and deposition context.",
       "entrypoint": "biomed_workbench.capabilities.evidence:structure_evidence",
@@ -4817,6 +5105,88 @@
       "requirements": [],
       "title": "Retrieve RCSB PDB structure evidence",
       "workflow": "evidence"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Render selected PDB or mmCIF coordinates with py3Dmol using explicit chain, style and color semantics, distinguish chain and confidence coloring, and emit a nonblank HTML artifact and manifest without treating visual appearance as structural evidence.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "structure-interactive-visualization",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "color_semantics": {
+            "enum": [
+              "chain",
+              "alphafold-plddt",
+              "uniform"
+            ],
+            "type": "string"
+          },
+          "confidence_provenance": {
+            "enum": [
+              "alphafold-b-column-plddt",
+              "not-applicable",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "model_index": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "selected_chains": {
+            "items": {
+              "maxLength": 8,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "structure_format": {
+            "enum": [
+              "pdb",
+              "mmcif"
+            ],
+            "type": "string"
+          },
+          "structure_path": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          },
+          "style": {
+            "enum": [
+              "cartoon",
+              "stick",
+              "sphere",
+              "line"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "structure_path",
+          "structure_format",
+          "model_index",
+          "selected_chains",
+          "style",
+          "color_semantics",
+          "confidence_provenance"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "writes_output",
+      "requirements": [],
+      "title": "Create a provenance-bound interactive molecular structure view",
+      "workflow": "molecular_design"
     },
     {
       "access": "public_api",
@@ -4884,6 +5254,69 @@
       "requirements": [],
       "title": "Retrieve RCSB polymer entity evidence",
       "workflow": "evidence"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Inspect PDB or mmCIF coordinates by model and chain, reconcile atoms and residues, diagnose occupancy, alternate locations, missing backbone atoms and coordinate anomalies, and interpret B-factor as pLDDT only when explicitly declared for an AlphaFold-style prediction.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "structure-quality-assessment",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "confidence_semantics": {
+            "enum": [
+              "experimental-b-factor",
+              "alphafold-plddt",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "model_index": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "selected_chains": {
+            "items": {
+              "maxLength": 8,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "structure_format": {
+            "enum": [
+              "pdb",
+              "mmcif"
+            ],
+            "type": "string"
+          },
+          "structure_path": {
+            "maxLength": 4096,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "structure_path",
+          "structure_format",
+          "confidence_semantics",
+          "model_index",
+          "selected_chains"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "writes_output",
+      "requirements": [],
+      "title": "Assess coordinate and confidence quality without conflating B-factor and pLDDT",
+      "workflow": "molecular_design"
     },
     {
       "access": "public_api",
@@ -5901,7 +6334,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 90,
+  "entry_count": 96,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

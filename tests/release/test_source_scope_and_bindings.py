@@ -18,23 +18,29 @@ class SourceScopeAndBindingEvidenceTests(unittest.TestCase):
 
     def test_compute_infrastructure_policy_is_explicit_and_complete(self):
         self.assertEqual(self.scope["row_count"], self.reconciliation["file_count"])
-        self.assertEqual(self.scope["changed_count"], 414)
-        self.assertEqual(self.scope["policy_rules"], ["compute-infrastructure-explicitly-excluded"])
+        self.assertEqual(self.scope["changed_count"], 418)
+        self.assertEqual(
+            self.scope["policy_rules"],
+            [
+                "compute-infrastructure-explicitly-excluded",
+                "materials-science-explicitly-excluded",
+                "local-model-inference-explicitly-excluded",
+            ],
+        )
         self.assertEqual(
             self.scope["transitions"],
-            {"redesign_schema->retire": 25, "rewrite_capability->retire": 389},
+            {"redesign_schema->retire": 25, "rewrite_capability->retire": 393},
         )
-        self.assertEqual(self.reconciliation["action_counts"]["retire"], 441)
+        self.assertEqual(self.reconciliation["action_counts"]["retire"], 445)
 
     def test_public_database_sources_are_bound_to_current_evidence(self):
-        self.assertEqual(self.bindings["rule_count"], 5)
-        self.assertEqual(self.bindings["added_binding_count"], 3)
-        self.assertEqual(self.bindings["matched_receipt_count"], 20)
-        self.assertEqual(sum(self.bindings["added_by_rule"].values()), 3)
-        self.assertEqual(sum(self.bindings["matches_by_rule"].values()), 20)
+        self.assertEqual(self.bindings["schema_version"], 2)
+        self.assertEqual(self.bindings["rule_count"], 16)
+        self.assertEqual(self.bindings["matched_receipt_count"], 39)
+        self.assertEqual(sum(self.bindings["bindings_by_rule"].values()), 39)
         self.assertEqual(self.bindings["total_binding_count"], self.reconciliation["binding_count"])
-        self.assertEqual(self.reconciliation["reconciled_count"], 88076)
-        self.assertEqual(self.reconciliation["pending_count"], 1238)
+        self.assertEqual(self.reconciliation["reconciled_count"], 88099)
+        self.assertEqual(self.reconciliation["pending_count"], 1215)
 
     def test_public_policy_reports_are_path_free(self):
         serialized = SCOPE_REPORT.read_text(encoding="utf-8") + BINDING_REPORT.read_text(encoding="utf-8")

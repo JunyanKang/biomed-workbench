@@ -1,8 +1,8 @@
 {
-  "bioinformatics_module_count": 38,
-  "covered_module_count": 38,
+  "bioinformatics_module_count": 44,
+  "covered_module_count": 44,
   "passed": true,
-  "passing_module_count": 38,
+  "passing_module_count": 44,
   "records": [
     {
       "domains": [
@@ -28,6 +28,19 @@
       "template_count": 1,
       "template_files": [
         "templates/run_alignment_sort_index_samtools.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "chemical-substructure-filter",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/filter_chemical_substructures.py"
       ]
     },
     {
@@ -94,6 +107,20 @@
       "template_count": 1,
       "template_files": [
         "templates/run_dna_align_bwa_mem_single.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "docking-pose-review",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 2,
+      "template_files": [
+        "templates/prepare_docking_batch.py",
+        "templates/review_docking_poses.py"
       ]
     },
     {
@@ -225,6 +252,20 @@
       "template_count": 1,
       "template_files": [
         "templates/run_primer_design.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "protein-secondary-structure",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 2,
+      "template_files": [
+        "templates/assign_secondary_structure.py",
+        "templates/render_secondary_structure_diagram.py"
       ]
     },
     {
@@ -434,6 +475,45 @@
     },
     {
       "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "structure-chain-comparison",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/compare_structure_chains.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "structure-interactive-visualization",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/render_structure_view.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "structure-quality-assessment",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/assess_structure_quality.py"
+      ]
+    },
+    {
+      "domains": [
         "omics"
       ],
       "errors": [],
@@ -512,6 +592,6 @@
       ]
     }
   ],
-  "registry_digest": "87f32dd15346331a7a27acb19f7097a3d582a2052c0ececd5ac3ef71cb159589",
+  "registry_digest": "59a57189d49943baf5e5a09974fb92d930441c3f634d0813fb6af6b9999a0300",
   "schema_version": 1
 }

@@ -62,6 +62,24 @@ COMMAND_EVIDENCE = {
 }
 
 AGENT_EVIDENCE = {
+    "chemical-substructure-filter": {
+        "path": "reports/chemical-substructure-filter-live-verification.json",
+        "execution_flags": ("template_completed", "outputs_reloaded"),
+        "summary_flags": ("all_records_accounted", "invalid_molecule_retained", "include_and_exclude_smarts_executed"),
+        "live_dependency_keys": ("python",),
+    },
+    "docking-pose-review": {
+        "path": "reports/docking-pose-review-live-verification.json",
+        "execution_flags": ("template_completed", "outputs_reloaded"),
+        "summary_flags": ("all_pose_files_accounted", "invalid_sdf_retained", "confidence_not_affinity", "receptor_clashes_computed"),
+        "live_dependency_keys": ("python",),
+    },
+    "protein-secondary-structure": {
+        "path": "reports/protein-secondary-structure-live-verification.json",
+        "execution_flags": ("template_completed", "outputs_reloaded"),
+        "summary_flags": ("mkdssp_executed", "dssp_resources_digested", "full_dssp_alphabet_retained", "residue_accounting_reconciled"),
+        "live_dependency_keys": ("python",),
+    },
     "single-cell-communication": {
         "path": "reports/single-cell-communication-live-verification.json",
         "execution_flags": ("liana_completed", "cellphonedb_completed", "cellchat_completed", "nichenet_completed"),
@@ -103,6 +121,24 @@ AGENT_EVIDENCE = {
         "execution_flags": ("dynamical_model_completed", "velocity_graph_completed"),
         "summary_flags": ("spliced_unspliced_layers_validated", "dynamical_rna_velocity_executed", "velocity_graph_and_pseudotime_executed", "latent_time_direction_validated_against_known_time", "root_and_terminal_direction_validated", "experimental_time_withheld_from_model_fitting", "source_counts_and_identifiers_preserved", "velocity_h5ad_reloaded", "no_environment_or_compute_infrastructure_managed"),
         "live_dependency_keys": ("anndata", "numpy", "pandas", "scipy", "scikit-learn", "numba", "umap-learn"),
+    },
+    "structure-chain-comparison": {
+        "path": "reports/structure-chain-comparison-live-verification.json",
+        "execution_flags": ("template_completed", "outputs_reloaded"),
+        "summary_flags": ("chain_mapping_explicit", "sequence_correspondence_used", "rigid_transform_recovered", "tm_score_not_fabricated"),
+        "live_dependency_keys": ("python",),
+    },
+    "structure-interactive-visualization": {
+        "path": "reports/structure-interactive-visualization-live-verification.json",
+        "execution_flags": ("template_completed", "outputs_reloaded"),
+        "summary_flags": ("html_nonblank", "plddt_provenance_explicit", "selected_chains_explicit", "rendering_not_analysis"),
+        "live_dependency_keys": ("python",),
+    },
+    "structure-quality-assessment": {
+        "path": "reports/structure-quality-assessment-live-verification.json",
+        "execution_flags": ("template_completed", "outputs_reloaded"),
+        "summary_flags": ("plddt_semantics_explicit", "coordinate_accounting_reconciled", "confidence_range_validated"),
+        "live_dependency_keys": ("python",),
     },
 }
 
@@ -303,7 +339,11 @@ def capture() -> dict[str, object]:
         elif manifest.agent_protocol is not None:
             case = fixtures.get(manifest.id)
             if not isinstance(case, dict):
-                raise RuntimeError(f"agent-generated regression fixture is missing: {manifest.id}")
+                packaged_cases = json.loads((BUILTIN_ROOT / manifest.id / "tests" / "cases.json").read_text(encoding="utf-8"))
+                first_case = packaged_cases.get("cases", [None])[0]
+                if not isinstance(first_case, dict):
+                    raise RuntimeError(f"agent-generated regression fixture is missing: {manifest.id}")
+                case = {"input": first_case["input"], "output": first_case["expected_subset"]}
             direct = json.loads(json.dumps(entrypoint(**case["input"]), sort_keys=True))
             _assert_subset(case["output"], direct)
             try:
@@ -326,6 +366,7 @@ def capture() -> dict[str, object]:
                 or live_report.get("module_id") != manifest.id
                 or live_report.get("module_version") != manifest.version
                 or live_report.get("compatibility_row_id") != row.id
+                or live_report.get("registry_digest") != registry.digest
                 or observed_templates != template_hashes
                 or any(not version_is_allowed(live_report.get("tool_versions", {}).get(key, ""), rules) for key, rules in row.tool_versions.items())
                 or any(not version_is_allowed(live_report.get("dependency_versions", {}).get(key, ""), row.dependency_versions[key]) for key in evidence_config["live_dependency_keys"])

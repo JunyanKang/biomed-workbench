@@ -1,7 +1,7 @@
 {
-  "compatibility_row_count": 91,
-  "end_to_end_passed": 91,
-  "module_count": 90,
+  "compatibility_row_count": 97,
+  "end_to_end_passed": 97,
+  "module_count": 96,
   "passed": true,
   "records": [
     {
@@ -118,7 +118,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "998aa73f5756ef1dcd232109af09e59c4278254519afcddf0ef6f148252a2988",
+        "digest": "678cd6bc02d857d03a27e26efe75087153ed293d5a7700f949a7bb081e04c5db",
         "id": "alphafold-structure-evidence-e2e-v1",
         "passed": true
       },
@@ -221,7 +221,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "f8f07b2387d0ee7b76745392bfe947152286237882bdaeba08193d942d421f6c",
+        "digest": "d5576d3b2ec08d016deb0ad7ab1d492e10a222d9b0bbf3d67c7c4edb3c5a696f",
         "id": "chemical-evidence-e2e-v1",
         "passed": true
       },
@@ -250,6 +250,46 @@
         ]
       },
       "verified_at": "2026-07-13"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.11,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "40054d782d375c21d1a0a6c91069d05217d815876b8256b27977cab06bff3382",
+        "id": "chemical-substructure-filter-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "20feb40851a46e755ab1aab44612db11921400bd344036cdb6619329ea73a152",
+      "input_formats": {
+        "chemical_records": [
+          "smi@1",
+          "sdf@v2000",
+          "csv@1"
+        ]
+      },
+      "module_id": "chemical-substructure-filter",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "substructure_filter_report": [
+          "tabular@1",
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "802e1c7ed6c3b89e96d291955b0e5d987a7e0dc999ef3db8ab0e04b007c62b73",
+        "id": "chemical-substructure-filter-regression-v1",
+        "passed": true
+      },
+      "row_id": "structure-analysis-2026-07-15-chemical-substructure-filter",
+      "tool_versions": {
+        "rdkit": [
+          ">=2025.9,<2026"
+        ]
+      },
+      "verified_at": "2026-07-15"
     },
     {
       "dependency_versions": {
@@ -291,7 +331,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "10b8a1c07331ec465035fb01b4f057acbdece8bdf7c1d953df96a8a3341965ea",
+        "digest": "1c4c25c4cfc9658cc4b309306cfa14888eb6dcbab0aa9482a8d3a015ff2bc32a",
         "id": "citation-record-resolution-e2e-v1",
         "passed": true
       },
@@ -496,7 +536,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "8fd63cd3c377ff3b077263619c5e43685614ad80d7d3695f08d627618fb6f020",
+        "digest": "316e01ad57e8193a776b5526f1c63363b19f1dcc28cc4d68623f20a600d36977",
         "id": "clinical-trial-evidence-e2e-v1",
         "passed": true
       },
@@ -767,6 +807,65 @@
     {
       "dependency_versions": {
         "python": [
+          ">=3.11,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "270b87713c51de8d34a5881be6d005189a0da56909c942fbfd44100cf34d255e",
+        "id": "docking-pose-review-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "20feb40851a46e755ab1aab44612db11921400bd344036cdb6619329ea73a152",
+      "input_formats": {
+        "docking_batch_manifest": [
+          "csv@1"
+        ],
+        "docking_inference_config": [
+          "json@RFC8259"
+        ],
+        "docking_results": [
+          "sdf@v2000"
+        ],
+        "receptor_coordinates": [
+          "pdb@3.3"
+        ]
+      },
+      "module_id": "docking-pose-review",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "docking_preparation_report": [
+          "inline-json@1"
+        ],
+        "docking_review_report": [
+          "tabular@1",
+          "inline-json@1"
+        ],
+        "validated_docking_batch": [
+          "csv@1"
+        ],
+        "validated_docking_config": [
+          "yaml@1.2"
+        ]
+      },
+      "regression": {
+        "digest": "b0253b7e994377ad618099ee77b5b26848cfce6fc718fd3992bca4a2254b80ce",
+        "id": "docking-pose-review-regression-v1",
+        "passed": true
+      },
+      "row_id": "structure-analysis-2026-07-15-docking-pose-review",
+      "tool_versions": {
+        "biopython": [
+          ">=1.87,<1.88"
+        ],
+        "rdkit": [
+          ">=2025.9,<2026"
+        ]
+      },
+      "verified_at": "2026-07-15"
+    },
+    {
+      "dependency_versions": {
+        "python": [
           ">=3.14,<3.15"
         ]
       },
@@ -969,7 +1068,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "368ce5149a12d078f96b58a2bf04860c175ce22dd18500ed398f0aac96f22fc2",
+        "digest": "e68c71d7a9abf8ede6520b87a4c75d161049df5c4ec5b588f2b0a66f708f36fb",
         "id": "gene-evidence-e2e-v1",
         "passed": true
       },
@@ -1319,7 +1418,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "e1a96f85d064007b984d5c6ea5c5c03ee1a148bf601cc976635381b7d4b41586",
+        "digest": "ccdeda78d9bb66b71075c36692fe6d25114a68038d7e1e6b008d3f3f96dfbb4c",
         "id": "literature-evidence-e2e-v1",
         "passed": true
       },
@@ -1540,7 +1639,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "084c84bfaaa221c0fc309abc55e460bee5b945911e95849cfef3a039c9683571",
+        "digest": "699a13f9a5c8464b98c572dd59b521c127e36c85edea23b1a87b4da33de56a96",
         "id": "ncbi-fetch-e2e-v1",
         "passed": true
       },
@@ -1577,7 +1676,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "c71540f5a2757d8e9c822c68fa2f430928d0ed253437dcb2a30a19943555cecc",
+        "digest": "1c1997692685f626726fbeabc3f7acb32a1555e325c00bc536b9f31c0614195d",
         "id": "ncbi-info-e2e-v1",
         "passed": true
       },
@@ -1614,7 +1713,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "4dd62ee712e81e8e5d4869ac80687ddffd2c19bc0a4a087f2dade4e628216093",
+        "digest": "7f4e2b9a6e03d971e5915cdf857538591377d60fda8106aebb3efcf085167eec",
         "id": "ncbi-link-e2e-v1",
         "passed": true
       },
@@ -1651,7 +1750,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "5b76f0635437614f047a51bf241dd343f8cc00b88cab958317e89f2863014fd5",
+        "digest": "a721a4bc41c4c2430862929c4983f6809ad318a077fcf243856ff744b73bc199",
         "id": "ncbi-search-e2e-v1",
         "passed": true
       },
@@ -1688,7 +1787,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "740bd8cc244637ffc4df6b1a5a1513805a74362bdc800ab17dc2b17f61490aa3",
+        "digest": "cd98634b6abc466266bccb3daeeb9643994f318671e6a869c291a800fb8dd019",
         "id": "ncbi-search-summary-e2e-v1",
         "passed": true
       },
@@ -1725,7 +1824,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "dd52f918647b3f2dea17fe169232092c020d664d115958c1e757988b8bc43abf",
+        "digest": "898e882a62d69bbab3a1abb7d96f823e5341d2a9a76ce68a8fdc5b35129e742d",
         "id": "ncbi-summary-e2e-v1",
         "passed": true
       },
@@ -1894,7 +1993,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "c07054f34e6db217e7fe1b2aeea0e35f2b67bcc09f16eddc40fb1740e814192d",
+        "digest": "d86bdb3f147a40a39409ab75a638337da0b7fbf547df64e8a9e0610932ea0bc5",
         "id": "preprint-evidence-e2e-v1",
         "passed": true
       },
@@ -1956,6 +2055,60 @@
       "row_id": "python-3.14.3-inline-json-1",
       "tool_versions": {},
       "verified_at": "2026-07-12"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.11,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "034859fad94f1429532cad730140203d23a83c1a095d5a5db20f7856175d7650",
+        "id": "protein-secondary-structure-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "20feb40851a46e755ab1aab44612db11921400bd344036cdb6619329ea73a152",
+      "input_formats": {
+        "secondary_structure_rows": [
+          "tabular@1"
+        ],
+        "structure_coordinates": [
+          "pdb@3.3",
+          "mmcif@5"
+        ]
+      },
+      "module_id": "protein-secondary-structure",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "secondary_structure_diagram": [
+          "svg@2"
+        ],
+        "secondary_structure_diagram_manifest": [
+          "inline-json@1"
+        ],
+        "secondary_structure_report": [
+          "tabular@1",
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "9e8f58a624e666c598980fe864548ec3108c4574f827eb0a416eed4bdf6ce42b",
+        "id": "protein-secondary-structure-regression-v1",
+        "passed": true
+      },
+      "row_id": "structure-analysis-2026-07-15-protein-secondary-structure",
+      "tool_versions": {
+        "biopython": [
+          ">=1.87,<1.88"
+        ],
+        "matplotlib": [
+          ">=3.11,<3.12"
+        ],
+        "mkdssp": [
+          ">=4.6,<4.7"
+        ]
+      },
+      "verified_at": "2026-07-15"
     },
     {
       "dependency_versions": {
@@ -2421,7 +2574,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "4f2155f75915e989bc3d993b289517a5e4da6173e35957cfb6bb4778b73c43f5",
+        "digest": "7a64fcb46dac1ab435966c79943d5f55f6919a59dfa8bdd8bade1da3a70116d3",
         "id": "single-cell-batch-integration-e2e-v1",
         "passed": true
       },
@@ -2473,7 +2626,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "15d70916e41cb46c3192dbe42f68c9fabc8fde4b24f1d2853300daa644ae8ad2",
+        "digest": "23aa60e0d59e9dc7ec4892877a97dbdce64ca41fb57a8b98bf63b6ecc2e62636",
         "id": "single-cell-communication-python-e2e-v1",
         "passed": true
       },
@@ -2517,7 +2670,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "c9d1f9c0d3f9a8f99baab7d130e7209ae2d0033edb112dbcfea7bd0519bc2d4d",
+        "digest": "b88cbb6b80f55fed125039d7611e7852253dc02fc5cc0f90f97d82547c24cb05",
         "id": "single-cell-communication-r-e2e-v1",
         "passed": true
       },
@@ -2582,7 +2735,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "00cf7487304040dd0c9e22285e5e84e118e1713b8b614b327de2f5dc056608ac",
+        "digest": "37a126aa20661810fc7aa9adb6b77b6474f6aa161fbade9547c07da48f916374",
         "id": "single-cell-donor-inference-e2e-v1",
         "passed": true
       },
@@ -2637,7 +2790,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "4db30218d1009b9b7eccf6103973062d91e634015a9759e80368e8ffe8036d87",
+        "digest": "49e744fde1ab9fbda61e48c0005aefa06f586857b3dc424bf880e31bc0cb879c",
         "id": "single-cell-foundation-workflow-e2e-v1",
         "passed": true
       },
@@ -2708,7 +2861,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "4242800a144720e8956285560177f0660ba15f854a3555dae6f5fefae22f1cec",
+        "digest": "fb23b1b5c6678878d213240a257f1115120a30a64d0beaf1f1a1965c9053cf41",
         "id": "single-cell-generative-modeling-e2e-v1",
         "passed": true
       },
@@ -2814,7 +2967,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "a2ebb097bd8e09e5ff0fd0fe0439e3217d2d132763ba6831cc7408d727d771da",
+        "digest": "73f65ef71fd72276cf97eb929dae9bb908abdade4434ec877f514bd1309113a2",
         "id": "single-cell-reference-annotation-e2e-v1",
         "passed": true
       },
@@ -2887,7 +3040,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "972109f9cfb7b0bd0c79da8816f213b6a4ebb653ff83df6407f65fd13ceb52fa",
+        "digest": "ca3f0f024121d5932af801bb9bf7abe58626eba3bcef9e2dc8200c743431d2fe",
         "id": "single-cell-trajectory-velocity-e2e-v1",
         "passed": true
       },
@@ -2959,11 +3112,57 @@
     {
       "dependency_versions": {
         "python": [
+          ">=3.11,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "3e10fd9d400685831896af6b621b0da5a5d53fc68d9898d84db034687e677e51",
+        "id": "structure-chain-comparison-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "20feb40851a46e755ab1aab44612db11921400bd344036cdb6619329ea73a152",
+      "input_formats": {
+        "moving_coordinates": [
+          "pdb@3.3",
+          "mmcif@5"
+        ],
+        "reference_coordinates": [
+          "pdb@3.3",
+          "mmcif@5"
+        ]
+      },
+      "module_id": "structure-chain-comparison",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "structure_comparison_report": [
+          "inline-json@1"
+        ],
+        "superposed_coordinates": [
+          "pdb@3.3",
+          "mmcif@5"
+        ]
+      },
+      "regression": {
+        "digest": "119f4b772dcc176587cb333dcfe4d8ab3e654db3436c2708eafbdf61cd7e216b",
+        "id": "structure-chain-comparison-regression-v1",
+        "passed": true
+      },
+      "row_id": "structure-analysis-2026-07-15-structure-chain-comparison",
+      "tool_versions": {
+        "biopython": [
+          ">=1.87,<1.88"
+        ]
+      },
+      "verified_at": "2026-07-15"
+    },
+    {
+      "dependency_versions": {
+        "python": [
           ">=3.14,<3.15"
         ]
       },
       "end_to_end": {
-        "digest": "39bdd9a658641551981d99f0ec936c1bb0ac102db19aef40dd139eef29379fba",
+        "digest": "e6ffc6e23932ecbba0b9d8c3dd3513d87e5b6e8691349646e746d78fbae96a17",
         "id": "structure-evidence-e2e-v1",
         "passed": true
       },
@@ -2996,11 +3195,55 @@
     {
       "dependency_versions": {
         "python": [
+          ">=3.11,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "2e89cf617d1409ed03bd241b910a2b30b78f71c6f67ef240277a606151353a41",
+        "id": "structure-interactive-visualization-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "20feb40851a46e755ab1aab44612db11921400bd344036cdb6619329ea73a152",
+      "input_formats": {
+        "structure_coordinates": [
+          "pdb@3.3",
+          "mmcif@5"
+        ]
+      },
+      "module_id": "structure-interactive-visualization",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "interactive_structure_view": [
+          "html@5"
+        ],
+        "visualization_manifest": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "7518b7b84c521639ae030d5b35cca909430ed58521c18f89f7045ff870e06a92",
+        "id": "structure-interactive-visualization-regression-v1",
+        "passed": true
+      },
+      "row_id": "structure-analysis-2026-07-15-structure-interactive-visualization",
+      "tool_versions": {
+        "biopython": [
+          ">=1.87,<1.88"
+        ],
+        "py3dmol": [
+          ">=2.5,<2.6"
+        ]
+      },
+      "verified_at": "2026-07-15"
+    },
+    {
+      "dependency_versions": {
+        "python": [
           ">=3.14,<3.15"
         ]
       },
       "end_to_end": {
-        "digest": "3822f628d1988df3d7387e5f1fa8249f0f33aeb6633f6b7cca5b144b9ccad246",
+        "digest": "4c0afd15b2703b4e7d1cfdee283a0a98c595138e5c41f6dbf4f2a901514c2187",
         "id": "structure-ligands-e2e-v1",
         "passed": true
       },
@@ -3037,7 +3280,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "6292c603033afa90384a1dc8deb01e434ba134d90a1ef657f8dbe56d60d3f7f9",
+        "digest": "d7e42a474642b7783d9a16fd57b066cf2ec663527b1538469fcbdfd4c4023b69",
         "id": "structure-polymer-entities-e2e-v1",
         "passed": true
       },
@@ -3070,11 +3313,50 @@
     {
       "dependency_versions": {
         "python": [
+          ">=3.11,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "6c522f1468abdb2173bb72b468ee710f95309708a1ba37a3f6ab7dc31404d273",
+        "id": "structure-quality-assessment-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "20feb40851a46e755ab1aab44612db11921400bd344036cdb6619329ea73a152",
+      "input_formats": {
+        "structure_coordinates": [
+          "pdb@3.3",
+          "mmcif@5"
+        ]
+      },
+      "module_id": "structure-quality-assessment",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "structure_quality_report": [
+          "tabular@1",
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "ee0787fb14154068b889711e029ff67e8c113d6fad73105e399c48530611714a",
+        "id": "structure-quality-assessment-regression-v1",
+        "passed": true
+      },
+      "row_id": "structure-analysis-2026-07-15-structure-quality-assessment",
+      "tool_versions": {
+        "biopython": [
+          ">=1.87,<1.88"
+        ]
+      },
+      "verified_at": "2026-07-15"
+    },
+    {
+      "dependency_versions": {
+        "python": [
           ">=3.14,<3.15"
         ]
       },
       "end_to_end": {
-        "digest": "a6ff4bc46f428760da5120911291eeba61f44d13991512058c9c347e11b4d3bc",
+        "digest": "f81a5f575c18a701950d0b55665bc37725fd3cae0c3ae5e62850c8a1348b78c9",
         "id": "structure-search-e2e-v1",
         "passed": true
       },
@@ -3287,7 +3569,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "260ca10ecd1d5f36cf50b7c7050a08216b2b48ac4b31f737ebfa17a8923b1d3b",
+        "digest": "d913a7373a4f54224925b56946fbdfe38552d7525ccad771cc81a4c656705df0",
         "id": "variant-evidence-e2e-v1",
         "passed": true
       },
@@ -3428,7 +3710,7 @@
       "verified_at": "2026-07-12"
     }
   ],
-  "registry_digest": "87f32dd15346331a7a27acb19f7097a3d582a2052c0ececd5ac3ef71cb159589",
-  "regression_passed": 91,
+  "registry_digest": "59a57189d49943baf5e5a09974fb92d930441c3f634d0813fb6af6b9999a0300",
+  "regression_passed": 97,
   "schema_version": 1
 }

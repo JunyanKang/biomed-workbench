@@ -48,8 +48,24 @@ class SourcePolicyTests(unittest.TestCase):
             second = refine_ledger(path)
             row = json.loads(path.read_text(encoding="utf-8"))
         self.assertEqual(first["changed_count"], 1)
-        self.assertEqual(second["changed_count"], 0)
+        self.assertEqual(second["changed_count"], 1)
+        self.assertEqual(first["transitions"], second["transitions"])
         self.assertEqual(row["action"], "retire")
+
+    def test_private_scope_rule_retires_only_the_reviewed_receipt(self):
+        rule = {
+            "id": "materials-science-explicitly-excluded",
+            "target": "excluded/product-boundary/materials-science",
+            "rationale": "Explicit reviewed product boundary for a non-biomedical operation; related biomedical structure analysis remains independently implemented and tested.",
+            "criteria": {"source": "primary-b", "capability_cluster": "structural_biology", "path_exact": ["family/material.py"]},
+        }
+        row = self.compute_row()
+        row.update(path="family/material.py", capability_cluster="structural_biology", target="biomed_workbench/capabilities/structure.py")
+        updated, matched = apply_scope_policy(row, [rule])
+        self.assertEqual(matched, rule["id"])
+        self.assertEqual(updated["action"], "retire")
+        self.assertEqual(updated["reuse_mode"], "none")
+        self.assertEqual(updated["target"], rule["target"])
 
     def test_duplicate_identity_fails(self):
         row = self.compute_row()

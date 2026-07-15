@@ -31,16 +31,17 @@ class SourceBindingTests(unittest.TestCase):
 
     def test_rule_adds_deterministic_path_free_binding(self):
         bindings, report = apply_binding_rules([self.row()], [], [self.rule()])
-        self.assertEqual(report["added_binding_count"], 1)
+        self.assertEqual(report["matched_receipt_count"], 1)
+        self.assertEqual(report["bindings_by_rule"], {"clinical-trials-v2": 1})
         self.assertEqual(bindings[0]["module_ids"], ["clinical-trial-evidence"])
         self.assertRegex(bindings[0]["receipt_id"], r"^[0-9a-f]{64}$")
         self.assertNotIn("family/client.py", json.dumps(report))
 
     def test_existing_identical_binding_is_idempotent(self):
-        bindings, _ = apply_binding_rules([self.row()], [], [self.rule()])
+        bindings, first_report = apply_binding_rules([self.row()], [], [self.rule()])
         repeated, report = apply_binding_rules([self.row()], bindings, [self.rule()])
         self.assertEqual(repeated, bindings)
-        self.assertEqual(report["added_binding_count"], 0)
+        self.assertEqual(report, first_report)
 
     def test_overlap_nonpending_and_conflict_fail(self):
         second = self.rule()

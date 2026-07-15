@@ -1,6 +1,21 @@
-# Biomed Workbench
+<p align="center">
+  <img src="assets/biomed-workbench-mark.svg" width="112" alt="Biomed Workbench logo">
+</p>
 
-Unified local biomedical research workbench for Codex.
+<h1 align="center">Biomed Workbench</h1>
+
+<p align="center"><strong>Unified biomedical research and publication workbench for Codex.</strong></p>
+
+<p align="center">
+  <a href="https://github.com/JunyanKang/biomed-workbench/actions"><img alt="Quality" src="https://img.shields.io/github/actions/workflow/status/JunyanKang/biomed-workbench/quality.yml?branch=main&amp;label=quality"></a>
+  <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-4388C7"></a>
+  <img alt="96 modules" src="https://img.shields.io/badge/modules-96-36A58B">
+  <img alt="One Codex skill" src="https://img.shields.io/badge/Codex%20skills-1-E05A47">
+</p>
+
+<p align="center">
+  <img src="assets/research-loop.svg" width="100%" alt="Biomed Workbench scientific research loop">
+</p>
 
 This project exposes one Codex skill:
 
@@ -8,7 +23,7 @@ This project exposes one Codex skill:
 
 Use that single entry for biomedical evidence search, omics, single-cell analysis, molecular design, imaging, clinical translation, experimental planning, manuscript work, citation auditing, peer review, patents, and presentation planning. The workbench decides whether a task needs one analysis, independent parallel analyses, or a dependent scientific pipeline.
 
-The current registry contains 90 dynamically discovered modules and 91 fully evidenced compatibility rows. The release suite discovers 572 tests; these counts are observations of this revision, not monotonic quality targets.
+The current registry contains 96 dynamically discovered modules and 97 fully evidenced compatibility rows. The release suite discovers 577 tests; these counts are observations of this revision, not monotonic quality targets.
 
 The operational catalog is source-neutral. Provenance is kept separately from routing and execution.
 
@@ -50,6 +65,7 @@ Run these checks from the repository root before pushing or tagging a release:
 ```bash
 python3 tools/validate_workbench.py --release
 python3 -m unittest discover -s tests -v
+python3 tools/verify_codex_install.py --codex-cli "$(command -v codex)"
 python3 tools/reconcile_sources.py --manifest .source-audit/manifest.jsonl --design-ledger .source-audit/rewrite-ledger.jsonl --capability-bindings .source-audit/capability-bindings.jsonl --private-output .source-audit/reconciliation-ledger.jsonl --public-output reports/source-reconciliation-summary.json
 python3 tools/route_task.py "single-cell analysis and Nature-style result writing"
 python3 tools/search_tools.py --workflow publication reviewer --limit 5
@@ -123,6 +139,12 @@ External scientific engines remain project dependencies rather than bundled vend
 | `structure-polymer-entities` | RCSB PDB Data REST v1 contract observed `2026-07-13` | Python `3.14.3` standard-library HTTPS client | PDB ID plus optional bounded entity IDs and sequence inclusion | entity identity, source organism, UniProt links, sequence length, mutation count, optional canonical sequence, and explicit missing entities |
 | `structure-ligands` | RCSB PDB Data REST v1 contract observed `2026-07-13` | Python `3.14.3` standard-library HTTPS client | PDB ID and ligand cap | entry-to-nonpolymer-to-chemical-component links with formula, charge, InChIKey, stereochemical SMILES, truncation, and explicit missing records |
 | `alphafold-structure-evidence` | AlphaFold DB prediction API contract observed `2026-07-14` | Python `3.14.3` bounded HTTPS client | one to 40 UniProt accessions with optional sequence inclusion | explicit model coverage, canonical and isoform records, provider/tool/version, sequence range, global and binned pLDDT, and approved coordinate/PAE/MSA/annotation resource URLs |
+| `structure-quality-assessment` | Biopython `1.87` | Python `3.11.15` | one explicit PDB `3.3` or mmCIF `5` model with experimental B-factor, AlphaFold pLDDT, or unknown semantics | residue-level coordinate completeness, alternate locations, occupancy, confidence/B-factor distributions, and reason-coded limitations |
+| `structure-chain-comparison` | Biopython `1.87` | Python `3.11.15` | reference and moving PDB `3.3` or mmCIF `5` plus one-to-one chain map | sequence-aware residue correspondence, coverage, identity, rigid transform, independently checked RMSD, unmatched residues, and transformed coordinates; TM-score remains absent unless a validated backend computes it |
+| `docking-pose-review` | RDKit `2025.09.6`, Biopython `1.87` | Python `3.11.15` | exact four-column DiffDock batch CSV, bounded JSON parameters, receptor PDB, and complete SDF pose directory | validated canonical batch/config, per-pose identity and geometry ledger, clashes, pose diversity, invalid-pose retention, and confidence-is-not-affinity boundary |
+| `chemical-substructure-filter` | RDKit `2025.09.6` | Python `3.11.15` | SMILES, CSV, or SDF records plus validated inclusion/exclusion SMARTS | complete accepted/rejected record ledger, atom matches, canonical stereochemical identity, and explicit parse/sanitization failures |
+| `protein-secondary-structure` | mkdssp `4.6.1`, Biopython `1.87`, Matplotlib `3.11.0` | Python `3.11.15` plus explicit DSSP dictionary resources | selected PDB `3.3` or mmCIF `5` model/chains | full DSSP alphabet, accessibility, phi/psi, unresolved-residue accounting, gap-aware segment track, and digest-bound SVG diagram |
+| `structure-interactive-visualization` | py3Dmol `2.5.3`, Biopython `1.87` | Python `3.11.15` | selected PDB `3.3` or mmCIF `5` model/chains with explicit color semantics | nonblank HTML molecular view plus manifest binding source digest, selection, style, confidence provenance, and non-analytical-use boundary |
 | `image-chroma-key-remove` | Python `3.14.3` | Pillow `10.4.0` | one static untagged-sRGB PNG `3.0`, JPEG `T.81`, or WebP `riff-container-2025` communication asset | canonical RGBA PNG plus independently recomputed matte-quality report |
 
 Tool-use guidance and routing remain available regardless of the installed version. For scientific execution, versions inside the declared compatibility policy may run and are recorded verbatim; provenance also states whether each version is an exact tested baseline. Missing tools first trigger compatible-environment discovery and, when feasible, an isolated temporary or project-local installation plus regression check. Versions outside the policy, failed installation, known breaking changes, or invalid output structures prevent the result from entering the evidence ledger until compatibility is established or a validated alternative is selected. The `reports/*-live-verification.json` files preserve the concrete versions used for FastQC, fastp, MultiQC, FastQ Screen, samtools, bedtools, VCF processing, TMB, and NMF regression evidence.
@@ -131,7 +153,9 @@ The public evidence clients require no new credentials. They use HTTPS host allo
 
 ## Bioinformatics Code Templates
 
-Every built-in `omics` or `molecular_design` analysis, validation, transform, or design module packages at least one substantive Python or R template for Codex to inspect and adapt. The current release covers 38/38 bioinformatics modules with 42 templates. A template must expose real parameterization, input validation, output serialization, failure handling, version provenance, and scientific quality checks; placeholders, dependency installation, infrastructure management, unsafe shell execution, local paths, and unbound blocking quality gates fail release validation.
+Every built-in `omics` or `molecular_design` analysis, validation, transform, or design module packages at least one substantive Python or R template for Codex to inspect and adapt. The current release covers 44/44 bioinformatics modules with 50 templates. A template must expose real parameterization, input validation, output serialization, failure handling, version provenance, and scientific quality checks; placeholders, dependency installation, infrastructure management, unsafe shell execution, local paths, and unbound blocking quality gates fail release validation.
+
+Structural analysis is implemented as composable scientific steps rather than a vendor bridge. DiffDock preparation and result review are separate templates in one module; DSSP assignment feeds a separate gap-aware SVG renderer; quality assessment, chain comparison, SMARTS filtering, and py3Dmol inspection remain independently routable. Real verification uses public 1CRN and AlphaFold P04637 v6 structures, valid and malformed SDF records, a known rigid transform, observed mkdssp execution, and reloadable output artifacts. See the six `reports/*structure*-live-verification.json` files plus `reports/docking-pose-review-live-verification.json` and `reports/chemical-substructure-filter-live-verification.json`.
 
 Deterministic modules declare `code_templates`; Agent-generated workflows reference templates through `agent_protocol.template_sections`. Both routes use module-local source, exact manifest references, the shared compatibility and artifact contracts, and observed output checks. `tools/create_module.py` automatically scaffolds and validates a template when a future bioinformatics module is created, while `tools/scaffold_bioinformatics_templates.py --check` detects drift. See `reports/bioinformatics-template-coverage.json` for the complete inventory.
 
@@ -158,8 +182,9 @@ Deterministic modules declare `code_templates`; Agent-generated workflows refere
 - `tools/search_tools.py`: catalog search and inspection.
 - `tools/run_tool.py`: generic runner for direct, bounded tools.
 - `tools/validate_workbench.py`: release validation for single-entry skill, catalog consistency, source coverage, and publish-safe paths.
+- `tools/verify_codex_install.py`: repeatable isolated Codex marketplace installation, cache discovery, routing, and execution verification.
 - `tools/reconcile_sources.py`: development-only one-to-one reconciliation of ignored source/design ledgers into a path-free release receipt root.
-- `tools/refine_source_design_ledger.py`: deterministic product-boundary policy that retires compute-infrastructure responsibilities without touching scientific pending records.
+- `tools/refine_source_design_ledger.py`: deterministic product-boundary policy that retires compute infrastructure, local-model inference, and non-biomedical materials-science responsibilities without touching in-scope scientific records.
 - `tools/apply_source_capability_bindings.py`: generic private-rule binder; source paths remain ignored while the public report exposes only rule and receipt counts.
 - `reports/compatibility-execution-evidence.json`: path-free regression and end-to-end evidence bound to every supported compatibility row.
 - `reports/bioinformatics-template-coverage.json`: complete bioinformatics module-to-template coverage and source-quality results.
@@ -168,6 +193,7 @@ Deterministic modules declare `code_templates`; Agent-generated workflows refere
 - `reports/chroma-key-live-verification.json`: real command-boundary execution, synthetic edge fixture, output digests, alpha-class checks, and non-quantitative-use evidence for chroma keying.
 - `reports/source-reconciliation-summary.json`: public counts, pending capability decisions, current module/project-contract evidence binding, and an irreversible digest over all private per-file receipts.
 - `reports/plugin-contract-verification.json`: path-free official Codex plugin and Skill validation bound to the current manifest, single Skill entry, generated registry, and isolated snapshot.
+- `reports/codex-install-verification.json`: path-free proof that a fresh isolated Codex home installed the current plugin cache, discovered 96 modules and one Skill, routed a task, and executed an offline module.
 - `reports/local-update-verification.json`: digest-bound proof that local cachebuster updates replace one SemVer build suffix atomically and never enter the scientific runtime.
 - `reports/ci-quality-verification.json`: current GitHub test, release-validation, deterministic-evidence, and checksum-verified full-history secret-scan contract.
 - `biomed_workbench/capabilities/`: independently rewritten scientific implementations.
@@ -194,6 +220,6 @@ This workbench is an independent clean-room implementation informed by inspected
 
 Every inspected source file has one private content-identified design receipt. The release reconciler rejects missing or duplicate receipts, then classifies each as implemented, superseded, guidance, excluded, provenance, or pending. Executable capability and schema decisions remain pending until a path-free private receipt binding resolves them to current passing module compatibility, regression, and representative execution evidence; therefore reading a source file is never presented as functional implementation.
 
-The current reconciliation accounts for all 89,314 inspected files, with 88,076 resolved and 1,238 still pending specific scientific module or project-contract evidence. Nonzero pending records deliberately prevent a source-union completeness or overall-superiority claim; they are the maintained backlog for deeper capability absorption rather than a hidden bridge to source code.
+The current reconciliation accounts for all 89,314 inspected files, with 88,099 resolved and 1,215 still pending specific scientific module or project-contract evidence. Nonzero pending records deliberately prevent a source-union completeness or overall-superiority claim; they are the maintained backlog for deeper capability absorption rather than a hidden bridge to source code. The structural-biology review in this revision leaves no unbound in-scope structural record: independent current modules resolve those capabilities, while local ESMFold execution and materials-science crystal tooling are explicitly retired at the product boundary.
 
 The ignored `.source-audit/` ledgers are development evidence and are neither runtime inputs nor published path bridges. The repository publishes only source-neutral aggregate reports and a SHA-256 receipt root. See `NOTICE.md` for attribution and `reports/` for the releasable evidence.

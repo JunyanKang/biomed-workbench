@@ -1,0 +1,832 @@
+{
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not treat DiffDock confidence as binding affinity or validation.",
+      "Do not silently skip RDKit parse or sanitization failures.",
+      "Do not select a pose only because it has the desired visual orientation.",
+      "Do not install or manage environments, containers, accelerators, schedulers, remote runtimes, or local models from inside an analysis template."
+    ],
+    "languages": [
+      "python"
+    ],
+    "mode": "codex_generated_project_code",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "coordinate-units",
+          "receptor-preparation",
+          "ligand-heavy-atoms",
+          "predeclared-policy"
+        ],
+        "id": "select-docking-review-thresholds",
+        "parameter": "distance-thresholds",
+        "selection_rule": "Freeze severe-clash and close-contact distance thresholds in Angstrom before reading pose ranks.",
+        "validation_rule": "Block inverted thresholds, non-finite coordinates, unverified ligand identity, or incomplete pose inventory."
+      }
+    ],
+    "postflight_checks": [
+      "Reconcile every pose to one retained success or reason-coded failure record.",
+      "Verify finite coordinates, chemical identity, rank uniqueness, clash counts, and pairwise pose RMSD where atom identity permits.",
+      "Reload report tables and verify all source and output digests."
+    ],
+    "preflight_checks": [
+      "Validate the four-column batch manifest, unique complex names, exclusive protein path or sequence, ligand identity, bounded configuration, and source digests.",
+      "Hash receptor and every pose file and preserve the declared DiffDock producer version.",
+      "Inventory ranks and confidence values before filtering or sorting and freeze clash thresholds."
+    ],
+    "provenance_fields": [
+      "module-version",
+      "compatibility-row-id",
+      "source-artifact-digests",
+      "input-format-and-producer-version",
+      "tool-and-dependency-versions",
+      "model-chain-and-record-scope",
+      "parameters",
+      "quality-gate-results",
+      "output-artifact-digests"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-docking-pose-review",
+        "output_artifact_types": [
+          "docking_batch_manifest",
+          "docking_inference_config",
+          "docking_preparation_report",
+          "docking_review_report"
+        ],
+        "purpose": "Inspect project inputs, provenance, scientific scope, and compatibility before execution.",
+        "required_logic": [
+          "Validate the four-column batch manifest, unique complex names, exclusive protein path or sequence, ligand identity, bounded configuration, and source digests.",
+          "Hash receptor and every pose file and preserve the declared DiffDock producer version.",
+          "Inventory ranks and confidence values before filtering or sorting and freeze clash thresholds."
+        ],
+        "template_files": [
+          "templates/prepare_docking_batch.py",
+          "templates/review_docking_poses.py"
+        ]
+      },
+      {
+        "id": "execute-docking-pose-review",
+        "output_artifact_types": [
+          "docking_batch_manifest",
+          "docking_inference_config",
+          "docking_preparation_report",
+          "docking_review_report"
+        ],
+        "purpose": "Adapt and execute the packaged template, then admit only gate-passing outputs.",
+        "required_logic": [
+          "Reconcile every pose to one retained success or reason-coded failure record.",
+          "Verify finite coordinates, chemical identity, rank uniqueness, clash counts, and pairwise pose RMSD where atom identity permits.",
+          "Reload report tables and verify all source and output digests."
+        ],
+        "template_files": [
+          "templates/prepare_docking_batch.py",
+          "templates/review_docking_poses.py"
+        ]
+      }
+    ]
+  },
+  "alternatives": [],
+  "assumptions": [
+    "Coordinate units, molecular identity, producer provenance, model and chain scope, and scientific interpretation boundaries are declared rather than guessed."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/prepare_docking_batch.py",
+      "purpose": "Execute prepare and review docking workflows with complete chemical and coordinate checks against real project files with complete quality and provenance checks.",
+      "quality_gate_ids": [
+        "docking-preparation-manifest",
+        "docking-preparation-identity",
+        "docking-preparation-parameters",
+        "docking-review-result-accounting",
+        "docking-review-chemical-identity",
+        "docking-review-geometry",
+        "docking-review-score-semantics",
+        "docking-review-output-integrity"
+      ],
+      "requires_adaptation": true
+    },
+    {
+      "language": "python",
+      "path": "templates/review_docking_poses.py",
+      "purpose": "Execute prepare and review docking workflows with complete chemical and coordinate checks against real project files with complete quality and provenance checks.",
+      "quality_gate_ids": [
+        "docking-preparation-manifest",
+        "docking-preparation-identity",
+        "docking-preparation-parameters",
+        "docking-review-result-accounting",
+        "docking-review-chemical-identity",
+        "docking-review-geometry",
+        "docking-review-score-semantics",
+        "docking-review-output-integrity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.11,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "docking-pose-review-e2e-v1"
+      ],
+      "id": "structure-analysis-2026-07-15-docking-pose-review",
+      "input_formats": {
+        "docking_batch_manifest": [
+          "csv@1"
+        ],
+        "docking_inference_config": [
+          "json@RFC8259"
+        ],
+        "docking_results": [
+          "sdf@v2000"
+        ],
+        "receptor_coordinates": [
+          "pdb@3.3"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "docking_preparation_report": [
+          "inline-json@1"
+        ],
+        "docking_review_report": [
+          "tabular@1",
+          "inline-json@1"
+        ],
+        "validated_docking_batch": [
+          "csv@1"
+        ],
+        "validated_docking_config": [
+          "yaml@1.2"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "docking-pose-review-regression-v1"
+      ],
+      "tool_versions": {
+        "biopython": [
+          ">=1.87,<1.88"
+        ],
+        "rdkit": [
+          ">=2025.9,<2026"
+        ]
+      },
+      "verified_at": "2026-07-15"
+    }
+  ],
+  "complements": [
+    "alphafold-structure-evidence",
+    "structure-evidence",
+    "structure-polymer-entities",
+    "structure-ligands"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.11,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the project-adapted structural-analysis template and emit versioned provenance.",
+      "required": true,
+      "tested_versions": [
+        "3.11.15"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/"
+    }
+  ],
+  "description": "Validate and serialize DiffDock-style batch inputs and bounded inference parameters, then inventory pose outputs, preserve producer version and rank/confidence semantics, sanitize every ligand with RDKit, verify identity and 3D coordinates, quantify receptor clashes and pose diversity, and retain invalid or missing poses instead of ranking them away.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "produces-docking-pose-review-evidence",
+    "blocks-unsupported-structural-claims"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "docking-pose-review",
+  "input_artifacts": [
+    {
+      "artifact_type": "docking_batch_manifest",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "csv",
+          "orientations": [
+            "coordinate-or-record-input"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "docking_batch_manifest",
+      "processing_levels": [
+        "declared",
+        "source-preserved"
+      ],
+      "required_metadata": [
+        "input-artifact-digest",
+        "format-version",
+        "producer-version"
+      ]
+    },
+    {
+      "artifact_type": "docking_inference_config",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "json",
+          "orientations": [
+            "coordinate-or-record-input"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "RFC8259"
+          ]
+        }
+      ],
+      "name": "docking_inference_config",
+      "processing_levels": [
+        "declared",
+        "source-preserved"
+      ],
+      "required_metadata": [
+        "input-artifact-digest",
+        "format-version",
+        "producer-version"
+      ]
+    },
+    {
+      "artifact_type": "structure_coordinates",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "pdb",
+          "orientations": [
+            "coordinate-or-record-input"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "3.3"
+          ]
+        }
+      ],
+      "name": "receptor_coordinates",
+      "processing_levels": [
+        "declared",
+        "source-preserved"
+      ],
+      "required_metadata": [
+        "input-artifact-digest",
+        "format-version",
+        "producer-version"
+      ]
+    },
+    {
+      "artifact_type": "docking_pose_collection",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "sdf",
+          "orientations": [
+            "coordinate-or-record-input"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "v2000"
+          ]
+        }
+      ],
+      "name": "docking_results",
+      "processing_levels": [
+        "declared",
+        "source-preserved"
+      ],
+      "required_metadata": [
+        "input-artifact-digest",
+        "format-version",
+        "producer-version"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "batch_manifest_path": {
+        "maxLength": 4096,
+        "minLength": 1,
+        "type": "string"
+      },
+      "contact_distance": {
+        "exclusiveMinimum": 0,
+        "type": "number"
+      },
+      "diffdock_version": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "inference_config": {
+        "type": "object"
+      },
+      "ligand_identity": {
+        "maxLength": 2048,
+        "minLength": 1,
+        "type": "string"
+      },
+      "objective": {
+        "maxLength": 4000,
+        "minLength": 12,
+        "type": "string"
+      },
+      "receptor_path": {
+        "maxLength": 4096,
+        "minLength": 1,
+        "type": "string"
+      },
+      "results_directory": {
+        "maxLength": 4096,
+        "minLength": 1,
+        "type": "string"
+      },
+      "severe_clash_distance": {
+        "exclusiveMinimum": 0,
+        "type": "number"
+      }
+    },
+    "required": [
+      "objective",
+      "receptor_path",
+      "results_directory",
+      "diffdock_version",
+      "ligand_identity",
+      "severe_clash_distance",
+      "contact_distance",
+      "batch_manifest_path",
+      "inference_config"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "review DiffDock results",
+    "validate docking poses and clashes",
+    "\u590d\u6838\u5206\u5b50\u5bf9\u63a5\u6784\u8c61\u6392\u540d\u8eab\u4efd\u548c\u7a7a\u95f4\u51b2\u7a81"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "These computational checks support structural interpretation but do not establish experimental state, biological relevance, binding affinity, dynamics, function, or causal mechanism."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "writes_output",
+  "output_artifacts": [
+    {
+      "artifact_type": "docking_batch_manifest",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "csv",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "validated_docking_batch",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module-version",
+        "compatibility-row-id",
+        "artifact-digest"
+      ]
+    },
+    {
+      "artifact_type": "docking_inference_config",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "yaml",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.2"
+          ]
+        }
+      ],
+      "name": "validated_docking_config",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module-version",
+        "compatibility-row-id",
+        "artifact-digest"
+      ]
+    },
+    {
+      "artifact_type": "docking_preparation_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "docking_preparation_report",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module-version",
+        "compatibility-row-id",
+        "artifact-digest"
+      ]
+    },
+    {
+      "artifact_type": "docking_review_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tabular",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "docking_review_report",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module-version",
+        "compatibility-row-id",
+        "artifact-digest"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "codex_generated_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Codex can inspect immutable project inputs and an existing compatible scientific environment; outputs are new and no compute-infrastructure management is required."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://github.com/gcorso/DiffDock",
+      "https://www.rdkit.org/docs/",
+      "Project-owned clean-room structural-analysis implementation and scientific validation contract."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require the exact four-column DiffDock batch contract, unique safe complex names, exclusive protein path or sequence, and complete row accounting.",
+      "id": "docking-preparation-manifest",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require stable in-boundary PDB or SDF files, parseable finite protein coordinates, bounded protein sequences, and RDKit-validated ligand identity.",
+      "id": "docking-preparation-identity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require a closed configuration schema, explicit model-family flags, bounded diffusion and sampling parameters, and internally consistent step counts.",
+      "id": "docking-preparation-parameters",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Inventory every expected and observed pose, duplicate rank, parse failure, confidence value, and source digest.",
+      "id": "docking-review-result-accounting",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require RDKit sanitization, declared ligand identity reconciliation, stereochemical SMILES, heavy-atom count, fragment count, and finite 3D coordinates.",
+      "id": "docking-review-chemical-identity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require receptor coordinate parsing, distance thresholds fixed before review, severe-clash and close-contact counts, and pose-diversity accounting.",
+      "id": "docking-review-geometry",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Treat DiffDock confidence as producer-specific ranking evidence, never affinity, thermodynamics, kinetics, or experimental binding.",
+      "id": "docking-review-score-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require reloadable per-pose and summary outputs with versions, parameters, warnings, and digests.",
+      "id": "docking-review-output-integrity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which docking poses remain chemically and geometrically reviewable after complete result accounting, and what prevents any pose from being interpreted as binding evidence?"
+  ],
+  "schema_version": 1,
+  "title": "Prepare and review docking workflows with complete chemical and coordinate checks",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=2025.9,<2026"
+      ],
+      "ecosystem": "python",
+      "identity": "rdkit",
+      "mismatch_policy": "block",
+      "name": "rdkit",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "2025.09.6"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=2025.9,<2026"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "RDKit molecule parsing, sanitization, SMARTS matching, stereochemical identity, conformer, and distance APIs are version-sensitive.",
+          "id": "rdkit-validated-api",
+          "required_action": "Retain every invalid molecule, query, match, stereochemical identity, and coordinate-quality state instead of silently dropping records.",
+          "source": "https://www.rdkit.org/docs/"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import rdkit; print(rdkit.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://www.rdkit.org/docs/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.87,<1.88"
+      ],
+      "ecosystem": "python",
+      "identity": "Bio.PDB",
+      "mismatch_policy": "block",
+      "name": "biopython",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.87"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.87,<1.88"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "Bio.PDB parser, aligner, superposition, DSSP adapter, and writer APIs are used with explicit model and chain selection.",
+          "id": "biopython-validated-api",
+          "required_action": "Validate parser behavior, residue identity, chain mapping, coordinate counts, and serialized outputs before admitting results.",
+          "source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import Bio; print(Bio.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
+    }
+  ],
+  "version": "1.0.0"
+}

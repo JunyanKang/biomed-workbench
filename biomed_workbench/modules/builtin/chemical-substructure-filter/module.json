@@ -1,0 +1,557 @@
+{
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not silently drop invalid molecules or invalid SMARTS.",
+      "Do not imply tautomer, protonation, salt, or stereochemical equivalence unless explicitly standardized.",
+      "Do not overwrite the input molecular collection.",
+      "Do not install or manage environments, containers, accelerators, schedulers, remote runtimes, or local models from inside an analysis template."
+    ],
+    "languages": [
+      "python"
+    ],
+    "mode": "codex_generated_project_code",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "scientific-question",
+          "tautomer-policy",
+          "charge-policy",
+          "stereochemistry",
+          "record-format"
+        ],
+        "id": "select-substructure-policy",
+        "parameter": "smarts-policy",
+        "selection_rule": "Declare inclusion and exclusion SMARTS and molecular identity policy before filtering.",
+        "validation_rule": "Block invalid SMARTS, duplicate identifiers, silent sanitization failure, or unaccounted input records."
+      }
+    ],
+    "postflight_checks": [
+      "Require every input record to appear exactly once as accepted or reason-coded rejected.",
+      "Recompute atom matches and canonical isomeric SMILES for accepted records.",
+      "Reload result JSON and TSV and verify counts and digests."
+    ],
+    "preflight_checks": [
+      "Hash the input and inspect format, headers, record identifiers, molecule field, and duplicate IDs.",
+      "Parse every SMARTS query before reading molecular outcomes.",
+      "Freeze sanitization, stereochemistry, fragment, charge, and tautomer interpretation policy."
+    ],
+    "provenance_fields": [
+      "module-version",
+      "compatibility-row-id",
+      "source-artifact-digests",
+      "input-format-and-producer-version",
+      "tool-and-dependency-versions",
+      "model-chain-and-record-scope",
+      "parameters",
+      "quality-gate-results",
+      "output-artifact-digests"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-chemical-substructure-filter",
+        "output_artifact_types": [
+          "substructure_filter_report"
+        ],
+        "purpose": "Inspect project inputs, provenance, scientific scope, and compatibility before execution.",
+        "required_logic": [
+          "Hash the input and inspect format, headers, record identifiers, molecule field, and duplicate IDs.",
+          "Parse every SMARTS query before reading molecular outcomes.",
+          "Freeze sanitization, stereochemistry, fragment, charge, and tautomer interpretation policy."
+        ],
+        "template_files": [
+          "templates/filter_chemical_substructures.py"
+        ]
+      },
+      {
+        "id": "execute-chemical-substructure-filter",
+        "output_artifact_types": [
+          "substructure_filter_report"
+        ],
+        "purpose": "Adapt and execute the packaged template, then admit only gate-passing outputs.",
+        "required_logic": [
+          "Require every input record to appear exactly once as accepted or reason-coded rejected.",
+          "Recompute atom matches and canonical isomeric SMILES for accepted records.",
+          "Reload result JSON and TSV and verify counts and digests."
+        ],
+        "template_files": [
+          "templates/filter_chemical_substructures.py"
+        ]
+      }
+    ]
+  },
+  "alternatives": [],
+  "assumptions": [
+    "Coordinate units, molecular identity, producer provenance, model and chain scope, and scientific interpretation boundaries are declared rather than guessed."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/filter_chemical_substructures.py",
+      "purpose": "Execute filter chemical records with validated smarts and complete record accounting against real project files with complete quality and provenance checks.",
+      "quality_gate_ids": [
+        "substructure-filter-input-integrity",
+        "substructure-filter-query-validity",
+        "substructure-filter-molecule-validity",
+        "substructure-filter-output-integrity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.11,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "chemical-substructure-filter-e2e-v1"
+      ],
+      "id": "structure-analysis-2026-07-15-chemical-substructure-filter",
+      "input_formats": {
+        "chemical_records": [
+          "smi@1",
+          "sdf@v2000",
+          "csv@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "substructure_filter_report": [
+          "tabular@1",
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "chemical-substructure-filter-regression-v1"
+      ],
+      "tool_versions": {
+        "rdkit": [
+          ">=2025.9,<2026"
+        ]
+      },
+      "verified_at": "2026-07-15"
+    }
+  ],
+  "complements": [
+    "alphafold-structure-evidence",
+    "structure-evidence",
+    "structure-polymer-entities",
+    "structure-ligands"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.11,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the project-adapted structural-analysis template and emit versioned provenance.",
+      "required": true,
+      "tested_versions": [
+        "3.11.15"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/"
+    }
+  ],
+  "description": "Load SMILES, CSV, or SDF molecules, preserve record identity and failures, validate inclusion and exclusion SMARTS, retain atom-level matches and stereochemical canonical identity, and emit complete accepted and rejected ledgers.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "produces-chemical-substructure-filter-evidence",
+    "blocks-unsupported-structural-claims"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "chemical-substructure-filter",
+  "input_artifacts": [
+    {
+      "artifact_type": "chemical_record_collection",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "smi",
+          "orientations": [
+            "coordinate-or-record-input"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "sdf",
+          "orientations": [
+            "coordinate-or-record-input"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "v2000"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "csv",
+          "orientations": [
+            "coordinate-or-record-input"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "chemical_records",
+      "processing_levels": [
+        "declared",
+        "source-preserved"
+      ],
+      "required_metadata": [
+        "input-artifact-digest",
+        "format-version",
+        "producer-version"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "exclude_smarts": {
+        "items": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "identifier_column": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "include_smarts": {
+        "items": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "type": "string"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "input_format": {
+        "enum": [
+          "smi",
+          "sdf",
+          "csv"
+        ],
+        "type": "string"
+      },
+      "input_path": {
+        "maxLength": 4096,
+        "minLength": 1,
+        "type": "string"
+      },
+      "objective": {
+        "maxLength": 4000,
+        "minLength": 12,
+        "type": "string"
+      },
+      "smiles_column": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "input_path",
+      "input_format",
+      "include_smarts",
+      "exclude_smarts",
+      "smiles_column",
+      "identifier_column"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "filter molecules by SMARTS",
+    "chemical substructure inclusion exclusion",
+    "\u4f7f\u7528SMARTS\u7b5b\u9009\u5316\u5408\u7269\u5e76\u4fdd\u7559\u5168\u90e8\u5931\u8d25\u8bb0\u5f55"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "These computational checks support structural interpretation but do not establish experimental state, biological relevance, binding affinity, dynamics, function, or causal mechanism."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "writes_output",
+  "output_artifacts": [
+    {
+      "artifact_type": "substructure_filter_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tabular",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "substructure_filter_report",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module-version",
+        "compatibility-row-id",
+        "artifact-digest"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "codex_generated_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Codex can inspect immutable project inputs and an existing compatible scientific environment; outputs are new and no compute-infrastructure management is required."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://www.rdkit.org/docs/RDKit_Book.html#substructure-searching",
+      "https://www.rdkit.org/docs/GettingStartedInPython.html",
+      "Project-owned clean-room structural-analysis implementation and scientific validation contract."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require stable input, unique record identifiers, explicit format and columns, and complete row accounting.",
+      "id": "substructure-filter-input-integrity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require every SMARTS query to parse and preserve query order, inclusion or exclusion role, and atom-query semantics.",
+      "id": "substructure-filter-query-validity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require reason-coded parsing and sanitization states, canonical isomeric identity, fragments, charge, heavy atoms, and atom-level matches.",
+      "id": "substructure-filter-molecule-validity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require accepted and rejected records to sum to input count and reload with versions, parameters, and digests.",
+      "id": "substructure-filter-output-integrity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which explicitly identified molecules satisfy every declared inclusion and exclusion SMARTS query after sanitization and complete record accounting?"
+  ],
+  "schema_version": 1,
+  "title": "Filter chemical records with validated SMARTS and complete record accounting",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=2025.9,<2026"
+      ],
+      "ecosystem": "python",
+      "identity": "rdkit",
+      "mismatch_policy": "block",
+      "name": "rdkit",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "2025.09.6"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=2025.9,<2026"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "RDKit molecule parsing, sanitization, SMARTS matching, stereochemical identity, conformer, and distance APIs are version-sensitive.",
+          "id": "rdkit-validated-api",
+          "required_action": "Retain every invalid molecule, query, match, stereochemical identity, and coordinate-quality state instead of silently dropping records.",
+          "source": "https://www.rdkit.org/docs/"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import rdkit; print(rdkit.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://www.rdkit.org/docs/"
+    }
+  ],
+  "version": "1.0.0"
+}

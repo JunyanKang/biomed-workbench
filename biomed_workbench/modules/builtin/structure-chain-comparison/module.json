@@ -1,0 +1,643 @@
+{
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not pair residues only by list position across chains.",
+      "Do not report an approximate or invented TM-score.",
+      "Do not hide chain pairs with poor identity, coverage, or unresolved coordinates.",
+      "Do not install or manage environments, containers, accelerators, schedulers, remote runtimes, or local models from inside an analysis template."
+    ],
+    "languages": [
+      "python"
+    ],
+    "mode": "codex_generated_project_code",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "reference-chains",
+          "moving-chains",
+          "sequence-identity",
+          "biological-construct"
+        ],
+        "id": "select-chain-correspondence",
+        "parameter": "chain-map",
+        "selection_rule": "Declare a one-to-one reference-to-moving chain map from the biological construct and observed sequences.",
+        "validation_rule": "Block duplicated chains, absent chains, insufficient matched C-alpha atoms, or chain-agnostic whole-file pairing."
+      }
+    ],
+    "postflight_checks": [
+      "Recompute sequence identity, chain coverage, matched C-alpha count, transform determinant, and RMSD.",
+      "Retain unmatched residues and low-coverage chain pairs as explicit limitations.",
+      "Reload the transformed PDB and ensure the reference remained unchanged."
+    ],
+    "preflight_checks": [
+      "Hash and parse both structures and enumerate models, chains, residue identifiers, and sequences.",
+      "Validate a one-to-one chain map against observed chain identifiers.",
+      "Freeze alignment scoring and minimum matched-residue requirements before superposition."
+    ],
+    "provenance_fields": [
+      "module-version",
+      "compatibility-row-id",
+      "source-artifact-digests",
+      "input-format-and-producer-version",
+      "tool-and-dependency-versions",
+      "model-chain-and-record-scope",
+      "parameters",
+      "quality-gate-results",
+      "output-artifact-digests"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-structure-chain-comparison",
+        "output_artifact_types": [
+          "structure_comparison_report",
+          "structure_coordinates"
+        ],
+        "purpose": "Inspect project inputs, provenance, scientific scope, and compatibility before execution.",
+        "required_logic": [
+          "Hash and parse both structures and enumerate models, chains, residue identifiers, and sequences.",
+          "Validate a one-to-one chain map against observed chain identifiers.",
+          "Freeze alignment scoring and minimum matched-residue requirements before superposition."
+        ],
+        "template_files": [
+          "templates/compare_structure_chains.py"
+        ]
+      },
+      {
+        "id": "execute-structure-chain-comparison",
+        "output_artifact_types": [
+          "structure_comparison_report",
+          "structure_coordinates"
+        ],
+        "purpose": "Adapt and execute the packaged template, then admit only gate-passing outputs.",
+        "required_logic": [
+          "Recompute sequence identity, chain coverage, matched C-alpha count, transform determinant, and RMSD.",
+          "Retain unmatched residues and low-coverage chain pairs as explicit limitations.",
+          "Reload the transformed PDB and ensure the reference remained unchanged."
+        ],
+        "template_files": [
+          "templates/compare_structure_chains.py"
+        ]
+      }
+    ]
+  },
+  "alternatives": [],
+  "assumptions": [
+    "Coordinate units, molecular identity, producer provenance, model and chain scope, and scientific interpretation boundaries are declared rather than guessed."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/compare_structure_chains.py",
+      "purpose": "Execute compare protein structures with explicit chain and sequence correspondence against real project files with complete quality and provenance checks.",
+      "quality_gate_ids": [
+        "structure-comparison-input-integrity",
+        "structure-comparison-correspondence",
+        "structure-comparison-superposition",
+        "structure-comparison-score-semantics",
+        "structure-comparison-output-integrity"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.11,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "structure-chain-comparison-e2e-v1"
+      ],
+      "id": "structure-analysis-2026-07-15-structure-chain-comparison",
+      "input_formats": {
+        "moving_coordinates": [
+          "pdb@3.3",
+          "mmcif@5"
+        ],
+        "reference_coordinates": [
+          "pdb@3.3",
+          "mmcif@5"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "structure_comparison_report": [
+          "inline-json@1"
+        ],
+        "superposed_coordinates": [
+          "pdb@3.3",
+          "mmcif@5"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "structure-chain-comparison-regression-v1"
+      ],
+      "tool_versions": {
+        "biopython": [
+          ">=1.87,<1.88"
+        ]
+      },
+      "verified_at": "2026-07-15"
+    }
+  ],
+  "complements": [
+    "alphafold-structure-evidence",
+    "structure-evidence",
+    "structure-polymer-entities",
+    "structure-ligands"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.11,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the project-adapted structural-analysis template and emit versioned provenance.",
+      "required": true,
+      "tested_versions": [
+        "3.11.15"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/"
+    }
+  ],
+  "description": "Align declared chain pairs by sequence, map residue correspondence, superpose matched C-alpha coordinates, report identity, coverage and RMSD, and leave TM-score explicitly uncomputed unless an independently validated TM-align result is supplied.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "produces-structure-chain-comparison-evidence",
+    "blocks-unsupported-structural-claims"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "structure-chain-comparison",
+  "input_artifacts": [
+    {
+      "artifact_type": "structure_coordinates",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "pdb",
+          "orientations": [
+            "coordinate-or-record-input"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "3.3"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "mmcif",
+          "orientations": [
+            "coordinate-or-record-input"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "5"
+          ]
+        }
+      ],
+      "name": "reference_coordinates",
+      "processing_levels": [
+        "declared",
+        "source-preserved"
+      ],
+      "required_metadata": [
+        "input-artifact-digest",
+        "format-version",
+        "producer-version"
+      ]
+    },
+    {
+      "artifact_type": "structure_coordinates",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "pdb",
+          "orientations": [
+            "coordinate-or-record-input"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "3.3"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "mmcif",
+          "orientations": [
+            "coordinate-or-record-input"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "5"
+          ]
+        }
+      ],
+      "name": "moving_coordinates",
+      "processing_levels": [
+        "declared",
+        "source-preserved"
+      ],
+      "required_metadata": [
+        "input-artifact-digest",
+        "format-version",
+        "producer-version"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "chain_map": {
+        "minProperties": 1,
+        "type": "object"
+      },
+      "minimum_aligned_residues": {
+        "minimum": 3,
+        "type": "integer"
+      },
+      "moving_model_index": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "moving_path": {
+        "maxLength": 4096,
+        "minLength": 1,
+        "type": "string"
+      },
+      "objective": {
+        "maxLength": 4000,
+        "minLength": 12,
+        "type": "string"
+      },
+      "reference_model_index": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "reference_path": {
+        "maxLength": 4096,
+        "minLength": 1,
+        "type": "string"
+      },
+      "structure_format": {
+        "enum": [
+          "pdb",
+          "mmcif"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "reference_path",
+      "moving_path",
+      "structure_format",
+      "chain_map",
+      "reference_model_index",
+      "moving_model_index",
+      "minimum_aligned_residues"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "compare protein structures",
+    "chain-aware structural alignment and RMSD",
+    "\u6309\u94fe\u548c\u5e8f\u5217\u5bf9\u5e94\u5173\u7cfb\u6bd4\u8f83\u86cb\u767d\u7ed3\u6784"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "These computational checks support structural interpretation but do not establish experimental state, biological relevance, binding affinity, dynamics, function, or causal mechanism."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "writes_output",
+  "output_artifacts": [
+    {
+      "artifact_type": "structure_comparison_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "structure_comparison_report",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module-version",
+        "compatibility-row-id",
+        "artifact-digest"
+      ]
+    },
+    {
+      "artifact_type": "structure_coordinates",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "pdb",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "3.3"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "mmcif",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "5"
+          ]
+        }
+      ],
+      "name": "superposed_coordinates",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module-version",
+        "compatibility-row-id",
+        "artifact-digest"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "codex_generated_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Codex can inspect immutable project inputs and an existing compatible scientific environment; outputs are new and no compute-infrastructure management is required."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://biopython.org/docs/latest/api/Bio.Align.html",
+      "https://biopython.org/docs/latest/api/Bio.PDB.Superimposer.html",
+      "Project-owned clean-room structural-analysis implementation and scientific validation contract."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require immutable parseable inputs, source digests, explicit models, and one-to-one chain mapping.",
+      "id": "structure-comparison-input-integrity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require sequence-derived residue correspondence with identity, coverage, gaps, unresolved residues, and matched C-alpha counts.",
+      "id": "structure-comparison-correspondence",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require finite rigid-body transform, sufficient matched atoms, independently recomputed RMSD, and unmodified reference coordinates.",
+      "id": "structure-comparison-superposition",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Do not report approximate RMSD-derived values as TM-score; retain TM-score as not computed unless produced by a validated TM-align backend.",
+      "id": "structure-comparison-score-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require reloadable reports and superposed coordinates with complete provenance and digests.",
+      "id": "structure-comparison-output-integrity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "How similar are the declared chain pairs after sequence-aware coordinate correspondence, and which unmatched or low-coverage regions limit interpretation?"
+  ],
+  "schema_version": 1,
+  "title": "Compare protein structures with explicit chain and sequence correspondence",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.87,<1.88"
+      ],
+      "ecosystem": "python",
+      "identity": "Bio.PDB",
+      "mismatch_policy": "block",
+      "name": "biopython",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.87"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.87,<1.88"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "Bio.PDB parser, aligner, superposition, DSSP adapter, and writer APIs are used with explicit model and chain selection.",
+          "id": "biopython-validated-api",
+          "required_action": "Validate parser behavior, residue identity, chain mapping, coordinate counts, and serialized outputs before admitting results.",
+          "source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import Bio; print(Bio.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://biopython.org/docs/latest/api/Bio.PDB.html"
+    }
+  ],
+  "version": "1.0.0"
+}
