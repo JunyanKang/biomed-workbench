@@ -4,7 +4,7 @@
       "database": "crossref-europe-pmc",
       "europe_pmc_exact_matches": 1,
       "name": "citation_record_resolution",
-      "output_sha256": "1d0e6f23e3b86297feaa07806406862b2fff06f676c555d7dc1746e7137251d0",
+      "output_sha256": "576c95cf03cd24dd817074a78879ff97cfef35b70e64f14bde20b66beb838ade",
       "passed": true,
       "requested_id": "10.1038/s41586-020-2649-2"
     },
@@ -56,7 +56,7 @@
         "X-RAY DIFFRACTION"
       ],
       "name": "structure_entry_context",
-      "output_sha256": "58052f798f3a1e1401176851ef00ec623b56a6a31795816e7a60ac79f7be9a11",
+      "output_sha256": "9de5982dbd6fec352328da8548018578b1caeccf181bef367cffd0d68ec4634a",
       "passed": true,
       "requested_id": "4HHB",
       "resolution_combined": [
@@ -66,7 +66,7 @@
     {
       "database": "rcsb-pdb-search",
       "name": "structure_attribute_search",
-      "output_sha256": "9b8eeaa12c37c86aa927547e31846bb45cc495be7ce2b5d90b7a050bff6533a4",
+      "output_sha256": "785f9d1b3ac9c3a8e46d5115bec4d9302e49b7f6883ae37dd6d8b6a98bbebe08",
       "passed": true,
       "records_truncated": true,
       "requested_query": {
@@ -97,9 +97,18 @@
       "passed": true,
       "requested_id": "4HHB",
       "returned_count": 1
+    },
+    {
+      "database": "alphafold-db",
+      "model_count": 9,
+      "name": "structure_prediction_metadata",
+      "output_sha256": "32f2bf91cda7330fbc43aed545b70177c389963a39356ced60f61dcecf4bed38",
+      "passed": true,
+      "requested_id": "P04637"
     }
   ],
   "contracts": {
+    "alphafold-db-api": "prediction-api-observed-2026-07-14",
     "biorxiv-details": "details-v1-observed-2026-07-13",
     "clinicaltrials-gov-api": "api-v2-observed-2026-07-13",
     "crossref-rest": "rest-v1-observed-2026-07-13",
@@ -116,9 +125,25 @@
     "structure-evidence",
     "structure-search",
     "structure-polymer-entities",
-    "structure-ligands"
+    "structure-ligands",
+    "alphafold-structure-evidence"
   ],
   "module_package_validation": {
+    "alphafold-structure-evidence": {
+      "compatibility_evidence_complete": true,
+      "compatibility_rows": 1,
+      "dependency_evidence_complete": true,
+      "entrypoint_resolved": true,
+      "errors": [],
+      "executed_test_cases": 1,
+      "format_evidence_complete": true,
+      "kernel_version": "0.2.0-dev",
+      "module_id": "alphafold-structure-evidence",
+      "module_version": "1.0.0",
+      "schema_version": 1,
+      "tool_evidence_complete": true,
+      "valid": true
+    },
     "chemical-evidence": {
       "compatibility_evidence_complete": true,
       "compatibility_rows": 1,
@@ -241,9 +266,10 @@
     }
   },
   "passed": true,
-  "registry_digest": "b07cd7373780eacacd88270956375f050e0c4de0cc51f9aa543f833cd73856bb",
+  "registry_digest": "87f32dd15346331a7a27acb19f7097a3d582a2052c0ececd5ac3ef71cb159589",
   "schema_version": 1,
   "scientific_summary": {
+    "alphafold_model_version_and_confidence_context_retained": true,
     "bound_ligand_component_identity_retained": true,
     "chemical_stereochemistry_context_retained": true,
     "cross_source_disagreement_not_silently_merged": true,
@@ -256,5 +282,5 @@
     "structure_search_counts_and_truncation_reconciled": true,
     "trial_protocol_and_results_context_retained": true
   },
-  "verified_at": "2026-07-14T14:18:23.164441+00:00"
+  "verified_at": "2026-07-15T02:52:18.936132+00:00"
 }

@@ -18,9 +18,11 @@ if str(ROOT) not in sys.path:
 from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 from biomed_workbench.services.public_databases import (  # noqa: E402
+    alphafold_structure_records,
     clinical_trial_records,
     preprint_record,
     probe_biorxiv_contract,
+    probe_alphafold_contract,
     probe_clinical_trials_contract,
     probe_crossref_contract,
     probe_europe_pmc_contract,
@@ -53,6 +55,7 @@ def verify() -> dict[str, object]:
         "structure-search",
         "structure-polymer-entities",
         "structure-ligands",
+        "alphafold-structure-evidence",
     ]
     citation = resolve_citation_record("10.1038/s41586-020-2649-2")
     preprint = preprint_record("10.1101/339747", "biorxiv")
@@ -62,6 +65,7 @@ def verify() -> dict[str, object]:
     structure_search = rcsb_structure_search(text="hemoglobin", experimental_method="X-RAY DIFFRACTION", max_records=3)
     polymer_entities = rcsb_polymer_entity_records("4HHB", ["1"], include_sequences=True)
     ligands = rcsb_ligand_records("4HHB", max_ligands=1)
+    alphafold = alphafold_structure_records(["P04637"], include_sequence=False)
 
     citation_passed = (
         citation["query"]["doi"] == "10.1038/s41586-020-2649-2"
@@ -104,6 +108,13 @@ def verify() -> dict[str, object]:
     structure_search_passed = structure_search["returned_count"] >= 1 and all(record["pdb_id"] for record in structure_search["records"])
     polymer_entities_passed = polymer_entities["returned_count"] == 1 and polymer_entities["entities"][0]["entry_id"] == "4HHB"
     ligands_passed = ligands["returned_count"] == 1 and bool(ligands["ligands"][0].get("comp_id"))
+    alphafold_passed = (
+        alphafold["requested_count"] == 1
+        and alphafold["covered_count"] == 1
+        and alphafold["records"][0]["requested_uniprot_accession"] == "P04637"
+        and alphafold["records"][0]["model_count"] >= 1
+        and all(0 <= model["global_plddt"] <= 100 for model in alphafold["records"][0]["models"] if model["global_plddt"] is not None)
+    )
     checks = [
         {
             "name": "citation_record_resolution",
@@ -152,6 +163,7 @@ def verify() -> dict[str, object]:
         {"name": "structure_attribute_search", "database": "rcsb-pdb-search", "passed": structure_search_passed, "requested_query": structure_search["query"], "returned_count": structure_search["returned_count"], "records_truncated": structure_search["records_truncated"], "output_sha256": _digest(structure_search)},
         {"name": "structure_polymer_entities", "database": "rcsb-pdb", "passed": polymer_entities_passed, "requested_id": "4HHB", "returned_count": polymer_entities["returned_count"], "output_sha256": _digest(polymer_entities)},
         {"name": "structure_bound_ligands", "database": "rcsb-pdb", "passed": ligands_passed, "requested_id": "4HHB", "returned_count": ligands["returned_count"], "output_sha256": _digest(ligands)},
+        {"name": "structure_prediction_metadata", "database": "alphafold-db", "passed": alphafold_passed, "requested_id": "P04637", "model_count": alphafold["records"][0]["model_count"], "output_sha256": _digest(alphafold)},
     ]
     contracts = {
         "crossref-rest": probe_crossref_contract(),
@@ -161,6 +173,7 @@ def verify() -> dict[str, object]:
         "clinicaltrials-gov-api": probe_clinical_trials_contract(),
         "rcsb-pdb-data-api": probe_rcsb_contract(),
         "rcsb-pdb-search-api": probe_rcsb_search_contract(),
+        "alphafold-db-api": probe_alphafold_contract(),
     }
     module_validation = {
         module_id: validate_module(BUILTIN_ROOT / module_id, require_tests=True, execute_tests=True)
@@ -189,6 +202,7 @@ def verify() -> dict[str, object]:
             "structure_search_counts_and_truncation_reconciled": structure_search_passed,
             "polymer_entity_identity_and_sequence_context_retained": polymer_entities_passed,
             "bound_ligand_component_identity_retained": ligands_passed,
+            "alphafold_model_version_and_confidence_context_retained": alphafold_passed,
             "no_new_credentials_required": True,
         },
     }

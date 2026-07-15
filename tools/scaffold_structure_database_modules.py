@@ -77,6 +77,27 @@ def _specs() -> dict[str, dict[str, object]]:
             "limitations": ["A deposited component does not establish physiological binding, affinity, occupancy, or a design-ready pose."],
             "effect": "grounds-bound-ligand-identity",
         },
+        "alphafold-structure-evidence": {
+            "verified_at": "2026-07-14",
+            "assumption": "Each supplied UniProt accession identifies the intended protein or isoform and predicted models are interpreted within their sequence coverage and confidence limits.",
+            "complements": ["structure-search", "structure-evidence", "structure-polymer-entities", "literature-evidence"],
+            "tools": ["alphafold"],
+            "title": "Retrieve AlphaFold DB structure and confidence evidence",
+            "description": "Retrieve bounded AlphaFold DB prediction metadata for one to 40 UniProt accessions while preserving no-model status, model provider and tool, version history, sequence coverage, global and binned pLDDT, and approved coordinate, PAE, MSA, and annotation resource URLs.",
+            "entrypoint": "biomed_workbench.capabilities.evidence:alphafold_structure_evidence",
+            "intents": ["retrieve AlphaFold DB prediction", "check AlphaFold coverage and pLDDT for UniProt proteins", "检索AlphaFold结构覆盖模型版本和置信度"],
+            "questions": ["Which requested UniProt proteins have AlphaFold DB models, and what model, version, sequence-coverage, and confidence limits govern their use?"],
+            "input_properties": {
+                "uniprot_accessions": {"type": "array", "items": {"type": "string", "minLength": 6, "maxLength": 14}, "minItems": 1, "maxItems": 40, "uniqueItems": True},
+                "include_sequence": {"type": "boolean"},
+            },
+            "input_required": ["uniprot_accessions"],
+            "output_properties": {"query": {"type": "object"}, "requested_count": {"type": "integer"}, "covered_count": {"type": "integer"}, "not_covered_count": {"type": "integer"}, "records": {"type": "array"}, "provenance": {"type": "object"}, "limitations": {"type": "array"}},
+            "output_required": ["query", "requested_count", "covered_count", "not_covered_count", "records", "provenance", "limitations"],
+            "quality": "Every requested accession must reconcile to exactly one explicit coverage record; returned models must preserve accession identity, provider, tool, version, sequence coverage, 0..100 global pLDDT, 0..1 confidence fractions, approved resource hosts, and request provenance.",
+            "limitations": ["Predicted coordinates and pLDDT do not validate experimental state, assembly, dynamics, interfaces, ligands, or function; per-residue confidence and PAE require separate inspection."],
+            "effect": "grounds-predicted-structure-coverage-and-confidence",
+        },
     }
 
 
@@ -89,6 +110,9 @@ def _case(module_id: str) -> dict[str, object]:
     if module_id == "structure-polymer-entities":
         entity = {"rcsb_id": "4HHB_1", "rcsb_polymer_entity": {"pdbx_description": "Hemoglobin subunit alpha"}, "rcsb_polymer_entity_container_identifiers": {"entry_id": "4HHB", "entity_id": "1", "uniprot_ids": ["P69905"]}, "entity_poly": {"rcsb_entity_polymer_type": "Protein", "rcsb_sample_sequence_length": 141}}
         return {"name": "retrieve-one-polymer-entity", "input": {"pdb_id": "4HHB"}, "expected_subset": {"returned_count": 1, "not_found": []}, "http_fixtures": [{"url": entry_url, "status": 200, "headers": {}, "json": entry}, {"url": "https://data.rcsb.org/rest/v1/core/polymer_entity/4HHB/1", "status": 200, "headers": {}, "json": entity}]}
+    if module_id == "alphafold-structure-evidence":
+        model = {"modelEntityId": "AF-P04637-F1", "entryId": "AF-P04637-F1", "providerId": "GDM", "toolUsed": "AlphaFold Monomer v2.0 pipeline", "uniprotAccession": "P04637", "uniprotId": "P53_HUMAN", "sequence": "MEEPQ", "uniprotStart": 1, "uniprotEnd": 5, "globalMetricValue": 72.5, "fractionPlddtVeryLow": 0.1, "fractionPlddtLow": 0.2, "fractionPlddtConfident": 0.3, "fractionPlddtVeryHigh": 0.4, "latestVersion": 6, "allVersions": [1, 2, 3, 4, 5, 6], "cifUrl": "https://alphafold.ebi.ac.uk/files/AF-P04637-F1-model_v6.cif", "paeDocUrl": "https://alphafold.ebi.ac.uk/files/AF-P04637-F1-predicted_aligned_error_v6.json"}
+        return {"name": "retrieve-one-alphafold-model", "input": {"uniprot_accessions": ["P04637"], "include_sequence": True}, "expected_subset": {"requested_count": 1, "covered_count": 1, "not_covered_count": 0}, "http_fixtures": [{"url": "https://alphafold.ebi.ac.uk/api/prediction/P04637", "status": 200, "headers": {}, "json": [model]}]}
     entity = {"rcsb_nonpolymer_entity_container_identifiers": {"entity_id": "1", "nonpolymer_comp_id": "HEM"}, "rcsb_nonpolymer_entity": {"pdbx_description": "Heme"}}
     component = {"chem_comp": {"id": "HEM", "name": "Heme", "formula": "C34 H32 Fe N4 O4"}, "rcsb_chem_comp_descriptor": {"InChIKey": "KABFMIBPWCXCRK-RGGAHWMASA-L", "SMILES_stereo": "[Fe]"}}
     return {"name": "retrieve-one-bound-ligand", "input": {"pdb_id": "4HHB"}, "expected_subset": {"returned_count": 1, "not_found_entity_ids": []}, "http_fixtures": [{"url": entry_url, "status": 200, "headers": {}, "json": entry}, {"url": "https://data.rcsb.org/rest/v1/core/nonpolymer_entity/4HHB/1", "status": 200, "headers": {}, "json": entity}, {"url": "https://data.rcsb.org/rest/v1/core/chemcomp/HEM", "status": 200, "headers": {}, "json": component}]}

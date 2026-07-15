@@ -24,6 +24,7 @@ from biomed_workbench.router import route  # noqa: E402
 
 
 SERVICE_COVERAGE = {
+    "alphafold-structure-evidence": (("structure_prediction_metadata", "alphafold-db"),),
     "chemical-evidence": (("compound_identity", "pubchem"),),
     "citation-record-resolution": (("citation_record_resolution", "crossref-europe-pmc"),),
     "clinical-trial-evidence": (("trial_design_record", "clinicaltrials-gov"),),

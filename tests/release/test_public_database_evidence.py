@@ -5,6 +5,7 @@ from pathlib import Path
 from biomed_workbench.modules.index import BUILTIN_ROOT
 from biomed_workbench.modules.registry import ModuleRegistry
 from biomed_workbench.services.public_databases import (
+    ALPHAFOLD_CONTRACT_VERSION,
     BIORXIV_CONTRACT_VERSION,
     CLINICAL_TRIALS_CONTRACT_VERSION,
     CROSSREF_CONTRACT_VERSION,
@@ -26,6 +27,7 @@ MODULE_IDS = {
     "structure-search",
     "structure-polymer-entities",
     "structure-ligands",
+    "alphafold-structure-evidence",
 }
 
 
@@ -37,6 +39,7 @@ class PublicDatabaseEvidenceTests(unittest.TestCase):
 
     def test_live_evidence_is_bound_to_current_modules_and_contracts(self):
         expected_contracts = {
+            "alphafold-db-api": ALPHAFOLD_CONTRACT_VERSION,
             "biorxiv-details": BIORXIV_CONTRACT_VERSION,
             "clinicaltrials-gov-api": CLINICAL_TRIALS_CONTRACT_VERSION,
             "crossref-rest": CROSSREF_CONTRACT_VERSION,
@@ -61,6 +64,7 @@ class PublicDatabaseEvidenceTests(unittest.TestCase):
             "structure_attribute_search",
             "structure_polymer_entities",
             "structure_bound_ligands",
+            "structure_prediction_metadata",
         }
         packages = self.report["module_package_validation"]
 
@@ -75,10 +79,11 @@ class PublicDatabaseEvidenceTests(unittest.TestCase):
     def test_scientific_quality_assertions_are_explicit(self):
         summary = self.report["scientific_summary"]
 
-        self.assertGreaterEqual(len(summary), 8)
+        self.assertGreaterEqual(len(summary), 9)
         self.assertEqual(set(summary.values()), {True})
         self.assertTrue(summary["cross_source_disagreement_not_silently_merged"])
         self.assertTrue(summary["preprint_versions_not_collapsed"])
+        self.assertTrue(summary["alphafold_model_version_and_confidence_context_retained"])
         self.assertTrue(summary["no_new_credentials_required"])
 
     def test_public_evidence_contains_no_local_path_or_credential(self):

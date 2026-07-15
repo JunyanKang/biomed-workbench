@@ -9,6 +9,11 @@ from tools.validate_module import validate_module
 
 
 class ServiceModuleFixtureTests(unittest.TestCase):
+    def test_service_fixture_accepts_json_array_response(self):
+        source = BUILTIN_ROOT / "alphafold-structure-evidence"
+        report = validate_module(source, require_tests=True, execute_tests=True)
+        self.assertTrue(report["valid"], report["errors"])
+
     def copied_module(self, module_id):
         temporary = tempfile.TemporaryDirectory()
         module_path = Path(temporary.name) / module_id

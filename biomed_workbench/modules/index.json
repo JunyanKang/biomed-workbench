@@ -1,5 +1,5 @@
 {
-  "module_count": 89,
+  "module_count": 90,
   "modules": [
     {
       "access": "offline",
@@ -989,6 +989,305 @@
           "version_probe_kind": "command",
           "version_probe_timeout_seconds": 10,
           "version_source": "https://github.com/samtools/samtools/releases/tag/1.23"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "public_api",
+      "alternatives": [
+        "literature-evidence"
+      ],
+      "assumptions": [
+        "Each supplied UniProt accession identifies the intended protein or isoform and predicted models are interpreted within their sequence coverage and confidence limits."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "alphafold-structure-evidence-e2e-v1"
+          ],
+          "id": "public-database-contract-2026-07-14-alphafold-structure-evidence",
+          "input_formats": {
+            "alphafold-structure-evidence-query": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "alphafold-structure-evidence-result": [
+              "normalized-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "alphafold-structure-evidence-regression-v1"
+          ],
+          "tool_versions": {
+            "alphafold-db-api": [
+              "==prediction-api-observed-2026-07-14"
+            ]
+          },
+          "verified_at": "2026-07-14"
+        }
+      ],
+      "complements": [
+        "structure-search",
+        "structure-evidence",
+        "structure-polymer-entities",
+        "literature-evidence"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated module implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Retrieve bounded AlphaFold DB prediction metadata for one to 40 UniProt accessions while preserving no-model status, model provider and tool, version history, sequence coverage, global and binned pLDDT, and approved coordinate, PAE, MSA, and annotation resource URLs.",
+      "domains": [
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evidence:alphafold_structure_evidence",
+      "evidence_effects": [
+        "grounds-predicted-structure-coverage-and-confidence"
+      ],
+      "execution": {
+        "kind": "service",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 90
+      },
+      "id": "alphafold-structure-evidence",
+      "input_artifacts": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "alphafold-structure-evidence-query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "include_sequence": {
+            "type": "boolean"
+          },
+          "uniprot_accessions": {
+            "items": {
+              "maxLength": 14,
+              "minLength": 6,
+              "type": "string"
+            },
+            "maxItems": 40,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "uniprot_accessions"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "retrieve AlphaFold DB prediction",
+        "check AlphaFold coverage and pLDDT for UniProt proteins",
+        "\u68c0\u7d22AlphaFold\u7ed3\u6784\u8986\u76d6\u6a21\u578b\u7248\u672c\u548c\u7f6e\u4fe1\u5ea6"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Predicted coordinates and pLDDT do not validate experimental state, assembly, dynamics, interfaces, ligands, or function; per-residue confidence and PAE require separate inspection."
+      ],
+      "maturity": "validated",
+      "module_type": "data_source",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "alphafold-structure-evidence-result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "service_contract",
+            "retrieval_time"
+          ]
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "covered_count": {
+            "type": "integer"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "not_covered_count": {
+            "type": "integer"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "query": {
+            "type": "object"
+          },
+          "records": {
+            "type": "array"
+          },
+          "requested_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query",
+          "requested_count",
+          "covered_count",
+          "not_covered_count",
+          "records",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://alphafold.ebi.ac.uk/api-docs",
+          "Project-owned clean-room implementation and scientific validation contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Every requested accession must reconcile to exactly one explicit coverage record; returned models must preserve accession identity, provider, tool, version, sequence coverage, 0..100 global pLDDT, 0..1 confidence fractions, approved resource hosts, and request provenance.",
+          "id": "alphafold-structure-evidence-validity",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Which requested UniProt proteins have AlphaFold DB models, and what model, version, sequence-coverage, and confidence limits govern their use?"
+      ],
+      "schema_version": 1,
+      "title": "Retrieve AlphaFold DB structure and confidence evidence",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==prediction-api-observed-2026-07-14"
+          ],
+          "ecosystem": "service",
+          "identity": "alphafold.ebi.ac.uk/api/prediction",
+          "mismatch_policy": "block",
+          "name": "alphafold-db-api",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "prediction-api-observed-2026-07-14"
+          ],
+          "verified_at": "2026-07-14",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==prediction-api-observed-2026-07-14"
+              ],
+              "category": "output-format",
+              "compatibility_effect": "requires-parser",
+              "description": "Prediction records expose provider, tool, model version, sequence coverage, global and binned pLDDT, and versioned resource URLs; coverage and resource availability vary by accession and model provider.",
+              "id": "alphafold-prediction-metadata-and-confidence",
+              "required_action": "Preserve no-model state, validate accession and confidence ranges, record provider/tool/version, and treat coordinate and PAE URLs as unexecuted resources until separately retrieved and checked.",
+              "source": "https://alphafold.ebi.ac.uk/api-docs"
+            }
+          ],
+          "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_alphafold_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://alphafold.ebi.ac.uk/api-docs"
         }
       ],
       "version": "1.0.0"
@@ -35017,6 +35316,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "b07cd7373780eacacd88270956375f050e0c4de0cc51f9aa543f833cd73856bb",
+  "registry_digest": "87f32dd15346331a7a27acb19f7097a3d582a2052c0ececd5ac3ef71cb159589",
   "schema_version": 1
 }

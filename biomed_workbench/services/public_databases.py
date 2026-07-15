@@ -24,11 +24,16 @@ PUBCHEM_CONTRACT_VERSION = "pug-rest-observed-2026-07-13"
 CLINICAL_TRIALS_CONTRACT_VERSION = "api-v2-observed-2026-07-13"
 RCSB_CONTRACT_VERSION = "data-rest-v1-observed-2026-07-13"
 RCSB_SEARCH_CONTRACT_VERSION = "search-v2-observed-2026-07-13"
+ALPHAFOLD_CONTRACT_VERSION = "prediction-api-observed-2026-07-14"
 
 _MAX_RESPONSE_BYTES = 20 * 1024 * 1024
 _MAX_REQUEST_BYTES = 1024 * 1024
 _DOI_RE = re.compile(r"^10\.\d{4,9}/[-._;()/:A-Z0-9]+$", re.IGNORECASE)
 _PDB_RE = re.compile(r"^[0-9][A-Za-z0-9]{3}$")
+_UNIPROT_ACCESSION_RE = re.compile(
+    r"^(?:[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9](?:[A-Z][A-Z0-9]{2}[0-9]){1,2})(?:-[1-9][0-9]*)?$",
+    re.IGNORECASE,
+)
 _NCT_RE = re.compile(r"^NCT\d{8}$", re.IGNORECASE)
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _CT_PHASES = frozenset({"NA", "EARLY_PHASE1", "PHASE1", "PHASE2", "PHASE3", "PHASE4"})
@@ -58,6 +63,7 @@ _ALLOWED_HOSTS = frozenset(
         "clinicaltrials.gov",
         "data.rcsb.org",
         "search.rcsb.org",
+        "alphafold.ebi.ac.uk",
     }
 )
 
@@ -200,6 +206,61 @@ class PublicJSONClient:
     def get(self, base_url: str, path: str, params: Mapping[str, Any] | None = None) -> dict[str, Any]:
         payload, _metadata = self.get_with_metadata(base_url, path, params)
         return payload
+
+    def get_array_with_metadata(
+        self,
+        base_url: str,
+        path: str,
+        params: Mapping[str, Any] | None = None,
+        *,
+        not_found_as_empty: bool = False,
+    ) -> tuple[list[Any], dict[str, Any]]:
+        """Retrieve a bounded JSON array while retaining an explicit 404 state."""
+        if not path.startswith("/") or ".." in path:
+            raise ValueError("database path must be absolute and traversal-free")
+        parsed = urlsplit(base_url)
+        if parsed.scheme != "https" or parsed.hostname not in _ALLOWED_HOSTS or parsed.path or parsed.query:
+            raise ValueError("database base URL is not approved")
+        query = urlencode({key: value for key, value in (params or {}).items() if value is not None}, doseq=True)
+        url = f"{base_url}{path}{'?' + query if query else ''}"
+        headers = {
+            "Accept": "application/json",
+            "User-Agent": "biomed-workbench/0.2 (+https://github.com/JunyanKang/biomed-workbench)",
+        }
+        response: HTTPResponse | None = None
+        attempts = 0
+        for attempt in range(self._retries + 1):
+            attempts = attempt + 1
+            try:
+                response = self._transport(url, headers, self._timeout)
+            except PublicDatabaseError:
+                if attempt >= self._retries:
+                    raise
+                self._sleeper(min(2**attempt, 4))
+                continue
+            if response.status not in {429, 500, 502, 503, 504} or attempt >= self._retries:
+                break
+            self._sleeper(min(2**attempt, 4))
+        assert response is not None
+        metadata = {
+            "url": url,
+            "status_code": response.status,
+            "bytes": len(response.body),
+            "attempts": attempts,
+        }
+        if response.status == 404 and not_found_as_empty:
+            return [], {**metadata, "not_found": True}
+        if response.status < 200 or response.status >= 300:
+            raise PublicDatabaseError(f"public database request failed with HTTP {response.status}")
+        if len(response.body) > _MAX_RESPONSE_BYTES:
+            raise PublicDatabaseError("public database response exceeded the 20 MiB safety limit")
+        try:
+            payload = json.loads(response.body)
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            raise PublicDatabaseError("public database returned invalid JSON") from None
+        if not isinstance(payload, list):
+            raise PublicDatabaseError("public database JSON root must be an array")
+        return payload, metadata
 
     def post_with_metadata(
         self,
@@ -978,6 +1039,148 @@ def rcsb_ligand_records(
     }
 
 
+_ALPHAFOLD_URL_FIELDS = {
+    "cif": "cifUrl",
+    "bcif": "bcifUrl",
+    "pdb": "pdbUrl",
+    "pae_image": "paeImageUrl",
+    "pae_json": "paeDocUrl",
+    "plddt_json": "plddtDocUrl",
+    "msa": "msaUrl",
+    "alphamissense_csv": "amAnnotationsUrl",
+}
+
+
+def _require_uniprot_accession(value: str) -> str:
+    accession = value.strip().upper()
+    if not _UNIPROT_ACCESSION_RE.fullmatch(accession):
+        raise ValueError("UniProt accession must be a valid 6- or 10-character accession with an optional isoform suffix")
+    return accession
+
+
+def _alphafold_model_record(raw: Mapping[str, Any], *, include_sequence: bool) -> dict[str, Any]:
+    accession = _require_uniprot_accession(str(raw.get("uniprotAccession", "")))
+    global_plddt = raw.get("globalMetricValue")
+    if global_plddt is not None and (not isinstance(global_plddt, (int, float)) or not 0 <= float(global_plddt) <= 100):
+        raise PublicDatabaseError("AlphaFold globalMetricValue is outside the declared pLDDT range")
+    fractions = {
+        "very_low": raw.get("fractionPlddtVeryLow"),
+        "low": raw.get("fractionPlddtLow"),
+        "confident": raw.get("fractionPlddtConfident"),
+        "very_high": raw.get("fractionPlddtVeryHigh"),
+    }
+    observed_fractions = [float(value) for value in fractions.values() if value is not None]
+    if any(value < 0 or value > 1 for value in observed_fractions):
+        raise PublicDatabaseError("AlphaFold pLDDT fractions are outside 0..1")
+    if len(observed_fractions) == 4 and abs(sum(observed_fractions) - 1.0) > 0.02:
+        raise PublicDatabaseError("AlphaFold pLDDT fractions do not reconcile to one")
+    urls = {}
+    for name, field in _ALPHAFOLD_URL_FIELDS.items():
+        value = raw.get(field)
+        if value is None:
+            continue
+        parsed = urlsplit(str(value))
+        if parsed.scheme != "https" or parsed.hostname != "alphafold.ebi.ac.uk":
+            raise PublicDatabaseError("AlphaFold resource URL is outside the approved HTTPS host")
+        urls[name] = str(value)
+    sequence = str(raw.get("sequence") or "").replace("\n", "").replace(" ", "")
+    if sequence and re.fullmatch(r"[A-Z]+", sequence) is None:
+        raise PublicDatabaseError("AlphaFold sequence is not an uppercase protein sequence")
+    start = raw.get("uniprotStart")
+    end = raw.get("uniprotEnd")
+    if start is not None and end is not None and int(end) < int(start):
+        raise PublicDatabaseError("AlphaFold UniProt coordinate range is inverted")
+    record = {
+        "model_entity_id": raw.get("modelEntityId"),
+        "entry_id": raw.get("entryId"),
+        "provider_id": raw.get("providerId"),
+        "tool_used": raw.get("toolUsed"),
+        "uniprot_accession": accession,
+        "uniprot_id": raw.get("uniprotId"),
+        "uniprot_description": _clean_text(raw.get("uniprotDescription")),
+        "gene": raw.get("gene"),
+        "organism_scientific_name": raw.get("organismScientificName"),
+        "tax_id": raw.get("taxId"),
+        "is_uniprot_reviewed": raw.get("isUniProtReviewed"),
+        "is_reference_proteome": raw.get("isReferenceProteome"),
+        "is_complex": raw.get("isComplex"),
+        "sequence_length": len(sequence) if sequence else None,
+        "uniprot_start": start,
+        "uniprot_end": end,
+        "global_plddt": float(global_plddt) if global_plddt is not None else None,
+        "fraction_plddt": fractions,
+        "fraction_plddt_sum": sum(observed_fractions) if len(observed_fractions) == 4 else None,
+        "latest_version": raw.get("latestVersion"),
+        "all_versions": raw.get("allVersions") or [],
+        "model_created_date": raw.get("modelCreatedDate"),
+        "urls": urls,
+    }
+    if include_sequence:
+        record["sequence"] = sequence or None
+    return record
+
+
+def alphafold_structure_records(
+    uniprot_accessions: list[str],
+    include_sequence: bool = False,
+    *,
+    client: PublicJSONClient | None = None,
+) -> dict[str, Any]:
+    """Retrieve AlphaFold DB model metadata with explicit coverage accounting."""
+    if not 1 <= len(uniprot_accessions) <= 40:
+        raise ValueError("one to 40 UniProt accessions are required")
+    if not isinstance(include_sequence, bool):
+        raise ValueError("include_sequence must be boolean")
+    normalized = [_require_uniprot_accession(value) for value in uniprot_accessions]
+    if len(normalized) != len(set(normalized)):
+        raise ValueError("UniProt accessions must be unique")
+    client = client or PublicJSONClient()
+    records = []
+    requests = []
+    for requested in normalized:
+        payload, metadata = client.get_array_with_metadata(
+            "https://alphafold.ebi.ac.uk",
+            f"/api/prediction/{quote(requested, safe='')}",
+            not_found_as_empty=True,
+        )
+        requests.append(metadata)
+        models = []
+        for raw in payload:
+            if not isinstance(raw, Mapping):
+                raise PublicDatabaseError("AlphaFold prediction array contains a non-object record")
+            model = _alphafold_model_record(raw, include_sequence=include_sequence)
+            returned = model["uniprot_accession"]
+            if returned != requested and not returned.startswith(f"{requested}-"):
+                raise PublicDatabaseError("AlphaFold response does not preserve the requested UniProt accession")
+            models.append(model)
+        records.append(
+            {
+                "requested_uniprot_accession": requested,
+                "has_model": bool(models),
+                "model_count": len(models),
+                "models": models,
+            }
+        )
+    return {
+        "query": {"uniprot_accessions": normalized, "include_sequence": include_sequence},
+        "requested_count": len(normalized),
+        "covered_count": sum(record["has_model"] for record in records),
+        "not_covered_count": sum(not record["has_model"] for record in records),
+        "records": records,
+        "provenance": {
+            "retrieved_at_runtime": True,
+            "service": "AlphaFold Protein Structure Database API",
+            "contract": ALPHAFOLD_CONTRACT_VERSION,
+            "requests": requests,
+        },
+        "limitations": [
+            "Predicted coordinates and confidence are model evidence, not experimental validation of structure, state, assembly, dynamics, or function.",
+            "Global and binned pLDDT do not establish domain orientation, interface accuracy, ligand pose, or biological relevance; inspect per-residue confidence and PAE before interpretation.",
+            "This operation returns metadata and approved resource URLs only; coordinate, PAE, MSA, and annotation payloads are not silently downloaded.",
+        ],
+    }
+
+
 def probe_crossref_contract() -> str:
     return CROSSREF_CONTRACT_VERSION
 
@@ -1004,3 +1207,7 @@ def probe_rcsb_contract() -> str:
 
 def probe_rcsb_search_contract() -> str:
     return RCSB_SEARCH_CONTRACT_VERSION
+
+
+def probe_alphafold_contract() -> str:
+    return ALPHAFOLD_CONTRACT_VERSION

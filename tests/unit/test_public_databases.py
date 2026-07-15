@@ -5,6 +5,7 @@ from biomed_workbench.services.public_databases import (
     HTTPResponse,
     PublicDatabaseError,
     PublicJSONClient,
+    alphafold_structure_records,
     clinical_trial_records,
     preprint_record,
     pubchem_compound,
@@ -320,6 +321,58 @@ class PublicDatabaseTests(unittest.TestCase):
         self.assertEqual(result["ligands"][0]["chemical_component"]["comp_id"], "HEM")
         self.assertEqual(result["not_found_entity_ids"], ["2"])
         self.assertFalse(result["records_truncated"])
+
+    def test_alphafold_records_preserve_model_confidence_versions_and_absence(self):
+        model = {
+            "modelEntityId": "AF-P04637-F1",
+            "entryId": "AF-P04637-F1",
+            "providerId": "GDM",
+            "toolUsed": "AlphaFold Monomer v2.0 pipeline",
+            "uniprotAccession": "P04637",
+            "uniprotId": "P53_HUMAN",
+            "uniprotDescription": "Cellular tumor antigen p53",
+            "gene": "TP53",
+            "organismScientificName": "Homo sapiens",
+            "taxId": 9606,
+            "sequence": "MEEPQ",
+            "uniprotStart": 1,
+            "uniprotEnd": 5,
+            "globalMetricValue": 72.5,
+            "fractionPlddtVeryLow": 0.1,
+            "fractionPlddtLow": 0.2,
+            "fractionPlddtConfident": 0.3,
+            "fractionPlddtVeryHigh": 0.4,
+            "latestVersion": 6,
+            "allVersions": [1, 2, 3, 4, 5, 6],
+            "modelCreatedDate": "2025-08-01",
+            "cifUrl": "https://alphafold.ebi.ac.uk/files/AF-P04637-F1-model_v6.cif",
+            "paeDocUrl": "https://alphafold.ebi.ac.uk/files/AF-P04637-F1-predicted_aligned_error_v6.json",
+        }
+        client = self.client(
+            [
+                ("/api/prediction/P04637", [model]),
+                ("/api/prediction/Q9Y6K9", HTTPResponse(404, {}, b"{}")),
+            ]
+        )
+        result = alphafold_structure_records(["p04637", "Q9Y6K9"], include_sequence=True, client=client)
+        self.assertEqual(result["requested_count"], 2)
+        self.assertEqual(result["covered_count"], 1)
+        self.assertEqual(result["not_covered_count"], 1)
+        self.assertEqual(result["records"][0]["models"][0]["sequence"], "MEEPQ")
+        self.assertEqual(result["records"][0]["models"][0]["global_plddt"], 72.5)
+        self.assertEqual(result["records"][0]["models"][0]["fraction_plddt_sum"], 1.0)
+        self.assertFalse(result["records"][1]["has_model"])
+        self.assertTrue(result["provenance"]["requests"][1]["not_found"])
+
+    def test_alphafold_blocks_invalid_accessions_and_confidence(self):
+        with self.assertRaises(ValueError):
+            alphafold_structure_records(["TP53"], client=self.client([]))
+        bad = {"uniprotAccession": "P04637", "globalMetricValue": 101}
+        with self.assertRaisesRegex(PublicDatabaseError, "pLDDT range"):
+            alphafold_structure_records(
+                ["P04637"],
+                client=self.client([("/api/prediction/P04637", [bad])]),
+            )
 
     def test_post_transport_rejects_unapproved_hosts_and_oversized_payloads(self):
         client = PublicJSONClient(post_transport=lambda *_: HTTPResponse(200, {}, b"{}"), retries=0)

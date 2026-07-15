@@ -6,6 +6,7 @@ from typing import Any
 
 from biomed_workbench.services.eutils import EUtilitiesClient, EUtilitiesError
 from biomed_workbench.services.public_databases import (
+    alphafold_structure_records,
     clinical_trial_records,
     preprint_record,
     pubchem_compound,
@@ -79,6 +80,14 @@ def structure_polymer_entities(
 def structure_ligands(pdb_id: str, max_ligands: int = 25) -> dict[str, Any]:
     """Retrieve bound nonpolymer entities and chemical-component identity."""
     return rcsb_ligand_records(pdb_id, max_ligands)
+
+
+def alphafold_structure_evidence(
+    uniprot_accessions: list[str],
+    include_sequence: bool = False,
+) -> dict[str, Any]:
+    """Retrieve versioned AlphaFold DB model and confidence metadata."""
+    return alphafold_structure_records(uniprot_accessions, include_sequence)
 
 
 def _bounded_links(client: EUtilitiesClient, source: str, target: str, ids: tuple[str, ...], limit: int) -> tuple[dict[str, Any], str | None]:

@@ -20,6 +20,7 @@ from biomed_workbench.modules.index import BUILTIN_ROOT, MODULE_INDEX, build_ind
 from biomed_workbench.modules.registry import ModuleRegistry, ModuleRegistryError  # noqa: E402
 from biomed_workbench.orchestration.graph import build_capability_graph  # noqa: E402
 from biomed_workbench.services.public_databases import (  # noqa: E402
+    ALPHAFOLD_CONTRACT_VERSION,
     BIORXIV_CONTRACT_VERSION,
     CLINICAL_TRIALS_CONTRACT_VERSION,
     CROSSREF_CONTRACT_VERSION,
@@ -299,8 +300,10 @@ def main() -> int:
             "structure-search",
             "structure-polymer-entities",
             "structure-ligands",
+            "alphafold-structure-evidence",
         }
         expected_public_database_contracts = {
+            "alphafold-db-api": ALPHAFOLD_CONTRACT_VERSION,
             "biorxiv-details": BIORXIV_CONTRACT_VERSION,
             "clinicaltrials-gov-api": CLINICAL_TRIALS_CONTRACT_VERSION,
             "crossref-rest": CROSSREF_CONTRACT_VERSION,
@@ -326,6 +329,7 @@ def main() -> int:
                 "structure_attribute_search",
                 "structure_polymer_entities",
                 "structure_bound_ligands",
+                "structure_prediction_metadata",
             }
             scientific_summary = public_database_report.get("scientific_summary", {})
             if (

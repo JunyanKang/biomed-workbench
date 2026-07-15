@@ -108,6 +108,40 @@
       "workflow": "omics"
     },
     {
+      "access": "public_api",
+      "description": "Retrieve bounded AlphaFold DB prediction metadata for one to 40 UniProt accessions while preserving no-model status, model provider and tool, version history, sequence coverage, global and binned pLDDT, and approved coordinate, PAE, MSA, and annotation resource URLs.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:alphafold_structure_evidence",
+      "id": "alphafold-structure-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "include_sequence": {
+            "type": "boolean"
+          },
+          "uniprot_accessions": {
+            "items": {
+              "maxLength": 14,
+              "minLength": 6,
+              "type": "string"
+            },
+            "maxItems": 40,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "uniprot_accessions"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve AlphaFold DB structure and confidence evidence",
+      "workflow": "evidence"
+    },
+    {
       "access": "offline",
       "description": "Detect external empirical, quantitative, comparative, and causal assertions lacking inventory-backed citations while binding current-study results to analysis or experiment artifacts and surfacing incomplete extraction.",
       "entrypoint": "biomed_workbench.capabilities.assertion_citation:audit_assertion_citation_coverage",
@@ -5867,7 +5901,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 89,
+  "entry_count": 90,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

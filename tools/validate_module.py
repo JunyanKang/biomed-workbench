@@ -124,7 +124,7 @@ def _load_cases(path: Path) -> list[dict[str, Any]]:
             if (
                 not isinstance(headers, dict)
                 or not all(isinstance(key, str) and isinstance(value, str) for key, value in headers.items())
-                or not isinstance(fixture["json"], dict)
+                or not isinstance(fixture["json"], (dict, list))
             ):
                 raise ModuleValidationError(f"test case {case['name']} HTTP fixture headers and JSON body are invalid")
             if method == "GET" and "request_json" in fixture:

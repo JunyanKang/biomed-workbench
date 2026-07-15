@@ -1,0 +1,55 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "covered_count": 1,
+        "not_covered_count": 0,
+        "requested_count": 1
+      },
+      "http_fixtures": [
+        {
+          "headers": {},
+          "json": [
+            {
+              "allVersions": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "cifUrl": "https://alphafold.ebi.ac.uk/files/AF-P04637-F1-model_v6.cif",
+              "entryId": "AF-P04637-F1",
+              "fractionPlddtConfident": 0.3,
+              "fractionPlddtLow": 0.2,
+              "fractionPlddtVeryHigh": 0.4,
+              "fractionPlddtVeryLow": 0.1,
+              "globalMetricValue": 72.5,
+              "latestVersion": 6,
+              "modelEntityId": "AF-P04637-F1",
+              "paeDocUrl": "https://alphafold.ebi.ac.uk/files/AF-P04637-F1-predicted_aligned_error_v6.json",
+              "providerId": "GDM",
+              "sequence": "MEEPQ",
+              "toolUsed": "AlphaFold Monomer v2.0 pipeline",
+              "uniprotAccession": "P04637",
+              "uniprotEnd": 5,
+              "uniprotId": "P53_HUMAN",
+              "uniprotStart": 1
+            }
+          ],
+          "status": 200,
+          "url": "https://alphafold.ebi.ac.uk/api/prediction/P04637"
+        }
+      ],
+      "input": {
+        "include_sequence": true,
+        "uniprot_accessions": [
+          "P04637"
+        ]
+      },
+      "name": "retrieve-one-alphafold-model"
+    }
+  ],
+  "schema_version": 1
+}

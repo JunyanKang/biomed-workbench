@@ -21,7 +21,16 @@ from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
 VERIFIED_AT = "2026-07-13"
 
 
-def _tool(name: str, identity: str, contract: str, probe: str, source: str, differences: list[dict[str, object]]) -> dict[str, object]:
+def _tool(
+    name: str,
+    identity: str,
+    contract: str,
+    probe: str,
+    source: str,
+    differences: list[dict[str, object]],
+    *,
+    verified_at: str = VERIFIED_AT,
+) -> dict[str, object]:
     return {
         "name": name,
         "ecosystem": "service",
@@ -30,7 +39,7 @@ def _tool(name: str, identity: str, contract: str, probe: str, source: str, diff
         "tested_versions": [contract],
         "allowed_versions": [f"=={contract}"],
         "version_source": source,
-        "verified_at": VERIFIED_AT,
+        "verified_at": verified_at,
         "version_probe": [probe],
         "version_probe_kind": "service_contract",
         "version_probe_timeout_seconds": 10,
@@ -185,6 +194,25 @@ TOOLS = {
                 "source": "https://search.rcsb.org/",
             }
         ],
+    ),
+    "alphafold": _tool(
+        "alphafold-db-api",
+        "alphafold.ebi.ac.uk/api/prediction",
+        "prediction-api-observed-2026-07-14",
+        "biomed_workbench.services.public_databases:probe_alphafold_contract",
+        "https://alphafold.ebi.ac.uk/api-docs",
+        [
+            {
+                "id": "alphafold-prediction-metadata-and-confidence",
+                "affected_versions": ["==prediction-api-observed-2026-07-14"],
+                "category": "output-format",
+                "description": "Prediction records expose provider, tool, model version, sequence coverage, global and binned pLDDT, and versioned resource URLs; coverage and resource availability vary by accession and model provider.",
+                "compatibility_effect": "requires-parser",
+                "required_action": "Preserve no-model state, validate accession and confidence ranges, record provider/tool/version, and treat coordinate and PAE URLs as unexecuted resources until separately retrieved and checked.",
+                "source": "https://alphafold.ebi.ac.uk/api-docs",
+            }
+        ],
+        verified_at="2026-07-14",
     ),
 }
 
@@ -483,6 +511,7 @@ def _manifest(module_id: str, spec: dict[str, object], python_dependency: dict[s
     gate_id = f"{module_id}-validity"
     input_name = f"{module_id}-query"
     output_name = f"{module_id}-result"
+    verified_at = str(spec.get("verified_at", VERIFIED_AT))
     return {
         "schema_version": 1,
         "id": module_id,
@@ -525,7 +554,7 @@ def _manifest(module_id: str, spec: dict[str, object], python_dependency: dict[s
         "dependencies": [deepcopy(python_dependency)],
         "compatibility_matrix": [
             {
-                "id": f"public-database-contract-2026-07-13-{module_id}",
+                "id": f"public-database-contract-{verified_at}-{module_id}",
                 "module_version": module_version,
                 "tool_versions": tool_versions,
                 "dependency_versions": {"python": [">=3.14,<3.15"]},
@@ -534,7 +563,7 @@ def _manifest(module_id: str, spec: dict[str, object], python_dependency: dict[s
                 "platforms": ["any"],
                 "regression_evidence_ids": [f"{module_id}-regression-v1"],
                 "end_to_end_evidence_ids": [f"{module_id}-e2e-v1"],
-                "verified_at": VERIFIED_AT,
+                "verified_at": verified_at,
             }
         ],
         "access": "public_api",
