@@ -43,6 +43,13 @@ class SkillEntrypointE2ETests(unittest.TestCase):
         for term in ("local scientific model", "gpu", "container", "slurm", "runtime-status"):
             self.assertNotIn(term, self.lower)
 
+    def test_missing_scientific_dependency_triggers_bounded_recovery_before_blocking(self):
+        self.assertIn("a missing package is not evidence that the scientific capability can be skipped", self.lower)
+        self.assertIn("project-local or temporary environment", self.lower)
+        self.assertIn("compatibility and representative execution checks", self.lower)
+        self.assertIn("templates must never install packages while analyzing data", self.lower)
+        self.assertIn("only block the branch after installation or compatible-environment discovery has failed", self.lower)
+
     def test_operational_skill_contains_no_source_project_bridge(self):
         forbidden = (
             "biomni",
