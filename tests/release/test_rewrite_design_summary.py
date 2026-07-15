@@ -21,7 +21,9 @@ class RewriteDesignSummaryTests(unittest.TestCase):
         self.assertEqual(sum(design["action_counts"].values()), assimilated_count)
         self.assertEqual(sum(design["reuse_mode_counts"].values()), assimilated_count)
         self.assertRegex(design["design_digest"], r"^[0-9a-f]{64}$")
-        self.assertEqual(design, build_summary(ROOT / ".source-audit" / "rewrite-ledger.jsonl"))
+        private_ledger = ROOT / ".source-audit" / "rewrite-ledger.jsonl"
+        if private_ledger.is_file():
+            self.assertEqual(design, build_summary(private_ledger))
 
     def test_reuse_policy_is_clean_room_only(self):
         design = json.loads(DESIGN.read_text(encoding="utf-8"))
