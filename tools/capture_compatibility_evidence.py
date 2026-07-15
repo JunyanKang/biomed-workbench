@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import inspect
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -414,9 +415,11 @@ def capture() -> dict[str, object]:
             e2e_digest = digest_value(
                 {**context, "kind": "end-to-end", "objective": plan["objective"], "plan_type": plan["plan_type"], "output": result["output"]}
             )
-        if row.regression_evidence_ids != (f"{manifest.id}-regression-v1",):
+        regression_match = re.fullmatch(rf"{re.escape(manifest.id)}-regression-v([1-9][0-9]*)", row.regression_evidence_ids[0]) if len(row.regression_evidence_ids) == 1 else None
+        e2e_match = re.fullmatch(rf"{re.escape(manifest.id)}-e2e-v([1-9][0-9]*)", row.end_to_end_evidence_ids[0]) if len(row.end_to_end_evidence_ids) == 1 else None
+        if regression_match is None:
             raise RuntimeError(f"regression evidence id mismatch: {manifest.id}")
-        if row.end_to_end_evidence_ids != (f"{manifest.id}-e2e-v1",):
+        if e2e_match is None or e2e_match.group(1) != regression_match.group(1):
             raise RuntimeError(f"end-to-end evidence id mismatch: {manifest.id}")
         records.append(
             {

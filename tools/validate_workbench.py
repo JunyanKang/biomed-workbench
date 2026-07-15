@@ -668,7 +668,7 @@ def main() -> int:
                 or chroma_report.get("module_version") != chroma_manifest.version
                 or chroma_report.get("compatibility_row_id") != chroma_row.id
                 or chroma_report.get("tool_versions") != {"python3": "3.14.3"}
-                or chroma_report.get("dependency_versions") != {"Pillow": "10.4.0"}
+                or chroma_report.get("dependency_versions") != {"Pillow": "12.1.1"}
                 or chroma_report.get("fixture", {}).get("format") != "png@3.0"
                 or chroma_report.get("fixture", {}).get("orientation") != "top-left-raster"
                 or implementation.get("module") != "biomed_workbench.implementations.chroma_key"

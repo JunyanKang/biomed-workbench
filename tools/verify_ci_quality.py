@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
+import tomllib
 from pathlib import Path
 
 import yaml
@@ -15,6 +17,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "quality.yml"
 REQUIREMENTS = ROOT / "requirements-ci.txt"
+GITLEAKS_CONFIG = ROOT / ".gitleaks.toml"
 EVIDENCE_ID = "github-quality-and-secret-gates-v1"
 
 
@@ -64,7 +67,7 @@ def verify() -> dict[str, object]:
     required_secret = (
         "GITLEAKS_LINUX_X64_SHA256",
         "sha256sum --check --strict",
-        "gitleaks git . --redact --no-banner --exit-code 1",
+        "gitleaks git . --config .gitleaks.toml --redact --no-banner --exit-code 1",
     )
     if any(marker not in secret_script and marker not in json.dumps(secret_steps) for marker in required_secret):
         raise RuntimeError("checksum-verified redacted secret scan is incomplete")
@@ -78,15 +81,30 @@ def verify() -> dict[str, object]:
         if not separator or not name or not version or name in requirements:
             raise RuntimeError("CI requirements must use unique exact tested baselines")
         requirements[name] = version
-    expected = {"numpy": "2.4.4", "scipy": "1.17.1", "scikit-learn": "1.8.0", "Pillow": "10.4.0", "PyYAML": "6.0.3"}
+    expected = {"numpy": "2.4.4", "scipy": "1.17.1", "scikit-learn": "1.8.0", "Pillow": "12.1.1", "PyYAML": "6.0.3"}
     if requirements != expected:
         raise RuntimeError("CI requirements differ from the verified repository baseline")
+
+    gitleaks_config = tomllib.loads(GITLEAKS_CONFIG.read_text(encoding="utf-8"))
+    allowlists = gitleaks_config.get("allowlists", [])
+    expected_digest_pattern = r'"output_sha256"\s*:\s*"[0-9a-f]{64}"'
+    if (
+        gitleaks_config.get("extend") != {"useDefault": True}
+        or len(allowlists) != 1
+        or allowlists[0].get("paths") != [r"^reports/.*\.json$"]
+        or allowlists[0].get("regexTarget") != "line"
+        or allowlists[0].get("regexes") != [expected_digest_pattern]
+        or re.fullmatch(expected_digest_pattern, '"output_sha256": "' + "a" * 64 + '"') is None
+        or re.fullmatch(expected_digest_pattern, '"api_key": "' + "a" * 64 + '"') is not None
+    ):
+        raise RuntimeError("Gitleaks allowlist must remain limited to generated report output SHA-256 fields")
     return {
         "schema_version": 1,
         "passed": True,
         "evidence_id": EVIDENCE_ID,
         "evidence_type": "github-quality-and-secret-gates",
         "workflow": {"sha256": _sha256(WORKFLOW), "jobs": ["secrets", "verify"], "read_only_permissions": True},
+        "gitleaks_config": {"sha256": _sha256(GITLEAKS_CONFIG), "default_rules_extended": True, "narrow_digest_allowlist": True},
         "requirements": {"sha256": _sha256(REQUIREMENTS), "tested_baselines": requirements},
         "quality_gates": {
             "complete_unittest_suite": True,

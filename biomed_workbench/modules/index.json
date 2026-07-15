@@ -12313,13 +12313,13 @@
         {
           "dependency_versions": {
             "Pillow": [
-              ">=10.4,<11"
+              ">=12.1,<13"
             ]
           },
           "end_to_end_evidence_ids": [
-            "image-chroma-key-remove-e2e-v1"
+            "image-chroma-key-remove-e2e-v2"
           ],
-          "id": "python-3.14-pillow-10.4-static-raster-chroma-v1",
+          "id": "python-3.14-pillow-12.1-static-raster-chroma-v2",
           "input_formats": {
             "source_image": [
               "png@3.0",
@@ -12327,7 +12327,7 @@
               "webp@riff-container-2025"
             ]
           },
-          "module_version": "1.0.0",
+          "module_version": "1.1.0",
           "output_formats": {
             "matte_report": [
               "biomed-chroma-key-report@1.0.0"
@@ -12337,17 +12337,18 @@
             ]
           },
           "platforms": [
-            "macos-arm64"
+            "macos-arm64",
+            "linux-x86_64"
           ],
           "regression_evidence_ids": [
-            "image-chroma-key-remove-regression-v1"
+            "image-chroma-key-remove-regression-v2"
           ],
           "tool_versions": {
             "python3": [
               ">=3.14,<3.15"
             ]
           },
-          "verified_at": "2026-07-13"
+          "verified_at": "2026-07-15"
         }
       ],
       "complements": [
@@ -12360,21 +12361,22 @@
       "dependencies": [
         {
           "allowed_versions": [
-            ">=10.4,<11"
+            ">=12.1,<13"
           ],
           "conflicts": [],
           "ecosystem": "python",
           "identity": "PIL",
           "name": "Pillow",
           "platforms": [
-            "macos-arm64"
+            "macos-arm64",
+            "linux-x86_64"
           ],
           "purpose": "Decode validated static PNG, JPEG, and WebP rasters, preserve and filter alpha, and encode a canonical lossless RGBA PNG.",
           "required": true,
           "tested_versions": [
-            "10.4.0"
+            "12.1.1"
           ],
-          "verified_at": "2026-07-13",
+          "verified_at": "2026-07-15",
           "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
           "version_probe": [
             "python3",
@@ -12383,7 +12385,7 @@
           ],
           "version_probe_kind": "command",
           "version_probe_timeout_seconds": 10,
-          "version_source": "https://pillow.readthedocs.io/en/stable/releasenotes/10.4.0.html"
+          "version_source": "https://pillow.readthedocs.io/en/stable/releasenotes/12.1.1.html"
         }
       ],
       "description": "Decode one declared static PNG, JPEG, or WebP communication asset, validate its raster and color assumptions, select an explicit or statistically consistent border key, construct a soft alpha matte in linearized sRGB, preserve existing alpha, reduce key-channel edge spill, emit a canonical RGBA PNG, and independently verify the output structure, matte fractions, hidden transparent colors, digest, and scientific-use boundary.",
@@ -12576,7 +12578,7 @@
         ">=0.2.0,<0.3.0"
       ],
       "limitations": [
-        "The validated row covers one static 8-bit untagged-sRGB PNG, JPEG, or WebP on macOS arm64 and emits PNG only. It does not perform color-profile conversion, animation processing, semantic foreground segmentation, hair or microscopy-specific matting, manual mask refinement, calibrated image analysis, or batch processing. JPEG key backgrounds may contain compression artifacts and need wider declared thresholds plus full-resolution review. Compute resource provisioning remains outside plugin scope."
+        "The validated row covers one static 8-bit untagged-sRGB PNG, JPEG, or WebP on macOS arm64 or Linux x86-64 and emits PNG only. It does not perform color-profile conversion, animation processing, semantic foreground segmentation, hair or microscopy-specific matting, manual mask refinement, calibrated image analysis, or batch processing. JPEG key backgrounds may contain compression artifacts and need wider declared thresholds plus full-resolution review. Compute resource provisioning remains outside plugin scope."
       ],
       "maturity": "validated",
       "module_type": "transform",
@@ -12686,7 +12688,7 @@
           "Independent clean-room implementation informed by general chroma-key compositing, alpha-matte, and despill principles.",
           "https://www.w3.org/TR/png-3/",
           "https://developers.google.com/speed/webp/docs/riff_container",
-          "https://pillow.readthedocs.io/en/stable/releasenotes/10.4.0.html"
+          "https://pillow.readthedocs.io/en/stable/releasenotes/12.1.1.html"
         ],
         "license": "Apache-2.0"
       },
@@ -12737,13 +12739,14 @@
           "mismatch_policy": "block",
           "name": "python3",
           "platforms": [
-            "macos-arm64"
+            "macos-arm64",
+            "linux-x86_64"
           ],
           "required": true,
           "tested_versions": [
             "3.14.3"
           ],
-          "verified_at": "2026-07-13",
+          "verified_at": "2026-07-15",
           "version_differences": [
             {
               "affected_versions": [
@@ -12767,7 +12770,7 @@
           "version_source": "https://www.python.org/downloads/release/python-3143/"
         }
       ],
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     {
       "access": "offline",
@@ -39247,6 +39250,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "59a57189d49943baf5e5a09974fb92d930441c3f634d0813fb6af6b9999a0300",
+  "registry_digest": "1f2a1f54df50aa7e377e7253fc9e7c97785dac377d9b8cc777fc3297ce6620e5",
   "schema_version": 1
 }

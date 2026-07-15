@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Generated report output SHA-256 digests"
+paths = ['''^reports/.*\.json$''']
+regexTarget = "line"
+regexes = ['''"output_sha256"\s*:\s*"[0-9a-f]{64}"''']

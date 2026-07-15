@@ -23,7 +23,7 @@ This project exposes one Codex skill:
 
 Use that single entry for biomedical evidence search, omics, single-cell analysis, molecular design, imaging, clinical translation, experimental planning, manuscript work, citation auditing, peer review, patents, and presentation planning. The workbench decides whether a task needs one analysis, independent parallel analyses, or a dependent scientific pipeline.
 
-The current registry contains 96 dynamically discovered modules and 97 fully evidenced compatibility rows. The release suite discovers 577 tests; these counts are observations of this revision, not monotonic quality targets.
+The current registry contains 96 dynamically discovered modules and 97 fully evidenced compatibility rows. The release suite discovers 579 tests; these counts are observations of this revision, not monotonic quality targets.
 
 The operational catalog is source-neutral. Provenance is kept separately from routing and execution.
 
@@ -145,7 +145,7 @@ External scientific engines remain project dependencies rather than bundled vend
 | `chemical-substructure-filter` | RDKit `2025.09.6` | Python `3.11.15` | SMILES, CSV, or SDF records plus validated inclusion/exclusion SMARTS | complete accepted/rejected record ledger, atom matches, canonical stereochemical identity, and explicit parse/sanitization failures |
 | `protein-secondary-structure` | mkdssp `4.6.1`, Biopython `1.87`, Matplotlib `3.11.0` | Python `3.11.15` plus explicit DSSP dictionary resources | selected PDB `3.3` or mmCIF `5` model/chains | full DSSP alphabet, accessibility, phi/psi, unresolved-residue accounting, gap-aware segment track, and digest-bound SVG diagram |
 | `structure-interactive-visualization` | py3Dmol `2.5.3`, Biopython `1.87` | Python `3.11.15` | selected PDB `3.3` or mmCIF `5` model/chains with explicit color semantics | nonblank HTML molecular view plus manifest binding source digest, selection, style, confidence provenance, and non-analytical-use boundary |
-| `image-chroma-key-remove` | Python `3.14.3` | Pillow `10.4.0` | one static untagged-sRGB PNG `3.0`, JPEG `T.81`, or WebP `riff-container-2025` communication asset | canonical RGBA PNG plus independently recomputed matte-quality report |
+| `image-chroma-key-remove` | Python `3.14.3` | Pillow `12.1.1` | one static untagged-sRGB PNG `3.0`, JPEG `T.81`, or WebP `riff-container-2025` communication asset | canonical RGBA PNG plus independently recomputed matte-quality report |
 
 Tool-use guidance and routing remain available regardless of the installed version. For scientific execution, versions inside the declared compatibility policy may run and are recorded verbatim; provenance also states whether each version is an exact tested baseline. Missing tools first trigger compatible-environment discovery and, when feasible, an isolated temporary or project-local installation plus regression check. Versions outside the policy, failed installation, known breaking changes, or invalid output structures prevent the result from entering the evidence ledger until compatibility is established or a validated alternative is selected. The `reports/*-live-verification.json` files preserve the concrete versions used for FastQC, fastp, MultiQC, FastQ Screen, samtools, bedtools, VCF processing, TMB, and NMF regression evidence.
 

@@ -67,7 +67,7 @@ def verify(executable: Path) -> dict[str, object]:
     os.environ["PATH"] = os.pathsep.join((str(executable.parent), original_path))
     try:
         environment = detect_environment(manifest)
-        expected = ({"python3": "3.14.3"}, {"Pillow": "10.4.0"})
+        expected = ({"python3": "3.14.3"}, {"Pillow": "12.1.1"})
         if (environment.tools, environment.dependencies) != expected:
             raise RuntimeError("raster runtime differs from the validated chroma-key compatibility row")
         row = manifest.compatibility_matrix[0]
@@ -148,7 +148,10 @@ def main() -> int:
     parser.add_argument("--python-executable", type=Path, required=True)
     parser.add_argument("--output", type=Path, default=ROOT / "reports" / "chroma-key-live-verification.json")
     args = parser.parse_args()
-    report = verify(args.python_executable.resolve())
+    executable = args.python_executable.expanduser().absolute()
+    if not executable.is_file():
+        raise RuntimeError(f"Python executable does not exist: {executable}")
+    report = verify(executable)
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({"passed": report["passed"], "alpha_counts": report["scientific_summary"]["alpha_counts"]}, sort_keys=True))
     return 0
