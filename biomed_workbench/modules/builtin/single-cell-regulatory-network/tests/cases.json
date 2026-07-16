@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "prepare-complete-pyscenic-and-scenicplus-analysis",
+      "input": {
+        "objective": "Infer motif-pruned regulons and score evidence-backed paired RNA-ATAC eRegulons without causal overinterpretation.",
+        "expression_artifact_id": "artifact-count-backed-expression",
+        "accessibility_artifact_id": "artifact-paired-accessibility",
+        "requested_backends": ["pyscenic", "scenicplus"],
+        "tf_resource": "species-matched-TF-list-with-digest",
+        "motif_resources": ["cisTarget-ranking-with-digest", "motif-annotations-with-digest"],
+        "eregulon_evidence_fields": ["motif_evidence", "region_gene_score", "region_gene_pvalue", "tf_gene_score"],
+        "cell_identity_policy": "exact-paired-cells",
+        "declared_thresholds": {"minimum_targets": 5, "aucell_threshold": 0.05},
+        "design_notes": "Cells, feature namespaces, resources, evidence fields, parameters and claim boundaries are frozen before execution."
+      },
+      "expected_subset": {
+        "handoff_type": "codex_generated_project_analysis",
+        "module": {"id": "single-cell-regulatory-network", "version": "1.0.0"},
+        "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}
+      }
+    }
+  ]
+}

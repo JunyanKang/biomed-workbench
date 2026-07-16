@@ -1,0 +1,167 @@
+{
+  "backend_summaries": {
+    "macs3": {
+      "accounting": {
+        "allowlist_barcodes": 20,
+        "allowlist_barcodes_absent_from_fragments": [],
+        "excluded_fragment_count": 720,
+        "excluded_records": 720,
+        "observed_barcodes": 24,
+        "selected_barcodes": 20,
+        "selected_fragment_count": 2800,
+        "selected_records": 2800,
+        "total_fragment_count": 3520,
+        "total_records": 3520
+      },
+      "input": {
+        "barcode_allowlist_sha256": "c6fd32fe99c93b411da626420483372e3abc63c1eb67915491d45bd31e73e3cf",
+        "compression": "gzip",
+        "format": "10x-fragments-frag-five-column",
+        "sha256": "8961cb33f836436bf5e7c2e60ca7b6699726e0e8306f08e48380c04a5f6ceffa"
+      },
+      "no_environment_or_compute_infrastructure_managed": true,
+      "outputs": {
+        "narrow_peak": {
+          "chromosomes": {
+            "chr1": 2
+          },
+          "rows": 2,
+          "sha256": "61dc1739175e29c82560088a76675d00c2896b5bfe8ded12a4cac24f69958ea2"
+        },
+        "peaks_xls_sha256": "292dfe6e05e3a61e5c056aed8b7ed5d3b7b98d4cf4ea69aa1c9a664225f529bf",
+        "summits": {
+          "chromosomes": {
+            "chr1": 2
+          },
+          "rows": 2,
+          "sha256": "77ed34039a12f004bef02e01012490a4ec87f51f5cd794eb2b63edebd7259ee5"
+        }
+      },
+      "outputs_reloaded": true,
+      "parameters": {
+        "call_summits": true,
+        "format": "FRAG",
+        "genome_size": "120000",
+        "keep_duplicates": "all",
+        "name": "fixture",
+        "qvalue": 0.05
+      },
+      "passed": true,
+      "quality_status": "passed",
+      "schema_version": 1,
+      "source_fragments_immutable": true,
+      "tool": "MACS3",
+      "tool_version": "3.0.4"
+    },
+    "regulatory": {
+      "input": {
+        "cells": 180,
+        "genes": 18,
+        "motifs": 3,
+        "peaks": 120,
+        "source_sha256": {
+          "cell-metadata": "a3996c90a5c490e2178ef8ad2045e57e913193cf3c4e72fef1d5b4cee844bcd5",
+          "gene-metadata": "325a0c74e4989e85259ad02020f4e5be9ca22d6359763d9662d134fcaa617566",
+          "motifs-rds": "1bdfd3aa66352692696c70c1480b65d0ff62fc31ee51824f69145431bc33baec",
+          "peak-counts-rds": "e24e08f0af16b8a44b2e23acf51ecb8b2379a0fccf648c42ad21f83aaa3ac812",
+          "peak-metadata": "f75ee4a542577d772322d9e05360ff21e1d368f93e07646e7b07e329e04f1ce6",
+          "peak-sequences-fasta": "ab13188a49646c3d6bc086a523820151bbfc44f07e374c0c328b006348c1cc0e",
+          "rna-counts-rds": "94963f053c5abdc907a9f7ff9f7d377c14eb41510411c681a26b0061478e3584"
+        }
+      },
+      "parameters": {
+        "background_bins": 50,
+        "background_iterations": 50,
+        "background_window": 0.1,
+        "link_background_samples": 20,
+        "link_distance": 20000,
+        "link_min_cells": 5,
+        "link_pvalue": 0.05,
+        "link_score": 0.05,
+        "seed": 1203
+      },
+      "results": {
+        "background_iterations": 50,
+        "background_rows": 120,
+        "deviation_rows": 540,
+        "modeled_motifs": 2,
+        "motif_matches": 31,
+        "peak_gene_links": 177,
+        "unsupported_motifs": 1
+      }
+    }
+  },
+  "compatibility_row_id": "agent-protocol-1-macs3-304-signac-116-chromvar-124-motifmatchr-124",
+  "dependency_versions": {
+    "Biostrings": "2.70.3",
+    "GenomicRanges": "1.54.1",
+    "Matrix": "1.6.5",
+    "Seurat": "5.2.1",
+    "SummarizedExperiment": "1.32.0",
+    "TFBSTools": "1.40.0",
+    "digest": "0.6.39",
+    "jsonlite": "2.0.0",
+    "python": "3.12.11",
+    "r": "4.3.2"
+  },
+  "execution": {
+    "chromvar_completed": true,
+    "linkpeaks_completed": true,
+    "macs3_completed": true,
+    "motifmatchr_completed": true,
+    "outputs_reloaded": true
+  },
+  "fixture": {
+    "excluded_barcodes": 4,
+    "genes": 18,
+    "motifs": 3,
+    "paired_cells": 180,
+    "peaks": 120,
+    "selected_barcodes": 20
+  },
+  "independent_evaluation": {
+    "excluded_barcode_peak_absent": true,
+    "expected_peak_20k_recovered": true,
+    "expected_peak_60k_recovered": true,
+    "motif_a_group_a_mean_z": 2.368233154441,
+    "motif_a_group_c_mean_z": 0.000418620408758995,
+    "motif_a_group_contrast": 2.36781453403224,
+    "motif_a_planted_matches": 15,
+    "peak_gene_link_rows": 177,
+    "target_gene1_positive_link": true
+  },
+  "module_id": "single-cell-atac-regulatory",
+  "module_version": "1.0.0",
+  "passed": true,
+  "registry_digest": "8c57d693020fb6750bcc8c0e62a5a42a06192146b33f45325ff937b411eff20d",
+  "schema_version": 1,
+  "scientific_summary": {
+    "barcode_filtering_and_fragment_accounting_reconciled": true,
+    "evaluation_truth_posthoc_only": true,
+    "gc_accessibility_matched_chromvar_executed": true,
+    "macs3_frag_peak_calling_executed": true,
+    "method_specific_outputs_retained": true,
+    "motifmatchr_sequence_scan_executed": true,
+    "no_environment_or_compute_infrastructure_managed": true,
+    "outputs_reloaded": true,
+    "paired_cells_source_counts_and_fragments_preserved": true,
+    "planted_peaks_motif_activity_and_peak_gene_link_recovered": true,
+    "signac_linkpeaks_executed": true
+  },
+  "templates": {
+    "macs3": {
+      "name": "call_macs3_fragments.py",
+      "sha256": "a135a1404f21075d5353e0f28480119a1af36f27e8786e55736f0e54befb33da"
+    },
+    "regulatory": {
+      "name": "run_atac_regulatory.R",
+      "sha256": "9b164eed5af95707275861daadf6a02aee3cdef524881c332f38cb26a346de26"
+    }
+  },
+  "tool_versions": {
+    "MACS3": "3.0.4",
+    "Signac": "1.16.0",
+    "chromVAR": "1.24.0",
+    "motifmatchr": "1.24.0"
+  }
+}

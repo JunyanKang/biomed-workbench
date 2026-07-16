@@ -62,7 +62,7 @@ class ModuleRegistryEvidenceTests(unittest.TestCase):
     def test_report_contains_no_machine_path_or_secret(self):
         text = REPORT.read_text(encoding="utf-8")
 
-        for marker in ("/Users/", "/private/", "/var/folders/", "nvapi-", "bf339"):
+        for marker in ("/Users/", "/private/", "/var/folders/", "ACCESS_TOKEN=", "SECRET="):
             self.assertNotIn(marker, text)
 
     def test_every_dependency_has_a_typed_probe_and_tool_differences_are_structured(self):

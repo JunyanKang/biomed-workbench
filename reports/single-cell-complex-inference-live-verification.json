@@ -1,0 +1,139 @@
+{
+  "compatibility_observations": {
+    "primary_repeated_measure_backend": "variancePartition-dream",
+    "propeller_backend_used": "propeller.anova-fixed-only-sensitivity",
+    "speckle_propeller_ttest_status": "excluded-after-observed-one-coefficient-dimension-drop"
+  },
+  "compatibility_row_id": "agent-protocol-1-dream-1325-speckle-120",
+  "dependency_versions": {
+    "BiocParallel": "1.36.0",
+    "anndata": "0.12.19",
+    "digest": "0.6.39",
+    "edgeR": "4.0.16",
+    "jsonlite": "2.0.0",
+    "limma": "3.58.1",
+    "lme4": "1.1.38",
+    "lmerTest": "3.1.3",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "python": "3.12.11",
+    "r": "4.3.2",
+    "scipy": "1.17.1"
+  },
+  "execution": {
+    "composition_completed": true,
+    "linear_dream_completed": true,
+    "outputs_reloaded": true,
+    "preparation_completed": true,
+    "spline_dream_completed": true
+  },
+  "fixture": {
+    "biological_samples": 24,
+    "cell_types": 3,
+    "cells": 2880,
+    "features": 60,
+    "sha256": "80aa3c2ba2953f749e3ffe8878e90bad4b04797bef795fef39fef474fa46046c",
+    "subjects": 8,
+    "time_points": 3
+  },
+  "model_summaries": {
+    "composition": {
+      "primary_effects": {
+        "TypeA": 0.342458340711715,
+        "TypeB": -0.341445340196378,
+        "TypeC": -0.0760959076709633
+      },
+      "reference_stability": {
+        "TypeA": {
+          "admitted_reference_stable": true,
+          "cell_type": "TypeA",
+          "coefficient": "conditiontreated:time",
+          "direction": "positive",
+          "median_alr_effect": 0.3523,
+          "references_tested": 2,
+          "significant_references": 2
+        },
+        "TypeB": {
+          "admitted_reference_stable": true,
+          "cell_type": "TypeB",
+          "coefficient": "conditiontreated:time",
+          "direction": "negative",
+          "median_alr_effect": -0.3257,
+          "references_tested": 2,
+          "significant_references": 2
+        },
+        "TypeC": {
+          "admitted_reference_stable": false,
+          "cell_type": "TypeC",
+          "coefficient": "conditiontreated:time",
+          "direction": "discordant",
+          "median_alr_effect": -0.0267,
+          "references_tested": 2,
+          "significant_references": 2
+        }
+      }
+    },
+    "linear": {
+      "cell_types": 3,
+      "formula": "~ condition * time + sex + (1 | subject)",
+      "planted_top_five": [
+        "GENE000",
+        "GENE001",
+        "GENE003",
+        "GENE002",
+        "GENE004"
+      ]
+    },
+    "spline": {
+      "basis_coefficients_per_cell_type": 2,
+      "cell_types": 3,
+      "formula": "~ condition * ns(time, df = 2) + sex + (1 | subject)",
+      "planted_joint_top_five": [
+        "GENE000",
+        "GENE003",
+        "GENE002",
+        "GENE004",
+        "GENE001"
+      ]
+    }
+  },
+  "module_id": "single-cell-complex-inference",
+  "module_version": "1.0.0",
+  "passed": true,
+  "registry_digest": "8c57d693020fb6750bcc8c0e62a5a42a06192146b33f45325ff937b411eff20d",
+  "schema_version": 1,
+  "scientific_summary": {
+    "all_cells_and_counts_accounted": true,
+    "biological_samples_used_as_replicates": true,
+    "cells_not_used_as_replicates": true,
+    "complete_composition_grid_and_closure_checked": true,
+    "linear_longitudinal_effect_recovered": true,
+    "multi_reference_alr_sensitivity_completed": true,
+    "no_environment_or_compute_infrastructure_managed": true,
+    "nonlinear_spline_joint_test_executed": true,
+    "outputs_reloaded": true,
+    "propeller_fixed_only_sensitivity_explicit": true,
+    "reference_discordance_preserved": true,
+    "repeated_measure_composition_effects_recovered": true,
+    "subject_random_effect_enforced": true,
+    "variance_components_extracted": true
+  },
+  "templates": {
+    "composition": {
+      "name": "fit_composition_models.R",
+      "sha256": "687e2c2e2025c53e20596db658c1186be9217b52290f9ac89b4728e4e6004ae2"
+    },
+    "dream": {
+      "name": "fit_dream_longitudinal.R",
+      "sha256": "c8406fbaaa6652e3c632f8600d00289f2f882fba7a14cc8617c870f68e179afb"
+    },
+    "prepare": {
+      "name": "prepare_inference_inputs.py",
+      "sha256": "580f1ca3186f740948d7073d6c21a6c5461745114998077250669e5a59be4e6d"
+    }
+  },
+  "tool_versions": {
+    "speckle": "1.2.0",
+    "variancePartition": "1.32.5"
+  }
+}

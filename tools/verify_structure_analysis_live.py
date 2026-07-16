@@ -435,7 +435,7 @@ def verify(dssp_executable: Path, dssp_data_directory: Path, output_directory: P
                 "no_environment_or_compute_infrastructure_managed": True,
             }
             serialized = json.dumps(report, indent=2, sort_keys=True) + "\n"
-            if any(marker in serialized for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "nvapi-")):
+            if any(marker in serialized for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "ACCESS_TOKEN")):
                 raise RuntimeError(f"{module_id} public report contains a local path or credential marker")
             target = output_directory / REPORT_NAMES[module_id]
             target.write_text(serialized, encoding="utf-8")

@@ -18,6 +18,33 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         self.assertNotIn("qpcr-relative-expression", routed)
         self.assertNotIn("claim-evidence-integrity-audit", routed)
 
+    def test_compound_single_cell_request_selects_all_explicit_concepts_without_domain_leakage(self):
+        plan = route(
+            "分析单细胞RNA+ATAC数据，做doublet、ambient RNA、marker和atlas注释，"
+            "再做组成差异、轨迹、细胞通讯、SCENIC调控网络和空间转录组验证"
+        )
+        selected = set(plan["selected_module_ids"])
+        visible = {item["id"] for step in plan["steps"] for item in step["candidates"]}
+
+        self.assertEqual(plan["matched_workflows"], ["omics"])
+        self.assertTrue(
+            {
+                "single-cell-atlas-annotation",
+                "single-cell-communication",
+                "single-cell-complex-inference",
+                "single-cell-doublet-detection",
+                "single-cell-droplet-decontamination",
+                "single-cell-marker-discovery",
+                "single-cell-multimodal-integration",
+                "single-cell-regulatory-network",
+                "single-cell-spatial-analysis",
+                "single-cell-trajectory-topology",
+            }
+            <= selected
+        )
+        self.assertTrue(selected <= visible)
+        self.assertNotIn("docking-pose-review", visible)
+
     def test_donor_aware_single_cell_inference_routes_from_manifest(self):
         plan = route("Run donor-aware single-cell pseudobulk differential expression with edgeR")
         routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}

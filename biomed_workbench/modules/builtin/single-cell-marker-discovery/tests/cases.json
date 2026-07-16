@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "cases": [{
+    "name": "prepare-sample-stable-marker-discovery",
+    "input": {"objective": "Discover cluster markers and require directional support across biological samples before annotation use.", "input_artifact_id": "artifact-clustered-scrna", "input_format": "h5ad", "raw_count_location": "layers.counts", "cluster_key": "leiden_reviewed", "biological_sample_key": "donor_sample", "requested_method": "wilcoxon", "declared_thresholds": {"min_in_fraction": 0.25, "max_out_fraction": 0.5, "min_logfc": 0.25, "max_adjusted_p": 0.05, "min_sample_support": 2}, "design_notes": "Markers are evidence for reference and ontology review; they do not directly assign labels."},
+    "expected_subset": {"handoff_type": "codex_generated_project_analysis", "module": {"id": "single-cell-marker-discovery", "version": "1.0.0"}, "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}}
+  }]
+}

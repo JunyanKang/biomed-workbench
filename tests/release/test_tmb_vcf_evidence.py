@@ -37,7 +37,7 @@ class TMBVCFEvidenceTests(unittest.TestCase):
     def test_public_evidence_has_no_machine_path_credential_or_clinical_label(self):
         serialized = REPORT.read_text(encoding="utf-8")
 
-        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "nvapi-", '"classification": "High"'):
+        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "ACCESS_TOKEN=", '"classification": "High"'):
             self.assertNotIn(marker, serialized)
 
 

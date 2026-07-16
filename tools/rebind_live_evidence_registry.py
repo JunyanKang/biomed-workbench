@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -31,6 +32,23 @@ def _validate_module_report(report: dict[str, object], registry: ModuleRegistry)
     row_id = report.get("compatibility_row_id")
     if row_id is not None and row_id not in {row.id for row in manifest.compatibility_matrix}:
         raise RuntimeError(f"live report compatibility row is stale: {module_id}")
+    reported_templates = report.get("templates")
+    if reported_templates is not None:
+        if not isinstance(reported_templates, dict):
+            raise RuntimeError(f"live report template evidence is invalid: {module_id}")
+        observed = {
+            item.get("name"): item.get("sha256")
+            for item in reported_templates.values()
+            if isinstance(item, dict)
+        }
+        template_root = BUILTIN_ROOT / module_id / "templates"
+        expected = {
+            path.name: hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in sorted(template_root.iterdir())
+            if path.is_file()
+        }
+        if observed != expected:
+            raise RuntimeError(f"live report template evidence is stale: {module_id}")
 
 
 def _validate_multi_module_report(report: dict[str, object], registry: ModuleRegistry) -> None:

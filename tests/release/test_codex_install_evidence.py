@@ -53,8 +53,8 @@ class CodexInstallEvidenceTests(unittest.TestCase):
         self.assertNotIn("/Users/", text)
         self.assertNotIn("/private/", text)
         self.assertNotIn("/var/folders/", text)
-        self.assertNotIn("nvapi-", text)
-        self.assertNotIn("bf339", text)
+        self.assertNotIn("ACCESS_TOKEN=", text)
+        self.assertNotIn("SECRET=", text)
 
 
 if __name__ == "__main__":

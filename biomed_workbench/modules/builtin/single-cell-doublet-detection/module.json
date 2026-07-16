@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "id": "single-cell-doublet-detection",
+  "version": "1.0.0",
+  "title": "Detect single-cell doublets with sample-aware Scrublet and scDblFinder evidence",
+  "description": "Direct Codex to inspect immutable count-backed single-cell data and biological sample structure, execute Scrublet and/or scDblFinder in the user's existing scientific environment, preserve method-specific scores and calls, compare method agreement without forcing removal, and admit only reload-validated, reason-coded doublet evidence into a downstream quality decision.",
+  "module_type": "analysis",
+  "domains": ["omics", "statistics"],
+  "intents": ["detect single-cell doublets with Scrublet and scDblFinder", "sample-aware doublet calling before single-cell analysis", "compare Scrublet scDblFinder doublet scores and calls", "单细胞双细胞检测 Scrublet scDblFinder 样本感知复核"],
+  "questions": ["Which cells have reproducible doublet evidence under methods whose assumptions, sample structure, expected loading, and score distributions are explicit, and which cells require review rather than automatic exclusion?"],
+  "maturity": "experimental",
+  "entrypoint": "agent-generated-analysis",
+  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
+  "input_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "objective": {"type": "string", "minLength": 12, "maxLength": 4000},
+      "input_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256},
+      "input_format": {"type": "string", "enum": ["h5ad", "matrix-market"]},
+      "raw_count_location": {"type": "string", "minLength": 1, "maxLength": 256},
+      "biological_sample_key": {"type": "string", "minLength": 1, "maxLength": 128},
+      "chemistry": {"type": "string", "minLength": 1, "maxLength": 256},
+      "expected_doublet_rate": {"type": "number", "minimum": 0.0001, "maximum": 0.5},
+      "requested_methods": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["scrublet", "scDblFinder"]}},
+      "declared_thresholds": {"type": "object"},
+      "design_notes": {"type": "string", "minLength": 1, "maxLength": 8000}
+    },
+    "required": ["objective", "input_artifact_id", "input_format", "raw_count_location", "biological_sample_key", "chemistry", "expected_doublet_rate", "requested_methods", "declared_thresholds", "design_notes"]
+  },
+  "output_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]},
+      "module": {"type": "object"}, "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "request_fields": {"type": "array"},
+      "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"},
+      "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"},
+      "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"},
+      "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}
+    },
+    "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]
+  },
+  "input_artifacts": [{
+    "name": "single_cell_counts", "artifact_type": "single_cell_analysis_object",
+    "formats": [
+      {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["observations-by-variables"]},
+      {"name": "matrix-market", "versions": ["2.0"], "representations": ["text", "sparse"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["features-by-observations"]}
+    ],
+    "processing_levels": ["count-backed", "quality-controlled"],
+    "required_metadata": ["input-artifact-digest", "raw-count-location", "biological-sample-key", "chemistry", "cell-accounting", "feature-identifier-namespace"]
+  }],
+  "output_artifacts": [
+    {
+      "name": "doublet_annotated_object", "artifact_type": "single_cell_doublet_annotated_object",
+      "formats": [{"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-from-input"], "orientations": ["observations-by-variables"]}],
+      "processing_levels": ["doublet-scored", "source-preserved", "reload-validated"],
+      "required_metadata": ["module-version", "input-artifact-digest", "raw-count-location", "biological-sample-key", "method-scores", "method-calls", "method-status", "expected-doublet-rate", "quality-gate-results", "reload-check"]
+    },
+    {
+      "name": "doublet_evidence_report", "artifact_type": "single_cell_doublet_evidence",
+      "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["cells-and-samples-by-method-evidence"]}],
+      "processing_levels": ["derived"],
+      "required_metadata": ["method-versions", "sample-accounting", "score-distributions", "called-fractions", "method-agreement", "review-candidates", "not-run-methods", "quality-gate-results"]
+    }
+  ],
+  "assumptions": ["Counts, cells, features, sample identities, chemistry, and expected recovery are declared; doublet scores are method-specific evidence rather than ground truth; and a biological sample is not split or pooled merely to satisfy a method."],
+  "preconditions": ["Codex can inspect the real count object or Matrix Market bundle, biological sample field, chemistry and loading context; the requested method is available in an existing compatible scientific environment; output locations are new; and doublet decisions will be reviewed before removal."],
+  "quality_gates": [
+    {"id": "doublet-input-semantics", "severity": "fatal", "description": "Block when counts, cell identities, sample membership, chemistry, raw-count location, expected loading, or source digest cannot be established without guessing.", "blocks_interpretation": true},
+    {"id": "doublet-sample-accounting", "severity": "fatal", "description": "Every input cell must be completed or retained with an explicit not-run or exclusion reason; cells must not be pooled across biologically distinct samples without a declared rationale.", "blocks_interpretation": true},
+    {"id": "doublet-method-output", "severity": "fatal", "description": "Scores, calls, thresholds, parameters, versions, and exact cell order must be finite, reloadable, and method-specific.", "blocks_interpretation": true},
+    {"id": "doublet-rate-plausibility", "severity": "major", "description": "Flag results when called fractions are incompatible with declared loading, sample distribution, or score structure; a method threshold cannot be selected to obtain a desired retention fraction.", "blocks_interpretation": true},
+    {"id": "doublet-adjudication", "severity": "fatal", "description": "Automatic deletion is prohibited. Concordance, discordance, neighborhood context, lineage markers, and downstream sensitivity must be recorded before a cell is removed from biological inference.", "blocks_interpretation": true},
+    {"id": "doublet-source-preservation", "severity": "fatal", "description": "Raw counts, source cells, features, sample labels, and pre-existing annotations must survive output reload unchanged.", "blocks_interpretation": true}
+  ],
+  "evidence_effects": ["records_sample_aware_doublet_scores_and_calls", "preserves_method_disagreement_for_review", "blocks_unjustified_cell_removal", "creates_reloadable_quality_evidence_before_downstream_analysis"],
+  "alternatives": [],
+  "complements": ["single-cell-foundation-workflow", "single-cell-donor-inference"],
+  "tool_requirements": [
+    {"name": "scrublet", "ecosystem": "python", "identity": "scrublet", "required": true, "tested_versions": ["0.2.3"], "allowed_versions": [">=0.2,<0.3"], "version_source": "https://github.com/swolock/scrublet", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('scrublet'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "alternative", "version_differences": [{"id": "scrublet-score-threshold-api", "affected_versions": [">=0.2,<0.3"], "category": "behavior", "description": "Expected-rate priors, simulated doublets, score thresholding, and PCA settings affect called doublets.", "compatibility_effect": "requires-parameter", "required_action": "Record expected doublet rate, PCA settings, score distribution, threshold, sample-level calls, and downstream sensitivity.", "source": "https://github.com/swolock/scrublet"}], "platforms": ["any"]},
+    {"name": "scDblFinder", "ecosystem": "r", "identity": "scDblFinder", "required": true, "tested_versions": ["1.16.0"], "allowed_versions": [">=1.16,<1.17"], "version_source": "https://bioconductor.org/packages/3.18/bioc/html/scDblFinder.html", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('scDblFinder')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "alternative", "version_differences": [{"id": "scdblfinder-classification-api", "affected_versions": [">=1.16,<1.17"], "category": "behavior", "description": "Artificial-doublet construction, expected-rate handling, score calibration, and class labels are version-coupled.", "compatibility_effect": "requires-parser", "required_action": "Retain score and class fields in exact cell order and compare called fractions with declared loading context.", "source": "https://bioconductor.org/packages/3.18/bioc/html/scDblFinder.html"}], "platforms": ["any"]}
+  ],
+  "dependencies": [
+    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.10.20"], "allowed_versions": [">=3.10,<3.11"], "version_source": "https://www.python.org/downloads/release/python-31020/", "verified_at": "2026-07-15", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run the validated Scrublet reference template in the existing scientific environment.", "conflicts": [], "platforms": ["any"]},
+    {"name": "r", "ecosystem": "runtime", "identity": "r-runtime", "required": true, "tested_versions": ["4.3.2"], "allowed_versions": [">=4.3,<4.4"], "version_source": "https://cran.r-project.org/src/base/R-4/", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(getRversion()))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run the validated scDblFinder reference template in the existing scientific environment.", "conflicts": [], "platforms": ["any"]}
+  ],
+  "compatibility_matrix": [{
+    "id": "agent-protocol-1-scrublet-023-scdblfinder-1160", "module_version": "1.0.0",
+    "tool_versions": {"scrublet": [">=0.2,<0.3"], "scDblFinder": [">=1.16,<1.17"]},
+    "dependency_versions": {"python": [">=3.10,<3.11"], "r": [">=4.3,<4.4"]},
+    "input_formats": {"single_cell_counts": ["h5ad@0.1.0", "matrix-market@2.0"]},
+    "output_formats": {"doublet_annotated_object": ["h5ad@0.1.0"], "doublet_evidence_report": ["inline-json@1"]},
+    "platforms": ["any"], "regression_evidence_ids": ["single-cell-doublet-detection-regression-v1"], "end_to_end_evidence_ids": ["single-cell-doublet-detection-e2e-v1"], "verified_at": "2026-07-15"
+  }],
+  "access": "agent_generated",
+  "mutability": "read_only",
+  "credentials": [],
+  "limitations": ["The validated module covers Scrublet 0.2.3 and scDblFinder 1.16.0 as complementary sample-aware evidence. It does not establish a true doublet label, infer ambient RNA, replace empty-droplet testing, or justify automatic removal. CellBender requires a separate project-specific runtime and compatibility validation because this plugin does not manage GPU or other compute infrastructure."],
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned conservative doublet-adjudication workflow synthesized from explicit sample, loading, and source-preservation contracts.", "https://github.com/swolock/scrublet", "https://bioconductor.org/packages/3.18/bioc/html/scDblFinder.html"]},
+  "agent_protocol": {
+    "schema_version": 1, "mode": "codex_generated_project_code", "languages": ["python", "r", "notebook"],
+    "template_sections": [
+      {"id": "inspect-doublet-design", "purpose": "Establish count, sample, chemistry, loading, and downstream-use semantics before doublet detection.", "required_logic": ["Inspect immutable counts, cells, features, biological samples, chemistry, expected recovery, existing labels, raw-count location, and source digest.", "Block guessed sample identities, pooled incompatible samples, noninteger counts, missing loading rationale, or a request to optimize retention after reviewing outcomes.", "Predeclare requested methods, expected-rate prior, score or call review policy, and downstream sensitivity plan."], "output_artifact_types": ["single_cell_doublet_evidence"], "template_files": ["templates/run_scrublet.py", "templates/run_scdblfinder.R"]},
+      {"id": "execute-per-sample-methods", "purpose": "Run detected compatible methods independently for each biological sample while retaining method-specific evidence.", "required_logic": ["Run Scrublet on count-backed H5AD samples and scDblFinder on count-backed Matrix Market samples using the declared expected-rate rationale.", "Preserve every score, threshold, class, warning, not-run sample, parameter, seed, and exact cell order.", "Do not delete cells, use target labels to tune thresholds, or replace raw counts during detection."], "output_artifact_types": ["single_cell_doublet_annotated_object", "single_cell_doublet_evidence"], "template_files": ["templates/run_scrublet.py", "templates/run_scdblfinder.R"]},
+      {"id": "adjudicate-and-sensitivity", "purpose": "Turn method outputs into reviewable quality evidence rather than a black-box filter.", "required_logic": ["Compare score distributions, expected and observed called fractions, between-method agreement, sample-specific shifts, neighborhood context, lineage-marker context, and potential rare-population impact.", "Treat concordance as stronger review evidence and preserve discordant calls; evaluate justified parameter sensitivity before exclusion.", "Write a cell-level retain, review, or exclude recommendation with reasons, but require an explicit project decision before destructive filtering."], "output_artifact_types": ["single_cell_doublet_evidence"], "template_files": ["templates/run_scrublet.py", "templates/run_scdblfinder.R"]},
+      {"id": "reload-and-admit", "purpose": "Bind doublet evidence to reloadable source-preserving artifacts.", "required_logic": ["Reload output H5AD and tabular outputs, reconcile cells, raw counts, sample labels, scores, calls, statuses, versions, and digests.", "Record non-run methods and insufficient samples explicitly rather than interpreting absence as a negative result.", "Admit only observed evidence that passes all quality gates; preserve unresolved doublet status for downstream sensitivity analysis."], "output_artifact_types": ["single_cell_doublet_annotated_object", "single_cell_doublet_evidence"], "template_files": ["templates/run_scrublet.py", "templates/run_scdblfinder.R"]}
+    ],
+    "parameter_rules": [
+      {"id": "expected-doublet-rate", "parameter": "expected-doublet-rate", "decision_inputs": ["chemistry", "recovery", "loading concentration", "multiplexing", "sample size"], "selection_rule": "Derive a sample-specific expected rate from documented loading and chemistry, then retain sensitivity around the chosen value.", "validation_rule": "Flag implausible called fractions and prohibit changing the rate after observing desired retention."},
+      {"id": "method-selection", "parameter": "requested-methods", "decision_inputs": ["input format", "sample design", "available compatible runtime", "computational constraints"], "selection_rule": "Use both compatible methods when formats and runtime permit; otherwise state exactly which method was not run and why.", "validation_rule": "Never relabel an unavailable method as a negative doublet finding."},
+      {"id": "exclusion-decision", "parameter": "doublet-adjudication", "decision_inputs": ["method agreement", "score distribution", "cell neighborhood", "marker context", "rare-state impact", "downstream sensitivity"], "selection_rule": "Require explicit biological and technical review before destructive removal.", "validation_rule": "Keep scores, calls, reasons, and a retained sensitivity branch for every consequential exclusion."}
+    ],
+    "preflight_checks": ["Inspect the actual count object or Matrix Market bundle, raw-count location, sample field, chemistry, recovery, expected doublet rate, source digest, and requested methods.", "Detect Scrublet, scDblFinder, Python, R, and their supporting package versions in existing compatible environments.", "Verify integer-like nonnegative counts, unique cells and features, adequate cells per sample, immutable source artifacts, new output paths, and a predeclared downstream sensitivity plan."],
+    "postflight_checks": ["Reconcile all input cells to completed, insufficient-sample, or explicit error states for every method.", "Inspect finite scores, method classes, thresholds, called fractions, agreement, sample distributions, parameter sensitivity, and no automatic source-cell deletion.", "Reload outputs and verify raw counts, cells, features, sample labels, previous annotations, method fields, versions, and digests are preserved."],
+    "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-artifact-sha256", "raw-count-location", "biological-sample-key", "chemistry", "loading-rationale", "expected-doublet-rate", "actual-tool-versions", "method-parameters", "random-seeds", "sample-accounting", "method-scores-and-calls", "agreement", "review-recommendations", "output-artifact-sha256", "quality-gate-results"],
+    "forbidden_actions": ["Do not install, update, activate, create, or manage Python, R, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.", "Do not pool biologically distinct samples, guess loading, infer a raw-count layer, tune a threshold from desired retention, or use desired cell labels during fitting.", "Do not overwrite raw counts, source cells, features, sample labels, or existing annotations.", "Do not automatically remove cells or claim a called doublet is ground truth.", "Do not report generated code or unreloaded outputs as validated doublet evidence."],
+    "requires_observed_execution": true
+  }
+}

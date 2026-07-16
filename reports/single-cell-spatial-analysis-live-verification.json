@@ -1,0 +1,193 @@
+{
+  "backend_summaries": {
+    "h5ad": {
+      "input": {
+        "clusters": 3,
+        "coordinate_unit": "grid-unit",
+        "genes": 60,
+        "kind": "h5ad",
+        "observations": 360,
+        "sample_sizes": {
+          "S1": 180,
+          "S2": 180
+        },
+        "samples": 2,
+        "source_count_digest": "d072abfe7e10ed466b4c801aa513691a7296040f12267557bfd0ec400dafcabc",
+        "source_digest": "9caf9340280afd2aa618d62bf8e74b3460b2800b6bdb3f85b2ceebe70e132e0d",
+        "spatial_elements": {
+          "images": [],
+          "labels": [],
+          "points": [],
+          "shapes": [],
+          "tables": []
+        }
+      },
+      "results": {
+        "admitted_spatial_genes": [
+          "SVG_C",
+          "SVG_A",
+          "SVG_B"
+        ],
+        "cooccurrence_rows": 162,
+        "cross_sample_edges": 0,
+        "domains": 3,
+        "highly_variable_genes": 50,
+        "moran_genes": 6,
+        "moran_q_column": "pval_sim_fdr_bh",
+        "moran_rows": 18,
+        "neighborhood_rows": 9,
+        "principal_components": 15,
+        "spatial_edges": 970,
+        "spatial_gene_support": {
+          "SVG_A": 2,
+          "SVG_B": 2,
+          "SVG_C": 2
+        }
+      }
+    },
+    "spatialdata": {
+      "input": {
+        "clusters": 3,
+        "coordinate_unit": "grid-unit",
+        "genes": 60,
+        "kind": "spatialdata-zarr",
+        "observations": 360,
+        "sample_sizes": {
+          "S1": 180,
+          "S2": 180
+        },
+        "samples": 2,
+        "source_count_digest": "d072abfe7e10ed466b4c801aa513691a7296040f12267557bfd0ec400dafcabc",
+        "source_digest": "fdc3b026da3153e75e9141aab1c55be192aa2d239b7e931128ea82e66c4f2366",
+        "spatial_elements": {
+          "images": [
+            "histology"
+          ],
+          "labels": [],
+          "points": [],
+          "shapes": [],
+          "tables": [
+            "spots"
+          ]
+        }
+      },
+      "results": {
+        "admitted_spatial_genes": [
+          "SVG_C",
+          "SVG_A",
+          "SVG_B"
+        ],
+        "cooccurrence_rows": 162,
+        "cross_sample_edges": 0,
+        "domains": 3,
+        "highly_variable_genes": 50,
+        "moran_genes": 6,
+        "moran_q_column": "pval_sim_fdr_bh",
+        "moran_rows": 18,
+        "neighborhood_rows": 9,
+        "principal_components": 15,
+        "spatial_edges": 970,
+        "spatial_gene_support": {
+          "SVG_A": 2,
+          "SVG_B": 2,
+          "SVG_C": 2
+        }
+      }
+    }
+  },
+  "compatibility_row_id": "agent-protocol-1-squidpy-166-spatialdata-050-scanpy-1115",
+  "dependency_versions": {
+    "anndata": "0.12.19",
+    "igraph": "0.11.9",
+    "numpy": "2.4.6",
+    "pandas": "2.3.3",
+    "python": "3.12.11",
+    "scikit-learn": "1.9.0",
+    "scipy": "1.18.0",
+    "zarr": "2.18.7"
+  },
+  "execution": {
+    "cooccurrence_completed": true,
+    "domain_model_completed": true,
+    "h5ad_completed": true,
+    "moran_completed": true,
+    "neighborhood_completed": true,
+    "outputs_reloaded": true,
+    "spatial_graph_completed": true,
+    "spatialdata_completed": true
+  },
+  "fixture": {
+    "biological_samples": 2,
+    "genes": 60,
+    "negative_control_genes": 3,
+    "observations": 360,
+    "observations_per_sample": 180,
+    "planted_spatial_genes": 3,
+    "planted_zones": 3,
+    "spatialdata_images": 1
+  },
+  "independent_evaluation": {
+    "h5ad": {
+      "admitted_spatial_genes": [
+        "SVG_A",
+        "SVG_B",
+        "SVG_C"
+      ],
+      "domain_ari": 1.0,
+      "nearest_cooccurrence_diagonal_gap": 2.5374744828572817,
+      "neighborhood_diagonal_gap": 47.31491030438881,
+      "spatial_gene_support": {
+        "SVG_A": 2,
+        "SVG_B": 2,
+        "SVG_C": 2
+      }
+    },
+    "spatialdata": {
+      "admitted_spatial_genes": [
+        "SVG_A",
+        "SVG_B",
+        "SVG_C"
+      ],
+      "domain_ari": 1.0,
+      "nearest_cooccurrence_diagonal_gap": 2.5374744828572817,
+      "neighborhood_diagonal_gap": 47.31491030438881,
+      "spatial_gene_support": {
+        "SVG_A": 2,
+        "SVG_B": 2,
+        "SVG_C": 2
+      }
+    }
+  },
+  "module_id": "single-cell-spatial-analysis",
+  "module_version": "1.0.0",
+  "passed": true,
+  "registry_digest": "8c57d693020fb6750bcc8c0e62a5a42a06192146b33f45325ff937b411eff20d",
+  "schema_version": 1,
+  "scientific_summary": {
+    "all_planted_spatial_genes_and_no_controls_admitted": true,
+    "global_and_sample_level_moran_executed": true,
+    "h5ad_and_spatialdata_zarr_executed": true,
+    "multiplicity_and_sample_replication_gates_applied": true,
+    "no_environment_or_compute_infrastructure_managed": true,
+    "outputs_reloaded": true,
+    "sample_isolated_spatial_graph_executed": true,
+    "sample_level_cooccurrence_executed": true,
+    "sample_restricted_neighborhood_permutations_executed": true,
+    "source_counts_cells_genes_coordinates_and_elements_preserved": true,
+    "spatialdata_image_and_table_provenance_retained": true,
+    "spots_not_used_as_condition_replicates": true,
+    "three_planted_domains_recovered_without_label_leakage": true,
+    "zero_cross_sample_spatial_edges": true
+  },
+  "templates": {
+    "spatial": {
+      "name": "run_spatial_analysis.py",
+      "sha256": "7c4876ff19882c39542c1776f0dfb324c15ab5730b8c3c16d005a0930703c5c8"
+    }
+  },
+  "tool_versions": {
+    "scanpy": "1.11.5",
+    "spatialdata": "0.5.0",
+    "squidpy": "1.6.6"
+  }
+}

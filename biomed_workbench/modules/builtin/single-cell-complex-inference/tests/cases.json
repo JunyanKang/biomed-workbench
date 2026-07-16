@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "cases": [{
+    "name": "prepare-longitudinal-expression-and-composition-inference",
+    "input": {
+      "objective": "Test condition-by-time expression and cell-type composition while accounting for repeated subjects and nonlinear trajectories.",
+      "input_artifact_id": "artifact-longitudinal-scrna", "input_format": "h5ad", "raw_count_location": "layers.counts",
+      "sample_key": "sample", "subject_key": "subject", "cell_type_key": "cell_type", "condition_key": "condition", "time_key": "time",
+      "covariates": ["sex"], "hypothesis_formula": "~ condition * ns(time, df = 2) + sex + (1 | subject)",
+      "variance_formula": "~ time + (1 | condition) + (1 | sex) + (1 | subject)",
+      "coefficient_pattern": "^conditiontreated:ns[(]time, df = 2[)]", "composition_reference_cell_types": ["TypeA", "TypeB", "TypeC"],
+      "declared_thresholds": {"min_cells_per_pseudobulk": 20, "min_subjects": 6, "min_repeated_subjects": 6, "fdr": 0.05, "min_reference_support": 2},
+      "design_notes": "Cells are observations within biological samples; 8 subjects have 3 longitudinal samples each; formulas, coefficients, and composition references are frozen before testing."
+    },
+    "expected_subset": {"handoff_type": "codex_generated_project_analysis", "module": {"id": "single-cell-complex-inference", "version": "1.0.0"}, "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}}
+  }]
+}

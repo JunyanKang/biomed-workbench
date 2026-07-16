@@ -47,7 +47,7 @@ class ResearchEngineEvidenceTests(unittest.TestCase):
 
     def test_report_and_fixtures_are_path_credential_and_source_neutral(self):
         text = REPORT.read_text(encoding="utf-8") + "".join(path.read_text(encoding="utf-8") for path in FIXTURES.glob("*.json"))
-        for marker in ("/Users/", "/private/", "NCBI_API_KEY", "nvapi-", "source_path"):
+        for marker in ("/Users/", "/private/", "NCBI_API_KEY", "ACCESS_TOKEN=", "source_path"):
             self.assertNotIn(marker, text)
         self.assertGreaterEqual(len(json.loads(REPORT.read_text())["limitations"]), 4)
 

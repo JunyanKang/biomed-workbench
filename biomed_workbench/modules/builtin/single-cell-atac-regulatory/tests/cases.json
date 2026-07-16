@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "prepare-complete-scatac-regulatory-analysis",
+      "input": {
+        "objective": "Call barcode-accounted scATAC peaks and compute sequence-bound motif, chromVAR, and paired RNA peak-to-gene evidence.",
+        "fragments_artifact_id": "artifact-tenx-fragments",
+        "paired_counts_artifact_id": "artifact-paired-rna-atac",
+        "genome_build": "fixture-build-1",
+        "motif_resource": "named-PFMatrixList-with-digest",
+        "requested_analyses": ["macs3-peaks", "motifmatchr", "chromvar", "linkpeaks"],
+        "declared_thresholds": {"macs3_qvalue": 0.05, "chromvar_background_iterations": 50, "link_distance": 50000},
+        "design_notes": "Cells, count locations, coordinate conversions, sequences, motifs, barcodes, and parameters are frozen before execution."
+      },
+      "expected_subset": {
+        "handoff_type": "codex_generated_project_analysis",
+        "module": {"id": "single-cell-atac-regulatory", "version": "1.0.0"},
+        "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}
+      }
+    }
+  ]
+}

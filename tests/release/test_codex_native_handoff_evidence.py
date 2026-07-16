@@ -33,7 +33,7 @@ class CodexNativeHandoffEvidenceTests(unittest.TestCase):
     def test_handoff_evidence_is_path_source_and_secret_free(self):
         serialized = REPORT.read_text(encoding="utf-8")
 
-        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "OPENAI_API_KEY", "nvapi-", "bf339", "image_gen.py"):
+        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "ACCESS_TOKEN=", "SECRET=", "image_gen.py"):
             self.assertNotIn(marker, serialized)
 
 
