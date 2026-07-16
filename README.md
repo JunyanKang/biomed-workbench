@@ -9,7 +9,7 @@
 <p align="center">
   <a href="https://github.com/JunyanKang/biomed-workbench/actions"><img alt="Quality" src="https://img.shields.io/github/actions/workflow/status/JunyanKang/biomed-workbench/quality.yml?branch=main&amp;label=quality"></a>
   <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-4388C7"></a>
-  <img alt="96 modules" src="https://img.shields.io/badge/modules-96-36A58B">
+  <img alt="Dynamic scientific modules" src="https://img.shields.io/badge/modules-dynamic-36A58B">
   <img alt="One Codex skill" src="https://img.shields.io/badge/Codex%20skills-1-E05A47">
 </p>
 
@@ -19,20 +19,22 @@
 
 Biomed Workbench gives Codex one entry point for biomedical research. Describe the scientific problem in ordinary language; the workbench frames the question, selects the relevant capabilities, coordinates independent and dependent analyses, challenges the evidence, revises the plan when quality gates fail, and prepares research-grade deliverables.
 
-The current release dynamically discovers **96 scientific modules** behind one Codex skill: `biomed-workbench`. Tasks can be routed as a single operation, a serial workflow, parallel analyses, or a mixed research program without asking the user to invoke separate skills.
+The workbench dynamically discovers its registered scientific modules behind one Codex skill: `biomed-workbench`. Tasks can be routed as a single operation, a serial workflow, parallel analyses, or a mixed research program without asking the user to invoke separate skills.
 
 ## Professional Capabilities
 
 | Research area | What the workbench coordinates |
 | --- | --- |
 | [Evidence and literature](docs/capabilities/evidence-and-literature.md) | Literature discovery, public biomedical databases, citation resolution, evidence synthesis, contradiction and freshness checks |
-| [Omics and single-cell](docs/capabilities/omics-and-single-cell.md) | Sequencing QC, bulk expression, variants, enrichment, networks, single-cell foundations, integration, annotation, communication, and trajectory analysis |
+| [Omics and single-cell](docs/capabilities/omics-and-single-cell.md) | Sequencing and expression analysis, donor-aware inference, droplet and doublet review, atlas annotation, cell-state dynamics, multimodal integration, regulatory networks, and spatial analysis |
 | [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | Sequence analysis, CRISPR and primer design, molecular evidence, structure retrieval, quality assessment, comparison, docking review, and chemical filtering |
 | [Imaging and visualization](docs/capabilities/imaging-and-visualization.md) | Image profiling, segmentation, colocalization, tracking, quantitative checks, scientific figures, and molecular visualization |
 | [Clinical and experimental research](docs/capabilities/clinical-and-experimental.md) | Cohort and survival analysis, biomarkers, adverse events, de-identification, assay design, dose response, growth curves, and experimental interpretation |
 | [Publication and translation](docs/capabilities/publication-and-translation.md) | Claim-evidence integrity, figures, manuscript revision, peer review, response letters, patents, and publication-ready research packages |
 
 See the [complete capability map](docs/capabilities/README.md) for scope, orchestration patterns, quality boundaries, and current limitations.
+
+Single-cell projects can be coordinated as complete research programs: validate raw inputs, challenge technical artifacts, establish cell states, test donor-aware hypotheses, connect trajectories and interactions, integrate modalities, examine regulatory or spatial evidence, and revise the analysis when quality gates fail. The [omics and single-cell guide](docs/capabilities/omics-and-single-cell.md) describes the supported workflows, scientific safeguards, and expected deliverables.
 
 ## How It Works
 
@@ -51,7 +53,7 @@ After installation, start a new Codex task and describe the research goal natura
 
 > Use Biomed Workbench to compare the literature, gene, variant, and structure evidence for TP53, identify disagreements, and propose the next decisive analyses.
 
-> Analyze this donor-aware single-cell study from input validation through annotation, communication, trajectory, hypothesis revision, and a manuscript-ready results package.
+> Analyze this donor-aware single-cell and spatial study from input validation and artifact review through annotation, multimodal integration, communication, trajectory, regulatory analysis, hypothesis revision, and a manuscript-ready results package.
 
 > Review these docking results together with protein structure quality and chemical filters, then explain which conclusions are supported and which require experimental validation.
 
