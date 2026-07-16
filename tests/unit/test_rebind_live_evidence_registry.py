@@ -43,6 +43,18 @@ class RebindLiveEvidenceRegistryTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "compatibility row is stale"):
                 rebind(self._write(root, compatibility_row_id="retired-row"), self.registry)
 
+    def test_rejects_stale_template_hashes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = self._write(
+                Path(temporary),
+                module_id="single-cell-doublet-detection",
+                module_version="1.0.0",
+                compatibility_row_id="agent-protocol-1-scrublet-023-scdblfinder-1160",
+                templates={"scrublet": {"name": "run_scrublet.py", "sha256": "0" * 64}},
+            )
+            with self.assertRaisesRegex(RuntimeError, "template evidence is stale"):
+                rebind(path, self.registry)
+
 
 if __name__ == "__main__":
     unittest.main()

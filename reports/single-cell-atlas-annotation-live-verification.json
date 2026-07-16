@@ -1,0 +1,114 @@
+{
+  "backend_summaries": {
+    "azimuth": {
+      "cells": 150,
+      "counts_present": true,
+      "known_accuracy": 1,
+      "known_unknown": 0,
+      "novel_unknown": 18,
+      "unknown_total": 18
+    },
+    "celltypist": {
+      "cells": 150,
+      "counts_present": true,
+      "known_accuracy": 1.0,
+      "known_unknown": 0,
+      "novel_unknown": 28,
+      "unknown_total": 28
+    },
+    "popv": {
+      "cells": 150,
+      "counts_present": true,
+      "known_accuracy": 1.0,
+      "known_unknown": 0,
+      "novel_unknown": 17,
+      "unknown_total": 17
+    }
+  },
+  "compatibility_observations": {
+    "popv_validated_experts": [
+      "Support_Vector",
+      "Random_Forest",
+      "CELLTYPIST"
+    ],
+    "popv_xgboost_status": "excluded-on-observed-macos-arm-profile-after-native-segmentation-fault"
+  },
+  "compatibility_row_id": "agent-protocol-1-celltypist-171-popv-061-azimuth-051",
+  "dependency_versions": {
+    "Seurat": "5.2.1",
+    "anndata": "0.12.19",
+    "python": "3.12.11",
+    "r": "4.3.2",
+    "scanpy": "1.11.5"
+  },
+  "execution": {
+    "azimuth_completed": true,
+    "celltypist_completed": true,
+    "outputs_reloaded": true,
+    "popv_completed": true
+  },
+  "fixtures": {
+    "azimuth_query": {
+      "absent_reference_class_cells": 30,
+      "cells": 150,
+      "features": 140,
+      "sha256": "3f4a09b4901c0ee7babae17c4d1384cb31d8a466cecff126819a04e5057944ee"
+    },
+    "azimuth_reference": {
+      "cells": 300,
+      "classes": 3,
+      "features": 140,
+      "sha256": "c3813e4c7e7614e0237383360678b119015b00017b89c72ca359d013de92f7d1"
+    },
+    "python_query": {
+      "absent_reference_class_cells": 30,
+      "cells": 150,
+      "features": 140,
+      "known_classes": 3,
+      "sha256": "1745218f7dce4b672951d9edcfdac710ebd2a3e5e2dbc8f853f3b8aa1b4cf18b"
+    },
+    "python_reference": {
+      "batches": 2,
+      "cells": 300,
+      "classes": 3,
+      "features": 140,
+      "sha256": "96cc43e17b0a4ff708c56da02e190d2eb88cea516d5669383d499193bdc3c77c"
+    }
+  },
+  "module_id": "single-cell-atlas-annotation",
+  "module_version": "1.0.0",
+  "passed": true,
+  "registry_digest": "8c57d693020fb6750bcc8c0e62a5a42a06192146b33f45325ff937b411eff20d",
+  "schema_version": 1,
+  "scientific_summary": {
+    "absent_reference_population_retained_as_unknown": true,
+    "all_query_cells_accounted": true,
+    "all_three_backends_executed": true,
+    "evaluation_labels_posthoc_only": true,
+    "known_reference_classes_recovered": true,
+    "method_specific_probabilities_and_scores_retained": true,
+    "no_environment_or_compute_infrastructure_managed": true,
+    "outputs_reloaded": true,
+    "popv_expert_disagreement_preserved": true,
+    "source_counts_and_identifiers_preserved": true
+  },
+  "templates": {
+    "azimuth": {
+      "name": "annotate_azimuth.R",
+      "sha256": "de9c3113eabd160c7fb89383692a951e2c763ad77174bfa4fecc17dac26da76e"
+    },
+    "celltypist": {
+      "name": "annotate_celltypist.py",
+      "sha256": "a46233bca2dcd10ddcb595318aa32f5e76e5f7fd7dfed8eb40ef5dc95b44ddc3"
+    },
+    "popv": {
+      "name": "annotate_popv.py",
+      "sha256": "fc4012efb4147b7bff9bba63843ddc050ad2656e676eba5615fc233fb965f678"
+    }
+  },
+  "tool_versions": {
+    "Azimuth": "0.5.1",
+    "CellTypist": "1.7.1",
+    "popV": "0.6.1"
+  }
+}

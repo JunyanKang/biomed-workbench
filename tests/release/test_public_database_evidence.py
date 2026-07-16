@@ -89,7 +89,7 @@ class PublicDatabaseEvidenceTests(unittest.TestCase):
     def test_public_evidence_contains_no_local_path_or_credential(self):
         serialized = REPORT.read_text(encoding="utf-8")
 
-        for marker in ("/Users/", "/private/", "file://", "api_key=", "nvapi-", "sk-"):
+        for marker in ("/Users/", "/private/", "file://", "api_key=", "ACCESS_TOKEN=", "sk-"):
             self.assertNotIn(marker, serialized)
 
 

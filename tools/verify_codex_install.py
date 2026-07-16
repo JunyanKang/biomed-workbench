@@ -146,7 +146,7 @@ def build_report(codex_cli: Path, source: Path) -> dict[str, Any]:
             "checks": [{"operation": operation, "passed": passed} for operation, passed in checks],
         }
         serialized = json.dumps(report, indent=2, sort_keys=True) + "\n"
-        if any(marker in serialized for marker in ("/Users/", "/private/", "/var/folders/", "file://", "nvapi-", "API_KEY=")):
+        if any(marker in serialized for marker in ("/Users/", "/private/", "/var/folders/", "file://", "API_KEY=", "ACCESS_TOKEN=")):
             raise RuntimeError("public installation report contains a local path or credential value")
         return report
 

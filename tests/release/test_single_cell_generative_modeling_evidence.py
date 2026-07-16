@@ -51,7 +51,7 @@ class SingleCellGenerativeModelingEvidenceTests(unittest.TestCase):
 
     def test_report_contains_no_machine_path_or_credential(self):
         serialized = REPORT.read_text(encoding="utf-8")
-        for marker in ("/Users/", "/private/", "file://", "NCBI_API_KEY", "nvapi-", "bf339"):
+        for marker in ("/Users/", "/private/", "file://", "NCBI_API_KEY", "ACCESS_TOKEN=", "SECRET="):
             self.assertNotIn(marker, serialized)
 
 

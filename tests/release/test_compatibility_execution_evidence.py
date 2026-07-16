@@ -36,7 +36,7 @@ class CompatibilityExecutionEvidenceTests(unittest.TestCase):
 
     def test_report_contains_no_path_or_credential(self):
         serialized = REPORT.read_text(encoding="utf-8")
-        for marker in ("/Users/", "/private/", "file://", "NCBI_API_KEY", "api_key=", "nvapi-"):
+        for marker in ("/Users/", "/private/", "file://", "NCBI_API_KEY", "api_key=", "ACCESS_TOKEN="):
             self.assertNotIn(marker, serialized)
 
     def test_every_record_is_bound_to_current_project_implementation_bytes(self):

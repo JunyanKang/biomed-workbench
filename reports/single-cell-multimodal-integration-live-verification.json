@@ -1,0 +1,125 @@
+{
+  "backend_summaries": {
+    "mofaplus": {
+      "factor_variance": {
+        "Factor1": 2.2687557783327152,
+        "Factor2": 1.2231853565807396,
+        "Factor3": 8.367354126682482e-125,
+        "Factor4": 1.05474210961174e-124,
+        "Factor5": 2.578084267220721e-126,
+        "Factor6": 4.310481971107976e-121
+      },
+      "variance_explained_rows": 3,
+      "weight_rows": 150
+    },
+    "rna_adt_wnn": {
+      "RNA_weight": {
+        "maximum": 0.6028,
+        "mean": 0.4412,
+        "median": 0.4432,
+        "minimum": 0.0293
+      },
+      "clusters": 3,
+      "secondary_weight": {
+        "maximum": 0.9707,
+        "mean": 0.5588,
+        "median": 0.5568,
+        "minimum": 0.3972
+      },
+      "wknn_nonzero": 3538,
+      "wsnn_nonzero": 10032
+    },
+    "rna_atac_wnn": {
+      "RNA_weight": {
+        "maximum": 0.649,
+        "mean": 0.5139,
+        "median": 0.5117,
+        "minimum": 0.3894
+      },
+      "clusters": 3,
+      "secondary_weight": {
+        "maximum": 0.6106,
+        "mean": 0.4861,
+        "median": 0.4883,
+        "minimum": 0.351
+      },
+      "wknn_nonzero": 3324,
+      "wsnn_nonzero": 10072
+    }
+  },
+  "compatibility_row_id": "agent-protocol-1-seurat-521-signac-116-mofapy2-074",
+  "dependency_versions": {
+    "Matrix": "1.6.5",
+    "anndata": "0.13.2",
+    "digest": "0.6.39",
+    "h5py": "3.16.0",
+    "jsonlite": "2.0.0",
+    "mudata": "0.3.10",
+    "numpy": "2.5.1",
+    "pandas": "3.0.3",
+    "python": "3.12.11",
+    "r": "4.3.2",
+    "scipy": "1.18.0",
+    "uwot": "0.2.4"
+  },
+  "execution": {
+    "mofaplus_completed": true,
+    "outputs_reloaded": true,
+    "rna_adt_wnn_completed": true,
+    "rna_atac_wnn_completed": true
+  },
+  "fixture": {
+    "adt_features": 36,
+    "atac_features": 90,
+    "cells": 180,
+    "classes": 3,
+    "mofa_views": 3,
+    "rna_features": 120
+  },
+  "independent_evaluation": {
+    "maximum_absolute_mofa_truth_correlation": 0.999009117717972,
+    "mofa_factor_truth_correlations": {
+      "Factor1": 0.999009117717972,
+      "Factor2": -0.005861763795988574,
+      "Factor3": 0.045239181807732065,
+      "Factor4": 0.04530700771680819,
+      "Factor5": -0.042988937928982625,
+      "Factor6": -0.0453589077582536
+    },
+    "rna_adt_ari": 1.0,
+    "rna_atac_ari": 1.0
+  },
+  "module_id": "single-cell-multimodal-integration",
+  "module_version": "1.0.0",
+  "passed": true,
+  "registry_digest": "8c57d693020fb6750bcc8c0e62a5a42a06192146b33f45325ff937b411eff20d",
+  "schema_version": 1,
+  "scientific_summary": {
+    "cell_specific_modality_weights_retained": true,
+    "evaluation_labels_posthoc_only": true,
+    "mofaplus_factors_weights_and_variance_retained": true,
+    "mofaplus_three_view_model_converged": true,
+    "no_environment_or_compute_infrastructure_managed": true,
+    "outputs_reloaded": true,
+    "paired_cells_and_source_counts_preserved": true,
+    "planted_shared_factor_recovered": true,
+    "rna_adt_wnn_executed": true,
+    "rna_atac_wnn_executed": true,
+    "wknn_wsnn_neighbor_umap_and_clusters_retained": true
+  },
+  "templates": {
+    "mofaplus": {
+      "name": "fit_mofaplus.py",
+      "sha256": "de9e3919a4b1eb6ebd6ce63158418f13e834d6b104707af7454e187a6afab567"
+    },
+    "wnn": {
+      "name": "run_wnn.R",
+      "sha256": "1b9986b9e5f19c8eb908d5c83441bbae37085ef2dc7109a7115dbac37cf6bba3"
+    }
+  },
+  "tool_versions": {
+    "Seurat": "5.2.1",
+    "Signac": "1.16.0",
+    "mofapy2": "0.7.4"
+  }
+}

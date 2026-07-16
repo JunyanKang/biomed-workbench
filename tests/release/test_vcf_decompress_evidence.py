@@ -32,7 +32,7 @@ class VCFDecompressEvidenceTests(unittest.TestCase):
     def test_public_evidence_has_no_machine_path_or_credential(self):
         serialized = REPORT.read_text(encoding="utf-8")
 
-        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "nvapi-"):
+        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "ACCESS_TOKEN="):
             self.assertNotIn(marker, serialized)
 
 

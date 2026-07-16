@@ -23,7 +23,7 @@ class CIQualityEvidenceTests(unittest.TestCase):
 
     def test_report_is_path_and_secret_free(self):
         text = REPORT.read_text(encoding="utf-8")
-        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "nvapi-"):
+        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "ACCESS_TOKEN="):
             self.assertNotIn(marker, text)
 
 

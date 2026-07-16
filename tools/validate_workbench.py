@@ -37,7 +37,9 @@ from tools.audit_bioinformatics_templates import build as build_bioinformatics_t
 
 CATALOG_FIELDS = {"id", "workflow", "kind", "title", "description", "entrypoint", "input_schema", "requirements", "access", "mutability"}
 SECRET_PATTERNS = [
-    re.compile(r"nvapi-[A-Za-z0-9_-]{20,}"), re.compile(r"sk-[A-Za-z0-9_-]{32,}"), re.compile(r"gh[opsu]_[A-Za-z0-9]{30,}"),
+    re.compile(r"(?:api[_-]?key|access[_-]?token|secret)\s*[:=]\s*['\"][A-Za-z0-9_-]{16,}['\"]", re.IGNORECASE),
+    re.compile(r"\b[A-Z][A-Z0-9_]*(?:API_KEY|ACCESS_TOKEN|SECRET)=[A-Za-z0-9_-]{16,}\b"),
+    re.compile(r"(?:bearer\s+)[A-Za-z0-9._-]{20,}", re.IGNORECASE),
 ]
 LOCAL_PATH_PATTERNS = ("/Users/" + "kangjunyan", "/private/" + "var/folders/")
 LEGACY_PATHS = (

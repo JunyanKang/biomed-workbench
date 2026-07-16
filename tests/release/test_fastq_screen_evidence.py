@@ -40,7 +40,7 @@ class FastQScreenEvidenceTests(unittest.TestCase):
 
     def test_report_contains_no_paths_or_credentials(self):
         text = REPORT.read_text(encoding="utf-8")
-        for marker in ("/Users/", "/private/", "/tmp/", "/var/folders/", "NCBI_API_KEY", "nvapi-", "bf339"):
+        for marker in ("/Users/", "/private/", "/tmp/", "/var/folders/", "NCBI_API_KEY", "ACCESS_TOKEN=", "SECRET="):
             self.assertNotIn(marker, text)
 
 

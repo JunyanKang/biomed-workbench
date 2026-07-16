@@ -4164,6 +4164,187 @@
     },
     {
       "access": "agent_generated",
+      "description": "Direct Codex to validate 10x fragments and paired RNA/ATAC count evidence, call peaks with MACS3 FRAG semantics, scan declared motifs against supplied peak sequences, construct reproducible GC/accessibility-matched chromVAR backgrounds, calculate motif deviations, execute Signac peak-to-gene linking, and retain reload-validated method-specific evidence without causal overinterpretation.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-atac-regulatory",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "type": "string"
+          },
+          "fragments_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genome_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "motif_resource": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "paired_counts_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_analyses": {
+            "items": {
+              "enum": [
+                "macs3-peaks",
+                "motifmatchr",
+                "chromvar",
+                "linkpeaks"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "objective",
+          "fragments_artifact_id",
+          "paired_counts_artifact_id",
+          "genome_build",
+          "motif_resource",
+          "requested_analyses",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Call scATAC peaks and infer motif, chromVAR, and peak-to-gene evidence",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to inspect count-backed query cells and declared reference assets, execute CellTypist, Azimuth, or a popV expert ensemble in compatible existing scientific runtimes, retain method-specific labels and confidence evidence, preserve low-confidence or discordant cells as Unknown, and admit only reload-validated annotations that leave source counts and identities unchanged.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-atlas-annotation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "query_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "query_batch_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "query_format": {
+            "enum": [
+              "h5ad",
+              "seurat-rds"
+            ],
+            "type": "string"
+          },
+          "query_raw_count_location": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_batch_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_format": {
+            "enum": [
+              "celltypist-model",
+              "h5ad",
+              "azimuth-reference"
+            ],
+            "type": "string"
+          },
+          "reference_label_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_scope_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_backends": {
+            "items": {
+              "enum": [
+                "celltypist",
+                "azimuth",
+                "popv"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "unknown_label": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "query_artifact_id",
+          "reference_artifact_id",
+          "query_format",
+          "reference_format",
+          "query_raw_count_location",
+          "requested_backends",
+          "reference_label_key",
+          "query_batch_key",
+          "reference_batch_key",
+          "unknown_label",
+          "declared_thresholds",
+          "reference_scope_notes",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Map single cells with CellTypist, Azimuth, and popV while retaining unknown states",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
       "description": "Direct Codex to inspect a real quality-controlled h5ad and crossed biological design; generate project-specific Harmony, Scanorama, and BBKNN runs from the same batch-aware feature and PCA foundation; execute each method in the user's existing scientific environment; compare batch mixing against label-neighborhood purity, label graph connectivity, silhouettes, unknown-label retention, and raw-count preservation; reject overcorrection and label leakage; and admit only a method whose observed outputs pass declared scientific gates.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-batch-integration",
@@ -4352,6 +4533,125 @@
     },
     {
       "access": "agent_generated",
+      "description": "Direct Codex to validate count-backed annotated single-cell data, aggregate immutable counts by biological sample and cell type, fit linear or spline longitudinal dream models with subject random effects, quantify variance components, and test cell-type composition with repeated-measure, propeller, and multi-reference additive-log-ratio evidence without treating cells as replicates.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-complex-inference",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "cell_type_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "coefficient_pattern": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "composition_reference_cell_types": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "condition_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "covariates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "hypothesis_formula": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "raw_count_location": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "sample_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "subject_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "time_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "variance_formula": {
+            "maxLength": 1000,
+            "minLength": 3,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "raw_count_location",
+          "sample_key",
+          "subject_key",
+          "cell_type_key",
+          "condition_key",
+          "time_key",
+          "covariates",
+          "hypothesis_formula",
+          "variance_formula",
+          "coefficient_pattern",
+          "composition_reference_cell_types",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Fit longitudinal mixed models and compositional single-cell inference",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
       "description": "Direct Codex to inspect a real annotated single-cell count object and experimental design; generate project-specific code that aggregates immutable raw counts by biological sample and cell type; fit estimable edgeR, DESeq2, or limma-voom condition contrasts using biological replicates; diagnose confounding, low replication, sample outliers, and model sensitivity; execute the reviewed code in the user's existing scientific environment; and admit only observed, reloaded, quality-controlled statistical artifacts into project evidence.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-donor-inference",
@@ -4472,6 +4772,262 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Generate and validate donor-aware single-cell pseudobulk inference",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to inspect immutable count-backed single-cell data and biological sample structure, execute Scrublet and/or scDblFinder in the user's existing scientific environment, preserve method-specific scores and calls, compare method agreement without forcing removal, and admit only reload-validated, reason-coded doublet evidence into a downstream quality decision.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-doublet-detection",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "biological_sample_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "chemistry": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "expected_doublet_rate": {
+            "maximum": 0.5,
+            "minimum": 0.0001,
+            "type": "number"
+          },
+          "input_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad",
+              "matrix-market"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "raw_count_location": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_methods": {
+            "items": {
+              "enum": [
+                "scrublet",
+                "scDblFinder"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "raw_count_location",
+          "biological_sample_key",
+          "chemistry",
+          "expected_doublet_rate",
+          "requested_methods",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Detect single-cell doublets with sample-aware Scrublet and scDblFinder evidence",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to inspect unfiltered and filtered droplet counts, execute emptyDrops, SoupX, and CellBender in compatible existing scientific runtimes, preserve each method's assumptions and outputs, and admit only barcode-reconciled, nonnegative, reload-validated contamination evidence into downstream single-cell analysis.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-droplet-decontamination",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "chemistry": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "declared_parameters": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "expected_cells": {
+            "minimum": 10,
+            "type": "integer"
+          },
+          "filtered_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "matrix-market",
+              "cellranger-h5",
+              "h5ad"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "raw_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_methods": {
+            "items": {
+              "enum": [
+                "emptyDrops",
+                "SoupX",
+                "CellBender"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "sample_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "raw_artifact_id",
+          "filtered_artifact_id",
+          "input_format",
+          "sample_id",
+          "chemistry",
+          "expected_cells",
+          "requested_methods",
+          "declared_parameters",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Call non-empty droplets and quantify ambient RNA with emptyDrops, SoupX, and CellBender",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to construct separately reviewable pseudotime or moscot real-time transition kernels, estimate GPCCA fate probabilities toward declared terminal states, retain lineage-driver statistics, validate stochasticity and direction against experimental time, and preserve every source cell and raw count.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-fate-mapping",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "pseudotime_key": {
+            "type": "string"
+          },
+          "raw_count_location": {
+            "type": "string"
+          },
+          "requested_modes": {
+            "items": {
+              "enum": [
+                "pseudotime",
+                "real-time-optimal-transport"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "sample_key": {
+            "type": "string"
+          },
+          "terminal_state_key": {
+            "type": "string"
+          },
+          "terminal_states": {
+            "minItems": 2,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "time_key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "raw_count_location",
+          "sample_key",
+          "time_key",
+          "pseudotime_key",
+          "terminal_state_key",
+          "terminal_states",
+          "requested_modes",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Estimate single-cell fate with CellRank and real-time optimal transport",
       "workflow": "omics"
     },
     {
@@ -4671,6 +5227,156 @@
       "workflow": "omics"
     },
     {
+      "access": "agent_generated",
+      "description": "Direct Codex to validate count-backed clustered single-cell data, rank cluster-versus-rest genes, calculate raw-count detection fractions, test direction consistency across biological samples, and emit reload-validated marker candidates without turning cell-level significance into donor-level inference or automatic cell-type labels.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-marker-discovery",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "biological_sample_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "cluster_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "raw_count_location": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_method": {
+            "enum": [
+              "wilcoxon",
+              "t-test",
+              "logreg"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "raw_count_location",
+          "cluster_key",
+          "biological_sample_key",
+          "requested_method",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Discover sample-stable single-cell cluster markers",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to validate paired multimodal cells and immutable count layers, execute Seurat WNN separately for RNA+ATAC or RNA+ADT, fit MOFA+ across two or more declared model matrices, preserve cell-specific modality weights, graphs, factors, feature loadings and view-wise variance, and admit only reload-validated outputs without treating integration as biological truth.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-multimodal-integration",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "cell_identity_policy": {
+            "enum": [
+              "exact-paired-cells"
+            ],
+            "type": "string"
+          },
+          "declared_model_layers": {
+            "type": "object"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "seurat-rds",
+              "h5mu"
+            ],
+            "type": "string"
+          },
+          "modalities": {
+            "minItems": 2,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "requested_backends": {
+            "items": {
+              "enum": [
+                "wnn",
+                "mofaplus"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "modalities",
+          "cell_identity_policy",
+          "requested_backends",
+          "declared_model_layers",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Integrate paired RNA, ATAC, and protein modalities with WNN and MOFA+",
+      "workflow": "omics"
+    },
+    {
       "access": "offline",
       "description": "Compute per-cell counts, detected genes, mitochondrial fraction, and transparent threshold flags.",
       "entrypoint": "biomed_workbench.capabilities.omics:single_cell_qc",
@@ -4839,6 +5545,243 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Annotate single cells with SingleR, markers, ontology constraints, and unknown retention",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to validate count-backed expression, paired chromatin accessibility, TF, motif-ranking, motif-annotation, and region-gene evidence; execute GRNBoost2, cisTarget pruning, regulon construction, AUCell, and SCENIC+ eRegulon scoring in compatible existing scientific runtimes; preserve method-specific gene and region evidence; and admit only source-bound, reload-validated regulatory results without converting association into causality.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-regulatory-network",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "accessibility_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "cell_identity_policy": {
+            "enum": [
+              "exact-paired-cells"
+            ],
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "type": "string"
+          },
+          "eregulon_evidence_fields": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "expression_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "motif_resources": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "requested_backends": {
+            "items": {
+              "enum": [
+                "pyscenic",
+                "scenicplus"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "tf_resource": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "expression_artifact_id",
+          "accessibility_artifact_id",
+          "requested_backends",
+          "tf_resource",
+          "motif_resources",
+          "eregulon_evidence_fields",
+          "cell_identity_policy",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Infer and score single-cell regulatory networks with pySCENIC and SCENIC+",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to validate count-backed h5ad or SpatialData Zarr tables, coordinate units, biological samples, annotations, images and shapes; build sample-isolated spatial graphs; execute neighborhood enrichment, per-sample co-occurrence, global and sample-level Moran permutation tests, replicated spatial-gene admission, and joint expression-spatial domain discovery; and retain reload-validated outputs without treating spots or cells as condition-level replicates.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-spatial-analysis",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "cluster_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "coordinate_unit": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad",
+              "spatialdata-zarr"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "spatial_gene_candidates": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "spatial_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "table_name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "table_name",
+          "sample_key",
+          "cluster_key",
+          "spatial_key",
+          "coordinate_unit",
+          "spatial_gene_candidates",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Analyze spatial single-cell and spot transcriptomes with Squidpy and SpatialData",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to infer declared branch topology independently with Slingshot and Monocle3, validate direction against withheld time, fit tradeSeq lineage-weighted GAMs, and retain association, pattern, start-versus-end, and differential-end statistics with complete cell and count accounting.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-trajectory-topology",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "cluster_key": {
+            "type": "string"
+          },
+          "counts_artifact_id": {
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "type": "string"
+          },
+          "embedding_artifact_id": {
+            "type": "string"
+          },
+          "end_clusters": {
+            "minItems": 2,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "external_time_key": {
+            "type": "string"
+          },
+          "metadata_artifact_id": {
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "root_cells": {
+            "minItems": 3,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "sample_key": {
+            "type": "string"
+          },
+          "start_cluster": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "counts_artifact_id",
+          "metadata_artifact_id",
+          "embedding_artifact_id",
+          "cluster_key",
+          "sample_key",
+          "external_time_key",
+          "start_cluster",
+          "end_clusters",
+          "root_cells",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Infer lineage topology with Slingshot, Monocle3, and tradeSeq",
       "workflow": "omics"
     },
     {
@@ -6334,7 +7277,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 96,
+  "entry_count": 107,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

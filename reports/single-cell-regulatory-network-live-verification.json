@@ -1,0 +1,145 @@
+{
+  "backend_summaries": {
+    "pyscenic": {
+      "adjacencies": 78,
+      "auc_shape": [
+        120,
+        2
+      ],
+      "coexpression_modules": 9,
+      "motif_enrichment_rows": 9,
+      "regulon_targets": {
+        "TF1(+)": 11,
+        "TF2(+)": 11
+      },
+      "regulons": 2
+    },
+    "scenicplus": {
+      "concordance": [
+        {
+          "Gene_signature_name": "TF_A_Gene",
+          "Region_signature_name": "TF_A_Region",
+          "TF": "TF_A",
+          "genes": 10,
+          "pearson": 0.9884695927572368,
+          "regions": 10,
+          "rows": 10,
+          "spearman": 0.9507948853959176
+        },
+        {
+          "Gene_signature_name": "TF_B_Gene",
+          "Region_signature_name": "TF_B_Region",
+          "TF": "TF_B",
+          "genes": 10,
+          "pearson": 0.9950095286830132,
+          "regions": 10,
+          "rows": 10,
+          "spearman": 0.9605455899623067
+        }
+      ],
+      "gene_auc_shape": [
+        120,
+        2
+      ],
+      "region_auc_shape": [
+        120,
+        2
+      ]
+    }
+  },
+  "compatibility_row_id": "agent-protocol-1-pyscenic-0121-scenicplus-10a2",
+  "dependency_versions": {
+    "arboreto": "0.1.6",
+    "ctxcore": "0.2.0",
+    "dask": "2023.5.0",
+    "distributed": "2023.5.0",
+    "numpy-pyscenic": "1.23.5",
+    "numpy-scenicplus": "1.26.4",
+    "pandas-pyscenic": "1.5.3",
+    "pandas-scenicplus": "1.5.3",
+    "pycistopic": "2.0a0",
+    "python-pyscenic": "3.10.18",
+    "python-scenicplus": "3.11.15",
+    "scikit-learn-scenicplus": "1.3.2",
+    "scipy-pyscenic": "1.10.1",
+    "scipy-scenicplus": "1.12.0",
+    "tables": "3.10.2"
+  },
+  "execution": {
+    "aucell_completed": true,
+    "cistarget_completed": true,
+    "grnboost2_completed": true,
+    "outputs_reloaded": true,
+    "scenicplus_gene_auc_completed": true,
+    "scenicplus_region_auc_completed": true
+  },
+  "fixture": {
+    "cells": 120,
+    "eregulon_pairs": 2,
+    "motifs": 2,
+    "pyscenic_genes": 40,
+    "regions": 40,
+    "scenicplus_genes": 40,
+    "transcription_factors": 2
+  },
+  "independent_evaluation": {
+    "pyscenic": {
+      "activity_contrasts": {
+        "TF1": 0.3938354977118312,
+        "TF2": 0.40155367856989865
+      },
+      "planted_targets_recovered": {
+        "TF1": 10,
+        "TF2": 10
+      }
+    },
+    "scenicplus": {
+      "activity_contrasts": {
+        "TF_A": {
+          "gene": 0.432,
+          "region": 0.4406666666666667
+        },
+        "TF_B": {
+          "gene": 0.4371666666666667,
+          "region": 0.43883333333333335
+        }
+      },
+      "minimum_gene_region_pearson": 0.9884695927572368,
+      "minimum_gene_region_spearman": 0.9507948853959176
+    }
+  },
+  "module_id": "single-cell-regulatory-network",
+  "module_version": "1.0.0",
+  "passed": true,
+  "registry_digest": "8c57d693020fb6750bcc8c0e62a5a42a06192146b33f45325ff937b411eff20d",
+  "schema_version": 1,
+  "scientific_summary": {
+    "aucell_executed_for_every_cell": true,
+    "causal_claims_prohibited_without_independent_evidence": true,
+    "cistarget_motif_pruning_executed": true,
+    "coexpression_motif_and_region_gene_evidence_separated": true,
+    "grnboost2_executed": true,
+    "no_environment_or_compute_infrastructure_managed": true,
+    "outputs_reloaded": true,
+    "paired_cells_and_source_inputs_preserved": true,
+    "paired_rna_atac_programs_recovered": true,
+    "planted_tf_target_programs_recovered": true,
+    "regulons_constructed": true,
+    "resources_hashed": true,
+    "scenicplus_gene_and_region_auc_executed": true
+  },
+  "templates": {
+    "pyscenic": {
+      "name": "run_pyscenic.py",
+      "sha256": "89d61c6c16b7933886436e77060b04fd1e4cfdfd3d5ce5bf82e7a1abad93ea2f"
+    },
+    "scenicplus": {
+      "name": "score_scenicplus_eregulons.py",
+      "sha256": "e61e0d203c2601c45b7133200d59f45306155d8885fd03ae914ebe7a32de83ef"
+    }
+  },
+  "tool_versions": {
+    "pyscenic": "0.12.1",
+    "scenicplus": "1.0a2"
+  }
+}

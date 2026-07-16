@@ -20,9 +20,11 @@ _ASCII_STOP = frozenset(
     {
         "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of", "on", "or", "the", "then", "to", "with",
         "analyze", "analysis", "assess", "data", "result", "results", "run", "scientific", "summary", "test", "tool",
+        "validate", "validation",
     }
 )
-_CJK_STOP = frozenset({"分析", "数据", "结果", "进行", "检查", "评估", "科研", "汇总", "工具"})
+_CJK_STOP = frozenset({"分析", "数据", "结果", "进行", "检查", "评估", "验证", "科研", "汇总", "工具"})
+_CJK_BOUNDARY_CONNECTORS = frozenset({"与", "及", "和"})
 
 
 def _normalize(value: str) -> str:
@@ -38,7 +40,14 @@ def _features(value: str) -> set[str]:
     }
     for run in re.findall(r"[\u3400-\u9fff]+", normalized):
         for width in (2, 3, 4):
-            features.update(run[index : index + width] for index in range(max(0, len(run) - width + 1)))
+            features.update(
+                feature
+                for index in range(max(0, len(run) - width + 1))
+                if not (
+                    (feature := run[index : index + width])[0] in _CJK_BOUNDARY_CONNECTORS
+                    or feature[-1] in _CJK_BOUNDARY_CONNECTORS
+                )
+            )
     return {feature for feature in features if feature not in _CJK_STOP}
 
 
@@ -134,11 +143,13 @@ def _select_ranked_modules(
     for item in ranked:
         score, module, reasons = item
         selected_ids = {chosen[1].id for chosen in selected}
-        if module.id in selected_ids or score < threshold or len(selected) >= 4:
+        if module.id in selected_ids or score < threshold or len(selected) >= 10:
             continue
         if not reasons or all(reason.startswith("available in matched workflow") for reason in reasons):
             continue
-        if any(module.id in chosen[1].alternatives or chosen[1].id in module.alternatives for chosen in selected):
+        if not multi_intent and any(
+            module.id in chosen[1].alternatives or chosen[1].id in module.alternatives for chosen in selected
+        ):
             continue
         features = _matched_features(module, query)
         if not features - covered:
@@ -278,6 +289,12 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
         ranked = sorted(grouped[workflow], key=lambda item: (-item[0], item[1].id))
         ranked = [item for item in ranked if item[1].id not in assigned_modules]
         selected_by_workflow[workflow] = _select_ranked_modules(ranked, query)
+        selected_ids = set(selected_by_workflow[workflow])
+        visible_ranked = list(ranked[:per_workflow])
+        visible_ids = {module.id for _score, module, _reasons in visible_ranked}
+        visible_ranked.extend(
+            item for item in ranked if item[1].id in selected_ids and item[1].id not in visible_ids
+        )
         candidates[workflow] = [
             {
                 "id": module.id,
@@ -289,7 +306,7 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
                 "selected": module.id in selected_by_workflow[workflow],
                 "selection_reasons": reasons,
             }
-            for score, module, reasons in ranked[:per_workflow]
+            for score, module, reasons in visible_ranked
         ]
         assigned_modules.update(item["id"] for item in candidates[workflow])
     parallel_requested = any(term in _normalize(query) for term in ("parallel", "并行", "同时"))

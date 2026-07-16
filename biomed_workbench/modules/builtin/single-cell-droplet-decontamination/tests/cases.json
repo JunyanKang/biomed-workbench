@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "cases": [{
+    "name": "prepare-method-separated-droplet-decontamination",
+    "input": {
+      "objective": "Call non-empty droplets and compare ambient RNA correction without overwriting source counts.",
+      "raw_artifact_id": "artifact-raw-droplets",
+      "filtered_artifact_id": "artifact-filtered-cells",
+      "input_format": "matrix-market",
+      "sample_id": "capture-01",
+      "chemistry": "10x 3-prime v3",
+      "expected_cells": 3000,
+      "requested_methods": ["emptyDrops", "SoupX", "CellBender"],
+      "declared_parameters": {"emptydrops_fdr": 0.001, "soupx_mode": "auto", "cellbender_fpr": 0.01},
+      "design_notes": "Raw and filtered Cell Ranger bundles are from one capture; outputs remain alternatives until diagnostics and sensitivity pass."
+    },
+    "expected_subset": {
+      "handoff_type": "codex_generated_project_analysis",
+      "module": {"id": "single-cell-droplet-decontamination", "version": "1.0.0"},
+      "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}
+    }
+  }]
+}

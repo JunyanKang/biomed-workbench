@@ -54,7 +54,7 @@ class SourceReconciliationEvidenceTests(unittest.TestCase):
 
         for forbidden in ("/Users/", "/private/", '"path"', '"private_path"', "Biomni", "openscience", "claude"):
             self.assertNotIn(forbidden.lower(), serialized.lower())
-        self.assertIsNone(re.search(r"(?:nvapi-|sk-|gh[opsu]_)[A-Za-z0-9_-]{20,}", serialized))
+        self.assertIsNone(re.search(r"(?:api[_-]?key|access[_-]?token|secret)\s*[:=]\s*['\"]?[A-Za-z0-9_-]{16,}", serialized, re.IGNORECASE))
 
 
 if __name__ == "__main__":

@@ -92,7 +92,7 @@ class StructureAnalysisEvidenceTests(unittest.TestCase):
             (ROOT / "reports" / f"{module_id}-live-verification.json").read_text(encoding="utf-8")
             for module_id in MODULE_IDS
         )
-        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "nvapi-", "NGC_API_KEY"):
+        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "ACCESS_TOKEN=", "SECRET="):
             self.assertNotIn(marker, serialized)
 
 

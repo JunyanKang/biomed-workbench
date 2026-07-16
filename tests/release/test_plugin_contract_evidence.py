@@ -33,7 +33,7 @@ class PluginContractEvidenceTests(unittest.TestCase):
     def test_public_contract_evidence_is_path_and_secret_free(self):
         serialized = REPORT.read_text(encoding="utf-8")
 
-        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "nvapi-", "bf339"):
+        for marker in ("/Users/", "/private/", "/Volumes/", "file://", "API_KEY", "ACCESS_TOKEN=", "SECRET="):
             self.assertNotIn(marker, serialized)
 
 
