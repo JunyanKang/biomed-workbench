@@ -679,6 +679,107 @@ def main() -> int:
                 errors.append(
                     "GSE96583 donor-aware public-data case differs from its source, module, templates, runtime, paired design, or scientific gates"
                 )
+        gse96583_marker_report_path = (
+            ROOT / "reports" / "public-case-gse96583-marker-discovery.json"
+        )
+        gse96583_marker_root = BUILTIN_ROOT / "single-cell-marker-discovery"
+        try:
+            gse96583_marker_report = json.loads(
+                gse96583_marker_report_path.read_text(encoding="utf-8")
+            )
+            gse96583_marker_manifest = registry.get(
+                "single-cell-marker-discovery"
+            )
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append(
+                "GSE96583 marker-discovery public-data acceptance case is missing or invalid"
+            )
+        else:
+            marker_parameters = gse96583_marker_report.get("parameters", {})
+            marker_execution = gse96583_marker_report.get("execution", {})
+            marker_counts = marker_execution.get(
+                "independently_validated_rows_by_cell_type", {}
+            )
+            marker_families = set(
+                marker_execution.get(
+                    "recovered_expected_marker_families", ()
+                )
+            )
+            expected_marker_cell_types = {
+                "B cells",
+                "CD14+ Monocytes",
+                "CD4 T cells",
+                "CD8 T cells",
+                "FCGR3A+ Monocytes",
+                "NK cells",
+            }
+            if (
+                gse96583_marker_report.get("passed") is not True
+                or gse96583_marker_report.get("case_type")
+                != "public-data-end-to-end"
+                or gse96583_marker_report.get("module", {}).get("id")
+                != gse96583_marker_manifest.id
+                or gse96583_marker_report.get("module", {}).get("version")
+                != gse96583_marker_manifest.version
+                or gse96583_marker_report.get("module", {}).get(
+                    "compatibility_row_id"
+                )
+                != gse96583_marker_manifest.compatibility_matrix[0].id
+                or gse96583_marker_report.get("module", {}).get(
+                    "manifest_sha256"
+                )
+                != hashlib.sha256(
+                    (gse96583_marker_root / "module.json").read_bytes()
+                ).hexdigest()
+                or gse96583_marker_report.get("module", {}).get(
+                    "template_sha256"
+                )
+                != hashlib.sha256(
+                    (
+                        gse96583_marker_root
+                        / "templates"
+                        / "discover_markers.py"
+                    ).read_bytes()
+                ).hexdigest()
+                or gse96583_marker_report.get("source", {}).get("accession")
+                != "GSE96583"
+                or gse96583_marker_report.get("source", {})
+                .get("files", {})
+                .get("archive", {})
+                .get("sha256")
+                != "e5d41a3248a813f99d68fd5c9eb9773de7f46a83680a67f4a02d683b8955fe80"
+                or gse96583_marker_report.get("runtime", {}).get("scanpy")
+                != "1.10.4"
+                or gse96583_marker_report.get("runtime", {}).get("anndata")
+                != "0.10.8"
+                or marker_parameters.get("sample_split_frozen_before_ranking")
+                is not True
+                or marker_parameters.get("feature_filter", {}).get(
+                    "uses_cell_type_labels"
+                )
+                is not False
+                or len(marker_parameters.get("discovery_donors", ())) != 6
+                or len(marker_parameters.get("validation_donors", ())) != 2
+                or set(marker_parameters.get("discovery_donors", ()))
+                & set(marker_parameters.get("validation_donors", ()))
+                or marker_execution.get("input_control_singlets") != 11990
+                or marker_execution.get("retained_features") != 10859
+                or marker_execution.get("cell_types") != 6
+                or marker_execution.get("tested_marker_rows") != 900
+                or marker_execution.get("discovery_admitted_rows") != 612
+                or marker_execution.get("independently_validated_rows") != 606
+                or set(marker_counts) != expected_marker_cell_types
+                or any(value < 5 for value in marker_counts.values())
+                or marker_families != expected_marker_cell_types
+                or marker_execution.get("exact_repeat_marker_tsv") is not True
+                or set(
+                    gse96583_marker_report.get("quality_gates", {}).values()
+                )
+                != {"pass"}
+            ):
+                errors.append(
+                    "GSE96583 marker-discovery public-data case differs from its source, sample split, module, template, runtime, held-out validation, repeatability, or scientific gates"
+                )
         public_database_report_path = ROOT / "reports" / "public-database-live-verification.json"
         public_database_module_ids = {
             "citation-record-resolution",

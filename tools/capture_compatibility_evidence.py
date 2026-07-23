@@ -125,8 +125,8 @@ AGENT_EVIDENCE = {
     },
     "single-cell-marker-discovery": {
         "path": "reports/single-cell-marker-discovery-live-verification.json",
-        "execution_flags": ("marker_ranking_completed", "output_reloaded"),
-        "summary_flags": ("all_clusters_ranked", "raw_detection_fractions_computed", "sample_stability_computed", "planted_markers_admitted", "raw_counts_preserved", "no_automatic_label_assignment"),
+        "execution_flags": ("marker_ranking_completed", "held_out_validation_completed", "held_out_perturbation_rank_invariance_completed", "output_reloaded"),
+        "summary_flags": ("all_clusters_ranked", "raw_detection_fractions_computed", "discovery_sample_stability_computed", "held_out_sample_stability_computed", "validation_excluded_from_ranking_and_threshold_selection", "held_out_values_do_not_change_discovery_ranks", "held_out_perturbation_changes_validation_evidence", "cell_level_p_values_limited_to_descriptive_scope", "planted_markers_independently_validated", "raw_counts_preserved", "no_automatic_label_assignment"),
         "live_dependency_keys": ("python", "anndata"),
     },
     "single-cell-atlas-annotation": {

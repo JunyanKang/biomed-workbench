@@ -38,7 +38,9 @@ def run(command: list[str], environment: dict[str, str]) -> subprocess.Completed
 
 
 def verify(scientific_python: Path) -> dict[str, object]:
-    python = scientific_python.expanduser().resolve(strict=True)
+    python = scientific_python.expanduser().absolute()
+    if not python.is_file():
+        raise FileNotFoundError(f"scientific Python is absent: {python}")
     with tempfile.TemporaryDirectory(prefix="biomed-markers-") as temporary:
         work = Path(temporary)
         for name in ("home", "cache", "matplotlib", "numba"):
@@ -55,19 +57,57 @@ def verify(scientific_python: Path) -> dict[str, object]:
         )
         run([str(python), "-c", fixture], environment)
         source_digest = sha256(source)
-        run([str(python), str(TEMPLATE), "--input-h5ad", str(source), "--output-tsv", str(markers), "--report", str(report), "--cluster-key", "cluster", "--sample-key", "sample", "--raw-count-location", "layers.counts", "--method", "wilcoxon", "--top-per-cluster", "30", "--min-in-fraction", "0.25", "--max-out-fraction", "0.5", "--min-logfc", "0.25", "--max-adjusted-p", "0.05", "--min-sample-support", "2", "--seed", "23"], environment)
+        run([str(python), str(TEMPLATE), "--input-h5ad", str(source), "--output-tsv", str(markers), "--report", str(report), "--cluster-key", "cluster", "--sample-key", "sample", "--raw-count-location", "layers.counts", "--validation-samples", "S4", "--method", "wilcoxon", "--top-per-cluster", "30", "--min-in-fraction", "0.25", "--max-out-fraction", "0.5", "--min-logfc", "0.25", "--max-adjusted-p", "0.05", "--min-sample-support", "3", "--min-validation-sample-support", "1", "--seed", "23"], environment)
         payload = json.loads(report.read_text(encoding="utf-8"))
-        inspect = "import json,pandas as pd;" + f"x=pd.read_csv({str(markers)!r},sep='\\t');" + "print(json.dumps({'rows':len(x),'clusters':sorted(x.cluster.unique().tolist()),'admitted':int(x.admitted_marker.sum()),'stable':int((x.sample_stability=='stable-positive').sum()),'max_support':int(x.supporting_samples.max())}))"
+        inspect = "import json,pandas as pd;" + f"x=pd.read_csv({str(markers)!r},sep='\\t');" + "print(json.dumps({'rows':len(x),'clusters':sorted(x.cluster.unique().tolist()),'admitted':int(x.admitted_marker.sum()),'discovered':int(x.discovery_admitted_marker.sum()),'validated':int(x.independently_validated_marker.sum()),'max_discovery_support':int(x.discovery_supporting_samples.max()),'max_validation_support':int(x.validation_supporting_samples.max()),'scope':sorted(x.inferential_scope.unique().tolist())}))"
         table = json.loads(run([str(python), "-c", inspect], environment).stdout)
-        if payload["admitted_rows"] < 20 or payload["clusters_with_admitted_markers"] != 2 or table["clusters"] != ["A", "B"] or table["max_support"] != 4 or sha256(source) != source_digest:
-            raise RuntimeError("marker evidence failed effect, sample-stability, or source-preservation checks")
+        if (
+            payload["quality_status"] != "passed"
+            or payload["sample_split"]["discovery_samples"] != ["S1", "S2", "S3"]
+            or payload["sample_split"]["validation_samples"] != ["S4"]
+            or payload["sample_split"]["validation_used_for_ranking_or_threshold_selection"] is not False
+            or payload["accounting"]["independently_validated_rows"] < 20
+            or payload["accounting"]["clusters_with_independently_validated_markers"] != 2
+            or table["clusters"] != ["A", "B"]
+            or table["max_discovery_support"] != 3
+            or table["max_validation_support"] != 1
+            or table["scope"] != ["descriptive-cell-level-ranking-not-donor-level-inference"]
+            or sha256(source) != source_digest
+        ):
+            raise RuntimeError("marker evidence failed split, effect, held-out validation, or source-preservation checks")
+        perturbed_source = work / "validation-perturbed.h5ad"
+        perturb = (
+            "import anndata as ad,numpy as np,scipy.sparse as sp;"
+            f"a=ad.read_h5ad({str(source)!r});"
+            "x=a.layers['counts'].tolil();"
+            "x[np.asarray(a.obs['sample'].astype(str)=='S4'),:]=0;"
+            "a.layers['counts']=x.tocsr();"
+            f"a.write_h5ad({str(perturbed_source)!r})"
+        )
+        run([str(python), "-c", perturb], environment)
+        perturbed_markers = work / "validation-perturbed-markers.tsv"
+        perturbed_report = work / "validation-perturbed-report.json"
+        run([str(python), str(TEMPLATE), "--input-h5ad", str(perturbed_source), "--output-tsv", str(perturbed_markers), "--report", str(perturbed_report), "--cluster-key", "cluster", "--sample-key", "sample", "--raw-count-location", "layers.counts", "--validation-samples", "S4", "--method", "wilcoxon", "--top-per-cluster", "30", "--min-in-fraction", "0.25", "--max-out-fraction", "0.5", "--min-logfc", "0.25", "--max-adjusted-p", "0.05", "--min-sample-support", "3", "--min-validation-sample-support", "1", "--seed", "23"], environment)
+        compare = (
+            "import json,pandas as pd;"
+            f"x=pd.read_csv({str(markers)!r},sep='\\t');"
+            f"y=pd.read_csv({str(perturbed_markers)!r},sep='\\t');"
+            "cols=['cluster','rank','gene','score','log2_fold_change','p_value','adjusted_p_value','discovery_fraction_in','discovery_fraction_out','discovery_supporting_samples','discovery_discordant_samples','discovery_evaluable_samples','discovery_sample_stability','discovery_admitted_marker'];"
+            "print(json.dumps({'ranking_and_discovery_evidence_exact':x[cols].equals(y[cols]),'validation_evidence_changed':not x.filter(regex='^validation_').equals(y.filter(regex='^validation_'))}))"
+        )
+        leakage = json.loads(run([str(python), "-c", compare], environment).stdout)
+        if (
+            leakage["ranking_and_discovery_evidence_exact"] is not True
+            or leakage["validation_evidence_changed"] is not True
+        ):
+            raise RuntimeError("held-out validation values leaked into marker discovery")
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
-        return {"schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": "1.0.0", "compatibility_row_id": ROW_ID, "registry_digest": registry.digest,
+        return {"schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": "1.1.0", "compatibility_row_id": ROW_ID, "registry_digest": registry.digest,
                 "templates": {"marker": {"name": TEMPLATE.name, "sha256": sha256(TEMPLATE)}},
                 "tool_versions": {"scanpy": payload["versions"]["scanpy"]}, "dependency_versions": {"python": payload["versions"]["python"], "anndata": payload["versions"]["anndata"]},
                 "fixture": {"sha256": source_digest, "cells": 240, "features": 100, "clusters": 2, "biological_samples": 4},
-                "execution": {"marker_ranking_completed": True, "output_reloaded": True},
-                "scientific_summary": {"all_clusters_ranked": True, "raw_detection_fractions_computed": True, "sample_stability_computed": True, "planted_markers_admitted": True, "raw_counts_preserved": True, "no_automatic_label_assignment": True}}
+                "execution": {"marker_ranking_completed": True, "held_out_validation_completed": True, "held_out_perturbation_rank_invariance_completed": True, "output_reloaded": True},
+                "scientific_summary": {"all_clusters_ranked": True, "raw_detection_fractions_computed": True, "discovery_sample_stability_computed": True, "held_out_sample_stability_computed": True, "validation_excluded_from_ranking_and_threshold_selection": True, "held_out_values_do_not_change_discovery_ranks": True, "held_out_perturbation_changes_validation_evidence": True, "cell_level_p_values_limited_to_descriptive_scope": True, "planted_markers_independently_validated": True, "raw_counts_preserved": True, "no_automatic_label_assignment": True}}
 
 
 def main() -> int:

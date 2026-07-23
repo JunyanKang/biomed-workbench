@@ -16280,14 +16280,14 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
-            "single-cell-marker-discovery-e2e-v1"
+            "single-cell-marker-discovery-e2e-v2"
           ],
           "id": "agent-protocol-1-scanpy-1104-marker-stability",
-          "module_version": "1.0.0",
+          "module_version": "1.1.0",
           "regression_evidence_ids": [
-            "single-cell-marker-discovery-regression-v1"
+            "single-cell-marker-discovery-regression-v2"
           ],
-          "verified_at": "2026-07-15"
+          "verified_at": "2026-07-23"
         }
       ],
       "dependencies": [
@@ -16392,7 +16392,7 @@
           ]
         }
       ],
-      "module_version": "1.0.0",
+      "module_version": "1.1.0",
       "output_formats": [
         {
           "artifact_type": "single_cell_marker_evidence",
@@ -16428,21 +16428,21 @@
               "genome_builds": [],
               "name": "inline-json",
               "orientations": [
-                "cluster-and-sample-summary"
+                "cluster-and-discovery-validation-sample-summary"
               ],
               "representations": [
                 "structured"
               ],
               "required_indexes": [],
               "versions": [
-                "1"
+                "2"
               ]
             }
           ],
           "name": "marker_evidence",
           "processing_levels": [
-            "ranked",
-            "sample-stability-reviewed",
+            "ranked-in-discovery-samples",
+            "held-out-sample-validated",
             "reload-validated"
           ],
           "required_metadata": [
@@ -16450,11 +16450,15 @@
             "method-version",
             "cluster-key",
             "sample-key",
+            "discovery-sample-ids",
+            "validation-sample-ids",
             "rank-score",
             "effect-size",
             "adjusted-p-value",
-            "detection-fractions",
-            "sample-support",
+            "discovery-detection-fractions",
+            "validation-detection-fractions",
+            "discovery-sample-support",
+            "validation-sample-support",
             "admission-status",
             "quality-gate-results"
           ]
@@ -23525,6 +23529,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "5127cc94973b065e50ca7a7fea46a98e39405ab0be4247d67fd5f2332826cd40",
+  "registry_digest": "34f04b99ee8f28c7c8451b412970d53b61bc170a5baa4e6d4a80ff89be7fa29d",
   "schema_version": 1
 }

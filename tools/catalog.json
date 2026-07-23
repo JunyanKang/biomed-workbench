@@ -5244,7 +5244,7 @@
     },
     {
       "access": "agent_generated",
-      "description": "Direct Codex to validate count-backed clustered single-cell data, rank cluster-versus-rest genes, calculate raw-count detection fractions, test direction consistency across biological samples, and emit reload-validated marker candidates without turning cell-level significance into donor-level inference or automatic cell-type labels.",
+      "description": "Direct Codex to validate count-backed clustered single-cell data, freeze discovery and held-out biological samples before ranking, calculate raw-count detection evidence in each partition, and emit independently validated marker candidates without turning cell-level significance into donor-level inference or automatic cell-type labels.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-marker-discovery",
       "input_schema": {
@@ -5296,6 +5296,16 @@
               "logreg"
             ],
             "type": "string"
+          },
+          "validation_sample_ids": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
           }
         },
         "required": [
@@ -5305,6 +5315,7 @@
           "raw_count_location",
           "cluster_key",
           "biological_sample_key",
+          "validation_sample_ids",
           "requested_method",
           "declared_thresholds",
           "design_notes"
@@ -5314,7 +5325,7 @@
       "kind": "workflow",
       "mutability": "read_only",
       "requirements": [],
-      "title": "Discover sample-stable single-cell cluster markers",
+      "title": "Discover and independently validate single-cell cluster markers",
       "workflow": "omics"
     },
     {
