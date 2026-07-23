@@ -349,6 +349,64 @@ def main() -> int:
                 errors.append(
                     "PBMC3k public-data case differs from its source, module, template, runtime, execution, or scientific gates"
                 )
+        pbmc3k_atlas_report_path = ROOT / "reports" / "public-case-pbmc3k-atlas-annotation.json"
+        pbmc3k_atlas_root = BUILTIN_ROOT / "single-cell-atlas-annotation"
+        try:
+            pbmc3k_atlas_report = json.loads(
+                pbmc3k_atlas_report_path.read_text(encoding="utf-8")
+            )
+            pbmc3k_atlas_manifest = registry.get("single-cell-atlas-annotation")
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("PBMC3k atlas-annotation public-data acceptance case is missing or invalid")
+        else:
+            execution = pbmc3k_atlas_report.get("execution", {})
+            output_validation = execution.get("output_validation", {})
+            marker_review = execution.get("posthoc_marker_review", {})
+            if (
+                pbmc3k_atlas_report.get("passed") is not True
+                or pbmc3k_atlas_report.get("case_type") != "public-data-end-to-end"
+                or pbmc3k_atlas_report.get("module", {}).get("id")
+                != pbmc3k_atlas_manifest.id
+                or pbmc3k_atlas_report.get("module", {}).get("version")
+                != pbmc3k_atlas_manifest.version
+                or pbmc3k_atlas_report.get("module", {}).get("compatibility_row_id")
+                != pbmc3k_atlas_manifest.compatibility_matrix[0].id
+                or pbmc3k_atlas_report.get("module", {}).get("manifest_sha256")
+                != hashlib.sha256((pbmc3k_atlas_root / "module.json").read_bytes()).hexdigest()
+                or pbmc3k_atlas_report.get("module", {}).get("template_sha256")
+                != hashlib.sha256(
+                    (pbmc3k_atlas_root / "templates" / "annotate_celltypist.py").read_bytes()
+                ).hexdigest()
+                or pbmc3k_atlas_report.get("source", {}).get("sha256")
+                != "847d6ebd9a1ec9a768f2be7e40ca42cbfe75ebeb6d76a4c24167041699dc28b5"
+                or pbmc3k_atlas_report.get("source", {}).get("documented_shape")
+                != [2700, 32738]
+                or pbmc3k_atlas_report.get("reference", {}).get("model")
+                != "Immune_All_Low.pkl"
+                or pbmc3k_atlas_report.get("reference", {}).get("version") != "v2"
+                or pbmc3k_atlas_report.get("reference", {}).get("sha256")
+                != "290874d35dac039d4c9218c343fde4aac1077709b72a331ce7266f6828c36502"
+                or pbmc3k_atlas_report.get("reference", {}).get("classes") != 98
+                or pbmc3k_atlas_report.get("runtime", {}).get("celltypist") != "1.7.1"
+                or pbmc3k_atlas_report.get("runtime", {}).get("scanpy") != "1.11.5"
+                or execution.get("cells") != 2700
+                or execution.get("features") != 32738
+                or execution.get("model_feature_overlap", 0) < 1000
+                or execution.get("prediction_label_count") != 98
+                or execution.get("unknown_cells", 0) < 1
+                or output_validation.get("probability_matrix_shape") != [2700, 98]
+                or output_validation.get("raw_counts_preserved") is not True
+                or output_validation.get("complete_probability_matrix") is not True
+                or output_validation.get("unknown_policy_exact") is not True
+                or output_validation.get("all_cells_accounted") is not True
+                or marker_review.get("all_evaluable_families_enriched") is not True
+                or len(marker_review.get("families", {})) < 3
+                or "T" not in marker_review.get("not_evaluable_families", {})
+                or set(pbmc3k_atlas_report.get("quality_gates", {}).values()) != {"pass"}
+            ):
+                errors.append(
+                    "PBMC3k atlas-annotation public-data case differs from its query, model, module, template, uncertainty policy, marker review, or scientific gates"
+                )
         gse96583_report_path = ROOT / "reports" / "public-case-gse96583-donor-inference.json"
         gse96583_root = BUILTIN_ROOT / "single-cell-donor-inference"
         try:

@@ -1,0 +1,239 @@
+{
+  "case_id": "pbmc3k-celltypist-atlas-annotation-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "broad_family_counts": {
+      "B": 360,
+      "NK": 271,
+      "T": 1359,
+      "myeloid": 688,
+      "other": 22
+    },
+    "cells": 2700,
+    "features": 32738,
+    "median_confidence": 0.8459482309750765,
+    "model_feature_overlap": 5278,
+    "output_validation": {
+      "all_cells_accounted": true,
+      "cell_identifiers_preserved": true,
+      "changed_count_entries": 0,
+      "complete_probability_matrix": true,
+      "feature_identifiers_preserved": true,
+      "probability_matrix_shape": [
+        2700,
+        98
+      ],
+      "raw_counts_preserved": true,
+      "shape_preserved": true,
+      "unknown_policy_exact": true
+    },
+    "posthoc_marker_review": {
+      "all_evaluable_families_enriched": true,
+      "families": {
+        "B": {
+          "cells": 360,
+          "difference": 1.940043568611145,
+          "direction": "enriched",
+          "markers": [
+            "MS4A1",
+            "CD79A",
+            "CD37",
+            "CD74"
+          ],
+          "mean_log1p_marker_umis_inside": 3.564870834350586,
+          "mean_log1p_marker_umis_outside": 1.624827265739441
+        },
+        "NK": {
+          "cells": 271,
+          "difference": 2.9747631549835205,
+          "direction": "enriched",
+          "markers": [
+            "NKG7",
+            "GNLY",
+            "KLRD1",
+            "PRF1"
+          ],
+          "mean_log1p_marker_umis_inside": 3.3602259159088135,
+          "mean_log1p_marker_umis_outside": 0.38546276092529297
+        },
+        "myeloid": {
+          "cells": 688,
+          "difference": 2.727226436138153,
+          "direction": "enriched",
+          "markers": [
+            "LST1",
+            "TYROBP",
+            "FCER1G",
+            "CTSS"
+          ],
+          "mean_log1p_marker_umis_inside": 3.357990264892578,
+          "mean_log1p_marker_umis_outside": 0.630763828754425
+        }
+      },
+      "not_evaluable_families": {
+        "T": {
+          "cells": 1359,
+          "declared_markers": [
+            "CD3D",
+            "CD3E",
+            "TRBC1",
+            "TRAC"
+          ],
+          "present_markers": [
+            "CD3D",
+            "CD3E"
+          ],
+          "reasons": [
+            "fewer-than-3-declared-markers-present"
+          ]
+        }
+      },
+      "purpose": "broad coherence review, not tuning data or ground truth",
+      "timing": "performed only after model, thresholds, and labels were frozen"
+    },
+    "prediction_label_count": 98,
+    "raw_label_counts": {
+      "B cells": 340,
+      "CD16+ NK cells": 144,
+      "CD16- NK cells": 5,
+      "Classical monocytes": 419,
+      "Cycling T cells": 2,
+      "DC": 17,
+      "DC1": 1,
+      "DC2": 8,
+      "DC3": 1,
+      "Double-positive thymocytes": 3,
+      "Follicular helper T cells": 1,
+      "HSC/MPP": 1,
+      "MAIT cells": 74,
+      "MEMP": 1,
+      "Macrophages": 9,
+      "Megakaryocyte precursor": 1,
+      "Megakaryocytes/platelets": 11,
+      "Memory B cells": 1,
+      "Monocytes": 6,
+      "Myelocytes": 5,
+      "NK cells": 115,
+      "NKT cells": 7,
+      "Naive B cells": 16,
+      "Non-classical monocytes": 223,
+      "Plasma cells": 1,
+      "Plasmablasts": 1,
+      "Proliferative germinal center B cells": 1,
+      "Regulatory T cells": 103,
+      "T(agonist)": 1,
+      "Tcm/Naive cytotoxic T cells": 218,
+      "Tcm/Naive helper T cells": 670,
+      "Tem/Effector helper T cells": 161,
+      "Tem/Temra cytotoxic T cells": 9,
+      "Tem/Trm cytotoxic T cells": 104,
+      "Treg(diff)": 2,
+      "Trm cytotoxic T cells": 9,
+      "Type 1 helper T cells": 2,
+      "Type 17 helper T cells": 3,
+      "pDC": 4
+    },
+    "review_label_counts": {
+      "B cells": 306,
+      "CD16+ NK cells": 138,
+      "Classical monocytes": 395,
+      "Cycling T cells": 1,
+      "DC": 6,
+      "DC1": 1,
+      "DC2": 5,
+      "MAIT cells": 44,
+      "Macrophages": 4,
+      "Megakaryocytes/platelets": 8,
+      "Memory B cells": 1,
+      "Monocytes": 4,
+      "Myelocytes": 4,
+      "NK cells": 34,
+      "Naive B cells": 10,
+      "Non-classical monocytes": 209,
+      "Regulatory T cells": 56,
+      "Tcm/Naive cytotoxic T cells": 153,
+      "Tcm/Naive helper T cells": 476,
+      "Tem/Effector helper T cells": 69,
+      "Tem/Temra cytotoxic T cells": 3,
+      "Tem/Trm cytotoxic T cells": 76,
+      "Trm cytotoxic T cells": 3,
+      "Type 17 helper T cells": 1,
+      "Unknown": 689,
+      "pDC": 4
+    },
+    "unknown_cells": 689
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-celltypist-171-popv-061-azimuth-051-consensus",
+    "id": "single-cell-atlas-annotation",
+    "manifest_sha256": "5a7f0d63a5ff5416d2f8068afd22d694360965cf4eb4f9cb8075235af8459f19",
+    "template_sha256": "a46233bca2dcd10ddcb595318aa32f5e76e5f7fd7dfed8eb40ef5dc95b44ddc3",
+    "version": "1.1.0"
+  },
+  "parameters": {
+    "majority_voting": false,
+    "mode": "best match",
+    "probability_threshold": 0.5,
+    "raw_count_location": "X",
+    "thresholds_frozen_before_prediction": true,
+    "unknown_threshold": 0.5
+  },
+  "passed": true,
+  "quality_gates": {
+    "complete_cell_and_count_accounting": "pass",
+    "complete_probability_evidence": "pass",
+    "feature_overlap": "pass",
+    "finite_nonnegative_integer_counts": "pass",
+    "official_model_digest_and_scope": "pass",
+    "official_query_digest": "pass",
+    "posthoc_marker_coherence": "pass",
+    "serialized_output_reload": "pass",
+    "thresholds_frozen_before_prediction": "pass",
+    "unknown_retention_policy": "pass"
+  },
+  "reference": {
+    "classes": 98,
+    "declared_scope": "98 immune sub-populations from 20 tissues and 18 studies",
+    "model": "Immune_All_Low.pkl",
+    "publisher": "CellTypist",
+    "sha256": "290874d35dac039d4c9218c343fde4aac1077709b72a331ce7266f6828c36502",
+    "training_source": "https://doi.org/10.1126/science.abl5197",
+    "url": "https://celltypist.cog.sanger.ac.uk/models/Pan_Immune_CellTypist/v2/Immune_All_Low.pkl",
+    "version": "v2"
+  },
+  "runtime": {
+    "anndata": "0.12.19",
+    "celltypist": "1.7.1",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "scanpy": "1.11.5",
+    "scipy": "1.15.3"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "CellTypist outputs are reference-model evidence, not biological ground truth or expert-reviewed final labels.",
+    "Broad marker coherence was evaluated only after model selection, thresholds, and labels were frozen; markers did not tune predictions.",
+    "PBMC3k is one filtered healthy-donor sample and does not establish generalization across donors, tissues, diseases, chemistries, developmental stages, or absent-reference populations.",
+    "The broad-family review cannot validate all 98 fine-grained model classes, transitional states, novel states, or rare populations.",
+    "The recorded model and query digests bind this acceptance result to these exact public artifacts; future model updates require a new compatibility and acceptance record."
+  ],
+  "source": {
+    "dataset": "3k PBMCs from a healthy donor",
+    "documented_shape": [
+      2700,
+      32738
+    ],
+    "publisher": "10x Genomics",
+    "sha256": "847d6ebd9a1ec9a768f2be7e40ca42cbfe75ebeb6d76a4c24167041699dc28b5",
+    "source_validation": {
+      "cells": 2700,
+      "features": 32738,
+      "integer_nonnegative_counts": true,
+      "nonzero_counts": 2286884,
+      "total_umis": 6390631,
+      "unique_cell_ids": true,
+      "unique_feature_ids": true
+    },
+    "url": "https://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz"
+  }
+}
