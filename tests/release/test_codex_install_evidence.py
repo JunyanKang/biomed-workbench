@@ -35,7 +35,8 @@ class CodexInstallEvidenceTests(unittest.TestCase):
                 "new_task_reload_required",
             },
         )
-        self.assertEqual(report["codex_cli_version"], "0.144.0-alpha.4")
+        self.assertEqual(report["codex_cli_distribution"], "desktop-bundled")
+        self.assertRegex(report["codex_cli_version"], r"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$")
         self.assertEqual(report["schema_version"], 3)
         self.assertEqual(report["installed_module_count"], len(registry.all()))
         self.assertEqual(report["installed_registry_digest"], registry.digest)

@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 107,
-  "module_count": 107,
+  "compatibility_complete": 108,
+  "module_count": 108,
   "modules": [
     {
       "compatibility_rows": [
@@ -11402,14 +11402,14 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
-            "single-cell-atlas-annotation-e2e-v1"
+            "single-cell-atlas-annotation-e2e-v2"
           ],
-          "id": "agent-protocol-1-celltypist-171-popv-061-azimuth-051",
-          "module_version": "1.0.0",
+          "id": "agent-protocol-1-celltypist-171-popv-061-azimuth-051-consensus",
+          "module_version": "1.1.0",
           "regression_evidence_ids": [
-            "single-cell-atlas-annotation-regression-v1"
+            "single-cell-atlas-annotation-regression-v2"
           ],
-          "verified_at": "2026-07-15"
+          "verified_at": "2026-07-23"
         }
       ],
       "dependencies": [
@@ -11724,7 +11724,7 @@
           ]
         }
       ],
-      "module_version": "1.0.0",
+      "module_version": "1.1.0",
       "output_formats": [
         {
           "artifact_type": "single_cell_annotated_object",
@@ -18604,6 +18604,532 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "single-cell-regulatory-velocity-e2e-v1"
+          ],
+          "id": "agent-protocol-1-regvelo-042-python-311",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "single-cell-regulatory-velocity-regression-v1"
+          ],
+          "verified_at": "2026-07-23"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.11,<3.12"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Run the observed RegVelo compatibility profile.",
+          "required": true,
+          "tested_versions": [
+            "3.11.14"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        },
+        {
+          "allowed_versions": [
+            ">=0.12,<0.13"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "anndata",
+          "name": "anndata",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Preserve count layers, regulatory velocity outputs, identifiers, and provenance.",
+          "required": true,
+          "tested_versions": [
+            "0.12.19"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import anndata; print(anndata.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://anndata.readthedocs.io/en/stable/release-notes/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.26,<2"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "numpy",
+          "name": "numpy",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated numerical ABI profile and finite-output checks.",
+          "required": true,
+          "tested_versions": [
+            "1.26.4"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import numpy; print(numpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://numpy.org/doc/1.26/release.html"
+        },
+        {
+          "allowed_versions": [
+            ">=2.3,<2.4"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "pandas",
+          "name": "pandas",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate and align target-by-regulator network matrices.",
+          "required": true,
+          "tested_versions": [
+            "2.3.3"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import pandas; print(pandas.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pandas.pydata.org/docs/whatsnew/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.15,<1.16"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "scipy",
+          "name": "scipy",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Preserve sparse source layers and validated scientific dependencies.",
+          "required": true,
+          "tested_versions": [
+            "1.15.3"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import scipy; print(scipy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://docs.scipy.org/doc/scipy/release.html"
+        },
+        {
+          "allowed_versions": [
+            ">=0.3.4,<0.4"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "scvelo",
+          "name": "scvelo",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Supply the RNA-velocity data model used by RegVelo and baseline comparison.",
+          "required": true,
+          "tested_versions": [
+            "0.3.4"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import scvelo; print(scvelo.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://scvelo.readthedocs.io/en/stable/release_notes/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.0,<1.2.1"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "scvi-tools",
+          "name": "scvi-tools",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Provide the model lifecycle, training, persistence, and reload APIs used by RegVelo.",
+          "required": true,
+          "tested_versions": [
+            "1.2.0"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import importlib.metadata; print(importlib.metadata.version('scvi-tools'))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://docs.scvi-tools.org/en/stable/release_notes/"
+        },
+        {
+          "allowed_versions": [
+            ">=2.0,<2.1"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "cellrank",
+          "name": "cellrank",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Support downstream fate-probability and terminal-state sensitivity analysis.",
+          "required": true,
+          "tested_versions": [
+            "2.0.7"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import cellrank; print(cellrank.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://cellrank.readthedocs.io/en/stable/release_notes.html"
+        },
+        {
+          "allowed_versions": [
+            ">=2.4,<2.5"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "torch",
+          "name": "torch",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the validated RegVelo model profile.",
+          "required": true,
+          "tested_versions": [
+            "2.4.1"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import torch; print(torch.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pytorch.org/blog/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.0,<1.1"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "torchode",
+          "name": "torchode",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Provide the differential-equation dependency used by RegVelo.",
+          "required": true,
+          "tested_versions": [
+            "1.0.1"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import importlib.metadata; print(importlib.metadata.version('torchode'))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pypi.org/project/torchode/"
+        },
+        {
+          "allowed_versions": [
+            ">=0.4.35,<0.5"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "jax",
+          "name": "jax",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Maintain the validated CellRank and scvi-tools import profile.",
+          "required": true,
+          "tested_versions": [
+            "0.4.35"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import jax; print(jax.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://docs.jax.dev/en/latest/changelog.html"
+        },
+        {
+          "allowed_versions": [
+            ">=0.4.35,<0.5"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "jaxlib",
+          "name": "jaxlib",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Match the validated JAX binary interface.",
+          "required": true,
+          "tested_versions": [
+            "0.4.35"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import jaxlib; print(jaxlib.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://docs.jax.dev/en/latest/changelog.html"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "single-cell-regulatory-velocity",
+      "input_formats": [
+        {
+          "artifact_type": "single_cell_splicing_and_regulatory_prior",
+          "formats": [
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none",
+                "gzip",
+                "lzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "h5ad-plus-grn-tsv",
+              "orientations": [
+                "cells-by-genes-plus-targets-by-regulators"
+              ],
+              "representations": [
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [
+                "cell-id",
+                "feature-id",
+                "target-id",
+                "regulator-id"
+              ],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "splicing_and_regulatory_prior",
+          "processing_levels": [
+            "quality-controlled",
+            "spliced-unspliced-counted",
+            "prior-grn-frozen"
+          ],
+          "required_metadata": [
+            "input-artifact-digest",
+            "prior-grn-digest",
+            "spliced-layer",
+            "unspliced-layer",
+            "feature-identifier-namespace",
+            "grn-orientation",
+            "grn-construction-provenance",
+            "cell-accounting",
+            "quantification-provenance"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "single_cell_regulatory_velocity_object",
+          "formats": [
+            {
+              "annotation_releases": [
+                "inherited-from-input"
+              ],
+              "compression": [
+                "none",
+                "gzip",
+                "lzf"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "h5ad",
+              "orientations": [
+                "observations-by-variables"
+              ],
+              "representations": [
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "0.1.0"
+              ]
+            }
+          ],
+          "name": "regulatory_velocity_object",
+          "processing_levels": [
+            "grn-informed-velocity-modeled",
+            "stability-reviewed",
+            "reload-validated"
+          ],
+          "required_metadata": [
+            "regvelo-velocity-layer",
+            "regvelo-latent-time-layer",
+            "regvelo-latent-representation",
+            "prior-grn-digest",
+            "model-mode",
+            "model-seed",
+            "source-preservation",
+            "quality-status"
+          ]
+        },
+        {
+          "artifact_type": "single_cell_regulatory_velocity_validation",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "run-by-mode-seed-stability-and-quality"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "regulatory_velocity_validation",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "model-parameters",
+            "training-history",
+            "mode-and-seed-comparison",
+            "finite-output-checks",
+            "model-reload-validation",
+            "source-preservation",
+            "actual-versions",
+            "artifact-digests",
+            "causal-claim-boundary"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=0.4.2,<0.5"
+          ],
+          "ecosystem": "python",
+          "identity": "regvelo",
+          "mismatch_policy": "block",
+          "name": "RegVelo",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "0.4.2"
+          ],
+          "verified_at": "2026-07-23",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=0.4.2,<0.5"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parameter",
+              "description": "Observed RegVelo 0.4.2 initialization requires dense spliced and unspliced working arrays and a square gene-aligned GRN tensor even when the declared prior is rectangular; explicitly passing n_latent or n_hidden also triggers duplicate-keyword failures in the model constructor.",
+              "id": "regvelo-042-dense-layers-square-grn",
+              "required_action": "Preflight dense memory, preserve source sparse layers, build an explicit square working matrix, retain the original target and regulator identities, use the validated default 10-dimensional latent and 256-unit hidden architecture, and record all representations.",
+              "source": "https://github.com/theislab/regvelo/tree/v0.4.2"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import importlib.metadata; print(importlib.metadata.version('regvelo'))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/theislab/regvelo/releases/tag/v0.4.2"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "single-cell-spatial-analysis-e2e-v1"
           ],
           "id": "agent-protocol-1-squidpy-166-spatialdata-050-scanpy-1115",
@@ -22998,6 +23524,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "8c57d693020fb6750bcc8c0e62a5a42a06192146b33f45325ff937b411eff20d",
+  "registry_digest": "803fc12521d91b13a1616afffe6da2cee6f89ba6d30208ec02cb3b2f42c25a90",
   "schema_version": 1
 }

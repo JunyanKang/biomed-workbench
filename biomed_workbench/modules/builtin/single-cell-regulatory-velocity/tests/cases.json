@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "prepare-grn-informed-regulatory-velocity",
+      "input": {
+        "objective": "Infer GRN-informed RNA velocity and latent time, compare model modes and seeds, and preserve uncertainty and causal-claim boundaries.",
+        "input_artifact_id": "artifact-splicing-and-prior-grn",
+        "input_format": "h5ad-plus-grn-tsv",
+        "spliced_layer": "spliced",
+        "unspliced_layer": "unspliced",
+        "grn_orientation": "targets-by-regulators",
+        "requested_model_modes": ["hard", "soft"],
+        "declared_thresholds": {
+          "minimum_regulators": 5,
+          "minimum_edges": 10,
+          "minimum_repeats": 2
+        },
+        "design_notes": "The prior GRN is independently constructed and versioned; phenotype labels are withheld from fitting; perturbation predictions remain hypotheses."
+      },
+      "expected_subset": {
+        "handoff_type": "codex_generated_project_analysis",
+        "module": {
+          "id": "single-cell-regulatory-velocity",
+          "version": "1.0.0"
+        },
+        "execution_policy": {
+          "observed_execution_required": true,
+          "manage_environment_or_compute_infrastructure": false,
+          "planned_output_is_not_evidence": true
+        }
+      }
+    }
+  ]
+}

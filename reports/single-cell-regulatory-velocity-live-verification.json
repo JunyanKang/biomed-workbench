@@ -1,0 +1,93 @@
+{
+  "compatibility_observations": {
+    "custom_n_latent_or_n_hidden": "blocked-after-observed-regvelo-0.4.2-duplicate-keyword-failure",
+    "modern_jax_profile": "excluded-after-observed-jaxlib.xla_extension-import-failure",
+    "numpy_2_profile": "excluded-after-observed-compiled-extension-abi-failure",
+    "rectangular_model_grn": "converted-explicitly-to-square-gene-aligned-working-matrix",
+    "sparse_working_layers": "blocked-by-observed-regvelo-0.4.2-initializer-behavior"
+  },
+  "compatibility_row_id": "agent-protocol-1-regvelo-042-python-311",
+  "dependency_versions": {
+    "anndata": "0.12.19",
+    "cellrank": "2.0.7",
+    "jax": "0.4.35",
+    "jaxlib": "0.4.35",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "python": "3.11.15",
+    "scipy": "1.15.3",
+    "scvelo": "0.3.4",
+    "scvi-tools": "1.2.0",
+    "torch": "2.4.1",
+    "torchode": "1.0.1"
+  },
+  "execution": {
+    "analysis_report_sha256": "49850af2c9b47986ecc61526c4fa91e16d89ee45509dc69f55b92ec630ed1883",
+    "hard_constraint_completed": true,
+    "latent_time_completed": true,
+    "models_reloaded": true,
+    "output_sha256": "c00755fa7988bee90cafa4eeddad18f0a5a9e9348d2a6d0d7918d817a0af56e8",
+    "outputs_reloaded": true,
+    "soft_constraint_completed": true,
+    "velocity_completed": true
+  },
+  "fixture": {
+    "biological_samples": 4,
+    "cells": 96,
+    "edges": 26,
+    "genes": 24,
+    "grn_orientation": "targets-by-regulators",
+    "grn_sha256": "78443ac7d393a32839f899752f486eb6159b41fa1ca982ab5cefefcced403c8d",
+    "regulators": 6,
+    "source_sha256": "1ead22078ffc0aaea71014a1f605cce263c8d1788baacd884175e574655d5a70"
+  },
+  "module_id": "single-cell-regulatory-velocity",
+  "module_version": "1.0.0",
+  "passed": true,
+  "registry_digest": "803fc12521d91b13a1616afffe6da2cee6f89ba6d30208ec02cb3b2f42c25a90",
+  "results": {
+    "cells": 96,
+    "genes": 24,
+    "latent_shape": [
+      96,
+      10
+    ],
+    "latent_time_finite": true,
+    "latent_time_shape": [
+      96,
+      24
+    ],
+    "pairwise_velocity_comparisons": 1,
+    "provenance_present": true,
+    "runs": 2,
+    "velocity_finite": true,
+    "velocity_shape": [
+      96,
+      24
+    ]
+  },
+  "schema_version": 1,
+  "scientific_summary": {
+    "dense_memory_budget_enforced": true,
+    "experimental_labels_withheld_from_fitting": true,
+    "grn_namespace_orientation_and_edges_validated": true,
+    "hard_and_soft_constraints_executed": true,
+    "model_mode_comparison_retained": true,
+    "models_saved_and_reloaded": true,
+    "no_environment_or_compute_infrastructure_managed": true,
+    "outputs_reloaded": true,
+    "perturbation_predictions_limited_to_hypotheses": true,
+    "regvelo_042_executed": true,
+    "source_counts_grn_and_identifiers_preserved": true,
+    "velocity_latent_time_and_latent_state_finite": true
+  },
+  "templates": {
+    "run_regvelo": {
+      "name": "run_regvelo.py",
+      "sha256": "40d6a8febd2e00e090b9df637bb04a5cf89ba00626497e2efdaa99f8816306ea"
+    }
+  },
+  "tool_versions": {
+    "RegVelo": "0.4.2"
+  }
+}

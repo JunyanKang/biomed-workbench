@@ -1,0 +1,137 @@
+{
+  "case_id": "gse96583-donor-pseudobulk-public-data-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "all_cells_accounted": true,
+    "complete_pairs_by_cell_type": {
+      "B cells": 8,
+      "CD14+ Monocytes": 8,
+      "CD4 T cells": 8,
+      "CD8 T cells": 7,
+      "Dendritic cells": 5,
+      "FCGR3A+ Monocytes": 8,
+      "NK cells": 7
+    },
+    "completed_cell_types": 7,
+    "eligible_pseudobulks": 109,
+    "ephemeral_result_sha256": "eec3f926456996d3143cf9a840c45ee99bce8fcf39e5fa44229b5451e0f0017c",
+    "excluded_pseudobulks": 19,
+    "ifn_response_cell_types": [
+      "B cells",
+      "CD14+ Monocytes",
+      "CD4 T cells",
+      "CD8 T cells",
+      "NK cells"
+    ],
+    "ifn_response_genes_recovered": [
+      "IFI6",
+      "IFIT1",
+      "IFIT2",
+      "IFIT3",
+      "ISG15",
+      "MX1",
+      "OAS1",
+      "OAS2",
+      "OAS3",
+      "STAT1"
+    ],
+    "paired_designs_full_rank": true,
+    "pseudobulks": 128,
+    "raw_counts_conserved": true,
+    "result_reload_validated": true,
+    "result_rows": 21874
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-scanpy-110-edger-40-deseq2-142-limma-358",
+    "id": "single-cell-donor-inference",
+    "manifest_sha256": "98209e36ae461b5ef1f9d9c5e69fdc5af393547f0c98a857e5bdc5468f0af934",
+    "template_sha256": {
+      "donor_differential.R": "1ffda21e0b16da3e5f688dc7dbce8ad39d11303549a5c191df97cb08fb17d117",
+      "pseudobulk_aggregate.py": "9644d8d7c8f04365cdba5842f692c2da87b0a4e956704845c5260a3fd6ead3d6"
+    },
+    "version": "1.0.0"
+  },
+  "parameters": {
+    "contrast": "stim versus ctrl",
+    "design": "~ donor + condition",
+    "engine": "edgeR",
+    "fdr": 0.05,
+    "minimum_cells_per_pseudobulk": 20,
+    "minimum_count": 10,
+    "minimum_library_size": 1000,
+    "minimum_replicates_per_condition": 4,
+    "minimum_samples_expressed": 4,
+    "multiplet_policy": "published singlet calls only"
+  },
+  "passed": true,
+  "quality_gates": {
+    "biological_replicate_not_cell_inference": "pass",
+    "eight_donor_paired_design": "pass",
+    "full_rank_subject_fixed_effect_design": "pass",
+    "independent_expected_ifn_response_check": "pass",
+    "matrix_metadata_and_barcode_identity": "pass",
+    "official_source_digests": "pass",
+    "published_multiplet_exclusion": "pass",
+    "raw_count_and_cell_conservation": "pass",
+    "result_schema_and_reload": "pass"
+  },
+  "runtime": {
+    "R": "4.3.2",
+    "anndata": "0.11.4",
+    "edgeR": "4.0.16",
+    "numpy": "2.2.6",
+    "pandas": "2.2.3",
+    "python": "3.10.18",
+    "scanpy": "1.11.5",
+    "scipy": "1.15.2"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "Cell-type and multiplet labels are the publisher-provided annotations; this case does not independently reannotate cells or rerun demuxlet.",
+    "The case validates one paired edgeR subject-fixed-effect analysis and does not claim cross-engine sensitivity until DESeq2 or limma-voom is run on the same public data.",
+    "The expected interferon-response check is a bounded positive-control acceptance gate, not an exhaustive reproduction of the publication.",
+    "Statistical evidence is limited to the eight sampled donors, published cell labels, retained pseudobulks, recorded filtering rules, and IFN-beta stimulation contrast.",
+    "The recorded parameters are acceptance-case settings and are not universal defaults for another cohort, chemistry, tissue, or perturbation."
+  ],
+  "source": {
+    "accession": "GSE96583",
+    "assay": "10x single-cell RNA-seq PBMC control and IFN-beta stimulation",
+    "files": {
+      "archive": {
+        "filename": "GSE96583_RAW.tar",
+        "sha256": "e5d41a3248a813f99d68fd5c9eb9773de7f46a83680a67f4a02d683b8955fe80",
+        "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE96nnn/GSE96583/suppl/GSE96583_RAW.tar"
+      },
+      "genes": {
+        "filename": "GSE96583_batch2.genes.tsv.gz",
+        "sha256": "93aa4e9b530ef9d6411ca129b416324c5cc1cc5a01a1fa6ed4f4a845480ed3ca",
+        "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE96nnn/GSE96583/suppl/GSE96583_batch2.genes.tsv.gz"
+      },
+      "metadata": {
+        "filename": "GSE96583_batch2.total.tsne.df.tsv.gz",
+        "sha256": "1d57e72e92ca8695250e88cc0f1c3fa8c0be1175d974f8b427c58f1274dc6c09",
+        "url": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE96nnn/GSE96583/suppl/GSE96583_batch2.total.tsne.df.tsv.gz"
+      }
+    },
+    "publication_pmid": "29227470",
+    "publisher": "NCBI Gene Expression Omnibus",
+    "source_validation": {
+      "cell_types": 8,
+      "combined_metadata_barcode_normalizations": {
+        "ctrl": 0,
+        "stim": 313
+      },
+      "conditions": 2,
+      "donors": 8,
+      "excluded_doublet_or_ambiguous_or_untyped": 4392,
+      "features": 35635,
+      "integer_nonnegative_counts": true,
+      "paired_donors": 8,
+      "published_cells": 29065,
+      "retained_published_singlets_with_cell_type": 24673,
+      "total_raw_counts": 38671243
+    },
+    "study_record": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE96583",
+    "title": "Multiplexing droplet-based single cell RNA-sequencing using genetic barcodes"
+  }
+}

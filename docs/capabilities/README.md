@@ -35,7 +35,7 @@ When a required input, compatible backend, quality threshold, or evidence link i
 
 ## Current Scope
 
-The registry currently contains 96 independently discoverable modules. Modules cover literature and public databases, omics, single-cell analysis, molecular design, structural biology, imaging, clinical analysis, wet-lab calculations, scientific quality control, and publication workflows.
+The registry currently contains 108 independently discoverable modules. Modules cover literature and public databases, omics, single-cell analysis, molecular design, structural biology, imaging, clinical analysis, wet-lab calculations, scientific quality control, and publication workflows.
 
 The workbench does not claim that every named third-party method is installed in every user environment. It provides routing, contracts, templates, compatibility guidance, and quality criteria; consequential execution is accepted only when the required backend and output checks succeed. See [reproducibility and compatibility](../reproducibility.md) for the evidence model.
 

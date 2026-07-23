@@ -131,8 +131,8 @@ AGENT_EVIDENCE = {
     },
     "single-cell-atlas-annotation": {
         "path": "reports/single-cell-atlas-annotation-live-verification.json",
-        "execution_flags": ("celltypist_completed", "azimuth_completed", "popv_completed", "outputs_reloaded"),
-        "summary_flags": ("all_three_backends_executed", "method_specific_probabilities_and_scores_retained", "known_reference_classes_recovered", "absent_reference_population_retained_as_unknown", "popv_expert_disagreement_preserved", "all_query_cells_accounted", "source_counts_and_identifiers_preserved", "outputs_reloaded", "evaluation_labels_posthoc_only", "no_environment_or_compute_infrastructure_managed"),
+        "execution_flags": ("celltypist_completed", "azimuth_completed", "popv_completed", "consensus_completed", "outputs_reloaded"),
+        "summary_flags": ("all_three_backends_executed", "cross_backend_consensus_executed", "consensus_conflicts_retained_as_unknown", "consensus_ontology_ids_required", "method_specific_probabilities_and_scores_retained", "known_reference_classes_recovered", "absent_reference_population_retained_as_unknown", "popv_expert_disagreement_preserved", "all_query_cells_accounted", "source_counts_and_identifiers_preserved", "outputs_reloaded", "evaluation_labels_posthoc_only", "no_environment_or_compute_infrastructure_managed"),
         "live_dependency_keys": ("python", "anndata", "scanpy", "r", "Seurat"),
     },
     "single-cell-complex-inference": {
@@ -170,6 +170,12 @@ AGENT_EVIDENCE = {
         "execution_flags": ("grnboost2_completed", "cistarget_completed", "aucell_completed", "scenicplus_gene_auc_completed", "scenicplus_region_auc_completed", "outputs_reloaded"),
         "summary_flags": ("grnboost2_executed", "cistarget_motif_pruning_executed", "regulons_constructed", "aucell_executed_for_every_cell", "scenicplus_gene_and_region_auc_executed", "planted_tf_target_programs_recovered", "paired_rna_atac_programs_recovered", "coexpression_motif_and_region_gene_evidence_separated", "resources_hashed", "paired_cells_and_source_inputs_preserved", "outputs_reloaded", "causal_claims_prohibited_without_independent_evidence", "no_environment_or_compute_infrastructure_managed"),
         "live_dependency_keys": ("python-pyscenic", "arboreto", "ctxcore", "numpy-pyscenic", "pandas-pyscenic", "scipy-pyscenic", "dask", "distributed", "python-scenicplus", "pycistopic", "numpy-scenicplus", "pandas-scenicplus", "scipy-scenicplus", "scikit-learn-scenicplus", "tables"),
+    },
+    "single-cell-regulatory-velocity": {
+        "path": "reports/single-cell-regulatory-velocity-live-verification.json",
+        "execution_flags": ("hard_constraint_completed", "soft_constraint_completed", "velocity_completed", "latent_time_completed", "models_reloaded", "outputs_reloaded"),
+        "summary_flags": ("regvelo_042_executed", "hard_and_soft_constraints_executed", "grn_namespace_orientation_and_edges_validated", "dense_memory_budget_enforced", "velocity_latent_time_and_latent_state_finite", "model_mode_comparison_retained", "models_saved_and_reloaded", "source_counts_grn_and_identifiers_preserved", "experimental_labels_withheld_from_fitting", "perturbation_predictions_limited_to_hypotheses", "outputs_reloaded", "no_environment_or_compute_infrastructure_managed"),
+        "live_dependency_keys": ("python", "anndata", "numpy", "pandas", "scipy", "scvelo", "scvi-tools", "cellrank", "torch", "torchode", "jax", "jaxlib"),
     },
     "single-cell-spatial-analysis": {
         "path": "reports/single-cell-spatial-analysis-live-verification.json",

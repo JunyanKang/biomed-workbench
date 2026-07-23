@@ -26,7 +26,7 @@ The workbench dynamically discovers its registered scientific modules behind one
 | Research area | What the workbench coordinates |
 | --- | --- |
 | [Evidence and literature](docs/capabilities/evidence-and-literature.md) | Literature discovery, public biomedical databases, citation resolution, evidence synthesis, contradiction and freshness checks |
-| [Omics and single-cell](docs/capabilities/omics-and-single-cell.md) | Sequencing and expression analysis, donor-aware inference, droplet and doublet review, atlas annotation, cell-state dynamics, multimodal integration, regulatory networks, and spatial analysis |
+| [Omics and single-cell](docs/capabilities/omics-and-single-cell.md) | Sequencing and expression analysis, donor-aware inference, droplet and doublet review, atlas annotation, scVelo and RegVelo dynamics, multimodal integration, regulatory networks, and spatial analysis |
 | [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | Sequence analysis, CRISPR and primer design, molecular evidence, structure retrieval, quality assessment, comparison, docking review, and chemical filtering |
 | [Imaging and visualization](docs/capabilities/imaging-and-visualization.md) | Image profiling, segmentation, colocalization, tracking, quantitative checks, scientific figures, and molecular visualization |
 | [Clinical and experimental research](docs/capabilities/clinical-and-experimental.md) | Cohort and survival analysis, biomarkers, adverse events, de-identification, assay design, dose response, growth curves, and experimental interpretation |

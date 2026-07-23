@@ -22,12 +22,13 @@ from biomed_workbench.modules.registry import ModuleRegistry
 
 
 MODULE_ID = "single-cell-atlas-annotation"
-MODULE_VERSION = "1.0.0"
-ROW_ID = "agent-protocol-1-celltypist-171-popv-061-azimuth-051"
+MODULE_VERSION = "1.1.0"
+ROW_ID = "agent-protocol-1-celltypist-171-popv-061-azimuth-051-consensus"
 MODULE_ROOT = BUILTIN_ROOT / MODULE_ID
 CELLTYPIST_TEMPLATE = MODULE_ROOT / "templates" / "annotate_celltypist.py"
 POPV_TEMPLATE = MODULE_ROOT / "templates" / "annotate_popv.py"
 AZIMUTH_TEMPLATE = MODULE_ROOT / "templates" / "annotate_azimuth.R"
+CONSENSUS_TEMPLATE = MODULE_ROOT / "templates" / "reconcile_annotation_consensus.py"
 
 
 def sha256(path: Path) -> str:
@@ -275,6 +276,59 @@ def verify(scientific_python: Path, rscript: Path, r_library: Path) -> dict[str,
         python_summary = inspect_python_outputs(python, celltypist_output, popv_output, environment)
         azimuth_summary = inspect_azimuth_output(r_executable, azimuth_output, environment)
         backend_summaries = {**python_summary, "azimuth": azimuth_summary}
+
+        run(
+            [str(python), "-c", (
+                "import anndata as ad; d=ad.read_h5ad(" + repr(str(celltypist_output)) + "); "
+                "d.obs.assign(cell_id=d.obs_names, normalized_confidence=d.obs['celltypist_confidence'], "
+                "status=d.obs['celltypist_label_review'].astype(str).ne('Unknown').map({True:'mapped',False:'unknown'}))"
+                ".to_csv(" + repr(str(work / "celltypist-evidence.tsv")) + ", sep='\\t', index=False)"
+            )],
+            environment,
+        )
+        run(
+            [str(python), "-c", (
+                "import anndata as ad; d=ad.read_h5ad(" + repr(str(popv_output)) + "); "
+                "d.obs.assign(cell_id=d.obs_names, normalized_confidence=d.obs['popv_consensus_count'].astype(float)/3.0, "
+                "status=d.obs['popv_mapping_status']).to_csv(" + repr(str(work / "popv-evidence.tsv")) + ", sep='\\t', index=False)"
+            )],
+            environment,
+        )
+        label_map = {
+            label: {"label": label, "ontology_id": f"CL:fixture-{index + 1:04d}"}
+            for index, label in enumerate(("TypeA", "TypeB", "TypeC"))
+        }
+        consensus_manifest = work / "consensus-manifest.json"
+        consensus_manifest.write_text(json.dumps({
+            "schema_version": 1,
+            "methods": [
+                {
+                    "backend": "celltypist", "path": str(work / "celltypist-evidence.tsv"), "source_kind": "tsv",
+                    "cell_id_column": "cell_id", "label_column": "celltypist_label_review",
+                    "confidence_column": "normalized_confidence", "status_column": "status",
+                    "accepted_statuses": ["mapped"], "label_map": label_map, "weight": 1.0,
+                },
+                {
+                    "backend": "popv", "path": str(work / "popv-evidence.tsv"), "source_kind": "tsv",
+                    "cell_id_column": "cell_id", "label_column": "popv_label_review",
+                    "confidence_column": "normalized_confidence", "status_column": "status",
+                    "accepted_statuses": ["mapped"], "label_map": label_map, "weight": 1.0,
+                },
+            ],
+        }), encoding="utf-8")
+        consensus_table, consensus_evidence, consensus_report = (
+            work / "annotation-consensus.tsv",
+            work / "annotation-evidence.tsv",
+            work / "annotation-consensus.json",
+        )
+        run([
+            str(python), str(CONSENSUS_TEMPLATE), "--query-h5ad", str(query_h5ad),
+            "--evidence-manifest", str(consensus_manifest), "--output-consensus", str(consensus_table),
+            "--output-evidence", str(consensus_evidence), "--report", str(consensus_report),
+            "--minimum-methods", "2", "--minimum-agreement", "1.0",
+            "--minimum-weighted-support", "0.5", "--minimum-confidence", "0.5",
+        ], environment)
+        consensus_payload = json.loads(consensus_report.read_text(encoding="utf-8"))
         if sha256(query_h5ad) != query_digest or sha256(reference_h5ad) != reference_digest:
             raise RuntimeError("atlas annotation templates modified source H5AD fixtures")
         for backend, summary in backend_summaries.items():
@@ -297,6 +351,7 @@ def verify(scientific_python: Path, rscript: Path, r_library: Path) -> dict[str,
                 "celltypist": {"name": CELLTYPIST_TEMPLATE.name, "sha256": sha256(CELLTYPIST_TEMPLATE)},
                 "azimuth": {"name": AZIMUTH_TEMPLATE.name, "sha256": sha256(AZIMUTH_TEMPLATE)},
                 "popv": {"name": POPV_TEMPLATE.name, "sha256": sha256(POPV_TEMPLATE)},
+                "consensus": {"name": CONSENSUS_TEMPLATE.name, "sha256": sha256(CONSENSUS_TEMPLATE)},
             },
             "tool_versions": {
                 "CellTypist": celltypist_payload["versions"]["celltypist"],
@@ -320,6 +375,7 @@ def verify(scientific_python: Path, rscript: Path, r_library: Path) -> dict[str,
                 "celltypist_completed": True,
                 "azimuth_completed": True,
                 "popv_completed": True,
+                "consensus_completed": True,
                 "outputs_reloaded": True,
             },
             "backend_summaries": backend_summaries,
@@ -329,6 +385,9 @@ def verify(scientific_python: Path, rscript: Path, r_library: Path) -> dict[str,
             },
             "scientific_summary": {
                 "all_three_backends_executed": True,
+                "cross_backend_consensus_executed": True,
+                "consensus_conflicts_retained_as_unknown": consensus_payload["quality"]["low_confidence_disagreement_and_ties_retained_as_unknown"],
+                "consensus_ontology_ids_required": consensus_payload["quality"]["ontology_ids_required_for_mapped_labels"],
                 "method_specific_probabilities_and_scores_retained": True,
                 "known_reference_classes_recovered": True,
                 "absent_reference_population_retained_as_unknown": True,

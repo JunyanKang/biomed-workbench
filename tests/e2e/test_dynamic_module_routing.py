@@ -76,6 +76,25 @@ class DynamicModuleRoutingTests(unittest.TestCase):
 
         self.assertIn("single-cell-trajectory-velocity", routed)
 
+    def test_regvelo_routes_and_composes_from_manifest(self):
+        plan = route(
+            "Use RegVelo with an independently defined GRN to compare regulatory velocity, "
+            "CellRank fate probabilities, and transcription factor perturbation hypotheses"
+        )
+        selected = set(plan["selected_module_ids"])
+
+        self.assertIn("single-cell-regulatory-velocity", selected)
+        self.assertIn("single-cell-fate-mapping", selected)
+        self.assertIn("omics", plan["matched_workflows"])
+
+    def test_multi_method_annotation_consensus_routes_to_atlas_annotation(self):
+        plan = route(
+            "Reconcile CellTypist Azimuth popV SingleR and scANVI annotations with "
+            "Cell Ontology labels and keep conflicts as Unknown"
+        )
+
+        self.assertIn("single-cell-atlas-annotation", plan["selected_module_ids"])
+
     def test_router_contains_no_module_specific_intent_table(self):
         source = (Path(__file__).resolve().parents[2] / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
 

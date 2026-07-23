@@ -20,6 +20,7 @@ class SingleCellAtlasAnnotationEvidenceTests(unittest.TestCase):
             "celltypist": "annotate_celltypist.py",
             "azimuth": "annotate_azimuth.R",
             "popv": "annotate_popv.py",
+            "consensus": "reconcile_annotation_consensus.py",
         }
 
         self.assertTrue(report["passed"])
@@ -51,6 +52,7 @@ class SingleCellAtlasAnnotationEvidenceTests(unittest.TestCase):
         self.assertTrue(report["execution"]["celltypist_completed"])
         self.assertTrue(report["execution"]["azimuth_completed"])
         self.assertTrue(report["execution"]["popv_completed"])
+        self.assertTrue(report["execution"]["consensus_completed"])
         self.assertTrue(report["execution"]["outputs_reloaded"])
         self.assertTrue(summary["method_specific_probabilities_and_scores_retained"])
         self.assertTrue(summary["absent_reference_population_retained_as_unknown"])
@@ -58,6 +60,9 @@ class SingleCellAtlasAnnotationEvidenceTests(unittest.TestCase):
         self.assertTrue(summary["all_query_cells_accounted"])
         self.assertTrue(summary["source_counts_and_identifiers_preserved"])
         self.assertTrue(summary["evaluation_labels_posthoc_only"])
+        self.assertTrue(summary["cross_backend_consensus_executed"])
+        self.assertTrue(summary["consensus_conflicts_retained_as_unknown"])
+        self.assertTrue(summary["consensus_ontology_ids_required"])
 
     def test_observed_popv_xgboost_conflict_is_not_hidden(self):
         report = json.loads(REPORT.read_text(encoding="utf-8"))

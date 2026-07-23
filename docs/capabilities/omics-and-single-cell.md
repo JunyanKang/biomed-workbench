@@ -45,11 +45,11 @@ These capabilities are implemented by `single-cell-donor-inference`, `single-cel
 ## Annotation, Communication, And Dynamics
 
 - Count-backed marker discovery with detection fractions, effect sizes, cross-sample direction review, and no automatic conversion of markers into labels.
-- CellTypist, Azimuth, popV, and SingleR annotation with feature-namespace alignment, method-specific confidence, score and pruning review, marker contracts, Cell Ontology constraints, expert disagreement, and unknown-state retention.
+- CellTypist, Azimuth, popV, SingleR, and scANVI annotation with feature-namespace alignment, method-specific confidence, score and pruning review, explicit canonical-label and Cell Ontology mapping, cross-method weighted consensus, expert disagreement, and unknown-state retention.
 - LIANA, CellPhoneDB, CellChat, and NicheNet workflows that preserve biological samples and compare interaction support across replicates.
-- scVelo dynamical modelling, CellRank GPCCA fate mapping, moscot optimal transport, Slingshot and Monocle3 topology, and tradeSeq lineage tests validated against independent time, root, branch, and terminal anchors.
+- scVelo dynamical modelling; RegVelo 0.4.2 GRN-informed velocity, gene-resolved latent time, regulatory-constraint comparison, and perturbation hypotheses; CellRank GPCCA fate mapping; moscot optimal transport; Slingshot and Monocle3 topology; and tradeSeq lineage tests validated against independent time, root, branch, and terminal anchors.
 
-These capabilities are implemented by `single-cell-marker-discovery`, `single-cell-atlas-annotation`, `single-cell-reference-annotation`, `single-cell-communication`, `single-cell-trajectory-velocity`, `single-cell-fate-mapping`, and `single-cell-trajectory-topology`.
+These capabilities are implemented by `single-cell-marker-discovery`, `single-cell-atlas-annotation`, `single-cell-reference-annotation`, `single-cell-communication`, `single-cell-trajectory-velocity`, `single-cell-regulatory-velocity`, `single-cell-fate-mapping`, and `single-cell-trajectory-topology`. See the [RegVelo regulatory-velocity guide](regulatory-velocity.md) for its executable scope and compatibility boundary.
 
 ## Multimodal, Regulatory, And Spatial Analysis
 
@@ -63,7 +63,7 @@ These capabilities are implemented by `single-cell-multimodal-integration`, `sin
 
 ## Quality Gates And Limits
 
-Cells and spatial spots are never substituted for independent condition-level replicates. Integration is rejected when it erases biological structure or leaks labels. Annotation conflicts remain unknown. Communication and spatial-gene claims require sample-level support. Temporal interpretations are blocked when required layers, anchors, or independent time evidence are absent. Coexpression, motif support, peak-to-gene association, eRegulon concordance, and spatial autocorrelation are not reported as causal regulation without independent evidence.
+Cells and spatial spots are never substituted for independent condition-level replicates. Integration is rejected when it erases biological structure or leaks labels. Annotation conflicts remain unknown. Communication and spatial-gene claims require sample-level support. Temporal interpretations are blocked when required layers, anchors, prior-network provenance, baseline comparisons, or independent time evidence are absent. Coexpression, motif support, peak-to-gene association, eRegulon concordance, and spatial autocorrelation are not reported as causal regulation without independent evidence.
 
 The validated templates and planted-signal fixtures establish executable method coverage, compatibility, source preservation, and scientific gate behaviour. They do not replace project-specific checks of chemistry, tissue architecture, references, genome build, motif resources, experimental design, model sensitivity, biological replication, or external validation.
 

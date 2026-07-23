@@ -4231,7 +4231,7 @@
     },
     {
       "access": "agent_generated",
-      "description": "Direct Codex to inspect count-backed query cells and declared reference assets, execute CellTypist, Azimuth, or a popV expert ensemble in compatible existing scientific runtimes, retain method-specific labels and confidence evidence, preserve low-confidence or discordant cells as Unknown, and admit only reload-validated annotations that leave source counts and identities unchanged.",
+      "description": "Direct Codex to inspect count-backed query cells and declared reference assets, execute CellTypist, Azimuth, or a popV expert ensemble in compatible existing scientific runtimes, reconcile comparable CellTypist, Azimuth, popV, SingleR, or scANVI evidence through ontology-aware weighted consensus, retain every method-specific label and confidence, preserve low-confidence or discordant cells as Unknown, and admit only reload-validated annotations that leave source counts and identities unchanged.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-atlas-annotation",
       "input_schema": {
@@ -4340,7 +4340,7 @@
       "kind": "workflow",
       "mutability": "read_only",
       "requirements": [],
-      "title": "Map single cells with CellTypist, Azimuth, and popV while retaining unknown states",
+      "title": "Map and reconcile single-cell atlas annotations while retaining unknown states",
       "workflow": "omics"
     },
     {
@@ -5631,6 +5631,86 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Infer and score single-cell regulatory networks with pySCENIC and SCENIC+",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to inspect count-backed spliced and unspliced single-cell data plus an independently versioned target-by-regulator network; execute RegVelo 0.4.2 with bounded dense working layers, multiple model modes or seeds, model persistence, reload validation, and explicit uncertainty and causal-claim boundaries; then hand validated dynamics to trajectory, fate-mapping, and perturbation-hypothesis workflows.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-regulatory-velocity",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "grn_orientation": {
+            "enum": [
+              "targets-by-regulators"
+            ],
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "h5ad-plus-grn-tsv"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "requested_model_modes": {
+            "items": {
+              "enum": [
+                "hard",
+                "soft"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "spliced_layer": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "unspliced_layer": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "input_artifact_id",
+          "input_format",
+          "spliced_layer",
+          "unspliced_layer",
+          "grn_orientation",
+          "requested_model_modes",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Infer GRN-informed regulatory velocity with RegVelo",
       "workflow": "omics"
     },
     {
@@ -7277,7 +7357,7 @@
       "workflow": "omics"
     }
   ],
-  "entry_count": 107,
+  "entry_count": 108,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

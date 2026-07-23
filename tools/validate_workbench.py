@@ -34,6 +34,7 @@ from biomed_workbench.version import VERSION  # noqa: E402
 from tools.validate_module import validate_module  # noqa: E402
 from tools.build_format_contract_report import build as build_format_contract_report  # noqa: E402
 from tools.audit_bioinformatics_templates import build as build_bioinformatics_template_report  # noqa: E402
+from tools.build_experimental_maturity_report import build as build_experimental_maturity_report  # noqa: E402
 
 CATALOG_FIELDS = {"id", "workflow", "kind", "title", "description", "entrypoint", "input_schema", "requirements", "access", "mutability"}
 SECRET_PATTERNS = [
@@ -254,6 +255,20 @@ def main() -> int:
                 or any(item.get("template_count", 0) < 1 for item in template_report.get("records", ()))
             ):
                 errors.append("every bioinformatics module must retain at least one passing code template")
+        experimental_maturity_path = ROOT / "reports" / "experimental-module-maturity.json"
+        try:
+            experimental_maturity = json.loads(experimental_maturity_path.read_text(encoding="utf-8"))
+            expected_experimental_maturity = build_experimental_maturity_report()
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
+            errors.append(f"experimental module maturity report is missing or invalid: {exc}")
+        else:
+            if (
+                experimental_maturity != expected_experimental_maturity
+                or experimental_maturity.get("passed") is not True
+                or experimental_maturity.get("experimental_module_count") != 19
+                or experimental_maturity.get("representative_execution_passed") != 19
+            ):
+                errors.append("experimental module maturity evidence differs from current checked reports")
         communication_report_path = ROOT / "reports" / "single-cell-communication-live-verification.json"
         try:
             communication_report = json.loads(communication_report_path.read_text(encoding="utf-8"))
@@ -333,6 +348,54 @@ def main() -> int:
             ):
                 errors.append(
                     "PBMC3k public-data case differs from its source, module, template, runtime, execution, or scientific gates"
+                )
+        gse96583_report_path = ROOT / "reports" / "public-case-gse96583-donor-inference.json"
+        gse96583_root = BUILTIN_ROOT / "single-cell-donor-inference"
+        try:
+            gse96583_report = json.loads(gse96583_report_path.read_text(encoding="utf-8"))
+            gse96583_manifest = registry.get("single-cell-donor-inference")
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("GSE96583 donor-aware public-data acceptance case is missing or invalid")
+        else:
+            source_validation = gse96583_report.get("source", {}).get("source_validation", {})
+            execution = gse96583_report.get("execution", {})
+            if (
+                gse96583_report.get("passed") is not True
+                or gse96583_report.get("case_type") != "public-data-end-to-end"
+                or gse96583_report.get("module", {}).get("id") != gse96583_manifest.id
+                or gse96583_report.get("module", {}).get("version") != gse96583_manifest.version
+                or gse96583_report.get("module", {}).get("compatibility_row_id")
+                != gse96583_manifest.compatibility_matrix[0].id
+                or gse96583_report.get("module", {}).get("manifest_sha256")
+                != hashlib.sha256((gse96583_root / "module.json").read_bytes()).hexdigest()
+                or gse96583_report.get("module", {}).get("template_sha256")
+                != {
+                    name: hashlib.sha256((gse96583_root / "templates" / name).read_bytes()).hexdigest()
+                    for name in ("pseudobulk_aggregate.py", "donor_differential.R")
+                }
+                or gse96583_report.get("source", {}).get("accession") != "GSE96583"
+                or gse96583_report.get("source", {}).get("files", {}).get("archive", {}).get("sha256")
+                != "e5d41a3248a813f99d68fd5c9eb9773de7f46a83680a67f4a02d683b8955fe80"
+                or source_validation.get("published_cells") != 29065
+                or source_validation.get("retained_published_singlets_with_cell_type") != 24673
+                or source_validation.get("paired_donors") != 8
+                or source_validation.get("combined_metadata_barcode_normalizations") != {"ctrl": 0, "stim": 313}
+                or gse96583_report.get("runtime", {}).get("scanpy") != "1.11.5"
+                or gse96583_report.get("runtime", {}).get("edgeR") != "4.0.16"
+                or execution.get("pseudobulks") != 128
+                or execution.get("eligible_pseudobulks") != 109
+                or execution.get("completed_cell_types") != 7
+                or execution.get("all_cells_accounted") is not True
+                or execution.get("raw_counts_conserved") is not True
+                or execution.get("paired_designs_full_rank") is not True
+                or execution.get("result_reload_validated") is not True
+                or set(execution.get("ifn_response_genes_recovered", ()))
+                != {"IFI6", "IFIT1", "IFIT2", "IFIT3", "ISG15", "MX1", "OAS1", "OAS2", "OAS3", "STAT1"}
+                or len(execution.get("ifn_response_cell_types", ())) < 5
+                or set(gse96583_report.get("quality_gates", {}).values()) != {"pass"}
+            ):
+                errors.append(
+                    "GSE96583 donor-aware public-data case differs from its source, module, templates, runtime, paired design, or scientific gates"
                 )
         public_database_report_path = ROOT / "reports" / "public-database-live-verification.json"
         public_database_module_ids = {

@@ -36,7 +36,12 @@ inside an allowed range.
 The release validator binds the registry to compatibility execution evidence,
 live tool and database reports, public-data cases, template coverage, the
 research-state engine, and source reconciliation. The [public-data acceptance
-case index](cases/README.md) shows the strongest current live examples.
+case index](cases/README.md) shows the strongest current live examples. The
+generated [experimental-module evidence matrix](../reports/experimental-module-maturity.json)
+separately records contract, template, compatibility, representative execution,
+public-data acceptance, and project-validation status for every experimental
+module. A deterministic fixture can therefore never silently promote itself to
+public-data evidence.
 
 For a user project, the final maturity decision is always made at project
 validation level. Failed or unrun gates remain visible, experimental modules are
