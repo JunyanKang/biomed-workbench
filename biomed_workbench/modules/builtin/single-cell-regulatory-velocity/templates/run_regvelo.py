@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 import regvelo
 from regvelo import REGVELOVI
+import scvi
 from scipy import sparse
 import torch
 
@@ -29,6 +30,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--report", required=True)
     parser.add_argument("--spliced-layer", default="spliced")
     parser.add_argument("--unspliced-layer", default="unspliced")
+    parser.add_argument(
+        "--layer-semantics",
+        choices=("integer-counts", "nonnegative-continuous"),
+        default="integer-counts",
+    )
     parser.add_argument("--model-modes", default="soft")
     parser.add_argument("--repeats", type=int, default=2)
     parser.add_argument("--max-epochs", type=int, required=True)
@@ -56,14 +62,18 @@ def package_version(name: str) -> str:
     return importlib.metadata.version(name)
 
 
-def count_layer(data: ad.AnnData, key: str) -> np.ndarray:
+def validated_layer(data: ad.AnnData, key: str, semantics: str) -> np.ndarray:
     if key not in data.layers:
-        raise ValueError(f"required count layer is missing: {key}")
+        raise ValueError(f"required splicing layer is missing: {key}")
     matrix = data.layers[key]
     values = matrix.data if sparse.issparse(matrix) else np.asarray(matrix)
     if values.size and (not np.isfinite(values).all() or np.min(values) < 0):
         raise ValueError(f"{key} contains negative or nonfinite values")
-    if values.size and not np.allclose(values, np.rint(values), rtol=0, atol=1e-8):
+    if (
+        semantics == "integer-counts"
+        and values.size
+        and not np.allclose(values, np.rint(values), rtol=0, atol=1e-8)
+    ):
         raise ValueError(f"{key} is not integer-like")
     return np.asarray(matrix.toarray() if sparse.issparse(matrix) else matrix, dtype=np.float32)
 
@@ -141,8 +151,8 @@ def main() -> int:
             f"dense spliced/unspliced working layers require {estimated_dense_bytes} bytes, "
             f"above the declared maximum of {args.maximum_dense_bytes}"
         )
-    spliced = count_layer(source, args.spliced_layer)
-    unspliced = count_layer(source, args.unspliced_layer)
+    spliced = validated_layer(source, args.spliced_layer, args.layer_semantics)
+    unspliced = validated_layer(source, args.unspliced_layer, args.layer_semantics)
     if spliced.shape != unspliced.shape or not np.any(spliced) or not np.any(unspliced):
         raise ValueError("spliced and unspliced layers are empty or misaligned")
 
@@ -163,6 +173,7 @@ def main() -> int:
         "orientation": "targets-by-regulators",
         "regulators": regulators,
         "edge_count": edge_count,
+        "layer_semantics": args.layer_semantics,
     }
     REGVELOVI.setup_anndata(work, spliced_layer="spliced", unspliced_layer="unspliced")
 
@@ -174,6 +185,8 @@ def main() -> int:
             random.seed(run_seed)
             np.random.seed(run_seed)
             torch.manual_seed(run_seed)
+            scvi.settings.seed = run_seed
+            torch.use_deterministic_algorithms(True, warn_only=True)
             model = REGVELOVI(
                 work,
                 W=torch.tensor(square_grn.to_numpy().T, dtype=torch.float32),
@@ -189,6 +202,7 @@ def main() -> int:
                 validation_size=0.2,
                 early_stopping=False,
                 enable_progress_bar=False,
+                deterministic=True,
                 check_val_every_n_epoch=1,
                 plan_kwargs={"lr": 1e-3},
             )
@@ -235,18 +249,20 @@ def main() -> int:
         "primary_run": primary_id,
         "model_modes": modes,
         "repeats": args.repeats,
+        "deterministic_training": True,
         "prior_grn_sha256": grn_digest,
         "prior_grn_orientation": "targets-by-regulators",
         "regulator_count": len(regulators),
         "edge_count": edge_count,
         "source_data_used_for_fitting": ["spliced", "unspliced", "prior-grn"],
+        "layer_semantics": args.layer_semantics,
         "experimental_labels_used_for_fitting": False,
         "perturbation_predictions_are_causal_evidence": False,
     }
     output.write_h5ad(output_path, compression="gzip")
     reloaded = ad.read_h5ad(output_path)
-    reloaded_spliced = count_layer(reloaded, args.spliced_layer)
-    reloaded_unspliced = count_layer(reloaded, args.unspliced_layer)
+    reloaded_spliced = validated_layer(reloaded, args.spliced_layer, args.layer_semantics)
+    reloaded_unspliced = validated_layer(reloaded, args.unspliced_layer, args.layer_semantics)
     if (
         reloaded.shape != source.shape
         or not np.array_equal(reloaded.obs_names, source.obs_names)
@@ -280,6 +296,7 @@ def main() -> int:
             "genes": int(source.n_vars),
             "spliced_layer": args.spliced_layer,
             "unspliced_layer": args.unspliced_layer,
+            "layer_semantics": args.layer_semantics,
             "estimated_dense_bytes": estimated_dense_bytes,
             "maximum_dense_bytes": args.maximum_dense_bytes,
         },
@@ -301,14 +318,16 @@ def main() -> int:
             "lambda_grn": args.lambda_grn,
             "lambda_l1": args.lambda_l1,
             "seed": args.seed,
+            "deterministic_training": True,
         },
         "runs": runs,
         "stability": {"pairwise_velocity_correlations": pairwise},
         "quality": {
-            "count_layers_validated": True,
+            "splicing_layers_validated_under_declared_semantics": True,
             "dense_memory_budget_enforced": True,
             "grn_namespace_and_orientation_validated": True,
             "multiple_modes_or_seeds_retained": len(runs) > 1,
+            "deterministic_training_requested": True,
             "all_outputs_finite": True,
             "models_saved_and_reloaded": True,
             "source_artifacts_immutable": True,

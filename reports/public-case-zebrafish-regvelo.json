@@ -1,0 +1,406 @@
+{
+  "case_id": "zebrafish-neural-crest-regvelo-public-data-v1",
+  "case_type": "public-data-end-to-end",
+  "derivation": {
+    "cells": 697,
+    "derived_h5ad_sha256": "eb8dc09ec27daafb1d2eff6f1f121906d8fe5c5eccf6216b96e7f6b863f1fd8e",
+    "derived_target_by_regulator_grn_sha256": "b90e367b79369d114b4aef4ccad7ffa5474746d7f044126248ba554ef7ca69ac",
+    "edges": 4309,
+    "features": 1008,
+    "labels_removed_before_preprocessing_and_restored_after": true,
+    "labels_used_for_preprocessing": false,
+    "parameters": {
+      "grn_correlation_filter": "regvelo-0.4.2-default",
+      "moments": "scvelo-0.3.4-default",
+      "neighbors": 30,
+      "preprocessing": "regvelo-0.4.2-default",
+      "principal_components": 50,
+      "random_seed": 0
+    },
+    "regulators": 81,
+    "splicing_layers": {
+      "Ms": {
+        "finite_nonnegative": true,
+        "integer_like": false,
+        "maximum": 1.0000001192092896,
+        "minimum": 0.0
+      },
+      "Mu": {
+        "finite_nonnegative": true,
+        "integer_like": false,
+        "maximum": 1.0000001192092896,
+        "minimum": 0.0
+      }
+    }
+  },
+  "execution": {
+    "all_outputs_finite": true,
+    "deterministic_repeat_execution": {
+      "gate": "pass",
+      "independent_template_runs": 2,
+      "outputs": {
+        "latent_state": {
+          "exactly_equal": true,
+          "maximum_absolute_difference": 0.0,
+          "shape": [
+            697,
+            10
+          ]
+        },
+        "latent_time": {
+          "exactly_equal": true,
+          "maximum_absolute_difference": 0.0,
+          "shape": [
+            697,
+            1008
+          ]
+        },
+        "velocity": {
+          "exactly_equal": true,
+          "maximum_absolute_difference": 0.0,
+          "shape": [
+            697,
+            1008
+          ]
+        }
+      },
+      "same_parameters_histories_and_mode_comparison": true
+    },
+    "mode_comparisons": [
+      {
+        "left": "hard-seed-2026",
+        "right": "soft-seed-2026",
+        "velocity_pearson": 0.3615893881700917
+      }
+    ],
+    "mode_sensitivity_status": "warning-no-robustness-claim",
+    "models_saved_and_reloaded": true,
+    "output_reloaded": true,
+    "runs": [
+      {
+        "history": {
+          "elbo_train": {
+            "finite_observations": 20,
+            "last_finite": 728.1192626953125,
+            "observations": 20
+          },
+          "elbo_validation": {
+            "finite_observations": 20,
+            "last_finite": 726.67822265625,
+            "observations": 20
+          },
+          "kl_global_train": {
+            "finite_observations": 20,
+            "last_finite": 0.0,
+            "observations": 20
+          },
+          "kl_global_validation": {
+            "finite_observations": 20,
+            "last_finite": 0.0,
+            "observations": 20
+          },
+          "kl_local_train": {
+            "finite_observations": 20,
+            "last_finite": 45.122947692871094,
+            "observations": 20
+          },
+          "kl_local_validation": {
+            "finite_observations": 20,
+            "last_finite": 41.599853515625,
+            "observations": 20
+          },
+          "reconstruction_loss_train": {
+            "finite_observations": 20,
+            "last_finite": 682.996337890625,
+            "observations": 20
+          },
+          "reconstruction_loss_validation": {
+            "finite_observations": 20,
+            "last_finite": 685.078369140625,
+            "observations": 20
+          },
+          "train_loss_epoch": {
+            "finite_observations": 20,
+            "last_finite": 2533.799560546875,
+            "observations": 20
+          },
+          "train_loss_step": {
+            "finite_observations": 10,
+            "last_finite": 2521.43359375,
+            "observations": 10
+          },
+          "validation_loss": {
+            "finite_observations": 20,
+            "last_finite": 2531.93896484375,
+            "observations": 20
+          }
+        },
+        "latent_representation_finite": true,
+        "latent_time_finite": true,
+        "mode": "hard",
+        "model_directory": "hard-seed-2026",
+        "model_files": [
+          "model.pt"
+        ],
+        "model_reloaded": true,
+        "run_id": "hard-seed-2026",
+        "seed": 2026,
+        "velocity_finite": true
+      },
+      {
+        "history": {
+          "elbo_train": {
+            "finite_observations": 20,
+            "last_finite": 728.9508056640625,
+            "observations": 20
+          },
+          "elbo_validation": {
+            "finite_observations": 20,
+            "last_finite": 726.4405517578125,
+            "observations": 20
+          },
+          "kl_global_train": {
+            "finite_observations": 20,
+            "last_finite": 0.0,
+            "observations": 20
+          },
+          "kl_global_validation": {
+            "finite_observations": 20,
+            "last_finite": 0.0,
+            "observations": 20
+          },
+          "kl_local_train": {
+            "finite_observations": 20,
+            "last_finite": 26.030071258544922,
+            "observations": 20
+          },
+          "kl_local_validation": {
+            "finite_observations": 20,
+            "last_finite": 23.99178695678711,
+            "observations": 20
+          },
+          "reconstruction_loss_train": {
+            "finite_observations": 20,
+            "last_finite": 702.9207153320312,
+            "observations": 20
+          },
+          "reconstruction_loss_validation": {
+            "finite_observations": 20,
+            "last_finite": 702.4487915039062,
+            "observations": 20
+          },
+          "train_loss_epoch": {
+            "finite_observations": 20,
+            "last_finite": 1617.224853515625,
+            "observations": 20
+          },
+          "train_loss_step": {
+            "finite_observations": 10,
+            "last_finite": 1581.228515625,
+            "observations": 10
+          },
+          "validation_loss": {
+            "finite_observations": 20,
+            "last_finite": 1605.4765625,
+            "observations": 20
+          }
+        },
+        "latent_representation_finite": true,
+        "latent_time_finite": true,
+        "mode": "soft",
+        "model_directory": "soft-seed-2026",
+        "model_files": [
+          "model.pt"
+        ],
+        "model_reloaded": true,
+        "run_id": "soft-seed-2026",
+        "seed": 2026,
+        "velocity_finite": true
+      }
+    ],
+    "source_layers_preserved": true,
+    "withheld_stage_direction": {
+      "aggregation": "median-across-gene-resolved-latent-time",
+      "evidence_field": "stage",
+      "excluded_stages": [
+        {
+          "cells": 2,
+          "reason": "fewer-than-20-cells",
+          "stage": "3ss"
+        }
+      ],
+      "gate": "pass",
+      "included_cells": 695,
+      "included_stages": [
+        "6-7ss",
+        "10ss",
+        "12-13ss",
+        "17-18ss",
+        "21-22ss"
+      ],
+      "minimum_cells_per_stage": 20,
+      "spearman_pvalue": 1.7977435024113023e-148,
+      "spearman_rho": 0.7885588698661461,
+      "stage_summaries": {
+        "10ss": {
+          "cells": 105,
+          "mean": 0.29812753200531006,
+          "median": 0.2961347997188568
+        },
+        "12-13ss": {
+          "cells": 156,
+          "mean": 0.3923422396183014,
+          "median": 0.38457605242729187
+        },
+        "17-18ss": {
+          "cells": 146,
+          "mean": 0.46075543761253357,
+          "median": 0.4479205310344696
+        },
+        "21-22ss": {
+          "cells": 183,
+          "mean": 0.48351597785949707,
+          "median": 0.47719231247901917
+        },
+        "3ss": {
+          "cells": 2,
+          "mean": 0.2915762662887573,
+          "median": 0.2915762662887573
+        },
+        "6-7ss": {
+          "cells": 105,
+          "mean": 0.29313865303993225,
+          "median": 0.2905924320220947
+        }
+      },
+      "used_for_fitting_or_preprocessing": false
+    }
+  },
+  "methods_not_run": {
+    "cellrank_terminal_state_and_fate_sensitivity": "not-run",
+    "experimental_perturbation_validation": "not-run",
+    "regulator_perturbation_screen": "not-run",
+    "scvelo_or_velovi_method_advantage_baseline": "not-run"
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-regvelo-042-python-311-layer-semantics",
+    "id": "single-cell-regulatory-velocity",
+    "manifest_sha256": "eef42a343f86b3193dbc94121c4e16c317bec894a6ef8e303c94c4baf3392fbf",
+    "template_sha256": "d90e0819763108910ce65401f40bfda5884c4b37c7d675587da03e68b3d46824",
+    "version": "1.1.0"
+  },
+  "parameters": {
+    "batch_size": 128,
+    "deterministic_training": true,
+    "lambda_grn": 1.0,
+    "lambda_l1": 0.01,
+    "max_epochs": 20,
+    "model_modes": [
+      "hard",
+      "soft"
+    ],
+    "n_hidden": 256,
+    "n_latent": 10,
+    "repeats": 1,
+    "seed": 2026
+  },
+  "passed": true,
+  "prior_grn": {
+    "description": "zebrafish neural crest multiome-derived prior network",
+    "documented_shape": [
+      4508,
+      4508
+    ],
+    "publisher": "RegVelo authors",
+    "sha256": "356bfde785af53e36f9334c4f5032c06f111d67d30b881b41e24a8ebde7a536a",
+    "source_orientation": "regulators-by-targets",
+    "url": "https://drive.google.com/uc?id=1ci_gCwdgGlZ0xSn6gSa_-LlIl9-aDa1c&export=download/",
+    "validation": {
+      "finite": true,
+      "identical_axis_order": true,
+      "nonzero_edges_before_query_alignment": 25617,
+      "shape": [
+        4508,
+        4508
+      ],
+      "unique_identifiers": true
+    }
+  },
+  "quality_gates": {
+    "continuous_layer_semantics_explicit": "pass",
+    "deterministic_repeat_execution": "pass",
+    "feature_regulator_and_edge_accounting": "pass",
+    "finite_velocity_latent_time_and_state": "pass",
+    "hard_and_soft_execution": "pass",
+    "label_free_official_preprocessing": "pass",
+    "mode_sensitivity_retained": "pass-with-warning",
+    "model_persistence_and_output_reload": "pass",
+    "official_grn_digest_orientation_and_shape": "pass",
+    "official_h5ad_digest_and_shape": "pass",
+    "official_source_immutability": "pass",
+    "withheld_developmental_stage_direction": "pass"
+  },
+  "runtime": {
+    "anndata": "0.12.19",
+    "cellrank": "2.0.7",
+    "jax": "0.4.35",
+    "jaxlib": "0.4.35",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "python": "3.11.15",
+    "regvelo": "0.4.2",
+    "scipy": "1.15.3",
+    "scvelo": "0.3.4",
+    "scvi-tools": "1.2.0",
+    "torch": "2.4.1",
+    "torchode": "1.0.1"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "The public case validates exact official artifacts and a recorded RegVelo 0.4.2 preprocessing and runtime profile; it does not establish portability to another assay, organism, quantifier, GRN, or dependency profile.",
+    "Developmental stage and cell type were withheld from preprocessing and model fitting; stage was inspected only after outputs were frozen as independent directional evidence.",
+    "The two-cell 3ss stage was excluded from the direction gate by the predeclared minimum-stage-size rule and is not interpreted.",
+    "Hard-versus-soft velocity agreement is retained as a sensitivity warning, so this case does not claim mode-robust velocities or superiority to scVelo or VeloVI.",
+    "No CellRank fate, terminal-state sensitivity, regulator perturbation, causal mechanism, or experimental validation claim is made.",
+    "The official prior is multiome-derived and then filtered by the documented RegVelo preprocessing on the query expression data; it is not treated as wholly independent causal evidence."
+  ],
+  "source": {
+    "dataset": "zebrafish neural crest Smart-seq3",
+    "documented_shape": [
+      697,
+      8012
+    ],
+    "publisher": "RegVelo authors",
+    "sha256": "eccab081c44cfe335b726aec8172bbcda072241b4f006f6420bb5d46d39611cb",
+    "url": "https://drive.google.com/uc?id=1Nzq1F6dGw-nR9lhRLfZdHOG7dcYq7P0i&export=download",
+    "validation": {
+      "cell_type_count": 13,
+      "cells": 697,
+      "features": 8012,
+      "splicing_layers": {
+        "spliced": {
+          "finite_nonnegative": true,
+          "integer_like": false,
+          "maximum": 51351.60546875,
+          "minimum": 0.28416505455970764
+        },
+        "unspliced": {
+          "finite_nonnegative": true,
+          "integer_like": false,
+          "maximum": 24262.955078125,
+          "minimum": 0.29097044467926025
+        }
+      },
+      "stages": {
+        "10ss": 105,
+        "12-13ss": 156,
+        "17-18ss": 146,
+        "21-22ss": 183,
+        "3ss": 2,
+        "6-7ss": 105
+      },
+      "unique_cells": true,
+      "unique_features": true
+    }
+  }
+}

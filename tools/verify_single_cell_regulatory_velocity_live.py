@@ -22,8 +22,8 @@ from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 
 
 MODULE_ID = "single-cell-regulatory-velocity"
-MODULE_VERSION = "1.0.0"
-ROW_ID = "agent-protocol-1-regvelo-042-python-311"
+MODULE_VERSION = "1.1.0"
+ROW_ID = "agent-protocol-1-regvelo-042-python-311-layer-semantics"
 MODULE_ROOT = BUILTIN_ROOT / MODULE_ID
 TEMPLATE = MODULE_ROOT / "templates" / "run_regvelo.py"
 
@@ -144,6 +144,7 @@ def verify(scientific_python: Path) -> dict[str, object]:
             "--report", str(analysis_report),
             "--spliced-layer", "spliced",
             "--unspliced-layer", "unspliced",
+            "--layer-semantics", "integer-counts",
             "--model-modes", "hard,soft",
             "--repeats", "1",
             "--max-epochs", "2",
@@ -218,6 +219,7 @@ def verify(scientific_python: Path) -> dict[str, object]:
                 **inspected,
             },
             "compatibility_observations": {
+                "integer_count_layer_semantics": analysis["input"]["layer_semantics"],
                 "sparse_working_layers": "blocked-by-observed-regvelo-0.4.2-initializer-behavior",
                 "rectangular_model_grn": "converted-explicitly-to-square-gene-aligned-working-matrix",
                 "numpy_2_profile": "excluded-after-observed-compiled-extension-abi-failure",
@@ -233,6 +235,7 @@ def verify(scientific_python: Path) -> dict[str, object]:
                 "model_mode_comparison_retained": True,
                 "models_saved_and_reloaded": True,
                 "source_counts_grn_and_identifiers_preserved": True,
+                "integer_count_semantics_executed": analysis["input"]["layer_semantics"] == "integer-counts",
                 "experimental_labels_withheld_from_fitting": True,
                 "perturbation_predictions_limited_to_hypotheses": True,
                 "outputs_reloaded": True,

@@ -407,6 +407,97 @@ def main() -> int:
                 errors.append(
                     "PBMC3k atlas-annotation public-data case differs from its query, model, module, template, uncertainty policy, marker review, or scientific gates"
                 )
+        zebrafish_regvelo_report_path = ROOT / "reports" / "public-case-zebrafish-regvelo.json"
+        zebrafish_regvelo_root = BUILTIN_ROOT / "single-cell-regulatory-velocity"
+        try:
+            zebrafish_regvelo_report = json.loads(
+                zebrafish_regvelo_report_path.read_text(encoding="utf-8")
+            )
+            zebrafish_regvelo_manifest = registry.get("single-cell-regulatory-velocity")
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("zebrafish RegVelo public-data acceptance case is missing or invalid")
+        else:
+            derivation = zebrafish_regvelo_report.get("derivation", {})
+            execution = zebrafish_regvelo_report.get("execution", {})
+            direction = execution.get("withheld_stage_direction", {})
+            repeat_execution = execution.get("deterministic_repeat_execution", {})
+            comparisons = execution.get("mode_comparisons", [])
+            comparison = comparisons[0] if len(comparisons) == 1 else {}
+            gates = zebrafish_regvelo_report.get("quality_gates", {})
+            if (
+                zebrafish_regvelo_report.get("passed") is not True
+                or zebrafish_regvelo_report.get("case_type") != "public-data-end-to-end"
+                or zebrafish_regvelo_report.get("module", {}).get("id")
+                != zebrafish_regvelo_manifest.id
+                or zebrafish_regvelo_report.get("module", {}).get("version")
+                != zebrafish_regvelo_manifest.version
+                or zebrafish_regvelo_report.get("module", {}).get("compatibility_row_id")
+                != zebrafish_regvelo_manifest.compatibility_matrix[0].id
+                or zebrafish_regvelo_report.get("module", {}).get("manifest_sha256")
+                != hashlib.sha256((zebrafish_regvelo_root / "module.json").read_bytes()).hexdigest()
+                or zebrafish_regvelo_report.get("module", {}).get("template_sha256")
+                != hashlib.sha256(
+                    (zebrafish_regvelo_root / "templates" / "run_regvelo.py").read_bytes()
+                ).hexdigest()
+                or zebrafish_regvelo_report.get("source", {}).get("sha256")
+                != "eccab081c44cfe335b726aec8172bbcda072241b4f006f6420bb5d46d39611cb"
+                or zebrafish_regvelo_report.get("source", {}).get("documented_shape")
+                != [697, 8012]
+                or zebrafish_regvelo_report.get("prior_grn", {}).get("sha256")
+                != "356bfde785af53e36f9334c4f5032c06f111d67d30b881b41e24a8ebde7a536a"
+                or zebrafish_regvelo_report.get("prior_grn", {}).get("documented_shape")
+                != [4508, 4508]
+                or derivation.get("cells") != 697
+                or derivation.get("features") != 1008
+                or derivation.get("regulators") != 81
+                or derivation.get("edges") != 4309
+                or derivation.get("labels_used_for_preprocessing") is not False
+                or derivation.get(
+                    "labels_removed_before_preprocessing_and_restored_after"
+                )
+                is not True
+                or derivation.get("splicing_layers", {}).get("Ms", {}).get("integer_like")
+                is not False
+                or derivation.get("splicing_layers", {}).get("Mu", {}).get("integer_like")
+                is not False
+                or zebrafish_regvelo_report.get("runtime", {}).get("regvelo") != "0.4.2"
+                or zebrafish_regvelo_report.get("runtime", {}).get("scvelo") != "0.3.4"
+                or zebrafish_regvelo_report.get("parameters", {}).get("model_modes")
+                != ["hard", "soft"]
+                or zebrafish_regvelo_report.get("parameters", {}).get("max_epochs") != 20
+                or len(execution.get("runs", [])) != 2
+                or execution.get("all_outputs_finite") is not True
+                or execution.get("models_saved_and_reloaded") is not True
+                or execution.get("source_layers_preserved") is not True
+                or execution.get("output_reloaded") is not True
+                or repeat_execution.get("independent_template_runs") != 2
+                or repeat_execution.get("same_parameters_histories_and_mode_comparison")
+                is not True
+                or set(repeat_execution.get("outputs", {}))
+                != {"velocity", "latent_time", "latent_state"}
+                or any(
+                    item.get("exactly_equal") is not True
+                    or item.get("maximum_absolute_difference") != 0
+                    for item in repeat_execution.get("outputs", {}).values()
+                )
+                or direction.get("used_for_fitting_or_preprocessing") is not False
+                or direction.get("included_cells") != 695
+                or direction.get("spearman_rho", 0) <= 0.7
+                or direction.get("spearman_pvalue", 1) >= 1e-100
+                or direction.get("excluded_stages")
+                != [{"cells": 2, "reason": "fewer-than-20-cells", "stage": "3ss"}]
+                or not isinstance(comparison.get("velocity_pearson"), (int, float))
+                or not -1 <= comparison.get("velocity_pearson", 2) <= 1
+                or execution.get("mode_sensitivity_status")
+                != "warning-no-robustness-claim"
+                or gates.get("mode_sensitivity_retained") != "pass-with-warning"
+                or set(gates.values()) != {"pass", "pass-with-warning"}
+                or set(zebrafish_regvelo_report.get("methods_not_run", {}).values())
+                != {"not-run"}
+            ):
+                errors.append(
+                    "zebrafish RegVelo public-data case differs from its official artifacts, continuous-layer contract, module, template, execution, withheld-stage direction, mode sensitivity, or scientific gates"
+                )
         gse96583_report_path = ROOT / "reports" / "public-case-gse96583-donor-inference.json"
         gse96583_root = BUILTIN_ROOT / "single-cell-donor-inference"
         try:

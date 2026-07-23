@@ -8,7 +8,9 @@ RegVelo contributes a gene-regulatory-network prior to RNA-velocity modelling. T
 
 ## Required Evidence
 
-- A count-backed H5AD object with aligned, integer-like spliced and unspliced layers.
+- An H5AD object with aligned spliced and unspliced layers declared as either
+  integer counts or finite nonnegative continuous abundances with complete
+  quantification and preprocessing provenance.
 - Unique cell and feature identifiers with declared quantification and feature-namespace provenance.
 - An independently constructed, versioned target-by-regulator network with a stable digest.
 - A declared dense-memory budget because RegVelo 0.4.2 requires dense working layers in the validated path.
@@ -18,7 +20,14 @@ The prior network may come from reviewed literature, curated resources, perturba
 
 ## Executable Scope
 
-The project-owned template validates count layers and network identities, converts only a bounded working copy to dense arrays, expands the declared target-by-regulator matrix into the square gene-aligned tensor required by RegVelo 0.4.2, executes all declared constraint modes or seeds, records training histories, computes velocity and latent outputs, saves every model, reloads the models, writes a new derived H5AD object, and verifies that source artifacts remain unchanged.
+The project-owned template validates layers under their declared semantics and
+never rounds continuous abundance into counts. It validates network identities,
+converts only a bounded working copy to dense arrays, expands the declared
+target-by-regulator matrix into the square gene-aligned tensor required by
+RegVelo 0.4.2, executes all declared constraint modes or seeds, records training
+histories, computes velocity and latent outputs, saves every model, reloads the
+models, writes a new derived H5AD object, and verifies that source artifacts
+remain unchanged.
 
 The observed verification fixture executed:
 
@@ -31,6 +40,14 @@ The observed verification fixture executed:
 | Persistence | Every model saved and reloaded |
 | Source handling | H5AD, count layers, identifiers, and GRN remained immutable |
 
+The [public zebrafish neural-crest acceptance
+case](../cases/zebrafish-regvelo.md) additionally executes the continuous-layer
+path on the exact official H5AD and GRN. It retains 697 cells, derives the
+documented 1,008-gene and 81-TF model space, executes 20-epoch hard and soft
+models, and evaluates frozen latent time against withheld developmental stage.
+The resulting stage association passes the directional gate, while modest
+hard-versus-soft velocity agreement remains an explicit sensitivity warning.
+
 ## Compatibility Boundary
 
 The validated profile uses Python 3.11, NumPy 1.26, SciPy 1.15, scVelo 0.3.4, scvi-tools 1.2.0, CellRank 2.0.7, torch 2.4.1, JAX and jaxlib 0.4.35, and the companion versions recorded in the module manifest and live report. These versions are provenance for the passing execution, not a general instruction to freeze every future project.
@@ -38,6 +55,9 @@ The validated profile uses Python 3.11, NumPy 1.26, SciPy 1.15, scVelo 0.3.4, sc
 Observed RegVelo 0.4.2 behaviour requires explicit safeguards:
 
 - sparse spliced and unspliced arrays cannot be passed directly through the validated initializer;
+- official RegVelo preprocessed and moment layers can be fractional and must be
+  declared as nonnegative continuous abundance rather than rejected or
+  misrepresented as integer molecule counts;
 - a rectangular model tensor fails, so the original network is retained while a square gene-aligned working matrix is built explicitly;
 - NumPy 2 produced compiled-extension ABI failures in the tested dependency stack;
 - newer JAX profiles failed on the removed `jaxlib.xla_extension` interface;

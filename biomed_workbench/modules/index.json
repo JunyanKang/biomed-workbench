@@ -39740,10 +39740,10 @@
       "agent_protocol": {
         "forbidden_actions": [
           "Do not install, update, activate, create, or manage Python, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.",
-          "Do not guess count-layer semantics, feature identifiers, homologs, GRN direction, regulator identities, edge provenance, time direction, root or terminal states, or perturbation mechanism.",
+          "Do not guess layer semantics, describe fractional abundance as integer counts, or guess feature identifiers, homologs, GRN direction, regulator identities, edge provenance, time direction, root or terminal states, or perturbation mechanism.",
           "Do not silently densify a large object, pass sparse arrays into the observed RegVelo 0.4.2 initializer, or pass a rectangular network tensor as the model skeleton.",
           "Do not use phenotype, desired fate, expected regulator, evaluation truth, or visual appearance to select genes, GRN edges, modes, seeds, terminal states, or thresholds.",
-          "Do not overwrite source counts, identifiers, annotations, h5ad, or GRN; do not discard failed modes, unstable runs, warnings, null perturbations, or discordant baselines.",
+          "Do not overwrite source splicing layers, identifiers, annotations, h5ad, or GRN; do not discard failed modes, unstable runs, warnings, null perturbations, or discordant baselines.",
           "Do not report generated code, successful import, successful exit, or unreloaded model as validated regulatory velocity evidence.",
           "Do not describe inferred direction, CellRank fate, or RegVelo in-silico perturbation as lineage causality or experimental validation."
         ],
@@ -39755,7 +39755,8 @@
         "parameter_rules": [
           {
             "decision_inputs": [
-              "count support",
+              "layer semantics",
+              "quantification and preprocessing provenance",
               "feature namespace",
               "prior source",
               "edge provenance",
@@ -39797,11 +39798,11 @@
         "postflight_checks": [
           "Reconcile all cells, genes, regulators, GRN edges, model runs, failed runs, warnings, and derived arrays.",
           "Require finite velocity, latent-time, latent-state, and training-history outputs; compare declared modes or seeds; and retain discordance.",
-          "Save and reload every model, reload the derived h5ad and report, and verify source count layers, identities, digests, GRN provenance, parameters, versions, and causal-claim boundary.",
+          "Save and reload every model, reload the derived h5ad and report, and verify source splicing layers under their declared semantics, identities, digests, GRN provenance, parameters, versions, and causal-claim boundary.",
           "For direction, fate, or perturbation claims, verify the declared scVelo or VeloVI baseline, withheld direction evidence, CellRank terminal-state sensitivity, and baseline-versus-perturbed fate comparison."
         ],
         "preflight_checks": [
-          "Inspect actual h5ad and GRN artifacts, source digests, spliced and unspliced count semantics, unique cells and genes, biological design, feature namespace, target and regulator identities, GRN orientation, edge provenance, self-edge policy, and independent direction evidence.",
+          "Inspect actual h5ad and GRN artifacts, source digests, declared spliced and unspliced layer semantics, quantification and preprocessing provenance, unique cells and genes, biological design, feature namespace, target and regulator identities, GRN orientation, edge provenance, self-edge policy, and independent direction evidence.",
           "Detect exact RegVelo, Python, AnnData, NumPy, pandas, SciPy, scVelo, scvi-tools, CellRank, torch, torchode, JAX, and jaxlib versions in the existing scientific runtime.",
           "Block NumPy 2 or incompatible JAX profiles for the validated 0.4.2 row, sparse-array passage into the observed model initializer, rectangular model tensors, guessed mappings, stale outputs, and dense working sets above the declared memory budget.",
           "Freeze model modes, seeds, regularization, epochs, baseline, independent-direction gates, terminal-state sensitivity, perturbation candidates, and output locations before execution."
@@ -39814,6 +39815,7 @@
           "prior-grn-sha256",
           "prior-grn-construction-provenance",
           "feature-namespace",
+          "layer-semantics-and-preprocessing-provenance",
           "grn-orientation",
           "regulator-and-edge-counts",
           "dense-memory-estimate-and-budget",
@@ -39840,7 +39842,7 @@
             "purpose": "Establish whether GRN-informed regulatory velocity is scientifically and computationally identifiable.",
             "required_logic": [
               "Inspect the real spliced and unspliced layers, quantification provenance, cells, genes, biological samples, independent direction evidence, prior-GRN construction, feature namespace, target and regulator orientation, edge distribution, and artifact digests.",
-              "Block non-count layers, guessed feature mapping, circular GRNs constructed from the conclusion being tested, inadequate dynamic coverage, and missing source provenance.",
+              "Block undeclared or invalid layer semantics, guessed feature mapping, circular GRNs constructed from the conclusion being tested, inadequate dynamic coverage, and missing source provenance; never relabel fractional abundance as integer counts.",
               "Estimate dense working-layer memory before execution and freeze model modes, seeds, regularization, baseline, direction tests, fate settings, and outputs."
             ],
             "template_files": [
@@ -39855,7 +39857,7 @@
             ],
             "purpose": "Execute RegVelo 0.4.2 with version-correct GRN and layer handling.",
             "required_logic": [
-              "Preserve source sparse layers and create only a bounded dense working copy because the observed 0.4.2 model path does not accept sparse layer arrays.",
+              "Preserve source sparse layers, validate them under the declared integer-count or nonnegative-continuous semantics, and create only a bounded dense working copy because the observed 0.4.2 model path does not accept sparse layer arrays.",
               "Align the declared target-by-regulator prior to exact feature identifiers, remove declared self edges, construct the square gene-aligned working tensor, and retain the original GRN digest and orientation.",
               "Train every declared hard or soft constraint and random-seed run, retain complete histories and warnings, and compute velocity, gene-resolved latent time, and latent representation."
             ],
@@ -39902,7 +39904,7 @@
             "purpose": "Produce traceable models and derived artifacts without altering the source.",
             "required_logic": [
               "Save and reload every model before admitting its output and write primary velocity, latent time, latent representation, parameters, mode comparisons, versions, and quality status to a new h5ad and report.",
-              "Verify source and GRN digests, cell and feature identities, original count layers, derived fields, model files, and output reload.",
+              "Verify source and GRN digests, cell and feature identities, original splicing layers and declared semantics, derived fields, model files, and output reload.",
               "Admit only observed executions; generated code, package import, or a successful process exit without scientific checks is not evidence."
             ],
             "template_files": [
@@ -39915,7 +39917,7 @@
         "single-cell-trajectory-velocity"
       ],
       "assumptions": [
-        "Spliced and unspliced layers contain aligned integer-like molecule counts; the prior network is independently constructed with the same feature namespace and target-by-regulator orientation; selected cells cover a sufficiently connected dynamic process; and model-based perturbations generate testable hypotheses rather than causal proof."
+        "Spliced and unspliced layers are aligned and explicitly declared as either integer-like molecule counts or finite nonnegative continuous abundances with documented preprocessing; the prior network has the same feature namespace and target-by-regulator orientation; selected cells cover a sufficiently connected dynamic process; and model-based perturbations generate testable hypotheses rather than causal proof."
       ],
       "compatibility_matrix": [
         {
@@ -39958,15 +39960,15 @@
             ]
           },
           "end_to_end_evidence_ids": [
-            "single-cell-regulatory-velocity-e2e-v1"
+            "single-cell-regulatory-velocity-e2e-v2"
           ],
-          "id": "agent-protocol-1-regvelo-042-python-311",
+          "id": "agent-protocol-1-regvelo-042-python-311-layer-semantics",
           "input_formats": {
             "splicing_and_regulatory_prior": [
               "h5ad-plus-grn-tsv@1"
             ]
           },
-          "module_version": "1.0.0",
+          "module_version": "1.1.0",
           "output_formats": {
             "regulatory_velocity_object": [
               "h5ad@0.1.0"
@@ -39979,7 +39981,7 @@
             "any"
           ],
           "regression_evidence_ids": [
-            "single-cell-regulatory-velocity-regression-v1"
+            "single-cell-regulatory-velocity-regression-v2"
           ],
           "tool_versions": {
             "RegVelo": [
@@ -40322,7 +40324,7 @@
           "version_source": "https://docs.jax.dev/en/latest/changelog.html"
         }
       ],
-      "description": "Direct Codex to inspect count-backed spliced and unspliced single-cell data plus an independently versioned target-by-regulator network; execute RegVelo 0.4.2 with bounded dense working layers, multiple model modes or seeds, model persistence, reload validation, and explicit uncertainty and causal-claim boundaries; then hand validated dynamics to trajectory, fate-mapping, and perturbation-hypothesis workflows.",
+      "description": "Direct Codex to inspect explicitly declared integer-count or nonnegative-continuous spliced and unspliced single-cell layers plus a versioned target-by-regulator network; execute RegVelo 0.4.2 with bounded dense working layers, multiple model modes or seeds, model persistence, reload validation, and explicit uncertainty and causal-claim boundaries; then hand validated dynamics to trajectory, fate-mapping, and perturbation-hypothesis workflows.",
       "domains": [
         "omics",
         "statistics"
@@ -40379,7 +40381,8 @@
           "name": "splicing_and_regulatory_prior",
           "processing_levels": [
             "quality-controlled",
-            "spliced-unspliced-counted",
+            "splicing-quantified",
+            "layer-semantics-declared",
             "prior-grn-frozen"
           ],
           "required_metadata": [
@@ -40387,6 +40390,7 @@
             "prior-grn-digest",
             "spliced-layer",
             "unspliced-layer",
+            "layer-semantics",
             "feature-identifier-namespace",
             "grn-orientation",
             "grn-construction-provenance",
@@ -40420,6 +40424,13 @@
           "input_format": {
             "enum": [
               "h5ad-plus-grn-tsv"
+            ],
+            "type": "string"
+          },
+          "layer_semantics": {
+            "enum": [
+              "integer-counts",
+              "nonnegative-continuous"
             ],
             "type": "string"
           },
@@ -40457,6 +40468,7 @@
           "input_format",
           "spliced_layer",
           "unspliced_layer",
+          "layer_semantics",
           "grn_orientation",
           "requested_model_modes",
           "declared_thresholds",
@@ -40475,7 +40487,7 @@
         ">=0.2.0,<0.3.0"
       ],
       "limitations": [
-        "The validated row covers RegVelo 0.4.2 on a bounded dense working copy with a square gene-aligned prior, hard or soft constraints, velocity, latent time, latent representation, model persistence, and reload inference. It does not establish universal biological direction, causal transcription-factor effects, experimental perturbation validation, optimal terminal states, or superiority to scVelo or VeloVI on a user's dataset. Full CellRank perturbation analysis requires independently justified terminal states and project-specific sensitivity testing."
+        "The validated row covers RegVelo 0.4.2 integer-count and nonnegative-continuous layer semantics on bounded dense working copies with a square gene-aligned prior, hard or soft constraints, velocity, latent time, latent representation, model persistence, and reload inference. Public zebrafish neural-crest evidence supports execution and withheld-stage direction for one exact official H5AD, GRN, preprocessing, and runtime profile, while hard-versus-soft velocity disagreement remains a sensitivity warning. It does not establish universal biological direction, causal transcription-factor effects, experimental perturbation validation, optimal terminal states, portability, or superiority to scVelo or VeloVI on a user's dataset. Full CellRank perturbation analysis requires independently justified terminal states and project-specific sensitivity testing."
       ],
       "maturity": "experimental",
       "module_type": "analysis",
@@ -40641,7 +40653,7 @@
         "type": "object"
       },
       "preconditions": [
-        "Codex can inspect the real h5ad, count provenance, prior-GRN construction and digest, feature namespace, biological design, existing scientific runtime, and available memory; outputs are new; and no environment or compute-infrastructure management is required."
+        "Codex can inspect the real h5ad, layer semantics and preprocessing provenance, prior-GRN construction and digest, feature namespace, biological design, existing scientific runtime, and available memory; outputs are new; and no environment or compute-infrastructure management is required."
       ],
       "provenance": {
         "concept_sources": [
@@ -40655,7 +40667,7 @@
       "quality_gates": [
         {
           "blocks_interpretation": true,
-          "description": "Block when spliced or unspliced count semantics, cells, features, identifiers, quantification provenance, or source digests cannot be established without guessing.",
+          "description": "Block when spliced or unspliced layer semantics, preprocessing, cells, features, identifiers, quantification provenance, or source digests cannot be established without guessing; integer-count mode rejects fractional values while continuous mode still requires finite nonnegative values and explicit provenance.",
           "id": "regvelo-layer-and-identity-semantics",
           "severity": "fatal"
         },
@@ -40742,7 +40754,7 @@
           "version_source": "https://github.com/theislab/regvelo/releases/tag/v0.4.2"
         }
       ],
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     {
       "access": "agent_generated",
@@ -50725,6 +50737,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "803fc12521d91b13a1616afffe6da2cee6f89ba6d30208ec02cb3b2f42c25a90",
+  "registry_digest": "767f4a47deb04edb1bbdbae38e0340fff7f5bd9c4f4e1c1ee16deda4dd447a4d",
   "schema_version": 1
 }

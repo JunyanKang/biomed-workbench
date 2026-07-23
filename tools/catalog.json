@@ -5635,7 +5635,7 @@
     },
     {
       "access": "agent_generated",
-      "description": "Direct Codex to inspect count-backed spliced and unspliced single-cell data plus an independently versioned target-by-regulator network; execute RegVelo 0.4.2 with bounded dense working layers, multiple model modes or seeds, model persistence, reload validation, and explicit uncertainty and causal-claim boundaries; then hand validated dynamics to trajectory, fate-mapping, and perturbation-hypothesis workflows.",
+      "description": "Direct Codex to inspect explicitly declared integer-count or nonnegative-continuous spliced and unspliced single-cell layers plus a versioned target-by-regulator network; execute RegVelo 0.4.2 with bounded dense working layers, multiple model modes or seeds, model persistence, reload validation, and explicit uncertainty and causal-claim boundaries; then hand validated dynamics to trajectory, fate-mapping, and perturbation-hypothesis workflows.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-regulatory-velocity",
       "input_schema": {
@@ -5663,6 +5663,13 @@
           "input_format": {
             "enum": [
               "h5ad-plus-grn-tsv"
+            ],
+            "type": "string"
+          },
+          "layer_semantics": {
+            "enum": [
+              "integer-counts",
+              "nonnegative-continuous"
             ],
             "type": "string"
           },
@@ -5700,6 +5707,7 @@
           "input_format",
           "spliced_layer",
           "unspliced_layer",
+          "layer_semantics",
           "grn_orientation",
           "requested_model_modes",
           "declared_thresholds",
