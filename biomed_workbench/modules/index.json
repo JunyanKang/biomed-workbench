@@ -31125,7 +31125,8 @@
         "postflight_checks": [
           "Reconcile all input cells to completed, insufficient-sample, or explicit error states for every method.",
           "Inspect finite scores, method classes, thresholds, called fractions, agreement, sample distributions, parameter sensitivity, and no automatic source-cell deletion.",
-          "Reload outputs and verify raw counts, cells, features, sample labels, previous annotations, method fields, versions, and digests are preserved."
+          "Reload sparse outputs and verify raw counts, cells, features, sample labels, previous annotations, method fields, complete direct versions, and SHA-256 digests are preserved.",
+          "When predeclared independent labels exist, assess them only after fitting, exclude ambiguous labels from discrimination metrics, and state which doublet classes the labels cannot detect."
         ],
         "preflight_checks": [
           "Inspect the actual count object or Matrix Market bundle, raw-count location, sample field, chemistry, recovery, expected doublet rate, source digest, and requested methods.",
@@ -31177,11 +31178,11 @@
               "single_cell_doublet_annotated_object",
               "single_cell_doublet_evidence"
             ],
-            "purpose": "Run detected compatible methods independently for each biological sample while retaining method-specific evidence.",
+            "purpose": "Run detected compatible methods independently for each capture library while retaining method-specific evidence.",
             "required_logic": [
-              "Run Scrublet on count-backed H5AD samples and scDblFinder on count-backed Matrix Market samples using the declared expected-rate rationale.",
-              "Preserve every score, threshold, class, warning, not-run sample, parameter, seed, and exact cell order.",
-              "Do not delete cells, use target labels to tune thresholds, or replace raw counts during detection."
+              "Run Scrublet on count-backed H5AD libraries and scDblFinder on count-backed Matrix Market libraries using the declared expected-rate rationale.",
+              "Preserve every score, threshold, class, warning, not-run sample, parameter, seed, exact cell order, direct dependency version, and source-file SHA-256.",
+              "Do not delete cells, use independent labels to fit or tune thresholds, or replace raw counts during detection."
             ],
             "template_files": [
               "templates/run_scrublet.py",
@@ -31230,15 +31231,42 @@
       "compatibility_matrix": [
         {
           "dependency_versions": {
+            "BiocParallel": [
+              ">=1.36,<1.37"
+            ],
+            "DropletUtils": [
+              ">=1.22,<1.23"
+            ],
+            "SingleCellExperiment": [
+              ">=1.24,<1.25"
+            ],
+            "anndata": [
+              ">=0.10,<0.11"
+            ],
+            "digest": [
+              ">=0.6.39,<0.7"
+            ],
+            "jsonlite": [
+              ">=2,<3"
+            ],
+            "numpy": [
+              ">=1.26,<2"
+            ],
+            "pandas": [
+              ">=2.2,<2.3"
+            ],
             "python": [
               ">=3.10,<3.11"
             ],
             "r": [
               ">=4.3,<4.4"
+            ],
+            "scipy": [
+              ">=1.13,<1.14"
             ]
           },
           "end_to_end_evidence_ids": [
-            "single-cell-doublet-detection-e2e-v1"
+            "single-cell-doublet-detection-e2e-v2"
           ],
           "id": "agent-protocol-1-scrublet-023-scdblfinder-1160",
           "input_formats": {
@@ -31247,20 +31275,20 @@
               "matrix-market@2.0"
             ]
           },
-          "module_version": "1.0.0",
+          "module_version": "1.1.0",
           "output_formats": {
             "doublet_annotated_object": [
               "h5ad@0.1.0"
             ],
             "doublet_evidence_report": [
-              "inline-json@1"
+              "inline-json@2"
             ]
           },
           "platforms": [
             "any"
           ],
           "regression_evidence_ids": [
-            "single-cell-doublet-detection-regression-v1"
+            "single-cell-doublet-detection-regression-v2"
           ],
           "tool_versions": {
             "scDblFinder": [
@@ -31270,7 +31298,7 @@
               ">=0.2,<0.3"
             ]
           },
-          "verified_at": "2026-07-15"
+          "verified_at": "2026-07-23"
         }
       ],
       "complements": [
@@ -31293,16 +31321,124 @@
           "purpose": "Run the validated Scrublet reference template in the existing scientific environment.",
           "required": true,
           "tested_versions": [
-            "3.10.20"
+            "3.10.18"
           ],
-          "verified_at": "2026-07-15",
+          "verified_at": "2026-07-23",
           "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
           "version_probe": [
             "biomed_workbench.modules.compatibility:probe_python_runtime"
           ],
           "version_probe_kind": "python_callable",
           "version_probe_timeout_seconds": 5,
-          "version_source": "https://www.python.org/downloads/release/python-31020/"
+          "version_source": "https://www.python.org/downloads/"
+        },
+        {
+          "allowed_versions": [
+            ">=0.10,<0.11"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "anndata",
+          "name": "anndata",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Read and reload sparse H5AD count objects.",
+          "required": true,
+          "tested_versions": [
+            "0.10.8"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import importlib.metadata; print(importlib.metadata.version('anndata'))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://anndata.readthedocs.io/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.26,<2"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "numpy",
+          "name": "numpy",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate cell-level arrays.",
+          "required": true,
+          "tested_versions": [
+            "1.26.4"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import numpy; print(numpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://numpy.org/"
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "pandas",
+          "name": "pandas",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Preserve cell metadata.",
+          "required": true,
+          "tested_versions": [
+            "2.2.3"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import pandas; print(pandas.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pandas.pydata.org/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.13,<1.14"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "scipy",
+          "name": "scipy",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Preserve and compare sparse counts.",
+          "required": true,
+          "tested_versions": [
+            "1.13.1"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import scipy; print(scipy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://scipy.org/"
         },
         {
           "allowed_versions": [
@@ -31320,7 +31456,7 @@
           "tested_versions": [
             "4.3.2"
           ],
-          "verified_at": "2026-07-15",
+          "verified_at": "2026-07-23",
           "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
           "version_probe": [
             "Rscript",
@@ -31330,9 +31466,144 @@
           "version_probe_kind": "command",
           "version_probe_timeout_seconds": 30,
           "version_source": "https://cran.r-project.org/src/base/R-4/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.24,<1.25"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "SingleCellExperiment",
+          "name": "SingleCellExperiment",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Represent count-backed single-cell objects.",
+          "required": true,
+          "tested_versions": [
+            "1.24.0"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('SingleCellExperiment')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://bioconductor.org/packages/SingleCellExperiment"
+        },
+        {
+          "allowed_versions": [
+            ">=1.22,<1.23"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "DropletUtils",
+          "name": "DropletUtils",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Read 10x Matrix Market bundles.",
+          "required": true,
+          "tested_versions": [
+            "1.22.0"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('DropletUtils')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://bioconductor.org/packages/DropletUtils"
+        },
+        {
+          "allowed_versions": [
+            ">=1.36,<1.37"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "BiocParallel",
+          "name": "BiocParallel",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Force reproducible serial execution.",
+          "required": true,
+          "tested_versions": [
+            "1.36.0"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('BiocParallel')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://bioconductor.org/packages/BiocParallel"
+        },
+        {
+          "allowed_versions": [
+            ">=2,<3"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "jsonlite",
+          "name": "jsonlite",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Serialize execution evidence.",
+          "required": true,
+          "tested_versions": [
+            "2.0.0"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('jsonlite')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://cran.r-project.org/package=jsonlite"
+        },
+        {
+          "allowed_versions": [
+            ">=0.6.39,<0.7"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "digest",
+          "name": "digest",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Bind Matrix Market source files by SHA-256.",
+          "required": true,
+          "tested_versions": [
+            "0.6.39"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('digest')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://cran.r-project.org/package=digest"
         }
       ],
-      "description": "Direct Codex to inspect immutable count-backed single-cell data and biological sample structure, execute Scrublet and/or scDblFinder in the user's existing scientific environment, preserve method-specific scores and calls, compare method agreement without forcing removal, and admit only reload-validated, reason-coded doublet evidence into a downstream quality decision.",
+      "description": "Direct Codex to inspect immutable count-backed single-cell data and capture-library structure, execute Scrublet and/or scDblFinder in the user's existing scientific environment, preserve method-specific scores and calls with complete runtime and source provenance, compare method agreement without forcing removal, and evaluate predeclared independent labels only after fitting.",
       "domains": [
         "omics",
         "statistics"
@@ -31504,7 +31775,7 @@
         ">=0.2.0,<0.3.0"
       ],
       "limitations": [
-        "The validated module covers Scrublet 0.2.3 and scDblFinder 1.16.0 as complementary sample-aware evidence. It does not establish a true doublet label, infer ambient RNA, replace empty-droplet testing, or justify automatic removal. CellBender requires a separate project-specific runtime and compatibility validation because this plugin does not manage GPU or other compute infrastructure."
+        "The validated module covers Scrublet 0.2.3 and scDblFinder 1.16.0 as complementary capture-library-aware evidence. Genetic-demultiplexing labels provide independent evidence for cross-genotype doublets but miss same-donor doublets and therefore are not complete ground truth. The module does not infer ambient RNA, replace empty-droplet testing, or justify automatic removal. CellBender requires a separate project-specific runtime and compatibility validation because this plugin does not manage GPU or other compute infrastructure."
       ],
       "maturity": "experimental",
       "module_type": "analysis",
@@ -31578,7 +31849,7 @@
               ],
               "required_indexes": [],
               "versions": [
-                "1"
+                "2"
               ]
             }
           ],
@@ -31696,7 +31967,7 @@
         },
         {
           "blocks_interpretation": true,
-          "description": "Scores, calls, thresholds, parameters, versions, and exact cell order must be finite, reloadable, and method-specific.",
+          "description": "Scores, calls, thresholds, parameters, seeds, direct dependency versions, sparse counts, cells, features, and capture-library identities must be finite, reloadable, and method-specific.",
           "id": "doublet-method-output",
           "severity": "fatal"
         },
@@ -31714,9 +31985,15 @@
         },
         {
           "blocks_interpretation": true,
-          "description": "Raw counts, source cells, features, sample labels, and pre-existing annotations must survive output reload unchanged.",
+          "description": "Raw counts, source cells, features, sample labels, and pre-existing annotations must survive sparse output reload unchanged, and every source-file digest must remain stable during execution.",
           "id": "doublet-source-preservation",
           "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Independent demultiplexing labels may be used only after fitting; ambiguous labels must be excluded from metrics, and genetic labels must not be described as complete ground truth because same-donor doublets are not identified.",
+          "id": "doublet-independent-label-boundary",
+          "severity": "major"
         }
       ],
       "questions": [
@@ -31740,7 +32017,7 @@
           "tested_versions": [
             "0.2.3"
           ],
-          "verified_at": "2026-07-15",
+          "verified_at": "2026-07-23",
           "version_differences": [
             {
               "affected_versions": [
@@ -31779,7 +32056,7 @@
           "tested_versions": [
             "1.16.0"
           ],
-          "verified_at": "2026-07-15",
+          "verified_at": "2026-07-23",
           "version_differences": [
             {
               "affected_versions": [
@@ -31804,7 +32081,7 @@
           "version_source": "https://bioconductor.org/packages/3.18/bioc/html/scDblFinder.html"
         }
       ],
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     {
       "access": "agent_generated",
@@ -50799,6 +51076,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "34f04b99ee8f28c7c8451b412970d53b61bc170a5baa4e6d4a80ff89be7fa29d",
+  "registry_digest": "c597256c183d84cb455cfb8769e0c5cbc2e0af4c398d4ba068544c7c6258d398",
   "schema_version": 1
 }

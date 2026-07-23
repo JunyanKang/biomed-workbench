@@ -1,0 +1,207 @@
+{
+  "case_id": "gse96583-doublet-detection-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "all_cells_accounted": true,
+    "ambiguous_cells_excluded_from_metrics": 1217,
+    "automatic_cell_removal_performed": false,
+    "input_cells": 29065,
+    "input_features": 35635,
+    "labelled_singlet_or_doublet_cells": 27848,
+    "method_agreement": {
+      "both_called": 2074,
+      "neither_called": 23559,
+      "published_doublet_prevalence": 0.11379632289571961,
+      "published_doublet_prevalence_among_both_called": 0.7309546769527483,
+      "scDblFinder_only": 1923,
+      "scrublet_only": 292
+    },
+    "method_metrics": {
+      "scDblFinder": {
+        "ctrl": {
+          "auroc": 0.9309391509992444,
+          "average_precision": 0.69917732441406,
+          "called_doublets": 2035,
+          "cells": 13913,
+          "f1": 0.731626754748142,
+          "matthews_correlation": 0.6986847209257575,
+          "precision": 0.653071253071253,
+          "prevalence": 0.1148566089269029,
+          "published_doublets": 1598,
+          "recall": 0.8316645807259074,
+          "score_median_doublet": 0.999492526054382,
+          "score_median_singlet": 0.0008086270536296
+        },
+        "overall": {
+          "auroc": 0.9304353989158953,
+          "average_precision": 0.6889101624886487,
+          "called_doublets": 3997,
+          "cells": 27848,
+          "f1": 0.7276025676807145,
+          "matthews_correlation": 0.6941007428112991,
+          "precision": 0.6522391793845385,
+          "prevalence": 0.11379632289571961,
+          "published_doublets": 3169,
+          "recall": 0.8226569895866204,
+          "score_median_doublet": 0.999558389186859,
+          "score_median_singlet": 0.0008173017413355
+        },
+        "stim": {
+          "auroc": 0.9303071781260186,
+          "average_precision": 0.6859648370465822,
+          "called_doublets": 1962,
+          "cells": 13935,
+          "f1": 0.7234644777809227,
+          "matthews_correlation": 0.6894213571753117,
+          "precision": 0.6513761467889908,
+          "prevalence": 0.11273771080014353,
+          "published_doublets": 1571,
+          "recall": 0.8134945894334819,
+          "score_median_doublet": 0.999630928039551,
+          "score_median_singlet": 0.00082742096856235
+        }
+      },
+      "scrublet": {
+        "ctrl": {
+          "auroc": 0.8709347656962596,
+          "average_precision": 0.5638885876776212,
+          "called_doublets": 1200,
+          "cells": 13913,
+          "f1": 0.5718370264474625,
+          "matthews_correlation": 0.5317058041051951,
+          "precision": 0.6666666666666666,
+          "prevalence": 0.1148566089269029,
+          "published_doublets": 1598,
+          "recall": 0.5006257822277848,
+          "score_median_doublet": 0.2586490939044482,
+          "score_median_singlet": 0.07042253521126758
+        },
+        "overall": {
+          "auroc": 0.8686591946621762,
+          "average_precision": 0.5509674296449039,
+          "called_doublets": 2366,
+          "cells": 27848,
+          "f1": 0.5654923215898826,
+          "matthews_correlation": 0.5254953182991552,
+          "precision": 0.6614539306846999,
+          "prevalence": 0.11379632289571961,
+          "published_doublets": 3169,
+          "recall": 0.49384663931839695,
+          "score_median_doublet": 0.2586490939044482,
+          "score_median_singlet": 0.0689655172413793
+        },
+        "stim": {
+          "auroc": 0.8664219605552844,
+          "average_precision": 0.5390287658212566,
+          "called_doublets": 1166,
+          "cells": 13935,
+          "f1": 0.5590062111801242,
+          "matthews_correlation": 0.5191478632197227,
+          "precision": 0.6560891938250428,
+          "prevalence": 0.11273771080014353,
+          "published_doublets": 1571,
+          "recall": 0.486950986632718,
+          "score_median_doublet": 0.2586490939044482,
+          "score_median_singlet": 0.06754098360655737
+        }
+      }
+    },
+    "outputs_reloaded": true,
+    "source_immutable": true
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-scrublet-023-scdblfinder-1160",
+    "id": "single-cell-doublet-detection",
+    "manifest_sha256": "e525716d3eb8da5c813c3f40aa56b9c79cdd86b14fcba5d6104f50aac0a58b6a",
+    "registry_digest": "c597256c183d84cb455cfb8769e0c5cbc2e0af4c398d4ba068544c7c6258d398",
+    "template_sha256": {
+      "run_scdblfinder.R": "6c8ef824ca8b4ce77d2bbe35776cf8f0ba79ac6a3b4ebf6f9563b4f1551776ea",
+      "run_scrublet.py": "4168c311b1c052e04125bf2efc4696c868030d6b7f3f2c29039a2df9127d504b"
+    },
+    "version": "1.1.0"
+  },
+  "parameters": {
+    "ambiguous_label_policy": "retain in method execution; exclude from discrimination metrics",
+    "capture_library_key": "capture_library",
+    "expected_doublet_rate": 0.1,
+    "frozen_acceptance_thresholds": {
+      "average_precision": "greater than published-label prevalence",
+      "overall_auroc_minimum": 0.55,
+      "per_library_auroc_minimum": 0.52,
+      "score_direction": "published doublet median greater than singlet median"
+    },
+    "labels_available_to_methods": false,
+    "labels_used_for_threshold_selection": false,
+    "rate_rationale": "predeclared pooled 10x loading-context prior",
+    "seed": 96583
+  },
+  "passed": true,
+  "quality_gates": {
+    "all_cells_and_labels_accounted": "pass",
+    "ambiguous_labels_excluded_from_metrics": "pass",
+    "concordant_call_enrichment": "pass",
+    "labels_withheld_until_postfit": "pass",
+    "no_automatic_cell_removal": "pass",
+    "outputs_reloaded_and_identity_preserved": "pass",
+    "scDblFinder_discrimination": "pass",
+    "scrublet_discrimination": "pass",
+    "source_identity_and_immutability": "pass"
+  },
+  "runtime": {
+    "anndata": "0.10.8",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "python": "3.10.18",
+    "r": "4.3.2",
+    "scDblFinder": "1.16.0",
+    "scikit_learn": "1.7.2",
+    "scipy": "1.13.1",
+    "scrublet": "0.2.3"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "Publisher genetic-demultiplexing labels were withheld from fitting and inspected only after method outputs and thresholds were frozen.",
+    "Ambiguous publisher labels were retained during both methods but excluded from AUROC, average-precision, and call metrics.",
+    "Genetic-demultiplexing labels identify cross-genotype multiplets but miss same-donor doublets, so they are independent incomplete labels rather than complete ground truth.",
+    "Scrublet and scDblFinder disagreement is retained for review; no cell was automatically removed.",
+    "Performance is specific to these two pooled 10x PBMC capture libraries, the frozen parameters, and recorded runtimes."
+  ],
+  "source": {
+    "accession": "GSE96583",
+    "files": {
+      "archive": {
+        "filename": "GSE96583_RAW.tar",
+        "sha256": "e5d41a3248a813f99d68fd5c9eb9773de7f46a83680a67f4a02d683b8955fe80"
+      },
+      "genes": {
+        "filename": "GSE96583_batch2.genes.tsv.gz",
+        "sha256": "93aa4e9b530ef9d6411ca129b416324c5cc1cc5a01a1fa6ed4f4a845480ed3ca"
+      },
+      "metadata": {
+        "filename": "GSE96583_batch2.total.tsne.df.tsv.gz",
+        "sha256": "1d57e72e92ca8695250e88cc0f1c3fa8c0be1175d974f8b427c58f1274dc6c09"
+      }
+    },
+    "source_validation": {
+      "capture_libraries": 2,
+      "label_counts_by_library": {
+        "ctrl": {
+          "ambs": 706,
+          "doublet": 1598,
+          "singlet": 12315
+        },
+        "stim": {
+          "ambs": 511,
+          "doublet": 1571,
+          "singlet": 12364
+        }
+      },
+      "metadata_barcode_normalizations": {
+        "ctrl": 0,
+        "stim": 313
+      },
+      "published_cells": 29065
+    },
+    "study": "Kang et al. multiplexed PBMC interferon response"
+  }
+}

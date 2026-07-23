@@ -14108,14 +14108,14 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
-            "single-cell-doublet-detection-e2e-v1"
+            "single-cell-doublet-detection-e2e-v2"
           ],
           "id": "agent-protocol-1-scrublet-023-scdblfinder-1160",
-          "module_version": "1.0.0",
+          "module_version": "1.1.0",
           "regression_evidence_ids": [
-            "single-cell-doublet-detection-regression-v1"
+            "single-cell-doublet-detection-regression-v2"
           ],
-          "verified_at": "2026-07-15"
+          "verified_at": "2026-07-23"
         }
       ],
       "dependencies": [
@@ -14133,16 +14133,124 @@
           "purpose": "Run the validated Scrublet reference template in the existing scientific environment.",
           "required": true,
           "tested_versions": [
-            "3.10.20"
+            "3.10.18"
           ],
-          "verified_at": "2026-07-15",
+          "verified_at": "2026-07-23",
           "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
           "version_probe": [
             "biomed_workbench.modules.compatibility:probe_python_runtime"
           ],
           "version_probe_kind": "python_callable",
           "version_probe_timeout_seconds": 5,
-          "version_source": "https://www.python.org/downloads/release/python-31020/"
+          "version_source": "https://www.python.org/downloads/"
+        },
+        {
+          "allowed_versions": [
+            ">=0.10,<0.11"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "anndata",
+          "name": "anndata",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Read and reload sparse H5AD count objects.",
+          "required": true,
+          "tested_versions": [
+            "0.10.8"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import importlib.metadata; print(importlib.metadata.version('anndata'))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://anndata.readthedocs.io/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.26,<2"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "numpy",
+          "name": "numpy",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate cell-level arrays.",
+          "required": true,
+          "tested_versions": [
+            "1.26.4"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import numpy; print(numpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://numpy.org/"
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "pandas",
+          "name": "pandas",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Preserve cell metadata.",
+          "required": true,
+          "tested_versions": [
+            "2.2.3"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import pandas; print(pandas.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://pandas.pydata.org/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.13,<1.14"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "scipy",
+          "name": "scipy",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Preserve and compare sparse counts.",
+          "required": true,
+          "tested_versions": [
+            "1.13.1"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import scipy; print(scipy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://scipy.org/"
         },
         {
           "allowed_versions": [
@@ -14160,7 +14268,7 @@
           "tested_versions": [
             "4.3.2"
           ],
-          "verified_at": "2026-07-15",
+          "verified_at": "2026-07-23",
           "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
           "version_probe": [
             "Rscript",
@@ -14170,6 +14278,141 @@
           "version_probe_kind": "command",
           "version_probe_timeout_seconds": 30,
           "version_source": "https://cran.r-project.org/src/base/R-4/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.24,<1.25"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "SingleCellExperiment",
+          "name": "SingleCellExperiment",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Represent count-backed single-cell objects.",
+          "required": true,
+          "tested_versions": [
+            "1.24.0"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('SingleCellExperiment')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://bioconductor.org/packages/SingleCellExperiment"
+        },
+        {
+          "allowed_versions": [
+            ">=1.22,<1.23"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "DropletUtils",
+          "name": "DropletUtils",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Read 10x Matrix Market bundles.",
+          "required": true,
+          "tested_versions": [
+            "1.22.0"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('DropletUtils')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://bioconductor.org/packages/DropletUtils"
+        },
+        {
+          "allowed_versions": [
+            ">=1.36,<1.37"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "BiocParallel",
+          "name": "BiocParallel",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Force reproducible serial execution.",
+          "required": true,
+          "tested_versions": [
+            "1.36.0"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('BiocParallel')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://bioconductor.org/packages/BiocParallel"
+        },
+        {
+          "allowed_versions": [
+            ">=2,<3"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "jsonlite",
+          "name": "jsonlite",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Serialize execution evidence.",
+          "required": true,
+          "tested_versions": [
+            "2.0.0"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('jsonlite')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://cran.r-project.org/package=jsonlite"
+        },
+        {
+          "allowed_versions": [
+            ">=0.6.39,<0.7"
+          ],
+          "conflicts": [],
+          "ecosystem": "r",
+          "identity": "digest",
+          "name": "digest",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Bind Matrix Market source files by SHA-256.",
+          "required": true,
+          "tested_versions": [
+            "0.6.39"
+          ],
+          "verified_at": "2026-07-23",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('digest')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://cran.r-project.org/package=digest"
         }
       ],
       "external_tool_required": true,
@@ -14243,7 +14486,7 @@
           ]
         }
       ],
-      "module_version": "1.0.0",
+      "module_version": "1.1.0",
       "output_formats": [
         {
           "artifact_type": "single_cell_doublet_annotated_object",
@@ -14313,7 +14556,7 @@
               ],
               "required_indexes": [],
               "versions": [
-                "1"
+                "2"
               ]
             }
           ],
@@ -14349,7 +14592,7 @@
           "tested_versions": [
             "0.2.3"
           ],
-          "verified_at": "2026-07-15",
+          "verified_at": "2026-07-23",
           "version_differences": [
             {
               "affected_versions": [
@@ -14388,7 +14631,7 @@
           "tested_versions": [
             "1.16.0"
           ],
-          "verified_at": "2026-07-15",
+          "verified_at": "2026-07-23",
           "version_differences": [
             {
               "affected_versions": [
@@ -23529,6 +23772,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "34f04b99ee8f28c7c8451b412970d53b61bc170a5baa4e6d4a80ff89be7fa29d",
+  "registry_digest": "c597256c183d84cb455cfb8769e0c5cbc2e0af4c398d4ba068544c7c6258d398",
   "schema_version": 1
 }

@@ -39,7 +39,9 @@ def run(command: list[str], environment: dict[str, str], timeout: int = 180) -> 
 
 
 def verify(scientific_python: Path, rscript: Path, r_libs: Path) -> dict[str, object]:
-    python = scientific_python.expanduser().resolve(strict=True)
+    python = scientific_python.expanduser().absolute()
+    if not python.is_file():
+        raise FileNotFoundError(f"scientific Python is absent: {python}")
     r = rscript.expanduser().resolve(strict=True)
     libraries = r_libs.expanduser().resolve(strict=True)
     with tempfile.TemporaryDirectory(prefix="biomed-doublet-") as temporary:
@@ -74,17 +76,46 @@ def verify(scientific_python: Path, rscript: Path, r_libs: Path) -> dict[str, ob
         run([str(r), str(SCDBLFINDER), "--input-mtx", str(tenx), "--sample-id", "S1", "--output-tsv", str(calls), "--report", str(sc_report), "--expected-doublet-rate", "0.08", "--seed", "17"], environment)
         sc_payload = json.loads(sc_report.read_text())
         header = calls.read_text(encoding="utf-8").splitlines()[0].split("\t")
-        passed = (scrublet_payload["completed_cells"] == 160 and len(scrublet_payload["sample_results"]) == 2 and scrublet_object["cells"] == 160 and scrublet_object["features"] == 160 and scrublet_object["counts"] and {"scrublet_score", "scrublet_call", "scrublet_status"} <= set(scrublet_object["obs"]) and sc_payload["input_cells"] == 160 and sc_payload["output_rows_reloaded"] == 160 and header == ["cell_id", "biological_sample", "scDblFinder_score", "scDblFinder_class"])
+        passed = (
+            scrublet_payload["schema_version"] == 2
+            and scrublet_payload["completed_cells"] == 160
+            and len(scrublet_payload["sample_results"]) == 2
+            and scrublet_payload["source_immutable"] is True
+            and scrublet_payload["output_reloaded"] is True
+            and scrublet_payload["automatic_cell_removal_performed"] is False
+            and scrublet_object["cells"] == 160
+            and scrublet_object["features"] == 160
+            and scrublet_object["counts"]
+            and {"scrublet_score", "scrublet_call", "scrublet_status"} <= set(scrublet_object["obs"])
+            and sc_payload["schema_version"] == 2
+            and sc_payload["input_cells"] == 160
+            and sc_payload["output_rows_reloaded"] == 160
+            and sc_payload["source_immutable"] is True
+            and sc_payload["automatic_cell_removal_performed"] is False
+            and header == ["cell_id", "biological_sample", "scDblFinder_score", "scDblFinder_class"]
+        )
         if not passed:
             raise RuntimeError("doublet templates failed source-preservation or output-accounting validation")
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
-        return {"schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": "1.0.0", "compatibility_row_id": ROW_ID, "registry_digest": registry.digest,
+        return {"schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": "1.1.0", "compatibility_row_id": ROW_ID, "registry_digest": registry.digest,
                 "templates": {"scrublet": {"name": SCRUBLET.name, "sha256": sha256(SCRUBLET)}, "scDblFinder": {"name": SCDBLFINDER.name, "sha256": sha256(SCDBLFINDER)}},
                 "tool_versions": {"scrublet": "0.2.3", "scDblFinder": sc_payload["versions"]["scDblFinder"]},
-                "dependency_versions": {"python": run([str(python), "-c", "import platform;print(platform.python_version())"], environment).stdout.strip(), "r": sc_payload["versions"]["R"]},
+                "dependency_versions": {
+                    "python": scrublet_payload["versions"]["python"],
+                    "anndata": scrublet_payload["versions"]["anndata"],
+                    "numpy": scrublet_payload["versions"]["numpy"],
+                    "pandas": scrublet_payload["versions"]["pandas"],
+                    "scipy": scrublet_payload["versions"]["scipy"],
+                    "r": sc_payload["versions"]["R"],
+                    "SingleCellExperiment": sc_payload["versions"]["SingleCellExperiment"],
+                    "DropletUtils": sc_payload["versions"]["DropletUtils"],
+                    "BiocParallel": sc_payload["versions"]["BiocParallel"],
+                    "jsonlite": sc_payload["versions"]["jsonlite"],
+                    "digest": sc_payload["versions"]["digest"],
+                },
                 "fixtures": {"h5ad_sha256": sha256(h5ad), "matrix_market_sha256": sha256(tenx / "matrix.mtx"), "cells": 160, "features": 160, "biological_samples": 2},
-                "execution": {"scrublet_completed": True, "scdblfinder_completed": True, "outputs_reloaded": True, "scrublet_h5ad_sha256": sha256(scrublet_h5ad), "scdblfinder_calls_sha256": sha256(calls)},
-                "scientific_summary": {"sample_aware_methods_executed": True, "raw_counts_preserved": True, "method_specific_scores_retained": True, "no_automatic_cell_removal": True, "method_disagreement_preserved": True}}
+                "execution": {"scrublet_completed": True, "scdblfinder_completed": True, "outputs_reloaded": True, "sparse_reload_validation_completed": True, "source_immutability_verified": True, "scrublet_h5ad_sha256": sha256(scrublet_h5ad), "scdblfinder_calls_sha256": sha256(calls)},
+                "scientific_summary": {"sample_aware_methods_executed": True, "raw_counts_preserved": True, "cell_and_feature_identity_preserved": True, "method_specific_scores_retained": True, "score_distributions_retained": True, "no_automatic_cell_removal": True, "method_disagreement_preserved": True}}
 
 
 def main() -> int:

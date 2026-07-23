@@ -780,6 +780,89 @@ def main() -> int:
                 errors.append(
                     "GSE96583 marker-discovery public-data case differs from its source, sample split, module, template, runtime, held-out validation, repeatability, or scientific gates"
                 )
+        gse96583_doublet_report_path = (
+            ROOT / "reports" / "public-case-gse96583-doublet-detection.json"
+        )
+        gse96583_doublet_root = BUILTIN_ROOT / "single-cell-doublet-detection"
+        try:
+            gse96583_doublet_report = json.loads(
+                gse96583_doublet_report_path.read_text(encoding="utf-8")
+            )
+            gse96583_doublet_manifest = registry.get(
+                "single-cell-doublet-detection"
+            )
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append(
+                "GSE96583 doublet-detection public-data acceptance case is missing or invalid"
+            )
+        else:
+            doublet_parameters = gse96583_doublet_report.get("parameters", {})
+            doublet_execution = gse96583_doublet_report.get("execution", {})
+            doublet_metrics = doublet_execution.get("method_metrics", {})
+            doublet_agreement = doublet_execution.get("method_agreement", {})
+            if (
+                gse96583_doublet_report.get("passed") is not True
+                or gse96583_doublet_report.get("case_type")
+                != "public-data-end-to-end"
+                or gse96583_doublet_report.get("module", {}).get("id")
+                != gse96583_doublet_manifest.id
+                or gse96583_doublet_report.get("module", {}).get("version")
+                != gse96583_doublet_manifest.version
+                or gse96583_doublet_report.get("module", {}).get(
+                    "compatibility_row_id"
+                )
+                != gse96583_doublet_manifest.compatibility_matrix[0].id
+                or gse96583_doublet_report.get("module", {}).get(
+                    "manifest_sha256"
+                )
+                != hashlib.sha256(
+                    (gse96583_doublet_root / "module.json").read_bytes()
+                ).hexdigest()
+                or gse96583_doublet_report.get("module", {}).get(
+                    "template_sha256"
+                )
+                != {
+                    name: hashlib.sha256(
+                        (gse96583_doublet_root / "templates" / name).read_bytes()
+                    ).hexdigest()
+                    for name in ("run_scrublet.py", "run_scdblfinder.R")
+                }
+                or gse96583_doublet_report.get("source", {}).get("accession")
+                != "GSE96583"
+                or doublet_parameters.get("labels_available_to_methods") is not False
+                or doublet_parameters.get("labels_used_for_threshold_selection")
+                is not False
+                or doublet_parameters.get("expected_doublet_rate") != 0.10
+                or doublet_execution.get("input_cells") != 29065
+                or doublet_execution.get(
+                    "ambiguous_cells_excluded_from_metrics"
+                )
+                != 1217
+                or doublet_execution.get("all_cells_accounted") is not True
+                or doublet_execution.get("source_immutable") is not True
+                or doublet_execution.get("outputs_reloaded") is not True
+                or doublet_execution.get("automatic_cell_removal_performed")
+                is not False
+                or doublet_metrics.get("scrublet", {})
+                .get("overall", {})
+                .get("auroc", 0)
+                < 0.85
+                or doublet_metrics.get("scDblFinder", {})
+                .get("overall", {})
+                .get("auroc", 0)
+                < 0.90
+                or doublet_agreement.get(
+                    "published_doublet_prevalence_among_both_called", 0
+                )
+                <= doublet_agreement.get("published_doublet_prevalence", 1)
+                or set(
+                    gse96583_doublet_report.get("quality_gates", {}).values()
+                )
+                != {"pass"}
+            ):
+                errors.append(
+                    "GSE96583 doublet-detection public-data case differs from its source, module, templates, withheld-label design, execution, or scientific gates"
+                )
         public_database_report_path = ROOT / "reports" / "public-database-live-verification.json"
         public_database_module_ids = {
             "citation-record-resolution",

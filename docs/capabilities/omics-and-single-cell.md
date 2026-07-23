@@ -27,7 +27,9 @@ Representative modules include `expression-qc`, `differential-expression`, `enri
 - Strict project-specific handling of H5AD, 10x HDF5, Matrix Market, and Seurat v5 inputs.
 - Raw-count preservation, QC, normalization, feature selection, scaling, dimensionality reduction, neighbourhood graphs, clustering, and stability review in Scanpy or Seurat workflows.
 - EmptyDrops, SoupX, and CellBender droplet and ambient-RNA evidence with barcode reconciliation and immutable source counts.
-- Scrublet and scDblFinder sample-aware doublet evidence with method disagreement retained for review.
+- [Scrublet and scDblFinder doublet detection](doublet-detection.md) by capture
+  library, with source-preserving execution, withheld-label evaluation, and method
+  disagreement retained for review.
 - Transparent per-cell count, detected-gene, mitochondrial-fraction, and threshold flags.
 
 The principal modules are `single-cell-foundation-workflow`, `single-cell-qc`, `single-cell-droplet-decontamination`, and `single-cell-doublet-detection`.

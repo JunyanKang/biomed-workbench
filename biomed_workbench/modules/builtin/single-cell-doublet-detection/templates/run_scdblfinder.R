@@ -13,8 +13,8 @@ parse_args <- function(values) {
   result
 }
 
-md5 <- function(path) {
-  unname(tools::md5sum(path))
+sha256 <- function(path) {
+  digest::digest(file = path, algo = "sha256", serialize = FALSE)
 }
 
 matrix_market_file <- function(input) {
@@ -24,6 +24,18 @@ matrix_market_file <- function(input) {
     stop("Matrix Market input must contain exactly one of matrix.mtx.gz or matrix.mtx")
   }
   available[[1L]]
+}
+
+input_files <- function(input) {
+  matrix <- matrix_market_file(input)
+  barcodes <- file.path(input, c("barcodes.tsv.gz", "barcodes.tsv"))
+  features <- file.path(input, c("features.tsv.gz", "features.tsv", "genes.tsv.gz", "genes.tsv"))
+  barcodes <- barcodes[file.exists(barcodes)]
+  features <- features[file.exists(features)]
+  if (length(barcodes) != 1L || length(features) != 1L) {
+    stop("Matrix Market input requires exactly one barcode and one feature table")
+  }
+  c(matrix = matrix, barcodes = barcodes[[1L]], features = features[[1L]])
 }
 
 validate_counts <- function(matrix) {
@@ -40,6 +52,9 @@ main <- function() {
   output <- args[["output-tsv"]]
   report_path <- args[["report"]]
   if (file.exists(output) || file.exists(report_path)) stop("refusing to overwrite output artifacts")
+  if (normalizePath(output, mustWork = FALSE) == input || normalizePath(report_path, mustWork = FALSE) == input) {
+    stop("output artifacts must not replace the input directory")
+  }
   expected_rate <- as.numeric(args[["expected-doublet-rate"]])
   if (!is.finite(expected_rate) || expected_rate <= 0 || expected_rate >= 1) stop("expected doublet rate must be between zero and one")
   set.seed(as.integer(args$seed))
@@ -49,9 +64,13 @@ main <- function() {
     library(SingleCellExperiment)
     library(scDblFinder)
     library(jsonlite)
+    library(digest)
   })
+  source_files <- input_files(input)
+  source_digests <- vapply(source_files, sha256, character(1L))
   sce <- read10xCounts(input, col.names = TRUE)
   validate_counts(counts(sce))
+  input_count_sum <- sum(counts(sce))
   colData(sce)$biological_sample <- args[["sample-id"]]
   sce <- scDblFinder(sce, samples = "biological_sample", dbr = expected_rate, BPPARAM = BiocParallel::SerialParam())
   score <- colData(sce)$scDblFinder.score
@@ -71,18 +90,44 @@ main <- function() {
   write.table(result, output, quote = FALSE, sep = "\t", row.names = FALSE)
   reloaded <- read.delim(output, check.names = FALSE)
   if (nrow(reloaded) != ncol(sce) || !identical(reloaded$cell_id, colnames(sce))) stop("serialized doublet calls do not reconcile to source cells")
+  if (!identical(source_digests, vapply(source_files, sha256, character(1L)))) {
+    stop("Matrix Market source files changed during scDblFinder execution")
+  }
+  score_summary <- list(
+    minimum = min(score),
+    median = median(score),
+    maximum = max(score),
+    singlet_median = median(score[call == "singlet"]),
+    doublet_median = if (any(call == "doublet")) median(score[call == "doublet"]) else NULL
+  )
   report <- list(
-    input_matrix_md5 = md5(matrix_market_file(input)),
+    schema_version = 2L,
+    input = list(
+      directory_name = basename(input),
+      file_sha256 = as.list(source_digests),
+      cells = ncol(sce),
+      features = nrow(sce),
+      total_counts = input_count_sum,
+      sample_id = args[["sample-id"]]
+    ),
     input_cells = ncol(sce),
     input_features = nrow(sce),
     sample_id = args[["sample-id"]],
     called_doublets = sum(call == "doublet"),
     called_fraction = mean(call == "doublet"),
+    score_summary = score_summary,
     output_rows_reloaded = nrow(reloaded),
+    source_immutable = TRUE,
+    cell_identity_preserved = TRUE,
+    automatic_cell_removal_performed = FALSE,
     versions = list(
       R = as.character(getRversion()),
       scDblFinder = as.character(packageVersion("scDblFinder")),
-      SingleCellExperiment = as.character(packageVersion("SingleCellExperiment"))
+      SingleCellExperiment = as.character(packageVersion("SingleCellExperiment")),
+      DropletUtils = as.character(packageVersion("DropletUtils")),
+      BiocParallel = as.character(packageVersion("BiocParallel")),
+      jsonlite = as.character(packageVersion("jsonlite")),
+      digest = as.character(packageVersion("digest"))
     ),
     quality_status = "review-required"
   )

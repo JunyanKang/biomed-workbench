@@ -63,6 +63,18 @@ def count_matrix(adata: anndata.AnnData, location: str):
     return matrix.copy()
 
 
+def matrices_equal(left, right) -> bool:
+    if left.shape != right.shape:
+        return False
+    if sparse.issparse(left) or sparse.issparse(right):
+        left_csr = sparse.csr_matrix(left)
+        right_csr = sparse.csr_matrix(right)
+        difference = left_csr - right_csr
+        difference.eliminate_zeros()
+        return difference.nnz == 0
+    return np.array_equal(np.asarray(left), np.asarray(right))
+
+
 def run_sample(matrix, expected_rate: float, n_prin_comps: int, seed: int) -> tuple[np.ndarray, np.ndarray, float, int]:
     # Scrublet filters features internally. Retry only the PCA dimension after its
     # own admissibility check and retain the actual value in the evidence record.
@@ -91,17 +103,28 @@ def main() -> int:
     report_path = Path(args.report)
     if target.exists() or report_path.exists():
         raise FileExistsError("refusing to overwrite declared outputs")
+    if target.absolute() == source or report_path.absolute() == source:
+        raise ValueError("output artifacts must not replace the source H5AD")
     if not 0 < args.expected_doublet_rate < 1:
         raise ValueError("expected-doublet-rate must be strictly between zero and one")
     if args.min_cells_per_sample < 20 or args.n_prin_comps < 2:
         raise ValueError("minimum sample size and principal components are invalid")
 
+    source_digest = sha256(source)
     adata = anndata.read_h5ad(source)
     if args.sample_key not in adata.obs or adata.obs[args.sample_key].isna().any():
         raise ValueError("sample-key is absent or incomplete")
     if not adata.obs_names.is_unique or not adata.var_names.is_unique:
         raise ValueError("cell and feature identifiers must be unique")
     counts = count_matrix(adata, args.raw_count_location)
+    if (
+        "counts" in adata.layers
+        and args.raw_count_location != "layers.counts"
+        and not matrices_equal(adata.layers["counts"], counts)
+    ):
+        raise ValueError(
+            "an existing layers.counts differs from the declared raw-count location"
+        )
     adata.layers["counts"] = counts
 
     scores = np.full(adata.n_obs, np.nan, dtype=float)
@@ -132,6 +155,7 @@ def main() -> int:
                 "status": "completed",
                 "threshold": threshold,
                 "n_prin_comps": used_components,
+                "seed": args.seed + offset,
                 "called_doublets": int(sample_calls.sum()),
                 "called_fraction": float(sample_calls.mean()),
             }
@@ -156,11 +180,36 @@ def main() -> int:
     report_path.parent.mkdir(parents=True, exist_ok=True)
     adata.write_h5ad(target, compression="gzip")
     reloaded = anndata.read_h5ad(target)
-    if reloaded.n_obs != adata.n_obs or "counts" not in reloaded.layers or "scrublet_score" not in reloaded.obs:
+    if (
+        reloaded.shape != adata.shape
+        or "counts" not in reloaded.layers
+        or "scrublet_score" not in reloaded.obs
+    ):
         raise RuntimeError("reloaded H5AD does not retain counts and Scrublet fields")
-    if not np.array_equal(reloaded.obs_names, adata.obs_names) or not np.allclose(reloaded.layers["counts"].toarray() if sparse.issparse(reloaded.layers["counts"]) else reloaded.layers["counts"], counts.toarray() if sparse.issparse(counts) else counts):
+    if (
+        not np.array_equal(reloaded.obs_names, adata.obs_names)
+        or not np.array_equal(reloaded.var_names, adata.var_names)
+        or not np.array_equal(
+            reloaded.obs[args.sample_key].astype(str).to_numpy(),
+            sample_values,
+        )
+        or not matrices_equal(reloaded.layers["counts"], counts)
+    ):
         raise RuntimeError("raw counts or cell identities changed after serialization")
+    if sha256(source) != source_digest:
+        raise RuntimeError("source H5AD changed during Scrublet execution")
     report = {
+        "schema_version": 2,
+        "input": {
+            "filename": source.name,
+            "sha256": source_digest,
+            "cells": int(adata.n_obs),
+            "features": int(adata.n_vars),
+            "raw_count_location": args.raw_count_location,
+            "sample_key": args.sample_key,
+            "samples": sorted(pd.unique(sample_values).tolist()),
+            "total_counts": int(counts.sum()),
+        },
         "input_cells": int(adata.n_obs),
         "completed_cells": int(completed.sum()),
         "not_run_cells": int((~completed).sum()),
@@ -168,7 +217,19 @@ def main() -> int:
         "called_fraction": float(calls[completed].mean()),
         "sample_results": sample_reports,
         "raw_count_preserved": True,
+        "source_immutable": True,
+        "cell_and_feature_identity_preserved": True,
+        "automatic_cell_removal_performed": False,
+        "versions": {
+            "python": platform.python_version(),
+            "scrublet": package_version("scrublet"),
+            "anndata": package_version("anndata"),
+            "numpy": package_version("numpy"),
+            "pandas": package_version("pandas"),
+            "scipy": package_version("scipy"),
+        },
         "output_h5ad_sha256": sha256(target),
+        "output_reloaded": True,
         "quality_status": "review-required",
     }
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")

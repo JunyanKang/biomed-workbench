@@ -48,7 +48,7 @@ class RebindLiveEvidenceRegistryTests(unittest.TestCase):
             path = self._write(
                 Path(temporary),
                 module_id="single-cell-doublet-detection",
-                module_version="1.0.0",
+                module_version="1.1.0",
                 compatibility_row_id="agent-protocol-1-scrublet-023-scdblfinder-1160",
                 templates={"scrublet": {"name": "run_scrublet.py", "sha256": "0" * 64}},
             )

@@ -101,9 +101,9 @@ AGENT_EVIDENCE = {
     },
     "single-cell-doublet-detection": {
         "path": "reports/single-cell-doublet-detection-live-verification.json",
-        "execution_flags": ("scrublet_completed", "scdblfinder_completed", "outputs_reloaded"),
-        "summary_flags": ("sample_aware_methods_executed", "raw_counts_preserved", "method_specific_scores_retained", "no_automatic_cell_removal", "method_disagreement_preserved"),
-        "live_dependency_keys": ("python", "r"),
+        "execution_flags": ("scrublet_completed", "scdblfinder_completed", "outputs_reloaded", "sparse_reload_validation_completed", "source_immutability_verified"),
+        "summary_flags": ("sample_aware_methods_executed", "raw_counts_preserved", "cell_and_feature_identity_preserved", "method_specific_scores_retained", "score_distributions_retained", "no_automatic_cell_removal", "method_disagreement_preserved"),
+        "live_dependency_keys": ("python", "anndata", "numpy", "pandas", "scipy", "r", "SingleCellExperiment", "DropletUtils", "BiocParallel", "jsonlite", "digest"),
     },
     "single-cell-droplet-decontamination": {
         "path": "reports/single-cell-droplet-decontamination-live-verification.json",
