@@ -21,7 +21,8 @@ class ReleaseSurfaceTests(unittest.TestCase):
         text = (ROOT / "skills" / "biomed-workbench" / "SKILL.md").read_text()
 
         self.assertIn("WORKBENCH_ROOT", text)
-        self.assertIn('$WORKBENCH_ROOT/tools/route_task.py', text)
+        self.assertIn('$WORKBENCH_ROOT/tools/workbench" doctor --strict', text)
+        self.assertIn('$WORKBENCH_ROOT/tools/workbench" route', text)
         self.assertNotIn("From the plugin root", text)
 
     def test_public_release_has_license_and_consistent_versions(self):

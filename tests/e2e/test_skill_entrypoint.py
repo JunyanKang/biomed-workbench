@@ -30,9 +30,10 @@ class SkillEntrypointE2ETests(unittest.TestCase):
         self.assertIn("mixed", self.lower)
 
     def test_commands_use_the_source_neutral_json_contract(self):
-        self.assertIn('$WORKBENCH_ROOT/tools/route_task.py', self.text)
-        self.assertIn('$WORKBENCH_ROOT/tools/search_tools.py', self.text)
-        self.assertRegex(self.text, re.compile(r'run_tool\.py"\s+CAPABILITY_ID\s+--input'))
+        self.assertIn('$WORKBENCH_ROOT/tools/workbench" doctor --strict', self.text)
+        self.assertIn('$WORKBENCH_ROOT/tools/workbench" route', self.text)
+        self.assertIn('$WORKBENCH_ROOT/tools/workbench" search', self.text)
+        self.assertRegex(self.text, re.compile(r'tools/workbench"\s+run\s+CAPABILITY_ID\s+--input'))
         self.assertNotIn("-- ARGUMENTS", self.text)
         self.assertIn("execution_handoff", self.text)
         self.assertIn("access: codex_native", self.text)

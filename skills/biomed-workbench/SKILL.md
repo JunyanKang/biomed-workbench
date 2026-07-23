@@ -33,25 +33,33 @@ Treat `fatal` findings as branch stops and `major` findings as interpretation bl
 
 Resolve `WORKBENCH_ROOT` as the directory two levels above this `SKILL.md`; do not depend on the user's working directory.
 
+Before the first operation in a newly installed or updated package, run the bounded health check. Resolve failed checks before scientific execution; do not ask the user to diagnose interpreter or registry details that Codex can inspect directly.
+
+```bash
+"$WORKBENCH_ROOT/tools/workbench" doctor --strict
+```
+
 Route the objective:
 
 ```bash
-python3 "$WORKBENCH_ROOT/tools/route_task.py" "USER OBJECTIVE"
+"$WORKBENCH_ROOT/tools/workbench" route "USER OBJECTIVE"
 ```
 
 Inspect an exact capability contract or refine a broad route:
 
 ```bash
-python3 "$WORKBENCH_ROOT/tools/search_tools.py" --id CAPABILITY_ID
-python3 "$WORKBENCH_ROOT/tools/search_tools.py" --workflow WORKFLOW "SEARCH TERMS"
+"$WORKBENCH_ROOT/tools/workbench" search --id CAPABILITY_ID
+"$WORKBENCH_ROOT/tools/workbench" search --workflow WORKFLOW "SEARCH TERMS"
 ```
 
 Execute a bounded capability with a JSON object. Prefer `--input-file` when payloads are large or contain multiline scientific data.
 
 ```bash
-python3 "$WORKBENCH_ROOT/tools/run_tool.py" CAPABILITY_ID --input '{"field":"value"}'
-python3 "$WORKBENCH_ROOT/tools/run_tool.py" CAPABILITY_ID --input-file INPUT.json
+"$WORKBENCH_ROOT/tools/workbench" run CAPABILITY_ID --input '{"field":"value"}'
+"$WORKBENCH_ROOT/tools/workbench" run CAPABILITY_ID --input-file INPUT.json
 ```
+
+The launcher selects a compatible interpreter for the plugin core. This is an operational bootstrap only: detect and record scientific package and tool versions independently for every selected module.
 
 Treat `selected_module_ids` as the router's compact execution set and the remaining candidates as alternatives for inspection. The selector uses manifest intent coverage, declared alternatives, and artifact input/output dependencies: independent selected modules may run in parallel, while a selected producer-consumer pair runs serially. Verify every selected input schema, unit, organism/build, identifier, dependency, and scientific compatibility before execution. Do not substitute a merely available capability for the analysis the question requires.
 

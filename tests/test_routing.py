@@ -115,6 +115,26 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(plan["plan_type"], "parallel")
         self.assertEqual(plan["steps"][0]["mode"], "parallel")
 
+    def test_broad_research_process_words_do_not_trigger_unrelated_scientific_domains(self):
+        plan = route(
+            "Validate donor-aware single-cell RNA analysis, revise the hypothesis, "
+            "and prepare a publication-grade evidence package.",
+            per_workflow=5,
+        )
+
+        self.assertEqual(plan["matched_workflows"], ["omics", "publication"])
+        self.assertIn("single-cell-donor-inference", plan["selected_module_ids"])
+        self.assertNotIn("gene-evidence", plan["selected_module_ids"])
+        self.assertNotIn("variant-decompress-bgzip", plan["selected_module_ids"])
+        self.assertNotIn("ddr-coexpression-hypothesis-network", plan["selected_module_ids"])
+        self.assertNotIn("docking-pose-review", plan["selected_module_ids"])
+
+    def test_prepare_and_evidence_are_not_enough_to_select_docking(self):
+        plan = route("Prepare publication evidence from donor-aware single-cell results")
+
+        self.assertNotIn("molecular_design", plan["matched_workflows"])
+        self.assertNotIn("docking-pose-review", plan["selected_module_ids"])
+
     def test_route_output_has_no_source_or_adapter_fields(self):
         plan = route("search TP53 gene evidence")
         serialized = repr(plan).lower()

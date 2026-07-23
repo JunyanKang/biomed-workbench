@@ -39,7 +39,15 @@ Pull the desired repository revision, then reinstall or refresh the marketplace 
 
 ## Verify The Installation
 
-`codex plugin list` should show the marketplace and installed plugin. In a new task, ask Codex to use Biomed Workbench for a small scientific request, such as inspecting a DNA sequence or planning a literature search. A successful installation exposes one user-facing skill while the internal module registry remains dynamically discoverable.
+`codex plugin list` should show the marketplace and installed plugin. In a new task, ask Codex to use Biomed Workbench for a small scientific request, such as inspecting a DNA sequence or planning a literature search. The agent runs the packaged health check before first use and reports whether the plugin manifest, unified skill, module registry, routing, and optional credential policy are ready.
+
+Maintainers can run the same health check directly:
+
+```bash
+tools/workbench doctor --strict
+```
+
+The plugin core requires Python 3.10 or newer. The launcher discovers a compatible interpreter instead of assuming that the operating system's `python3` is suitable. Scientific package and command versions remain module-level compatibility and provenance records: the health check does not claim that every optional analysis backend is already installed.
 
 For maintainers who need repository, release, and isolated-install checks, see [development and release](development.md).
 
@@ -51,5 +59,6 @@ Most public evidence clients require no credential. When a scientific service su
 
 - **Skill is missing:** start a new Codex task after installation or update.
 - **Marketplace cannot be resolved:** confirm the repository URL, branch, and marketplace name.
+- **Core runtime is blocked:** install Python 3.10 or newer. The workbench launcher will select it automatically; no global environment activation is required.
 - **A scientific backend is unavailable:** the skill can still provide guidance and routing, but execution must wait for a compatible project environment or use a validated alternative.
 - **A result is blocked:** inspect the named input, compatibility, or scientific quality gate; blocked evidence is not silently promoted into a conclusion.

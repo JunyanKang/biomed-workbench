@@ -15,12 +15,13 @@ from .modules.registry import ModuleRegistry, ModuleRegistryError
 
 PREFERRED_DOMAIN_ORDER = ("evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication")
 SERIAL_DOMAINS = frozenset({"evidence", "publication"})
+GENERIC_DOMAIN_LABELS = frozenset({"evidence"})
 _DEFAULT_REGISTRY = ModuleRegistry.discover(BUILTIN_ROOT)
 _ASCII_STOP = frozenset(
     {
         "a", "an", "and", "as", "at", "by", "for", "from", "in", "into", "of", "on", "or", "the", "then", "to", "with",
         "analyze", "analysis", "assess", "data", "result", "results", "run", "scientific", "summary", "test", "tool",
-        "validate", "validation",
+        "evidence", "grade", "hypothesis", "package", "prepare", "publication-grade", "revise", "validate", "validation",
     }
 )
 _CJK_STOP = frozenset({"分析", "数据", "结果", "进行", "检查", "评估", "验证", "科研", "汇总", "工具"})
@@ -140,6 +141,9 @@ def _select_ranked_modules(
     top_score = ranked[0][0]
     threshold = max(5.0, top_score * 0.25)
     covered = set().union(*(_matched_features(item[1], query) for item in selected))
+    matched_by_module = {item[1].id: _matched_features(item[1], query) for item in ranked}
+    feature_frequency = Counter(feature for features in matched_by_module.values() for feature in features)
+    specificity_limit = max(2, len(ranked) // 5)
     for item in ranked:
         score, module, reasons = item
         selected_ids = {chosen[1].id for chosen in selected}
@@ -151,8 +155,12 @@ def _select_ranked_modules(
             module.id in chosen[1].alternatives or chosen[1].id in module.alternatives for chosen in selected
         ):
             continue
-        features = _matched_features(module, query)
-        if not features - covered:
+        features = matched_by_module[module.id]
+        new_features = features - covered
+        informative_features = {
+            feature for feature in new_features if feature_frequency[feature] <= specificity_limit
+        }
+        if not informative_features:
             continue
         selected.append(item)
         covered.update(features)
@@ -166,6 +174,37 @@ def _artifact_dependency(modules: list[ModuleManifest]) -> bool:
             if producer.id != consumer.id and output_types & {port.artifact_type for port in consumer.input_artifacts}:
                 return True
     return False
+
+
+def _order_by_artifact_dependencies(
+    module_ids: list[str], registry: ModuleRegistry
+) -> list[str]:
+    """Return a stable producer-before-consumer order for selected modules."""
+    if len(module_ids) < 2:
+        return module_ids
+    modules = {module_id: registry.get(module_id) for module_id in module_ids}
+    original_position = {module_id: index for index, module_id in enumerate(module_ids)}
+    dependencies = {module_id: set() for module_id in module_ids}
+    for producer_id, producer in modules.items():
+        output_types = {port.artifact_type for port in producer.output_artifacts}
+        for consumer_id, consumer in modules.items():
+            if producer_id == consumer_id:
+                continue
+            input_types = {port.artifact_type for port in consumer.input_artifacts}
+            if output_types & input_types:
+                dependencies[consumer_id].add(producer_id)
+    ordered: list[str] = []
+    remaining = set(module_ids)
+    while remaining:
+        ready = sorted(
+            (module_id for module_id in remaining if not (dependencies[module_id] & remaining)),
+            key=original_position.__getitem__,
+        )
+        if not ready:
+            return module_ids
+        ordered.extend(ready)
+        remaining.difference_update(ready)
+    return ordered
 
 
 def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> list[str]:
@@ -231,11 +270,14 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
         if not tied and (len(counts) == 1 or concentration >= 0.8):
             if domain_scores.get(dominant_domain, 0.0) >= 5.0:
                 domain_concentrated_feature_domains.add(dominant_domain)
-    explicit_primary_domains = {
-        module.domains[0]
-        for module in active.all()
-        if _features(module.domains[0].replace("_", " ")) & query_features
-    }
+    explicit_primary_domains = set()
+    for module in active.all():
+        domain = module.domains[0]
+        if domain in GENERIC_DOMAIN_LABELS:
+            continue
+        label = re.escape(_normalize(domain.replace("_", " "))).replace(r"\ ", r"[\s_-]+")
+        if re.search(rf"(?<![a-z0-9]){label}(?![a-z0-9])", normalized_query):
+            explicit_primary_domains.add(domain)
     matched = {
         domain
         for domain, score in domain_scores.items()
@@ -288,7 +330,10 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
     for workflow in workflows:
         ranked = sorted(grouped[workflow], key=lambda item: (-item[0], item[1].id))
         ranked = [item for item in ranked if item[1].id not in assigned_modules]
-        selected_by_workflow[workflow] = _select_ranked_modules(ranked, query)
+        selected_by_workflow[workflow] = _order_by_artifact_dependencies(
+            _select_ranked_modules(ranked, query),
+            active,
+        )
         selected_ids = set(selected_by_workflow[workflow])
         visible_ranked = list(ranked[:per_workflow])
         visible_ids = {module.id for _score, module, _reasons in visible_ranked}

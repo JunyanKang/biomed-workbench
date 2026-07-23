@@ -61,6 +61,17 @@ Source-study ledgers are private development evidence and are never runtime depe
 python3 tools/reconcile_sources.py --manifest .source-audit/manifest.jsonl --design-ledger .source-audit/rewrite-ledger.jsonl --capability-bindings .source-audit/capability-bindings.jsonl --private-output .source-audit/reconciliation-ledger.jsonl --public-output reports/source-reconciliation-summary.json
 ```
 
+The full reconciliation command is required when source receipts, bindings, status counts, or
+assimilation conclusions change. For an ordinary plugin update that changes only the current
+skill, registry, or test snapshot, refresh the public snapshot without private receipt mutation:
+
+```bash
+python3 tools/refresh_source_reconciliation_snapshot.py
+```
+
+The bounded refresher validates the existing file totals, pending count, and receipt-root digest
+before replacing only `current_evidence`. It cannot mark a receipt implemented or superseded.
+
 Every source record must resolve to implemented, superseded, guidance, excluded, provenance, or a visible pending capability decision. Reading a source file is not accepted as implementation evidence.
 
 ## Release Discipline
