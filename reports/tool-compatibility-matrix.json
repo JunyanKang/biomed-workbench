@@ -14926,14 +14926,14 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
-            "single-cell-fate-mapping-e2e-v1"
+            "single-cell-fate-mapping-e2e-v2"
           ],
-          "id": "agent-protocol-1-cellrank-232-moscot-051",
-          "module_version": "1.0.0",
+          "id": "agent-protocol-2-cellrank-232-moscot-051-velocity",
+          "module_version": "1.1.0",
           "regression_evidence_ids": [
-            "single-cell-fate-mapping-regression-v1"
+            "single-cell-fate-mapping-regression-v2"
           ],
-          "verified_at": "2026-07-15"
+          "verified_at": "2026-07-23"
         }
       ],
       "dependencies": [
@@ -15184,25 +15184,24 @@
               ]
             }
           ],
-          "name": "time_resolved_single_cell_counts",
+          "name": "single_cell_dynamics_input",
           "processing_levels": [
-            "count-backed",
-            "time-resolved",
+            "expression-semantics-declared",
+            "direction-backed",
             "terminal-state-anchored"
           ],
           "required_metadata": [
             "input-digest",
-            "raw-count-location",
-            "sample-key",
-            "experimental-time-key",
-            "pseudotime-key",
+            "expression-location-and-semantics",
+            "selected-kernel-inputs",
+            "withheld-direction-evidence",
             "terminal-state-key",
             "terminal-state-evidence",
             "cell-accounting"
           ]
         }
       ],
-      "module_version": "1.0.0",
+      "module_version": "1.1.0",
       "output_formats": [
         {
           "artifact_type": "single_cell_fate_evidence",
@@ -15308,7 +15307,7 @@
           "tested_versions": [
             "2.3.2"
           ],
-          "verified_at": "2026-07-15",
+          "verified_at": "2026-07-23",
           "version_differences": [
             {
               "affected_versions": [
@@ -15316,9 +15315,9 @@
               ],
               "category": "api",
               "compatibility_effect": "requires-parser",
-              "description": "Kernel construction, GPCCA terminal-state assignment, fate probabilities, and lineage-driver fields are release-coupled.",
+              "description": "Velocity, Connectivity, Pseudotime, RealTime, kernel composition, GPCCA terminal-state assignment, fate probabilities, and lineage-driver fields are release-coupled.",
               "id": "cellrank-kernel-gpcca-api",
-              "required_action": "Detect the release, validate transition and fate stochasticity, and reload all fields before widening support.",
+              "required_action": "Detect the release, validate transition and fate stochasticity, record every component weight, and reload all fields before widening support.",
               "source": "https://cellrank.readthedocs.io/en/stable/"
             }
           ],
@@ -23526,6 +23525,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "767f4a47deb04edb1bbdbae38e0340fff7f5bd9c4f4e1c1ee16deda4dd447a4d",
+  "registry_digest": "5127cc94973b065e50ca7a7fea46a98e39405ab0be4247d67fd5f2332826cd40",
   "schema_version": 1
 }

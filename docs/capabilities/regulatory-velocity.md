@@ -48,6 +48,14 @@ models, and evaluates frozen latent time against withheld developmental stage.
 The resulting stage association passes the directional gate, while modest
 hard-versus-soft velocity agreement remains an explicit sensitivity warning.
 
+The downstream [RegVelo-to-CellRank public
+case](../cases/zebrafish-cellrank-fate.md) now executes the admitted hard-mode
+velocity through CellRank 2.3.2. Two pure-velocity runs are exactly
+reproducible, both pure and connectivity-weighted kernels move forward in
+withheld developmental stage, and the 20% connectivity sensitivity remains
+within frozen fate-probability bounds. The upstream hard-soft warning is
+retained, so this does not establish hard-versus-soft fate robustness.
+
 ## Compatibility Boundary
 
 The validated profile uses Python 3.11, NumPy 1.26, SciPy 1.15, scVelo 0.3.4, scvi-tools 1.2.0, CellRank 2.0.7, torch 2.4.1, JAX and jaxlib 0.4.35, and the companion versions recorded in the module manifest and live report. These versions are provenance for the passing execution, not a general instruction to freeze every future project.

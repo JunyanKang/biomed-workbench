@@ -1,0 +1,183 @@
+{
+  "case_id": "zebrafish-regvelo-cellrank-fate-public-data-v1",
+  "case_type": "public-data-end-to-end",
+  "design": {
+    "neighbors": 30,
+    "primary_kernel": "CellRank VelocityKernel",
+    "representation": "X_regvelo",
+    "sample_or_donor_replication_available": false,
+    "stage_used_for_kernel_or_terminal_assignment": false,
+    "state_location": "X",
+    "state_semantics": "log-normalized-continuous",
+    "terminal_state_source": "official RegVelo tutorial annotations",
+    "terminal_states": [
+      "mNC_head_mesenchymal",
+      "mNC_arch2",
+      "mNC_hox34",
+      "Pigment"
+    ],
+    "velocity_location": "layers.regvelo_velocity",
+    "velocity_source": "RegVelo 0.4.2 hard-seed-2026",
+    "withheld_direction_field": "developmental stage"
+  },
+  "execution": {
+    "connectivity_sensitivity": {
+      "blended_connectivity_weight": 0.2,
+      "blended_velocity_weight": 0.8,
+      "flattened_fate_pearson": 0.998141328935125,
+      "gate": "pass",
+      "lineage_fate_pearson": {
+        "Pigment": 0.9981596947103318,
+        "mNC_arch2": 0.9982618185370926,
+        "mNC_head_mesenchymal": 0.9951714806963063,
+        "mNC_hox34": 0.997633334997181
+      },
+      "maximum_absolute_fate_difference": 0.10964583285884733,
+      "maximum_fate_assignment_agreement": 0.974304068522484,
+      "mean_absolute_fate_difference": 0.015190204052614082,
+      "pure_velocity_weight": 1.0,
+      "thresholds": {
+        "maximum_absolute_fate_difference": 0.15,
+        "minimum_flattened_fate_pearson": 0.95
+      },
+      "transient_cells": 467
+    },
+    "deterministic_repeat": {
+      "fate_probabilities": {
+        "exactly_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "shape": [
+          697,
+          4
+        ]
+      },
+      "fate_table": {
+        "exactly_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "shape": [
+          697,
+          4
+        ]
+      },
+      "transition_matrix": {
+        "exactly_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "shape": [
+          697,
+          697
+        ]
+      }
+    },
+    "independent_template_runs": 3,
+    "lineage_driver_rows": 1008,
+    "outputs_reloaded": true,
+    "pure_velocity_runs": 2,
+    "source_expression_preserved": true,
+    "terminal_state_consistency": {
+      "Pigment": 1.0,
+      "mNC_arch2": 1.0,
+      "mNC_head_mesenchymal": 1.0,
+      "mNC_hox34": 1.0
+    },
+    "velocity_connectivity_runs": 1,
+    "withheld_stage_direction": {
+      "expected_deltas": {
+        "pure_velocity": 0.2011913673768591,
+        "velocity_connectivity": 0.16150507849261517
+      },
+      "gate": "pass",
+      "minimum_expected_delta": 0.0,
+      "stage_mapping": {
+        "10ss": 10.0,
+        "12-13ss": 12.5,
+        "17-18ss": 17.5,
+        "21-22ss": 21.5,
+        "3ss": 3.0,
+        "6-7ss": 6.5
+      },
+      "stage_used_for_fitting": false
+    }
+  },
+  "methods_not_run": {
+    "automatic_terminal_state_discovery": "not-run",
+    "clonal_or_experimental_fate_validation": "not-run",
+    "condition_or_donor_level_inference": "not-run",
+    "hard_vs_soft_regvelo_downstream_fate": "not-run",
+    "macrostate_number_sensitivity": "not-run",
+    "regulator_perturbation_fate_screen": "not-run",
+    "scvelo_or_velovi_fate_baseline": "not-run"
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-2-cellrank-232-moscot-051-velocity",
+    "id": "single-cell-fate-mapping",
+    "manifest_sha256": "40dfdbf766e32ae491516828107e78cc640e625a85dd9a19872701df776a0c9d",
+    "template_sha256": "ea4af5a40b71e24c70fde5014382c16cf0716315dbe97d3a974d1793e9a242bf",
+    "version": "1.1.0"
+  },
+  "passed": true,
+  "quality_gates": {
+    "admitted_upstream_regvelo_public_case": "pass-with-warning",
+    "cellrank_232_velocity_kernel_execution": "pass",
+    "deterministic_repeat_execution": "pass",
+    "regvelo_artifact_identity_and_semantics": "pass",
+    "source_immutability_and_output_reload": "pass",
+    "terminal_state_consistency": "pass-not-independent",
+    "transition_and_fate_stochasticity": "pass",
+    "velocity_connectivity_sensitivity": "pass",
+    "withheld_developmental_stage_direction": "pass"
+  },
+  "runtime": {
+    "anndata": "0.13.2",
+    "cellrank": "2.3.2",
+    "jax": "0.10.2",
+    "moscot": "0.5.1",
+    "numpy": "2.4.6",
+    "ott-jax": "0.6.0",
+    "pandas": "3.0.3",
+    "python": "3.12.11",
+    "scanpy": "1.12.2",
+    "scipy": "1.16.3"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "This case validates a CellRank 2.3.2 fate workflow on one admitted RegVelo 0.4.2 zebrafish artifact; it does not establish portability to another dataset, velocity model, representation, neighborhood, or terminal-state definition.",
+    "Developmental stage was withheld from RegVelo fitting and CellRank kernel construction and was used only after transitions were frozen to test expected forward direction.",
+    "The four terminal states follow the official RegVelo tutorial and are annotation-defined rather than discovered independently.",
+    "Terminal cells are clamped by GPCCA, so terminal-state consistency is an implementation check and not independent biological validation.",
+    "The hard RegVelo velocity field is the primary input. Upstream hard-versus-soft disagreement remains a warning, and downstream hard-versus-soft fate robustness is not claimed.",
+    "Connectivity-weight sensitivity passed the frozen software acceptance bounds but does not prove biological robustness or lineage ancestry.",
+    "No donor or experimental replicate field is available, so no condition-level or population-level inferential claim is made.",
+    "Lineage-driver statistics are retained as candidate associations and are not treated as validated regulators or causal mechanisms."
+  ],
+  "source": {
+    "dataset": "zebrafish neural crest Smart-seq3",
+    "derived_cellrank_input_sha256": "69fef9c0ac2d1485fab057215a02eebf8a10966a781e68fbd2e370508f042338",
+    "official_h5ad_sha256": "eccab081c44cfe335b726aec8172bbcda072241b4f006f6420bb5d46d39611cb",
+    "official_h5ad_url": "https://drive.google.com/uc?id=1Nzq1F6dGw-nR9lhRLfZdHOG7dcYq7P0i&export=download",
+    "publisher": "RegVelo authors",
+    "regvelo_artifact_sha256": "3195f22f693c60db753699fc87911646dacbcaa1a567b5a2a4d09d32da925f34",
+    "upstream_case_id": "zebrafish-neural-crest-regvelo-public-data-v1",
+    "upstream_report_sha256": "cdf24a5be4c932809e04922728b766035204dffbcd4c0009bb459385f4698e95",
+    "validation": {
+      "cells": 697,
+      "expression_semantics": "log-normalized-continuous",
+      "features": 1008,
+      "latent_representation_shape": [
+        697,
+        10
+      ],
+      "regvelo_modes": [
+        "hard",
+        "soft"
+      ],
+      "regvelo_primary_run": "hard-seed-2026",
+      "terminal_state_counts": {
+        "Pigment": 56,
+        "mNC_arch2": 61,
+        "mNC_head_mesenchymal": 62,
+        "mNC_hox34": 51
+      },
+      "velocity_finite_signed": true
+    }
+  }
+}

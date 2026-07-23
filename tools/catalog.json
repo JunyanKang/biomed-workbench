@@ -4949,7 +4949,7 @@
     },
     {
       "access": "agent_generated",
-      "description": "Direct Codex to construct separately reviewable pseudotime or moscot real-time transition kernels, estimate GPCCA fate probabilities toward declared terminal states, retain lineage-driver statistics, validate stochasticity and direction against experimental time, and preserve every source cell and raw count.",
+      "description": "Direct Codex to construct separately reviewable RegVelo or scVelo velocity, pseudotime, or moscot real-time transition kernels; estimate CellRank GPCCA fate probabilities toward evidence-backed terminal states; retain lineage-driver statistics; test withheld direction and kernel sensitivity; and preserve every source cell and declared expression layer.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-fate-mapping",
       "input_schema": {
@@ -4959,6 +4959,17 @@
             "type": "object"
           },
           "design_notes": {
+            "type": "string"
+          },
+          "expression_location": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "expression_semantics": {
+            "enum": [
+              "integer-counts",
+              "log-normalized-continuous"
+            ],
             "type": "string"
           },
           "input_artifact_id": {
@@ -4978,12 +4989,13 @@
           "pseudotime_key": {
             "type": "string"
           },
-          "raw_count_location": {
+          "representation_key": {
             "type": "string"
           },
           "requested_modes": {
             "items": {
               "enum": [
+                "velocity",
                 "pseudotime",
                 "real-time-optimal-transport"
               ],
@@ -4996,6 +5008,9 @@
           "sample_key": {
             "type": "string"
           },
+          "state_location": {
+            "type": "string"
+          },
           "terminal_state_key": {
             "type": "string"
           },
@@ -5006,16 +5021,17 @@
           },
           "time_key": {
             "type": "string"
+          },
+          "velocity_location": {
+            "type": "string"
           }
         },
         "required": [
           "objective",
           "input_artifact_id",
           "input_format",
-          "raw_count_location",
-          "sample_key",
-          "time_key",
-          "pseudotime_key",
+          "expression_location",
+          "expression_semantics",
           "terminal_state_key",
           "terminal_states",
           "requested_modes",
@@ -5027,7 +5043,7 @@
       "kind": "workflow",
       "mutability": "read_only",
       "requirements": [],
-      "title": "Estimate single-cell fate with CellRank and real-time optimal transport",
+      "title": "Estimate single-cell fate across velocity, pseudotime, and real-time kernels",
       "workflow": "omics"
     },
     {

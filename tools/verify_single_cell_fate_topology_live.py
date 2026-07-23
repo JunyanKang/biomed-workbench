@@ -48,7 +48,7 @@ import pandas as pd
 from scipy import sparse
 
 rng = np.random.default_rng(42)
-rows, metadata, coordinates = [], [], []
+rows, velocities, metadata, coordinates = [], [], [], []
 for time, number in ((0, 60), (1, 80), (2, 100)):
     for index in range(number):
         terminal = 'none' if time < 2 else ('A' if index < 50 else 'B')
@@ -59,6 +59,12 @@ for time, number in ((0, 60), (1, 80), (2, 100)):
         if terminal == 'A': rate[10:20] += 8
         if terminal == 'B': rate[20:30] += 8
         rows.append(rng.poisson(np.maximum(rate, 0.1)).astype(np.int32))
+        velocity = np.zeros(80, dtype=np.float64)
+        velocity[0:5] = 4
+        if terminal == 'A': velocity[10:20] = 8
+        elif terminal == 'B': velocity[20:30] = 8
+        else: velocity[10:30] = 4
+        velocities.append(velocity)
         metadata.append({{'sample': f'T{{time}}_S{{index % 2 + 1}}', 'time': time, 'pseudotime': pseudotime, 'terminal': terminal, 'cluster': ('Root' if time == 0 else ('Mid' if time == 1 else terminal))}})
         coordinates.append((pseudotime + rng.normal(0, 0.02), branch * max(pseudotime - 0.5, 0) * 1.6 + rng.normal(0, 0.03)))
 cells = [f'cell-{{index:03d}}' for index in range(len(rows))]
@@ -66,6 +72,8 @@ genes = [f'GENE{{index:03d}}' for index in range(80)]
 counts = np.asarray(rows, dtype=np.int32)
 adata = ad.AnnData(sparse.csr_matrix(counts), obs=pd.DataFrame(metadata, index=cells), var=pd.DataFrame(index=genes))
 adata.layers['counts'] = adata.X.copy()
+adata.layers['state'] = sparse.csr_matrix(np.log1p(counts.astype(np.float64)))
+adata.layers['velocity'] = sparse.csr_matrix(np.asarray(velocities))
 adata.write_h5ad({str(work / 'input.h5ad')!r})
 pd.DataFrame(counts.T, index=genes, columns=cells).rename_axis('gene_id').reset_index().to_csv({str(work / 'counts.tsv')!r}, sep='\\t', index=False)
 obs = adata.obs.copy(); obs.insert(0, 'cell_id', cells); obs.to_csv({str(work / 'metadata.tsv')!r}, sep='\\t', index=False)
@@ -85,8 +93,11 @@ def verify(python: Path, rscript: Path, r_library: Path) -> tuple[dict[str, obje
         source_digest = sha256(work / "input.h5ad")
 
         reports = {}
-        for mode, prefix in (("pseudotime", "pseudo"), ("real-time-optimal-transport", "ot")):
-            run([str(python), str(FATE_TEMPLATE), "--input-h5ad", str(work / "input.h5ad"), "--output-h5ad", str(work / f"{prefix}.h5ad"), "--fate-table", str(work / f"{prefix}-fate.tsv"), "--driver-table", str(work / f"{prefix}-drivers.tsv"), "--report", str(work / f"{prefix}.json"), "--raw-count-location", "layers.counts", "--sample-key", "sample", "--time-key", "time", "--pseudotime-key", "pseudotime", "--terminal-state-key", "terminal", "--terminal-states", "A,B", "--mode", mode, "--n-top-genes", "60", "--n-pcs", "15", "--n-neighbors", "15", "--ot-epsilon", "0.05", "--ot-threshold", "0.001", "--minimum-terminal-own-fate", "0.7", "--minimum-time-direction", "0.0", "--seed", "43"], environment)
+        for mode, prefix in (("velocity", "velocity"), ("pseudotime", "pseudo"), ("real-time-optimal-transport", "ot")):
+            command = [str(python), str(FATE_TEMPLATE), "--input-h5ad", str(work / "input.h5ad"), "--output-h5ad", str(work / f"{prefix}.h5ad"), "--fate-table", str(work / f"{prefix}-fate.tsv"), "--driver-table", str(work / f"{prefix}-drivers.tsv"), "--report", str(work / f"{prefix}.json"), "--raw-count-location", "layers.counts", "--sample-key", "sample", "--time-key", "time", "--pseudotime-key", "pseudotime", "--terminal-state-key", "terminal", "--terminal-states", "A,B", "--mode", mode, "--n-top-genes", "60", "--n-pcs", "15", "--n-neighbors", "15", "--ot-epsilon", "0.05", "--ot-threshold", "0.001", "--minimum-terminal-own-fate", "0.7", "--minimum-time-direction", "0.0", "--seed", "43"]
+            if mode == "velocity":
+                command.extend(["--state-location", "layers.state", "--velocity-location", "layers.velocity", "--connectivity-weight", "0.2"])
+            run(command, environment)
             reports[prefix] = json.loads((work / f"{prefix}.json").read_text())
 
         root_cells = ",".join(f"cell-{index:03d}" for index in range(10))
@@ -106,7 +117,7 @@ print(json.dumps({{'association_branch_hits': len(branch & association), 'differ
             raise RuntimeError("optimal transport or planted tradeSeq programs were not recovered")
 
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
-        fate = {"schema_version": 1, "passed": True, "module_id": FATE_ID, "module_version": "1.0.0", "compatibility_row_id": "agent-protocol-1-cellrank-232-moscot-051", "registry_digest": registry.digest, "templates": {"cellrank": {"name": FATE_TEMPLATE.name, "sha256": sha256(FATE_TEMPLATE)}}, "tool_versions": {"CellRank": reports["pseudo"]["versions"]["cellrank"], "moscot": reports["ot"]["versions"]["moscot"]}, "dependency_versions": {key: reports["ot"]["versions"][key] for key in ("python", "scanpy", "anndata", "numpy", "pandas", "scipy", "jax", "ott-jax")}, "fixture": {"sha256": source_digest, "cells": 240, "genes": 80, "samples": 6, "time_points": 3, "terminal_states": 2}, "execution": {"pseudotime_kernel_completed": True, "optimal_transport_completed": True, "gpcca_completed": True, "outputs_reloaded": True}, "backend_summaries": {"pseudotime": reports["pseudo"]["results"], "optimal_transport": reports["ot"]["results"]}, "scientific_summary": {"pseudotime_and_optimal_transport_kernels_executed": True, "two_transport_pairs_solved": True, "gpcca_fate_probabilities_sum_to_one": True, "declared_terminal_states_recovered": True, "lineage_drivers_retained": True, "experimental_time_direction_checked": True, "source_counts_and_identifiers_preserved": True, "outputs_reloaded": True, "no_environment_or_compute_infrastructure_managed": True}}
+        fate = {"schema_version": 2, "passed": True, "module_id": FATE_ID, "module_version": "1.1.0", "compatibility_row_id": "agent-protocol-2-cellrank-232-moscot-051-velocity", "registry_digest": registry.digest, "templates": {"cellrank": {"name": FATE_TEMPLATE.name, "sha256": sha256(FATE_TEMPLATE)}}, "tool_versions": {"CellRank": reports["pseudo"]["versions"]["cellrank"], "moscot": reports["ot"]["versions"]["moscot"]}, "dependency_versions": {key: reports["ot"]["versions"][key] for key in ("python", "scanpy", "anndata", "numpy", "pandas", "scipy", "jax", "ott-jax")}, "fixture": {"sha256": source_digest, "cells": 240, "genes": 80, "samples": 6, "time_points": 3, "terminal_states": 2}, "execution": {"velocity_kernel_completed": True, "connectivity_sensitivity_completed": True, "pseudotime_kernel_completed": True, "optimal_transport_completed": True, "gpcca_completed": True, "outputs_reloaded": True}, "backend_summaries": {"velocity": reports["velocity"]["results"], "pseudotime": reports["pseudo"]["results"], "optimal_transport": reports["ot"]["results"]}, "scientific_summary": {"velocity_pseudotime_and_optimal_transport_kernels_executed": True, "velocity_connectivity_weight_recorded": reports["velocity"]["model"]["connectivity_weight"] == 0.2, "two_transport_pairs_solved": True, "gpcca_fate_probabilities_sum_to_one": True, "declared_terminal_states_recovered": True, "lineage_drivers_retained": True, "experimental_time_direction_checked": True, "source_counts_and_identifiers_preserved": True, "outputs_reloaded": True, "no_environment_or_compute_infrastructure_managed": True}}
         topo_versions = topology["versions"]
         topo = {"schema_version": 1, "passed": True, "module_id": TOPOLOGY_ID, "module_version": "1.0.0", "compatibility_row_id": "agent-protocol-1-slingshot-210-monocle3-1426-tradeseq-116", "registry_digest": registry.digest, "templates": {"trajectory": {"name": TOPOLOGY_TEMPLATE.name, "sha256": sha256(TOPOLOGY_TEMPLATE)}}, "tool_versions": {key: topo_versions[key] for key in ("slingshot", "monocle3", "tradeSeq")}, "dependency_versions": {"r": topo_versions["R"], **{key: topo_versions[key] for key in ("SingleCellExperiment", "Matrix", "BiocParallel", "jsonlite", "digest")}}, "fixture": {"counts_sha256": topology["input"]["counts_sha256"], "cells": 240, "genes": 80, "samples": 6, "lineages": 2}, "execution": {"slingshot_completed": True, "monocle3_completed": True, "tradeseq_completed": True, "outputs_reloaded": True}, "results": {**topology["results"], **inspect}, "scientific_summary": {"two_declared_lineages_recovered": True, "slingshot_and_monocle3_direction_validated": True, "method_concordance_checked": True, "tradeseq_association_pattern_start_end_and_diff_end_completed": True, "planted_branch_programs_recovered": True, "lineage_weights_and_unassigned_cells_preserved": True, "source_counts_and_identifiers_preserved": True, "outputs_reloaded": True, "no_environment_or_compute_infrastructure_managed": True}}
         return fate, topo

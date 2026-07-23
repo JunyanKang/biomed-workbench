@@ -47,9 +47,9 @@ These capabilities are implemented by `single-cell-donor-inference`, `single-cel
 - Count-backed marker discovery with detection fractions, effect sizes, cross-sample direction review, and no automatic conversion of markers into labels.
 - CellTypist, Azimuth, popV, SingleR, and scANVI annotation with feature-namespace alignment, method-specific confidence, score and pruning review, explicit canonical-label and Cell Ontology mapping, cross-method weighted consensus, expert disagreement, and unknown-state retention.
 - LIANA, CellPhoneDB, CellChat, and NicheNet workflows that preserve biological samples and compare interaction support across replicates.
-- scVelo dynamical modelling; RegVelo 0.4.2 GRN-informed velocity, gene-resolved latent time, regulatory-constraint comparison, and perturbation hypotheses; CellRank GPCCA fate mapping; moscot optimal transport; Slingshot and Monocle3 topology; and tradeSeq lineage tests validated against independent time, root, branch, and terminal anchors.
+- scVelo dynamical modelling; RegVelo 0.4.2 GRN-informed velocity, gene-resolved latent time, regulatory-constraint comparison, and perturbation hypotheses; CellRank 2.3.2 velocity, connectivity-weight, pseudotime, and real-time GPCCA fate mapping; moscot optimal transport; Slingshot and Monocle3 topology; and tradeSeq lineage tests validated against independent time, root, branch, and terminal anchors.
 
-These capabilities are implemented by `single-cell-marker-discovery`, `single-cell-atlas-annotation`, `single-cell-reference-annotation`, `single-cell-communication`, `single-cell-trajectory-velocity`, `single-cell-regulatory-velocity`, `single-cell-fate-mapping`, and `single-cell-trajectory-topology`. See the [RegVelo regulatory-velocity guide](regulatory-velocity.md) for its executable scope and compatibility boundary.
+These capabilities are implemented by `single-cell-marker-discovery`, `single-cell-atlas-annotation`, `single-cell-reference-annotation`, `single-cell-communication`, `single-cell-trajectory-velocity`, `single-cell-regulatory-velocity`, `single-cell-fate-mapping`, and `single-cell-trajectory-topology`. See the [RegVelo regulatory-velocity guide](regulatory-velocity.md) and [fate-mapping guide](fate-mapping.md) for their executable scope and compatibility boundaries.
 
 ## Multimodal, Regulatory, And Spatial Analysis
 

@@ -32760,8 +32760,9 @@
       "agent_protocol": {
         "forbidden_actions": [
           "Do not manage Python, R, Conda, containers, CPU, GPU, Slurm, remote, or local-model infrastructure.",
-          "Do not guess terminal states, tune kernels to desired fates, combine incompatible kernels, or claim fate probabilities prove ancestry.",
-          "Do not overwrite source counts or report generated or unreloaded outputs as evidence."
+          "Do not round continuous expression, guess state or velocity semantics, guess terminal states, tune kernels to desired fates, average incompatible kernels, or claim fate probabilities prove ancestry.",
+          "Do not treat clamped terminal-cell fate of one as independent validation.",
+          "Do not overwrite source expression or report generated or unreloaded outputs as evidence."
         ],
         "languages": [
           "python",
@@ -32771,6 +32772,8 @@
         "parameter_rules": [
           {
             "decision_inputs": [
+              "velocity provenance",
+              "state semantics",
               "experimental time",
               "pseudotime evidence",
               "sampling design",
@@ -32778,24 +32781,41 @@
             ],
             "id": "fate-kernel",
             "parameter": "kernel-mode",
-            "selection_rule": "Use pseudotime for a validated continuous ordering and moscot for observed time-point transport; run both as sensitivity models when justified.",
+            "selection_rule": "Use velocity only with an admitted velocity field and withheld direction evidence, pseudotime for a validated continuous ordering, and moscot for observed replicated time-point transport; run justified alternatives as sensitivity models.",
             "validation_rule": "Never average kernel outputs or conceal disagreement."
+          },
+          {
+            "decision_inputs": [
+              "velocity confidence",
+              "neighborhood stability",
+              "terminal-state sensitivity"
+            ],
+            "id": "velocity-connectivity-weight",
+            "parameter": "connectivity-weight",
+            "selection_rule": "Freeze a pure velocity primary analysis and one biologically justified nonzero connectivity sensitivity weight before viewing fate outcomes.",
+            "validation_rule": "Report fate and direction changes between weights; do not select a weight because it produces desired biology."
           }
         ],
         "postflight_checks": [
-          "Recompute transition and fate row sums, expected time direction and terminal own-fate support.",
-          "Reload all objects and tables and preserve method-specific outputs and source counts."
+          "Recompute transition and fate row sums, withheld direction, terminal-state consistency, and any declared kernel sensitivity.",
+          "Reload all objects and tables and preserve method-specific outputs and source expression exactly."
         ],
         "preflight_checks": [
-          "Inspect actual object, counts, samples, time, pseudotime, terminal-state cells, neighbors, source digest and output paths.",
-          "Detect exact CellRank, moscot, Scanpy, AnnData, NumPy, pandas, SciPy, JAX, OTT-JAX and Python versions in an existing runtime."
+          "Inspect actual object, expression location and semantics, velocity and state layers, representation, samples, time, pseudotime, terminal-state cells, neighbors, source digest, and output paths.",
+          "Detect exact CellRank, moscot, Scanpy, AnnData, NumPy, pandas, SciPy, JAX, OTT-JAX, and Python versions in an existing runtime.",
+          "On macOS, execute the template from a real script guarded by a main entry because CellRank kernel coordination uses multiprocessing spawn."
         ],
         "provenance_fields": [
           "module-id",
           "module-version",
           "generated-code-sha256",
           "input-sha256",
+          "expression-location-and-semantics",
           "kernel-mode",
+          "state-location",
+          "velocity-location",
+          "representation-key",
+          "connectivity-weight",
           "time-key",
           "pseudotime-key",
           "terminal-states",
@@ -32804,6 +32824,7 @@
           "actual-tool-versions",
           "transition-summary",
           "fate-summary",
+          "sensitivity-summary",
           "output-sha256",
           "quality-gates"
         ],
@@ -32815,10 +32836,10 @@
             "output_artifact_types": [
               "single_cell_fate_evidence"
             ],
-            "purpose": "Establish count, sample, time, pseudotime and terminal-state evidence.",
+            "purpose": "Establish expression, direction, kernel, representation, sampling, and terminal-state evidence.",
             "required_logic": [
-              "Inspect immutable counts, samples, ordered time, pseudotime provenance, terminal evidence, feature namespace, cell accounting and source digest.",
-              "Freeze neighborhood, kernel mode, optimal-transport regularization, terminal cells and quality thresholds before execution."
+              "Inspect immutable expression and its declared semantics, any state and velocity matrices, neighborhood representation, samples, ordered time, pseudotime provenance, terminal evidence, feature namespace, cell accounting, and source digest.",
+              "Freeze kernel mode, connectivity weight, neighborhood, optimal-transport regularization, terminal cells, and quality thresholds before execution."
             ],
             "template_files": [
               "templates/run_cellrank_fate.py"
@@ -32831,7 +32852,7 @@
             ],
             "purpose": "Execute separate transition kernels and GPCCA fate estimation.",
             "required_logic": [
-              "Build a pseudotime kernel or solve adjacent moscot temporal couplings and convert them to a RealTimeKernel.",
+              "Build a velocity kernel from explicitly named RegVelo or scVelo state and velocity matrices, optionally combine it with a separately weighted connectivity kernel, build a pseudotime kernel, or solve adjacent moscot temporal couplings and convert them to a RealTimeKernel.",
               "Require row-stochastic transitions, assign declared terminal cells, compute fate probabilities without PETSc dependence, and retain lineage-driver statistics."
             ],
             "template_files": [
@@ -32843,10 +32864,10 @@
             "output_artifact_types": [
               "single_cell_fate_evidence"
             ],
-            "purpose": "Check direction, terminal recovery, source preservation and serialization.",
+            "purpose": "Check withheld direction, terminal consistency, sensitivity, source preservation, and serialization.",
             "required_logic": [
-              "Test expected experimental-time and pseudotime transition deltas and terminal own-fate probabilities.",
-              "Reload H5AD and evidence tables and reconcile every cell, count, transition, fate, driver, parameter and version."
+              "Test expected withheld experimental-time or pseudotime transition deltas and report clamped terminal-state consistency without treating it as independent validation.",
+              "Compare justified kernel or connectivity-weight variants without averaging them, then reload H5AD and evidence tables and reconcile every cell, expression value, transition, fate, driver, parameter, and version."
             ],
             "template_files": [
               "templates/run_cellrank_fate.py"
@@ -32859,7 +32880,7 @@
         "single-cell-trajectory-velocity"
       ],
       "assumptions": [
-        "Fate probabilities describe transitions under the selected kernel and terminal-state definition; they do not prove clonal ancestry, and pseudotime and real-time optimal transport remain separate sensitivity models."
+        "Fate probabilities are conditional on the selected kernel, neighborhood, state representation, and terminal-state definition; they do not prove clonal ancestry. Velocity, connectivity blending, pseudotime, and real-time optimal transport remain separate sensitivity models."
       ],
       "compatibility_matrix": [
         {
@@ -32890,15 +32911,15 @@
             ]
           },
           "end_to_end_evidence_ids": [
-            "single-cell-fate-mapping-e2e-v1"
+            "single-cell-fate-mapping-e2e-v2"
           ],
-          "id": "agent-protocol-1-cellrank-232-moscot-051",
+          "id": "agent-protocol-2-cellrank-232-moscot-051-velocity",
           "input_formats": {
-            "time_resolved_single_cell_counts": [
+            "single_cell_dynamics_input": [
               "h5ad@0.1.0"
             ]
           },
-          "module_version": "1.0.0",
+          "module_version": "1.1.0",
           "output_formats": {
             "fate_mapping_evidence": [
               "h5ad@0.1.0",
@@ -32910,7 +32931,7 @@
             "any"
           ],
           "regression_evidence_ids": [
-            "single-cell-fate-mapping-regression-v1"
+            "single-cell-fate-mapping-regression-v2"
           ],
           "tool_versions": {
             "CellRank": [
@@ -32920,7 +32941,7 @@
               ">=0.5,<0.6"
             ]
           },
-          "verified_at": "2026-07-15"
+          "verified_at": "2026-07-23"
         }
       ],
       "complements": [
@@ -33146,7 +33167,7 @@
           "version_source": "https://ott-jax.readthedocs.io/"
         }
       ],
-      "description": "Direct Codex to construct separately reviewable pseudotime or moscot real-time transition kernels, estimate GPCCA fate probabilities toward declared terminal states, retain lineage-driver statistics, validate stochasticity and direction against experimental time, and preserve every source cell and raw count.",
+      "description": "Direct Codex to construct separately reviewable RegVelo or scVelo velocity, pseudotime, or moscot real-time transition kernels; estimate CellRank GPCCA fate probabilities toward evidence-backed terminal states; retain lineage-driver statistics; test withheld direction and kernel sensitivity; and preserve every source cell and declared expression layer.",
       "domains": [
         "omics",
         "statistics"
@@ -33154,9 +33175,11 @@
       "entrypoint": "agent-generated-analysis",
       "evidence_effects": [
         "adds_cellrank_gpcca_fate_probabilities",
+        "adds_regvelo_or_scvelo_velocity_kernel",
+        "adds_connectivity_weight_sensitivity",
         "adds_moscot_real_time_optimal_transport",
         "adds_lineage_driver_correlations",
-        "tests_kernel_direction_and_terminal_recovery"
+        "tests_kernel_direction_and_terminal_consistency"
       ],
       "execution": {
         "kind": "workflow",
@@ -33194,18 +33217,17 @@
               ]
             }
           ],
-          "name": "time_resolved_single_cell_counts",
+          "name": "single_cell_dynamics_input",
           "processing_levels": [
-            "count-backed",
-            "time-resolved",
+            "expression-semantics-declared",
+            "direction-backed",
             "terminal-state-anchored"
           ],
           "required_metadata": [
             "input-digest",
-            "raw-count-location",
-            "sample-key",
-            "experimental-time-key",
-            "pseudotime-key",
+            "expression-location-and-semantics",
+            "selected-kernel-inputs",
+            "withheld-direction-evidence",
             "terminal-state-key",
             "terminal-state-evidence",
             "cell-accounting"
@@ -33219,6 +33241,17 @@
             "type": "object"
           },
           "design_notes": {
+            "type": "string"
+          },
+          "expression_location": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "expression_semantics": {
+            "enum": [
+              "integer-counts",
+              "log-normalized-continuous"
+            ],
             "type": "string"
           },
           "input_artifact_id": {
@@ -33238,12 +33271,13 @@
           "pseudotime_key": {
             "type": "string"
           },
-          "raw_count_location": {
+          "representation_key": {
             "type": "string"
           },
           "requested_modes": {
             "items": {
               "enum": [
+                "velocity",
                 "pseudotime",
                 "real-time-optimal-transport"
               ],
@@ -33256,6 +33290,9 @@
           "sample_key": {
             "type": "string"
           },
+          "state_location": {
+            "type": "string"
+          },
           "terminal_state_key": {
             "type": "string"
           },
@@ -33266,16 +33303,17 @@
           },
           "time_key": {
             "type": "string"
+          },
+          "velocity_location": {
+            "type": "string"
           }
         },
         "required": [
           "objective",
           "input_artifact_id",
           "input_format",
-          "raw_count_location",
-          "sample_key",
-          "time_key",
-          "pseudotime_key",
+          "expression_location",
+          "expression_semantics",
           "terminal_state_key",
           "terminal_states",
           "requested_modes",
@@ -33286,15 +33324,17 @@
       },
       "intents": [
         "CellRank fate probabilities",
+        "RegVelo CellRank fate mapping",
+        "scVelo velocity kernel",
         "moscot optimal transport time course",
         "GPCCA terminal state fate mapping",
-        "\u5355\u7ec6\u80de\u547d\u8fd0\u6982\u7387 \u6700\u4f18\u4f20\u8f93 CellRank moscot"
+        "\u5355\u7ec6\u80de\u547d\u8fd0\u6982\u7387 RegVelo CellRank \u6700\u4f18\u4f20\u8f93"
       ],
       "kernel_compatibility": [
         ">=0.2.0,<0.3.0"
       ],
       "limitations": [
-        "Validated execution covers a three-time-point bifurcation with two declared terminal states using CellRank 2.3.2 PseudotimeKernel and moscot 0.5.1 TemporalProblem through RealTimeKernel. Fate probabilities depend on kernel, neighborhood, time sampling, and terminal definitions and do not establish clonal ancestry or condition-level inference. Environment and compute-resource management remain outside plugin scope."
+        "Validated execution covers CellRank 2.3.2 VelocityKernel with RegVelo state and velocity layers, velocity-plus-connectivity sensitivity, PseudotimeKernel, and moscot 0.5.1 TemporalProblem through RealTimeKernel. Public zebrafish neural-crest acceptance is conditional on one official dataset, one RegVelo-derived velocity field, four annotation-defined terminal states, and withheld stage direction; terminal-state consistency is partly imposed by GPCCA clamping and is not independent biological validation. Fate probabilities depend on kernel, neighborhood, representation, time sampling, and terminal definitions and do not establish clonal ancestry, causal regulation, or condition-level inference. Environment and compute-resource management remain outside plugin scope."
       ],
       "maturity": "experimental",
       "module_type": "analysis",
@@ -33460,12 +33500,13 @@
         "type": "object"
       },
       "preconditions": [
-        "The H5AD has immutable integer-like raw counts, unique cells and features, multiple biological samples, at least three ordered experimental times, a precomputed independent pseudotime, at least two evidence-backed terminal states, and new output paths."
+        "The H5AD has immutable declared expression values, unique cells and features, at least two evidence-backed terminal states, a mode-appropriate direction source, and new output paths. Velocity mode additionally requires aligned state and velocity matrices plus withheld time or pseudotime; real-time transport requires replicated sampling and at least three ordered times."
       ],
       "provenance": {
         "concept_sources": [
-          "Project-owned fate workflow separating pseudotime and experimental-time optimal-transport kernels.",
+          "Project-owned fate workflow separating velocity, connectivity-weight, pseudotime, and experimental-time optimal-transport kernels.",
           "https://cellrank.readthedocs.io/en/stable/",
+          "https://regvelo.readthedocs.io/en/stable/tutorials/zebrafish/tutorial.html",
           "https://moscot.readthedocs.io/"
         ],
         "license": "Apache-2.0"
@@ -33473,7 +33514,7 @@
       "quality_gates": [
         {
           "blocks_interpretation": true,
-          "description": "Block guessed count, sample, time, pseudotime, terminal-state, feature, or source-object semantics.",
+          "description": "Block guessed expression, velocity, state, representation, sample, time, pseudotime, terminal-state, feature, or source-object semantics; continuous expression is never rounded or relabelled as counts.",
           "id": "fate-input-semantics",
           "severity": "fatal"
         },
@@ -33485,34 +33526,34 @@
         },
         {
           "blocks_interpretation": true,
-          "description": "Terminal states require predeclared independent evidence and adequate cells; their own-fate probabilities must pass the frozen threshold.",
+          "description": "Terminal states require predeclared biological evidence and adequate cells; clamped terminal-state consistency is checked but is not misrepresented as independent validation.",
           "id": "fate-terminal-evidence",
           "severity": "fatal"
         },
         {
           "blocks_interpretation": true,
-          "description": "Expected transition direction must agree with withheld pseudotime and experimental time; a directed graph alone is insufficient.",
+          "description": "Expected transition direction must agree with a mode-appropriate withheld time or pseudotime field; a directed graph alone is insufficient.",
           "id": "fate-time-direction",
           "severity": "fatal"
         },
         {
           "blocks_interpretation": true,
-          "description": "Pseudotime and moscot optimal-transport kernels remain separately parameterized and reported; disagreement is sensitivity evidence.",
+          "description": "Velocity, velocity-plus-connectivity, pseudotime, and moscot optimal-transport kernels remain separately parameterized and reported; disagreement is sensitivity evidence.",
           "id": "fate-mode-separation",
           "severity": "fatal"
         },
         {
           "blocks_interpretation": true,
-          "description": "Reload H5AD, transition matrix, fate table, driver table, source counts, identities, parameters, versions, and quality status.",
+          "description": "Reload H5AD, transition matrix, fate table, driver table, source expression, identities, parameters, versions, and quality status.",
           "id": "fate-output-reload",
           "severity": "fatal"
         }
       ],
       "questions": [
-        "Which terminal fates are probabilistically supported for each cell, and are those conclusions stable to a pseudotime-directed versus experimental-time optimal-transport transition model?"
+        "Which terminal fates are probabilistically supported for each cell, and how sensitive are those conclusions to velocity, expression connectivity, pseudotime, or experimental-time transport assumptions?"
       ],
       "schema_version": 1,
-      "title": "Estimate single-cell fate with CellRank and real-time optimal transport",
+      "title": "Estimate single-cell fate across velocity, pseudotime, and real-time kernels",
       "tool_requirements": [
         {
           "allowed_versions": [
@@ -33529,7 +33570,7 @@
           "tested_versions": [
             "2.3.2"
           ],
-          "verified_at": "2026-07-15",
+          "verified_at": "2026-07-23",
           "version_differences": [
             {
               "affected_versions": [
@@ -33537,9 +33578,9 @@
               ],
               "category": "api",
               "compatibility_effect": "requires-parser",
-              "description": "Kernel construction, GPCCA terminal-state assignment, fate probabilities, and lineage-driver fields are release-coupled.",
+              "description": "Velocity, Connectivity, Pseudotime, RealTime, kernel composition, GPCCA terminal-state assignment, fate probabilities, and lineage-driver fields are release-coupled.",
               "id": "cellrank-kernel-gpcca-api",
-              "required_action": "Detect the release, validate transition and fate stochasticity, and reload all fields before widening support.",
+              "required_action": "Detect the release, validate transition and fate stochasticity, record every component weight, and reload all fields before widening support.",
               "source": "https://cellrank.readthedocs.io/en/stable/"
             }
           ],
@@ -33593,7 +33634,7 @@
           "version_source": "https://moscot.readthedocs.io/"
         }
       ],
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     {
       "access": "agent_generated",
@@ -50737,6 +50778,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "767f4a47deb04edb1bbdbae38e0340fff7f5bd9c4f4e1c1ee16deda4dd447a4d",
+  "registry_digest": "5127cc94973b065e50ca7a7fea46a98e39405ab0be4247d67fd5f2332826cd40",
   "schema_version": 1
 }

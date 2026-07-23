@@ -9,6 +9,10 @@
         "A": 1.0,
         "B": 1.0
       },
+      "terminal_state_consistency": {
+        "A": 1.0,
+        "B": 1.0
+      },
       "transition_nonzero": 2179
     },
     "pseudotime": {
@@ -20,10 +24,29 @@
         "A": 1.0,
         "B": 1.0
       },
+      "terminal_state_consistency": {
+        "A": 1.0,
+        "B": 1.0
+      },
+      "transition_nonzero": 4932
+    },
+    "velocity": {
+      "driver_rows": 80,
+      "expected_experimental_time_delta": 0.5519339037268858,
+      "expected_pseudotime_delta": 0.2770825941588685,
+      "maximum_fate_vs_time_spearman": 0.7910610460260288,
+      "terminal_own_fate": {
+        "A": 1.0,
+        "B": 1.0
+      },
+      "terminal_state_consistency": {
+        "A": 1.0,
+        "B": 1.0
+      },
       "transition_nonzero": 4932
     }
   },
-  "compatibility_row_id": "agent-protocol-1-cellrank-232-moscot-051",
+  "compatibility_row_id": "agent-protocol-2-cellrank-232-moscot-051-velocity",
   "dependency_versions": {
     "anndata": "0.13.2",
     "jax": "0.10.2",
@@ -35,24 +58,26 @@
     "scipy": "1.16.3"
   },
   "execution": {
+    "connectivity_sensitivity_completed": true,
     "gpcca_completed": true,
     "optimal_transport_completed": true,
     "outputs_reloaded": true,
-    "pseudotime_kernel_completed": true
+    "pseudotime_kernel_completed": true,
+    "velocity_kernel_completed": true
   },
   "fixture": {
     "cells": 240,
     "genes": 80,
     "samples": 6,
-    "sha256": "18cf2cdbbd1832c069468be58ca5e7fcb13f34e3f30f3077a9dc9d2e491a9cc2",
+    "sha256": "138bee1f483ace475c435e1e644fe6e47ce661646f8594e1cd9608767be9f7c0",
     "terminal_states": 2,
     "time_points": 3
   },
   "module_id": "single-cell-fate-mapping",
-  "module_version": "1.0.0",
+  "module_version": "1.1.0",
   "passed": true,
-  "registry_digest": "767f4a47deb04edb1bbdbae38e0340fff7f5bd9c4f4e1c1ee16deda4dd447a4d",
-  "schema_version": 1,
+  "registry_digest": "5127cc94973b065e50ca7a7fea46a98e39405ab0be4247d67fd5f2332826cd40",
+  "schema_version": 2,
   "scientific_summary": {
     "declared_terminal_states_recovered": true,
     "experimental_time_direction_checked": true,
@@ -60,14 +85,15 @@
     "lineage_drivers_retained": true,
     "no_environment_or_compute_infrastructure_managed": true,
     "outputs_reloaded": true,
-    "pseudotime_and_optimal_transport_kernels_executed": true,
     "source_counts_and_identifiers_preserved": true,
-    "two_transport_pairs_solved": true
+    "two_transport_pairs_solved": true,
+    "velocity_connectivity_weight_recorded": true,
+    "velocity_pseudotime_and_optimal_transport_kernels_executed": true
   },
   "templates": {
     "cellrank": {
       "name": "run_cellrank_fate.py",
-      "sha256": "66469fa6686979787f36d6681d90ed041b811624d0823785aeb8c0b56062cf1d"
+      "sha256": "ea4af5a40b71e24c70fde5014382c16cf0716315dbe97d3a974d1793e9a242bf"
     }
   },
   "tool_versions": {

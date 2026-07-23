@@ -498,6 +498,139 @@ def main() -> int:
                 errors.append(
                     "zebrafish RegVelo public-data case differs from its official artifacts, continuous-layer contract, module, template, execution, withheld-stage direction, mode sensitivity, or scientific gates"
                 )
+        zebrafish_cellrank_report_path = (
+            ROOT / "reports" / "public-case-zebrafish-cellrank.json"
+        )
+        zebrafish_cellrank_root = BUILTIN_ROOT / "single-cell-fate-mapping"
+        try:
+            zebrafish_cellrank_report = json.loads(
+                zebrafish_cellrank_report_path.read_text(encoding="utf-8")
+            )
+            zebrafish_cellrank_manifest = registry.get(
+                "single-cell-fate-mapping"
+            )
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append(
+                "zebrafish CellRank public-data acceptance case is missing or invalid"
+            )
+        else:
+            cellrank_source = zebrafish_cellrank_report.get("source", {})
+            cellrank_execution = zebrafish_cellrank_report.get("execution", {})
+            cellrank_repeat = cellrank_execution.get(
+                "deterministic_repeat", {}
+            )
+            cellrank_direction = cellrank_execution.get(
+                "withheld_stage_direction", {}
+            )
+            cellrank_sensitivity = cellrank_execution.get(
+                "connectivity_sensitivity", {}
+            )
+            cellrank_gates = zebrafish_cellrank_report.get(
+                "quality_gates", {}
+            )
+            if (
+                zebrafish_cellrank_report.get("passed") is not True
+                or zebrafish_cellrank_report.get("case_type")
+                != "public-data-end-to-end"
+                or zebrafish_cellrank_report.get("module", {}).get("id")
+                != zebrafish_cellrank_manifest.id
+                or zebrafish_cellrank_report.get("module", {}).get("version")
+                != zebrafish_cellrank_manifest.version
+                or zebrafish_cellrank_report.get("module", {}).get(
+                    "compatibility_row_id"
+                )
+                != zebrafish_cellrank_manifest.compatibility_matrix[0].id
+                or zebrafish_cellrank_report.get("module", {}).get(
+                    "manifest_sha256"
+                )
+                != hashlib.sha256(
+                    (zebrafish_cellrank_root / "module.json").read_bytes()
+                ).hexdigest()
+                or zebrafish_cellrank_report.get("module", {}).get(
+                    "template_sha256"
+                )
+                != hashlib.sha256(
+                    (
+                        zebrafish_cellrank_root
+                        / "templates"
+                        / "run_cellrank_fate.py"
+                    ).read_bytes()
+                ).hexdigest()
+                or cellrank_source.get("official_h5ad_sha256")
+                != "eccab081c44cfe335b726aec8172bbcda072241b4f006f6420bb5d46d39611cb"
+                or cellrank_source.get("upstream_report_sha256")
+                != hashlib.sha256(
+                    zebrafish_regvelo_report_path.read_bytes()
+                ).hexdigest()
+                or cellrank_source.get("validation", {}).get("cells") != 697
+                or cellrank_source.get("validation", {}).get("features")
+                != 1008
+                or cellrank_source.get("validation", {}).get(
+                    "expression_semantics"
+                )
+                != "log-normalized-continuous"
+                or cellrank_source.get("validation", {}).get(
+                    "velocity_finite_signed"
+                )
+                is not True
+                or zebrafish_cellrank_report.get("runtime", {}).get(
+                    "cellrank"
+                )
+                != "2.3.2"
+                or cellrank_execution.get("independent_template_runs") != 3
+                or cellrank_execution.get("pure_velocity_runs") != 2
+                or cellrank_execution.get("velocity_connectivity_runs") != 1
+                or cellrank_execution.get("source_expression_preserved")
+                is not True
+                or cellrank_execution.get("outputs_reloaded") is not True
+                or set(cellrank_repeat)
+                != {
+                    "fate_probabilities",
+                    "fate_table",
+                    "transition_matrix",
+                }
+                or any(
+                    item.get("exactly_equal") is not True
+                    or item.get("maximum_absolute_difference") != 0
+                    for item in cellrank_repeat.values()
+                )
+                or cellrank_direction.get("stage_used_for_fitting")
+                is not False
+                or cellrank_direction.get("expected_deltas", {}).get(
+                    "pure_velocity", 0
+                )
+                <= 0
+                or cellrank_direction.get("expected_deltas", {}).get(
+                    "velocity_connectivity", 0
+                )
+                <= 0
+                or cellrank_sensitivity.get("blended_connectivity_weight")
+                != 0.2
+                or cellrank_sensitivity.get("flattened_fate_pearson", 0)
+                < cellrank_sensitivity.get("thresholds", {}).get(
+                    "minimum_flattened_fate_pearson", 1
+                )
+                or cellrank_sensitivity.get(
+                    "maximum_absolute_fate_difference", 1
+                )
+                > cellrank_sensitivity.get("thresholds", {}).get(
+                    "maximum_absolute_fate_difference", 0
+                )
+                or cellrank_sensitivity.get("gate") != "pass"
+                or cellrank_gates.get("terminal_state_consistency")
+                != "pass-not-independent"
+                or set(cellrank_gates.values())
+                != {"pass", "pass-with-warning", "pass-not-independent"}
+                or set(
+                    zebrafish_cellrank_report.get(
+                        "methods_not_run", {}
+                    ).values()
+                )
+                != {"not-run"}
+            ):
+                errors.append(
+                    "zebrafish CellRank public-data case differs from its admitted RegVelo input, velocity-kernel contract, exact repeat, withheld-stage direction, sensitivity bounds, or scientific claim limits"
+                )
         gse96583_report_path = ROOT / "reports" / "public-case-gse96583-donor-inference.json"
         gse96583_root = BUILTIN_ROOT / "single-cell-donor-inference"
         try:

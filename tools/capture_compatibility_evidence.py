@@ -143,8 +143,8 @@ AGENT_EVIDENCE = {
     },
     "single-cell-fate-mapping": {
         "path": "reports/single-cell-fate-mapping-live-verification.json",
-        "execution_flags": ("pseudotime_kernel_completed", "optimal_transport_completed", "gpcca_completed", "outputs_reloaded"),
-        "summary_flags": ("pseudotime_and_optimal_transport_kernels_executed", "two_transport_pairs_solved", "gpcca_fate_probabilities_sum_to_one", "declared_terminal_states_recovered", "lineage_drivers_retained", "experimental_time_direction_checked", "source_counts_and_identifiers_preserved", "outputs_reloaded", "no_environment_or_compute_infrastructure_managed"),
+        "execution_flags": ("velocity_kernel_completed", "connectivity_sensitivity_completed", "pseudotime_kernel_completed", "optimal_transport_completed", "gpcca_completed", "outputs_reloaded"),
+        "summary_flags": ("velocity_pseudotime_and_optimal_transport_kernels_executed", "velocity_connectivity_weight_recorded", "two_transport_pairs_solved", "gpcca_fate_probabilities_sum_to_one", "declared_terminal_states_recovered", "lineage_drivers_retained", "experimental_time_direction_checked", "source_counts_and_identifiers_preserved", "outputs_reloaded", "no_environment_or_compute_infrastructure_managed"),
         "live_dependency_keys": ("python", "scanpy", "anndata", "numpy", "pandas", "scipy", "jax", "ott-jax"),
     },
     "single-cell-trajectory-topology": {

@@ -32,7 +32,8 @@ class SingleCellFateTopologyEvidenceTests(unittest.TestCase):
     def test_fate_backends_and_topology_gene_tests_pass(self):
         fate = json.loads((ROOT / "reports" / "single-cell-fate-mapping-live-verification.json").read_text())
         topology = json.loads((ROOT / "reports" / "single-cell-trajectory-topology-live-verification.json").read_text())
-        self.assertTrue(fate["scientific_summary"]["pseudotime_and_optimal_transport_kernels_executed"])
+        self.assertTrue(fate["scientific_summary"]["velocity_pseudotime_and_optimal_transport_kernels_executed"])
+        self.assertTrue(fate["scientific_summary"]["velocity_connectivity_weight_recorded"])
         self.assertEqual(fate["backend_summaries"]["optimal_transport"]["terminal_own_fate"], {"A": 1.0, "B": 1.0})
         self.assertGreater(topology["results"]["slingshot_external_time_spearman"], 0.9)
         self.assertGreater(topology["results"]["monocle3_external_time_spearman"], 0.9)
