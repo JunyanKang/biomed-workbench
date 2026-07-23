@@ -1,0 +1,120 @@
+{
+  "case_id": "pbmc3k-foundation-public-data-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "adjacent_resolution_ari": [
+      {
+        "adjusted_rand_index": 0.8564137327042023,
+        "left": "leiden_0.4",
+        "right": "leiden_0.8"
+      }
+    ],
+    "cluster_counts": {
+      "leiden_0.4": 6,
+      "leiden_0.8": 9
+    },
+    "excluded_cells": 62,
+    "exclusion_reason_counts": {
+      "high-features": 5,
+      "high-mitochondrial-fraction": 57
+    },
+    "input_cells": 2700,
+    "input_features": 32738,
+    "minimum_cluster_sizes": {
+      "leiden_0.4": 12,
+      "leiden_0.8": 13
+    },
+    "reload_validation": {
+      "cluster_keys_present": true,
+      "ephemeral_output_sha256": "4fa5a599b36c1facf89ede40636b77659edf510758dcb6f26ea2f0408d28c042",
+      "neighbor_graph_present": true,
+      "pca_present": true,
+      "raw_counts_integer": true,
+      "raw_counts_present": true,
+      "shape_matches_report": true,
+      "umap_present": true
+    },
+    "retained_cells": 2638,
+    "retained_features": 13656
+  },
+  "methods_not_run": {
+    "ambient_rna": "not-run",
+    "doublet": "not-run",
+    "empty_droplet": "not-run"
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-scanpy-110-or-seurat-52",
+    "id": "single-cell-foundation-workflow",
+    "manifest_sha256": "b691e3888e71aad593a1fe621bd456e36afc53103e1cb7c603afeca265e8fb20",
+    "template_sha256": "de901030184e4a32467a289e276d2d159da178c26c3d5aa450664a4cbd6fb446",
+    "version": "1.0.0"
+  },
+  "parameters": {
+    "cluster_method": "leiden",
+    "highly_variable_genes": 2000,
+    "maximum_genes_per_cell": 2500,
+    "maximum_mitochondrial_percent": 5,
+    "minimum_cells_per_gene": 3,
+    "minimum_genes_per_cell": 200,
+    "neighbors": 10,
+    "normalization_target_sum": 10000,
+    "principal_components": 40,
+    "random_seed": 0,
+    "resolutions": [
+      0.4,
+      0.8
+    ],
+    "scope": "reproducible public-case baseline, not universal biological defaults"
+  },
+  "passed": true,
+  "quality_gates": {
+    "complete_cell_accounting": "pass",
+    "finite_nonnegative_integer_counts": "pass",
+    "matrix_identity_and_orientation": "pass",
+    "official_archive_digest": "pass",
+    "pca_neighbor_umap_and_clustering": "pass",
+    "raw_count_preservation": "pass",
+    "serialized_output_reload": "pass",
+    "unexecuted_methods_explicit": "pass"
+  },
+  "runtime": {
+    "anndata": "0.11.4",
+    "igraph": "0.11.8",
+    "leidenalg": "0.10.2",
+    "numpy": "2.2.5",
+    "pandas": "2.3.3",
+    "scanpy": "1.11.5",
+    "scikit-learn": "1.7.2",
+    "scipy": "1.15.3",
+    "umap-learn": "0.5.12"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "The source is a filtered matrix, so empty-droplet calling cannot be evaluated from this artifact.",
+    "Ambient RNA correction and doublet detection were not run and no negative finding is claimed.",
+    "The dataset represents one healthy donor; it cannot support donor-aware condition inference, differential abundance, population generalization, or causal claims.",
+    "Clusters are technical workflow outputs until marker, reference, ontology, sample-composition, and unknown-state review is completed.",
+    "The recorded thresholds reproduce this bounded public case and are not universal defaults for another chemistry, tissue, organism, or study design."
+  ],
+  "source": {
+    "archive": "pbmc3k_filtered_gene_bc_matrices.tar.gz",
+    "assay": "single-cell 3-prime gene expression",
+    "dataset": "3k PBMCs from a healthy donor",
+    "documented_shape": [
+      2700,
+      32738
+    ],
+    "publisher": "10x Genomics",
+    "sha256": "847d6ebd9a1ec9a768f2be7e40ca42cbfe75ebeb6d76a4c24167041699dc28b5",
+    "source_validation": {
+      "cells": 2700,
+      "features": 32738,
+      "integer_nonnegative_counts": true,
+      "nonzero_counts": 2286884,
+      "total_umis": 6390631,
+      "unique_cell_ids": true,
+      "unique_feature_ids": true
+    },
+    "url": "https://cf.10xgenomics.com/samples/cell-exp/1.1.0/pbmc3k/pbmc3k_filtered_gene_bc_matrices.tar.gz"
+  }
+}

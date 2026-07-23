@@ -292,6 +292,48 @@ def main() -> int:
                 or not re.fullmatch(r"[0-9a-f]{64}", communication_report.get("cellphonedb_database", {}).get("sha256", ""))
             ):
                 errors.append("single-cell communication verification differs from its module, fixture, or four validated backends")
+        pbmc3k_report_path = ROOT / "reports" / "public-case-pbmc3k-foundation.json"
+        pbmc3k_template_path = (
+            BUILTIN_ROOT
+            / "single-cell-foundation-workflow"
+            / "templates"
+            / "scanpy_foundation.py"
+        )
+        pbmc3k_manifest_path = BUILTIN_ROOT / "single-cell-foundation-workflow" / "module.json"
+        try:
+            pbmc3k_report = json.loads(pbmc3k_report_path.read_text(encoding="utf-8"))
+            pbmc3k_manifest = registry.get("single-cell-foundation-workflow")
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append("PBMC3k public-data acceptance case is missing or invalid")
+        else:
+            execution = pbmc3k_report.get("execution", {})
+            reload_validation = execution.get("reload_validation", {})
+            if (
+                pbmc3k_report.get("passed") is not True
+                or pbmc3k_report.get("case_type") != "public-data-end-to-end"
+                or pbmc3k_report.get("module", {}).get("id") != pbmc3k_manifest.id
+                or pbmc3k_report.get("module", {}).get("version") != pbmc3k_manifest.version
+                or pbmc3k_report.get("module", {}).get("compatibility_row_id")
+                != pbmc3k_manifest.compatibility_matrix[0].id
+                or pbmc3k_report.get("module", {}).get("manifest_sha256")
+                != hashlib.sha256(pbmc3k_manifest_path.read_bytes()).hexdigest()
+                or pbmc3k_report.get("module", {}).get("template_sha256")
+                != hashlib.sha256(pbmc3k_template_path.read_bytes()).hexdigest()
+                or pbmc3k_report.get("source", {}).get("sha256")
+                != "847d6ebd9a1ec9a768f2be7e40ca42cbfe75ebeb6d76a4c24167041699dc28b5"
+                or pbmc3k_report.get("source", {}).get("documented_shape") != [2700, 32738]
+                or pbmc3k_report.get("runtime", {}).get("scanpy") != "1.11.5"
+                or execution.get("input_cells") != 2700
+                or execution.get("retained_cells", 0) + execution.get("excluded_cells", 0)
+                != execution.get("input_cells")
+                or execution.get("retained_features", 0) < 10000
+                or any(value is not True for key, value in reload_validation.items() if key != "ephemeral_output_sha256")
+                or set(pbmc3k_report.get("quality_gates", {}).values()) != {"pass"}
+                or set(pbmc3k_report.get("methods_not_run", {}).values()) != {"not-run"}
+            ):
+                errors.append(
+                    "PBMC3k public-data case differs from its source, module, template, runtime, execution, or scientific gates"
+                )
         public_database_report_path = ROOT / "reports" / "public-database-live-verification.json"
         public_database_module_ids = {
             "citation-record-resolution",

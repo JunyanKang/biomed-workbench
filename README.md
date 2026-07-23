@@ -77,6 +77,8 @@ Then open a **new Codex task** so the `biomed-workbench` skill is loaded. See [i
 - [Using Biomed Workbench](docs/using-biomed-workbench.md)
 - [Installation and updates](docs/installation.md)
 - [Reproducibility and compatibility](docs/reproducibility.md)
+- [Public-data acceptance cases](docs/cases/README.md)
+- [Capability maturity and evidence](docs/maturity.md)
 - [Architecture and module extension](docs/architecture.md)
 - [Format contracts](docs/format-contracts.md)
 - [Development and release](docs/development.md)
