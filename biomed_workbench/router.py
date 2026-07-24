@@ -115,7 +115,7 @@ def _matched_features(module: ModuleManifest, query: str) -> set[str]:
 
 
 def _select_ranked_modules(
-    ranked: list[tuple[float, ModuleManifest, list[str]]], query: str
+    ranked: list[tuple[float, ModuleManifest, list[str]]], query: str, *, max_selected: int
 ) -> list[str]:
     """Select a compact, nonredundant module set without module-specific rules."""
     if not ranked:
@@ -147,7 +147,7 @@ def _select_ranked_modules(
     for item in ranked:
         score, module, reasons = item
         selected_ids = {chosen[1].id for chosen in selected}
-        if module.id in selected_ids or score < threshold or len(selected) >= 10:
+        if module.id in selected_ids or score < threshold or len(selected) >= max_selected:
             continue
         if not reasons or all(reason.startswith("available in matched workflow") for reason in reasons):
             continue
@@ -314,8 +314,8 @@ def score_capability(
 
 
 def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None = None) -> dict[str, Any]:
-    if not query.strip() or not 1 <= per_workflow <= 10:
-        raise ValueError("query must be nonempty and per_workflow must be 1..10")
+    if not query.strip() or not 1 <= per_workflow <= 30:
+        raise ValueError("query must be nonempty and per_workflow must be 1..30")
     active = registry or _DEFAULT_REGISTRY
     workflows = infer_workflows(query, registry=active)
     grouped: dict[str, list[tuple[float, ModuleManifest, list[str]]]] = defaultdict(list)
@@ -331,7 +331,7 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
         ranked = sorted(grouped[workflow], key=lambda item: (-item[0], item[1].id))
         ranked = [item for item in ranked if item[1].id not in assigned_modules]
         selected_by_workflow[workflow] = _order_by_artifact_dependencies(
-            _select_ranked_modules(ranked, query),
+            _select_ranked_modules(ranked, query, max_selected=max(per_workflow, 10)),
             active,
         )
         selected_ids = set(selected_by_workflow[workflow])

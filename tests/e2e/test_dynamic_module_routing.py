@@ -87,6 +87,50 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         self.assertIn("single-cell-fate-mapping", selected)
         self.assertIn("omics", plan["matched_workflows"])
 
+    def test_explicit_single_cell_module_bundle_routes_without_regression_to_subset(self):
+        import json
+        from pathlib import Path
+
+        target_modules = {
+            "single-cell-atac-regulatory",
+            "single-cell-atlas-annotation",
+            "single-cell-batch-integration",
+            "single-cell-communication",
+            "single-cell-complex-inference",
+            "single-cell-donor-inference",
+            "single-cell-doublet-detection",
+            "single-cell-droplet-decontamination",
+            "single-cell-fate-mapping",
+            "single-cell-marker-discovery",
+            "single-cell-multimodal-integration",
+            "single-cell-qc",
+            "single-cell-reference-annotation",
+            "single-cell-regulatory-network",
+            "single-cell-regulatory-velocity",
+            "single-cell-spatial-analysis",
+            "single-cell-trajectory-topology",
+            "single-cell-trajectory-velocity",
+        }
+        module_roots = [
+            Path(__file__).resolve().parents[2]
+            / "biomed_workbench"
+            / "modules"
+            / "builtin"
+            / module_id
+            / "module.json"
+            for module_id in sorted(target_modules)
+        ]
+        intent_fragments = [
+            json.loads(path.read_text(encoding="utf-8")).get("intents", [])[0]
+            for path in module_roots
+            if path.exists()
+        ]
+        plan = route(", ".join(intent_fragments), per_workflow=30)
+        selected = set(plan["selected_module_ids"])
+
+        self.assertTrue(target_modules.issubset(selected))
+        self.assertIn("omics", plan["matched_workflows"])
+
     def test_multi_method_annotation_consensus_routes_to_atlas_annotation(self):
         plan = route(
             "Reconcile CellTypist Azimuth popV SingleR and scANVI annotations with "
