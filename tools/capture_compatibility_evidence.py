@@ -547,7 +547,13 @@ def capture() -> dict[str, object]:
             result, _fallback = _safe_capability_run(manifest.id, case)
             _assert_subset(case["output"], result)
             e2e_digest = digest_value(
-                {**context, "kind": "end-to-end", "objective": plan["objective"], "plan_type": plan["plan_type"], "output": result}
+                {
+                    **context,
+                    "kind": "end-to-end",
+                    "objective": plan["objective"],
+                    "plan_type": plan["plan_type"],
+                    "validated_output_contract": case["output"],
+                }
             )
         regression_match = re.fullmatch(r".+-v([1-9][0-9]*)", row.regression_evidence_ids[0]) if len(row.regression_evidence_ids) == 1 else None
         e2e_match = re.fullmatch(r".+-v([1-9][0-9]*)", row.end_to_end_evidence_ids[0])
