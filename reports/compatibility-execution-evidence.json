@@ -1162,12 +1162,12 @@
           "end_to_end_evidence_ids": [
             "assembly-reference-alignment-e2e-v1"
           ],
-          "id": "agent-protocol-1-minimap2-231-python-3143-fasta-paf",
+          "id": "agent-protocol-1-minimap2-226-231-python-3143-fasta-paf",
           "module_version": "0.1.0",
           "regression_evidence_ids": [
             "assembly-reference-alignment-regression-v1"
           ],
-          "verified_at": "2026-07-23"
+          "verified_at": "2026-07-27"
         }
       ],
       "dependencies": [
@@ -1348,7 +1348,7 @@
       "tools": [
         {
           "allowed_versions": [
-            ">=2.31,<2.32"
+            ">=2.24,<2.32"
           ],
           "ecosystem": "system",
           "identity": "minimap2",
@@ -1359,17 +1359,18 @@
           ],
           "required": true,
           "tested_versions": [
+            "2.26",
             "2.31"
           ],
-          "verified_at": "2026-07-23",
+          "verified_at": "2026-07-27",
           "version_differences": [
             {
               "affected_versions": [
-                ">=2.31,<2.32"
+                ">=2.24,<2.32"
               ],
               "category": "behavior",
               "compatibility_effect": "requires-parser",
-              "description": "Preset heuristics, chaining and PAF tags are release-coupled.",
+              "description": "Preset heuristics, chaining and PAF tags are release-coupled; the template records the observed version and reloads PAF before admitting interpretation.",
               "id": "minimap2-preset-paf",
               "required_action": "Record exact preset and version and reload PAF before interpretation.",
               "source": "https://github.com/lh3/minimap2"
@@ -1382,7 +1383,7 @@
           ],
           "version_probe_kind": "command",
           "version_probe_timeout_seconds": 30,
-          "version_source": "https://github.com/lh3/minimap2/releases/tag/v2.31"
+          "version_source": "https://github.com/lh3/minimap2/releases"
         }
       ],
       "validation_status": "complete"
@@ -4706,12 +4707,12 @@
           "end_to_end_evidence_ids": [
             "comparative-sequence-phylogeny-e2e-v1"
           ],
-          "id": "agent-protocol-1-mafft-7526-iqtree3-312-biopython-186",
+          "id": "agent-protocol-1-mafft-7505-7526-iqtree3-312-biopython-186",
           "module_version": "0.1.0",
           "regression_evidence_ids": [
             "comparative-sequence-phylogeny-regression-v1"
           ],
-          "verified_at": "2026-07-23"
+          "verified_at": "2026-07-27"
         }
       ],
       "dependencies": [
@@ -4943,7 +4944,7 @@
       "tools": [
         {
           "allowed_versions": [
-            ">=7.520,<8"
+            ">=7.505,<8"
           ],
           "ecosystem": "system",
           "identity": "mafft",
@@ -4954,17 +4955,18 @@
           ],
           "required": true,
           "tested_versions": [
+            "7.505",
             "7.526"
           ],
-          "verified_at": "2026-07-23",
+          "verified_at": "2026-07-27",
           "version_differences": [
             {
               "affected_versions": [
-                ">=7.520,<8"
+                ">=7.505,<8"
               ],
               "category": "behavior",
               "compatibility_effect": "requires-parser",
-              "description": "Automatic strategy selection and command-line output behavior are release-coupled.",
+              "description": "Automatic strategy selection and command-line output behavior are release-coupled; the template records the observed version with alignment output.",
               "id": "mafft-auto-and-thread-cli",
               "required_action": "Capture exact command, output, version and record accounting; do not use an unvalidated fallback aligner.",
               "source": "https://mafft.cbrc.jp/alignment/software/"
@@ -34851,7 +34853,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "4ae6320868b355bb5224c9b483b31c0cae5e2663a2fc4100064c6c01d719063a",
+        "digest": "04f8191fcf859f247a67f4d3521993a8c032f7eb81e65850a4e236ed18870ac3",
         "id": "alphafold-structure-evidence-e2e-v1",
         "passed": true
       },
@@ -34923,7 +34925,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "801c9ba9c97f7fb912729499dd6541bb1c7973d4254dc85b74adc081a36b9eeb",
+        "digest": "78259eb88b73b8ce41c7da82464c77d6430c93d22e85e4e10f4c55f47013c232",
         "id": "archs4-expression-evidence-e2e-v1",
         "passed": true
       },
@@ -34961,7 +34963,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "6c506f5aabbf5c75b5410b2b29c7c6cee493b413f5d6efb644b5ed9bd78a3fa3",
+        "digest": "88e95cdecfe28c0d34becdaa0208cd6528848024945c87a0ce460fded22a3413",
         "id": "assembly-reference-alignment-e2e-v1",
         "passed": true
       },
@@ -34983,18 +34985,18 @@
         ]
       },
       "regression": {
-        "digest": "f9337c668886ca317982b013876e66d1aa2cf73440eb50eb3506e64b68f655d3",
+        "digest": "c217b748c4c0ff8f63e8eddd5f145274029749ed3f4903f7696a81f2cd4b4ef0",
         "id": "assembly-reference-alignment-regression-v1",
         "passed": true
       },
-      "row_id": "agent-protocol-1-minimap2-231-python-3143-fasta-paf",
+      "row_id": "agent-protocol-1-minimap2-226-231-python-3143-fasta-paf",
       "supplemental_end_to_end": [],
       "tool_versions": {
         "minimap2": [
-          ">=2.31,<2.32"
+          ">=2.24,<2.32"
         ]
       },
-      "verified_at": "2026-07-23"
+      "verified_at": "2026-07-27"
     },
     {
       "dependency_versions": {
@@ -35356,7 +35358,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "f46be5c29531d3b87dff775740a4ebd31f8554dc1f2ec769ab6309ebc8995a2d",
+        "digest": "acb4d9f867fbb4df3e06b4861a29f297d3752c21a271d6c412c57a83197fccd5",
         "id": "cfu-enumeration-e2e-v1",
         "passed": true
       },
@@ -35394,7 +35396,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "dd5a25b0138c0519891f2596c25e3f37051f53bf299474c1255d6ad9d2778f5e",
+        "digest": "26e6f04d9ac6c780fd169feba3261c4471d1a03301a4d61252a49046b05fa724",
         "id": "chemical-evidence-e2e-v1",
         "passed": true
       },
@@ -35432,7 +35434,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "49000086af8a442f47a3705cd009ca770265c4677fe6d86b3b897f8598c346c9",
+        "digest": "53b93605544f29942bf492839f2b5a638a926999e9026e69a1a22a48f288a46a",
         "id": "chemical-substructure-filter-e2e-v1",
         "passed": true
       },
@@ -35507,7 +35509,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "086f63d0c2d375f3a918f110b05562b5574bd0d4a617a24f9386c37f2eb9884d",
+        "digest": "36be699f48e9ebbd20794e251bd0b1526aab0963f3e35e40f9ce188e912a9afc",
         "id": "citation-record-resolution-e2e-v1",
         "passed": true
       },
@@ -35752,7 +35754,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "d710b8b20ccb570c204af29f6dc8f9c02aedc36ef0dc0706bf5ffefc1d359975",
+        "digest": "0c7fc9d5b6c9231bf2c49dd60d4534d72f68c4579d736a9742506544bfe781dc",
         "id": "clinical-trial-evidence-e2e-v1",
         "passed": true
       },
@@ -35827,7 +35829,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "2a5579bbe5da74384a86a9a2c901e0650ffe430b4e39da4d28fb1c6062fb54cb",
+        "digest": "246da5ccd565014527ac72d1d5c66e7b3737e86d30c83020579f934733bd29e2",
         "id": "comparative-sequence-phylogeny-e2e-v1",
         "passed": true
       },
@@ -35850,21 +35852,21 @@
         ]
       },
       "regression": {
-        "digest": "ebc33dc8b407912f8889dc8323a1bdcd632d51f1063eafecb0eb4b9dd2fbe60d",
+        "digest": "73e4705d8a19bd93093dfb14eb39ae9a86971d025c222192520a68a3118daba7",
         "id": "comparative-sequence-phylogeny-regression-v1",
         "passed": true
       },
-      "row_id": "agent-protocol-1-mafft-7526-iqtree3-312-biopython-186",
+      "row_id": "agent-protocol-1-mafft-7505-7526-iqtree3-312-biopython-186",
       "supplemental_end_to_end": [],
       "tool_versions": {
         "iqtree": [
           ">=3.1,<3.2"
         ],
         "mafft": [
-          ">=7.520,<8"
+          ">=7.505,<8"
         ]
       },
-      "verified_at": "2026-07-23"
+      "verified_at": "2026-07-27"
     },
     {
       "dependency_versions": {
@@ -36018,7 +36020,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "04e68a9f8d572066efd1de6ec8a1db412d50bfcfdb2686702f70301220257474",
+        "digest": "22e8bf57f6fe9e768c7b07649d96b1aa457a266e6b054bf0c5b63ca5f597d723",
         "id": "dbsnp-rsid-evidence-e2e-v1",
         "passed": true
       },
@@ -36199,7 +36201,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "d18cf07a49ed4167bda18e54e796217d5fe112fae8d1034423f05b015f34a7fc",
+        "digest": "9dbd4261228bc5c52e74c953030fab939f08a10376376105f987ef0600334c0e",
         "id": "dna-content-phase-fit-e2e-v1",
         "passed": true
       },
@@ -36237,7 +36239,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "bbe0c45460ee61c3e0483f4ef90cfa5e11500f7504aa2cc219b7df068705b329",
+        "digest": "b319ace3d9c684b5d355a84583d3c2e6944f26ab9d26d6e99cbe64bda8a26e43",
         "id": "docking-pose-review-e2e-v1",
         "passed": true
       },
@@ -36433,7 +36435,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "7252f8cfa4e8bbc8d2003004f60c56caefd4f976f1b82a1b3e03256d5abb5cd2",
+        "digest": "0b003aa316fa9402ac0985ca2e34faa03663be8640c2913b181ea4e19bf7adac",
         "id": "ensembl-gene-evidence-e2e-v1",
         "passed": true
       },
@@ -36539,7 +36541,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "df92feea121efd95f8bdfcb9b97a6445f383885a44b916f10829c9f986cd1099",
+        "digest": "03daac2ac3eb5028ec89772847e3ad4fd464b6de89df88976cadbec8dadd8d6c",
         "id": "fcs-event-import-e2e-v1",
         "passed": true
       },
@@ -36616,7 +36618,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "d004d3f93d11bbaffc4d8dc4f77e53d0bbdf2761082043cd55e1ceace35af044",
+        "digest": "e7b9fa4252931d6f3622e99df09188d68b1692026b1c58042a2fb6cdc50887b9",
         "id": "fixed-period-cosinor-e2e-v1",
         "passed": true
       },
@@ -36725,7 +36727,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "ecb540016d2de6f32c6c6c07ccf2d55b813f9c5fcdc50e1d183706d0f29b21cd",
+        "digest": "fbc5c0a2e8725c3af5a2acd4a0631ccdca2f0bc0676f8581d91225d46efaaab3",
         "id": "genbank-coding-sequence-extraction-e2e-v1",
         "passed": true
       },
@@ -36763,7 +36765,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "b33e8c8e3de0742a1f3e79f2eb44d77f5b3ea271f9e2a9405b13c32eb9121e72",
+        "digest": "aeed9cdd9082c617680f9c9e39c8ff23b047979b15a1d402185c19bf14212ff2",
         "id": "gene-evidence-e2e-v1",
         "passed": true
       },
@@ -36801,7 +36803,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "483bb6dcdf99ecafefb1e50b1c60d307cd45aadc9354069fd4d6654bc08926fd",
+        "digest": "4b7a1976482818128b14134c7da1e365c9b06d55d1a49e82b6486d183183c2f1",
         "id": "gene-identifier-resolution-e2e-v1",
         "passed": true
       },
@@ -36839,7 +36841,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "a53ad6fe26d30fffd4fc647424b96ee51370fc26962b1217197779c8199c5edf",
+        "digest": "6555cb235ec6a6801f3b11ea341a89d99d0259a3ec6eca1dbd07c996316f3aba",
         "id": "gene-ortholog-evidence-e2e-v1",
         "passed": true
       },
@@ -36877,7 +36879,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "52905d0c1cca62581bec2fb989d3221da0915ff13e03a03521b0fb119e52ca42",
+        "digest": "0a5544fae1731e0e65b72a0c067fbf25247c406afc2f72023d979305c022bf0b",
         "id": "gene-set-library-catalog-e2e-v1",
         "passed": true
       },
@@ -36915,7 +36917,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "54dfcd0788213e5389c51dc94a32cdea3389b840b6b3bb6469522f447f201ce0",
+        "digest": "2ae154d26404b56d74d0333915c22e63d3e7d2a48f747510813c2558ffa194c4",
         "id": "gene-set-library-membership-e2e-v1",
         "passed": true
       },
@@ -37099,7 +37101,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "d56d77fc54e3135dbd8d4b500cc1fb39ad649c4d412574b0a99fca69ed79f003",
+        "digest": "bf13faa0a6b7b26e18792d9a9fdb83858f1367731aa869f09f9b6afd892ce6f7",
         "id": "growth-curve-e2e-v2",
         "passed": true
       },
@@ -37184,7 +37186,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "f800d0ac2145dd00d37c2261057985516514a0799a2f44a582bd12f0507bad74",
+        "digest": "b6e6191478e78f4336b93e8dc859990115e0effa10a20f2ffdc307109fa13f59",
         "id": "hpo-term-evidence-e2e-v1",
         "passed": true
       },
@@ -37484,7 +37486,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "0f43a5a3db723e5c5a6f0e3c6a92baa2b14f057ab7309edd921ccc6343fad155",
+        "digest": "615a43a1bda7cdad311061d09e54b43b738ac0b339d72ba894effdec02cc8a05",
         "id": "itc-single-site-binding-e2e-v1",
         "passed": true
       },
@@ -37522,7 +37524,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "2197b64ba9a61743ef6955523385cce8c0a7a4e0428731f186349b140120d4c7",
+        "digest": "3fa3666d348b8886806378b3252e9022994ff82f0b91a24533cd7df3bd4298d3",
         "id": "literature-evidence-e2e-v1",
         "passed": true
       },
@@ -37861,7 +37863,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "9d5309984ed57fca02cfbb01d16955bc0e6018200ff1f62f81a055d41649f56e",
+        "digest": "1d68c56ac304871c919adac11ffefd9af815b297c2bcb9262aff06f014841fb0",
         "id": "ncbi-fetch-e2e-v1",
         "passed": true
       },
@@ -37899,7 +37901,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "41f3e8e71d484def6b21ba77df5f8eeac1f02d5de5a9ed757c79e3cb03726de0",
+        "digest": "cab2cb299742d19be66e6115dec1edb27848aedd7e99173591d205b13655411f",
         "id": "ncbi-info-e2e-v1",
         "passed": true
       },
@@ -37937,7 +37939,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "93ef312f74340fd283fa55f9737658558eaa8f7dde361c50e29ee5fe3c1c44f5",
+        "digest": "c397b63a538a3494cd8d5e6fd84c24cc1a8e6ede223ef8c680832632be1660d0",
         "id": "ncbi-link-e2e-v1",
         "passed": true
       },
@@ -37975,7 +37977,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "ea4af07c4dfabe2c318b42043ba35f3bdc99fc5b520b5559c3fbd2c850873a66",
+        "digest": "9b96699ad21d688447083bf44d077d970cbdbf8425e074ec273b234197dff6e0",
         "id": "ncbi-search-e2e-v1",
         "passed": true
       },
@@ -38013,7 +38015,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "a9293a104be9ca1ff7dd2bb9bc4144cb767813a15a4b616fa6bd642c23d78388",
+        "digest": "0c9bd931c03574ba112dd8617c884a7a43669f8201abe202bf38249294a034b1",
         "id": "ncbi-search-summary-e2e-v1",
         "passed": true
       },
@@ -38051,7 +38053,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "9a73169fc8e444a43d4cb73e8e0c1a0f2366c9a0a7f905fc1aaddf96006556c2",
+        "digest": "0ddbfb8ff0597ed6696991b70d201df90abe91b66f2b2c52779737f092661c3d",
         "id": "ncbi-summary-e2e-v1",
         "passed": true
       },
@@ -38160,7 +38162,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "d2fdbbdd5c94874ee28341a75cb16b1d6f07ab72c115955df5b3426f616a6f29",
+        "digest": "f9d8f79b99029571eb4cefc2115d942422187788b51eb9a04c59b40f878812fb",
         "id": "opentargets-target-disease-evidence-e2e-v1",
         "passed": true
       },
@@ -38473,7 +38475,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "a190300cd3c745605a437dd37ff1c43958305490f108b6854045ee2364ffa0f7",
+        "digest": "69e2ea9de0fdc0de627c8f169811daf12d96a76743afcbb94cae2fd709af5940",
         "id": "pdf-evidence-extraction-e2e-v1",
         "passed": true
       },
@@ -38549,7 +38551,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "0bdddec7339fc43bffac136b6a42a4e94e69651e2c8900bba4bcd9f1d57c9006",
+        "digest": "8c7dd5d17a329402bb1b6611b2e155ac3d400f2ea8e96befd4f87ccd6eb13d4c",
         "id": "preprint-evidence-e2e-v1",
         "passed": true
       },
@@ -38698,7 +38700,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "c4ee0c492f3d30a64972e31ef19006e26db6504cb821bf4568ca18ddf5b0cbea",
+        "digest": "338be64f607ed0122d831ddba0ed6369876aa83bb0d1fe3fd2ab76bd510156ac",
         "id": "protein-disorder-evidence-e2e-v1",
         "passed": true
       },
@@ -38736,7 +38738,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "f6854d044fb4f58f20d870a08cc569c0f1f0990c52e4bb39d75959eafb044186",
+        "digest": "84836fb6a47379edcc1caada06866ceb630d4f3b9165fcd38b4211a57dae16b4",
         "id": "protein-secondary-structure-e2e-v1",
         "passed": true
       },
@@ -38881,7 +38883,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "c0e164bcb0ae9b4ef51ef606d60a2f6d0a0ee6f6496f2c12f7d06da1d00ba636",
+        "digest": "c632e9dec209eca2c2cfaffe1b3ce6ba0b7525804999ab659968f246736499f0",
         "id": "quickgo-term-evidence-e2e-v1",
         "passed": true
       },
@@ -38953,7 +38955,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "97285553437c2a579eeb7b94fffa0d3d97ed8251fdea1012728c827f713a08b4",
+        "digest": "9bad4afa5125b9b93a0a6ee4c5c4465d0372b815f0068e11bc39ca2f53a4e919",
         "id": "reactome-overrepresentation-evidence-e2e-v1",
         "passed": true
       },
@@ -38991,7 +38993,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "f829cc4093c9f8e95ce06c4498b3c2d7d03e9a95dfedf28ac2d733993772c171",
+        "digest": "6afbc8c4a18869ff0a8499937a44588a925ad05633018a078cb653deae53eac0",
         "id": "reactome-pathway-evidence-e2e-v1",
         "passed": true
       },
@@ -39658,7 +39660,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "d09a907c57e58baddadb1df810dcfb7a458d30f008a9bcde01a182d112f2716b",
+        "digest": "4a4c70e60e928ea457de73070b01f833854dee451b046c9ee50b7d6a36f68566",
         "id": "single-cell-atac-regulatory-e2e-v1",
         "passed": true
       },
@@ -39691,7 +39693,7 @@
       "row_id": "agent-protocol-1-macs3-304-signac-116-chromvar-124-motifmatchr-124",
       "supplemental_end_to_end": [
         {
-          "digest": "c4e8af6954a871ea34d566049e29cf16fc77b54d724e1fcb4261513c00868d4e",
+          "digest": "aa68da2a1e72220d85aaea498ed56e1bd3563a4fd6d197ed81d0079ec5d6e46a",
           "id": "pbmc1k-atac-macs3-v1",
           "passed": true,
           "report": "public-case-pbmc1k-atac-macs3.json"
@@ -39732,7 +39734,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "41ad27e3088e023cbf6f55ceff6278828e704a60dce454c22d9a3e610e51726e",
+        "digest": "a457b4b91903a0271ccdbb66ad91b97c32b8b811166fce8a700208df8275648c",
         "id": "single-cell-atlas-annotation-e2e-v2",
         "passed": true
       },
@@ -39804,7 +39806,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "99b6c141af0151c34d12815693d0daf00410093834721d8789aa8d374f8fd0fb",
+        "digest": "cf5c0defc039b73fdcd8ea8159f2af7884e9108849a46ed49137c9660df3915d",
         "id": "single-cell-batch-integration-e2e-v1",
         "passed": true
       },
@@ -39835,7 +39837,7 @@
       "row_id": "agent-protocol-1-scanpy-1104-harmony-020-scanorama-174-bbknn-160",
       "supplemental_end_to_end": [
         {
-          "digest": "4447eac8344f2f5a9e53b184ed3bab8ff742652232da36615b043974bd53a111",
+          "digest": "fe1e52400d9d2807cbd02d8c61eb088c10ab3f0d025136ad494da5557e60a3be",
           "id": "gse96583-crossed-batch-integration-v1",
           "passed": true,
           "report": "public-case-gse96583-batch-integration.json"
@@ -39870,7 +39872,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "c4c7ec28cce2599d5bb0aa260529f31ae96806e83e2d7df37a70ccd34bd6ae57",
+        "digest": "9691c3cc1f0b7ce9add52ef1257b4ed54857cfafea35a2aa5a2f3a28fa1a4c7e",
         "id": "single-cell-communication-python-e2e-v1",
         "passed": true
       },
@@ -39915,7 +39917,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "6d03c7e6840ff0d93ca98cb06679e26c1e62e37754896e60ff978163af42e58d",
+        "digest": "b814b507f41012a0711d4d7f308f502c0a0633a6d8a4500e1675468e0256f7e3",
         "id": "single-cell-communication-r-e2e-v1",
         "passed": true
       },
@@ -39996,7 +39998,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "38ae35819665ced52db50d398c71dfcfaeb5a8ba29c2fb1acc9dbdd8a8242c7d",
+        "digest": "da8b1bdf7334fdf30c4054937667319ae432b39cb50fa1353f0222de78408629",
         "id": "single-cell-complex-inference-e2e-v1",
         "passed": true
       },
@@ -40024,7 +40026,7 @@
       "row_id": "agent-protocol-1-dream-1325-speckle-120",
       "supplemental_end_to_end": [
         {
-          "digest": "8eea5808d36ccc8fef416f52b97d2795513f6c7eea37d1b2bae226578b873d6e",
+          "digest": "e19eaacff509678c823e83156eaa9809c9dd10ebdf2a1034e68b90aa056c6c94",
           "id": "gse96583-paired-complex-inference-v1",
           "passed": true,
           "report": "public-case-gse96583-complex-inference.json"
@@ -40068,7 +40070,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "cf3ac4c333b2c92ce5df5768ac6ffcf98d8a4986ec28cc4c20ef7677c313e753",
+        "digest": "7f5ac05a5c0d661338c5062b9871a3fc503e22f453ca11e39e92cefa56d50aa5",
         "id": "single-cell-donor-inference-e2e-v1",
         "passed": true
       },
@@ -40154,7 +40156,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "c8bc1a7895243cbbdbd9d5baa8e8f86078a0ff92584ff13db04203bfcd4b71b8",
+        "digest": "fd79af7bc6ae7405f6cd3be318c53a91fa2eb5bf4b0ce8b0046327ee987ebe17",
         "id": "single-cell-doublet-detection-e2e-v2",
         "passed": true
       },
@@ -40211,7 +40213,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "009bc366748ee8249f2ef7178f0a5aaf94be1603559464fbb6babfd41cb60c40",
+        "digest": "da854218cae06099f6ffb7e9def813ea75a2e5f5464efa6200ddfd9b3bb506d0",
         "id": "single-cell-droplet-decontamination-e2e-v1",
         "passed": true
       },
@@ -40245,7 +40247,7 @@
       "row_id": "agent-protocol-1-emptydrops-1220-soupx-162-cellbender-032",
       "supplemental_end_to_end": [
         {
-          "digest": "b9f43738488d7304daf69ab92e0554221fa55cd930707bd6e90ee589b6ec4fd3",
+          "digest": "0f7d4071c51efc62f8e475aa17997eccd60266d02dc7ae18f852763f8a256031",
           "id": "pbmc3k-emptydrops-soupx-public-data-v1",
           "passed": true,
           "report": "public-case-pbmc3k-droplet-decontamination.json"
@@ -40292,7 +40294,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "6d1be3cc2b994cabd5ffe800ad39c646f7f2a46fa55c1af545ecf88d1ff7c237",
+        "digest": "1ab3d9ec6d6bde834dde9832b44bf2bd94f4d3bb844d0d3e698bac9f80a80da6",
         "id": "single-cell-fate-mapping-e2e-v2",
         "passed": true
       },
@@ -40335,7 +40337,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "e9b9e99c8bda239a27d1443ede0bdefa310ec944a2f3dd6ed12903c96fb17567",
+        "digest": "16dcc0161194ccad81e26dcaf84678fc1c8be7b0773a46d2648d44b46b63b3da",
         "id": "single-cell-foundation-workflow-e2e-v1",
         "passed": true
       },
@@ -40407,7 +40409,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "d6b543c1af51def5dee9182d771f1e06cfc01d8884764de910540f725db07619",
+        "digest": "6ad8a180bfd9336b30f287453ee158573a9ff7591cafc2afa723f65461832804",
         "id": "single-cell-generative-modeling-e2e-v1",
         "passed": true
       },
@@ -40438,7 +40440,7 @@
       "row_id": "agent-protocol-1-scvi-120-scanpy-1115-torch-241",
       "supplemental_end_to_end": [
         {
-          "digest": "779c702712e8b741a974429df03849185262fcd045b48f8681801e0d25e1e49c",
+          "digest": "2982e61648eda6d2c8627d450dc8893c5c841894287195d4684cb8bf31219ef0",
           "id": "gse96583-heldout-donor-generative-modeling-v1",
           "passed": true,
           "report": "public-case-gse96583-generative-modeling.json"
@@ -40464,7 +40466,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "b4c40abaa626545e6f62f0c1f02c16ebb39d7db1593e6d7f516f1132d94112e2",
+        "digest": "436f1f7362d3f218b71b4730850084fcd410ab9588dad3e993ee581027e85694",
         "id": "single-cell-marker-discovery-e2e-v2",
         "passed": true
       },
@@ -40536,7 +40538,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "24bcefd47a71729177297550997d6b1d41fb6a9881e01032df6722ea8a50bc1e",
+        "digest": "902cc75f12116e88e069eb5962969fc5212ad992905501c275d7e789d97ab6d6",
         "id": "single-cell-multimodal-integration-e2e-v1",
         "passed": true
       },
@@ -40566,7 +40568,7 @@
       "row_id": "agent-protocol-1-seurat-521-signac-116-mofapy2-074",
       "supplemental_end_to_end": [
         {
-          "digest": "82bd94f64bc8ebfd6ee3359cd53b2817691090d5cd898eb2ce2d6d5c890199ea",
+          "digest": "d0172e428cca01587afd79f19ee7b23803c0bd1e4fd3a3e2403b266d7355c3ea",
           "id": "pbmc-multiome-10k-integration-v1",
           "passed": true,
           "report": "public-case-pbmc-multiome-integration.json"
@@ -40653,7 +40655,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "2b5c90c404e66a683b26a53dcfb794a9897c32892683a8614e8b09e19b87418a",
+        "digest": "9f2b500c0509c4f703a18f1b0b8c47e3758d0c202122f96b52d39b0767491523",
         "id": "single-cell-reference-annotation-e2e-v2",
         "passed": true
       },
@@ -40751,7 +40753,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "e9473cdca5d4cab522cba2ad8b75b37f10c56d3971124b776dc61ab162278391",
+        "digest": "aa68e9e55c2312e41f0bea05117a0f0d47ee424ae2fdb23cc3e8ce54658382d1",
         "id": "single-cell-regulatory-network-e2e-v1",
         "passed": true
       },
@@ -40779,7 +40781,7 @@
       "row_id": "agent-protocol-1-pyscenic-0121-scenicplus-10a2",
       "supplemental_end_to_end": [
         {
-          "digest": "61f6923ce80853bc5fa361a8219631da2fe3fbd3f36babcd418a1f1a9475c2d9",
+          "digest": "ad1435f5f1cd8ec8ed8a323a8054e08f7e149cede7f70a920548322b1141de35",
           "id": "gse96583-regulatory-program-v1",
           "passed": true,
           "report": "public-case-gse96583-regulatory-program.json"
@@ -40835,7 +40837,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "b1385bca310b41d8c91c9f5b030d4babc596b879ceac77b8009c3cd82fac0157",
+        "digest": "ef2b56c4bbe0c3e5cf31e94de3e4d9afd008404d72ea1e9584f8d99e8d375182",
         "id": "single-cell-regulatory-velocity-e2e-v2",
         "passed": true
       },
@@ -40900,7 +40902,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "38c5c100d413f86726a8f27f0aafc0e0ef9ba55bcde3ea7ba9562415931be25a",
+        "digest": "1f29dd1bcd52369db9a8fdb0ca64ea0b2f3d0687aaa2e065813ccb3564cf46c2",
         "id": "single-cell-spatial-analysis-e2e-v1",
         "passed": true
       },
@@ -40928,7 +40930,7 @@
       "row_id": "agent-protocol-1-squidpy-166-spatialdata-050-scanpy-1115",
       "supplemental_end_to_end": [
         {
-          "digest": "ab1c042dd85c8ced2e9f88f12d69c81a09608578c6e1284a8a035188b09424c8",
+          "digest": "a55dc9e065db6623acbbd5fab9873da7e69d035dacc7c12e93d06568dcb393c7",
           "id": "seqfish-embryo-spatial-v1",
           "passed": true,
           "report": "public-case-seqfish-spatial.json"
@@ -40969,7 +40971,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "5f0fa955c59529115980e3fd729d38539496e773b8c5c1853092369a3df0e91d",
+        "digest": "321aeada136a6442137dfcc7707f85884b5fe9721553f795a23638b2e249dfeb",
         "id": "single-cell-trajectory-topology-e2e-v1",
         "passed": true
       },
@@ -40996,7 +40998,7 @@
       "row_id": "agent-protocol-1-slingshot-210-monocle3-1426-tradeseq-116",
       "supplemental_end_to_end": [
         {
-          "digest": "1612749fcc75195f745836f46bdff49ff05ec58f538c7ba63df4c6cb24323068",
+          "digest": "3c6fda789e8608e34070cbf203cf416acbd533ed0e4b3d97231211ba5aa5e82a",
           "id": "gastrulation-erythroid-topology-v1",
           "passed": true,
           "report": "public-case-gastrulation-erythroid-topology.json"
@@ -41043,7 +41045,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "dad648f072b08e7c7b00e7f175ad4f169596134f25c57eabb51e29acb9d84ebc",
+        "digest": "fbb5afa4781b467e3fa2069e81957c343d4e3ff31e0a4527cc036b7a6b99919e",
         "id": "single-cell-trajectory-velocity-e2e-v1",
         "passed": true
       },
@@ -41071,7 +41073,7 @@
       "row_id": "agent-protocol-1-scvelo-034-scanpy-1115",
       "supplemental_end_to_end": [
         {
-          "digest": "ac003397ea6f102a561284b322fc5211aed5a6b354b74e68546e4d5cd83b6bc9",
+          "digest": "822f903c7da769bf714ff5090df69e33cb8db8776a723faa78d3484f96b3695e",
           "id": "gastrulation-erythroid-scvelo-v1",
           "passed": true,
           "report": "public-case-gastrulation-erythroid-velocity.json"
@@ -41128,7 +41130,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "1ecb6998ce61c999b4154a4268f1465ae9612df02c41970271373c16daf024e6",
+        "digest": "dd24d1884cb890f8871705a5d1fe4e9f9ff7d101966328ce33821ef8bdb99922",
         "id": "structure-chain-comparison-e2e-v1",
         "passed": true
       },
@@ -41175,7 +41177,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "4c5f0394ca51c0cea033582e4ad4d04548592e0c44599f66792d7e8cee9d6da3",
+        "digest": "f7f51cba1a70547f632a5155f96f64036d8d82892f8a1d394734241844d0dba0",
         "id": "structure-evidence-e2e-v1",
         "passed": true
       },
@@ -41213,7 +41215,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "db1e6d1b451dd108c5e3d5d0057330d183efad13bd655d4d1e8028bdf93cd0e6",
+        "digest": "8e9ca96e53a6ca80f1b86c276f8cbc422c88a1d5be9f321c2ac60bafb3dc3924",
         "id": "structure-interactive-visualization-e2e-v1",
         "passed": true
       },
@@ -41258,7 +41260,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "6a3675c3c7292b3ef6ddf7859ac67df6f1a31549ea0a15e258dfa1defa5e9595",
+        "digest": "554a24971d32843247e15f01e7568b9aab98b1914ebae53e7cb32c9d4552458f",
         "id": "structure-ligands-e2e-v1",
         "passed": true
       },
@@ -41296,7 +41298,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "577a08542958ad119b1368b911eef148750acf676e2ba8f2099a3afad5b291ac",
+        "digest": "6d7831b2854016066baed544955c85de96c591391287d4e3159c57b8432719d0",
         "id": "structure-polymer-entities-e2e-v1",
         "passed": true
       },
@@ -41334,7 +41336,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "05480b37a0196d17e114078825d42819236e3640d8dc67ab54b2c19c1506d14a",
+        "digest": "183659d03c46399b5ae072796765eee63fae388535a99f35657fc76c2dd89f3b",
         "id": "structure-quality-assessment-e2e-v1",
         "passed": true
       },
@@ -41374,7 +41376,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "107464002364d2b81d1ea9a943bb52d38f0ccaeab6629edf3780f79fcf137267",
+        "digest": "1e46504c9f23013db7a8964e4e6cea2ad336b503f54d58c14de09a0926be049b",
         "id": "structure-search-e2e-v1",
         "passed": true
       },
@@ -41555,7 +41557,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "bd3c8c7dc8806152865a7cf75a51e8b77702dee51d88de91a1bb3b8a09807e82",
+        "digest": "ecbe6c41786f190cd10e6a65fe7387d4977e0a3f46a5ac3464a5e48601a3d1f2",
         "id": "uniprot-protein-evidence-e2e-v1",
         "passed": true
       },
@@ -41593,7 +41595,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "925a5b70510117c4fb98811b4879ced5ae0fc70763a8884591b9d398a587ec23",
+        "digest": "0a73843b677a7655474d9d6ac597610c2651fbd8ed390d8d0a5dbeda4fb3102d",
         "id": "uniprot-to-ensembl-evidence-e2e-v1",
         "passed": true
       },
@@ -41669,7 +41671,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "7529a58f093ce1ea3772bdad2a02f26de8ed94049af7eb6a90bbe5482c8dc777",
+        "digest": "9349c585ae5900a5a59ea915cec19f4744ce6531ca1220e0e649dba1bf29575f",
         "id": "variant-evidence-e2e-v1",
         "passed": true
       },
@@ -41882,7 +41884,7 @@
       "verified_at": "2026-07-24"
     }
   ],
-  "registry_digest": "ffb47b2aa685588aedb3f2888cf9d2971663799e44fef78a9b943fddf8617d96",
+  "registry_digest": "cd048574ba9b96af0a2502b1ac47467e55f7f0cacf69cda2301a61fc66aaddc2",
   "regression_passed": 175,
   "schema_version": 1,
   "supplemental_end_to_end_passed": 10

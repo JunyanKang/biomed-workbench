@@ -39,7 +39,7 @@ class ComparativeSequencePhylogenyTemplateTests(unittest.TestCase):
         self.assertEqual(report["tree"]["tip_count"], 4)
         self.assertEqual(report["tree"]["outgroups_present"], ["yeast_cyc1"])
         self.assertEqual(report["parameters"]["support_replicates"], 1000)
-        self.assertIn("7.526", report["tool_versions"]["mafft"])
+        self.assertRegex(report["tool_versions"]["mafft"], r"(?:^|v)7\.(?:50[5-9]|5[1-9][0-9])")
         self.assertIn("3.1.2", report["tool_versions"]["iqtree"])
 
 

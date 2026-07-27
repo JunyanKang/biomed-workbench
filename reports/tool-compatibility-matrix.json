@@ -1160,12 +1160,12 @@
           "end_to_end_evidence_ids": [
             "assembly-reference-alignment-e2e-v1"
           ],
-          "id": "agent-protocol-1-minimap2-231-python-3143-fasta-paf",
+          "id": "agent-protocol-1-minimap2-226-231-python-3143-fasta-paf",
           "module_version": "0.1.0",
           "regression_evidence_ids": [
             "assembly-reference-alignment-regression-v1"
           ],
-          "verified_at": "2026-07-23"
+          "verified_at": "2026-07-27"
         }
       ],
       "dependencies": [
@@ -1346,7 +1346,7 @@
       "tools": [
         {
           "allowed_versions": [
-            ">=2.31,<2.32"
+            ">=2.24,<2.32"
           ],
           "ecosystem": "system",
           "identity": "minimap2",
@@ -1357,17 +1357,18 @@
           ],
           "required": true,
           "tested_versions": [
+            "2.26",
             "2.31"
           ],
-          "verified_at": "2026-07-23",
+          "verified_at": "2026-07-27",
           "version_differences": [
             {
               "affected_versions": [
-                ">=2.31,<2.32"
+                ">=2.24,<2.32"
               ],
               "category": "behavior",
               "compatibility_effect": "requires-parser",
-              "description": "Preset heuristics, chaining and PAF tags are release-coupled.",
+              "description": "Preset heuristics, chaining and PAF tags are release-coupled; the template records the observed version and reloads PAF before admitting interpretation.",
               "id": "minimap2-preset-paf",
               "required_action": "Record exact preset and version and reload PAF before interpretation.",
               "source": "https://github.com/lh3/minimap2"
@@ -1380,7 +1381,7 @@
           ],
           "version_probe_kind": "command",
           "version_probe_timeout_seconds": 30,
-          "version_source": "https://github.com/lh3/minimap2/releases/tag/v2.31"
+          "version_source": "https://github.com/lh3/minimap2/releases"
         }
       ],
       "validation_status": "complete"
@@ -4704,12 +4705,12 @@
           "end_to_end_evidence_ids": [
             "comparative-sequence-phylogeny-e2e-v1"
           ],
-          "id": "agent-protocol-1-mafft-7526-iqtree3-312-biopython-186",
+          "id": "agent-protocol-1-mafft-7505-7526-iqtree3-312-biopython-186",
           "module_version": "0.1.0",
           "regression_evidence_ids": [
             "comparative-sequence-phylogeny-regression-v1"
           ],
-          "verified_at": "2026-07-23"
+          "verified_at": "2026-07-27"
         }
       ],
       "dependencies": [
@@ -4941,7 +4942,7 @@
       "tools": [
         {
           "allowed_versions": [
-            ">=7.520,<8"
+            ">=7.505,<8"
           ],
           "ecosystem": "system",
           "identity": "mafft",
@@ -4952,17 +4953,18 @@
           ],
           "required": true,
           "tested_versions": [
+            "7.505",
             "7.526"
           ],
-          "verified_at": "2026-07-23",
+          "verified_at": "2026-07-27",
           "version_differences": [
             {
               "affected_versions": [
-                ">=7.520,<8"
+                ">=7.505,<8"
               ],
               "category": "behavior",
               "compatibility_effect": "requires-parser",
-              "description": "Automatic strategy selection and command-line output behavior are release-coupled.",
+              "description": "Automatic strategy selection and command-line output behavior are release-coupled; the template records the observed version with alignment output.",
               "id": "mafft-auto-and-thread-cli",
               "required_action": "Capture exact command, output, version and record accounting; do not use an unvalidated fallback aligner.",
               "source": "https://mafft.cbrc.jp/alignment/software/"
@@ -34662,6 +34664,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "ffb47b2aa685588aedb3f2888cf9d2971663799e44fef78a9b943fddf8617d96",
+  "registry_digest": "cd048574ba9b96af0a2502b1ac47467e55f7f0cacf69cda2301a61fc66aaddc2",
   "schema_version": 1
 }

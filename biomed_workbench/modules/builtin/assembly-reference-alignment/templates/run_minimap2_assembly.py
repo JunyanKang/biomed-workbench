@@ -55,7 +55,7 @@ def main() -> int:
     exe=shutil.which(a.minimap2) if not Path(a.minimap2).is_file() else a.minimap2
     if not exe: raise AlignmentError("minimap2 is unavailable in the existing environment")
     version=subprocess.run([str(exe),"--version"],text=True,capture_output=True,check=False,timeout=30).stdout.strip()
-    if not re.fullmatch(r"2\.3[01](?:-r\d+)?",version): raise AlignmentError(f"unvalidated minimap2 version: {version}")
+    if not re.fullmatch(r"2\.(?:2[4-9]|3[01])(?:-r\d+)?",version): raise AlignmentError(f"unvalidated minimap2 version: {version}")
     if a.output_dir.exists(): raise AlignmentError("output directory must be new")
     a.output_dir.mkdir(parents=True); paf=a.output_dir/"alignment.paf"
     run=subprocess.run([str(exe),"-x",a.preset,str(a.reference),str(a.query)],text=True,capture_output=True,check=False,timeout=300)

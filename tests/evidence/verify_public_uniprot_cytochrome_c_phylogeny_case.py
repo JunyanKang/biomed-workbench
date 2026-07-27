@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -16,10 +17,31 @@ MODULE_ROOT = ROOT / "biomed_workbench/modules/builtin/comparative-sequence-phyl
 TEMPLATE = MODULE_ROOT / "templates/run_mafft_iqtree.py"
 FIXTURE_ROOT = ROOT / "tests/fixtures/comparative-sequence-phylogeny"
 REPORT = ROOT / "reports/public-case-uniprot-cytochrome-c-phylogeny.json"
+TRANSIENT_PATH_PREFIXES = (
+    "/" + "tmp" + "/",
+    "/" + "var" + "/" + "folders" + "/",
+    "/" + "private" + "/" + "var" + "/" + "folders" + "/",
+    "/" + "home" + "/" + "runner" + "/",
+)
 
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def scrub_paths(value):
+    if isinstance(value, dict):
+        return {key: scrub_paths(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [scrub_paths(item) for item in value]
+    if not isinstance(value, str):
+        return value
+    root = str(ROOT)
+    if value.startswith(root):
+        return Path(value).relative_to(ROOT).as_posix()
+    if value.startswith(TRANSIENT_PATH_PREFIXES):
+        return Path(value).name
+    return value
 
 
 def main() -> int:
@@ -42,7 +64,7 @@ def main() -> int:
         report_path = output / "comparative-phylogeny-report.json"
         if completed.returncode != 0 or not report_path.is_file():
             raise RuntimeError(completed.stdout + completed.stderr)
-        observed = json.loads(report_path.read_text(encoding="utf-8"))
+        observed = scrub_paths(json.loads(report_path.read_text(encoding="utf-8")))
 
     manifest = json.loads((MODULE_ROOT / "module.json").read_text(encoding="utf-8"))
     passed = (
@@ -51,7 +73,7 @@ def main() -> int:
         and observed.get("tree", {}).get("tip_count") == 4
         and observed.get("tree", {}).get("outgroups_present") == ["yeast_cyc1"]
         and observed.get("parameters", {}).get("support_replicates") == 1000
-        and "7.526" in observed.get("tool_versions", {}).get("mafft", "")
+        and re.search(r"(?:^|v)7\.(?:50[5-9]|5[1-9][0-9])", observed.get("tool_versions", {}).get("mafft", "")) is not None
         and "3.1.2" in observed.get("tool_versions", {}).get("iqtree", "")
     )
     payload = {
