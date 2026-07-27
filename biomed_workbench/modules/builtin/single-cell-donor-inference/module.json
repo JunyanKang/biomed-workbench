@@ -2,7 +2,7 @@
   "access": "agent_generated",
   "agent_protocol": {
     "forbidden_actions": [
-      "Do not install, update, activate, create, or otherwise manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
       "Do not guess raw-count layers, transpose matrices, repair identifiers, impute design metadata, relabel cell types, merge technical libraries, or convert unsupported formats silently.",
       "Do not aggregate normalized, integrated, scaled, imputed, corrected, or residual values as counts.",
       "Do not use cells, clusters, technical libraries, or duplicated pseudobulks as independent biological replicates.",
@@ -743,7 +743,7 @@
     ">=0.2.0,<0.3.0"
   ],
   "limitations": [
-    "The validated row covers annotated h5ad input and two-group cell-type-stratified pseudobulk contrasts. It does not infer cell labels, repair incomplete metadata, convert Seurat objects, fit arbitrary nonlinear or zero-inflated cell-level models, establish causality, or guarantee power for rare cell types. Subject fixed effects require repeated observations and a full-rank design; complex random effects, longitudinal splines, compositional abundance models, and multi-condition contrasts require project-specific extensions and separate validation. Tool execution uses the user's existing scientific environment; environment and compute-resource management remain outside plugin scope."
+    "The validated row covers annotated h5ad input and two-group cell-type-stratified pseudobulk contrasts. It does not infer cell labels, repair incomplete metadata, convert Seurat objects, fit arbitrary nonlinear or zero-inflated cell-level models, establish causality, or guarantee power for rare cell types. Subject fixed effects require repeated observations and a full-rank design; complex random effects, longitudinal splines, compositional abundance models, and multi-condition contrasts require project-specific extensions and separate validation. Tool execution uses the user's existing scientific environment; execution requires a compatible project-approved scientific runtime."
   ],
   "maturity": "validated",
   "module_type": "analysis",

@@ -2,7 +2,7 @@
   "access": "agent_generated",
   "agent_protocol": {
     "forbidden_actions": [
-      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
       "Do not guess reference scope, labels, species, tissue, feature identifiers, homolog mappings, annotation release, model provenance, or missing populations.",
       "Do not use existing labels, expected markers, condition, desired biology, or evaluation truth to tune references, experts, or thresholds.",
       "Do not collapse method-specific probabilities, scores, expert labels, disagreement, or preprocessing omissions into one unqualified label.",
@@ -698,7 +698,7 @@
     ">=0.2.0,<0.3.0"
   ],
   "limitations": [
-    "Validated execution covers a declared CellTypist 1.7.1 model, a local Azimuth 0.5.1 reference plus homolog table, a popV 0.6.1 SVM, Random Forest, and CellTypist expert ensemble, and ontology-aware reconciliation of comparable CellTypist and popV outputs. The reconciliation contract can ingest Azimuth, SingleR, and scANVI evidence after project-specific confidence normalization and label mapping, but this compatibility row does not claim those five methods were jointly calibrated on a public atlas. It does not make nearest-reference labels ground truth, resolve novel continuous states, replace marker and ontology review, or validate popV XGboost on the observed macOS ARM profile. Environment and compute-resource management remain outside plugin scope."
+    "Validated execution covers a declared CellTypist 1.7.1 model, a local Azimuth 0.5.1 reference plus homolog table, a popV 0.6.1 SVM, Random Forest, and CellTypist expert ensemble, and ontology-aware reconciliation of comparable CellTypist and popV outputs. The reconciliation contract can ingest Azimuth, SingleR, and scANVI evidence after project-specific confidence normalization and label mapping, but this compatibility row does not claim those five methods were jointly calibrated on a public atlas. It does not make nearest-reference labels ground truth, resolve novel continuous states, replace marker and ontology review, or validate popV XGboost on the observed macOS ARM profile. Execution requires a compatible project-approved scientific runtime."
   ],
   "maturity": "validated",
   "module_type": "analysis",

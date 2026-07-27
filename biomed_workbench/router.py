@@ -39,9 +39,29 @@ _SINGLE_CELL_KEYWORDS = frozenset({
     "single-cell",
     "single cell",
     "scrna",
+    "scrna-seq",
     "scRNA",
     "sc-rna",
     "sc rn a",  # defensive token in case separators are normalized
+    "h5ad",
+    "seurat",
+    "scanpy",
+    "scvi",
+    "scanvi",
+    "celltypist",
+    "azimuth",
+    "popv",
+    "scrublet",
+    "scdblfinder",
+    "soupx",
+    "cellbender",
+    "emptydrops",
+    "cellchat",
+    "nichenet",
+    "cellphonedb",
+    "regvelo",
+    "scvelo",
+    "cellrank",
 })
 _IMAGING_KEYWORDS = frozenset({
     "图像",
@@ -116,6 +136,7 @@ def _is_single_cell_query(normalized_query: str) -> bool:
         or re.search(r"\bscrna\b", normalized_query)
         or re.search(r"\bscrna[-_ ]?seq\b", normalized_query)
         or re.search(r"\bsc[-_ ]?rnaseq\b", normalized_query)
+        or re.search(r"\b(harmony|scanorama|bbknn|rna velocity|cite[-_ ]?seq|wnn|mofa\+?|scenic\+?|liana)\b", normalized_query)
     )
 
 
@@ -137,7 +158,105 @@ def _is_single_cell_generic_query(normalized_query: str) -> bool:
 
 
 def _is_imaging_query(normalized_query: str) -> bool:
-    return any(keyword in normalized_query for keyword in _IMAGING_KEYWORDS)
+    for keyword in _IMAGING_KEYWORDS:
+        normalized_keyword = _normalize(keyword)
+        if re.search(r"[\u3400-\u9fff]", normalized_keyword):
+            if normalized_keyword in normalized_query:
+                return True
+        elif re.search(r"^[a-z0-9]+(?:[- ][a-z0-9]+)*$", normalized_keyword):
+            pattern = re.escape(normalized_keyword).replace(r"\ ", r"[\s_-]+")
+            if re.search(rf"(?<![a-z0-9]){pattern}(?![a-z0-9])", normalized_query):
+                return True
+        elif normalized_keyword in normalized_query:
+            return True
+    return False
+
+
+def _is_molecular_design_query(normalized_query: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(primer|pcr|amplicon|crispr|guide|restriction|digest|golden[ -]?gate|cloning|plasmid|orf|open reading frame|sanger|docking|ligand|smiles|protein structure|structure quality)\b",
+            normalized_query,
+        )
+        or any(term in normalized_query for term in ("引物", "酶切", "克隆", "质粒", "结构质量", "分子对接"))
+    )
+
+
+def _is_omics_assay_query(normalized_query: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(fastq|fastqc|fastp|multiqc|bwa|samtools|bam|cram|vcf|tabix|bgzip|variant|peak|motif|atac|chip[- ]?seq|cut&tag|cut&run|rna[- ]?seq|expression qc|differential expression|nmf|gwas|fine mapping|read[- ]?quality|contamination screen)\b",
+            normalized_query,
+        )
+        or any(term in normalized_query for term in ("测序", "比对", "峰", "变异", "差异表达", "富集", "组学"))
+    )
+
+
+def _is_publication_query(normalized_query: str) -> bool:
+    return bool(
+        re.search(r"\b(manuscript|paper|publication|publish|citation|reviewer|response|patent|presentation|figure|claim[- ]?evidence)\b", normalized_query)
+        or any(term in normalized_query for term in ("论文", "稿件", "审稿", "返修", "引用", "专利", "发表", "图表"))
+    )
+
+
+def _is_clinical_query(normalized_query: str) -> bool:
+    return bool(
+        re.search(r"\b(clinical|patient|cohort|survival|biomarker|adverse|trial|tumou?r|cancer|de[- ]?identif)\b", normalized_query)
+        or any(term in normalized_query for term in ("临床", "患者", "队列", "生存", "不良事件", "肿瘤"))
+    )
+
+
+def _is_wetlab_query(normalized_query: str) -> bool:
+    return bool(
+        re.search(r"\b(qpcr|flow cytometry|fcs|western blot|cfu|dose response|growth curve|dilution|annexin|viability|xenograft|radiotracer|immunoassay)\b", normalized_query)
+        or any(term in normalized_query for term in ("流式", "蛋白印迹", "稀释", "剂量", "细菌", "活性", "成像"))
+    )
+
+
+def _is_evidence_query(normalized_query: str) -> bool:
+    return bool(
+        re.search(r"\b(evidence|retrieve|search|database|ncbi|entrez|uniprot|ensembl|dbsnp|gnomad|hpo|go|reactome|cbioportal|opentargets|crossref|europe pmc|biorxiv|pubchem|rcsb|alphafold)\b", normalized_query)
+        or any(term in normalized_query for term in ("证据", "数据库", "检索", "查询", "文献"))
+    )
+
+
+def _has_exact_route_signal(module: ModuleManifest, query: str) -> bool:
+    return bool(
+        _phrase_matches(query, module.intents)
+        or _phrase_matches(query, module.questions)
+        or _phrase_matches(query, (module.title,))
+    )
+
+
+def _module_allowed_for_query(module: ModuleManifest, query: str) -> bool:
+    normalized_query = _normalize(query)
+    if _has_exact_route_signal(module, query):
+        return True
+    single_cell_query = _is_single_cell_query(normalized_query)
+    omics_query = _is_omics_assay_query(normalized_query)
+    molecular_query = _is_molecular_design_query(normalized_query)
+    if module.id.startswith("single-cell-") and not single_cell_query:
+        return False
+    if module.domains[0] == "imaging" and not _is_imaging_query(normalized_query):
+        return False
+    if module.domains[0] == "publication" and not _is_publication_query(normalized_query):
+        return False
+    if module.domains[0] == "wetlab" and omics_query and not _is_wetlab_query(normalized_query):
+        return False
+    if module.domains[0] == "evidence" and omics_query and not _is_evidence_query(normalized_query):
+        return False
+    if module.id == "source-freshness-audit" and molecular_query and not _is_evidence_query(normalized_query) and not _is_publication_query(normalized_query):
+        return False
+    if module.id == "clinical-trial-evidence" and not _is_clinical_query(normalized_query):
+        return False
+    if module.id == "rna-secondary-structure-summary" and not re.search(
+        r"\b(rna|secondary|dot[-_ ]?bracket|fold(?:ing)?|hairpin|stem[-_ ]?loop)\b|二级结构",
+        normalized_query,
+    ):
+        return False
+    if module.domains[0] == "omics" and molecular_query and not omics_query and module.id != "sequence-inspect":
+        return False
+    return True
 
 
 def _has_regvelo_intent(normalized_query: str) -> bool:
@@ -149,6 +268,41 @@ def _has_regvelo_intent(normalized_query: str) -> bool:
 
 def _has_scvi_intent(normalized_query: str) -> bool:
     return bool(re.search(r"\bscvi\b", normalized_query) or "scanvi" in normalized_query)
+
+
+def _forced_single_cell_module_ids(normalized_query: str) -> list[str]:
+    """Return modules explicitly named by single-cell method families."""
+    if not _is_single_cell_query(normalized_query):
+        return []
+    forced: list[str] = []
+
+    def add(module_id: str) -> None:
+        if module_id not in forced:
+            forced.append(module_id)
+
+    if re.search(r"\b(scvi|scanvi)\b", normalized_query):
+        add("single-cell-generative-modeling")
+    if re.search(r"\b(harmony|scanorama|bbknn)\b", normalized_query):
+        add("single-cell-batch-integration")
+    if re.search(r"\b(wnn|mofa\+?|cite[-_ ]?seq)\b", normalized_query) or "rna+atac" in normalized_query:
+        add("single-cell-multimodal-integration")
+    if re.search(r"\b(celltypist|azimuth|popv)\b", normalized_query):
+        add("single-cell-atlas-annotation")
+    if re.search(r"\b(singler|cell ontology)\b", normalized_query):
+        add("single-cell-reference-annotation")
+    if re.search(r"\b(liana|cellphonedb|cellchat|nichenet)\b", normalized_query):
+        add("single-cell-communication")
+    if re.search(r"\b(scenic\+?|pyscenic|grnboost2|cistarget|aucell)\b", normalized_query):
+        add("single-cell-regulatory-network")
+    if _has_regvelo_intent(normalized_query):
+        add("single-cell-regulatory-velocity")
+    if re.search(r"\b(scvelo|rna velocity|pseudotime|trajectory|cellrank|fate mapping)\b", normalized_query):
+        add("single-cell-trajectory-velocity")
+    if re.search(r"\b(cellrank|fate mapping|fate probabilities|moscot)\b", normalized_query):
+        add("single-cell-fate-mapping")
+    if re.search(r"\b(donor-aware|pseudobulk|mixed model|edger|deseq2|dream)\b", normalized_query):
+        add("single-cell-donor-inference")
+    return forced
 
 
 def _phrase_matches(query: str, phrases: Iterable[str]) -> list[str]:
@@ -246,6 +400,14 @@ def _select_ranked_modules(
     multi_intent = any(token in normalized for token in (" and ", " then ", "同时", "并行", "以及", "并且", "并", "然后", "最后", "和"))
     exact = [item for item in ranked if any(reason.startswith("exact intent:") or reason == "title matches the request" for reason in item[2])]
     selected: list[tuple[float, ModuleManifest, list[str]]] = exact[:] if exact else [ranked[0]]
+    forced_single_cell_ids = _forced_single_cell_module_ids(normalized)
+    if forced_single_cell_ids:
+        selected_ids = {item[1].id for item in selected}
+        for forced_id in forced_single_cell_ids:
+            forced_item = next((item for item in ranked if item[1].id == forced_id), None)
+            if forced_item is not None and forced_id not in selected_ids:
+                selected.append(forced_item)
+                selected_ids.add(forced_id)
     dominant_exact = [
         item
         for item in exact
@@ -282,7 +444,7 @@ def _select_ranked_modules(
     # those manifests already define the sufficient route. Context words should
     # not inflate that route into another broad workflow merely because it
     # shares a general assay or artifact term.
-    if len(exact) >= 2 and len(_features(query)) < 30:
+    if len(exact) >= 2 and len(_features(query)) < 18 and not forced_single_cell_ids:
         return [item[1].id for item in selected]
 
     if has_regvelo and not has_scvi:
@@ -592,6 +754,17 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
     } | exact_domains | explicit_primary_domains | specific_feature_domains | domain_concentrated_feature_domains
     if single_cell_query and not imaging_query:
         matched.discard("imaging")
+    if _is_omics_assay_query(normalized_query) and not _is_wetlab_query(normalized_query):
+        matched.discard("wetlab")
+    if _is_omics_assay_query(normalized_query) and not _is_evidence_query(normalized_query):
+        matched.discard("evidence")
+    if _is_molecular_design_query(normalized_query):
+        if not imaging_query:
+            matched.discard("imaging")
+        if not _is_publication_query(normalized_query):
+            matched.discard("publication")
+        if not _is_clinical_query(normalized_query):
+            matched.discard("clinical")
     if single_cell_query and not matched:
         matched_single_cell = {
             module.domains[0]
@@ -639,6 +812,8 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
     workflows = infer_workflows(query, registry=active)
     grouped: dict[str, list[tuple[float, ModuleManifest, list[str]]]] = defaultdict(list)
     for module in active.all():
+        if not _module_allowed_for_query(module, query):
+            continue
         score, reasons = _score_module(module, query)
         workflow = module.domains[0]
         if workflow in workflows:

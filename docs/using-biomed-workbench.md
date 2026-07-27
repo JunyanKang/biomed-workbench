@@ -1,5 +1,7 @@
 # Using Biomed Workbench
 
+Languages: [English](using-biomed-workbench.md) · [中文](using-biomed-workbench.zh-CN.md)
+
 ## Start With A Scientific Goal
 
 Invoke `biomed-workbench` and describe the biological question, the available data, the experimental units, and the intended decision or deliverable. Natural-language requests are preferred; users do not need to know module names or manually chain skills.

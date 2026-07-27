@@ -2,7 +2,7 @@
   "access": "agent_generated",
   "agent_protocol": {
     "forbidden_actions": [
-      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
       "Do not silently intersect or reorder cells, guess genome builds or coordinate systems, synthesize missing sequences, overwrite source counts/fragments, tune parameters toward expected loci, or report unexecuted outputs.",
       "Do not call motif presence, chromVAR deviation, or peak-gene correlation direct transcription-factor binding or causal regulation."
     ],
@@ -741,7 +741,7 @@
     ">=0.2.0,<0.3.0"
   ],
   "limitations": [
-    "Validated execution covers barcode-filtered MACS3 FRAG peak calling, supplied-sequence motif matching, chromVAR backgrounds/deviations, and paired-cell Signac LinkPeaks. The public PBMC1k ATAC case independently validates real 10x fragments, filtered-cell accounting, and MACS3 peak calling only; motifmatchr, chromVAR, and Signac LinkPeaks remain covered by the complete executable fixture because the ATAC-only public source has no paired RNA or declared motif/sequence resource. The module does not establish direct transcription-factor binding or causal peak-gene regulation, replace donor-level differential accessibility, infer missing RNA, or manage scientific environments and compute infrastructure."
+    "Validated execution covers barcode-filtered MACS3 FRAG peak calling, supplied-sequence motif matching, chromVAR backgrounds/deviations, and paired-cell Signac LinkPeaks. The public PBMC1k ATAC case independently validates real 10x fragments, filtered-cell accounting, and MACS3 peak calling only; motifmatchr, chromVAR, and Signac LinkPeaks remain covered by the complete executable fixture because the ATAC-only public source has no paired RNA or declared motif/sequence resource. The module does not establish direct transcription-factor binding or causal peak-gene regulation, replace donor-level differential accessibility, or infer missing RNA. Execution requires a compatible project-approved scientific runtime."
   ],
   "maturity": "validated",
   "module_type": "analysis",

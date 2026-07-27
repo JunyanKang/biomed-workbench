@@ -1,5 +1,7 @@
 # Installation And Updates
 
+Languages: [English](installation.md) · [中文](installation.zh-CN.md)
+
 ## Install From GitHub
 
 Add the repository as a Codex marketplace and install the plugin:

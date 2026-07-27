@@ -190,6 +190,25 @@ class DynamicModuleRoutingTests(unittest.TestCase):
 
         self.assertIn("single-cell-generative-modeling", routed)
 
+    def test_named_single_cell_method_families_are_not_collapsed_by_exact_matches(self):
+        plan = route(
+            "Plan scVI, scANVI, Harmony, Scanorama, BBKNN, MOFA+, SCENIC+, "
+            "LIANA and CellPhoneDB for donor-aware single-cell analysis"
+        )
+        selected = set(plan["selected_module_ids"])
+
+        self.assertTrue(
+            {
+                "single-cell-batch-integration",
+                "single-cell-communication",
+                "single-cell-donor-inference",
+                "single-cell-generative-modeling",
+                "single-cell-multimodal-integration",
+                "single-cell-regulatory-network",
+            }
+            <= selected
+        )
+
     def test_single_cell_reference_annotation_routes_from_manifest(self):
         plan = route("Annotate single cells with SingleR markers Cell Ontology constraints and unknown retention")
         routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}

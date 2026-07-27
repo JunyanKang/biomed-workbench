@@ -4,7 +4,11 @@
 
 <h1 align="center">Biomed Workbench</h1>
 
-<p align="center"><strong>A unified biomedical research assistant for Codex.</strong></p>
+<p align="center"><strong>A Codex-native biomedical research assistant for evidence, analysis, review, and scientific delivery.</strong></p>
+
+<p align="center">
+  <a href="README.zh-CN.md">中文</a> · <a href="README.md">English</a>
+</p>
 
 <p align="center">
   <a href="https://github.com/JunyanKang/biomed-workbench/actions"><img alt="Quality" src="https://img.shields.io/github/actions/workflow/status/JunyanKang/biomed-workbench/quality.yml?branch=main&amp;label=quality"></a>
@@ -17,51 +21,63 @@
   <img src="assets/research-loop.png" width="100%" alt="Biomed Workbench turns a research question into a quality-gated biomedical research loop and research-grade delivery">
 </p>
 
-Biomed Workbench gives Codex one entry point for biomedical research. Describe the scientific problem in ordinary language; the workbench frames the question, selects the relevant capabilities, coordinates independent and dependent analyses, challenges the evidence, revises the plan when quality gates fail, and prepares research-grade deliverables.
+Biomed Workbench is an independent Codex plugin for biomedical research. It gives Codex one disciplined research interface: the user describes a scientific problem, and the workbench routes the request through registered scientific modules, staged research plans, compatibility contracts, quality gates, and publication-facing delivery checks.
 
-The workbench dynamically discovers its registered scientific modules behind one Codex skill: `biomed-workbench`. Tasks can be routed as a single operation, a serial workflow, parallel analyses, or a mixed research program without asking the user to invoke separate skills.
+The goal is not to expose a pile of scripts. The goal is to help Codex behave like a rigorous biomedical research assistant: frame the question, inspect the available evidence, choose a scientifically coherent workflow, preserve uncertainty, reject unsupported claims, and prepare outputs that can be audited by another researcher.
 
-## Professional Capabilities
+## Why It Exists
 
-| Research area | What the workbench coordinates |
+Modern biomedical projects rarely fit into one tool. A real task may start with literature and public database evidence, move through omics or single-cell analysis, connect molecular or structural interpretation, challenge the statistical design, and end as a figure, manuscript, response matrix, patent disclosure, or presentation package.
+
+Biomed Workbench treats that as one research program. It keeps one Codex-facing entrypoint, while the registry behind it can compose a single module, a serial workflow, parallel evidence branches, or a mixed dependency graph.
+
+## Research Loop
+
+1. **Frame:** define the biological question, experimental unit, available evidence, and decision criteria.
+2. **Plan:** select the smallest scientifically complete set of modules and dependencies.
+3. **Analyze:** run or adapt compatible templates against real project inputs.
+4. **Challenge:** inspect assumptions, confounding, missing metadata, failed gates, and contradictory evidence.
+5. **Revise:** update the hypothesis or workflow when the evidence does not support the current path.
+6. **Deliver:** produce interpretable results, figures, methods, reviews, response matrices, patent or presentation materials with unresolved limits visible.
+
+The workbench does not turn a successful command into a scientific conclusion. Outputs enter project evidence only after the relevant contracts and quality gates are satisfied.
+
+## Capability Areas
+
+| Area | What it coordinates |
 | --- | --- |
-| [Evidence and literature](docs/capabilities/evidence-and-literature.md) | Literature discovery, public biomedical databases, citation resolution, evidence synthesis, contradiction and freshness checks |
-| [Omics and single-cell](docs/capabilities/omics-and-single-cell.md) | Sequencing and expression analysis, donor-aware inference, droplet and doublet review, atlas annotation, scVelo and RegVelo dynamics, multimodal integration, regulatory networks, and spatial analysis |
-| [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | Sequence analysis, CRISPR and primer design, molecular evidence, structure retrieval, quality assessment, comparison, docking review, and chemical filtering |
-| [Imaging and visualization](docs/capabilities/imaging-and-visualization.md) | Image profiling, segmentation, colocalization, tracking, quantitative checks, scientific figures, and molecular visualization |
-| [Clinical and experimental research](docs/capabilities/clinical-and-experimental.md) | Cohort and survival analysis, biomarkers, adverse events, de-identification, assay design, dose response, growth curves, and experimental interpretation |
-| [Publication and translation](docs/capabilities/publication-and-translation.md) | Claim-evidence integrity, figures, manuscript revision, peer review, response letters, patents, and publication-ready research packages |
+| [Evidence and literature](docs/capabilities/evidence-and-literature.md) | NCBI, UniProt, Ensembl, dbSNP, gnomAD, HPO, GO, Reactome, cBioPortal, Open Targets, Crossref, Europe PMC, bioRxiv, PubChem, ClinicalTrials.gov, RCSB PDB, AlphaFold, source freshness, citation and claim checks |
+| [Omics and single-cell](docs/capabilities/omics-and-single-cell.md) | FASTQ/BAM/VCF/BED/expression workflows, peak and motif analysis, NMF, GWAS fine mapping, single-cell QC, droplet and doublet review, donor-aware inference, integration, annotation, communication, trajectory, RegVelo, multimodal and spatial analysis |
+| [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | Sequence inspection, ORFs, PCR primers, specificity screening, CRISPR, restriction and Golden Gate design, structure evidence, coordinate quality, structure comparison, docking review, chemical filtering |
+| [Clinical and experimental research](docs/capabilities/clinical-and-experimental.md) | Cohorts, survival, biomarker performance, adverse events, clinical boundaries, flow cytometry, qPCR, growth curves, dose response, Western blot, biodistribution, xenografts, stability and assay interpretation |
+| [Imaging and visualization](docs/capabilities/imaging-and-visualization.md) | Image profiling, segmentation, colocalization, tracking, quantitative review, scientific figures and molecular visualization |
+| [Publication and translation](docs/capabilities/publication-and-translation.md) | Figure specifications, manuscript and citation audit, reviewer assessment, response matrix, revision lineage, patent readiness, method flowcharts and presentation delivery |
 
-See the [complete capability map](docs/capabilities/README.md) for scope, orchestration patterns, quality boundaries, and current limitations.
+See the full capability map in [English](docs/capabilities/README.md) or [Chinese](docs/capabilities/README.zh-CN.md).
 
-Single-cell projects can be coordinated as complete research programs: validate raw inputs, challenge technical artifacts, establish cell states, test donor-aware hypotheses, connect trajectories and interactions, integrate modalities, examine regulatory or spatial evidence, and revise the analysis when quality gates fail. The [omics and single-cell guide](docs/capabilities/omics-and-single-cell.md) describes the supported workflows, scientific safeguards, and expected deliverables.
+## Single-Cell And Omics Depth
 
-## How It Works
+Single-cell projects can be planned as complete research programs rather than isolated preprocessing steps. The workbench can coordinate raw input validation, ambient RNA and doublet review, Scanpy or Seurat foundation workflows, batch and generative integration, conservative annotation, donor-aware inference, marker validation, trajectory, RNA velocity, fate mapping, cell communication, SCENIC/SCENIC+, RegVelo, RNA+ATAC, CITE-seq, WNN, MOFA+, peak calling, chromVAR and spatial transcriptomics.
 
-1. **Frame** the question, study design, evidence landscape, and decision criteria.
-2. **Plan** the smallest scientifically complete set of modules and their dependencies.
-3. **Analyze** with explicit inputs, version-aware tools, and traceable artifacts.
-4. **Challenge** assumptions, statistical validity, conflicts, missing evidence, and failed quality gates.
-5. **Revise** the hypothesis or workflow when the evidence does not support the current path.
-6. **Deliver** interpretable results, figures, methods, manuscripts, reviews, or translational outputs.
-
-This is a research assistant, not a source of automatic scientific truth. It preserves uncertainty, separates observation from interpretation, keeps unsupported claims out of deliverables, and records the evidence needed to reproduce consequential results.
+The plan remains non-evidentiary until Codex inspects the user's actual files, adapts the relevant templates in the project workspace, records observed versions, reloads outputs, and admits only results that pass the module-specific gates.
 
 ## Use In Codex
 
-After installation, start a new Codex task and describe the research goal naturally. For example:
+After installation, start a new Codex task and describe the scientific goal naturally. Users do not need to know internal module names.
 
-> Use Biomed Workbench to compare the literature, gene, variant, and structure evidence for TP53, identify disagreements, and propose the next decisive analyses.
+Example requests:
 
-> Analyze this donor-aware single-cell and spatial study from input validation and artifact review through annotation, multimodal integration, communication, trajectory, regulatory analysis, hypothesis revision, and a manuscript-ready results package.
+> Compare the literature, gene, variant, pathway, structure and trial evidence for TP53. Identify disagreements, missing evidence, and the next decisive analyses.
 
-> Review these docking results together with protein structure quality and chemical filters, then explain which conclusions are supported and which require experimental validation.
+> Plan and analyze this donor-aware single-cell and spatial study from input validation through artifact review, annotation, multimodal integration, communication, trajectory, regulatory analysis, hypothesis revision, and manuscript-ready delivery.
 
-The [usage guide](docs/using-biomed-workbench.md) explains project inputs, checkpoints, deliverables, and how to add a new scientific module.
+> Review this molecular design package from sequence and structure quality through primer specificity, CRISPR design, docking-pose checks, chemical filters, and experimental validation planning.
+
+See the usage guide in [English](docs/using-biomed-workbench.md) or [Chinese](docs/using-biomed-workbench.zh-CN.md).
 
 ## Install
 
-Add the GitHub repository as a personal Codex marketplace and install the plugin:
+Add the GitHub repository as a Codex marketplace and install the plugin:
 
 ```bash
 codex plugin marketplace add JunyanKang/biomed-workbench --ref main
@@ -69,14 +85,14 @@ codex plugin add biomed-workbench@biomed-workbench
 codex plugin list
 ```
 
-Then open a **new Codex task** so the `biomed-workbench` skill is loaded. See [installation and updates](docs/installation.md) for local development, updating, verification, and troubleshooting.
+Then open a new Codex task so the `biomed-workbench` skill is loaded. Installation and update details are available in [English](docs/installation.md) and [Chinese](docs/installation.zh-CN.md).
 
 ## Documentation
 
-- [Capability map](docs/capabilities/README.md)
-- [Using Biomed Workbench](docs/using-biomed-workbench.md)
-- [Installation and updates](docs/installation.md)
-- [Reproducibility and compatibility](docs/reproducibility.md)
+- Capability map: [English](docs/capabilities/README.md) · [Chinese](docs/capabilities/README.zh-CN.md)
+- Usage guide: [English](docs/using-biomed-workbench.md) · [Chinese](docs/using-biomed-workbench.zh-CN.md)
+- Installation and updates: [English](docs/installation.md) · [Chinese](docs/installation.zh-CN.md)
+- Reproducibility and compatibility: [English](docs/reproducibility.md) · [Chinese](docs/reproducibility.zh-CN.md)
 - [Public-data acceptance cases](docs/cases/README.md)
 - [Capability maturity and evidence](docs/maturity.md)
 - [Architecture and module extension](docs/architecture.md)
@@ -85,8 +101,10 @@ Then open a **new Codex task** so the `biomed-workbench` skill is loaded. See [i
 
 ## Scope And Trust
 
-Biomed Workbench is an independent implementation. It does not vendor external research projects, dispatch into local development worktrees, or require private development artifacts at runtime. Compatibility evidence, public-database checks, template coverage, public-data cases, and release verification are published in [`reports/`](reports/); redistribution boundaries are documented in [NOTICE.md](NOTICE.md).
+Biomed Workbench is a research assistant, not an infrastructure manager, clinical decision system, legal advisor, or source of automatic scientific truth. It does not vendor external research repositories, dispatch into local development worktrees, or require private development artifacts at runtime.
 
-The plugin may use public scientific services and compatible project-local scientific packages. It does not own environment provisioning, execution infrastructure, remote job systems, or model-hosting infrastructure. Optional credentials are kept outside the repository and are never embedded in module code or research artifacts.
+New scientific methods are added through the module contract: a manifest, input and output artifacts, compatibility policy, templates, quality gates, tests, and documentation. The user-facing entrypoint remains `biomed-workbench`, so the assistant can keep routing future capabilities through the same research loop.
+
+Published reports in [`reports/`](reports/) summarize release-safe compatibility evidence, public-database checks, template coverage, installation verification, and public-data acceptance cases. Optional credentials are supplied outside the repository and are never embedded in module code, reports, examples or research artifacts.
 
 Licensed under [Apache-2.0](LICENSE).

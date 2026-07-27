@@ -2,7 +2,7 @@
   "access": "agent_generated",
   "agent_protocol": {
     "forbidden_actions": [
-      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
       "Do not silently intersect or reorder cells, guess transformations, overwrite source counts, impute absent modalities, tune factors or clusters toward desired labels, or treat integration as biological truth.",
       "Do not collapse WNN weights and MOFA+ factors into one score or report generated or unreloaded outputs as evidence."
     ],
@@ -725,7 +725,7 @@
     ">=0.2.0,<0.3.0"
   ],
   "limitations": [
-    "Validated execution covers public 10x RNA+ATAC HDF5 preparation, RNA+ATAC and RNA+ADT WNN, and Gaussian MOFA+ models on declared transformed layers. It does not infer missing modalities, repair unpaired cells, establish causal cross-modal regulation, replace ATAC motif or peak-to-gene analysis, or provide donor-level condition inference. Environment and compute-resource management remain outside plugin scope."
+    "Validated execution covers public 10x RNA+ATAC HDF5 preparation, RNA+ATAC and RNA+ADT WNN, and Gaussian MOFA+ models on declared transformed layers. It does not infer missing modalities, repair unpaired cells, establish causal cross-modal regulation, replace ATAC motif or peak-to-gene analysis, or provide donor-level condition inference. Execution requires a compatible project-approved scientific runtime."
   ],
   "maturity": "validated",
   "module_type": "analysis",

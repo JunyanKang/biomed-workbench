@@ -41,7 +41,7 @@
     {"id": "demography-reload", "severity": "fatal", "description": "Require successful msprime execution and reloadable tree-sequence, VCF, site-count, tree-count, diversity, version, and output hashes.", "blocks_interpretation": true},
     {"id": "demography-claim-boundary", "severity": "major", "description": "Simulation supports conditional method calibration or design only; it does not infer, validate, or establish real population history or biological mechanism.", "blocks_interpretation": true}
   ],
-  "limitations": ["This module supports only one-population constant, bottleneck, and expansion scenarios. It does not fit demographic models, estimate parameters from data, choose a model after inspecting output, simulate selection or structure, or establish empirical history. It does not manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure."],
+  "limitations": ["This module supports only one-population constant, bottleneck, and expansion scenarios. It does not fit demographic models, estimate parameters from data, choose a model after inspecting output, simulate selection or structure, or establish empirical history. It expects a compatible project-approved scientific runtime before execution."],
   "evidence_effects": ["adds-declared-demographic-simulation-evidence"],
   "alternatives": [],
   "complements": ["gwas-susie-fine-mapping", "rrblup-genomic-prediction", "multi-sample-variant-concordance"],
@@ -78,7 +78,7 @@
     "preflight_checks": ["Detect a compatible existing Python and msprime installation.", "Validate the frozen JSON scenario, rates, seed, output paths, model-specific values, and simulation-purpose boundary."],
     "postflight_checks": ["Reload the emitted report and tree sequence, reconcile reported hashes, counts, diversity, msprime version, VCF presence, and declared assumptions."],
     "provenance_fields": ["module-id", "module-version", "input-sha256", "model", "population-parameters", "rates", "seed", "Python-version", "msprime-version", "tree-sequence-sha256", "vcf-sha256", "quality-gates"],
-    "forbidden_actions": ["Do not install or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.", "Do not infer demographic history, estimate parameters from empirical data, select scenarios after viewing simulated output, or claim real biological history from simulations.", "Do not overwrite outputs or discard failed simulations without preserving the reason."],
+    "forbidden_actions": ["Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.", "Do not infer demographic history, estimate parameters from empirical data, select scenarios after viewing simulated output, or claim real biological history from simulations.", "Do not overwrite outputs or discard failed simulations without preserving the reason."],
     "requires_observed_execution": true
   }
 }

@@ -1,5 +1,7 @@
 # Professional Capability Map
 
+Languages: [English](README.md) · [中文](README.zh-CN.md)
+
 Biomed Workbench is organized around scientific decisions, not a menu of unrelated tools. A user supplies a research question and available data; the workbench combines the modules needed to move from framing and evidence gathering to analysis, challenge, revision, and delivery.
 
 ## Capability Areas

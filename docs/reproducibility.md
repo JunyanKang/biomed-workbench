@@ -1,5 +1,7 @@
 # Reproducibility And Compatibility
 
+Languages: [English](reproducibility.md) · [中文](reproducibility.zh-CN.md)
+
 ## Version Policy
 
 Scientific software versions affect accepted inputs, defaults, output fields, and numerical behaviour. Biomed Workbench therefore treats versions as provenance and compatibility evidence rather than universal installation pins.
@@ -14,7 +16,7 @@ Each scientific module declares:
 
 The published numeric versions are **reproducibility baselines**, **not installation pins** for every user project. At execution time, the workbench records the **actual detected versions** and whether each one matches an exact tested baseline. Versions inside the declared policy may execute if their outputs pass the module's contract and representative checks.
 
-When a scientific backend is absent or incompatible, guidance and routing remain available. Execution evidence is withheld until a compatible environment or validated alternative is available. The plugin does not silently upgrade a user's environment and does not manage compute infrastructure.
+When a scientific backend is absent or incompatible, guidance and routing remain available. Execution evidence is withheld until a compatible environment or validated alternative is available. The plugin does not silently change the user's execution environment.
 
 ## Evidence Layers
 

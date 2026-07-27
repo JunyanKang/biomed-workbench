@@ -789,6 +789,18 @@
       "structural_gate_ids": []
     }
   },
+  "clinical-decision-boundary-audit": {
+    "input": {
+      "has_qualified_clinician_review": false,
+      "intended_use": "patient_specific_decision",
+      "request_text": "Diagnose this patient and prescribe the best treatment dose."
+    },
+    "output": {
+      "clinical_recommendation_allowed": false,
+      "interpretation_allowed": false,
+      "risk_level": "blocked"
+    }
+  },
   "clinical-deidentify": {
     "input": {
       "record": {
@@ -1246,6 +1258,38 @@
       "division_index": 0.5714285714285714,
       "precursor_equivalent_count": 70.0,
       "total_observed_events": 120
+    }
+  },
+  "electrophysiology-trace-summary": {
+    "input": {
+      "baseline_window_ms": 1,
+      "polarity": "positive",
+      "signal": [
+        -70,
+        -70,
+        -69,
+        -50,
+        -20,
+        -45,
+        -68
+      ],
+      "time_ms": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    "output": {
+      "baseline": -70.0,
+      "observation_count": 7,
+      "peak_amplitude_from_baseline": 50.0,
+      "quality_status": "passed",
+      "threshold_crossing_count": 1,
+      "time_to_peak_ms": 4.0
     }
   },
   "enrichment-analysis": {
@@ -1750,11 +1794,129 @@
       "window": 3
     },
     "output": {
+      "blank_correction": {
+        "applied": false,
+        "blank_od": 0.0
+      },
+      "distinct_timepoint_count": 4,
       "doubling_time": 0.9902102579427791,
+      "fit_admissible": true,
+      "fit_status": "admissible",
+      "input_observation_count": 4,
+      "interpretation_status": "blocked-review-required",
       "log_phase_end_time": 2.0,
       "log_phase_start_time": 0.0,
       "max_growth_rate_per_time": 0.7,
-      "method": "maximum sliding-window linear slope of log-transformed positive measurements",
+      "method": "replicate-preserving logistic and modified Gompertz model comparison by AICc; legacy log-window summary retained for continuity",
+      "model_candidates": [
+        {
+          "aic": -54.94479491736682,
+          "aicc": null,
+          "fit_success": true,
+          "maximum_growth_rate_per_hour": 0.8347586934530822,
+          "model": "logistic",
+          "parameter_standard_errors": {
+            "amplitude_od": Infinity,
+            "baseline_od": Infinity,
+            "inflection_time_hours": Infinity,
+            "rate_constant_per_hour": Infinity
+          },
+          "parameters": {
+            "amplitude_od": 4.37471258751414,
+            "baseline_od": 0.0058799759213103205,
+            "inflection_time_hours": 5.999999993931487,
+            "rate_constant_per_hour": 0.7632580899925316
+          },
+          "r_squared": 0.9999922275190202,
+          "residual_mean": 7.477095730762384e-10,
+          "residual_root_mean_square": 0.0003827611606764317,
+          "rss": 5.860244244894767e-07
+        },
+        {
+          "aic": -44.71218259370621,
+          "aicc": null,
+          "fit_success": true,
+          "maximum_growth_rate_per_hour": 1.8145716087227115,
+          "model": "modified_gompertz",
+          "parameter_standard_errors": {
+            "amplitude_od": Infinity,
+            "baseline_od": Infinity,
+            "lag_time_hours": Infinity,
+            "maximum_growth_rate_per_hour": Infinity
+          },
+          "parameters": {
+            "amplitude_od": 30.867134117178896,
+            "baseline_od": 0.025326290023552044,
+            "lag_time_hours": 5.999999993180069,
+            "maximum_growth_rate_per_hour": 1.8145716087227115
+          },
+          "r_squared": 0.9998996421300934,
+          "residual_mean": -1.2213511452197068e-12,
+          "residual_root_mean_square": 0.0013753832984338865,
+          "rss": 7.566716870443509e-06
+        }
+      ],
+      "quality_gates": [
+        "Require a declared blank, OD units, plate layout, instrument settings, and raw replicate-level measurements before accepting model parameters.",
+        "Review model residuals and both candidate fits; AICc selects only between the declared empirical curves and cannot prove a biological mechanism.",
+        "Condition or strain claims require independently cultured biological replicates, randomization or plate-position review, and a predeclared between-condition model outside this per-curve summary."
+      ],
+      "replicate_design_status": "incomplete-at-one-or-more-timepoints",
+      "replicate_level": "unspecified",
+      "selected_model": "logistic",
+      "selected_model_summary": {
+        "aic": -54.94479491736682,
+        "aicc": null,
+        "fit_success": true,
+        "maximum_growth_rate_per_hour": 0.8347586934530822,
+        "model": "logistic",
+        "parameter_standard_errors": {
+          "amplitude_od": Infinity,
+          "baseline_od": Infinity,
+          "inflection_time_hours": Infinity,
+          "rate_constant_per_hour": Infinity
+        },
+        "parameters": {
+          "amplitude_od": 4.37471258751414,
+          "baseline_od": 0.0058799759213103205,
+          "inflection_time_hours": 5.999999993931487,
+          "rate_constant_per_hour": 0.7632580899925316
+        },
+        "r_squared": 0.9999922275190202,
+        "residual_mean": 7.477095730762384e-10,
+        "residual_root_mean_square": 0.0003827611606764317,
+        "rss": 5.860244244894767e-07
+      },
+      "timepoint_summary": [
+        {
+          "coefficient_of_variation_percent": null,
+          "mean_blank_corrected_od": 0.05,
+          "replicate_count": 1,
+          "standard_deviation_od": null,
+          "time_hours": 0.0
+        },
+        {
+          "coefficient_of_variation_percent": null,
+          "mean_blank_corrected_od": 0.10068763537352383,
+          "replicate_count": 1,
+          "standard_deviation_od": null,
+          "time_hours": 1.0
+        },
+        {
+          "coefficient_of_variation_percent": null,
+          "mean_blank_corrected_od": 0.20275999834223374,
+          "replicate_count": 1,
+          "standard_deviation_od": null,
+          "time_hours": 2.0
+        },
+        {
+          "coefficient_of_variation_percent": null,
+          "mean_blank_corrected_od": 0.40830849562838234,
+          "replicate_count": 1,
+          "standard_deviation_od": null,
+          "time_hours": 3.0
+        }
+      ],
       "window": 3
     }
   },
@@ -1814,77 +1976,6 @@
       "threshold_b": 0
     }
   },
-  "medical-imaging-metadata-audit": {
-    "input": {
-      "declare_modality": "MR",
-      "metadata": {
-        "Modality": "MR",
-        "PatientID": "P-1001",
-        "PatientName": "test-subject-01",
-        "StudyDate": "20260101",
-        "SeriesDescription": "T1_MPRAGE",
-        "PixelSpacing": [
-          1.2,
-          1.2
-        ],
-        "SliceThickness": 1.0
-      },
-      "minimum_required_fields": [
-        "Modality",
-        "PatientID",
-        "StudyDate",
-        "SeriesDescription",
-        "PixelSpacing"
-      ]
-    },
-    "output": {
-      "declared_modality": "MR",
-      "metadata_fields": [
-        "Modality",
-        "PatientID",
-        "PatientName",
-        "PixelSpacing",
-        "SeriesDescription",
-        "SliceThickness",
-        "StudyDate"
-      ],
-      "required_fields": {
-        "declared": [
-          "Modality",
-          "PatientID",
-          "PixelSpacing",
-          "SeriesDescription",
-          "StudyDate"
-        ],
-        "present": [
-          "Modality",
-          "PatientID",
-          "PixelSpacing",
-          "SeriesDescription",
-          "StudyDate"
-        ],
-        "missing": []
-      },
-      "pii_risk": {
-        "has_potential_pii_key": true,
-        "risk_level": "high",
-        "sensitive_fields": [
-          "patientid",
-          "patientname"
-        ]
-      },
-      "limitations": [
-        "This audit is a declared-metadata pass; full privacy governance depends on project policy and local IRB controls.",
-        "No de-identification service is executed and no on-file DICOM parser is called."
-      ],
-      "privacy_gates": [
-        "Raw image metadata is an input descriptor, not analyzed as biological evidence.",
-        "Any retained PHI-relevant fields must be pseudonymized before sharing.",
-        "Spatial, contrast-agent, and sequence metadata are declared before any interpretation."
-      ],
-      "release_ready": false
-    }
-  },
   "image-profile": {
     "input": {
       "image": [
@@ -1914,64 +2005,6 @@
       ],
       "standard_deviation": 1.118033988749895,
       "zero_fraction": 0.25
-    }
-  },
-  "medical-imaging-volume-summary": {
-    "input": {
-      "mm_per_voxel": [
-        1.0,
-        1.0,
-        1.5
-      ],
-      "required_voxel_order": "z-y-x",
-      "volume": [
-        [
-          [
-            0,
-            1
-          ],
-          [
-            2,
-            3
-          ]
-        ],
-        [
-          [
-            4,
-            5
-          ],
-          [
-            6,
-            7
-          ]
-        ]
-      ]
-    },
-    "output": {
-      "shape": [
-        2,
-        2,
-        2
-      ],
-      "voxel_geometry": {
-        "required_order": "z-y-x",
-        "shape": [
-          2,
-          2,
-          2
-        ],
-        "voxel_count": 8
-      },
-      "intensity": {
-        "minimum": 0.0,
-        "maximum": 7.0,
-        "mean": 3.5,
-        "nonzero_fraction": 0.875
-      },
-      "limitations": [
-        "No resampling, orientation normalization, NIfTI/DICOM parsing, or bias-field correction is performed.",
-        "This is a tensor-level quality check; clinical interpretation requires sequence context and acquisition metadata."
-      ]
     }
   },
   "image-segment": {
@@ -2486,6 +2519,135 @@
       ]
     }
   },
+  "medical-imaging-metadata-audit": {
+    "input": {
+      "declare_modality": "MR",
+      "metadata": {
+        "Modality": "MR",
+        "PatientID": "P-1001",
+        "PatientName": "test-subject-01",
+        "PixelSpacing": [
+          1.2,
+          1.2
+        ],
+        "SeriesDescription": "T1_MPRAGE",
+        "SliceThickness": 1.0,
+        "StudyDate": "20260101"
+      },
+      "minimum_required_fields": [
+        "Modality",
+        "PatientID",
+        "StudyDate",
+        "SeriesDescription",
+        "PixelSpacing"
+      ]
+    },
+    "output": {
+      "declared_modality": "MR",
+      "limitations": [
+        "This audit is a declared-metadata pass; full privacy governance depends on project policy and local IRB controls.",
+        "No de-identification service is executed and no on-file DICOM parser is called."
+      ],
+      "metadata_fields": [
+        "Modality",
+        "PatientID",
+        "PatientName",
+        "PixelSpacing",
+        "SeriesDescription",
+        "SliceThickness",
+        "StudyDate"
+      ],
+      "pii_risk": {
+        "has_potential_pii_key": true,
+        "risk_level": "high",
+        "sensitive_fields": [
+          "patientid",
+          "patientname"
+        ]
+      },
+      "privacy_gates": [
+        "Raw image metadata is an input descriptor, not analyzed as biological evidence.",
+        "Any retained PHI-relevant fields must be pseudonymized before sharing.",
+        "Spatial, contrast-agent, and sequence metadata are declared before any interpretation."
+      ],
+      "release_ready": false,
+      "required_fields": {
+        "declared": [
+          "Modality",
+          "PatientID",
+          "PixelSpacing",
+          "SeriesDescription",
+          "StudyDate"
+        ],
+        "missing": [],
+        "present": [
+          "Modality",
+          "PatientID",
+          "PixelSpacing",
+          "SeriesDescription",
+          "StudyDate"
+        ]
+      }
+    }
+  },
+  "medical-imaging-volume-summary": {
+    "input": {
+      "mm_per_voxel": [
+        1.0,
+        1.0,
+        1.5
+      ],
+      "required_voxel_order": "z-y-x",
+      "volume": [
+        [
+          [
+            0,
+            1
+          ],
+          [
+            2,
+            3
+          ]
+        ],
+        [
+          [
+            4,
+            5
+          ],
+          [
+            6,
+            7
+          ]
+        ]
+      ]
+    },
+    "output": {
+      "intensity": {
+        "maximum": 7.0,
+        "mean": 3.5,
+        "minimum": 0.0,
+        "nonzero_fraction": 0.875
+      },
+      "limitations": [
+        "No resampling, orientation normalization, NIfTI/DICOM parsing, or bias-field correction is performed.",
+        "This is a tensor-level quality check; clinical interpretation requires sequence context and acquisition metadata."
+      ],
+      "shape": [
+        2,
+        2,
+        2
+      ],
+      "voxel_geometry": {
+        "required_order": "z-y-x",
+        "shape": [
+          2,
+          2,
+          2
+        ],
+        "voxel_count": 8
+      }
+    }
+  },
   "msprime-demographic-simulation": {
     "input": {
       "design_notes": "Parameters and seed are frozen before simulation.",
@@ -2764,7 +2926,7 @@
   },
   "patent-claim-structure-audit": {
     "input": {
-      "claims_text": "1. 一种方法，其特征在于，包括步骤A。\n2. 根据权利要求3所述的方法，其特征在于，步骤B[待确认：条件]。\n3. 根据权利要求1所述的方法，其特征在于，获得更优结果。"
+      "claims_text": "1. \u4e00\u79cd\u65b9\u6cd5\uff0c\u5176\u7279\u5f81\u5728\u4e8e\uff0c\u5305\u62ec\u6b65\u9aa4A\u3002\n2. \u6839\u636e\u6743\u5229\u8981\u6c423\u6240\u8ff0\u7684\u65b9\u6cd5\uff0c\u5176\u7279\u5f81\u5728\u4e8e\uff0c\u6b65\u9aa4B[\u5f85\u786e\u8ba4\uff1a\u6761\u4ef6]\u3002\n3. \u6839\u636e\u6743\u5229\u8981\u6c421\u6240\u8ff0\u7684\u65b9\u6cd5\uff0c\u5176\u7279\u5f81\u5728\u4e8e\uff0c\u83b7\u5f97\u66f4\u4f18\u7ed3\u679c\u3002"
     },
     "output": {
       "claim_count": 3,
@@ -2772,21 +2934,21 @@
         {
           "number": 1,
           "references": [],
-          "text": "一种方法，其特征在于，包括步骤A。"
+          "text": "\u4e00\u79cd\u65b9\u6cd5\uff0c\u5176\u7279\u5f81\u5728\u4e8e\uff0c\u5305\u62ec\u6b65\u9aa4A\u3002"
         },
         {
           "number": 2,
           "references": [
             3
           ],
-          "text": "根据权利要求3所述的方法，其特征在于，步骤B[待确认：条件]。"
+          "text": "\u6839\u636e\u6743\u5229\u8981\u6c423\u6240\u8ff0\u7684\u65b9\u6cd5\uff0c\u5176\u7279\u5f81\u5728\u4e8e\uff0c\u6b65\u9aa4B[\u5f85\u786e\u8ba4\uff1a\u6761\u4ef6]\u3002"
         },
         {
           "number": 3,
           "references": [
             1
           ],
-          "text": "根据权利要求1所述的方法，其特征在于，获得更优结果。"
+          "text": "\u6839\u636e\u6743\u5229\u8981\u6c421\u6240\u8ff0\u7684\u65b9\u6cd5\uff0c\u5176\u7279\u5f81\u5728\u4e8e\uff0c\u83b7\u5f97\u66f4\u4f18\u7ed3\u679c\u3002"
         }
       ],
       "ready_for_formal_review": false
@@ -2919,11 +3081,11 @@
         "nodes": [
           {
             "id": "S1",
-            "label": "获取样品"
+            "label": "\u83b7\u53d6\u6837\u54c1"
           },
           {
             "id": "S2",
-            "label": "记录处理输出"
+            "label": "\u8bb0\u5f55\u5904\u7406\u8f93\u51fa"
           }
         ],
         "number": 1,
@@ -2937,185 +3099,6 @@
         "svg_nonblank_and_parseable": true
       },
       "width": 500
-    }
-  },
-  "presentation-delivery-plan": {
-    "input": {
-      "available_modules": [
-        "figure-specification",
-        "manuscript-audit",
-        "citation-audit",
-        "claim-evidence-integrity-audit",
-        "manuscript-revision-base",
-        "response-matrix",
-        "manuscript-revision-lineage"
-      ],
-      "figures": [
-        {
-          "title": "Figure 1",
-          "type": "UMAP"
-        },
-        {
-          "title": "Figure 2",
-          "type": "trajectory"
-        }
-      ],
-      "key_findings": [
-        {
-          "claim": "Treatment shifted HSC fate toward myeloid lineage.",
-          "evidence": "Cell counts and marker expression from independent donors."
-        },
-        {
-          "claim": "Pseudotime and velocity support progression order.",
-          "evidence": "Velocity-derived latent time and known marker switching."
-        }
-      ],
-      "manuscript_inputs": {
-        "evidence_map": {
-          "claim_to_evidence": true
-        }
-      },
-      "project_goal": "Prepare a publication-grade slide package.",
-      "storyline": "From evidence trace to translational implication.",
-      "target_audience": "Developmental biology and immunology collaborators",
-      "reviewer_feedback": [
-        {
-          "comment": "Add a controls slide.",
-          "status": "completed",
-          "action": "insert controls slide"
-        }
-      ]
-    },
-    "output": {
-      "delivery_mode": "single-presentation",
-      "findings": [
-        {
-          "audience_value": "",
-          "claim": "Treatment shifted HSC fate toward myeloid lineage.",
-          "evidence": "Cell counts and marker expression from independent donors.",
-          "index": 1,
-          "status": "valid"
-        },
-        {
-          "audience_value": "",
-          "claim": "Pseudotime and velocity support progression order.",
-          "evidence": "Velocity-derived latent time and known marker switching.",
-          "index": 2,
-          "status": "valid"
-        }
-      ],
-      "limitations": [
-        "This is a delivery-control planner and does not validate scientific conclusions.",
-        "Missing inputs are represented as explicit gating failures; no module output is a substitute for domain review."
-      ],
-      "module_sequence": [
-        {
-          "depends_on": [],
-          "missing_input": null,
-          "mode": "parallel",
-          "module_id": "figure-specification",
-          "rationale": "Normalize panel claims, data sources, and visual outputs for traceability.",
-          "status": "ready"
-        },
-        {
-          "depends_on": [
-            "figure-specification"
-          ],
-          "missing_input": null,
-          "mode": "serial",
-          "module_id": "manuscript-audit",
-          "rationale": "Validate completeness of manuscript components and readiness constraints.",
-          "status": "ready"
-        },
-        {
-          "depends_on": [
-            "figure-specification"
-          ],
-          "missing_input": null,
-          "mode": "parallel",
-          "module_id": "citation-audit",
-          "rationale": "Keep citation coverage and duplicate identifiers visible and bounded.",
-          "status": "ready"
-        },
-        {
-          "depends_on": [
-            "citation-audit",
-            "manuscript-audit"
-          ],
-          "missing_input": null,
-          "mode": "parallel",
-          "module_id": "claim-evidence-integrity-audit",
-          "rationale": "Bind claims to declared evidence and keep unresolved claims marked.",
-          "status": "ready"
-        },
-        {
-          "depends_on": [
-            "manuscript-audit",
-            "claim-evidence-integrity-audit"
-          ],
-          "missing_input": null,
-          "mode": "serial",
-          "module_id": "manuscript-revision-base",
-          "rationale": "Create an immutable revision baseline before presentation assembly.",
-          "status": "ready"
-        },
-        {
-          "depends_on": [
-            "manuscript-revision-base"
-          ],
-          "missing_input": null,
-          "mode": "parallel",
-          "module_id": "response-matrix",
-          "rationale": "Convert reviewer comments into explicit action records and unresolved items.",
-          "status": "ready"
-        },
-        {
-          "depends_on": [
-            "manuscript-revision-base",
-            "response-matrix"
-          ],
-          "missing_input": null,
-          "mode": "serial",
-          "module_id": "manuscript-revision-lineage",
-          "rationale": "Produce a replayable revision chain from draft through response loops.",
-          "status": "ready"
-        }
-      ],
-      "next_steps": [
-        "run figure-specification with valid figure/claim bindings",
-        "run manuscript-audit, citation-audit, and claim-evidence-integrity-audit",
-        "if feedback exists, run response-matrix then manuscript-revision-lineage",
-        "compile delivery package with explicit limitations and reproducibility ledger"
-      ],
-      "project_goal": "Prepare a publication-grade slide package.",
-      "readiness": {
-        "critical_gap_count": 0,
-        "critical_gaps": [],
-        "peer_feedback_to_resolve": 0,
-        "ready_for_delivery": true
-      },
-      "slide_plan": [
-        {
-          "focus": "Treatment shifted HSC fate toward myeloid lineage.",
-          "linked_artifact": "Figure 1",
-          "recommended_module": "figure-specification",
-          "slide": "S1"
-        },
-        {
-          "focus": "Pseudotime and velocity support progression order.",
-          "linked_artifact": "Figure 2",
-          "recommended_module": "figure-specification",
-          "slide": "S2"
-        }
-      ],
-      "storyline": "From evidence trace to translational implication.",
-      "target_audience": "Developmental biology and immunology collaborators",
-      "quality_gates": [
-        "Every slide claim must map to one finding and one evidence-anchored conclusion.",
-        "Review gates and unresolved comments cannot be silently closed; unresolved items remain explicit.",
-        "All publication-critical outputs must carry compatibility_row_id in provenance.",
-        "No causal claim may be claimed without explicit evidence mapping or explicit uncertainty tags."
-      ]
     }
   },
   "pcr-amplicon-simulation": {
@@ -3241,6 +3224,185 @@
           "track_id": 1
         }
       ]
+    }
+  },
+  "presentation-delivery-plan": {
+    "input": {
+      "available_modules": [
+        "figure-specification",
+        "manuscript-audit",
+        "citation-audit",
+        "claim-evidence-integrity-audit",
+        "manuscript-revision-base",
+        "response-matrix",
+        "manuscript-revision-lineage"
+      ],
+      "figures": [
+        {
+          "title": "Figure 1",
+          "type": "UMAP"
+        },
+        {
+          "title": "Figure 2",
+          "type": "trajectory"
+        }
+      ],
+      "key_findings": [
+        {
+          "claim": "Treatment shifted HSC fate toward myeloid lineage.",
+          "evidence": "Cell counts and marker expression from independent donors."
+        },
+        {
+          "claim": "Pseudotime and velocity support progression order.",
+          "evidence": "Velocity-derived latent time and known marker switching."
+        }
+      ],
+      "manuscript_inputs": {
+        "evidence_map": {
+          "claim_to_evidence": true
+        }
+      },
+      "project_goal": "Prepare a publication-grade slide package.",
+      "reviewer_feedback": [
+        {
+          "action": "insert controls slide",
+          "comment": "Add a controls slide.",
+          "status": "completed"
+        }
+      ],
+      "storyline": "From evidence trace to translational implication.",
+      "target_audience": "Developmental biology and immunology collaborators"
+    },
+    "output": {
+      "delivery_mode": "single-presentation",
+      "findings": [
+        {
+          "audience_value": "",
+          "claim": "Treatment shifted HSC fate toward myeloid lineage.",
+          "evidence": "Cell counts and marker expression from independent donors.",
+          "index": 1,
+          "status": "valid"
+        },
+        {
+          "audience_value": "",
+          "claim": "Pseudotime and velocity support progression order.",
+          "evidence": "Velocity-derived latent time and known marker switching.",
+          "index": 2,
+          "status": "valid"
+        }
+      ],
+      "limitations": [
+        "This is a delivery-control planner and does not validate scientific conclusions.",
+        "Missing inputs are represented as explicit gating failures; no module output is a substitute for domain review."
+      ],
+      "module_sequence": [
+        {
+          "depends_on": [],
+          "missing_input": null,
+          "mode": "parallel",
+          "module_id": "figure-specification",
+          "rationale": "Normalize panel claims, data sources, and visual outputs for traceability.",
+          "status": "ready"
+        },
+        {
+          "depends_on": [
+            "figure-specification"
+          ],
+          "missing_input": null,
+          "mode": "serial",
+          "module_id": "manuscript-audit",
+          "rationale": "Validate completeness of manuscript components and readiness constraints.",
+          "status": "ready"
+        },
+        {
+          "depends_on": [
+            "figure-specification"
+          ],
+          "missing_input": null,
+          "mode": "parallel",
+          "module_id": "citation-audit",
+          "rationale": "Keep citation coverage and duplicate identifiers visible and bounded.",
+          "status": "ready"
+        },
+        {
+          "depends_on": [
+            "citation-audit",
+            "manuscript-audit"
+          ],
+          "missing_input": null,
+          "mode": "parallel",
+          "module_id": "claim-evidence-integrity-audit",
+          "rationale": "Bind claims to declared evidence and keep unresolved claims marked.",
+          "status": "ready"
+        },
+        {
+          "depends_on": [
+            "manuscript-audit",
+            "claim-evidence-integrity-audit"
+          ],
+          "missing_input": null,
+          "mode": "serial",
+          "module_id": "manuscript-revision-base",
+          "rationale": "Create an immutable revision baseline before presentation assembly.",
+          "status": "ready"
+        },
+        {
+          "depends_on": [
+            "manuscript-revision-base"
+          ],
+          "missing_input": null,
+          "mode": "parallel",
+          "module_id": "response-matrix",
+          "rationale": "Convert reviewer comments into explicit action records and unresolved items.",
+          "status": "ready"
+        },
+        {
+          "depends_on": [
+            "manuscript-revision-base",
+            "response-matrix"
+          ],
+          "missing_input": null,
+          "mode": "serial",
+          "module_id": "manuscript-revision-lineage",
+          "rationale": "Produce a replayable revision chain from draft through response loops.",
+          "status": "ready"
+        }
+      ],
+      "next_steps": [
+        "run figure-specification with valid figure/claim bindings",
+        "run manuscript-audit, citation-audit, and claim-evidence-integrity-audit",
+        "if feedback exists, run response-matrix then manuscript-revision-lineage",
+        "compile delivery package with explicit limitations and reproducibility ledger"
+      ],
+      "project_goal": "Prepare a publication-grade slide package.",
+      "quality_gates": [
+        "Every slide claim must map to one finding and one evidence-anchored conclusion.",
+        "Review gates and unresolved comments cannot be silently closed; unresolved items remain explicit.",
+        "All publication-critical outputs must carry compatibility_row_id in provenance.",
+        "No causal claim may be claimed without explicit evidence mapping or explicit uncertainty tags."
+      ],
+      "readiness": {
+        "critical_gap_count": 0,
+        "critical_gaps": [],
+        "peer_feedback_to_resolve": 0,
+        "ready_for_delivery": true
+      },
+      "slide_plan": [
+        {
+          "focus": "Treatment shifted HSC fate toward myeloid lineage.",
+          "linked_artifact": "Figure 1",
+          "recommended_module": "figure-specification",
+          "slide": "S1"
+        },
+        {
+          "focus": "Pseudotime and velocity support progression order.",
+          "linked_artifact": "Figure 2",
+          "recommended_module": "figure-specification",
+          "slide": "S2"
+        }
+      ],
+      "storyline": "From evidence trace to translational implication.",
+      "target_audience": "Developmental biology and immunology collaborators"
     }
   },
   "primer-design": {
@@ -4018,6 +4180,441 @@
       }
     }
   },
+  "single-cell-batch-integration": {
+    "input": {
+      "batch_key": "chemistry_batch",
+      "biological_sample_key": "sample_id",
+      "declared_thresholds": {
+        "maximum_label_purity_loss": 0.15,
+        "minimum_batch_entropy_gain": 0.05,
+        "minimum_label_connectivity": 0.8
+      },
+      "design_notes": "Four independent samples cross two batches; labels are withheld from integration fitting.",
+      "evaluation_label_key": "reviewed_cell_type",
+      "input_artifact_id": "artifact-scrna-qc-annotated",
+      "input_format": "h5ad",
+      "objective": "Compare classical integration methods while preserving reviewed cell identities and unknown populations.",
+      "raw_count_location": "layers.counts",
+      "requested_methods": [
+        "harmony",
+        "scanorama",
+        "bbknn"
+      ],
+      "unknown_label": "unknown"
+    },
+    "output": {
+      "code_plan": [
+        {
+          "id": "inspect-integration-design",
+          "output_artifact_types": [
+            "single_cell_integration_benchmark",
+            "single_cell_integration_decision"
+          ],
+          "purpose": "Establish whether integration is scientifically identifiable and necessary before invoking a correction method.",
+          "required_logic": [
+            "Inspect raw counts, source reductions, sample and batch nesting, condition, known technical factors, reviewed labels, unknown labels, and feature namespace from the actual object.",
+            "Cross-tabulate biological samples, batches, conditions, and evaluation labels; block perfect confounding and labels confined to one batch.",
+            "Define the unintegrated PCA baseline and predeclare technical-mixing and biological-conservation metrics without inspecting method outcomes."
+          ],
+          "template_files": [
+            "templates/benchmark_integration.py"
+          ]
+        },
+        {
+          "id": "run-comparable-candidates",
+          "output_artifact_types": [
+            "single_cell_integrated_object",
+            "single_cell_integration_benchmark"
+          ],
+          "purpose": "Generate and execute method-specific integration branches from one frozen preprocessing foundation.",
+          "required_logic": [
+            "Use the same immutable raw counts, normalization, batch-aware HVGs, scaled HVG matrix, PCA basis, random seed, and evaluation neighborhood size for every candidate unless a documented method constraint requires a sensitivity branch.",
+            "Run Harmony and Scanorama as embedding corrections and BBKNN as graph correction using their detected validated APIs.",
+            "Never expose evaluation labels, desired annotations, condition outcomes, or expected conclusions to candidate fitting."
+          ],
+          "template_files": [
+            "templates/benchmark_integration.py"
+          ]
+        },
+        {
+          "id": "evaluate-mixing-and-conservation",
+          "output_artifact_types": [
+            "single_cell_integration_benchmark",
+            "single_cell_integration_decision"
+          ],
+          "purpose": "Quantify technical mixing and independent biological conservation against the unchanged baseline.",
+          "required_logic": [
+            "Compute normalized batch-neighbor entropy, batch silhouette, known-label neighbor purity, label silhouette, and per-label graph connectivity using fixed post hoc labels and retain unknown cells.",
+            "Compare integrated values with baseline deltas and inspect sample composition; UMAP appearance is descriptive only.",
+            "Block overcorrection, label fragmentation, unknown-cell loss, raw-count mutation, or improvement driven by a confounded design."
+          ],
+          "template_files": [
+            "templates/benchmark_integration.py"
+          ]
+        },
+        {
+          "id": "select-with-sensitivity",
+          "output_artifact_types": [
+            "single_cell_integration_decision",
+            "single_cell_integrated_object"
+          ],
+          "purpose": "Select an eligible representation only after method and parameter sensitivity review.",
+          "required_logic": [
+            "Repeat eligible candidates across justified HVG, PCA, neighbor, and seed perturbations and preserve all candidate reports.",
+            "Choose no method when integration is unnecessary or every candidate fails; do not force a winner.",
+            "Declare whether downstream tasks may use the selected embedding or graph and preserve raw counts for count-level inference."
+          ],
+          "template_files": [
+            "templates/benchmark_integration.py"
+          ]
+        },
+        {
+          "id": "reload-and-admit",
+          "output_artifact_types": [
+            "single_cell_integrated_object",
+            "single_cell_integration_benchmark",
+            "single_cell_integration_decision"
+          ],
+          "purpose": "Reload every candidate object and bind the selected decision to observed artifacts and quality gates.",
+          "required_logic": [
+            "Reload cells, features, raw counts, integrated representation or graph, UMAP, method metadata, and benchmark reports.",
+            "Verify template, input, output, sample-manifest, tool-version, dependency-version, parameter, and quality-gate provenance.",
+            "Admit only the selected observed artifact; preserve blocked candidates and reasons as non-evidentiary execution history."
+          ],
+          "template_files": [
+            "templates/benchmark_integration.py"
+          ]
+        }
+      ],
+      "dependency_profiles": [
+        {
+          "allowed_versions": [
+            ">=3.10,<3.11"
+          ],
+          "conflicts": [],
+          "identity": "python-runtime",
+          "name": "python",
+          "tested_versions": [
+            "3.10.18"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.10,<0.11"
+          ],
+          "conflicts": [],
+          "identity": "anndata",
+          "name": "anndata",
+          "tested_versions": [
+            "0.10.8"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.26,<1.27"
+          ],
+          "conflicts": [],
+          "identity": "numpy",
+          "name": "numpy",
+          "tested_versions": [
+            "1.26.4"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "conflicts": [],
+          "identity": "pandas",
+          "name": "pandas",
+          "tested_versions": [
+            "2.2.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.13,<1.14"
+          ],
+          "conflicts": [],
+          "identity": "scipy",
+          "name": "scipy",
+          "tested_versions": [
+            "1.13.1"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.7,<1.8"
+          ],
+          "conflicts": [],
+          "identity": "sklearn",
+          "name": "scikit-learn",
+          "tested_versions": [
+            "1.7.2"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.5.12,<0.6"
+          ],
+          "conflicts": [],
+          "identity": "umap",
+          "name": "umap-learn",
+          "tested_versions": [
+            "0.5.12"
+          ]
+        }
+      ],
+      "execution_policy": {
+        "execute_in_user_scientific_environment": true,
+        "generate_project_specific_code": true,
+        "inspect_before_execution": true,
+        "manage_environment_or_compute_infrastructure": false,
+        "observed_execution_required": true,
+        "planned_output_is_not_evidence": true
+      },
+      "forbidden_actions": [
+        "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
+        "Do not integrate a perfectly confounded design or treat integration as a repair for missing biological replication.",
+        "Do not use evaluation labels, desired annotations, conditions, expected markers, or desired conclusions during fitting or parameter tuning.",
+        "Do not select a method from UMAP appearance, batch mixing alone, or one aggregate score.",
+        "Do not overwrite raw counts, source objects, cell identities, unknown labels, or sample provenance.",
+        "Do not use corrected embeddings or graphs as count matrices for differential expression.",
+        "Do not report generated code, an unreloaded h5ad, or an ineligible candidate as validated integration evidence."
+      ],
+      "handoff_type": "codex_generated_project_analysis",
+      "languages": [
+        "python",
+        "notebook"
+      ],
+      "module": {
+        "id": "single-cell-batch-integration",
+        "version": "1.1.0"
+      },
+      "parameter_rules": [
+        {
+          "decision_inputs": [
+            "batch association",
+            "sample nesting",
+            "unintegrated PCA",
+            "technical covariates",
+            "downstream objective"
+          ],
+          "id": "integration-necessity",
+          "parameter": "integration-necessity",
+          "selection_rule": "Run integration only when a declared technical factor materially distorts the representation used by the downstream task and the design permits correction.",
+          "validation_rule": "Retain the unintegrated baseline and allow no-integration as a valid selected decision."
+        },
+        {
+          "decision_inputs": [
+            "batch-aware HVG overlap",
+            "feature namespace",
+            "variance ratios",
+            "technical association",
+            "cell count"
+          ],
+          "id": "feature-and-pca-foundation",
+          "parameter": "hvg-and-pca",
+          "selection_rule": "Freeze a batch-aware HVG and PCA foundation from log-normalized counts and test neighboring choices without using labels.",
+          "validation_rule": "Require finite components, adequate HVGs, raw-count separation, and comparable candidate inputs."
+        },
+        {
+          "decision_inputs": [
+            "cell count",
+            "batch count",
+            "population granularity",
+            "rare population objective"
+          ],
+          "id": "evaluation-neighborhood",
+          "parameter": "evaluation-neighbors",
+          "selection_rule": "Declare one evaluation neighborhood size and use it for baseline and candidate metrics; separately record BBKNN per-batch neighbor construction.",
+          "validation_rule": "Repeat conclusions over a defensible neighboring range and block candidates whose ranking is unstable."
+        },
+        {
+          "decision_inputs": [
+            "baseline entropy",
+            "batch count",
+            "sample balance",
+            "integration objective"
+          ],
+          "id": "mixing-threshold",
+          "parameter": "minimum-batch-entropy-gain",
+          "selection_rule": "Require a predeclared improvement over baseline rather than an absolute visual target.",
+          "validation_rule": "Interpret mixing only alongside sample composition, confounding review, and biological-conservation gates."
+        },
+        {
+          "decision_inputs": [
+            "label provenance",
+            "unknown labels",
+            "baseline purity",
+            "label connectivity",
+            "expected continua"
+          ],
+          "id": "conservation-thresholds",
+          "parameter": "biological-conservation-thresholds",
+          "selection_rule": "Declare maximum purity loss and minimum connectivity from label reliability and biological granularity before candidate comparison.",
+          "validation_rule": "Block any candidate that erases, fragments, or forcibly absorbs reviewed or unknown populations even when technical mixing improves."
+        },
+        {
+          "decision_inputs": [
+            "all quality gates",
+            "metric deltas",
+            "sensitivity runs",
+            "method output semantics",
+            "downstream task"
+          ],
+          "id": "candidate-selection",
+          "parameter": "selected-integration-method",
+          "selection_rule": "Select among eligible methods by the downstream representation needed and conservation robustness, not by one aggregate score.",
+          "validation_rule": "Require explicit no-selection when no candidate remains eligible and prohibit corrected embeddings as count matrices."
+        }
+      ],
+      "postflight_checks": [
+        "Reconcile cell, feature, metadata, unknown-label, and raw-count identities before and after every candidate.",
+        "Reload each integrated h5ad and verify representation or graph semantics, UMAP presence, parameters, versions, and quality status.",
+        "Recompute baseline and candidate batch entropy, label purity, label connectivity, and silhouettes independently using the fixed evaluation labels.",
+        "Compare candidate sensitivity across HVGs, PCs, neighbors, and seeds; inspect sample composition and retain all blocked methods and reasons.",
+        "Create a selected-method-or-none decision with an explicit downstream-use contract and update evidence only for observed eligible artifacts."
+      ],
+      "preflight_checks": [
+        "Inspect the actual h5ad and establish raw-count, batch, biological-sample, evaluation-label, unknown-label, feature, and annotation semantics.",
+        "Detect Scanpy, harmonypy, Scanorama, BBKNN, AnnData, NumPy, pandas, SciPy, scikit-learn, UMAP, Numba, and neighbor-search versions in the existing scientific environment.",
+        "Verify every biological sample maps to one batch and every known evaluation label spans at least two batches; identify batch-condition and batch-label confounding.",
+        "Freeze common preprocessing, candidate methods, metric definitions, quality thresholds, sensitivity grid, random seeds, and new output paths before execution.",
+        "Confirm labels are inaccessible to integration fitting and that source objects will not be modified."
+      ],
+      "provenance_fields": [
+        "module-id",
+        "module-version",
+        "generated-code-sha256",
+        "input-artifact-sha256",
+        "sample-manifest-sha256",
+        "raw-count-location",
+        "feature-namespace",
+        "batch-key",
+        "biological-sample-key",
+        "evaluation-label-key",
+        "unknown-label",
+        "labels-used-for-training-false",
+        "actual-tool-versions",
+        "actual-dependency-versions",
+        "candidate-method",
+        "preprocessing-parameters",
+        "method-parameters",
+        "metric-definitions",
+        "quality-thresholds",
+        "random-seed",
+        "sensitivity-runs",
+        "output-artifact-sha256",
+        "quality-gate-results"
+      ],
+      "quality_gate_ids": [
+        "integration-input-and-design-semantics",
+        "integration-identifiability",
+        "integration-no-label-leakage",
+        "integration-batch-mixing",
+        "integration-biological-conservation",
+        "integration-raw-count-and-reload",
+        "integration-selection-sensitivity"
+      ],
+      "request_digest": "0a33b20223a45811b044f8897426aa421b1c0c62c81123d5c3dcd83494488359",
+      "request_fields": [
+        "batch_key",
+        "biological_sample_key",
+        "declared_thresholds",
+        "design_notes",
+        "evaluation_label_key",
+        "input_artifact_id",
+        "input_format",
+        "objective",
+        "raw_count_location",
+        "requested_methods",
+        "unknown_label"
+      ],
+      "tool_profiles": [
+        {
+          "allowed_versions": [
+            ">=1.10,<1.11"
+          ],
+          "identity": "scanpy",
+          "mismatch_policy": "block",
+          "name": "scanpy",
+          "tested_versions": [
+            "1.10.4"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.10,<1.11"
+              ],
+              "id": "scanpy-external-integration-api",
+              "required_action": "Use only detected wrapper signatures and independently reload representations, graphs, embeddings, and raw counts."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.2,<0.3"
+          ],
+          "identity": "harmonypy",
+          "mismatch_policy": "alternative",
+          "name": "harmonypy",
+          "tested_versions": [
+            "0.2.0"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=0.2,<0.3"
+              ],
+              "id": "harmony-pca-adjustment",
+              "required_action": "Call the detected Harmony API, validate both possible orientations against the frozen PCA shape, normalize to cells by components, and compare corrected neighborhoods with the unchanged PCA baseline."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.7,<1.8"
+          ],
+          "identity": "scanorama",
+          "mismatch_policy": "alternative",
+          "name": "scanorama",
+          "tested_versions": [
+            "1.7.4"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.7,<1.8"
+              ],
+              "id": "scanorama-embedding-integration",
+              "required_action": "Record exact versus approximate matching and independently evaluate integrated neighbors and conservation metrics."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.6,<1.7"
+          ],
+          "identity": "bbknn",
+          "mismatch_policy": "alternative",
+          "name": "bbknn",
+          "tested_versions": [
+            "1.6.0"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.6,<1.7"
+              ],
+              "id": "bbknn-balanced-neighbor-graph",
+              "required_action": "Record per-batch neighbors and search mode and evaluate the graph rather than treating baseline PCA as a corrected embedding."
+            }
+          ]
+        }
+      ]
+    }
+  },
   "single-cell-donor-inference": {
     "input": {
       "biological_sample_key": "sample_id",
@@ -4231,7 +4828,7 @@
         "planned_output_is_not_evidence": true
       },
       "forbidden_actions": [
-        "Do not install, update, activate, create, or otherwise manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+        "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
         "Do not guess raw-count layers, transpose matrices, repair identifiers, impute design metadata, relabel cell types, merge technical libraries, or convert unsupported formats silently.",
         "Do not aggregate normalized, integrated, scaled, imputed, corrected, or residual values as counts.",
         "Do not use cells, clusters, technical libraries, or duplicated pseudobulks as independent biological replicates.",
@@ -4631,7 +5228,7 @@
         "planned_output_is_not_evidence": true
       },
       "forbidden_actions": [
-        "Do not install, update, activate, create, or otherwise manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+        "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
         "Do not silently convert formats, transpose matrices, guess raw-count layers, merge feature namespaces, rename cells, or join Seurat layers with different sample semantics.",
         "Do not overwrite source artifacts or raw counts.",
         "Do not use cells as independent biological replicates for condition-level inference.",
@@ -4824,6 +5421,400 @@
               ],
               "id": "seurat-v5-layer-semantics",
               "required_action": "Inspect assay layers and generate Seurat v5 layer-aware code without silently coercing or joining biologically distinct samples."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "single-cell-generative-modeling": {
+    "input": {
+      "batch_key": "chemistry_batch",
+      "biological_sample_key": "sample_id",
+      "declared_thresholds": {
+        "maximum_label_purity_loss": 0.15,
+        "minimum_heldout_macro_f1": 0.8,
+        "minimum_label_connectivity": 0.8
+      },
+      "design_notes": "Independent samples span two batches; every reviewed class occurs in both; unknown cells remain unpromoted.",
+      "input_artifact_id": "artifact-scrna-qc-reviewed",
+      "input_format": "h5ad",
+      "objective": "Train and validate a count-aware scANVI model while retaining reviewed labels and unknown cells.",
+      "raw_count_location": "layers.counts",
+      "requested_mode": "scanvi",
+      "reviewed_label_key": "reviewed_cell_type",
+      "unknown_label": "unknown"
+    },
+    "output": {
+      "code_plan": [
+        {
+          "id": "inspect-model-design",
+          "output_artifact_types": [
+            "single_cell_model_validation"
+          ],
+          "purpose": "Establish count, sample, batch, label, unknown, and model-use semantics before training.",
+          "required_logic": [
+            "Inspect the real h5ad and sample manifest; validate immutable integer-like counts and unique identifiers.",
+            "Cross-tabulate samples, batches, reviewed labels, conditions, and unknown cells; block confounding or batch-confined classes.",
+            "Declare whether scVI latent modeling or scANVI semi-supervision answers the project question and keep no-model as an eligible decision."
+          ],
+          "template_files": [
+            "templates/train_scvi_scanvi.py"
+          ]
+        },
+        {
+          "id": "train-count-aware-model",
+          "output_artifact_types": [
+            "single_cell_generative_model",
+            "single_cell_integrated_object"
+          ],
+          "purpose": "Train a project-specific model from raw counts in the detected existing runtime.",
+          "required_logic": [
+            "Register the declared raw-count layer and batch key without altering the source object.",
+            "Freeze model architecture, likelihood, train split, epochs, seed, neighborhood metrics, and output paths before execution.",
+            "Train scVI unsupervised; for scANVI derive semi-supervised models from the same scVI foundation and never overwrite reviewed labels."
+          ],
+          "template_files": [
+            "templates/train_scvi_scanvi.py"
+          ]
+        },
+        {
+          "id": "validate-generalization-and-conservation",
+          "output_artifact_types": [
+            "single_cell_model_validation",
+            "single_cell_integrated_object"
+          ],
+          "purpose": "Test the latent space and scANVI labels on independent gates.",
+          "required_logic": [
+            "Compare batch entropy, known-label purity, and label connectivity with a frozen unintegrated PCA baseline.",
+            "For scANVI hide a stratified subset of every reviewed class during training and compute macro-F1 and balanced accuracy on held-out cells.",
+            "Store predictions, confidence, and review flags separately while retaining every original reviewed and unknown label."
+          ],
+          "template_files": [
+            "templates/train_scvi_scanvi.py"
+          ]
+        },
+        {
+          "id": "save-reload-and-admit",
+          "output_artifact_types": [
+            "single_cell_generative_model",
+            "single_cell_integrated_object",
+            "single_cell_model_validation"
+          ],
+          "purpose": "Bind scientific claims to reloadable model and h5ad artifacts.",
+          "required_logic": [
+            "Save model state and registry plus an h5ad containing latent representation, graph, UMAP, suggestions, and unchanged counts and labels.",
+            "Reload model and h5ad independently and verify shapes, finite latent values, raw counts, labels, graph keys, parameters, versions, digests, and quality state.",
+            "Admit only observed artifacts passing every declared gate; preserve blocked runs and reasons."
+          ],
+          "template_files": [
+            "templates/train_scvi_scanvi.py"
+          ]
+        },
+        {
+          "id": "bounded-bayesian-differential-expression",
+          "output_artifact_types": [
+            "single_cell_model_validation"
+          ],
+          "purpose": "Generate an optional model-based contrast only after generative model admission.",
+          "required_logic": [
+            "Require a declared group key and group values present in model metadata; use an empty second group only for one-versus-all, never the literal rest category.",
+            "Call differential_expression in change mode with a predeclared delta and verify proba_de, lfc_mean, bayes_factor, group1, and group2 before export.",
+            "Label output as exploratory cell-level evidence, preserve the full model result in project outputs, and route condition conclusions to donor-aware pseudobulk or mixed-model inference."
+          ],
+          "template_files": [
+            "templates/train_scvi_scanvi.py"
+          ]
+        }
+      ],
+      "dependency_profiles": [
+        {
+          "allowed_versions": [
+            ">=3.11,<3.12"
+          ],
+          "conflicts": [],
+          "identity": "python-runtime",
+          "name": "python",
+          "tested_versions": [
+            "3.11.15"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.12,<0.13"
+          ],
+          "conflicts": [],
+          "identity": "anndata",
+          "name": "anndata",
+          "tested_versions": [
+            "0.12.19"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.26,<1.27"
+          ],
+          "conflicts": [],
+          "identity": "numpy",
+          "name": "numpy",
+          "tested_versions": [
+            "1.26.4"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=2.3,<2.4"
+          ],
+          "conflicts": [],
+          "identity": "pandas",
+          "name": "pandas",
+          "tested_versions": [
+            "2.3.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.15,<1.16"
+          ],
+          "conflicts": [],
+          "identity": "scipy",
+          "name": "scipy",
+          "tested_versions": [
+            "1.15.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.9,<1.10"
+          ],
+          "conflicts": [],
+          "identity": "sklearn",
+          "name": "scikit-learn",
+          "tested_versions": [
+            "1.9.0"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=2.4,<2.5"
+          ],
+          "conflicts": [],
+          "identity": "torch",
+          "name": "torch",
+          "tested_versions": [
+            "2.4.1"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=2.6,<2.7"
+          ],
+          "conflicts": [],
+          "identity": "lightning",
+          "name": "lightning",
+          "tested_versions": [
+            "2.6.5"
+          ]
+        }
+      ],
+      "execution_policy": {
+        "execute_in_user_scientific_environment": true,
+        "generate_project_specific_code": true,
+        "inspect_before_execution": true,
+        "manage_environment_or_compute_infrastructure": false,
+        "observed_execution_required": true,
+        "planned_output_is_not_evidence": true
+      },
+      "forbidden_actions": [
+        "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
+        "Do not train on normalized values when the declared model requires raw counts.",
+        "Do not repair confounding with a latent model or tune against desired UMAP, labels, markers, conditions, or conclusions.",
+        "Do not evaluate scANVI only on labels used for training.",
+        "Do not overwrite raw counts, source objects, reviewed labels, unknown labels, cell identities, or sample provenance.",
+        "Do not treat normalized expression or a latent representation as count-level evidence for differential expression.",
+        "Do not report a generated script, trained but unreloaded model, or blocked artifact as validated evidence.",
+        "Do not treat Bayesian model-based cell-level differential expression as pseudobulk, donor-aware, population-level, causal, or condition-level inference."
+      ],
+      "handoff_type": "codex_generated_project_analysis",
+      "languages": [
+        "python",
+        "notebook"
+      ],
+      "module": {
+        "id": "single-cell-generative-modeling",
+        "version": "1.2.0"
+      },
+      "parameter_rules": [
+        {
+          "decision_inputs": [
+            "project objective",
+            "reviewed label provenance",
+            "unknown population",
+            "reference coverage"
+          ],
+          "id": "model-mode",
+          "parameter": "scvi-or-scanvi",
+          "selection_rule": "Use scVI for unsupervised representation and scANVI only when reviewed labels are suitable for semi-supervision and holdout testing.",
+          "validation_rule": "Do not use scANVI as an annotation oracle or force unknown cells into known classes."
+        },
+        {
+          "decision_inputs": [
+            "cell count",
+            "gene count",
+            "count distribution",
+            "sparsity",
+            "replicate structure"
+          ],
+          "id": "architecture-and-likelihood",
+          "parameter": "architecture-and-gene-likelihood",
+          "selection_rule": "Choose a conservative architecture and count likelihood before outcomes are inspected.",
+          "validation_rule": "Repeat justified neighboring architectures and block unstable biological conclusions."
+        },
+        {
+          "decision_inputs": [
+            "class counts",
+            "sample structure",
+            "learning curves",
+            "validation loss"
+          ],
+          "id": "training-and-holdout",
+          "parameter": "epochs-train-split-holdout",
+          "selection_rule": "Use sample-aware diagnostics and stratified label holdout with enough training and evaluation cells per class.",
+          "validation_rule": "Report failed convergence, class collapse, and weak held-out performance rather than extending training until a desired result appears."
+        },
+        {
+          "decision_inputs": [
+            "probability calibration",
+            "heldout errors",
+            "marker evidence",
+            "ontology constraints"
+          ],
+          "id": "unknown-policy",
+          "parameter": "suggestion-confidence-and-review",
+          "selection_rule": "Emit confidence-bearing suggestions while preserving original unknown labels for separate review.",
+          "validation_rule": "No unknown cell is promoted automatically by this module."
+        },
+        {
+          "decision_inputs": [
+            "model metadata groups",
+            "contrast objective",
+            "biological sample structure",
+            "effect-size policy",
+            "donor-aware inference plan"
+          ],
+          "id": "bayesian-de-contrast",
+          "parameter": "bayesian-de-group-and-delta",
+          "selection_rule": "Request Bayesian differential expression only for a declared model metadata contrast after model admission; freeze group values, change-mode delta, and result bound before examining outcomes.",
+          "validation_rule": "Reject absent or ambiguous groups, literal rest categories, missing change-mode fields, and any conversion of cell-level output into donor-level condition evidence."
+        }
+      ],
+      "postflight_checks": [
+        "Inspect learning histories, finite latent values, batch mixing, reviewed-label purity, label connectivity, and held-out scANVI metrics.",
+        "Reconcile cells, features, raw counts, reviewed labels, unknown labels, suggestions, confidences, and review flags.",
+        "Reload model and h5ad independently and verify digests, versions, parameters, graph, UMAP, quality state, and downstream representation contract.",
+        "Compare against no model and classical integration when the project requires method selection.",
+        "For requested Bayesian differential expression, retain contrast parameters, full result location, required change-mode fields, top-feature accounting, and explicit exploratory cell-level interpretation boundary."
+      ],
+      "preflight_checks": [
+        "Inspect raw-count, sample, batch, reviewed-label, unknown-label, feature, condition, and source-object semantics.",
+        "Detect scvi-tools, Scanpy, AnnData, NumPy, pandas, SciPy, scikit-learn, torch, Lightning, and Python versions in the existing scientific environment.",
+        "Verify sample-to-batch mapping, cross-batch class support, unknown-cell presence, class counts, source immutability, and new output paths.",
+        "Freeze mode, architecture, likelihood, train split, holdout fraction, epochs, thresholds, seed, and reload checks before training.",
+        "When Bayesian differential expression is requested, verify the group key and both declared categories in the model metadata, a predeclared change-mode delta, result bound, and separate donor-aware inference plan."
+      ],
+      "provenance_fields": [
+        "module-id",
+        "module-version",
+        "generated-code-sha256",
+        "input-artifact-sha256",
+        "sample-manifest-sha256",
+        "raw-count-location",
+        "feature-namespace",
+        "batch-key",
+        "biological-sample-key",
+        "reviewed-label-key",
+        "unknown-label",
+        "actual-tool-versions",
+        "actual-dependency-versions",
+        "model-mode",
+        "architecture",
+        "gene-likelihood",
+        "training-parameters",
+        "holdout-indices-digest",
+        "random-seed",
+        "metric-definitions",
+        "quality-thresholds",
+        "model-directory-sha256",
+        "output-h5ad-sha256",
+        "quality-gate-results",
+        "bayesian-de-group-key",
+        "bayesian-de-groups",
+        "bayesian-de-mode",
+        "bayesian-de-delta",
+        "bayesian-de-result-digest",
+        "bayesian-de-boundary"
+      ],
+      "quality_gate_ids": [
+        "generative-input-semantics",
+        "generative-design-identifiability",
+        "generative-latent-conservation",
+        "scanvi-heldout-generalization",
+        "generative-unknown-retention",
+        "generative-artifact-reload",
+        "generative-bayesian-de-boundary"
+      ],
+      "request_digest": "9d77193100ba757a64242b1df13339c94e554ee94a821ffc4f92c6cec12e2790",
+      "request_fields": [
+        "batch_key",
+        "biological_sample_key",
+        "declared_thresholds",
+        "design_notes",
+        "input_artifact_id",
+        "input_format",
+        "objective",
+        "raw_count_location",
+        "requested_mode",
+        "reviewed_label_key",
+        "unknown_label"
+      ],
+      "tool_profiles": [
+        {
+          "allowed_versions": [
+            ">=1.2,<1.3"
+          ],
+          "identity": "scvi-tools",
+          "mismatch_policy": "block",
+          "name": "scvi-tools",
+          "tested_versions": [
+            "1.2.0"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.2,<1.3"
+              ],
+              "id": "scvi-scanvi-training-and-save-api",
+              "required_action": "Inspect detected signatures, preserve the registered count layer, and reload model and h5ad before admitting results."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.11,<1.12"
+          ],
+          "identity": "scanpy",
+          "mismatch_policy": "block",
+          "name": "scanpy",
+          "tested_versions": [
+            "1.11.5"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.11,<1.12"
+              ],
+              "id": "scanpy-pca-neighbor-umap-api",
+              "required_action": "Record the actual version and reload all representation and graph keys."
             }
           ]
         }
@@ -5087,7 +6078,7 @@
         "planned_output_is_not_evidence": true
       },
       "forbidden_actions": [
-        "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+        "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
         "Do not guess gene identifier mappings, ontology edges, reference scope, marker evidence, missing labels, or annotation releases.",
         "Do not use existing labels, evaluation truth, expected markers, desired cell types, conditions, or conclusions to tune SingleR or thresholds.",
         "Do not accept a maximum reference score without pruning, group consensus, marker support, ontology allowance, and cell-level confidence.",
@@ -5261,6 +6252,359 @@
               ],
               "id": "scanpy-h5ad-read-write",
               "required_action": "Reload the output and reconcile every source and annotation field before admission."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "single-cell-trajectory-velocity": {
+    "input": {
+      "biological_sample_key": "sample_id",
+      "declared_thresholds": {
+        "minimum_latent_time_correlation": 0.65,
+        "minimum_median_velocity_confidence": 0.7,
+        "minimum_modeled_genes": 20,
+        "minimum_root_terminal_separation": 0.05,
+        "minimum_velocity_pseudotime_correlation": 0.25
+      },
+      "design_notes": "Four independent samples span the process; experimental time is withheld from fitting.",
+      "experimental_time_key": "collection_time",
+      "input_artifact_id": "artifact-splicing-kinetics",
+      "input_format": "h5ad",
+      "objective": "Infer RNA velocity and validate direction against independent time and root-terminal evidence.",
+      "root_score_key": "root_score",
+      "spliced_layer": "spliced",
+      "terminal_score_key": "terminal_score",
+      "unspliced_layer": "unspliced"
+    },
+    "output": {
+      "code_plan": [
+        {
+          "id": "inspect-splicing-temporal-design",
+          "output_artifact_types": [
+            "single_cell_trajectory_validation"
+          ],
+          "purpose": "Establish whether velocity and directional trajectory inference are identifiable.",
+          "required_logic": [
+            "Inspect real spliced and unspliced layers, quantification provenance, cells, genes, samples, time, root and terminal evidence, batches, cell states, and source digest.",
+            "Block missing or non-count layers, one-sample designs, ambiguous anchors, inadequate temporal coverage, and guessed direction.",
+            "Freeze preprocessing, model, genes, neighbors, anchors, direction thresholds, confidence thresholds, and outputs before execution."
+          ],
+          "template_files": [
+            "templates/run_velocity.py"
+          ]
+        },
+        {
+          "id": "fit-dynamical-velocity",
+          "output_artifact_types": [
+            "single_cell_trajectory_object",
+            "single_cell_trajectory_validation"
+          ],
+          "purpose": "Execute the detected scVelo dynamical API without modifying source counts.",
+          "required_logic": [
+            "Normalize working copies, select HVGs, compute PCA, neighbors, moments, dynamics, velocity, graph, UMAP vectors, velocity pseudotime, latent time, and confidence using version-correct calls.",
+            "Keep experimental time out of model fitting and use only declared root and terminal scores for orientation.",
+            "Retain failed fit genes and warnings rather than selecting genes from desired temporal behavior."
+          ],
+          "template_files": [
+            "templates/run_velocity.py"
+          ]
+        },
+        {
+          "id": "validate-direction-confidence",
+          "output_artifact_types": [
+            "single_cell_trajectory_validation"
+          ],
+          "purpose": "Test whether the inferred direction is independently supported.",
+          "required_logic": [
+            "Compute Spearman correlations of latent time and velocity pseudotime with withheld experimental time.",
+            "Require root cells to precede terminal cells and median velocity confidence to pass predeclared thresholds.",
+            "Block temporal interpretation when any direction or confidence gate fails even if the embedding arrows appear coherent."
+          ],
+          "template_files": [
+            "templates/run_velocity.py"
+          ]
+        },
+        {
+          "id": "merge-reload-and-admit",
+          "output_artifact_types": [
+            "single_cell_trajectory_object",
+            "single_cell_trajectory_validation"
+          ],
+          "purpose": "Write derived trajectory fields to a new full-feature h5ad and verify source preservation.",
+          "required_logic": [
+            "Merge velocity layers, graph, UMAP vectors, pseudotimes, confidence, fit fields, parameters, and quality status into a copy of the full source object.",
+            "Reload cells, genes, spliced and unspliced counts, sample and anchor fields, trajectory fields, graph, versions, thresholds, and digest.",
+            "Admit only observed direction-validated outputs and keep blocked runs as non-evidentiary model history."
+          ],
+          "template_files": [
+            "templates/run_velocity.py"
+          ]
+        }
+      ],
+      "dependency_profiles": [
+        {
+          "allowed_versions": [
+            ">=3.11,<3.12"
+          ],
+          "conflicts": [],
+          "identity": "python-runtime",
+          "name": "python",
+          "tested_versions": [
+            "3.11.15"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.12,<0.13"
+          ],
+          "conflicts": [],
+          "identity": "anndata",
+          "name": "anndata",
+          "tested_versions": [
+            "0.12.19"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.26,<1.27"
+          ],
+          "conflicts": [],
+          "identity": "numpy",
+          "name": "numpy",
+          "tested_versions": [
+            "1.26.4"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=2.3,<2.4"
+          ],
+          "conflicts": [],
+          "identity": "pandas",
+          "name": "pandas",
+          "tested_versions": [
+            "2.3.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.15,<1.16"
+          ],
+          "conflicts": [],
+          "identity": "scipy",
+          "name": "scipy",
+          "tested_versions": [
+            "1.15.3"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.9,<1.10"
+          ],
+          "conflicts": [],
+          "identity": "sklearn",
+          "name": "scikit-learn",
+          "tested_versions": [
+            "1.9.0"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.66,<0.67"
+          ],
+          "conflicts": [],
+          "identity": "numba",
+          "name": "numba",
+          "tested_versions": [
+            "0.66.0"
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=0.5.12,<0.6"
+          ],
+          "conflicts": [],
+          "identity": "umap",
+          "name": "umap-learn",
+          "tested_versions": [
+            "0.5.12"
+          ]
+        }
+      ],
+      "execution_policy": {
+        "execute_in_user_scientific_environment": true,
+        "generate_project_specific_code": true,
+        "inspect_before_execution": true,
+        "manage_environment_or_compute_infrastructure": false,
+        "observed_execution_required": true,
+        "planned_output_is_not_evidence": true
+      },
+      "forbidden_actions": [
+        "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
+        "Do not fabricate, infer, or silently convert spliced and unspliced counts from total expression.",
+        "Do not use experimental time, desired lineage, annotations, markers, conditions, or conclusions to select genes or tune the model.",
+        "Do not infer direction from UMAP layout, arrows, root choice alone, or one pseudotime correlation.",
+        "Do not overwrite source layers, h5ad objects, cells, genes, samples, anchors, or provenance.",
+        "Do not treat cells as condition-level replicates or velocity as proof of lineage causality.",
+        "Do not report generated code, an unreloaded object, or a blocked direction as validated trajectory evidence."
+      ],
+      "handoff_type": "codex_generated_project_analysis",
+      "languages": [
+        "python",
+        "notebook"
+      ],
+      "module": {
+        "id": "single-cell-trajectory-velocity",
+        "version": "1.1.0"
+      },
+      "parameter_rules": [
+        {
+          "decision_inputs": [
+            "spliced counts",
+            "unspliced counts",
+            "gene detection",
+            "kinetic fit",
+            "cell count"
+          ],
+          "id": "velocity-gene-foundation",
+          "parameter": "hvg-modeled-gene-and-fit-thresholds",
+          "selection_rule": "Declare minimum HVG, finite-fit, and velocity-gene counts before model results.",
+          "validation_rule": "Do not cherry-pick genes by agreement with desired direction."
+        },
+        {
+          "decision_inputs": [
+            "cell count",
+            "state continuity",
+            "rare states",
+            "batch design"
+          ],
+          "id": "velocity-neighborhood",
+          "parameter": "pca-and-neighbors",
+          "selection_rule": "Choose a stable local neighborhood before velocity graph construction.",
+          "validation_rule": "Repeat justified neighboring values and block unstable direction."
+        },
+        {
+          "decision_inputs": [
+            "experimental time",
+            "root evidence",
+            "terminal evidence",
+            "sampling density"
+          ],
+          "id": "velocity-direction",
+          "parameter": "time-correlation-and-anchor-separation",
+          "selection_rule": "Predeclare temporal correlations and normalized root-terminal separation required for direction.",
+          "validation_rule": "Withhold experimental time from fitting and block direction when independent checks fail."
+        },
+        {
+          "decision_inputs": [
+            "velocity coherence",
+            "transition confidence",
+            "state coverage"
+          ],
+          "id": "velocity-confidence",
+          "parameter": "minimum-median-confidence",
+          "selection_rule": "Declare a confidence floor separately from temporal direction.",
+          "validation_rule": "An attractive UMAP vector field cannot substitute for confidence or time validation."
+        }
+      ],
+      "postflight_checks": [
+        "Inspect modeled genes, finite fits, velocity layers, graph, pseudotime, latent time, confidence, and warnings.",
+        "Recompute time correlations and root-terminal separation independently from fields withheld during fitting.",
+        "Reconcile all source cells, genes, samples, anchors, spliced and unspliced counts, derived fields, parameters, versions, and digests after reload.",
+        "Keep cell-level trajectory interpretation separate from donor-level condition inference and from causal lineage claims."
+      ],
+      "preflight_checks": [
+        "Inspect real spliced/unspliced counts, quantification provenance, sample design, time, roots, terminals, batches, states, feature namespace, and source object.",
+        "Detect scVelo, Scanpy, AnnData, NumPy, pandas, SciPy, scikit-learn, Numba, UMAP, and Python versions in the existing scientific environment.",
+        "Verify unique identifiers, layer alignment, integer-like counts, multiple samples, time coverage, nonoverlapping anchors, source immutability, and new output paths.",
+        "Freeze normalization, HVG, PCA, neighbors, dynamics iterations, seed, direction and confidence thresholds, and reload checks."
+      ],
+      "provenance_fields": [
+        "module-id",
+        "module-version",
+        "generated-code-sha256",
+        "input-h5ad-sha256",
+        "spliced-layer",
+        "unspliced-layer",
+        "quantification-provenance",
+        "sample-key",
+        "experimental-time-key",
+        "root-score-key",
+        "terminal-score-key",
+        "actual-tool-versions",
+        "actual-dependency-versions",
+        "preprocessing-parameters",
+        "dynamics-parameters",
+        "random-seed",
+        "modeled-genes",
+        "time-correlations",
+        "root-terminal-separation",
+        "velocity-confidence",
+        "output-h5ad-sha256",
+        "quality-gate-results"
+      ],
+      "quality_gate_ids": [
+        "velocity-input-and-layer-semantics",
+        "velocity-dynamics-fit",
+        "velocity-independent-direction",
+        "velocity-confidence",
+        "velocity-source-preservation",
+        "velocity-output-reload"
+      ],
+      "request_digest": "c6dfb2fdd96d9127b1a57fd948a69fa1cb0140987a6ecdfe5f07556b963c5a3f",
+      "request_fields": [
+        "biological_sample_key",
+        "declared_thresholds",
+        "design_notes",
+        "experimental_time_key",
+        "input_artifact_id",
+        "input_format",
+        "objective",
+        "root_score_key",
+        "spliced_layer",
+        "terminal_score_key",
+        "unspliced_layer"
+      ],
+      "tool_profiles": [
+        {
+          "allowed_versions": [
+            ">=0.3.4,<0.4"
+          ],
+          "identity": "scvelo",
+          "mismatch_policy": "block",
+          "name": "scvelo",
+          "tested_versions": [
+            "0.3.4"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=0.3.4,<0.4"
+              ],
+              "id": "scvelo-034-preprocessing-and-dynamics-api",
+              "required_action": "Call normalization, log transform, HVG selection, PCA, neighbors, moments, dynamics, and direction methods separately and reload all fields."
+            }
+          ]
+        },
+        {
+          "allowed_versions": [
+            ">=1.11,<1.12"
+          ],
+          "identity": "scanpy",
+          "mismatch_policy": "block",
+          "name": "scanpy",
+          "tested_versions": [
+            "1.11.5"
+          ],
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=1.11,<1.12"
+              ],
+              "id": "scanpy-neighbor-umap-h5ad",
+              "required_action": "Record parameters and reload representation, graph, and output fields."
             }
           ]
         }
@@ -5595,50 +6939,6 @@
         "control-1"
       ],
       "replicate_level": "biological"
-    }
-  },
-  "clinical-decision-boundary-audit": {
-    "input": {
-      "request_text": "Diagnose this patient and prescribe the best treatment dose.",
-      "intended_use": "patient_specific_decision",
-      "has_qualified_clinician_review": false
-    },
-    "output": {
-      "risk_level": "blocked",
-      "interpretation_allowed": false,
-      "clinical_recommendation_allowed": false
-    }
-  },
-  "electrophysiology-trace-summary": {
-    "input": {
-      "time_ms": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "signal": [
-        -70,
-        -70,
-        -69,
-        -50,
-        -20,
-        -45,
-        -68
-      ],
-      "baseline_window_ms": 1,
-      "polarity": "positive"
-    },
-    "output": {
-      "observation_count": 7,
-      "baseline": -70.0,
-      "peak_amplitude_from_baseline": 50.0,
-      "time_to_peak_ms": 4.0,
-      "threshold_crossing_count": 1,
-      "quality_status": "passed"
     }
   },
   "xenograft-tumor-growth": {

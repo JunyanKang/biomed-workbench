@@ -2,7 +2,7 @@
   "access": "agent_generated",
   "agent_protocol": {
     "forbidden_actions": [
-      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
       "Do not guess coordinate units, combine sample coordinate systems, create cross-sample spatial edges, silently intersect observations, overwrite source counts or imagery, use reviewed labels during domain fitting, or tune against desired labels.",
       "Do not use cells or spots as condition replicates, call Moran autocorrelation causality, call exploratory domains cell types, or report generated or unreloaded outputs as evidence."
     ],
@@ -636,7 +636,7 @@
     ">=0.2.0,<0.3.0"
   ],
   "limitations": [
-    "Validated execution covers count-backed point/spot tables with finite two-dimensional coordinates, sample-isolated generic-neighbor graphs, annotated neighborhood enrichment, sample-level co-occurrence, Moran-based spatial candidates and exploratory expression-spatial Leiden domains. Replicated spatial-gene status requires at least two independent biological samples; the public SeqFISH case has one embryo and therefore validates execution and within-embryo structure only. Platform-specific segmentation, image feature extraction, deconvolution, 3D geometry, continuous spatial models and sample-level condition inference require additional project-specific modules or code. The module records image and shape provenance but does not alter source imagery and does not manage environments or compute infrastructure."
+    "Validated execution covers count-backed point/spot tables with finite two-dimensional coordinates, sample-isolated generic-neighbor graphs, annotated neighborhood enrichment, sample-level co-occurrence, Moran-based spatial candidates and exploratory expression-spatial Leiden domains. Replicated spatial-gene status requires at least two independent biological samples; the public SeqFISH case has one embryo and therefore validates execution and within-embryo structure only. Platform-specific segmentation, image feature extraction, deconvolution, 3D geometry, continuous spatial models and sample-level condition inference require additional project-specific modules or code. The module records image and shape provenance but does not alter source imagery and requires a compatible project-approved scientific runtime."
   ],
   "maturity": "validated",
   "module_type": "analysis",

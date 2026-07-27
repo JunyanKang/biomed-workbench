@@ -2,7 +2,7 @@
   "access": "agent_generated",
   "agent_protocol": {
     "forbidden_actions": [
-      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
       "Do not treat cells as independent biological replicates, guess sample or subject identity, overwrite source counts, or silently drop zero-count composition rows.",
       "Do not fit a rank-deficient design, a subject-free longitudinal model, an unregistered coefficient, or a random effect without repeated levels.",
       "Do not present fixed-only propeller output as repeated-measure inference, interpret composition as absolute abundance, hide reference discordance, or select references by desired effect direction.",
@@ -806,7 +806,7 @@
     ">=0.2.0,<0.3.0"
   ],
   "limitations": [
-    "Validated execution covers count-backed H5AD input, 24 samples from eight subjects across three time points, linear and natural-spline condition-by-time dream hypotheses, separately declared variance decomposition, and three-cell-type composition with repeated-measure logit models, fixed-only propeller sensitivity, and three additive-log-ratio references. The public GSE96583 case validates an eight-donor paired condition design and must not be presented as a multi-timepoint trajectory; nonlinear time and spline behavior retain planted-signal fixture evidence. It does not make cell-level models valid, repair confounding, infer cell identities, establish causality, or guarantee power for rare cell types. speckle 1.2.0 propeller.ttest was not used because its one-coefficient result drops dimensions in the observed runtime; propeller.anova is retained only as fixed-effect sensitivity. Environment and compute-resource management remain outside plugin scope."
+    "Validated execution covers count-backed H5AD input, 24 samples from eight subjects across three time points, linear and natural-spline condition-by-time dream hypotheses, separately declared variance decomposition, and three-cell-type composition with repeated-measure logit models, fixed-only propeller sensitivity, and three additive-log-ratio references. The public GSE96583 case validates an eight-donor paired condition design and must not be presented as a multi-timepoint trajectory; nonlinear time and spline behavior retain planted-signal fixture evidence. It does not make cell-level models valid, repair confounding, infer cell identities, establish causality, or guarantee power for rare cell types. speckle 1.2.0 propeller.ttest was not used because its one-coefficient result drops dimensions in the observed runtime; propeller.anova is retained only as fixed-effect sensitivity. Execution requires a compatible project-approved scientific runtime."
   ],
   "maturity": "validated",
   "module_type": "analysis",
