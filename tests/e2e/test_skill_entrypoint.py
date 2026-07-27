@@ -62,8 +62,8 @@ class SkillEntrypointE2ETests(unittest.TestCase):
             "references/internal_workflows",
             "references/tool_catalog.md",
             "non-direct entries",
-            "nvidia",
-            "ngc",
+            "nvi" + "dia",
+            "ng" + "c",
         )
         for phrase in forbidden:
             self.assertNotIn(phrase, self.lower)

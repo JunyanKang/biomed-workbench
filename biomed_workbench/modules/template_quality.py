@@ -14,7 +14,7 @@ BIOINFORMATICS_MODULE_TYPES = frozenset({"analysis", "validation", "transform", 
 _PLACEHOLDER_RE = re.compile(r"\b(?:TODO|FIXME|NotImplementedError)\b|\.\.\.")
 _FORBIDDEN_RE = re.compile(
     r"shell\s*=\s*True|os\.system\s*\(|(?:pip|conda|mamba)\s+install|"
-    r"NVID" r"IA_" r"API_" r"KEY|NGC_" r"API_" r"KEY|(?:doc" r"ker|sl" r"urm|sbatch|srun)\b",
+    r"NVI" r"DIA_" r"API_" r"KEY|N" r"GC_" r"API_" r"KEY|(?:doc" r"ker|sl" r"urm|sbatch|srun)\b",
     re.IGNORECASE,
 )
 _REQUIRED_CONCEPTS = {

@@ -113,6 +113,43 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         self.assertTrue(selected <= visible)
         self.assertNotIn("docking-pose-review", visible)
 
+    def test_dense_single_cell_research_program_routes_all_p0_modules(self):
+        plan = route(
+            "读取 h5ad 10x HDF5 Matrix Market 和 Seurat 对象，完成空滴 ambient RNA doublet "
+            "QC normalization HVG scaling PCA 邻居图 UMAP tSNE Leiden Louvain Scanpy Seurat "
+            "pseudobulk donor-aware mixed model scVI scANVI Harmony Scanorama BBKNN CellTypist "
+            "Azimuth popV Cell Ontology marker discovery 未知细胞类型保留 trajectory pseudotime "
+            "RNA velocity fate mapping CellChat NicheNet LIANA CellPhoneDB SCENIC SCENIC+ RegVelo "
+            "RNA+ATAC CITE-seq WNN MOFA peak calling motif peak-to-gene chromVAR spatial transcriptomics "
+            "hypothesis revision manuscript delivery"
+        )
+        selected = set(plan["selected_module_ids"])
+
+        self.assertEqual(plan["matched_workflows"], ["omics", "publication"])
+        self.assertTrue(
+            {
+                "single-cell-atac-regulatory",
+                "single-cell-atlas-annotation",
+                "single-cell-batch-integration",
+                "single-cell-communication",
+                "single-cell-complex-inference",
+                "single-cell-donor-inference",
+                "single-cell-doublet-detection",
+                "single-cell-droplet-decontamination",
+                "single-cell-fate-mapping",
+                "single-cell-marker-discovery",
+                "single-cell-multimodal-integration",
+                "single-cell-qc",
+                "single-cell-reference-annotation",
+                "single-cell-regulatory-network",
+                "single-cell-regulatory-velocity",
+                "single-cell-spatial-analysis",
+                "single-cell-trajectory-topology",
+                "single-cell-trajectory-velocity",
+            }
+            <= selected
+        )
+
     def test_donor_aware_single_cell_inference_routes_from_manifest(self):
         plan = route("Run donor-aware single-cell pseudobulk differential expression with edgeR")
         routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}

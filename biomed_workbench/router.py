@@ -282,7 +282,7 @@ def _select_ranked_modules(
     # those manifests already define the sufficient route. Context words should
     # not inflate that route into another broad workflow merely because it
     # shares a general assay or artifact term.
-    if len(exact) >= 2:
+    if len(exact) >= 2 and len(_features(query)) < 30:
         return [item[1].id for item in selected]
 
     if has_regvelo and not has_scvi:
@@ -307,13 +307,14 @@ def _select_ranked_modules(
     matched_by_module = {item[1].id: _matched_features(item[1], query) for item in ranked}
     feature_frequency = Counter(feature for features in matched_by_module.values() for feature in features)
     specificity_limit = max(2, len(ranked) // 5)
+    selection_limit = 24 if len(_features(query)) >= 30 else 16
     for item in ranked:
         score, module, reasons = item
         selected_ids = {chosen[1].id for chosen in selected}
         # A dense scientific request can legitimately name more than ten
         # independent operations. Keep the plan bounded while preserving the
         # explicitly requested breadth for downstream artifact scheduling.
-        if module.id in selected_ids or score < threshold or len(selected) >= 16:
+        if module.id in selected_ids or score < threshold or len(selected) >= selection_limit:
             continue
         if not reasons or all(reason.startswith("available in matched workflow") for reason in reasons):
             continue
