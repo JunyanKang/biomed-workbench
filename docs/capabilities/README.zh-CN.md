@@ -1,6 +1,6 @@
 # 专业能力地图
 
-语言：[中文](README.zh-CN.md) · [English](README.md)
+语言：[中文](README.zh-CN.md) · [English](README.md) · 根目录：[中文](../../README.md) · [English](../../README.en.md)
 
 Biomed Workbench 按科研决策组织能力，而不是按脚本目录展示能力。用户提出研究问题并提供数据后，工作台会组合必要模块，把任务从问题界定、证据检索、分析执行、结果质疑、假设修正推进到科研交付。
 
