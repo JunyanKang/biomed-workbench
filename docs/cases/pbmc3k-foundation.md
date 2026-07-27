@@ -28,7 +28,7 @@ Run the verifier in an isolated environment satisfying the module compatibility
 row for Scanpy 1.10 or 1.11:
 
 ```bash
-python tools/verify_public_pbmc3k_case.py
+python tests/evidence/verify_public_pbmc3k_case.py
 ```
 
 The command downloads and verifies the official archive, runs the packaged

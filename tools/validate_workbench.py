@@ -1551,24 +1551,6 @@ def main() -> int:
             ):
                 errors.append("official Codex plugin contract evidence is stale or differs from current manifest, skill, validators, or isolated registry")
 
-        local_update_path = ROOT / "reports" / "local-update-verification.json"
-        local_update_implementation = ROOT / "tools" / "prepare_local_update.py"
-        try:
-            local_update = json.loads(local_update_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            errors.append("local plugin update evidence is missing or invalid")
-        else:
-            if (
-                local_update.get("passed") is not True
-                or local_update.get("evidence_id") != "codex-local-update-cachebuster-v1"
-                or local_update.get("evidence_type") != "codex-plugin-local-update-contract"
-                or local_update.get("implementation", {}).get("sha256") != hashlib.sha256(local_update_implementation.read_bytes()).hexdigest()
-                or local_update.get("regression", {}).get("passed") is not True
-                or not all(local_update.get("verified_behaviors", {}).values())
-                or local_update.get("scientific_runtime_capability") is not False
-            ):
-                errors.append("local plugin update evidence is stale, incomplete, or misclassified as scientific runtime")
-
         ci_quality_path = ROOT / "reports" / "ci-quality-verification.json"
         ci_workflow_path = ROOT / ".github" / "workflows" / "quality.yml"
         ci_requirements_path = ROOT / "requirements-ci.txt"
@@ -1638,7 +1620,7 @@ def main() -> int:
         if not root.exists():
             continue
         for path in root.rglob("*"):
-            if path.is_file() and ".source-audit" not in path.parts and "__pycache__" not in path.parts:
+            if path.is_file() and "__pycache__" not in path.parts and not any(part.startswith(".") for part in path.parts):
                 text = path.read_text(errors="ignore")
                 credential_names.update(re.findall(r"\b[A-Z][A-Z0-9_]*(?:API_KEY|AUTH_TOKEN)\b", text))
     undeclared = sorted(credential_names - set(ALLOWED_CREDENTIALS))

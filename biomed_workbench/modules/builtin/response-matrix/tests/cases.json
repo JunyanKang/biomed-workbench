@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "completed-reviewer-comment-is-resolved",
+      "input": {
+        "comments": [
+          {
+            "reviewer": "1",
+            "comment": "C",
+            "response": "R",
+            "action": "A",
+            "status": "completed"
+          }
+        ]
+      },
+      "expected_subset": {
+        "comment_count": 1,
+        "status_counts": {
+          "completed": 1
+        },
+        "unresolved_indices": []
+      }
+    }
+  ]
+}

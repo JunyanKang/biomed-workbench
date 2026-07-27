@@ -87,7 +87,7 @@ def build() -> dict[str, object]:
             f"The current {module_count} modules remain bounded scientific functions; project-specific validation is still required before biological claims are treated as research conclusions.",
             "Executable Scanpy and Seurat foundations, droplet decontamination, doublet detection, marker discovery, CellTypist, Azimuth, popV, SingleR adjudication, donor-aware and longitudinal inference, Harmony, Scanorama, BBKNN, scVI, scANVI, scVelo, CellRank, moscot, Slingshot, Monocle3, tradeSeq, LIANA, CellPhoneDB, CellChat, NicheNet, WNN, MOFA+, MACS3, chromVAR, pySCENIC, SCENIC+, Squidpy, and SpatialData are validated on planted representative fixtures; additional project-diverse and platform-specific validation remains necessary before production claims.",
             "Content-addressed artifacts, strict compatibility gates, bounded commands, Codex-native handoffs, claim and manuscript audits, NCBI E-utilities, Crossref, Europe PMC, bioRxiv, PubChem, ClinicalTrials.gov v2, RCSB PDB, and selected version-specific sequence, variant, imaging, and omics tools are implemented.",
-            "The legacy one-shot assistant API remains for v0.2 compatibility while new projects use replayable state.",
+            "The v0.2 assistant API remains available for compatibility while new projects use replayable state.",
         ],
     }
 

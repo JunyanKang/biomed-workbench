@@ -18,7 +18,7 @@ class VersionTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 read_version(manifest)
 
-    def test_codex_cachebuster_is_valid_semver_build_metadata(self):
+    def test_plugin_version_accepts_semver_build_metadata(self):
         with tempfile.TemporaryDirectory() as directory:
             manifest = Path(directory) / "plugin.json"
             manifest.write_text(json.dumps({"version": "0.2.0+codex.local-20260712-120000"}), encoding="utf-8")

@@ -150,6 +150,27 @@ class DynamicModuleRoutingTests(unittest.TestCase):
             <= selected
         )
 
+    def test_dense_publication_delivery_request_routes_full_review_package(self):
+        plan = route(
+            "audit manuscript claims figures methods citations reviewer concerns response matrix "
+            "patent readiness presentation delivery from analysis evidence"
+        )
+        selected = set(plan["selected_module_ids"])
+
+        self.assertEqual(plan["matched_workflows"], ["publication"])
+        self.assertTrue(
+            {
+                "citation-audit",
+                "figure-specification",
+                "manuscript-audit",
+                "patent-draft-readiness-audit",
+                "presentation-delivery-plan",
+                "response-matrix",
+                "reviewer-assessment",
+            }
+            <= selected
+        )
+
     def test_donor_aware_single_cell_inference_routes_from_manifest(self):
         plan = route("Run donor-aware single-cell pseudobulk differential expression with edgeR")
         routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}

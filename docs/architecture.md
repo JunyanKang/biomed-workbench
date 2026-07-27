@@ -102,24 +102,16 @@ python3 -m unittest discover -s tests -p 'test*.py'
 
 ## Release Flow
 
-The plugin manifest is the package version source. Publish only when rebuilding the generated index and catalog produces no diff, all unit/contract/end-to-end/release tests pass, and release validation confirms the single skill, every dynamically discovered built-in module, complete compatibility evidence, source-neutral paths, and absence of legacy registration surfaces.
+The plugin manifest is the package version source. Publish only when rebuilding the generated index and catalog produces no diff, all unit/contract/end-to-end/release tests pass, and release validation confirms the single skill, every dynamically discovered built-in module, complete compatibility evidence, source-neutral paths, and absence of retired registration surfaces.
 
 When one module changes, rerun that module's live verifier and issue a new compatibility row and evidence revision before rebuilding aggregate evidence. Reports for unchanged modules may be rebound to the new global registry digest with `python3 tools/rebind_live_evidence_registry.py`; the command rejects failed reports, unknown modules, changed module versions, and retired compatibility rows. Rebinding never replaces execution evidence for the changed module.
 
 Public biomedical databases share `PublicJSONClient` only for transport safety: HTTPS host allow-listing, bounded request and response bodies, transient retry policy, JSON-root validation, and request metadata. Crossref/Europe PMC citation identity, bioRxiv version history, PubChem chemical identity, ClinicalTrials.gov cohort retrieval, and RCSB structural evidence keep separate parsers, contracts, outputs, and quality gates. ClinicalTrials.gov 1.1 is count-verified and server-filtered: opaque page tokens are followed to a declared cap, unique NCT IDs reconcile with `totalCount`, capped cohorts are marked truncated, same-site location constraints use grouped Essie semantics, no hidden local post-filtering is allowed, and every request is retained in provenance. RCSB Search API v2 uses a separately versioned bounded JSON POST contract; first-page HTTP 204 is an explicit zero-result set, later-page 204 is a protocol error, unique PDB IDs and total counts must reconcile, and truncation remains visible. RCSB Data API modules separately retain entry, polymer-entity, and nonpolymer-to-chemical-component identity without converting deposited metadata into biological or binding claims.
 
-Generic plugin or Skill scaffolding, marketplace readers, provider model-release resolution, and host contract-validator implementations are not scientific runtime capabilities. The repository invokes current official validators unchanged, records their digests, and keeps the one curated Skill and plugin manifests under release tests. Project-owned developer maintenance is admitted only with separate digest-bound evidence, as with the atomic local cachebuster updater.
+Generic plugin or Skill scaffolding, marketplace readers, provider model-release resolution, and host contract-validator implementations are not scientific runtime capabilities. The repository invokes current official validators unchanged, records their digests, and keeps the one curated Skill and plugin manifests under release tests.
 
 Repository-quality checks are not scientific inference modules. They run the complete test and release suite, rebuild deterministic evidence, reject generated drift, and perform a redacted secret scan. Scientific eval thresholds and domain-specific gold sets remain separate named evidence requirements and are never inferred from a green generic quality job or a nondecreasing test count.
 
 Release validation also binds `reports/research-engine-verification.json` to the current registry and generated capability graph. Four replayable research-cycle fixtures must cover single, serial, parallel, and mixed plans; each includes a failed compatibility gate, an alternative-module plan revision, evidence ingestion, a hypothesis transition, and an exact final state digest.
-
-For local Codex iteration:
-
-```bash
-python3 tools/prepare_local_update.py
-codex plugin add biomed-workbench@biomed-workbench
-python3 tools/verify_codex_install.py --codex-cli "$(command -v codex)"
-```
 
 Start a new Codex task after reinstalling so updated Skill metadata and module indexes are loaded.

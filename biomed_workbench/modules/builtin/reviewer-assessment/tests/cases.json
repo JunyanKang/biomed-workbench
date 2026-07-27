@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "causal-overclaim-major-revision",
+      "input": {
+        "claims": [
+          {
+            "id": "c1",
+            "claim": "Marker causally drives fate",
+            "evidence_design": "observational",
+            "replicated": false
+          }
+        ],
+        "review_domains": {
+          "methods_reproducible": false,
+          "statistics_adequate": true,
+          "data_available": true,
+          "ethics_resolved": true
+        },
+        "novelty": "high"
+      },
+      "expected_subset": {
+        "recommendation": "major_revision",
+        "finding_counts": {
+          "major": 2,
+          "minor": 1
+        },
+        "novelty": "high"
+      }
+    }
+  ]
+}

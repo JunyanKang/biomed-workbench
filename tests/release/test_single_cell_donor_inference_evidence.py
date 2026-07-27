@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from biomed_workbench.modules.contract import parse_manifest, version_is_allowed
-from tools.verify_single_cell_donor_inference_live import bh_adjust
+from tests.evidence.verify_single_cell_donor_inference_live import bh_adjust
 
 
 ROOT = Path(__file__).resolve().parents[2]

@@ -49,11 +49,9 @@ def verify() -> dict[str, object]:
         "python tools/validate_workbench.py --release",
         "python tools/build_module_index.py",
         "python tools/build_format_contract_report.py",
-        "python tools/build_module_migration_report.py",
         "python tools/capture_compatibility_evidence.py",
         "python tools/verify_registry_snapshot.py",
         "python tools/verify_codex_native_handoffs.py",
-        "python tools/verify_local_update.py",
         "python tools/verify_ci_quality.py",
         "git diff --exit-code",
     )
@@ -81,7 +79,18 @@ def verify() -> dict[str, object]:
         if not separator or not name or not version or name in requirements:
             raise RuntimeError("CI requirements must use unique exact tested baselines")
         requirements[name] = version
-    expected = {"numpy": "2.4.4", "scipy": "1.17.1", "scikit-learn": "1.8.0", "Pillow": "12.1.1", "PyYAML": "6.0.3"}
+    expected = {
+        "numpy": "2.4.4",
+        "scipy": "1.17.1",
+        "scikit-learn": "1.8.0",
+        "Pillow": "12.1.1",
+        "PyYAML": "6.0.3",
+        "packaging": "26.2",
+        "biopython": "1.86",
+        "pandas": "3.0.5",
+        "anndata": "0.13.2",
+        "PyMuPDF": "1.28.0",
+    }
     if requirements != expected:
         raise RuntimeError("CI requirements differ from the verified repository baseline")
 

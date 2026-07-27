@@ -57,7 +57,11 @@ print(json.dumps({
 
 
 def _ignore(_directory: str, names: list[str]) -> set[str]:
-    return {name for name in names if name in {".git", ".source-audit", ".worktrees", "__pycache__"} or name.endswith(".pyc")}
+    return {
+        name
+        for name in names
+        if (name.startswith(".") and name != ".codex-plugin") or name == "__pycache__" or name.endswith(".pyc")
+    }
 
 
 def verify(output: Path) -> dict[str, object]:
