@@ -11,6 +11,32 @@ ROOT = Path(__file__).resolve().parents[2]
 REPORT = ROOT / "reports" / "compatibility-execution-evidence.json"
 
 
+def _first_difference(actual, expected, path="report"):
+    if type(actual) is not type(expected):
+        return f"{path}: type {type(actual).__name__} != {type(expected).__name__}"
+    if isinstance(actual, dict):
+        actual_keys = set(actual)
+        expected_keys = set(expected)
+        if actual_keys != expected_keys:
+            return f"{path}: keys {sorted(actual_keys ^ expected_keys)} differ"
+        for key in sorted(actual):
+            difference = _first_difference(actual[key], expected[key], f"{path}.{key}")
+            if difference:
+                return difference
+        return None
+    if isinstance(actual, list):
+        if len(actual) != len(expected):
+            return f"{path}: length {len(actual)} != {len(expected)}"
+        for index, (actual_item, expected_item) in enumerate(zip(actual, expected, strict=True)):
+            difference = _first_difference(actual_item, expected_item, f"{path}[{index}]")
+            if difference:
+                return difference
+        return None
+    if actual != expected:
+        return f"{path}: {actual!r} != {expected!r}"
+    return None
+
+
 class CompatibilityExecutionEvidenceTests(unittest.TestCase):
     def test_every_compatibility_row_binds_passing_regression_and_e2e_evidence(self):
         report = json.loads(REPORT.read_text(encoding="utf-8"))
@@ -32,7 +58,10 @@ class CompatibilityExecutionEvidenceTests(unittest.TestCase):
         self.assertEqual(observed, expected)
 
     def test_report_is_reproducible_from_real_execution(self):
-        self.assertEqual(capture(), json.loads(REPORT.read_text(encoding="utf-8")))
+        actual = capture()
+        expected = json.loads(REPORT.read_text(encoding="utf-8"))
+        difference = _first_difference(actual, expected)
+        self.assertIsNone(difference, difference)
 
     def test_report_contains_no_path_or_credential(self):
         serialized = REPORT.read_text(encoding="utf-8")
