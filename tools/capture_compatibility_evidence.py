@@ -402,7 +402,7 @@ def capture() -> dict[str, object]:
                     "output_formats": {key: list(value) for key, value in row.output_formats.items()},
                     "implementation_sha256": _sha256(implementation_path),
                 }
-                regression_digest = digest_value({**context, "kind": "regression", "input": case["input"], "handoff": direct, "templates": template_hashes})
+                regression_digest = digest_value({**context, "kind": "regression", "input": case["input"], "validated_output_contract": case["output"], "templates": template_hashes})
                 e2e_digest = digest_value({**context, "kind": "end-to-end", "live_report_sha256": _sha256(report_path), "execution": live_report["execution"], "scientific_summary": live_report["scientific_summary"]})
                 records.append(
                     {
@@ -526,7 +526,7 @@ def capture() -> dict[str, object]:
             candidates = [item["id"] for step in plan["steps"] for item in step["candidates"]]
             if manifest.id not in candidates:
                 raise RuntimeError(f"agent-generated module did not route through the unified entry: {manifest.id}")
-            regression_digest = digest_value({**context, "kind": "regression", "input": case["input"], "handoff": direct, "templates": template_hashes})
+            regression_digest = digest_value({**context, "kind": "regression", "input": case["input"], "validated_output_contract": case["output"], "templates": template_hashes})
         elif manifest.tool_requirements:
             required = set(SERVICE_COVERAGE.get(manifest.id, ()))
             if not required <= service_coverage:
@@ -539,7 +539,7 @@ def capture() -> dict[str, object]:
                 raise RuntimeError(f"offline regression fixture is missing: {manifest.id}")
             direct, _fallback = _safe_entrypoint_call(entrypoint, case, manifest.id)
             _assert_subset(case["output"], direct)
-            regression_digest = digest_value({**context, "kind": "regression", "input": case["input"], "output": direct})
+            regression_digest = digest_value({**context, "kind": "regression", "input": case["input"], "validated_output_contract": case["output"]})
             plan = route(manifest.intents[0], registry=registry)
             candidates = [item["id"] for step in plan["steps"] for item in step["candidates"]]
             if manifest.id not in candidates:
