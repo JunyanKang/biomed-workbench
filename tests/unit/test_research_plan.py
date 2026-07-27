@@ -3,6 +3,28 @@ import unittest
 from biomed_workbench.research_plan import compile_research_plan
 
 
+SINGLE_CELL_P1_MODULES = {
+    "single-cell-atac-regulatory",
+    "single-cell-atlas-annotation",
+    "single-cell-batch-integration",
+    "single-cell-communication",
+    "single-cell-complex-inference",
+    "single-cell-donor-inference",
+    "single-cell-doublet-detection",
+    "single-cell-droplet-decontamination",
+    "single-cell-fate-mapping",
+    "single-cell-marker-discovery",
+    "single-cell-multimodal-integration",
+    "single-cell-qc",
+    "single-cell-reference-annotation",
+    "single-cell-regulatory-network",
+    "single-cell-regulatory-velocity",
+    "single-cell-spatial-analysis",
+    "single-cell-trajectory-topology",
+    "single-cell-trajectory-velocity",
+}
+
+
 class ResearchPlanTests(unittest.TestCase):
     def test_plan_exposes_contracts_without_claiming_execution(self):
         plan = compile_research_plan("Import FCS flow cytometry data and apply a gating plan")
@@ -34,6 +56,51 @@ class ResearchPlanTests(unittest.TestCase):
         module = next(item for item in plan["modules"] if item["id"] == "flow-immunophenotype-summary")
         bindings = {item["name"]: item["selected_upstream_module_id"] for item in module["upstream_inputs"]}
         self.assertEqual(bindings, {"events": "fcs-event-import", "gates": "flow-cytometry-summary"})
+
+    def test_dense_single_cell_program_is_a_staged_evidence_bound_research_plan(self):
+        plan = compile_research_plan(
+            "读取 h5ad 10x HDF5 Matrix Market 和 Seurat 对象，完成空滴 ambient RNA doublet "
+            "QC normalization HVG scaling PCA 邻居图 UMAP tSNE Leiden Louvain Scanpy Seurat "
+            "pseudobulk donor-aware mixed model scVI scANVI Harmony Scanorama BBKNN CellTypist "
+            "Azimuth popV Cell Ontology marker discovery 未知细胞类型保留 trajectory pseudotime "
+            "RNA velocity fate mapping CellChat NicheNet LIANA CellPhoneDB SCENIC SCENIC+ RegVelo "
+            "RNA+ATAC CITE-seq WNN MOFA peak calling motif peak-to-gene chromVAR spatial transcriptomics "
+            "hypothesis revision manuscript delivery"
+        )
+
+        self.assertTrue(SINGLE_CELL_P1_MODULES <= set(plan["selected_module_ids"]))
+        self.assertGreaterEqual(len(plan["execution_layers"]), 8)
+        self.assertEqual(plan["execution_layers"][0]["module_ids"], ["single-cell-droplet-decontamination"])
+        self.assertEqual(
+            set(plan["execution_layers"][1]["module_ids"]),
+            {"single-cell-foundation-workflow", "single-cell-qc"},
+        )
+        self.assertEqual(plan["execution_layers"][2]["module_ids"], ["single-cell-doublet-detection"])
+        self.assertTrue(
+            {"single-cell-batch-integration", "single-cell-generative-modeling", "single-cell-multimodal-integration", "single-cell-atac-regulatory"}
+            <= set(plan["execution_layers"][3]["module_ids"])
+        )
+        self.assertTrue(
+            {"single-cell-reference-annotation", "single-cell-atlas-annotation", "single-cell-marker-discovery"}
+            <= set(plan["execution_layers"][4]["module_ids"])
+        )
+        self.assertTrue(
+            {"single-cell-trajectory-topology", "single-cell-trajectory-velocity", "single-cell-communication", "single-cell-regulatory-network", "single-cell-spatial-analysis"}
+            <= set(plan["execution_layers"][6]["module_ids"])
+        )
+
+        modules = {item["id"]: item for item in plan["modules"]}
+        for module_id in SINGLE_CELL_P1_MODULES:
+            module = modules[module_id]
+            self.assertTrue(module["compatibility_row_ids"], module_id)
+            self.assertTrue(module["quality_gate_ids"], module_id)
+            self.assertTrue(module["execution_templates"], module_id)
+            self.assertEqual(module["evidence_contract"]["module_version"], module["version"])
+            self.assertEqual(module["evidence_contract"]["compatibility_row_ids"], module["compatibility_row_ids"])
+
+        self.assertIn("single-cell-reference-annotation", modules["single-cell-donor-inference"]["depends_on"])
+        self.assertIn("single-cell-regulatory-network", modules["single-cell-regulatory-velocity"]["depends_on"])
+        self.assertIn("single-cell-regulatory-velocity", modules["response-matrix"]["depends_on"])
 
 
 if __name__ == "__main__":

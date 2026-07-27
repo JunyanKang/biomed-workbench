@@ -2,13 +2,36 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
 from typing import Any
 
 from .modules.contract import ArtifactPort, ModuleManifest
 from .modules.index import BUILTIN_ROOT
 from .modules.registry import ModuleRegistry
 from .router import ports_compatible, route
+
+
+_SINGLE_CELL_PROGRAM_STAGE: dict[str, int] = {
+    "single-cell-droplet-decontamination": 0,
+    "single-cell-foundation-workflow": 1,
+    "single-cell-qc": 1,
+    "single-cell-doublet-detection": 2,
+    "single-cell-batch-integration": 3,
+    "single-cell-generative-modeling": 3,
+    "single-cell-multimodal-integration": 3,
+    "single-cell-atac-regulatory": 3,
+    "single-cell-marker-discovery": 4,
+    "single-cell-reference-annotation": 4,
+    "single-cell-atlas-annotation": 4,
+    "single-cell-donor-inference": 5,
+    "single-cell-complex-inference": 5,
+    "single-cell-communication": 6,
+    "single-cell-regulatory-network": 6,
+    "single-cell-spatial-analysis": 6,
+    "single-cell-trajectory-topology": 6,
+    "single-cell-trajectory-velocity": 6,
+    "single-cell-fate-mapping": 7,
+    "single-cell-regulatory-velocity": 7,
+}
 
 
 def _format_tokens(port: ArtifactPort) -> list[str]:
@@ -77,11 +100,44 @@ def _port_bindings(selected: tuple[ModuleManifest, ...]) -> dict[str, dict[str, 
     return bindings
 
 
-def _dependencies(bindings: dict[str, dict[str, str]]) -> dict[str, tuple[str, ...]]:
-    return {
+def _scientific_dependencies(selected: tuple[ModuleManifest, ...]) -> dict[str, tuple[str, ...]]:
+    """Add research-program ordering when artifact ports are intentionally project-owned.
+
+    Many biomedical modules accept project inputs because real analyses often
+    need human-reviewed objects rather than blindly consuming another module's
+    file. When a broad program selects several related single-cell modules,
+    the plan still needs to communicate the scientific order: input validation
+    before artifact correction, correction before annotation, annotation before
+    donor-aware inference, and inference before dynamics/regulatory delivery.
+    """
+    by_id = {module.id: module for module in selected}
+    dependencies: dict[str, set[str]] = {module.id: set() for module in selected}
+    staged = {module_id: stage for module_id, stage in _SINGLE_CELL_PROGRAM_STAGE.items() if module_id in by_id}
+    for module_id, stage in staged.items():
+        dependencies[module_id].update(
+            upstream_id
+            for upstream_id, upstream_stage in staged.items()
+            if upstream_stage < stage
+        )
+    non_publication = {module.id for module in selected if module.domains[0] != "publication"}
+    if non_publication:
+        for module in selected:
+            if module.domains[0] == "publication":
+                dependencies[module.id].update(non_publication)
+    return {module_id: tuple(sorted(values)) for module_id, values in dependencies.items()}
+
+
+def _dependencies(
+    bindings: dict[str, dict[str, str]],
+    scientific_dependencies: dict[str, tuple[str, ...]] | None = None,
+) -> dict[str, tuple[str, ...]]:
+    dependency_map = {
         module_id: tuple(dict.fromkeys(port_bindings.values()))
         for module_id, port_bindings in bindings.items()
     }
+    for module_id, extra_dependencies in (scientific_dependencies or {}).items():
+        dependency_map[module_id] = tuple(dict.fromkeys((*dependency_map.get(module_id, ()), *extra_dependencies)))
+    return dependency_map
 
 
 def _layers(selected: tuple[ModuleManifest, ...], dependencies: dict[str, tuple[str, ...]]) -> list[dict[str, object]]:
@@ -101,6 +157,33 @@ def _layers(selected: tuple[ModuleManifest, ...], dependencies: dict[str, tuple[
     return layers
 
 
+def _evidence_contract(module: ModuleManifest) -> dict[str, object]:
+    return {
+        "module_version": module.version,
+        "compatibility_row_ids": [row.id for row in module.compatibility_matrix],
+        "regression_evidence_ids": sorted(
+            {evidence_id for row in module.compatibility_matrix for evidence_id in row.regression_evidence_ids}
+        ),
+        "end_to_end_evidence_ids": sorted(
+            {evidence_id for row in module.compatibility_matrix for evidence_id in row.end_to_end_evidence_ids}
+        ),
+        "required_tool_identities": [tool.identity for tool in module.tool_requirements if tool.required],
+        "required_dependency_identities": [dependency.identity for dependency in module.dependencies if dependency.required],
+        "provenance_fields": (
+            list(module.agent_protocol.provenance_fields)
+            if module.agent_protocol is not None
+            else [
+                "input-artifact-digest",
+                "module-version",
+                "template-digest",
+                "actual-tool-versions",
+                "quality-gate-results",
+            ]
+        ),
+        "claim_level": module.maturity,
+    }
+
+
 def compile_research_plan(
     objective: str,
     *,
@@ -118,7 +201,7 @@ def compile_research_plan(
     selected_ids = tuple(dict.fromkeys(routed["selected_module_ids"]))
     selected = tuple(active.get(module_id) for module_id in selected_ids)
     port_bindings = _port_bindings(selected)
-    dependencies = _dependencies(port_bindings)
+    dependencies = _dependencies(port_bindings, _scientific_dependencies(selected))
     candidate_reasons = {
         candidate["id"]: candidate["selection_reasons"]
         for step in routed["steps"]
@@ -147,11 +230,13 @@ def compile_research_plan(
         modules.append(
             {
                 "id": module.id,
+                "version": module.version,
                 "title": module.title,
                 "domain": module.domains[0],
                 "maturity": module.maturity,
                 "access": module.access,
                 "depends_on": list(dependencies[module.id]),
+                "compatibility_row_ids": [row.id for row in module.compatibility_matrix],
                 "selection_reasons": candidate_reasons.get(module.id, []),
                 "project_inputs": [input_summary(port) for port in project_inputs],
                 "upstream_inputs": [input_summary(port) for port in upstream_inputs],
@@ -165,6 +250,7 @@ def compile_research_plan(
                 },
                 "input_schema": module.input_schema,
                 "execution_templates": _execution_templates(module),
+                "evidence_contract": _evidence_contract(module),
             }
         )
         for port in project_inputs:

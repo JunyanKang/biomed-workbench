@@ -4,6 +4,25 @@
 
 This capability area coordinates sequencing data from input and design validation through statistical analysis, biological interpretation, hypothesis revision, and publication delivery. The workbench treats biological replication, immutable raw measurements, reference identity, and observed output checks as first-class requirements.
 
+## Unified Single-Cell Research Program
+
+For broad single-cell or single-cell multi-omics questions, Biomed Workbench does not expose a menu of separate skills. The single `biomed-workbench` entrypoint routes the objective into a staged research plan with declared module contracts, input and output artifacts, compatibility rows, templates, quality gates, unresolved project inputs, and an explicit boundary between planning and observed evidence.
+
+The staged plan is organized as a scientific program rather than a flat script list:
+
+1. Droplet and ambient-RNA evidence from raw and filtered counts.
+2. Foundation object construction, input-format validation, raw-count preservation, QC, normalization, HVG selection, PCA, neighbourhood graphs, embeddings, and clustering.
+3. Doublet detection and barcode/cell-accounting review.
+4. Batch integration, generative modelling, paired multi-omics integration, and single-cell ATAC regulatory preparation when requested.
+5. Marker discovery, reference or atlas annotation, ontology constraints, confidence review, and unknown-state retention.
+6. Donor-aware pseudobulk, mixed-model, longitudinal, composition, and complex experimental-design inference.
+7. Communication, trajectory, RNA velocity, topology, regulatory-network, and spatial evidence with sample-level and directionality gates.
+8. Fate mapping, RegVelo regulatory velocity, hypothesis revision, and manuscript or response-oriented delivery modules when publication work is part of the objective.
+
+The v1.0 single-cell core is represented by the following modules in the unified route and plan: `single-cell-atac-regulatory`, `single-cell-atlas-annotation`, `single-cell-batch-integration`, `single-cell-communication`, `single-cell-complex-inference`, `single-cell-donor-inference`, `single-cell-doublet-detection`, `single-cell-droplet-decontamination`, `single-cell-fate-mapping`, `single-cell-marker-discovery`, `single-cell-multimodal-integration`, `single-cell-qc`, `single-cell-reference-annotation`, `single-cell-regulatory-network`, `single-cell-regulatory-velocity`, `single-cell-spatial-analysis`, `single-cell-trajectory-topology`, and `single-cell-trajectory-velocity`.
+
+Each module contributes a manifest contract, execution or agent-generated template sections, typed inputs and outputs, failure and limitation boundaries, compatibility evidence, quality gates, tests, and a documentation entry. A plan remains non-evidentiary until Codex inspects the user's real artifacts, adapts the relevant templates in the project workspace, records observed tool and dependency versions, reloads outputs, and admits only quality-controlled results.
+
 ## Sequencing And Genomic Foundations
 
 - Read-level quality assessment with FastQC and fastp, cross-sample aggregation with MultiQC, and declared-reference contamination screening.
