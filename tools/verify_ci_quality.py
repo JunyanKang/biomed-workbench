@@ -47,6 +47,12 @@ def verify() -> dict[str, object]:
     required_verify = (
         "python -m unittest discover -s tests",
         "python tools/validate_workbench.py --release",
+        "sudo apt-get install --yes mafft minimap2",
+        "iqtree-${IQTREE3_VERSION}-Linux.tar.gz",
+        "export PATH=\"${RUNNER_TEMP}/iqtree-${IQTREE3_VERSION}-Linux/bin:${PATH}\"",
+        "mafft --version",
+        "minimap2 --version",
+        "iqtree3 --version",
         "python tools/build_module_index.py",
         "python tools/build_format_contract_report.py",
         "python tools/capture_compatibility_evidence.py",
@@ -90,6 +96,8 @@ def verify() -> dict[str, object]:
         "pandas": "3.0.5",
         "anndata": "0.13.2",
         "PyMuPDF": "1.28.0",
+        "primer3-py": "2.3.0",
+        "flowio": "1.4.0",
     }
     if requirements != expected:
         raise RuntimeError("CI requirements differ from the verified repository baseline")

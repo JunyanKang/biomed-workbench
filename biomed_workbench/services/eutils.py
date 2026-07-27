@@ -8,6 +8,7 @@ import re
 import threading
 import time
 from dataclasses import dataclass
+from http.client import IncompleteRead
 from typing import Any, Callable, Iterable, Mapping
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
@@ -100,7 +101,7 @@ def _default_transport(url: str, data: bytes | None, headers: Mapping[str, str],
     except HTTPError as exc:
         body = exc.read(64 * 1024)
         return HTTPResponse(exc.code, dict(exc.headers.items()), body)
-    except (URLError, TimeoutError, OSError) as exc:
+    except (IncompleteRead, URLError, TimeoutError, OSError) as exc:
         raise EUtilitiesError(f"NCBI request failed: {type(exc).__name__}") from None
 
 

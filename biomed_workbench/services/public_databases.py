@@ -14,6 +14,7 @@ import math
 import re
 import time
 from dataclasses import dataclass
+from http.client import IncompleteRead
 from typing import Any, Callable, Mapping
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlsplit
@@ -176,7 +177,7 @@ def _default_transport(url: str, headers: Mapping[str, str], timeout: float) -> 
             return HTTPResponse(response.status, dict(response.headers.items()), body)
     except HTTPError as exc:
         return HTTPResponse(exc.code, dict(exc.headers.items()), exc.read(64 * 1024))
-    except (URLError, TimeoutError, OSError) as exc:
+    except (IncompleteRead, URLError, TimeoutError, OSError) as exc:
         raise PublicDatabaseError(f"public database request failed: {type(exc).__name__}") from None
 
 
@@ -190,7 +191,7 @@ def _default_post_transport(url: str, headers: Mapping[str, str], body: bytes, t
             return HTTPResponse(response.status, dict(response.headers.items()), response_body)
     except HTTPError as exc:
         return HTTPResponse(exc.code, dict(exc.headers.items()), exc.read(64 * 1024))
-    except (URLError, TimeoutError, OSError) as exc:
+    except (IncompleteRead, URLError, TimeoutError, OSError) as exc:
         raise PublicDatabaseError(f"public database request failed: {type(exc).__name__}") from None
 
 

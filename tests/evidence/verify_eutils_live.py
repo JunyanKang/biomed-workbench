@@ -25,6 +25,7 @@ def _check(name: str, database: str, passed: bool, detail: dict[str, int | bool]
 def run() -> dict[str, object]:
     client = EUtilitiesClient(timeout=20, retries=2)
     checks: list[dict[str, object]] = []
+    has_api_key = bool(os.environ.get("NCBI_API_KEY", "").strip())
 
     info = client.info()
     databases = info.get("einforesult", {}).get("dblist", [])
@@ -43,6 +44,30 @@ def run() -> dict[str, object]:
             {"count": literature["count"], "records": len(literature["records"])},
         )
     )
+
+    if not has_api_key:
+        variant = variant_evidence("TP53[gene]", max_records=1, max_links=1)
+        checks.append(
+            _check(
+                "composed_workflow",
+                "variant_evidence_bundle",
+                variant["match_count"] > 0 and len(variant["variant_records"]) == 1,
+                {"count": variant["match_count"], "records": len(variant["variant_records"])},
+            )
+        )
+        return {
+            "schema_version": 1,
+            "verified_at": datetime.now(timezone.utc).isoformat(),
+            "service": "NCBI Entrez E-utilities",
+            "credential_mode": "zero_key",
+            "documentation": [
+                "https://www.ncbi.nlm.nih.gov/books/NBK25497/",
+                "https://www.ncbi.nlm.nih.gov/books/NBK25499/",
+            ],
+            "passed": all(check["passed"] for check in checks),
+            "checks": checks,
+            "scope": "zero-key supplement restricted to stable unauthenticated EInfo, PubMed literature, and ClinVar variant evidence checks",
+        }
 
     pmc = client.search("pmc", "retinal development", retmax=1)
     checks.append(_check("search", "pmc", pmc.count > 0, {"count": pmc.count}))
@@ -98,7 +123,7 @@ def run() -> dict[str, object]:
         "schema_version": 1,
         "verified_at": datetime.now(timezone.utc).isoformat(),
         "service": "NCBI Entrez E-utilities",
-        "credential_mode": "api_key" if os.environ.get("NCBI_API_KEY", "").strip() else "zero_key",
+        "credential_mode": "api_key",
         "documentation": [
             "https://www.ncbi.nlm.nih.gov/books/NBK25497/",
             "https://www.ncbi.nlm.nih.gov/books/NBK25499/",
