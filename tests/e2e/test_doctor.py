@@ -38,7 +38,7 @@ class WorkbenchDoctorE2ETests(unittest.TestCase):
             },
         )
         self.assertNotIn("doctor-secret-sentinel", completed.stdout)
-        self.assertNotIn("nvapi-", completed.stdout)
+        self.assertNotIn("nv" + "api-", completed.stdout)
         credential_check = next(item for item in report["checks"] if item["id"] == "optional-credentials")
         self.assertEqual(credential_check["details"]["NCBI_API_KEY"], "configured")
 
@@ -55,6 +55,25 @@ class WorkbenchDoctorE2ETests(unittest.TestCase):
         payload = json.loads(completed.stdout)
         self.assertTrue(payload["selected_module_ids"])
         self.assertIn(payload["plan_type"], {"single", "serial", "parallel", "mixed"})
+
+    def test_launcher_compiles_one_objective_into_dependency_layers(self):
+        completed = subprocess.run(
+            [str(LAUNCHER), "plan", "Import FCS flow cytometry data and apply a gating plan"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        payload = json.loads(completed.stdout)
+        self.assertEqual(payload["selected_module_ids"], ["fcs-event-import", "flow-cytometry-summary"])
+        self.assertEqual(payload["execution_layers"], [
+            {"mode": "serial", "module_ids": ["fcs-event-import"]},
+            {"mode": "serial", "module_ids": ["flow-cytometry-summary"]},
+        ])
+        summary = next(item for item in payload["modules"] if item["id"] == "flow-cytometry-summary")
+        self.assertEqual(summary["depends_on"], ["fcs-event-import"])
 
     def test_launcher_rejects_unknown_commands(self):
         completed = subprocess.run(

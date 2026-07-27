@@ -144,7 +144,7 @@
   "intents": [
     "biomarker performance",
     "Evaluate binary biomarker performance",
-    "\u8bc4\u4f30\u751f\u7269\u6807\u5fd7\u7269\u8bca\u65ad\u6027\u80fd"
+    "评估生物标志物诊断性能"
   ],
   "kernel_compatibility": [
     ">=0.2.0,<0.3.0"
@@ -239,7 +239,7 @@
   ],
   "provenance": {
     "concept_sources": [
-      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+      "Project-owned implementation with module-level validation evidence."
     ],
     "license": "Apache-2.0"
   },
@@ -257,5 +257,16 @@
   "schema_version": 1,
   "title": "Evaluate binary biomarker performance",
   "tool_requirements": [],
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "code_templates": [
+    {
+      "path": "templates/evaluate_biomarker.py",
+      "language": "python",
+      "purpose": "Validate binary biomarker labels, scores, and prespecified threshold, run performance metrics, and serialize finite research-use output.",
+      "quality_gate_ids": [
+        "biomarker-performance-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ]
 }

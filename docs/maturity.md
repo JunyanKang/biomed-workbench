@@ -34,8 +34,8 @@ inside an allowed range.
 ## Release Evidence
 
 The release validator binds the registry to compatibility execution evidence,
-live tool and database reports, public-data cases, template coverage, the
-research-state engine, and source reconciliation. The [public-data acceptance
+live tool and database reports, public-data cases, template coverage, and the
+research-state engine. The [public-data acceptance
 case index](cases/README.md) shows the strongest current live examples. The
 generated [experimental-module evidence matrix](../reports/experimental-module-maturity.json)
 separately records contract, template, compatibility, representative execution,

@@ -1,0 +1,292 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "All activity values use the same declared calibration and decay-correction basis within the requested analysis."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_radiotracer_biodistribution.py",
+      "purpose": "Execute declared radiotracer biodistribution accounting with project-bound provenance.",
+      "quality_gate_ids": [
+        "biodistribution-measurement-contract",
+        "biodistribution-interpretation-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "radiotracer-biodistribution-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "biodistribution_measurements": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "biodistribution_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "radiotracer-biodistribution-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "dose-response",
+    "cohort-summary"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic dose-normalized measurement accounting.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-24",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Calculate reviewed organ-level percent injected dose per gram, observed-interval trapezoidal AUC, and matching-time tumor-to-blood ratios while preserving calibration, decay-correction, and biological-replication boundaries.",
+  "domains": [
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_radiotracer_biodistribution",
+  "evidence_effects": [
+    "summarizes-reviewed-radiotracer-biodistribution"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "radiotracer-biodistribution",
+  "input_artifacts": [
+    {
+      "artifact_type": "radiotracer_organ_measurements",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "elapsed-time"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "sample-organ-by-activity-and-mass"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "biodistribution_measurements",
+      "processing_levels": [
+        "calibrated",
+        "decay-correction-declared",
+        "organ-weighed"
+      ],
+      "required_metadata": [
+        "radionuclide",
+        "injected-dose-calibration",
+        "decay-correction-reference-time",
+        "counting-efficiency",
+        "sample-provenance"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "blood_organ": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "measurements": {
+        "items": {
+          "type": "object"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "replicate_level": {
+        "enum": [
+          "unspecified",
+          "technical",
+          "biological"
+        ],
+        "type": "string"
+      },
+      "tumor_organ": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "measurements"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "radiotracer biodistribution",
+    "calculate percent injected dose per gram",
+    "tumor to blood ratio",
+    "\u653e\u5c04\u6027\u793a\u8e2a\u751f\u7269\u5206\u5e03",
+    "\u8ba1\u7b97\u767e\u5206\u6ce8\u5c04\u5242\u91cf\u6bcf\u514b",
+    "\u80bf\u7624\u8840\u6db2\u6bd4"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module does not calibrate counts, apply decay correction, estimate recovery, fit pharmacokinetic models, extrapolate AUC, calculate absorbed dose or MIRD dosimetry, or treat organs from one animal as independent biological replicates."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "radiotracer_biodistribution_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "elapsed-time"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "organ-timepoint-and-auc-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "biodistribution_summary",
+      "processing_levels": [
+        "dose-normalized",
+        "observed-interval-summarized"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "radionuclide",
+        "decay-correction-reference-time",
+        "replicate-level",
+        "quality-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "measurements": {
+        "type": "array"
+      },
+      "organ_auc_summary": {
+        "type": "array"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "replicate_level": {
+        "type": "string"
+      },
+      "timepoint_summary": {
+        "type": "array"
+      },
+      "tumor_to_blood_ratios": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "replicate_level",
+      "measurements",
+      "timepoint_summary",
+      "organ_auc_summary",
+      "tumor_to_blood_ratios",
+      "quality_gates"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Each measurement retains a unique sample, organ, time, calibrated injected dose, calibrated tissue activity, tissue mass, radionuclide, and declared decay-correction basis."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room radiotracer measurement accounting implementation."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require unique sample-organ-time observations, nonnegative time and activity, positive injected dose and tissue mass, and matching tumor/blood requests.",
+      "id": "biodistribution-measurement-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require radionuclide, calibration, decay correction, recovery, dissection, mass, and replicate review before exposure or biological interpretation; do not equate observed AUC with residence time or absorbed dose.",
+      "id": "biodistribution-interpretation-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What organ-level biodistribution measurements and observed-interval exposure summaries are supported by these declared radiotracer measurements?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize radiotracer biodistribution",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

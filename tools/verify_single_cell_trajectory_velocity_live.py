@@ -14,7 +14,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_ID = "single-cell-trajectory-velocity"
-MODULE_VERSION = "1.0.0"
+MODULE_VERSION = "1.1.0"
 ROW_ID = "agent-protocol-1-scvelo-034-scanpy-1115"
 TEMPLATE = ROOT / "biomed_workbench" / "modules" / "builtin" / MODULE_ID / "templates" / "run_velocity.py"
 
@@ -31,7 +31,7 @@ def run(command: list[str], environment: dict[str, str], timeout: int = 600) -> 
 
 
 def verify(scientific_python: Path) -> dict[str, object]:
-    python = scientific_python.expanduser().resolve(strict=True)
+    python = scientific_python.expanduser().absolute()
     if not os.access(python, os.X_OK):
         raise RuntimeError("scientific Python is not executable")
     with tempfile.TemporaryDirectory(prefix="biomed-velocity-") as temporary:
@@ -74,7 +74,8 @@ adata.write_h5ad({str(fixture)!r})
         ], environment)
         analysis = json.loads(analysis_path.read_text(encoding="utf-8"))
         if not (
-            analysis["quality_status"] == "passed"
+            analysis["schema_version"] == 2
+            and analysis["quality_status"] == "passed"
             and analysis["input"]["cells"] == 160
             and analysis["input"]["genes"] == 35
             and analysis["input"]["samples"] == 4
@@ -82,6 +83,9 @@ adata.write_h5ad({str(fixture)!r})
             and analysis["direction_validation"]["latent_time_spearman"] >= 0.65
             and analysis["direction_validation"]["velocity_pseudotime_spearman"] >= 0.25
             and analysis["direction_validation"]["experimental_time_used_for_fitting"] is False
+            and analysis["direction_validation"]["experimental_time_removed_before_backend_execution"] is True
+            and analysis["source_immutable"] is True
+            and analysis["cell_feature_and_source_metadata_identity_preserved"] is True
             and all(analysis["quality_gates"].values())
         ):
             raise RuntimeError(f"trajectory direction or preservation validation failed: {json.dumps(analysis, sort_keys=True)[:5000]}")
@@ -105,7 +109,9 @@ adata.write_h5ad({str(fixture)!r})
                 "spliced_unspliced_layers_validated": True, "dynamical_rna_velocity_executed": True,
                 "velocity_graph_and_pseudotime_executed": True, "latent_time_direction_validated_against_known_time": True,
                 "root_and_terminal_direction_validated": True, "experimental_time_withheld_from_model_fitting": True,
+                "experimental_time_removed_before_backend_execution": True,
                 "source_counts_and_identifiers_preserved": True, "velocity_h5ad_reloaded": True,
+                "source_immutable": True, "source_metadata_preserved": True,
                 "no_environment_or_compute_infrastructure_managed": True,
             },
         }

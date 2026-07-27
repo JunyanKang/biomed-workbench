@@ -1,0 +1,264 @@
+{
+  "schema_version": 1,
+  "id": "presentation-delivery-plan",
+  "version": "1.0.0",
+  "title": "Build a presentation delivery plan",
+  "description": "Create a publication-facing presentation plan and execution graph that binds findings, slide outputs, peer-response states, and review modules into a bounded delivery workflow.",
+  "module_type": "delivery",
+  "domains": ["publication"],
+  "intents": [
+    "presentation delivery plan",
+    "build presentation workflow",
+    "presentation plan"
+  ],
+  "questions": [
+    "How should this scientific output be translated into an auditable presentation package for a specific audience?"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.publication:presentation_delivery_plan",
+  "execution": {
+    "kind": "python",
+    "timeout_seconds": 30,
+    "max_output_bytes": 10000000
+  },
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "presentation_request",
+      "artifact_type": "presentation_request",
+      "processing_levels": ["declared"],
+      "required_metadata": ["project-id", "audience-boundary", "version"],
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["request-object"]
+        }
+      ]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "presentation_plan",
+      "artifact_type": "presentation_plan",
+      "processing_levels": ["derived", "delivery"],
+      "required_metadata": ["module-version", "compatibility_row_id"],
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["delivery-plan"]
+        }
+      ]
+    }
+  ],
+  "preconditions": [
+    "A bounded set of findings and a target audience definition are supplied."
+  ],
+  "assumptions": [
+    "The available module catalog and manuscript state are correctly described when provided."
+  ],
+  "quality_gates": [
+    {
+      "id": "presentation-delivery-boundary",
+      "severity": "major",
+      "description": "A delivery plan cannot be marked ready when key findings, figure bindings, or peer comments contain unresolved blocks.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "presentation-provenance-complete",
+      "severity": "major",
+      "description": "Downstream publication outputs must retain module lineage before final delivery.",
+      "blocks_interpretation": true
+    }
+  ],
+  "limitations": [
+    "This module plans delivery sequence and gating; it does not itself verify scientific truth, model fitness, or biological validity.",
+    "Missing evidence is kept as explicit gaps and must be closed before claiming delivery completeness."
+  ],
+  "evidence_effects": [
+    "qualifies-presentation-delivery-readiness",
+    "blocks-presentation-gaps"
+  ],
+  "alternatives": [],
+  "complements": [
+    "figure-specification",
+    "manuscript-audit",
+    "citation-audit",
+    "claim-evidence-integrity-audit",
+    "response-matrix",
+    "manuscript-revision-base",
+    "manuscript-revision-lineage"
+  ],
+  "tool_requirements": [],
+  "dependencies": [
+    {
+      "name": "python",
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "required": true,
+      "tested_versions": ["3.14.3"],
+      "allowed_versions": [">=3.14,<3.15"],
+      "version_source": "https://www.python.org/downloads/release/python-3143/",
+      "verified_at": "2026-07-26",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Execute the validated module implementation.",
+      "conflicts": [],
+      "platforms": ["any"]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "input_formats": {
+        "presentation_request": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "presentation_plan": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": ["any"],
+      "regression_evidence_ids": ["presentation-delivery-plan-regression-v1"],
+      "end_to_end_evidence_ids": ["presentation-delivery-plan-e2e-v1"],
+      "verified_at": "2026-07-26"
+    }
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "project_goal": {
+        "type": "string"
+      },
+      "target_audience": {
+        "type": "string"
+      },
+      "storyline": {
+        "type": "string"
+      },
+      "key_findings": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      },
+      "figures": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      },
+      "reviewer_feedback": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      },
+      "manuscript_inputs": {
+        "type": "object"
+      },
+      "available_modules": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "project_goal",
+      "target_audience",
+      "storyline",
+      "key_findings"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "project_goal": {
+        "type": "string"
+      },
+      "target_audience": {
+        "type": "string"
+      },
+      "storyline": {
+        "type": "string"
+      },
+      "findings": {
+        "type": "array"
+      },
+      "slide_plan": {
+        "type": "array"
+      },
+      "module_sequence": {
+        "type": "array"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "delivery_mode": {
+        "type": "string"
+      },
+      "readiness": {
+        "type": "object"
+      },
+      "next_steps": {
+        "type": "array"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "project_goal",
+      "target_audience",
+      "storyline",
+      "findings",
+      "slide_plan",
+      "module_sequence",
+      "quality_gates",
+      "delivery_mode",
+      "readiness",
+      "next_steps",
+      "limitations"
+    ]
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {
+    "license": "Apache-2.0",
+    "concept_sources": [
+      "Project-owned integration contract for publication workflow planning and module orchestration."
+    ]
+  }
+}

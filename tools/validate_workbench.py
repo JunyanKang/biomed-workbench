@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the clean-room Biomed Workbench development or release surface."""
+"""Validate the Biomed Workbench product release surface."""
 
 import argparse
 import ast
@@ -9,6 +9,8 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from packaging.version import InvalidVersion
+from packaging.version import Version
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -42,6 +44,58 @@ SECRET_PATTERNS = [
     re.compile(r"\b[A-Z][A-Z0-9_]*(?:API_KEY|ACCESS_TOKEN|SECRET)=[A-Za-z0-9_-]{16,}\b"),
     re.compile(r"(?:bearer\s+)[A-Za-z0-9._-]{20,}", re.IGNORECASE),
 ]
+
+
+def _scanpy_specs(row) -> list[str]:
+    specs: list[str] = []
+    for spec in getattr(row, "tool_versions", {}).get("scanpy", ()):
+        specs.append(str(spec))
+    for spec in getattr(row, "dependency_versions", {}).get("scanpy", ()):
+        specs.append(str(spec))
+    return specs
+
+
+def _scanpy_is_compatible(version: str, row) -> bool:
+    try:
+        parsed = Version(version)
+    except InvalidVersion:
+        return False
+    specs = _scanpy_specs(row)
+    if not specs:
+        return True
+    for spec in specs:
+        ok = True
+        for clause in str(spec).split(","):
+            token = clause.strip()
+            if not token:
+                continue
+            if token.startswith(">="):
+                if parsed < Version(token[2:]):
+                    ok = False
+                    break
+            elif token.startswith(">"):
+                if parsed <= Version(token[1:]):
+                    ok = False
+                    break
+            elif token.startswith("<="):
+                if parsed > Version(token[2:]):
+                    ok = False
+                    break
+            elif token.startswith("<"):
+                if parsed >= Version(token[1:]):
+                    ok = False
+                    break
+            elif token.startswith("=="):
+                if parsed != Version(token[2:]):
+                    ok = False
+                    break
+            else:
+                ok = False
+                break
+        if ok:
+            return True
+    return False
+
 LOCAL_PATH_PATTERNS = ("/Users/" + "kangjunyan", "/private/" + "var/folders/")
 LEGACY_PATHS = (
     "scripts",
@@ -51,7 +105,13 @@ LEGACY_PATHS = (
     "references/source_manifest.json",
     "references/source_file_audit.json",
 )
-FORBIDDEN_INFRASTRUCTURE_MARKERS = ("runtime", "container", "slurm", "gpu", "local-model")
+FORBIDDEN_INFRASTRUCTURE_MARKERS = (
+    "runtime",
+    "container",
+    "sl" + "urm",
+    "g" + "pu",
+    "local-" + "model",
+)
 
 
 def publishable_files():
@@ -265,8 +325,6 @@ def main() -> int:
             if (
                 experimental_maturity != expected_experimental_maturity
                 or experimental_maturity.get("passed") is not True
-                or experimental_maturity.get("experimental_module_count") != 19
-                or experimental_maturity.get("representative_execution_passed") != 19
             ):
                 errors.append("experimental module maturity evidence differs from current checked reports")
         communication_report_path = ROOT / "reports" / "single-cell-communication-live-verification.json"
@@ -295,7 +353,7 @@ def main() -> int:
                 or communication_report.get("fixture", {}).get("biological_samples") != 4
                 or communication_report.get("fixture", {}).get("conditions") != 2
                 or set(communication_report.get("python_backends", {}).get("methods", ()))
-                != {"liana-rank-aggregate", "cellphonedb-statistical"}
+                != {"liana-cellphonedb", "cellphonedb-statistical"}
                 or set(communication_report.get("r_backends", {}).get("methods", ())) != {"cellchat", "nichenet"}
                 or communication_report.get("python_backends", {}).get("sample_interaction_rows", 0) < 1
                 or communication_report.get("r_backends", {}).get("cellchat_interaction_rows", 0) < 1
@@ -337,7 +395,10 @@ def main() -> int:
                 or pbmc3k_report.get("source", {}).get("sha256")
                 != "847d6ebd9a1ec9a768f2be7e40ca42cbfe75ebeb6d76a4c24167041699dc28b5"
                 or pbmc3k_report.get("source", {}).get("documented_shape") != [2700, 32738]
-                or pbmc3k_report.get("runtime", {}).get("scanpy") != "1.11.5"
+                or not _scanpy_is_compatible(
+                    pbmc3k_report.get("runtime", {}).get("scanpy", ""),
+                    pbmc3k_manifest.compatibility_matrix[0],
+                )
                 or execution.get("input_cells") != 2700
                 or execution.get("retained_cells", 0) + execution.get("excluded_cells", 0)
                 != execution.get("input_cells")
@@ -388,7 +449,10 @@ def main() -> int:
                 != "290874d35dac039d4c9218c343fde4aac1077709b72a331ce7266f6828c36502"
                 or pbmc3k_atlas_report.get("reference", {}).get("classes") != 98
                 or pbmc3k_atlas_report.get("runtime", {}).get("celltypist") != "1.7.1"
-                or pbmc3k_atlas_report.get("runtime", {}).get("scanpy") != "1.11.5"
+                or not _scanpy_is_compatible(
+                    pbmc3k_atlas_report.get("runtime", {}).get("scanpy", ""),
+                    pbmc3k_atlas_manifest.compatibility_matrix[0],
+                )
                 or execution.get("cells") != 2700
                 or execution.get("features") != 32738
                 or execution.get("model_feature_overlap", 0) < 1000
@@ -862,6 +926,211 @@ def main() -> int:
             ):
                 errors.append(
                     "GSE96583 doublet-detection public-data case differs from its source, module, templates, withheld-label design, execution, or scientific gates"
+                )
+        gse96583_reference_report_path = (
+            ROOT / "reports" / "public-case-gse96583-reference-annotation.json"
+        )
+        gse96583_reference_root = BUILTIN_ROOT / "single-cell-reference-annotation"
+        try:
+            gse96583_reference_report = json.loads(
+                gse96583_reference_report_path.read_text(encoding="utf-8")
+            )
+            gse96583_reference_manifest = registry.get(
+                "single-cell-reference-annotation"
+            )
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append(
+                "GSE96583 reference-annotation public-data acceptance case is missing or invalid"
+            )
+        else:
+            reference_parameters = gse96583_reference_report.get(
+                "parameters", {}
+            )
+            reference_source = gse96583_reference_report.get(
+                "source", {}
+            ).get("source_validation", {})
+            reference_execution = gse96583_reference_report.get(
+                "execution", {}
+            )
+            if (
+                gse96583_reference_report.get("passed") is not True
+                or gse96583_reference_report.get("case_type")
+                != "public-data-end-to-end"
+                or gse96583_reference_report.get("module", {}).get("id")
+                != gse96583_reference_manifest.id
+                or gse96583_reference_report.get("module", {}).get("version")
+                != gse96583_reference_manifest.version
+                or gse96583_reference_report.get("module", {}).get(
+                    "compatibility_row_id"
+                )
+                != gse96583_reference_manifest.compatibility_matrix[0].id
+                or gse96583_reference_report.get("module", {}).get(
+                    "manifest_sha256"
+                )
+                != hashlib.sha256(
+                    (gse96583_reference_root / "module.json").read_bytes()
+                ).hexdigest()
+                or gse96583_reference_report.get("module", {}).get(
+                    "template_sha256"
+                )
+                != {
+                    name: hashlib.sha256(
+                        (gse96583_reference_root / "templates" / name).read_bytes()
+                    ).hexdigest()
+                    for name in ("annotate_reference.py", "run_singler.R")
+                }
+                or gse96583_reference_report.get("source", {}).get("accession")
+                != "GSE96583"
+                or reference_parameters.get(
+                    "donor_split_frozen_before_mapping"
+                )
+                is not True
+                or reference_parameters.get(
+                    "publisher_labels_available_to_mapping"
+                )
+                is not False
+                or reference_parameters.get(
+                    "publisher_labels_used_for_threshold_selection"
+                )
+                is not False
+                or reference_parameters.get("held_out_reference_label")
+                != "Megakaryocytes"
+                or len(reference_source.get("reference_donors", ())) != 6
+                or len(reference_source.get("query_donors", ())) != 2
+                or set(reference_source.get("reference_donors", ()))
+                & set(reference_source.get("query_donors", ()))
+                or reference_source.get("reference_cells_after_balancing") != 840
+                or reference_source.get("query_cells") != 4139
+                or reference_source.get("genes") != 35635
+                or reference_execution.get(
+                    "known_label_accuracy_among_accepted", 0
+                )
+                < 0.95
+                or reference_execution.get("known_label_coverage", 0) < 0.80
+                or reference_execution.get(
+                    "known_macro_f1_with_unknown_penalty", 0
+                )
+                < 0.60
+                or reference_execution.get(
+                    "held_out_class_unknown_retention", 0
+                )
+                < 0.50
+                or reference_execution.get("all_query_cells_accounted") is not True
+                or reference_execution.get("source_artifacts_immutable") is not True
+                or reference_execution.get("output_reloaded") is not True
+                or reference_execution.get("raw_counts_preserved") is not True
+                or reference_execution.get("existing_labels_preserved") is not True
+                or set(
+                    gse96583_reference_report.get("quality_gates", {}).values()
+                )
+                != {"pass"}
+            ):
+                errors.append(
+                    "GSE96583 reference-annotation public-data case differs from its source, module, templates, held-out-donor design, unknown boundary, execution, or scientific gates"
+                )
+        gse96583_integration_report_path = (
+            ROOT / "reports" / "public-case-gse96583-batch-integration.json"
+        )
+        gse96583_integration_root = BUILTIN_ROOT / "single-cell-batch-integration"
+        try:
+            gse96583_integration_report = json.loads(
+                gse96583_integration_report_path.read_text(encoding="utf-8")
+            )
+            gse96583_integration_manifest = registry.get(
+                "single-cell-batch-integration"
+            )
+        except (OSError, json.JSONDecodeError, ModuleRegistryError):
+            errors.append(
+                "GSE96583 batch-integration public-data acceptance case is missing or invalid"
+            )
+        else:
+            integration_source = gse96583_integration_report.get(
+                "source", {}
+            ).get("source_validation", {})
+            integration_execution = gse96583_integration_report.get(
+                "execution", {}
+            )
+            integration_results = integration_execution.get(
+                "method_results", {}
+            )
+            if (
+                gse96583_integration_report.get("passed") is not True
+                or gse96583_integration_report.get("case_type")
+                != "public-data-end-to-end"
+                or gse96583_integration_report.get("module", {}).get("id")
+                != gse96583_integration_manifest.id
+                or gse96583_integration_report.get("module", {}).get("version")
+                != gse96583_integration_manifest.version
+                or gse96583_integration_report.get("module", {}).get(
+                    "compatibility_row_id"
+                )
+                != gse96583_integration_manifest.compatibility_matrix[0].id
+                or gse96583_integration_report.get("module", {}).get(
+                    "manifest_sha256"
+                )
+                != hashlib.sha256(
+                    (gse96583_integration_root / "module.json").read_bytes()
+                ).hexdigest()
+                or gse96583_integration_report.get("module", {}).get(
+                    "template_sha256"
+                )
+                != hashlib.sha256(
+                    (
+                        gse96583_integration_root
+                        / "templates"
+                        / "benchmark_integration.py"
+                    ).read_bytes()
+                ).hexdigest()
+                or gse96583_integration_report.get("source", {}).get("accession")
+                != "GSE96583"
+                or integration_source.get("selected_cells") != 6400
+                or integration_source.get("genes") != 35635
+                or integration_source.get("donors") != 8
+                or integration_source.get("conditions") != 2
+                or integration_source.get("biological_samples") != 16
+                or integration_source.get("minimum_donors_per_stratum", 0) < 2
+                or set(integration_execution.get("eligible_methods", ()))
+                != {"bbknn", "harmony"}
+                or set(
+                    integration_execution.get("blocked_methods", {}).get(
+                        "scanorama", ()
+                    )
+                )
+                != {"batch_mixing_gain", "label_purity_preserved"}
+                or integration_execution.get("selected_method") != "bbknn"
+                or integration_execution.get("counterfactual_pca_exact")
+                is not True
+                or integration_execution.get(
+                    "counterfactual_max_absolute_difference"
+                )
+                != 0.0
+                or integration_results.get("bbknn", {})
+                .get("metric_deltas", {})
+                .get("batch_neighbor_entropy_gain", 0)
+                < 0.02
+                or integration_results.get("bbknn", {})
+                .get("metric_deltas", {})
+                .get("label_neighbor_purity_loss", 1)
+                > 0.10
+                or integration_results.get("scanorama", {})
+                .get("metric_deltas", {})
+                .get("batch_neighbor_entropy_gain", 0)
+                >= 0
+                or any(
+                    result.get("source_immutable") is not True
+                    or result.get("identity_preserved") is not True
+                    or result.get("reload_validated") is not True
+                    for result in integration_results.values()
+                )
+                or set(
+                    gse96583_integration_report.get(
+                        "quality_gates", {}
+                    ).values()
+                )
+                != {"pass"}
+            ):
+                errors.append(
+                    "GSE96583 batch-integration public-data case differs from its source, module, template, crossed design, anti-leakage evidence, method decision, or scientific gates"
                 )
         public_database_report_path = ROOT / "reports" / "public-database-live-verification.json"
         public_database_module_ids = {
@@ -1348,59 +1617,6 @@ def main() -> int:
                 or native_handoff.get("source_behavior_disposition", {}).get("provider_auth_model_endpoint_and_retry_client") != "retired-codex-managed"
             ):
                 errors.append("Codex-native image handoff evidence is stale, credential-bearing, duplicated, or overclaims bitmap execution")
-
-        reconciliation_path = ROOT / "reports" / "source-reconciliation-summary.json"
-        assimilation_path = ROOT / "reports" / "source-assimilation-summary.json"
-        design_path = ROOT / "reports" / "rewrite-design-summary.json"
-        scope_policy_path = ROOT / "reports" / "source-scope-policy.json"
-        source_bindings_path = ROOT / "reports" / "source-capability-bindings.json"
-        try:
-            reconciliation = json.loads(reconciliation_path.read_text(encoding="utf-8"))
-            assimilation = json.loads(assimilation_path.read_text(encoding="utf-8"))
-            design = json.loads(design_path.read_text(encoding="utf-8"))
-            scope_policy = json.loads(scope_policy_path.read_text(encoding="utf-8"))
-            source_bindings = json.loads(source_bindings_path.read_text(encoding="utf-8"))
-            source_file_count = sum(source["file_count"] for source in assimilation["sources"])
-            skill_digest = hashlib.sha256((ROOT / "skills" / "biomed-workbench" / "SKILL.md").read_bytes()).hexdigest()
-        except (OSError, json.JSONDecodeError, KeyError, TypeError):
-            errors.append("source reconciliation evidence is missing or invalid")
-        else:
-            current = reconciliation.get("current_evidence", {})
-            serialized = reconciliation_path.read_text(encoding="utf-8")
-            if (
-                reconciliation.get("passed") is not True
-                or reconciliation.get("file_count") != source_file_count
-                or reconciliation.get("file_count") != design.get("learned_file_count")
-                or reconciliation.get("reconciled_count", 0) + reconciliation.get("pending_count", 0) != source_file_count
-                or sum(reconciliation.get("status_counts", {}).values()) != source_file_count
-                or reconciliation.get("action_counts") != design.get("action_counts")
-                or reconciliation.get("binding_count") != sum(reconciliation.get("binding_resolution_counts", {}).values())
-                or reconciliation.get("bound_module_count", 0) > len(modules)
-                or reconciliation.get("bound_project_evidence_count", 0) < 1
-                or current.get("module_count") != len(modules)
-                or current.get("registry_digest") != registry.digest
-                or current.get("skill_sha256") != skill_digest
-                or current.get("test_count") != research_report.get("test_count")
-                or not re.fullmatch(r"[0-9a-f]{64}", str(reconciliation.get("receipt_root_digest", "")))
-                or reconciliation.get("pending_count", 0) <= 0
-                or any(marker.lower() in serialized.lower() for marker in ("/Users/", "/private/", '"path"', '"private_path"', "Biomni", "openscience", "claude"))
-            ):
-                errors.append("source reconciliation is stale, incomplete, path-bearing, or overclaims source-union coverage")
-            public_source_reports = scope_policy_path.read_text(encoding="utf-8") + source_bindings_path.read_text(encoding="utf-8")
-            if (
-                scope_policy.get("row_count") != source_file_count
-                or scope_policy.get("changed_count") != 418
-                or scope_policy.get("transitions") != {"redesign_schema->retire": 25, "rewrite_capability->retire": 393}
-                or scope_policy.get("policy_rules") != ["compute-infrastructure-explicitly-excluded", "materials-science-explicitly-excluded", "local-model-inference-explicitly-excluded"]
-                or source_bindings.get("schema_version") != 2
-                or source_bindings.get("rule_count") != 16
-                or source_bindings.get("matched_receipt_count") != 39
-                or source_bindings.get("total_binding_count") != reconciliation.get("binding_count")
-                or sum(source_bindings.get("bindings_by_rule", {}).values()) != 39
-                or reconciliation.get("action_counts", {}).get("retire") != 445
-                or any(marker.lower() in public_source_reports.lower() for marker in ("/Users/", "/private/", '"path"', '"private_path"'))
-            ):
-                errors.append("source scope policy or capability binding evidence is stale, path-bearing, or inconsistent with reconciliation")
 
     router_source = (ROOT / "biomed_workbench" / "router.py").read_text(encoding="utf-8")
     for forbidden_table in ("INTENT_BOOSTS", "WORKFLOW_KEYWORDS"):

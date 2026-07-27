@@ -47,6 +47,9 @@ class SingleCellGenerativeModelingEvidenceTests(unittest.TestCase):
         self.assertTrue(summary["reviewed_and_unknown_labels_preserved"])
         self.assertTrue(summary["scanvi_evaluated_on_hidden_labels"])
         self.assertTrue(summary["scanvi_predictions_are_reviewable_suggestions"])
+        self.assertTrue(summary["reviewed_labels_removed_before_base_scvi_training"])
+        self.assertTrue(summary["source_immutable"])
+        self.assertTrue(summary["source_metadata_preserved"])
         self.assertTrue(summary["no_environment_or_compute_infrastructure_managed"])
 
     def test_report_contains_no_machine_path_or_credential(self):

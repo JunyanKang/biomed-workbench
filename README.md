@@ -85,8 +85,8 @@ Then open a **new Codex task** so the `biomed-workbench` skill is loaded. See [i
 
 ## Scope And Trust
 
-Biomed Workbench is an independent, source-neutral implementation. It does not vendor or route through the research projects that informed its design. Compatibility evidence, public-database checks, template coverage, source reconciliation, and release verification are published in [`reports/`](reports/); attribution and clean-room boundaries are documented in [NOTICE.md](NOTICE.md).
+Biomed Workbench is an independent implementation. It does not vendor external research projects, dispatch into local development worktrees, or require private development artifacts at runtime. Compatibility evidence, public-database checks, template coverage, public-data cases, and release verification are published in [`reports/`](reports/); redistribution boundaries are documented in [NOTICE.md](NOTICE.md).
 
-The plugin may use public scientific services and compatible project-local scientific packages. It does not manage CPUs, GPUs, containers, schedulers, remote compute, or local foundation models. Optional credentials are kept outside the repository and are never embedded in module code or research artifacts.
+The plugin may use public scientific services and compatible project-local scientific packages. It does not own environment provisioning, execution infrastructure, remote job systems, or model-hosting infrastructure. Optional credentials are kept outside the repository and are never embedded in module code or research artifacts.
 
 Licensed under [Apache-2.0](LICENSE).

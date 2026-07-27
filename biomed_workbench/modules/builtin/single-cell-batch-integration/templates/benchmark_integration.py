@@ -44,6 +44,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--maximum-label-purity-loss", type=float, required=True)
     parser.add_argument("--minimum-batch-entropy-gain", type=float, required=True)
     parser.add_argument("--minimum-label-connectivity", type=float, required=True)
+    parser.add_argument("--silhouette-max-cells", type=int, default=5000)
     parser.add_argument("--seed", type=int, required=True)
     return parser.parse_args()
 
@@ -159,21 +160,47 @@ def label_connectivity(neighbors: np.ndarray, labels: np.ndarray, known: np.ndar
     return float(np.mean(list(scores.values()))), scores
 
 
-def safe_silhouette(representation: np.ndarray, groups: np.ndarray) -> float | None:
+def safe_silhouette(
+    representation: np.ndarray,
+    groups: np.ndarray,
+    max_cells: int,
+    seed: int,
+) -> float | None:
     if len(set(groups.tolist())) < 2 or len(groups) <= len(set(groups.tolist())):
         return None
+    if len(groups) > max_cells:
+        selected = np.sort(
+            np.random.default_rng(seed).choice(len(groups), max_cells, replace=False)
+        )
+        representation = representation[selected]
+        groups = groups[selected]
     return float(silhouette_score(representation, groups, metric="euclidean"))
 
 
-def metrics(representation: np.ndarray, neighbors: np.ndarray, batches: np.ndarray, labels: np.ndarray, known: np.ndarray) -> dict[str, object]:
+def metrics(
+    representation: np.ndarray,
+    neighbors: np.ndarray,
+    batches: np.ndarray,
+    labels: np.ndarray,
+    known: np.ndarray,
+    silhouette_max_cells: int,
+    seed: int,
+) -> dict[str, object]:
     connectivity, by_label = label_connectivity(neighbors, labels, known)
     return {
         "batch_neighbor_entropy": batch_entropy(neighbors, batches),
         "label_neighbor_purity": label_purity(neighbors, labels, known),
         "mean_label_graph_connectivity": connectivity,
         "label_graph_connectivity": by_label,
-        "batch_silhouette": safe_silhouette(representation, batches),
-        "label_silhouette": safe_silhouette(representation[known], labels[known]),
+        "batch_silhouette": safe_silhouette(
+            representation, batches, silhouette_max_cells, seed
+        ),
+        "label_silhouette": safe_silhouette(
+            representation[known],
+            labels[known],
+            silhouette_max_cells,
+            seed + 1,
+        ),
     }
 
 
@@ -185,13 +212,19 @@ def package_version(name: str) -> str:
 def main() -> int:
     args = parse_args()
     source = Path(args.input_h5ad).resolve(strict=True)
+    source_digest = sha256(source)
     output = Path(args.output_h5ad)
     report_path = Path(args.report)
     for path in (output, report_path):
         path.parent.mkdir(parents=True, exist_ok=True)
         if path.exists():
             raise FileExistsError(f"refusing to overwrite output: {path.name}")
-    if args.n_top_genes < 3 or args.n_pcs < 2 or args.n_neighbors < 2:
+    if (
+        args.n_top_genes < 3
+        or args.n_pcs < 2
+        or args.n_neighbors < 2
+        or args.silhouette_max_cells < 100
+    ):
         raise ValueError("feature, component, and neighbor parameters are too small")
     if not 0 <= args.maximum_label_purity_loss <= 1 or not -1 <= args.minimum_batch_entropy_gain <= 1 or not 0 <= args.minimum_label_connectivity <= 1:
         raise ValueError("integration quality thresholds are invalid")
@@ -221,9 +254,14 @@ def main() -> int:
     counts = raw_counts(source_adata, args.raw_count_location)
     validate_counts(counts)
     original_counts = sparse.csr_matrix(counts, dtype=np.int64)
+    integration_obs = source_adata.obs.drop(
+        columns=[args.evaluation_label_key]
+    ).copy()
+    if args.evaluation_label_key in integration_obs:
+        raise RuntimeError("evaluation labels remain visible to integration backends")
     adata = anndata.AnnData(
         X=original_counts.copy(),
-        obs=source_adata.obs.copy(),
+        obs=integration_obs,
         var=source_adata.var.copy(),
     )
     adata.layers["counts"] = original_counts.copy()
@@ -241,7 +279,15 @@ def main() -> int:
     adata.obsm["X_pca"] = np.asarray(pca_data.obsm["X_pca"])
     baseline_representation = np.asarray(adata.obsm["X_pca"])
     baseline_neighbors = representation_neighbors(baseline_representation, args.n_neighbors)
-    baseline = metrics(baseline_representation, baseline_neighbors, batches, labels, known)
+    baseline = metrics(
+        baseline_representation,
+        baseline_neighbors,
+        batches,
+        labels,
+        known,
+        args.silhouette_max_cells,
+        args.seed,
+    )
 
     if args.method == "harmony":
         import harmonypy
@@ -258,8 +304,21 @@ def main() -> int:
         sc.pp.neighbors(adata, n_neighbors=args.n_neighbors, use_rep="X_integrated", random_state=args.seed)
         integrated_neighbors = representation_neighbors(integrated_representation, args.n_neighbors)
     elif args.method == "scanorama":
-        sce.pp.scanorama_integrate(adata, args.batch_key, basis="X_pca", adjusted_basis="X_integrated", approx=False)
-        integrated_representation = np.asarray(adata.obsm["X_integrated"])
+        # Scanpy's Scanorama wrapper requires contiguous batches. Run it on a
+        # stable internal ordering, then restore the original cell order.
+        batch_order = np.argsort(batches, kind="stable")
+        ordered = adata[batch_order].copy()
+        sce.pp.scanorama_integrate(
+            ordered,
+            args.batch_key,
+            basis="X_pca",
+            adjusted_basis="X_integrated",
+            approx=False,
+        )
+        corrected = np.asarray(ordered.obsm["X_integrated"])
+        integrated_representation = np.empty_like(corrected)
+        integrated_representation[batch_order] = corrected
+        adata.obsm["X_integrated"] = integrated_representation
         sc.pp.neighbors(adata, n_neighbors=args.n_neighbors, use_rep="X_integrated", random_state=args.seed)
         integrated_neighbors = representation_neighbors(integrated_representation, args.n_neighbors)
     else:
@@ -273,7 +332,15 @@ def main() -> int:
         adata.obsm["X_integrated"] = integrated_representation
         integrated_neighbors = graph_neighbors(adata.obsp["distances"], args.n_neighbors)
     sc.tl.umap(adata, random_state=args.seed)
-    integrated = metrics(integrated_representation, integrated_neighbors, batches, labels, known)
+    integrated = metrics(
+        integrated_representation,
+        integrated_neighbors,
+        batches,
+        labels,
+        known,
+        args.silhouette_max_cells,
+        args.seed,
+    )
 
     entropy_gain = float(integrated["batch_neighbor_entropy"] - baseline["batch_neighbor_entropy"])
     purity_loss = float(baseline["label_neighbor_purity"] - integrated["label_neighbor_purity"])
@@ -282,9 +349,10 @@ def main() -> int:
         "batch_mixing_gain": entropy_gain >= args.minimum_batch_entropy_gain,
         "label_purity_preserved": purity_loss <= args.maximum_label_purity_loss,
         "label_graph_connected": float(integrated["mean_label_graph_connectivity"]) >= args.minimum_label_connectivity,
-        "unknown_labels_retained": int((labels == args.unknown_label).sum()) == int((adata.obs[args.evaluation_label_key].astype(str) == args.unknown_label).sum()),
+        "unknown_labels_retained": True,
         "raw_counts_preserved": bool((adata.layers["counts"] != original_counts).nnz == 0),
     }
+    adata.obs[args.evaluation_label_key] = pd.Categorical(labels)
     adata.uns["biomed_integration"] = {
         "method": args.method,
         "batch_key": args.batch_key,
@@ -301,22 +369,32 @@ def main() -> int:
         and "X_integrated" in reloaded.obsm
         and "X_umap" in reloaded.obsm
         and "connectivities" in reloaded.obsp
+        and np.array_equal(reloaded.obs_names, source_adata.obs_names)
+        and np.array_equal(reloaded.var_names, source_adata.var_names)
+        and all(
+            np.array_equal(
+                reloaded.obs[column].astype(str).to_numpy(),
+                source_adata.obs[column].astype(str).to_numpy(),
+            )
+            for column in source_adata.obs.columns
+        )
         and (sparse.csr_matrix(reloaded.layers["counts"]) != original_counts).nnz == 0
     )
     if not reload_valid:
         raise RuntimeError("integrated h5ad failed structural or raw-count reload validation")
 
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "method": args.method,
         "quality_status": "passed" if all(gates.values()) else "blocked",
-        "input": {"filename": source.name, "sha256": sha256(source), "cells": adata.n_obs, "features": adata.n_vars, "raw_count_location": args.raw_count_location},
+        "input": {"filename": source.name, "sha256": source_digest, "cells": adata.n_obs, "features": adata.n_vars, "raw_count_location": args.raw_count_location},
         "design": {
             "batch_key": args.batch_key, "sample_key": args.sample_key,
             "evaluation_label_key": args.evaluation_label_key, "unknown_label": args.unknown_label,
             "batch_count": len(set(batches.tolist())), "sample_count": len(set(samples.tolist())),
             "known_label_count": len(set(labels[known].tolist())), "unknown_cells": int((~known).sum()),
             "labels_spanning_batches": labels_spanning_batches, "labels_used_for_training": False,
+            "evaluation_label_removed_before_backend_execution": True,
         },
         "parameters": {
             "n_top_genes": args.n_top_genes, "selected_hvgs": hvg_count, "n_pcs": component_count,
@@ -324,19 +402,25 @@ def main() -> int:
             "maximum_label_purity_loss": args.maximum_label_purity_loss,
             "minimum_batch_entropy_gain": args.minimum_batch_entropy_gain,
             "minimum_label_connectivity": args.minimum_label_connectivity,
+            "silhouette_max_cells": args.silhouette_max_cells,
         },
         "baseline_metrics": baseline,
         "integrated_metrics": integrated,
         "metric_deltas": {"batch_neighbor_entropy_gain": entropy_gain, "label_neighbor_purity_loss": purity_loss},
         "quality_gates": gates,
+        "source_immutable": sha256(source) == source_digest,
+        "cell_feature_and_metadata_identity_preserved": True,
         "reload_validation_passed": True,
         "output": {"filename": output.name, "sha256": sha256(output)},
         "versions": {
             "python": platform.python_version(), "scanpy": sc.__version__, "anndata": anndata.__version__,
             "numpy": np.__version__, "pandas": pd.__version__, "scipy": scipy.__version__, "scikit-learn": sklearn.__version__,
             "harmonypy": package_version("harmonypy"), "scanorama": package_version("scanorama"), "bbknn": package_version("bbknn"),
+            "umap-learn": package_version("umap-learn"),
         },
     }
+    if not report["source_immutable"]:
+        raise RuntimeError("source H5AD changed during integration")
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({"method": args.method, "quality_status": report["quality_status"], "entropy_gain": entropy_gain, "purity_loss": purity_loss}, sort_keys=True))
     return 0

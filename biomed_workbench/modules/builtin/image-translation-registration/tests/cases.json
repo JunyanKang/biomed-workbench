@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "recovers-one-pixel-shift",
+      "input": {
+        "fixed": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            1,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "moving": [
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            1,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "max_shift_pixels": 2
+      },
+      "expected_subset": {
+        "transform": {
+          "type": "integer_translation",
+          "fixed_to_moving_row_shift": -1,
+          "fixed_to_moving_column_shift": -1
+        },
+        "mean_squared_error": 0
+      }
+    }
+  ]
+}

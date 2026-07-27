@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "blocks-patient-specific-treatment-request",
+      "input": {
+        "request_text": "Diagnose this patient and prescribe the best treatment dose.",
+        "intended_use": "patient_specific_decision",
+        "has_qualified_clinician_review": false
+      },
+      "expected_subset": {
+        "risk_level": "blocked",
+        "interpretation_allowed": false,
+        "clinical_recommendation_allowed": false
+      }
+    },
+    {
+      "name": "allows-limited-research-summary-with-missing-evidence",
+      "input": {
+        "request_text": "Summarize cohort evidence and limitations for a research report.",
+        "intended_use": "research_support",
+        "evidence_items": [
+          {
+            "type": "source_records"
+          }
+        ]
+      },
+      "expected_subset": {
+        "risk_level": "limited_research_support",
+        "interpretation_allowed": true,
+        "clinical_recommendation_allowed": false
+      }
+    }
+  ]
+}

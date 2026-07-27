@@ -7,6 +7,7 @@ import argparse
 import hashlib
 import json
 import platform
+import random
 from importlib.metadata import version
 from pathlib import Path
 
@@ -92,6 +93,7 @@ def copy_mapping(source, target, keys: list[str]) -> None:
 def main() -> int:
     args = parse_args()
     source_path = Path(args.input_h5ad).resolve(strict=True)
+    source_digest = sha256(source_path)
     output_path = Path(args.output_h5ad)
     report_path = Path(args.report)
     for path in (output_path, report_path):
@@ -123,9 +125,14 @@ def main() -> int:
     if spliced.shape != unspliced.shape or spliced.nnz == 0 or unspliced.nnz == 0:
         raise ValueError("spliced and unspliced layers are empty or misaligned")
 
-    work = anndata.AnnData(X=spliced.copy(), obs=source.obs.copy(), var=source.var.copy())
+    fitting_obs = source.obs.drop(columns=[args.experimental_time_key]).copy()
+    if args.experimental_time_key in fitting_obs:
+        raise RuntimeError("experimental time remains visible to velocity fitting")
+    work = anndata.AnnData(X=spliced.copy(), obs=fitting_obs, var=source.var.copy())
     work.layers["spliced"] = spliced.copy()
     work.layers["unspliced"] = unspliced.copy()
+    random.seed(args.seed)
+    np.random.seed(args.seed)
     scv.settings.seed = args.seed
     scv.settings.verbosity = 1
     scv.pp.filter_and_normalize(work, layers_normalize=["spliced", "unspliced"])
@@ -204,6 +211,13 @@ def main() -> int:
         reloaded.shape == source.shape
         and np.array_equal(reloaded.obs_names.to_numpy(), source.obs_names.to_numpy())
         and np.array_equal(reloaded.var_names.to_numpy(), source.var_names.to_numpy())
+        and all(
+            np.array_equal(
+                reloaded.obs[column].astype(str).to_numpy(),
+                source.obs[column].astype(str).to_numpy(),
+            )
+            for column in source.obs.columns
+        )
         and all(key in reloaded.obs for key in ("velocity_pseudotime", "latent_time", "velocity_confidence"))
         and all(key in reloaded.obsm for key in ("X_umap", "velocity_umap"))
         and "velocity_graph" in reloaded.uns
@@ -215,11 +229,12 @@ def main() -> int:
         raise RuntimeError("velocity h5ad failed identity, count, graph, or trajectory reload validation")
 
     report = {
-        "schema_version": 1, "quality_status": quality_status,
-        "input": {"filename": source_path.name, "sha256": sha256(source_path), "cells": source.n_obs, "genes": source.n_vars, "samples": len(set(samples.tolist())), "spliced_layer": args.spliced_layer, "unspliced_layer": args.unspliced_layer},
+        "schema_version": 2, "quality_status": quality_status,
+        "input": {"filename": source_path.name, "sha256": source_digest, "cells": source.n_obs, "genes": source.n_vars, "samples": len(set(samples.tolist())), "spliced_layer": args.spliced_layer, "unspliced_layer": args.unspliced_layer},
         "model": {"mode": "dynamical", "selected_hvgs": selected_genes, "modeled_genes": modeled_genes, "finite_fit_genes": finite_fit_genes, "n_pcs": component_count, "n_neighbors": args.n_neighbors, "max_dynamics_iterations": args.max_dynamics_iterations, "seed": args.seed},
         "direction_validation": {
             "experimental_time_key": args.experimental_time_key, "experimental_time_used_for_fitting": False,
+            "experimental_time_removed_before_backend_execution": True,
             "latent_time_spearman": latent_rho, "velocity_pseudotime_spearman": pseudotime_rho,
             "root_cells": int(root_mask.sum()), "terminal_cells": int(terminal_mask.sum()),
             "root_mean_latent_time": root_mean, "terminal_mean_latent_time": terminal_mean,
@@ -234,9 +249,13 @@ def main() -> int:
             "minimum_median_velocity_confidence": args.minimum_median_velocity_confidence,
         },
         "quality_gates": {**gates, "output_reload_valid": True},
+        "source_immutable": sha256(source_path) == source_digest,
+        "cell_feature_and_source_metadata_identity_preserved": True,
         "output": {"filename": output_path.name, "sha256": sha256(output_path)},
         "versions": {"python": platform.python_version(), "scvelo": scv.__version__, "scanpy": sc.__version__, "anndata": anndata.__version__, "numpy": np.__version__, "pandas": pd.__version__, "scipy": scipy.__version__, "scikit-learn": sklearn.__version__, "numba": version("numba"), "umap-learn": version("umap-learn")},
     }
+    if not report["source_immutable"]:
+        raise RuntimeError("source H5AD changed during trajectory-velocity analysis")
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({"quality_status": quality_status, "modeled_genes": modeled_genes, "latent_time_spearman": latent_rho, "velocity_pseudotime_spearman": pseudotime_rho}, sort_keys=True))
     return 0

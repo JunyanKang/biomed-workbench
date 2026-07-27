@@ -14,7 +14,7 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_ID = "single-cell-batch-integration"
-MODULE_VERSION = "1.0.0"
+MODULE_VERSION = "1.1.0"
 ROW_ID = "agent-protocol-1-scanpy-1104-harmony-020-scanorama-174-bbknn-160"
 TEMPLATE = ROOT / "biomed_workbench" / "modules" / "builtin" / MODULE_ID / "templates" / "benchmark_integration.py"
 
@@ -31,7 +31,7 @@ def run(command: list[str], *, environment: dict[str, str], timeout: int = 300) 
 
 
 def verify(scientific_python: Path) -> dict[str, object]:
-    python = scientific_python.expanduser().resolve(strict=True)
+    python = scientific_python.expanduser().absolute()
     if not python.is_file() or not os.access(python, os.X_OK):
         raise RuntimeError("scientific Python is not executable")
     with tempfile.TemporaryDirectory(prefix="biomed-integration-") as temporary:
@@ -96,13 +96,15 @@ adata.write_h5ad({str(fixture)!r})
                 "--sample-key", "sample_id", "--evaluation-label-key", "reviewed_cell_type", "--unknown-label", "unknown",
                 "--n-top-genes", "65", "--n-pcs", "15", "--n-neighbors", "15",
                 "--maximum-label-purity-loss", "0.15", "--minimum-batch-entropy-gain", "0.02",
-                "--minimum-label-connectivity", "0.85", "--seed", "29",
+                "--minimum-label-connectivity", "0.85", "--silhouette-max-cells", "5000",
+                "--seed", "29",
             ], environment=environment)
             report = json.loads(report_path.read_text(encoding="utf-8"))
             if baseline_reference is None:
                 baseline_reference = report["baseline_metrics"]
             if not (
-                report["method"] == method
+                report["schema_version"] == 2
+                and report["method"] == method
                 and report["input"]["cells"] == 280
                 and report["input"]["features"] == 80
                 and report["design"]["batch_count"] == 2
@@ -110,11 +112,14 @@ adata.write_h5ad({str(fixture)!r})
                 and report["design"]["known_label_count"] == 2
                 and report["design"]["unknown_cells"] == 40
                 and report["design"]["labels_used_for_training"] is False
+                and report["design"]["evaluation_label_removed_before_backend_execution"] is True
                 and report["design"]["labels_spanning_batches"] == {"B_cell": 2, "T_cell": 2}
                 and report["quality_gates"]["raw_counts_preserved"] is True
                 and report["quality_gates"]["unknown_labels_retained"] is True
                 and report["quality_gates"]["label_purity_preserved"] is True
                 and report["quality_gates"]["label_graph_connected"] is True
+                and report["source_immutable"] is True
+                and report["cell_feature_and_metadata_identity_preserved"] is True
                 and report["reload_validation_passed"] is True
             ):
                 raise RuntimeError(f"{method} failed structural or biological-conservation validation")
@@ -132,7 +137,7 @@ adata.write_h5ad({str(fixture)!r})
         selected = max(eligible, key=lambda method: reports[method]["metric_deltas"]["batch_neighbor_entropy_gain"])
         versions = reports["harmony"]["versions"]
         return {
-            "schema_version": 1,
+            "schema_version": 2,
             "passed": True,
             "module_id": MODULE_ID,
             "module_version": MODULE_VERSION,
@@ -142,7 +147,7 @@ adata.write_h5ad({str(fixture)!r})
             "dependency_versions": {
                 "anndata": versions["anndata"], "numpy": versions["numpy"], "pandas": versions["pandas"],
                 "scipy": versions["scipy"], "scikit-learn": versions["scikit-learn"],
-                "umap-learn": "0.5.12",
+                "umap-learn": versions["umap-learn"],
             },
             "fixture": {"sha256": sha256(fixture), "cells": 280, "features": 80, "biological_samples": 4, "batches": 2, "known_labels": 2, "unknown_cells": 40},
             "execution": execution,
@@ -161,8 +166,11 @@ adata.write_h5ad({str(fixture)!r})
                 "harmony_scanorama_bbknn_executed": True,
                 "one_frozen_baseline_used": True,
                 "labels_used_only_for_posthoc_evaluation": True,
+                "evaluation_labels_removed_before_backend_execution": True,
                 "unknown_cells_retained": True,
                 "raw_counts_preserved": True,
+                "source_immutable": True,
+                "cell_feature_and_metadata_identity_preserved": True,
                 "biological_conservation_gates_passed": True,
                 "eligible_method_selected_without_umap_scoring": True,
             },

@@ -3,6 +3,7 @@ import unittest
 from biomed_workbench.capabilities.clinical import (
     audit_report,
     biomarker_performance,
+    clinical_decision_boundary_audit,
     cohort_summary,
     deidentify_record,
     kaplan_meier,
@@ -60,6 +61,30 @@ class ClinicalCapabilityTests(unittest.TestCase):
         self.assertIn("title", result["present_sections"])
         self.assertIn("timeline", result["missing_sections"])
         self.assertIn("not a substitute", result["limitations"][0].lower())
+
+    def test_clinical_decision_boundary_blocks_patient_specific_treatment(self):
+        result = clinical_decision_boundary_audit(
+            request_text="Diagnose this patient and prescribe the best treatment dose.",
+            intended_use="patient_specific_decision",
+            has_qualified_clinician_review=False,
+        )
+        self.assertEqual(result["risk_level"], "blocked")
+        self.assertFalse(result["interpretation_allowed"])
+        self.assertFalse(result["clinical_recommendation_allowed"])
+        self.assertIn("diagnosis", result["blocker_hits"])
+        self.assertIn("treatment", result["blocker_hits"])
+        self.assertTrue(result["fatal_reasons"])
+
+    def test_clinical_decision_boundary_allows_limited_research_summary(self):
+        result = clinical_decision_boundary_audit(
+            request_text="Summarize cohort evidence and limitations for a research report.",
+            intended_use="research_support",
+            evidence_items=[{"type": "source_records"}],
+        )
+        self.assertEqual(result["risk_level"], "limited_research_support")
+        self.assertTrue(result["interpretation_allowed"])
+        self.assertFalse(result["clinical_recommendation_allowed"])
+        self.assertIn("cohort_denominator", result["missing_evidence_types"])
 
 
 if __name__ == "__main__":

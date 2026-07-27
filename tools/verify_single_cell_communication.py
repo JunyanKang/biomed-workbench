@@ -111,7 +111,7 @@ def validate_python_outputs(directory: Path, report_path: Path) -> dict[str, obj
     summary = pd.read_csv(directory / "replicated_interactions.tsv", sep="\t")
     report = json.loads(report_path.read_text(encoding="utf-8"))
     methods = set(interactions["method"])
-    if methods != {"liana-rank-aggregate", "cellphonedb-statistical"}:
+    if methods != {"liana-cellphonedb", "cellphonedb-statistical"}:
         raise ValueError("Python communication verification did not observe both methods")
     if interactions.empty or summary.empty or len(report["sample_runs"]) < 8:
         raise ValueError("Python communication outputs are incomplete")
@@ -233,6 +233,13 @@ def main() -> int:
                 "source_counts_and_identifiers_preserved": True,
                 "outputs_reloaded": True,
                 "no_environment_or_compute_infrastructure_managed": True,
+            },
+            "tool_versions": {
+                "python": platform.python_version(), "anndata": version("anndata"), "scanpy": version("scanpy"),
+                "liana": version("liana"), "cellphonedb": version("cellphonedb"),
+                "CellChat": run(["Rscript", "-e", "cat(as.character(packageVersion('CellChat')))"]).stdout,
+                "cellchat": run(["Rscript", "-e", "cat(as.character(packageVersion('CellChat')))"]).stdout,
+                "nichenetr": run(["Rscript", "-e", "cat(as.character(packageVersion('nichenetr')))"]).stdout,
             },
             "versions": {
                 "python": platform.python_version(), "anndata": version("anndata"), "scanpy": version("scanpy"),

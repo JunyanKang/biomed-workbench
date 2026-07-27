@@ -187,7 +187,7 @@ def main() -> int:
     if {path.name: sha256(path) for path in inputs} != source_hashes:
         raise RuntimeError("a pySCENIC input changed during analysis")
 
-    versions = {name: importlib.metadata.version(name) for name in ("pyscenic", "arboreto", "ctxcore", "numpy", "pandas", "scipy", "scikit-learn", "dask", "distributed")}
+    versions = {name: importlib.metadata.version(name) for name in ("pyscenic", "arboreto", "ctxcore", "numpy", "pandas", "scipy", "scikit-learn", "dask", "distributed", "setuptools")}
     versions["python"] = platform.python_version()
     report = {
         "schema_version": 1, "passed": True, "quality_status": "passed", "versions": versions,

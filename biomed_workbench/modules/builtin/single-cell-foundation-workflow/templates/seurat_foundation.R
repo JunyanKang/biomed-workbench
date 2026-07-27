@@ -53,13 +53,24 @@ max_counts <- as.numeric(args$`max-counts`)
 min_features <- as.numeric(args$`min-features`)
 max_features <- as.numeric(args$`max-features`)
 max_mito <- as.numeric(args$`max-mito-percent`)
+if (any(!is.finite(c(min_counts, max_counts, min_features, max_features, max_mito))) ||
+    min_counts < 0 || min_features < 0 || max_counts < 0 || max_features < 0 ||
+    (max_counts > 0 && max_counts <= min_counts) ||
+    (max_features > 0 && max_features <= min_features) || max_mito < 0 || max_mito > 100) {
+  stop("QC thresholds are invalid")
+}
+count_column <- paste0("nCount_", args$assay)
+feature_column <- paste0("nFeature_", args$assay)
+if (!all(c(count_column, feature_column, "percent.mt") %in% colnames(meta))) {
+  stop("assay-specific QC columns are absent after count-layer validation")
+}
 reasons <- lapply(seq_len(nrow(meta)), function(i) character())
 add_reason <- function(mask, label) for (i in which(mask)) reasons[[i]] <<- c(reasons[[i]], label)
-add_reason(meta$nCount_RNA < min_counts, "low-counts")
-add_reason(meta$nFeature_RNA < min_features, "low-features")
+add_reason(meta[[count_column]] < min_counts, "low-counts")
+add_reason(meta[[feature_column]] < min_features, "low-features")
 add_reason(meta$percent.mt > max_mito, "high-mitochondrial-fraction")
-if (max_counts > 0) add_reason(meta$nCount_RNA > max_counts, "high-counts")
-if (max_features > 0) add_reason(meta$nFeature_RNA > max_features, "high-features")
+if (max_counts > 0) add_reason(meta[[count_column]] > max_counts, "high-counts")
+if (max_features > 0) add_reason(meta[[feature_column]] > max_features, "high-features")
 retained <- lengths(reasons) == 0
 if (sum(retained) < 3) stop("QC retains too few cells")
 accounting <- data.frame(cell_id = rownames(meta), sample = as.character(meta[[args$`sample-key`]]), retained = retained,
@@ -72,15 +83,17 @@ object <- FindVariableFeatures(object, assay = args$assay, selection.method = "v
 object <- ScaleData(object, assay = args$assay, features = VariableFeatures(object), verbose = FALSE)
 npcs <- min(as.integer(args$`n-pcs`), ncol(object) - 1, length(VariableFeatures(object)) - 1)
 if (npcs < 2) stop("too few cells or variable features for PCA")
+n_neighbors <- min(as.integer(args$`n-neighbors`), ncol(object) - 1)
+if (!is.finite(n_neighbors) || n_neighbors < 2) stop("too few retained cells or invalid neighbor count for graph and UMAP")
 object <- RunPCA(object, assay = args$assay, features = VariableFeatures(object), npcs = npcs, seed.use = as.integer(args$seed), verbose = FALSE)
-object <- FindNeighbors(object, reduction = "pca", dims = seq_len(npcs), k.param = as.integer(args$`n-neighbors`), verbose = FALSE)
+object <- FindNeighbors(object, reduction = "pca", dims = seq_len(npcs), k.param = n_neighbors, verbose = FALSE)
 resolutions <- sort(unique(as.numeric(strsplit(args$resolutions, ",", fixed = TRUE)[[1]])))
 if (!length(resolutions) || any(!is.finite(resolutions)) || any(resolutions <= 0)) stop("invalid resolutions")
 for (resolution in resolutions) {
   object <- FindClusters(object, resolution = resolution, random.seed = as.integer(args$seed), verbose = FALSE)
   object[[paste0("seurat_clusters_", format(resolution, trim = TRUE))]] <- Idents(object)
 }
-object <- RunUMAP(object, reduction = "pca", dims = seq_len(npcs), seed.use = as.integer(args$seed), verbose = FALSE)
+object <- RunUMAP(object, reduction = "pca", dims = seq_len(npcs), n.neighbors = n_neighbors, seed.use = as.integer(args$seed), verbose = FALSE)
 
 object@misc$biomed_workbench <- list(
   template = "seurat_foundation.R",
@@ -100,11 +113,12 @@ qc <- list(
   sample_accounting = unname(sample_rows),
   methods = list(empty_droplet = "not-run", ambient_rna = "not-run", doublet = "not-run"),
   thresholds = list(min_counts = min_counts, max_counts = max_counts, min_features = min_features, max_features = max_features, max_mito_percent = max_mito),
+  assay_qc_columns = list(counts = count_column, features = feature_column),
   versions = list(R = as.character(getRversion()), Seurat = as.character(packageVersion("Seurat")), SeuratObject = as.character(packageVersion("SeuratObject")))
 )
 cluster_columns <- grep("^seurat_clusters_", colnames(reloaded[[]]), value = TRUE)
 clusters <- lapply(cluster_columns, function(key) list(key = key, cluster_sizes = as.list(table(reloaded[[key, drop = TRUE]]))))
 cluster_report <- list(cluster_columns = cluster_columns, clusters = clusters, n_pcs = npcs,
-                       n_neighbors = as.integer(args$`n-neighbors`), random_seed = as.integer(args$seed))
+                       n_neighbors = n_neighbors, random_seed = as.integer(args$seed))
 write_json(qc, args$`qc-report`, pretty = TRUE, auto_unbox = TRUE)
 write_json(cluster_report, args$`cluster-report`, pretty = TRUE, auto_unbox = TRUE)

@@ -1,0 +1,61 @@
+{
+  "id": "pdf-evidence-extraction",
+  "schema_version": 1,
+  "title": "Extract page-addressable PDF evidence",
+  "description": "Convert one accessible PDF into bounded page-level text, extraction diagnostics, navigational metadata, and immutable provenance before scientific synthesis.",
+  "version": "0.1.0",
+  "access": "offline",
+  "module_type": "transform",
+  "maturity": "validated",
+  "mutability": "read_only",
+  "domains": ["evidence", "publication"],
+  "intents": ["extract PDF evidence", "read paper PDF", "PDF page text", "PDF \u8bba\u6587\u8bc1\u636e\u63d0\u53d6", "\u6309\u9875\u63d0\u53d6 PDF"],
+  "entrypoint": "biomed_workbench.capabilities.publication:extract_pdf_evidence",
+  "execution": {"kind": "service", "timeout_seconds": 60, "max_output_bytes": 10000000},
+  "assumptions": ["The supplied file is a readable, unencrypted PDF and its local bytes are the artifact intended for review."],
+  "questions": ["What page-addressable text and navigational evidence can be extracted from this exact PDF, and what extraction limitations remain before scientific interpretation?"],
+  "preconditions": ["Exactly one readable, unencrypted PDF input is supplied; the page bound and per-page capture bound are declared before extraction."],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room implementation of page-addressable PDF evidence extraction identified during product capability planning.", "https://pymupdf.readthedocs.io/"]},
+  "limitations": ["Extraction does not perform OCR, interpret figures, verify scientific claims, or make PDF instructions authoritative."],
+  "complements": ["literature-evidence", "citation-audit", "assertion-citation-coverage-audit", "manuscript-audit"],
+  "alternatives": [],
+  "credentials": [],
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "input_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "document_path": {"type": "string", "minLength": 1},
+      "document_base64": {"type": "string", "minLength": 8},
+      "max_pages": {"type": "integer", "minimum": 1, "maximum": 1000},
+      "max_chars_per_page": {"type": "integer", "minimum": 200, "maximum": 50000}
+    },
+    "required": []
+  },
+  "output_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "document": {"type": "object"}, "extraction": {"type": "object"}, "outline": {"type": "object"},
+      "pages": {"type": "array"}, "content_handling": {"type": "object"}, "limitations": {"type": "array"}
+    },
+    "required": ["document", "extraction", "outline", "pages", "content_handling", "limitations"]
+  },
+  "input_artifacts": [{
+    "name": "source_pdf", "artifact_type": "pdf_document", "processing_levels": ["source"], "required_metadata": ["input-artifact-sha256"],
+    "formats": [{"name": "application-pdf", "versions": ["1.4", "1.5", "1.6", "1.7", "2.0"], "representations": ["binary"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["page-order"]}]
+  }],
+  "output_artifacts": [{
+    "name": "page_evidence", "artifact_type": "pdf_page_evidence", "processing_levels": ["page-addressable", "bounded", "source-preserved"], "required_metadata": ["module_version", "compatibility_row_id", "source-sha256", "parser-version", "page-count", "text-coverage", "content-boundary"],
+    "formats": [{"name": "normalized-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["page-order"]}]
+  }],
+  "dependencies": [{
+    "name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-23", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute deterministic local PDF evidence extraction.", "conflicts": [], "platforms": ["any"]
+  }],
+  "tool_requirements": [{
+    "name": "PyMuPDF", "ecosystem": "python", "identity": "pymupdf", "required": true, "tested_versions": ["1.27.2.2"], "allowed_versions": [">=1.27,<1.28"], "version_source": "https://pypi.org/project/PyMuPDF/1.27.2.2/", "verified_at": "2026-07-23", "version_probe": ["python3", "-c", "import fitz; print(fitz.VersionBind)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [], "platforms": ["any"]
+  }],
+  "compatibility_matrix": [{
+    "id": "pymupdf-1272-python-3143", "module_version": "0.1.0", "tool_versions": {"PyMuPDF": [">=1.27,<1.28"]}, "dependency_versions": {"python": [">=3.14,<3.15"]}, "input_formats": {"source_pdf": ["application-pdf@1.4", "application-pdf@1.5", "application-pdf@1.6", "application-pdf@1.7", "application-pdf@2.0"]}, "output_formats": {"page_evidence": ["normalized-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["pdf-evidence-extraction-regression-v1"], "end_to_end_evidence_ids": ["pdf-evidence-extraction-e2e-v1"], "verified_at": "2026-07-23"
+  }],
+  "quality_gates": [{"id": "pdf-readable-and-bounded", "severity": "fatal", "blocks_interpretation": true, "description": "The PDF is unencrypted, within the declared page bound, and each page extraction is explicitly bounded."}, {"id": "pdf-content-boundary", "severity": "fatal", "blocks_interpretation": true, "description": "The output labels PDF text as untrusted source evidence and records that embedded instructions are not executable."}],
+  "evidence_effects": ["creates-page-addressable-pdf-evidence", "records-pdf-extraction-coverage-and-provenance"]
+}

@@ -1,0 +1,373 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The period is declared before interpretation, and one fixed-period harmonic is an appropriate descriptive model for the supplied time series."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_fixed_period_cosinor.py",
+      "purpose": "Fit and validate declared fixed-period cosinor analysis against real project time-series inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "cosinor-sampling-and-period-contract",
+        "cosinor-model-boundary-review"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "numpy": [
+          ">=2.4,<2.5"
+        ],
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "fixed-period-cosinor-e2e-v1"
+      ],
+      "id": "scipy-1.17.1-numpy-2.4.4-inline-json-1",
+      "input_formats": {
+        "time_series": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "cosinor_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "fixed-period-cosinor-regression-v1"
+      ],
+      "tool_versions": {
+        "scipy": [
+          ">=1.17,<1.18"
+        ]
+      },
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "growth-curve",
+    "cohort-summary"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=2.4,<2.5"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "numpy",
+      "name": "numpy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Construct the fixed-period harmonic design matrix and residual diagnostics.",
+      "required": true,
+      "tested_versions": [
+        "2.4.4"
+      ],
+      "verified_at": "2026-07-24",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import numpy; print(numpy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://numpy.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic numerical fitting.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-24",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Fit a transparent ordinary-least-squares cosinor model for one predeclared period, retaining amplitude, acrophase, residual diagnostics, sampling coverage, and interpretation limits.",
+  "domains": [
+    "clinical",
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.rhythm:fit_fixed_period_cosinor",
+  "evidence_effects": [
+    "fits-declared-period-rhythm-evidence"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "fixed-period-cosinor",
+  "input_artifacts": [
+    {
+      "artifact_type": "declared_time_series",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "elapsed-time"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "observation-by-time-and-value"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "time_series",
+      "processing_levels": [
+        "measured",
+        "declared"
+      ],
+      "required_metadata": [
+        "time-unit",
+        "outcome-unit",
+        "sampling-protocol",
+        "period-declaration"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "period": {
+        "default": 24.0,
+        "exclusiveMinimum": 0,
+        "type": "number"
+      },
+      "time": {
+        "items": {
+          "type": "number"
+        },
+        "minItems": 6,
+        "type": "array"
+      },
+      "values": {
+        "items": {
+          "type": "number"
+        },
+        "minItems": 6,
+        "type": "array"
+      }
+    },
+    "required": [
+      "time",
+      "values"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "fixed-period cosinor",
+    "cosinor rhythm analysis",
+    "cosinor \u8282\u5f8b\u5206\u6790",
+    "\u9884\u8bbe\u5468\u671f\u4f59\u5f26\u8282\u5f8b\u62df\u5408",
+    "24\u5c0f\u65f6\u8282\u5f8b\u62df\u5408"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module tests one predeclared period in one series. It does not discover periods, correct for testing multiple periods, fit nonlinear trends, model repeated-measures dependence, establish circadian causality, or replace replicate-aware inference."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "fixed_period_cosinor_fit",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "elapsed-time"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "fit-summary-and-observation-residuals"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "cosinor_summary",
+      "processing_levels": [
+        "fitted",
+        "sampling-checked"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "declared-period",
+        "model-identity",
+        "quality-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "fit_diagnostics": {
+        "type": "object"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "mesor_95_ci": {
+        "type": "array"
+      },
+      "model": {
+        "type": "string"
+      },
+      "observation_count": {
+        "type": "integer"
+      },
+      "parameters": {
+        "type": "object"
+      },
+      "period": {
+        "type": "number"
+      },
+      "predicted_values": {
+        "type": "array"
+      },
+      "residuals": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "model",
+      "period",
+      "observation_count",
+      "parameters",
+      "mesor_95_ci",
+      "fit_diagnostics",
+      "predicted_values",
+      "residuals",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "At least six finite time-value observations, a positive declared period, and time, outcome, sampling, and period metadata are supplied."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned transparent fixed-period harmonic regression implementation.",
+      "https://docs.scipy.org/doc/scipy/reference/stats.html"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require finite paired observations, a positive period declared before analysis, an identifiable harmonic design, and retained sampling metadata.",
+      "id": "cosinor-sampling-and-period-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require review when observations cover less than three quarters of the declared period or occupy fewer than four eighth-period bins; block causal or replicate-level claims from a single-series fit.",
+      "id": "cosinor-model-boundary-review",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What fixed-period rhythmic pattern and sampling-limited uncertainty are supported by this declared time series?"
+  ],
+  "schema_version": 1,
+  "title": "Fit declared-period cosinor rhythm",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.17,<1.18"
+      ],
+      "ecosystem": "python",
+      "identity": "scipy",
+      "mismatch_policy": "block",
+      "name": "scipy",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.17.1"
+      ],
+      "verified_at": "2026-07-24",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.17,<1.18"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "SciPy F and t distributions provide the declared-model significance and confidence calculations retained in the result.",
+          "id": "scipy-distribution-result-contract",
+          "required_action": "Preserve actual SciPy version and retain diagnostic statistics; do not infer period discovery or causality.",
+          "source": "https://docs.scipy.org/doc/scipy/reference/stats.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import scipy; print(scipy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://docs.scipy.org/doc/scipy/"
+    }
+  ],
+  "version": "1.0.0"
+}

@@ -1,0 +1,54 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "mapped_count": 1,
+        "unmapped_accessions": [
+          "Q99999"
+        ]
+      },
+      "http_fixtures": [
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "jobId": "job-1"
+          },
+          "method": "POST",
+          "request_form": {
+            "from": "UniProtKB_AC-ID",
+            "ids": "P04637,Q99999",
+            "to": "Ensembl"
+          },
+          "status": 200,
+          "url": "https://rest.uniprot.org/idmapping/run"
+        },
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "results": [
+              {
+                "from": "P04637",
+                "to": "ENSG00000141510.20"
+              }
+            ]
+          },
+          "status": 200,
+          "url": "https://rest.uniprot.org/idmapping/status/job-1"
+        }
+      ],
+      "input": {
+        "accessions": [
+          "P04637",
+          "Q99999"
+        ],
+        "max_polls": 1
+      },
+      "name": "map-one-uniprot-accession-and-retain-one-unmapped-input"
+    }
+  ],
+  "schema_version": 1
+}

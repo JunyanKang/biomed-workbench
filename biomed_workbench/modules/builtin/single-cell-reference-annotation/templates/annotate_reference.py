@@ -163,6 +163,12 @@ def main() -> int:
     marker_path = Path(args.marker_panel).resolve(strict=True)
     ontology_path = Path(args.ontology_contract).resolve(strict=True)
     rscript = Path(args.rscript).resolve(strict=True)
+    source_digests = {
+        "query_h5ad": sha256(query_path),
+        "reference_h5ad": sha256(reference_path),
+        "marker_panel": sha256(marker_path),
+        "ontology_contract": sha256(ontology_path),
+    }
     for path in (output_path, report_path):
         if path.exists():
             raise FileExistsError(f"refusing to overwrite output: {path.name}")
@@ -258,7 +264,16 @@ def main() -> int:
     forced = predictions["singler_label"].astype(str).to_numpy()
     pruned = predictions["singler_pruned_label"].fillna("").astype(str).to_numpy()
     delta = predictions["singler_delta_next"].to_numpy(dtype=float)
-    if not np.isfinite(delta).all() or set(forced) - reference_label_set or set(pruned) - (reference_label_set | {""}):
+    score_columns = [f"score::{label}" for label in sorted(reference_label_set)]
+    if (
+        set(score_columns) - set(predictions)
+        or not np.isfinite(delta).all()
+        or not np.isfinite(
+            predictions[["singler_max_score", *score_columns]].to_numpy(dtype=float)
+        ).all()
+        or set(forced) - reference_label_set
+        or set(pruned) - (reference_label_set | {""})
+    ):
         raise RuntimeError("SingleR returned invalid labels or scores")
 
     global_mean = np.asarray(query_expression.mean(axis=0)).reshape(-1)
@@ -336,6 +351,14 @@ def main() -> int:
     )
     if not reload_valid or not raw_preserved:
         raise RuntimeError("annotated h5ad failed identity, label, or raw-count reload validation")
+    current_source_digests = {
+        "query_h5ad": sha256(query_path),
+        "reference_h5ad": sha256(reference_path),
+        "marker_panel": sha256(marker_path),
+        "ontology_contract": sha256(ontology_path),
+    }
+    if current_source_digests != source_digests:
+        raise RuntimeError("query, reference, marker, or ontology source changed during annotation")
 
     evaluation = None
     if args.evaluation_label_key != "none":
@@ -348,11 +371,11 @@ def main() -> int:
         }
 
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "quality_status": "passed",
         "input": {
-            "query_filename": query_path.name, "query_sha256": sha256(query_path),
-            "reference_filename": reference_path.name, "reference_sha256": sha256(reference_path),
+            "query_filename": query_path.name, "query_sha256": source_digests["query_h5ad"],
+            "reference_filename": reference_path.name, "reference_sha256": source_digests["reference_h5ad"],
             "query_cells": query.n_obs, "reference_cells": reference.n_obs,
             "query_genes": query.n_vars, "reference_genes": reference.n_vars,
             "common_genes": len(common_genes), "query_gene_overlap_fraction": overlap_fraction,
@@ -368,6 +391,7 @@ def main() -> int:
         "quality_gates": {
             "query_reference_gene_overlap": True, "reference_labels_have_marker_contracts": True,
             "ontology_contract_complete": True, "singler_cell_reconciliation": True,
+            "complete_finite_score_matrix": True, "source_artifacts_immutable": True,
             "existing_labels_preserved": bool(np.array_equal(output.obs[args.existing_label_key].astype(str).to_numpy(), existing_labels)),
             "raw_counts_preserved": bool(raw_preserved), "output_reload_valid": bool(reload_valid),
         },
@@ -378,7 +402,7 @@ def main() -> int:
             "maximum_negative_marker_conflict": args.maximum_negative_marker_conflict,
             "minimum_marker_log_expression_difference": args.minimum_marker_log_expression_difference,
         },
-        "contracts": {"marker_panel_sha256": sha256(marker_path), "ontology_contract_sha256": sha256(ontology_path)},
+        "contracts": {"marker_panel_sha256": source_digests["marker_panel"], "ontology_contract_sha256": source_digests["ontology_contract"]},
         "output": {"filename": output_path.name, "sha256": sha256(output_path)},
         "versions": {
             "python": platform.python_version(), "scanpy": sc.__version__, "anndata": anndata.__version__,

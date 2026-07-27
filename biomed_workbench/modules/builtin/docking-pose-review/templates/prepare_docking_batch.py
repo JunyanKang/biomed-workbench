@@ -338,7 +338,7 @@ def build(args: argparse.Namespace) -> tuple[str, str, dict[str, Any]]:
             "protein_and_ligand_parsed": True,
             "configuration_closed_and_bounded": True,
         },
-        "execution_boundary": "This preparation validates scientific inputs and inference parameters; it does not run DiffDock or manage environments, models, accelerators, containers, schedulers, or remote compute.",
+        "execution_boundary": "This preparation validates scientific inputs and inference parameters; it does not run DiffDock or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
     }
     return batch_text, config_text, report
 

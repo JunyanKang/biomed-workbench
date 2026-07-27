@@ -1,0 +1,312 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The supplied request text accurately represents the intended use and any clinical decision language to be audited.",
+    "Evidence item types are declared explicitly when the user expects more than literature or cohort summarization."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "clinical-decision-boundary-audit-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "clinical_request": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "clinical_boundary_report": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "clinical-decision-boundary-audit-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-27"
+    }
+  ],
+  "complements": [
+    "clinical-deidentify",
+    "clinical-report-audit",
+    "cohort-summary",
+    "literature-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run deterministic clinical boundary classification.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-27",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Classify clinical research-assistant requests into allowed research support, review-required support, or hard-blocked clinical decision use before interpretation.",
+  "domains": [
+    "clinical",
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.clinical:clinical_decision_boundary_audit",
+  "evidence_effects": [
+    "blocks-clinical-decision-overreach",
+    "preserves-non-clinical-research-boundary"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "clinical-decision-boundary-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "clinical_request",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "clinical_request",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": [
+        "intended-use"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "evidence_items": {
+        "items": {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "has_qualified_clinician_review": {
+        "type": "boolean"
+      },
+      "intended_use": {
+        "enum": [
+          "research_support",
+          "clinical_decision_support",
+          "patient_specific_decision"
+        ],
+        "type": "string"
+      },
+      "request_text": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "request_text"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "clinical decision boundary audit",
+    "clinical safety boundary",
+    "block patient-specific medical advice",
+    "clinical decision support risk gate",
+    "临床决策边界审计",
+    "医疗建议硬拦截",
+    "诊断治疗分诊预后边界"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module is a research-assistant boundary classifier only; it does not diagnose, triage, prescribe, select treatment, estimate patient prognosis, certify privacy compliance, or replace qualified clinical review."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "clinical_boundary_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "clinical_boundary_report",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "clinical_recommendation_allowed"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "allowed_actions": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "blocker_hits": {
+        "type": "object"
+      },
+      "clinical_recommendation_allowed": {
+        "const": false
+      },
+      "evidence_types": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "fatal_reasons": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "intended_use": {
+        "type": "string"
+      },
+      "interpretation_allowed": {
+        "type": "boolean"
+      },
+      "limitations": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "missing_evidence_types": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "risk_level": {
+        "enum": [
+          "blocked",
+          "major_review_required",
+          "limited_research_support",
+          "research_support_allowed"
+        ],
+        "type": "string"
+      },
+      "support_hits": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "intended_use",
+      "risk_level",
+      "interpretation_allowed",
+      "clinical_recommendation_allowed",
+      "blocker_hits",
+      "support_hits",
+      "evidence_types",
+      "missing_evidence_types",
+      "fatal_reasons",
+      "allowed_actions",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A clinical or translational request has been converted into schema-valid text plus declared intended use before any interpretation."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clinical decision-boundary rule set derived from source-neutral safety requirements."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Patient-specific diagnosis, treatment, triage, or prognosis requests are blocked from automatic conclusion generation.",
+      "id": "clinical-decision-hard-stop",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Clinical decision support requires explicit source records, cohort denominator, uncertainty or limitations, and qualified review evidence.",
+      "id": "clinical-decision-evidence-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Does this clinical request stay within research-assistant support, or must it be blocked as patient-specific medical decision support?"
+  ],
+  "schema_version": 1,
+  "title": "Audit clinical decision-support boundaries",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

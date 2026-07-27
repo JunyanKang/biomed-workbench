@@ -1,0 +1,98 @@
+{
+  "case_id": "gastrulation-erythroid-topology-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "outputs_reloaded": true,
+    "results": {
+      "association_rows": 160,
+      "differential_end_rows": 0,
+      "lineage_cell_support": {
+        "Lineage1": 297
+      },
+      "monocle3_external_time_spearman": 0.8171,
+      "pattern_rows": 0,
+      "slingshot_external_time_spearman": 0.8276,
+      "slingshot_monocle3_spearman": 0.9796,
+      "start_vs_end_rows": 160,
+      "test_applicability": {
+        "association": "executed",
+        "differential_end": "not_applicable_single_lineage",
+        "pattern": "not_applicable_single_lineage",
+        "start_vs_end": "executed"
+      }
+    },
+    "source_artifact_immutable": true
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-slingshot-210-monocle3-1426-tradeseq-116",
+    "id": "single-cell-trajectory-topology",
+    "manifest_sha256": "c38497fb0f967857e5ac64e9e9ca60ec6baec085e729ee975a3dec7cf97d6fba",
+    "registry_digest": "5b11049405a9122b4fdc197a33f8417f320ca9dbdfd13b520ae2a80de2764bd1",
+    "template_sha256": "797bb1b211e80af6161a17c123a0ba25b8be71d13815bead3abad216a8d52eac",
+    "version": "1.1.0"
+  },
+  "parameters": {
+    "end_clusters": [
+      "Erythroid3"
+    ],
+    "maximum_cells_per_sample": 12,
+    "minimum_lineage_cells": 40,
+    "minimum_time_correlation": 0.15,
+    "nknots": 5,
+    "seed": 20260723,
+    "start_cluster": "Blood progenitors 1"
+  },
+  "passed": true,
+  "quality_gates": {
+    "all_applicable_tradeseq_tests_completed": "pass",
+    "independent_methods_concordant": "pass",
+    "independent_time_direction": "pass",
+    "integer_spliced_counts_and_label_blind_selection": "pass",
+    "multiple_samples_and_external_stages": "pass",
+    "official_source_identity": "pass",
+    "outputs_reloaded_and_source_preserved": "pass",
+    "single_lineage_supported": "pass"
+  },
+  "runtime": {
+    "BiocParallel": "1.36.0",
+    "Matrix": "1.6.5",
+    "R": "4.3.2",
+    "SingleCellExperiment": "1.24.0",
+    "digest": "0.6.39",
+    "jsonlite": "2.0.0",
+    "monocle3": "1.4.26",
+    "slingshot": "2.10.0",
+    "tradeSeq": "1.16.0"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "Feature and cell sampling do not use stage or cell-type labels; external stage is used only for postfit direction validation.",
+    "Published Blood progenitors 1 and Erythroid3 annotations are predeclared orientation anchors and do not establish ancestry.",
+    "The 27 published samples establish dataset coverage, but tradeSeq cell-level trends are not donor-level condition inference.",
+    "This public case validates one erythroid lineage; the deterministic bifurcation fixture separately validates two-lineage topology and differential-end tests."
+  ],
+  "source": {
+    "dataset": "mouse gastrulation erythroid lineage",
+    "filename": "erythroid_lineage.h5ad",
+    "publisher": "Pijuan-Sala et al.; scVelo public dataset",
+    "sha256": "0af49504137dc8dc930a19e3534243a121da1ddddbe28ebc5fab0470294d60d4",
+    "url": "https://ndownloader.figshare.com/files/27686871",
+    "validation": {
+      "clusters": [
+        "Blood progenitors 1",
+        "Blood progenitors 2",
+        "Erythroid1",
+        "Erythroid2",
+        "Erythroid3"
+      ],
+      "external_stages": 7,
+      "feature_selection": "label-blind detected-cell count, then total count",
+      "root_cells": 20,
+      "samples": 27,
+      "selected_cells": 297,
+      "selected_genes": 160,
+      "source_cells": 9815,
+      "source_genes": 53801
+    }
+  }
+}

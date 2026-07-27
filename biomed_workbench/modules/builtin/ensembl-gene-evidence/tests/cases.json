@@ -1,0 +1,39 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "found": true,
+        "requested_symbol": "TP53",
+        "species": "human"
+      },
+      "http_fixtures": [
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "assembly_name": "GRCh38",
+            "biotype": "protein_coding",
+            "canonical_transcript": "ENST00000269305.9",
+            "display_name": "TP53",
+            "end": 7687546,
+            "id": "ENSG00000141510",
+            "seq_region_name": "17",
+            "species": "homo_sapiens",
+            "start": 7661779,
+            "strand": -1,
+            "version": 21
+          },
+          "status": 200,
+          "url": "https://rest.ensembl.org/lookup/symbol/homo_sapiens/TP53?expand=0"
+        }
+      ],
+      "input": {
+        "gene_symbol": "TP53",
+        "species": "human"
+      },
+      "name": "resolve-human-tp53-assembly-aware-gene-record"
+    }
+  ],
+  "schema_version": 1
+}

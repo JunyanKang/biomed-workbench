@@ -1,0 +1,308 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Input metadata is a declared, user-provided mapping representing project-accepted acquisition descriptors."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "medical-imaging-metadata-audit-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "metadata": [
+          "inline-json@1",
+          "dicom-metadata@1",
+          "nifti-metadata@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "metadata_audit": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "medical-imaging-metadata-audit-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-26"
+    }
+  ],
+  "complements": [
+    "medical-imaging-volume-summary"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-26",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Audit declared medical imaging metadata for minimal completeness and privacy-risk signals before downstream interpretation.",
+  "domains": [
+    "imaging"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.imaging:medical_metadata_audit",
+  "evidence_effects": [
+    "adds-medical-metadata-audit-evidence"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "medical-imaging-metadata-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "medical_imaging_metadata",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "none"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "project-declared"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "none"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "dicom-metadata",
+          "orientations": [
+            "project-declared"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "none"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "nifti-metadata",
+          "orientations": [
+            "project-declared"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "metadata",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "metadata": {
+        "type": "object",
+        "minProperties": 1
+      },
+      "declare_modality": {
+        "type": ["string", "null"]
+      },
+      "minimum_required_fields": {
+        "type": ["array", "null"],
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "metadata"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "medical imaging metadata audit",
+    "DICOM metadata privacy audit",
+    "NIfTI metadata policy check",
+    "metadata-required-fields review",
+    "imaging metadata de-identification audit",
+    "影像元数据隐私审计",
+    "影像元数据完整性检查"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "No PHI is rewritten and no external de-identification service is called.",
+    "Output indicates residual risk; it does not replace human PI governance review."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "medical_metadata_audit",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "none"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "metadata_audit",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "declared_modality": {
+        "type": ["string", "null"]
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "metadata_fields": {
+        "type": "array"
+      },
+      "pii_risk": {
+        "type": "object"
+      },
+      "privacy_gates": {
+        "type": "array"
+      },
+      "release_ready": {
+        "type": "boolean"
+      },
+      "required_fields": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "metadata_fields",
+      "required_fields",
+      "declared_modality",
+      "pii_risk",
+      "privacy_gates",
+      "release_ready",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Declared metadata is project-owned and already removed from direct identifiers by local policy where required."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite informed by internal medical-imaging governance expectations."
+    ],
+    "license": "Apache-2.0"
+  },
+  "questions": [
+    "Is the declared DICOM/NIfTI metadata complete and is PHI exposure risk explicitly enumerated?"
+  ],
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require metadata mapping inputs and a declared modality context for medical workflows.",
+      "id": "medical-metadata-contract",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Flag potential PHI-sensitive field patterns and require explicit release decision.",
+      "id": "medical-metadata-pii",
+      "severity": "major"
+    }
+  ],
+  "schema_version": 1,
+  "title": "Audit medical imaging metadata",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

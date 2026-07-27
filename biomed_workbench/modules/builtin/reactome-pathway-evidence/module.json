@@ -1,0 +1,283 @@
+{
+  "access": "public_api",
+  "alternatives": [
+    "literature-evidence"
+  ],
+  "assumptions": [
+    "The declared Reactome stable ID identifies the intended pathway rather than an entity, reaction, or free-text concept."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "reactome-pathway-evidence-e2e-v1"
+      ],
+      "id": "public-database-contract-2026-07-23-reactome-pathway-evidence",
+      "input_formats": {
+        "reactome-pathway-evidence-query": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "reactome-pathway-evidence-result": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "reactome-pathway-evidence-regression-v1"
+      ],
+      "tool_versions": {
+        "reactome-content-service": [
+          "==content-query-pathway-v1-observed-2026-07-23"
+        ]
+      },
+      "verified_at": "2026-07-23"
+    }
+  ],
+  "complements": [
+    "quickgo-term-evidence",
+    "gene-set-library-membership",
+    "gene-evidence",
+    "literature-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Retrieve one exact Reactome stable pathway record while preserving its versioned identity, species, release context, disease and inference flags, linked GO biological-process context, provenance, and explicit not-found state.",
+  "domains": [
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.evidence:reactome_pathway_evidence",
+  "evidence_effects": [
+    "grounds-curated-reactome-pathway-identity"
+  ],
+  "execution": {
+    "kind": "service",
+    "max_output_bytes": 20000000,
+    "timeout_seconds": 90
+  },
+  "id": "reactome-pathway-evidence",
+  "input_artifacts": [
+    {
+      "artifact_type": "database_query",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "reactome-pathway-evidence-query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "pathway_id": {
+        "pattern": "^R-[A-Za-z]{3}-[1-9][0-9]{0,11}$",
+        "type": "string"
+      }
+    },
+    "required": [
+      "pathway_id"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "Reactome pathway record",
+    "retrieve Reactome pathway",
+    "resolve Reactome stable ID",
+    "Reactome\u901a\u8def\u8bb0\u5f55\u67e5\u8be2"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "A curated pathway record is reference context only; it does not calculate pathway activity or enrichment, infer project gene membership, establish a mechanism, or prove causality."
+  ],
+  "maturity": "validated",
+  "module_type": "data_source",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "evidence_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "reactome-pathway-evidence-result",
+      "processing_levels": [
+        "source-preserved",
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "service_contract",
+        "retrieval_time"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "found": {
+        "type": "boolean"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "provenance": {
+        "type": "object"
+      },
+      "record": {
+        "nullable": true,
+        "type": "object"
+      },
+      "requested_pathway_id": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "requested_pathway_id",
+      "found",
+      "record",
+      "provenance",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://reactome.org/dev/content-service",
+      "Project-owned clean-room implementation and scientific validation contract."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "A found response must remain an exact stable-ID Pathway object with nonempty display name and species; it must retain versioned identity and retrieval provenance, while a 404 remains explicit.",
+      "id": "reactome-pathway-evidence-validity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "What curated Reactome pathway record is currently returned for this explicitly declared stable pathway identifier?"
+  ],
+  "schema_version": 1,
+  "title": "Resolve a bounded Reactome pathway record",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        "==content-query-pathway-v1-observed-2026-07-23"
+      ],
+      "ecosystem": "service",
+      "identity": "reactome.org/ContentService/data/query",
+      "mismatch_policy": "block",
+      "name": "reactome-content-service",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "content-query-pathway-v1-observed-2026-07-23"
+      ],
+      "verified_at": "2026-07-23",
+      "version_differences": [
+        {
+          "affected_versions": [
+            "==content-query-pathway-v1-observed-2026-07-23"
+          ],
+          "category": "field",
+          "compatibility_effect": "requires-parser",
+          "description": "A stable pathway query returns an exact pathway object with stable ID, display name, species, and optional release, disease, inference, and GO-process context.",
+          "id": "reactome-stable-pathway-identity-fields",
+          "required_action": "Accept only an exact stable-ID Pathway object with a nonempty display name and species; preserve explicit not-found state and retrieval provenance.",
+          "source": "https://reactome.org/dev/content-service"
+        }
+      ],
+      "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "version_probe": [
+        "biomed_workbench.services.public_databases:probe_reactome_pathway_contract"
+      ],
+      "version_probe_kind": "service_contract",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://reactome.org/dev/content-service"
+    }
+  ],
+  "version": "1.0.0"
+}

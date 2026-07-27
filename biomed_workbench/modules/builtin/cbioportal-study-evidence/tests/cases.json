@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "cases": [{
+    "name": "retrieves-exact-public-cancer-study-record",
+    "input": {"study_id": "msk_impact_2017"},
+    "http_fixtures": [{"method": "GET", "url": "https://www.cbioportal.org/api/studies/msk_impact_2017", "status": 200, "headers": {"Content-Type": "application/json"}, "json": {"studyId": "msk_impact_2017", "cancerTypeId": "mixed", "name": "MSK-IMPACT Clinical Sequencing Cohort", "description": "Targeted sequencing.", "publicStudy": true, "pmid": "28481359", "citation": "Zehir et al. Nat Med 2017", "allSampleCount": 10945, "sequencedSampleCount": 10945, "cnaSampleCount": 10945, "mrnaRnaSeqSampleCount": 0, "referenceGenome": "hg19", "treatmentCount": 0, "structuralVariantCount": 1667, "cancerType": {"id": "mixed", "name": "Mixed Cancer Types", "shortName": "MIXED", "parent": "other"}, "readPermission": true}}],
+    "expected_subset": {"study_id": "msk_impact_2017", "found": true}
+  }]
+}

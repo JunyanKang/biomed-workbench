@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "detects-a-second-reference-product",
+      "input": {
+        "forward_primer": "AAAACCCCGG",
+        "reverse_primer": "AGCTACGATC",
+        "reference_sequences": [
+          {"id": "intended", "sequence": "AAAACCCCGGGGTTTTACGATCGTAGCT"},
+          {"id": "off_target", "sequence": "AAAACCCCGGGGTTTTACGATCGTAGCT"}
+        ],
+        "intended_reference_id": "intended"
+      },
+      "expected_subset": {
+        "intended_product_count": 1,
+        "off_target_reference_ids": ["off_target"],
+        "specificity_status": "not-specific-within-declared-panel"
+      }
+    }
+  ]
+}

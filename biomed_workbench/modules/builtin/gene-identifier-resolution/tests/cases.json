@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "tp53-human-exact-resolution",
+      "input": {
+        "gene": "TP53",
+        "organism": "human"
+      },
+      "expected_subset": {
+        "resolution_status": "resolved",
+        "resolved": {
+          "gene_id": "7157",
+          "symbol": "TP53",
+          "taxon_id": "9606"
+        }
+      },
+      "http_fixtures": [
+        {
+          "method": "GET",
+          "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=gene&term=TP53%5BGene+Name%5D+AND+human%5BOrganism%5D&retmode=json&retmax=10&retstart=0&sort=relevance&tool=biomed_workbench",
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "esearchresult": {
+              "count": "1",
+              "idlist": [
+                "7157"
+              ],
+              "querytranslation": "TP53[Gene Name] AND human[Organism]"
+            }
+          }
+        },
+        {
+          "method": "GET",
+          "url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=gene&id=7157&retmode=json&version=2.0&retstart=0&retmax=500&tool=biomed_workbench",
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "result": {
+              "uids": [
+                "7157"
+              ],
+              "7157": {
+                "uid": "7157",
+                "name": "TP53",
+                "description": "Tumor protein p53",
+                "nomenclaturesymbol": "TP53",
+                "organism": {
+                  "taxid": "9606",
+                  "commonname": "human",
+                  "scientificname": "Homo sapiens"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

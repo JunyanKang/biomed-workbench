@@ -43,9 +43,12 @@ class SingleCellTrajectoryVelocityEvidenceTests(unittest.TestCase):
         self.assertTrue(report["execution"]["dynamical_model_completed"])
         self.assertTrue(report["execution"]["velocity_graph_completed"])
         self.assertTrue(summary["experimental_time_withheld_from_model_fitting"])
+        self.assertTrue(summary["experimental_time_removed_before_backend_execution"])
         self.assertTrue(summary["latent_time_direction_validated_against_known_time"])
         self.assertTrue(summary["root_and_terminal_direction_validated"])
         self.assertTrue(summary["source_counts_and_identifiers_preserved"])
+        self.assertTrue(summary["source_immutable"])
+        self.assertTrue(summary["source_metadata_preserved"])
         self.assertTrue(summary["velocity_h5ad_reloaded"])
         self.assertTrue(summary["no_environment_or_compute_infrastructure_managed"])
 

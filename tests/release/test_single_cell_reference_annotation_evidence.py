@@ -26,7 +26,7 @@ class SingleCellReferenceAnnotationEvidenceTests(unittest.TestCase):
             path = MODULE_ROOT / "templates" / filename
             self.assertEqual(report["templates"][key]["sha256"], hashlib.sha256(path.read_bytes()).hexdigest())
         self.assertTrue(all(version_is_allowed(report["tool_versions"][name], rules) for name, rules in row.tool_versions.items()))
-        self.assertEqual(set(report["dependency_versions"]), set(row.dependency_versions) - {"python"})
+        self.assertEqual(set(report["dependency_versions"]), set(row.dependency_versions))
         self.assertTrue(all(version_is_allowed(value, row.dependency_versions[name]) for name, value in report["dependency_versions"].items()))
 
     def test_known_cells_are_accepted_and_unknown_population_is_retained(self):
@@ -52,6 +52,8 @@ class SingleCellReferenceAnnotationEvidenceTests(unittest.TestCase):
         self.assertTrue(summary["existing_labels_and_raw_counts_preserved"])
         self.assertTrue(summary["evaluation_labels_posthoc_only"])
         self.assertTrue(summary["annotated_h5ad_reloaded"])
+        self.assertTrue(summary["complete_finite_score_matrix_retained"])
+        self.assertTrue(summary["all_source_artifacts_immutable"])
         self.assertTrue(summary["no_environment_or_compute_infrastructure_managed"])
 
     def test_report_contains_no_machine_path_or_credential(self):

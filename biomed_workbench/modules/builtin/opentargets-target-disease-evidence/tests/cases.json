@@ -1,0 +1,60 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "found": true,
+        "returned_count": 1,
+        "total_count": 2,
+        "truncated": true
+      },
+      "http_fixtures": [
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "data": {
+              "disease": {
+                "evidences": {
+                  "count": 2,
+                  "rows": [
+                    {
+                      "datasourceId": "cancer_gene_census",
+                      "datatypeId": "somatic_mutation",
+                      "literature": [
+                        "22722193"
+                      ],
+                      "score": 1,
+                      "studyId": null,
+                      "targetFromSourceId": "ENSG00000141510"
+                    }
+                  ]
+                },
+                "id": "MONDO_0007254",
+                "name": "breast cancer"
+              }
+            }
+          },
+          "method": "POST",
+          "request_json": {
+            "query": "query Evidence($diseaseId: String!, $geneId: String!, $size: Int!) { disease(efoId: $diseaseId) { id name evidences(ensemblIds: [$geneId], size: $size) { count rows { datasourceId datatypeId score targetFromSourceId studyId literature } } } }",
+            "variables": {
+              "diseaseId": "MONDO_0007254",
+              "geneId": "ENSG00000141510",
+              "size": 1
+            }
+          },
+          "status": 200,
+          "url": "https://api.platform.opentargets.org/api/v4/graphql"
+        }
+      ],
+      "input": {
+        "disease_id": "MONDO_0007254",
+        "ensembl_gene_id": "ENSG00000141510",
+        "max_records": 1
+      },
+      "name": "retain-source-resolved-target-disease-evidence-and-page-limit"
+    }
+  ],
+  "schema_version": 1
+}

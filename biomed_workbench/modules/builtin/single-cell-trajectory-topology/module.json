@@ -1,20 +1,797 @@
 {
-  "schema_version": 1, "id": "single-cell-trajectory-topology", "version": "1.0.0", "title": "Infer lineage topology with Slingshot, Monocle3, and tradeSeq", "description": "Direct Codex to infer declared branch topology independently with Slingshot and Monocle3, validate direction against withheld time, fit tradeSeq lineage-weighted GAMs, and retain association, pattern, start-versus-end, and differential-end statistics with complete cell and count accounting.",
-  "module_type": "analysis", "domains": ["omics", "statistics"], "intents": ["Slingshot lineage inference", "Monocle3 trajectory graph", "tradeSeq trajectory differential expression", "单细胞分支轨迹 Slingshot Monocle3 tradeSeq"], "questions": ["Which branches and lineage-dependent gene programs are supported by independent topology methods and external temporal direction?"], "entrypoint": "agent-generated-analysis", "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000}, "maturity": "experimental",
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {"objective": {"type": "string", "minLength": 12}, "counts_artifact_id": {"type": "string"}, "metadata_artifact_id": {"type": "string"}, "embedding_artifact_id": {"type": "string"}, "cluster_key": {"type": "string"}, "sample_key": {"type": "string"}, "external_time_key": {"type": "string"}, "start_cluster": {"type": "string"}, "end_clusters": {"type": "array", "minItems": 2, "uniqueItems": true}, "root_cells": {"type": "array", "minItems": 3, "uniqueItems": true}, "declared_thresholds": {"type": "object"}, "design_notes": {"type": "string"}}, "required": ["objective", "counts_artifact_id", "metadata_artifact_id", "embedding_artifact_id", "cluster_key", "sample_key", "external_time_key", "start_cluster", "end_clusters", "root_cells", "declared_thresholds", "design_notes"]},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]}, "module": {"type": "object"}, "request_digest": {"type": "string"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}}, "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]},
-  "input_artifacts": [{"name": "trajectory_counts_metadata_embedding", "artifact_type": "single_cell_trajectory_inputs", "formats": [{"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["gene-by-cell", "cell-by-metadata", "cell-by-dimension"]}], "processing_levels": ["count-backed", "clustered", "embedded", "time-resolved"], "required_metadata": ["input-digests", "cell-accounting", "sample-key", "cluster-key", "external-time-key", "start-cluster", "end-clusters", "root-cell-evidence"]}],
-  "output_artifacts": [{"name": "trajectory_topology_evidence", "artifact_type": "single_cell_trajectory_evidence", "formats": [{"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["cell-by-lineage", "gene-by-test"]}, {"name": "monocle-object-directory", "versions": ["1"], "representations": ["container"], "compression": ["none"], "required_indexes": ["nearest-neighbor-index"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["cell-data-set"]}, {"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["topology-model-quality-summary"]}], "processing_levels": ["lineage-inferred", "direction-validated", "gam-tested", "reload-validated"], "required_metadata": ["lineages", "pseudotimes", "lineage-weights", "method-concordance", "external-time-direction", "tradeSeq-tests", "versions", "quality-status"]}],
-  "preconditions": ["Counts are integer-like and cell-aligned to complete metadata and a finite embedding; multiple samples and at least three external times exist; start, end and root evidence is frozen; outputs are new."], "assumptions": ["Embedding and cluster choices are reviewed inputs; cell-level trajectories are descriptive and do not replace donor-level condition inference or prove ancestry."],
-  "quality_gates": [{"id": "topology-input-accounting", "severity": "fatal", "description": "Counts, metadata and embedding must align exactly by unique cell and preserve all source counts.", "blocks_interpretation": true}, {"id": "topology-lineage-coverage", "severity": "fatal", "description": "Slingshot must recover every declared end lineage with adequate weighted cell support.", "blocks_interpretation": true}, {"id": "topology-independent-direction", "severity": "fatal", "description": "Slingshot and Monocle3 pseudotime must each agree with withheld external time and be directionally concordant.", "blocks_interpretation": true}, {"id": "topology-tradeseq-completeness", "severity": "fatal", "description": "Retain association, pattern, start-versus-end and differential-end tests for every modeled gene with lineage weights.", "blocks_interpretation": true}, {"id": "topology-output-reload", "severity": "fatal", "description": "Reload cell, gene and native Monocle3 outputs including graph, pseudotime, indexes, identities and counts.", "blocks_interpretation": true}],
-  "evidence_effects": ["adds_slingshot_lineages", "adds_monocle3_graph_pseudotime", "adds_tradeseq_lineage_gene_tests", "tests_external_time_and_method_concordance"], "alternatives": ["single-cell-fate-mapping", "single-cell-trajectory-velocity"], "complements": ["single-cell-fate-mapping", "single-cell-trajectory-velocity", "single-cell-donor-inference"],
-  "tool_requirements": [
-    {"name": "slingshot", "ecosystem": "r", "identity": "slingshot", "required": true, "tested_versions": ["2.10.0"], "allowed_versions": [">=2.10,<2.11"], "version_source": "https://bioconductor.org/packages/3.18/bioc/html/slingshot.html", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('slingshot')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "slingshot-lineage-api", "affected_versions": [">=2.10,<2.11"], "category": "behavior", "description": "Curve topology, pseudotime and lineage-weight fields are release-coupled.", "compatibility_effect": "requires-parser", "required_action": "Reload lineage matrices and verify coverage and direction.", "source": "https://bioconductor.org/packages/3.18/bioc/html/slingshot.html"}], "platforms": ["any"]},
-    {"name": "monocle3", "ecosystem": "r", "identity": "monocle3", "required": true, "tested_versions": ["1.4.26"], "allowed_versions": [">=1.4,<1.5"], "version_source": "https://cole-trapnell-lab.github.io/monocle3/", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('monocle3')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "monocle3-graph-serialization", "affected_versions": [">=1.4,<1.5"], "category": "api", "description": "Graph learning, ordering and native object serialization are release-coupled.", "compatibility_effect": "requires-format", "required_action": "Use native save/load functions and reload graph and pseudotime.", "source": "https://cole-trapnell-lab.github.io/monocle3/"}], "platforms": ["any"]},
-    {"name": "tradeSeq", "ecosystem": "r", "identity": "tradeSeq", "required": true, "tested_versions": ["1.16.0"], "allowed_versions": [">=1.16,<1.17"], "version_source": "https://bioconductor.org/packages/3.18/bioc/html/tradeSeq.html", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('tradeSeq')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "tradeseq-gam-tests", "affected_versions": [">=1.16,<1.17"], "category": "output-format", "description": "fitGAM and four hypothesis-test result fields are release-coupled.", "compatibility_effect": "requires-parser", "required_action": "Prefix and retain every test table and reload all genes.", "source": "https://bioconductor.org/packages/3.18/bioc/html/tradeSeq.html"}], "platforms": ["any"]}
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not manage runtimes or infrastructure, guess anchors, tune topology to desired conclusions, treat cells as donor replicates, overwrite counts, or report unreloaded outputs."
+    ],
+    "languages": [
+      "r",
+      "notebook"
+    ],
+    "mode": "codex_generated_project_code",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "biology",
+          "external time",
+          "cluster coverage",
+          "independent markers"
+        ],
+        "id": "topology-anchors",
+        "parameter": "start-end-root",
+        "selection_rule": "Freeze anchors from independent evidence.",
+        "validation_rule": "Do not tune anchors toward desired genes or branches."
+      }
+    ],
+    "postflight_checks": [
+      "Check lineage coverage, external-time direction, method concordance, all tradeSeq tables and native object reload."
+    ],
+    "preflight_checks": [
+      "Inspect aligned counts, metadata and embedding and detect exact R package versions."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "input-digests",
+      "anchors",
+      "nknots",
+      "actual-tool-versions",
+      "lineage-support",
+      "time-correlations",
+      "output-digests",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-topology-design",
+        "output_artifact_types": [
+          "single_cell_trajectory_evidence"
+        ],
+        "purpose": "Establish aligned counts, embedding, clusters, samples, time and anchors.",
+        "required_logic": [
+          "Inspect source digests, cells, genes, counts, samples, external time, embedding, cluster coverage, roots and ends.",
+          "Freeze topology and tradeSeq parameters before execution."
+        ],
+        "template_files": [
+          "templates/run_slingshot_monocle_tradeseq.R"
+        ]
+      },
+      {
+        "id": "fit-and-cross-check-topology",
+        "output_artifact_types": [
+          "single_cell_trajectory_evidence"
+        ],
+        "purpose": "Infer lineages and graph with independent methods.",
+        "required_logic": [
+          "Fit Slingshot lineages and weights and Monocle3 graph pseudotime.",
+          "Require both methods to agree with withheld time and each other."
+        ],
+        "template_files": [
+          "templates/run_slingshot_monocle_tradeseq.R"
+        ]
+      },
+      {
+        "id": "fit-tradeseq-and-reload",
+        "output_artifact_types": [
+          "single_cell_trajectory_evidence"
+        ],
+        "purpose": "Test lineage gene programs and validate outputs.",
+        "required_logic": [
+          "Fit lineage-weighted GAMs and retain all four prefixed test tables.",
+          "Reload cell and gene tables and native Monocle3 directory including indexes."
+        ],
+        "template_files": [
+          "templates/run_slingshot_monocle_tradeseq.R"
+        ]
+      }
+    ]
+  },
+  "alternatives": [
+    "single-cell-fate-mapping",
+    "single-cell-trajectory-velocity"
   ],
-  "dependencies": [{"name": "r", "ecosystem": "runtime", "identity": "r-runtime", "required": true, "tested_versions": ["4.3.2"], "allowed_versions": [">=4.3,<4.4"], "version_source": "https://cran.r-project.org/", "verified_at": "2026-07-15", "version_probe": ["Rscript", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run validated trajectory templates in an existing runtime.", "conflicts": [], "platforms": ["any"]}, {"name": "SingleCellExperiment", "ecosystem": "r", "identity": "SingleCellExperiment", "required": true, "tested_versions": ["1.24.0"], "allowed_versions": [">=1.24,<1.25"], "version_source": "https://bioconductor.org/packages/3.18/bioc/html/SingleCellExperiment.html", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('SingleCellExperiment')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Represent count and trajectory objects.", "conflicts": [], "platforms": ["any"]}, {"name": "Matrix", "ecosystem": "r", "identity": "Matrix", "required": true, "tested_versions": ["1.6.5"], "allowed_versions": [">=1.6,<1.7"], "version_source": "https://cran.r-project.org/package=Matrix", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('Matrix')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Preserve sparse counts.", "conflicts": [], "platforms": ["any"]}, {"name": "BiocParallel", "ecosystem": "r", "identity": "BiocParallel", "required": true, "tested_versions": ["1.36.0"], "allowed_versions": [">=1.36,<1.37"], "version_source": "https://bioconductor.org/packages/3.18/bioc/html/BiocParallel.html", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('BiocParallel')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide deterministic execution support.", "conflicts": [], "platforms": ["any"]}, {"name": "jsonlite", "ecosystem": "r", "identity": "jsonlite", "required": true, "tested_versions": ["2.0.0"], "allowed_versions": [">=2.0,<2.1"], "version_source": "https://cran.r-project.org/package=jsonlite", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('jsonlite')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Serialize diagnostics.", "conflicts": [], "platforms": ["any"]}, {"name": "digest", "ecosystem": "r", "identity": "digest", "required": true, "tested_versions": ["0.6.39"], "allowed_versions": [">=0.6.39,<0.7"], "version_source": "https://cran.r-project.org/package=digest", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('digest')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Bind input and output digests.", "conflicts": [], "platforms": ["any"]}],
-  "compatibility_matrix": [{"id": "agent-protocol-1-slingshot-210-monocle3-1426-tradeseq-116", "module_version": "1.0.0", "tool_versions": {"slingshot": [">=2.10,<2.11"], "monocle3": [">=1.4,<1.5"], "tradeSeq": [">=1.16,<1.17"]}, "dependency_versions": {"r": [">=4.3,<4.4"], "SingleCellExperiment": [">=1.24,<1.25"], "Matrix": [">=1.6,<1.7"], "BiocParallel": [">=1.36,<1.37"], "jsonlite": [">=2.0,<2.1"], "digest": [">=0.6.39,<0.7"]}, "input_formats": {"trajectory_counts_metadata_embedding": ["tab-separated-values@1"]}, "output_formats": {"trajectory_topology_evidence": ["tab-separated-values@1", "monocle-object-directory@1", "inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["single-cell-trajectory-topology-regression-v1"], "end_to_end_evidence_ids": ["single-cell-trajectory-topology-e2e-v1"], "verified_at": "2026-07-15"}],
-  "access": "agent_generated", "mutability": "read_only", "credentials": [], "limitations": ["Validated execution covers a two-branch synthetic trajectory with external time, reviewed clusters and root cells. Topology depends on embedding and anchors; tradeSeq cell-level trends do not provide donor-level condition inference or prove ancestry."], "kernel_compatibility": [">=0.2.0,<0.3.0"], "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned topology workflow with independent method and external-time checks.", "https://bioconductor.org/packages/3.18/bioc/html/slingshot.html", "https://cole-trapnell-lab.github.io/monocle3/", "https://bioconductor.org/packages/3.18/bioc/html/tradeSeq.html"]},
-  "agent_protocol": {"schema_version": 1, "mode": "codex_generated_project_code", "languages": ["r", "notebook"], "template_sections": [{"id": "inspect-topology-design", "purpose": "Establish aligned counts, embedding, clusters, samples, time and anchors.", "required_logic": ["Inspect source digests, cells, genes, counts, samples, external time, embedding, cluster coverage, roots and ends.", "Freeze topology and tradeSeq parameters before execution."], "output_artifact_types": ["single_cell_trajectory_evidence"], "template_files": ["templates/run_slingshot_monocle_tradeseq.R"]}, {"id": "fit-and-cross-check-topology", "purpose": "Infer lineages and graph with independent methods.", "required_logic": ["Fit Slingshot lineages and weights and Monocle3 graph pseudotime.", "Require both methods to agree with withheld time and each other."], "output_artifact_types": ["single_cell_trajectory_evidence"], "template_files": ["templates/run_slingshot_monocle_tradeseq.R"]}, {"id": "fit-tradeseq-and-reload", "purpose": "Test lineage gene programs and validate outputs.", "required_logic": ["Fit lineage-weighted GAMs and retain all four prefixed test tables.", "Reload cell and gene tables and native Monocle3 directory including indexes."], "output_artifact_types": ["single_cell_trajectory_evidence"], "template_files": ["templates/run_slingshot_monocle_tradeseq.R"]}], "parameter_rules": [{"id": "topology-anchors", "parameter": "start-end-root", "decision_inputs": ["biology", "external time", "cluster coverage", "independent markers"], "selection_rule": "Freeze anchors from independent evidence.", "validation_rule": "Do not tune anchors toward desired genes or branches."}], "preflight_checks": ["Inspect aligned counts, metadata and embedding and detect exact R package versions."], "postflight_checks": ["Check lineage coverage, external-time direction, method concordance, all tradeSeq tables and native object reload."], "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-digests", "anchors", "nknots", "actual-tool-versions", "lineage-support", "time-correlations", "output-digests", "quality-gates"], "forbidden_actions": ["Do not manage runtimes or infrastructure, guess anchors, tune topology to desired conclusions, treat cells as donor replicates, overwrite counts, or report unreloaded outputs."], "requires_observed_execution": true}
+  "assumptions": [
+    "Embedding and cluster choices are reviewed inputs; cell-level trajectories are descriptive and do not replace donor-level condition inference or prove ancestry."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "BiocParallel": [
+          ">=1.36,<1.37"
+        ],
+        "Matrix": [
+          ">=1.6,<1.7"
+        ],
+        "SingleCellExperiment": [
+          ">=1.24,<1.25"
+        ],
+        "digest": [
+          ">=0.6.39,<0.7"
+        ],
+        "jsonlite": [
+          ">=2.0,<2.1"
+        ],
+        "r": [
+          ">=4.3,<4.4"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "single-cell-trajectory-topology-e2e-v1",
+        "gastrulation-erythroid-topology-v1"
+      ],
+      "id": "agent-protocol-1-slingshot-210-monocle3-1426-tradeseq-116",
+      "input_formats": {
+        "trajectory_counts_metadata_embedding": [
+          "tab-separated-values@1"
+        ]
+      },
+      "module_version": "1.1.0",
+      "output_formats": {
+        "trajectory_topology_evidence": [
+          "tab-separated-values@1",
+          "monocle-object-directory@1",
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "single-cell-trajectory-topology-regression-v1"
+      ],
+      "tool_versions": {
+        "monocle3": [
+          ">=1.4,<1.5"
+        ],
+        "slingshot": [
+          ">=2.10,<2.11"
+        ],
+        "tradeSeq": [
+          ">=1.16,<1.17"
+        ]
+      },
+      "verified_at": "2026-07-23"
+    }
+  ],
+  "complements": [
+    "single-cell-fate-mapping",
+    "single-cell-trajectory-velocity",
+    "single-cell-donor-inference"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=4.3,<4.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "r-runtime",
+      "name": "r",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run validated trajectory templates in an existing runtime.",
+      "required": true,
+      "tested_versions": [
+        "4.3.2"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.24,<1.25"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "SingleCellExperiment",
+      "name": "SingleCellExperiment",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Represent count and trajectory objects.",
+      "required": true,
+      "tested_versions": [
+        "1.24.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('SingleCellExperiment')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://bioconductor.org/packages/3.18/bioc/html/SingleCellExperiment.html"
+    },
+    {
+      "allowed_versions": [
+        ">=1.6,<1.7"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "Matrix",
+      "name": "Matrix",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Preserve sparse counts.",
+      "required": true,
+      "tested_versions": [
+        "1.6.5"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('Matrix')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=Matrix"
+    },
+    {
+      "allowed_versions": [
+        ">=1.36,<1.37"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "BiocParallel",
+      "name": "BiocParallel",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide deterministic execution support.",
+      "required": true,
+      "tested_versions": [
+        "1.36.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('BiocParallel')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://bioconductor.org/packages/3.18/bioc/html/BiocParallel.html"
+    },
+    {
+      "allowed_versions": [
+        ">=2.0,<2.1"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "jsonlite",
+      "name": "jsonlite",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Serialize diagnostics.",
+      "required": true,
+      "tested_versions": [
+        "2.0.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('jsonlite')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=jsonlite"
+    },
+    {
+      "allowed_versions": [
+        ">=0.6.39,<0.7"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "digest",
+      "name": "digest",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Bind input and output digests.",
+      "required": true,
+      "tested_versions": [
+        "0.6.39"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('digest')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=digest"
+    }
+  ],
+  "description": "Direct Codex to infer one or more declared lineages independently with Slingshot and Monocle3, validate direction against external time, fit tradeSeq lineage-weighted GAMs, and retain association, pattern, start-versus-end, and differential-end statistics with complete cell and count accounting.",
+  "domains": [
+    "omics",
+    "statistics"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "adds_slingshot_lineages",
+    "adds_monocle3_graph_pseudotime",
+    "adds_tradeseq_lineage_gene_tests",
+    "tests_external_time_and_method_concordance"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "single-cell-trajectory-topology",
+  "input_artifacts": [
+    {
+      "artifact_type": "single_cell_trajectory_inputs",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "gene-by-cell",
+            "cell-by-metadata",
+            "cell-by-dimension"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "trajectory_counts_metadata_embedding",
+      "processing_levels": [
+        "count-backed",
+        "clustered",
+        "embedded",
+        "time-resolved"
+      ],
+      "required_metadata": [
+        "input-digests",
+        "cell-accounting",
+        "sample-key",
+        "cluster-key",
+        "external-time-key",
+        "start-cluster",
+        "end-clusters",
+        "root-cell-evidence"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "cluster_key": {
+        "type": "string"
+      },
+      "counts_artifact_id": {
+        "type": "string"
+      },
+      "declared_thresholds": {
+        "type": "object"
+      },
+      "design_notes": {
+        "type": "string"
+      },
+      "embedding_artifact_id": {
+        "type": "string"
+      },
+      "end_clusters": {
+        "minItems": 2,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "external_time_key": {
+        "type": "string"
+      },
+      "metadata_artifact_id": {
+        "type": "string"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "root_cells": {
+        "minItems": 3,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "sample_key": {
+        "type": "string"
+      },
+      "start_cluster": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "counts_artifact_id",
+      "metadata_artifact_id",
+      "embedding_artifact_id",
+      "cluster_key",
+      "sample_key",
+      "external_time_key",
+      "start_cluster",
+      "end_clusters",
+      "root_cells",
+      "declared_thresholds",
+      "design_notes"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "Slingshot lineage inference",
+    "Monocle3 trajectory graph",
+    "tradeSeq trajectory differential expression",
+    "\u5355\u7ec6\u80de\u5206\u652f\u8f68\u8ff9 Slingshot Monocle3 tradeSeq"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Validated execution covers a public single-lineage erythroid trajectory with 27 samples and seven external stages plus a deterministic two-branch trajectory with reviewed roots and ends. Topology depends on the supplied embedding and independent anchors; tradeSeq cell-level trends do not provide donor-level condition inference or prove ancestry. Differential-end tests are meaningful only when more than one lineage is present and remain retained as method-native output for a single lineage."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "single_cell_trajectory_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "cell-by-lineage",
+            "gene-by-test"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "monocle-object-directory",
+          "orientations": [
+            "cell-data-set"
+          ],
+          "representations": [
+            "container"
+          ],
+          "required_indexes": [
+            "nearest-neighbor-index"
+          ],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "topology-model-quality-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "trajectory_topology_evidence",
+      "processing_levels": [
+        "lineage-inferred",
+        "direction-validated",
+        "gam-tested",
+        "reload-validated"
+      ],
+      "required_metadata": [
+        "lineages",
+        "pseudotimes",
+        "lineage-weights",
+        "method-concordance",
+        "external-time-direction",
+        "tradeSeq-tests",
+        "versions",
+        "quality-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "codex_generated_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Counts are integer-like and cell-aligned to complete metadata and a finite embedding; multiple samples and at least three external times exist; start, end and root evidence is frozen; outputs are new."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned topology workflow with independent method and external-time checks.",
+      "https://bioconductor.org/packages/3.18/bioc/html/slingshot.html",
+      "https://cole-trapnell-lab.github.io/monocle3/",
+      "https://bioconductor.org/packages/3.18/bioc/html/tradeSeq.html"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Counts, metadata and embedding must align exactly by unique cell and preserve all source counts.",
+      "id": "topology-input-accounting",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Slingshot must recover every declared end lineage with adequate weighted cell support.",
+      "id": "topology-lineage-coverage",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Slingshot and Monocle3 pseudotime must each agree with withheld external time and be directionally concordant.",
+      "id": "topology-independent-direction",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Retain association, pattern, start-versus-end and differential-end tests for every modeled gene with lineage weights.",
+      "id": "topology-tradeseq-completeness",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Reload cell, gene and native Monocle3 outputs including graph, pseudotime, indexes, identities and counts.",
+      "id": "topology-output-reload",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which branches and lineage-dependent gene programs are supported by independent topology methods and external temporal direction?"
+  ],
+  "schema_version": 1,
+  "title": "Infer lineage topology with Slingshot, Monocle3, and tradeSeq",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=2.10,<2.11"
+      ],
+      "ecosystem": "r",
+      "identity": "slingshot",
+      "mismatch_policy": "block",
+      "name": "slingshot",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "2.10.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=2.10,<2.11"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parser",
+          "description": "Curve topology, pseudotime and lineage-weight fields are release-coupled.",
+          "id": "slingshot-lineage-api",
+          "required_action": "Reload lineage matrices and verify coverage and direction.",
+          "source": "https://bioconductor.org/packages/3.18/bioc/html/slingshot.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('slingshot')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://bioconductor.org/packages/3.18/bioc/html/slingshot.html"
+    },
+    {
+      "allowed_versions": [
+        ">=1.4,<1.5"
+      ],
+      "ecosystem": "r",
+      "identity": "monocle3",
+      "mismatch_policy": "block",
+      "name": "monocle3",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.4.26"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.4,<1.5"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-format",
+          "description": "Graph learning, ordering and native object serialization are release-coupled.",
+          "id": "monocle3-graph-serialization",
+          "required_action": "Use native save/load functions and reload graph and pseudotime.",
+          "source": "https://cole-trapnell-lab.github.io/monocle3/"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('monocle3')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cole-trapnell-lab.github.io/monocle3/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.16,<1.17"
+      ],
+      "ecosystem": "r",
+      "identity": "tradeSeq",
+      "mismatch_policy": "block",
+      "name": "tradeSeq",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.16.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.16,<1.17"
+          ],
+          "category": "output-format",
+          "compatibility_effect": "requires-parser",
+          "description": "fitGAM and four hypothesis-test result fields are release-coupled.",
+          "id": "tradeseq-gam-tests",
+          "required_action": "Prefix and retain every test table and reload all genes.",
+          "source": "https://bioconductor.org/packages/3.18/bioc/html/tradeSeq.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('tradeSeq')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://bioconductor.org/packages/3.18/bioc/html/tradeSeq.html"
+    }
+  ],
+  "version": "1.1.0"
 }

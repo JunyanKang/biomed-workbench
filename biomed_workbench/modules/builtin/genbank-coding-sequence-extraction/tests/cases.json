@@ -1,0 +1,17 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "matched_cds_count": 1,
+        "record_id": "TEST000001.1",
+        "requested_identifier": "LT0001"
+      },
+      "input": {
+        "genbank_record": "LOCUS       TESTREC                   39 bp    DNA     linear   SYN 01-JAN-2000\nDEFINITION  synthetic test record.\nACCESSION   TEST000001\nVERSION     TEST000001.1\nFEATURES             Location/Qualifiers\n     source          1..39\n                     /organism=\"synthetic construct\"\n     CDS             4..15\n                     /gene=\"testgene\"\n                     /locus_tag=\"LT0001\"\n                     /codon_start=1\n                     /transl_table=1\n                     /translation=\"MKF\"\nORIGIN\n        1 cccatgaaat tttaaacccc ggggttttaa acccgggtt\n//\n",
+        "identifier": "LT0001"
+      },
+      "name": "extracts-one-exactly-matched-cds"
+    }
+  ],
+  "schema_version": 1
+}

@@ -25,18 +25,20 @@
         ]
       },
       "end_to_end_evidence_ids": [
-        "interval-overlap-bedtools-e2e-v1"
+        "interval-overlap-bedtools-e2e-v2"
       ],
-      "id": "bedtools-2.31.1-xz-5.8.3-bed-1.0-wa-wb",
+      "id": "bedtools-2.31.1-xz-5.8.3-bed-1-and-1.0-wa-wb",
       "input_formats": {
         "query_intervals": [
+          "bed@1",
           "bed@1.0"
         ],
         "reference_intervals": [
+          "bed@1",
           "bed@1.0"
         ]
       },
-      "module_version": "1.0.0",
+      "module_version": "1.1.0",
       "output_formats": {
         "overlaps": [
           "bedtools-intersect-tsv@2.31.1"
@@ -46,7 +48,7 @@
         "macos-arm64"
       ],
       "regression_evidence_ids": [
-        "interval-overlap-bedtools-regression-v1"
+        "interval-overlap-bedtools-regression-v2"
       ],
       "tool_versions": {
         "bedtools": [
@@ -158,7 +160,8 @@
           ],
           "genome_build_policy": "required",
           "genome_builds": [
-            "declared-in-project"
+            "declared-in-project",
+            "declared-target-assembly"
           ],
           "name": "bed",
           "orientations": [
@@ -169,6 +172,7 @@
           ],
           "required_indexes": [],
           "versions": [
+            "1",
             "1.0"
           ]
         }
@@ -201,7 +205,8 @@
           ],
           "genome_build_policy": "required",
           "genome_builds": [
-            "declared-in-project"
+            "declared-in-project",
+            "declared-target-assembly"
           ],
           "name": "bed",
           "orientations": [
@@ -212,6 +217,7 @@
           ],
           "required_indexes": [],
           "versions": [
+            "1",
             "1.0"
           ]
         }
@@ -239,6 +245,10 @@
   },
   "intents": [
     "intersect genomic intervals",
+    "genomic interval overlap",
+    "genome interval overlap",
+    "基因组区间重叠",
+    "区间重叠",
     "bedtools intersect",
     "compare peaks and regions",
     "\u57fa\u56e0\u7ec4\u533a\u95f4\u53d6\u4ea4\u96c6"
@@ -385,5 +395,5 @@
       "version_source": "https://github.com/arq5x/bedtools2/releases/tag/v2.31.1"
     }
   ],
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

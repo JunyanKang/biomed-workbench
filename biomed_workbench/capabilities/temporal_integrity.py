@@ -422,6 +422,6 @@ def audit_temporal_integrity(
         ],
         "limitations": [
             "The module evaluates supplied structured bindings and does not infer every temporal relation from unrestricted prose.",
-            "Timeline completeness and provenance declarations still require project governance and source review.",
+            "Timeline completeness and provenance declarations still require project governance and primary-evidence review.",
         ],
     }

@@ -1,0 +1,265 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Signal values have undergone declared instrument processing and are suitable for endpoint-normalized descriptive transition analysis."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_cd_thermal_transition_summary.py",
+      "purpose": "Execute strict CD thermal-transition summary against processed project curve data.",
+      "quality_gate_ids": [
+        "cd-thermal-input-order",
+        "cd-thermal-transition-coverage",
+        "cd-thermal-claim-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "input_formats": {
+        "cd_thermal_curve": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "cd_thermal_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "cd-thermal-transition-summary-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "cd-thermal-transition-summary-e2e-v1"
+      ],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Validate an ordered circular-dichroism thermal curve and calculate descriptive endpoint-normalized transition midpoint, width and monotonicity diagnostics.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:summarize_cd_thermal_transition",
+  "evidence_effects": [
+    "adds-cd-thermal-transition-summary"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "cd-thermal-transition-summary",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "cd_thermal_curve",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "temperatures_c": {
+        "type": "array",
+        "minItems": 4,
+        "items": {
+          "type": "number"
+        }
+      },
+      "signals": {
+        "type": "array",
+        "minItems": 4,
+        "items": {
+          "type": "number"
+        }
+      }
+    },
+    "required": [
+      "temperatures_c",
+      "signals"
+    ]
+  },
+  "intents": [
+    "circular dichroism thermal transition",
+    "CD melting curve analysis",
+    "Summarize circular-dichroism thermal transition",
+    "圆二色谱热变性分析"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This is a descriptive endpoint-normalized transition summary, not a thermodynamic unfolding fit, reversibility assessment, aggregation assessment, or calibrated secondary-structure deconvolution."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "circular_dichroism_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "cd_thermal_summary",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "temperature_unit": {
+        "type": "string"
+      },
+      "signal_direction": {
+        "type": "string"
+      },
+      "normalized_fraction": {
+        "type": "array"
+      },
+      "summary": {
+        "type": "object"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "temperature_unit",
+      "signal_direction",
+      "normalized_fraction",
+      "summary",
+      "limitations"
+    ]
+  },
+  "preconditions": [
+    "A schema-valid sequence set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned implementation with module-level validation evidence."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "cd-thermal-input-order",
+      "severity": "fatal",
+      "description": "Block invalid thermal observations.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "cd-thermal-transition-coverage",
+      "severity": "major",
+      "description": "Report transition crossings and monotonicity violations.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "cd-thermal-claim-boundary",
+      "severity": "major",
+      "description": "A processed CD transition summary is not a thermodynamic fit or structural deconvolution.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "What descriptive midpoint, transition width and monotonicity diagnostics are supported by this processed circular-dichroism thermal curve?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize circular-dichroism thermal transition",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

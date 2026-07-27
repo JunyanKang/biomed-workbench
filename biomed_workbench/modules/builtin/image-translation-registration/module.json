@@ -1,0 +1,317 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The images have equal geometry and translation-only registration is appropriate for the stated acquisition context."
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "input_formats": {
+        "fixed": [
+          "inline-json@1"
+        ],
+        "moving": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "translation_registration": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "image-translation-registration-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "image-translation-registration-e2e-v1"
+      ],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Register two equal-shape 2D images by exhaustive bounded integer translation and overlap mean-squared-error diagnostics.",
+  "domains": [
+    "imaging"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.imaging:register_image_translation",
+  "evidence_effects": [
+    "adds-translation-registration-evidence"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "image-translation-registration",
+  "input_artifacts": [
+    {
+      "artifact_type": "image_collection",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "fixed",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    },
+    {
+      "artifact_type": "image_collection",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "moving",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "fixed": {
+        "type": "array",
+        "minItems": 1
+      },
+      "moving": {
+        "type": "array",
+        "minItems": 1
+      },
+      "max_shift_pixels": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 200
+      },
+      "minimum_overlap_fraction": {
+        "type": "number",
+        "exclusiveMinimum": 0,
+        "maximum": 1
+      }
+    },
+    "required": [
+      "fixed",
+      "moving"
+    ]
+  },
+  "intents": [
+    "image translation registration",
+    "2D image translation alignment",
+    "register images by translation",
+    "二维图像平移配准"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This is exhaustive integer translation only; it does not estimate rotation, scale, affine or deformable registration.",
+    "Registration quality requires acquisition-aware visual review, masking where appropriate, and independent assessment of biological correspondence."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "image_registration_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "translation_registration",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "shape": {
+        "type": "array"
+      },
+      "transform": {
+        "type": "object"
+      },
+      "overlap_fraction": {
+        "type": "number"
+      },
+      "mean_squared_error": {
+        "type": "number"
+      },
+      "second_best_mean_squared_error": {
+        "type": "number",
+        "nullable": true
+      },
+      "registration_margin": {
+        "type": "number",
+        "nullable": true
+      },
+      "evaluated_candidate_count": {
+        "type": "integer"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "shape",
+      "transform",
+      "overlap_fraction",
+      "mean_squared_error",
+      "second_best_mean_squared_error",
+      "registration_margin",
+      "evaluated_candidate_count",
+      "limitations"
+    ]
+  },
+  "preconditions": [
+    "A schema-valid image collection is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned implementation with module-level validation evidence."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "translation-registration-geometry",
+      "severity": "fatal",
+      "description": "Block absent, nonfinite or unequal-shape 2D images.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "translation-registration-overlap",
+      "severity": "fatal",
+      "description": "Record bounded search range, eligible overlap policy, candidate count and the selected transform with objective values.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "translation-registration-claim-boundary",
+      "severity": "major",
+      "description": "Translation alignment alone is not geometric calibration, affine or deformable registration, cellular correspondence or biological evidence.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "Which bounded integer translation best aligns these declared fixed and moving 2D images under overlap MSE?"
+  ],
+  "schema_version": 1,
+  "title": "Register 2D images by integer translation",
+  "tool_requirements": [],
+  "version": "1.0.0",
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_image_translation_registration.py",
+      "purpose": "Execute bounded 2D integer-translation registration with overlap MSE diagnostics.",
+      "quality_gate_ids": [
+        "translation-registration-geometry",
+        "translation-registration-overlap",
+        "translation-registration-claim-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ]
+}

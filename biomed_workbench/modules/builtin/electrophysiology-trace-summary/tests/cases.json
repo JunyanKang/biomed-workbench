@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "summarizes-positive-peak-trace",
+      "input": {
+        "time_ms": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "signal": [
+          -70,
+          -70,
+          -69,
+          -50,
+          -20,
+          -45,
+          -68
+        ],
+        "baseline_window_ms": 1,
+        "polarity": "positive"
+      },
+      "expected_subset": {
+        "observation_count": 7,
+        "baseline": -70.0,
+        "polarity": "positive",
+        "peak_amplitude_from_baseline": 50.0,
+        "time_to_peak_ms": 4.0,
+        "threshold_crossing_count": 1,
+        "quality_status": "passed"
+      }
+    }
+  ]
+}

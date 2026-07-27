@@ -1,24 +1,37 @@
 {
   "schema_version": 1,
-  "cases": [{
-    "name": "prepare-scvi-scanvi-modeling",
-    "input": {
-      "objective": "Train and validate a count-aware scANVI model while retaining reviewed labels and unknown cells.",
-      "input_artifact_id": "artifact-scrna-qc-reviewed",
-      "input_format": "h5ad",
-      "raw_count_location": "layers.counts",
-      "batch_key": "chemistry_batch",
-      "biological_sample_key": "sample_id",
-      "reviewed_label_key": "reviewed_cell_type",
-      "unknown_label": "unknown",
-      "requested_mode": "scanvi",
-      "declared_thresholds": {"minimum_heldout_macro_f1": 0.8, "maximum_label_purity_loss": 0.15, "minimum_label_connectivity": 0.8},
-      "design_notes": "Independent samples span two technical batches; each reviewed class occurs in both batches; unknown cells are explicit and remain unpromoted."
-    },
-    "expected_subset": {
-      "handoff_type": "codex_generated_project_analysis",
-      "module": {"id": "single-cell-generative-modeling", "version": "1.0.0"},
-      "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}
+  "cases": [
+    {
+      "name": "prepare-scvi-scanvi-modeling",
+      "input": {
+        "objective": "Train and validate a count-aware scANVI model while retaining reviewed labels and unknown cells.",
+        "input_artifact_id": "artifact-scrna-qc-reviewed",
+        "input_format": "h5ad",
+        "raw_count_location": "layers.counts",
+        "batch_key": "chemistry_batch",
+        "biological_sample_key": "sample_id",
+        "reviewed_label_key": "reviewed_cell_type",
+        "unknown_label": "unknown",
+        "requested_mode": "scanvi",
+        "declared_thresholds": {
+          "minimum_heldout_macro_f1": 0.8,
+          "maximum_label_purity_loss": 0.15,
+          "minimum_label_connectivity": 0.8
+        },
+        "design_notes": "Independent samples span two technical batches; each reviewed class occurs in both batches; unknown cells are explicit and remain unpromoted."
+      },
+      "expected_subset": {
+        "handoff_type": "codex_generated_project_analysis",
+        "module": {
+          "id": "single-cell-generative-modeling",
+          "version": "1.2.0"
+        },
+        "execution_policy": {
+          "observed_execution_required": true,
+          "manage_environment_or_compute_infrastructure": false,
+          "planned_output_is_not_evidence": true
+        }
+      }
     }
-  }]
+  ]
 }

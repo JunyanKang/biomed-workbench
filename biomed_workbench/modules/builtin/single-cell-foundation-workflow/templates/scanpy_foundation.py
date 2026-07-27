@@ -88,6 +88,31 @@ def raw_counts(adata: anndata.AnnData, location: str):
     raise ValueError("raw-count-location must be X or an existing layers.NAME entry")
 
 
+def h5ad_safe_frame(frame: pd.DataFrame, *, preserve_missing: bool = True) -> pd.DataFrame:
+    """Normalize string-like metadata so AnnData HDF5 serialization is reloadable."""
+    sanitized = frame.copy()
+    sanitized.index = pd.Index(np.asarray(sanitized.index, dtype=object).astype(str), name=sanitized.index.name)
+    for column in sanitized.columns:
+        dtype = str(sanitized[column].dtype).lower()
+        if dtype != "object" and "string" not in dtype:
+            continue
+        missing = sanitized[column].isna()
+        values = np.array(sanitized[column].astype(object).where(~missing, None), dtype=object, copy=True)
+        values[~missing.to_numpy()] = np.asarray(sanitized.loc[~missing, column].astype(str), dtype=object)
+        if not preserve_missing:
+            values[missing.to_numpy()] = "nan"
+        sanitized[column] = pd.Categorical(values)
+    return sanitized
+
+
+def sanitize_h5ad_metadata(adata: anndata.AnnData) -> dict[str, int]:
+    """Preserve values while converting unsupported Arrow-backed string metadata."""
+    before = {"obs_columns": int(adata.obs.shape[1]), "var_columns": int(adata.var.shape[1])}
+    adata.obs = h5ad_safe_frame(adata.obs, preserve_missing=False)
+    adata.var = h5ad_safe_frame(adata.var, preserve_missing=False)
+    return before
+
+
 def versions() -> dict[str, str]:
     return {
         "python": platform.python_version(),
@@ -219,6 +244,7 @@ def main() -> int:
             },
         })
 
+    metadata_serialization = sanitize_h5ad_metadata(adata)
     adata.uns["biomed_workbench"] = {
         "template": "scanpy_foundation.py",
         "versions": versions(),
@@ -226,6 +252,7 @@ def main() -> int:
         "input_sha256": sha256(source) if source.is_file() else None,
         "raw_count_location": "layers.counts",
         "cluster_keys": cluster_keys,
+        "metadata_serialization": metadata_serialization,
     }
     adata.write_h5ad(outputs[0], compression="gzip")
     reloaded = sc.read_h5ad(outputs[0])

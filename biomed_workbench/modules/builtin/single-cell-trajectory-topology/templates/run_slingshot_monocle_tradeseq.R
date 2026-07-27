@@ -75,7 +75,7 @@ main <- function() {
   sample_key <- required_arg(args, "sample-key")
   external_time_key <- required_arg(args, "external-time-key")
   start_cluster <- required_arg(args, "start-cluster")
-  end_clusters <- comma_list(required_arg(args, "end-clusters"), 2)
+  end_clusters <- comma_list(required_arg(args, "end-clusters"), 1)
   root_cells <- comma_list(required_arg(args, "root-cells"), 3)
   nknots <- numeric_arg(args, "nknots", 3, 12, TRUE)
   minimum_lineage_cells <- numeric_arg(args, "minimum-lineage-cells", 10, Inf, TRUE)
@@ -144,9 +144,10 @@ main <- function() {
     nknots = nknots, verbose = FALSE, parallel = FALSE, family = "nb"
   )
   association <- associationTest(sce, global = TRUE, lineages = TRUE, l2fc = 0)
-  pattern <- patternTest(sce, global = TRUE, pairwise = TRUE, nPoints = 50, l2fc = 0)
   start_end <- startVsEndTest(sce, global = TRUE, lineages = TRUE, l2fc = 0)
-  differential_end <- diffEndTest(sce, global = TRUE, pairwise = TRUE, l2fc = 0)
+  multiple_lineages <- ncol(sling_pt) > 1
+  pattern <- if (multiple_lineages) patternTest(sce, global = TRUE, pairwise = TRUE, nPoints = 50, l2fc = 0) else NULL
+  differential_end <- if (multiple_lineages) diffEndTest(sce, global = TRUE, pairwise = TRUE, l2fc = 0) else NULL
   standardize <- function(table, test) {
     table <- as.data.frame(table, check.names = FALSE)
     prefix <- gsub("-", "_", test, fixed = TRUE)
@@ -155,10 +156,20 @@ main <- function() {
     rownames(table) <- NULL
     table[, c("gene_id", setdiff(names(table), "gene_id")), drop = FALSE]
   }
-  gene_results <- Reduce(function(x, y) merge(x, y, by = "gene_id", all = TRUE), list(
-    standardize(association, "association"), standardize(pattern, "pattern"),
-    standardize(start_end, "start-vs-end"), standardize(differential_end, "differential-end")
-  ))
+  test_tables <- list(
+    standardize(association, "association"),
+    standardize(start_end, "start-vs-end")
+  )
+  if (multiple_lineages) {
+    test_tables <- c(
+      test_tables,
+      list(
+        standardize(pattern, "pattern"),
+        standardize(differential_end, "differential-end")
+      )
+    )
+  }
+  gene_results <- Reduce(function(x, y) merge(x, y, by = "gene_id", all = TRUE), test_tables)
 
   cell_results <- data.frame(cell_id = metadata$cell_id, external_time = external_time, monocle3_pseudotime = as.numeric(monocle_pt), slingshot_weighted_pseudotime = weighted_pt, stringsAsFactors = FALSE)
   for (index in seq_len(ncol(sling_pt))) {
@@ -180,7 +191,7 @@ main <- function() {
     slingshot_external_time_direction = sling_time_rho >= minimum_time_correlation,
     monocle3_external_time_direction = monocle_time_rho >= minimum_time_correlation,
     methods_directionally_concordant = method_rho > 0,
-    tradeseq_all_tests_completed = all(vapply(list(association, pattern, start_end, differential_end), nrow, integer(1)) == nrow(counts)),
+    tradeseq_applicable_tests_completed = nrow(association) == nrow(counts) && nrow(start_end) == nrow(counts) && (!multiple_lineages || (nrow(pattern) == nrow(counts) && nrow(differential_end) == nrow(counts))),
     biological_samples_not_cells_are_condition_replicates = TRUE,
     source_counts_preserved = sum(counts) == sum(assay(reloaded_cds, "counts")),
     outputs_reloaded = TRUE
@@ -191,7 +202,7 @@ main <- function() {
     schema_version = 1, quality_status = quality_status,
     input = list(counts_filename = basename(counts_path), counts_sha256 = sha256(counts_path), metadata_filename = basename(metadata_path), metadata_sha256 = sha256(metadata_path), embedding_filename = basename(embedding_path), embedding_sha256 = sha256(embedding_path), cells = ncol(counts), genes = nrow(counts), samples = length(unique(metadata[[sample_key]]))),
     model = list(start_cluster = start_cluster, end_clusters = end_clusters, root_cells = length(root_cells), lineages = lineage_names, nknots = nknots, seed = seed, cds_serialization = "monocle3 native object directory with nearest-neighbor indexes"),
-    results = list(slingshot_external_time_spearman = sling_time_rho, monocle3_external_time_spearman = monocle_time_rho, slingshot_monocle3_spearman = method_rho, lineage_cell_support = as.list(colSums(sling_weights > 0.1)), association_rows = nrow(association), pattern_rows = nrow(pattern), start_vs_end_rows = nrow(start_end), differential_end_rows = nrow(differential_end)),
+    results = list(slingshot_external_time_spearman = sling_time_rho, monocle3_external_time_spearman = monocle_time_rho, slingshot_monocle3_spearman = method_rho, lineage_cell_support = as.list(colSums(sling_weights > 0.1)), association_rows = nrow(association), pattern_rows = if (multiple_lineages) nrow(pattern) else 0, start_vs_end_rows = nrow(start_end), differential_end_rows = if (multiple_lineages) nrow(differential_end) else 0, test_applicability = list(association = "executed", start_vs_end = "executed", pattern = if (multiple_lineages) "executed" else "not_applicable_single_lineage", differential_end = if (multiple_lineages) "executed" else "not_applicable_single_lineage")),
     quality_thresholds = list(minimum_lineage_cells = minimum_lineage_cells, minimum_time_correlation = minimum_time_correlation),
     quality_gates = gates,
     output = list(cell_results_filename = basename(cell_results_path), cell_results_sha256 = sha256(cell_results_path), gene_results_filename = basename(gene_results_path), gene_results_sha256 = sha256(gene_results_path), cds_directory = basename(cds_path), cds_directory_sha256 = directory_sha256(cds_path)),

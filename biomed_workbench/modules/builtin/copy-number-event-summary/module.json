@@ -1,0 +1,273 @@
+{
+  "schema_version": 1,
+  "id": "copy-number-event-summary",
+  "version": "0.1.0",
+  "title": "Audit discrete copy-number event coverage",
+  "description": "Audit sample identity, declared cohort denominator, coverage, and categorical event composition for discrete copy-number records before downstream cancer inference.",
+  "module_type": "analysis",
+  "domains": [
+    "clinical",
+    "omics"
+  ],
+  "intents": [
+    "CNA队列质量审计",
+    "拷贝数事件汇总",
+    "copy number event coverage"
+  ],
+  "questions": [
+    "Do declared discrete copy-number records cover the cohort sufficiently for descriptive event summaries?"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.clinical:copy_number_event_summary",
+  "execution": {
+    "kind": "python",
+    "timeout_seconds": 30,
+    "max_output_bytes": 10000000
+  },
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "discrete_copy_number_records",
+      "artifact_type": "cancer_genomics_copy_number_records",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": [
+        "declared-sample-count"
+      ],
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": [
+            "1"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "compression": [
+            "none"
+          ],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": [
+            "copy-number-event-by-sample"
+          ]
+        }
+      ]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "copy_number_event_coverage_summary",
+      "artifact_type": "cancer_genomics_copy_number_summary",
+      "processing_levels": [
+        "derived",
+        "quality-controlled"
+      ],
+      "required_metadata": [
+        "declared-sample-count",
+        "coverage-status"
+      ],
+      "formats": [
+        {
+          "name": "normalized-json",
+          "versions": [
+            "1"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "compression": [
+            "none"
+          ],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": [
+            "cohort-by-event-summary"
+          ]
+        }
+      ]
+    }
+  ],
+  "preconditions": [
+    "Every record declares one unique sample_id and a discrete alteration code in -2..2.",
+    "sample_count is the scientifically declared eligible denominator, not a value parsed from prose."
+  ],
+  "assumptions": [
+    "Records share one cohort, assay interpretation, and discrete alteration convention."
+  ],
+  "quality_gates": [
+    {
+      "id": "cna-record-identity",
+      "severity": "fatal",
+      "description": "Reject duplicate or missing sample identifiers and unsupported discrete alteration codes.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "cna-coverage",
+      "severity": "major",
+      "description": "Block cohort-wide prevalence claims when observed records do not cover the declared eligible denominator.",
+      "blocks_interpretation": true
+    }
+  ],
+  "limitations": [
+    "This module does not infer purity, ploidy, focality, allele-specific copy number, clonality, absolute copy number, driver status, or clinical actionability."
+  ],
+  "evidence_effects": [
+    "adds-quality-controlled-discrete-copy-number-summary"
+  ],
+  "alternatives": [],
+  "complements": [
+    "cbioportal-gene-copy-number-evidence"
+  ],
+  "tool_requirements": [],
+  "dependencies": [
+    {
+      "name": "python",
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "version_source": "https://www.python.org/downloads/release/python-3143/",
+      "verified_at": "2026-07-24",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Run deterministic cohort coverage audit.",
+      "conflicts": [],
+      "platforms": [
+        "any"
+      ]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "copy-number-event-summary-python-3143",
+      "module_version": "0.1.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "input_formats": {
+        "discrete_copy_number_records": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "copy_number_event_coverage_summary": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "copy-number-event-summary-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "copy-number-event-summary-e2e-v1"
+      ],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "records": {
+        "type": "array"
+      },
+      "sample_count": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "required": [
+      "records",
+      "sample_count"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "declared_sample_count": {
+        "type": "integer"
+      },
+      "observed_record_count": {
+        "type": "integer"
+      },
+      "missing_record_count": {
+        "type": "integer"
+      },
+      "observed_sample_fraction": {
+        "type": "number"
+      },
+      "event_counts": {
+        "type": "object"
+      },
+      "event_fractions_of_declared_cohort": {
+        "type": "object"
+      },
+      "non_diploid_record_count": {
+        "type": "integer"
+      },
+      "quality_status": {
+        "type": "string"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "declared_sample_count",
+      "observed_record_count",
+      "missing_record_count",
+      "observed_sample_fraction",
+      "event_counts",
+      "event_fractions_of_declared_cohort",
+      "non_diploid_record_count",
+      "quality_status",
+      "limitations"
+    ]
+  },
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "provenance": {
+    "license": "Apache-2.0",
+    "concept_sources": [
+      "Independent clean-room discrete copy-number cohort audit informed by direct primary-evidence review."
+    ]
+  },
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/audit_copy_number_events.py",
+      "purpose": "Execute deterministic discrete copy-number cohort coverage audit against project records and a declared eligible denominator.",
+      "quality_gate_ids": [
+        "cna-record-identity",
+        "cna-coverage"
+      ],
+      "requires_adaptation": true
+    }
+  ]
+}

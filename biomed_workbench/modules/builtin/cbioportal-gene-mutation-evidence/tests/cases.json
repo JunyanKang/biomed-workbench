@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "cases": [{
+    "name": "retrieves-bounded-study-gene-mutations",
+    "input": {"study_id": "msk_impact_2017", "gene_symbol": "TP53", "max_records": 1},
+    "http_fixtures": [
+      {"method": "GET", "url": "https://www.cbioportal.org/api/genes/TP53", "status": 200, "headers": {"Content-Type": "application/json"}, "json": {"entrezGeneId": 7157, "hugoGeneSymbol": "TP53", "type": "protein-coding"}},
+      {"method": "GET", "url": "https://www.cbioportal.org/api/studies/msk_impact_2017/molecular-profiles", "status": 200, "headers": {"Content-Type": "application/json"}, "json": [{"studyId": "msk_impact_2017", "molecularAlterationType": "MUTATION_EXTENDED", "molecularProfileId": "msk_impact_2017_mutations", "name": "Mutations", "datatype": "MAF"}]},
+      {"method": "GET", "url": "https://www.cbioportal.org/api/studies/msk_impact_2017/sample-lists", "status": 200, "headers": {"Content-Type": "application/json"}, "json": [{"studyId": "msk_impact_2017", "category": "all_cases_with_mutation_data", "sampleListId": "msk_impact_2017_sequenced", "name": "Mutation samples", "description": "All sequenced samples"}]},
+      {"method": "POST", "url": "https://www.cbioportal.org/api/molecular-profiles/msk_impact_2017_mutations/mutations/fetch?projection=SUMMARY", "request_json": {"entrezGeneIds": [7157], "sampleListId": "msk_impact_2017_sequenced"}, "status": 200, "headers": {"Content-Type": "application/json"}, "json": [{"studyId": "msk_impact_2017", "molecularProfileId": "msk_impact_2017_mutations", "sampleId": "P-0001-T01", "entrezGeneId": 7157, "startPosition": 7577539, "endPosition": 7577539, "referenceAllele": "G", "variantAllele": "A", "ncbiBuild": "GRCh37", "variantType": "SNP", "mutationType": "Missense_Mutation", "proteinChange": "R248W", "refseqMrnaId": "NM_001126112.2", "tumorAltCount": 61, "tumorRefCount": 131, "chr": "17"}, {"studyId": "msk_impact_2017", "molecularProfileId": "msk_impact_2017_mutations", "sampleId": "P-0002-T01", "entrezGeneId": 7157, "startPosition": 7578406, "endPosition": 7578406, "referenceAllele": "C", "variantAllele": "T", "ncbiBuild": "GRCh37", "variantType": "SNP", "mutationType": "Missense_Mutation", "proteinChange": "R175H", "refseqMrnaId": "NM_001126112.2", "tumorAltCount": 52, "tumorRefCount": 111, "chr": "17"}]}
+    ],
+    "expected_subset": {"study_id": "msk_impact_2017", "gene_symbol": "TP53", "found": true, "resolution_status": "resolved", "returned_count": 1, "truncated": true}
+  }]
+}

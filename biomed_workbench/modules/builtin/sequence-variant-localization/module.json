@@ -1,0 +1,391 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The supplied reference and query are the intended unambiguous sequences and descriptive, non-VCF-normalized event representation is appropriate."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_sequence_variant_localization.py",
+      "purpose": "Execute global pairwise sequence-difference localization with declared scoring and reference-coordinate offset.",
+      "quality_gate_ids": [
+        "sequence-difference-identity",
+        "sequence-difference-representation",
+        "sequence-difference-claim-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-biopython-1.86-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ],
+        "biopython": [
+          ">=1.86,<1.87"
+        ]
+      },
+      "input_formats": {
+        "reference": [
+          "inline-json@1"
+        ],
+        "query": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "sequence_difference_events": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "sequence-variant-localization-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "sequence-variant-localization-e2e-v1"
+      ],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "sequence-pairwise-alignment",
+    "variant-summary",
+    "variant-filter-vcf"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    },
+    {
+      "name": "biopython",
+      "ecosystem": "python",
+      "identity": "biopython",
+      "required": true,
+      "tested_versions": [
+        "1.86"
+      ],
+      "allowed_versions": [
+        ">=1.86,<1.87"
+      ],
+      "version_source": "https://biopython.org/wiki/Download",
+      "verified_at": "2026-07-24",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version(\"biopython\"))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Execute the versioned PairwiseAligner implementation and retain its exact version in alignment evidence.",
+      "conflicts": [],
+      "platforms": [
+        "any"
+      ]
+    }
+  ],
+  "description": "Globally align two unambiguous sequences and report descriptive substitutions, insertions and deletions with explicit reference intervals, scoring and alignment evidence.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:localize_sequence_variants",
+  "evidence_effects": [
+    "adds-descriptive-sequence-difference-evidence"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "sequence-variant-localization",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "reference",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    },
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "reference": {
+        "type": "string",
+        "minLength": 1
+      },
+      "query": {
+        "type": "string",
+        "minLength": 1
+      },
+      "alphabet": {
+        "type": "string",
+        "enum": [
+          "dna",
+          "rna",
+          "protein"
+        ]
+      },
+      "reference_coordinate_offset": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "match_score": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 100
+      },
+      "mismatch_score": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 100
+      },
+      "open_gap_score": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 0
+      },
+      "extend_gap_score": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 0
+      }
+    },
+    "required": [
+      "reference",
+      "query"
+    ]
+  },
+  "intents": [
+    "sequence variant localization",
+    "sequence mutation localization",
+    "compare sequence differences",
+    "Localize descriptive sequence differences",
+    "序列变异定位",
+    "序列突变定位"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Events are descriptive differences in the supplied sequence pair, not normalized VCF records, genomic variant calls, haplotypes, genotype calls, or clinical interpretations.",
+    "Repeat contexts can admit multiple equally scored alignments; retain the aligned sequences and scoring contract before selecting a representation for downstream work."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "sequence_difference_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "sequence_difference_events",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "alphabet": {
+        "type": "string"
+      },
+      "algorithm": {
+        "type": "string"
+      },
+      "biopython_version": {
+        "type": "string"
+      },
+      "reference_coordinate_offset": {
+        "type": "integer"
+      },
+      "coordinate_system": {
+        "type": "string"
+      },
+      "scoring": {
+        "type": "object"
+      },
+      "alignment_score": {
+        "type": "number"
+      },
+      "reference_aligned": {
+        "type": "string"
+      },
+      "query_aligned": {
+        "type": "string"
+      },
+      "events": {
+        "type": "array"
+      },
+      "summary": {
+        "type": "object"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "alphabet",
+      "algorithm",
+      "biopython_version",
+      "reference_coordinate_offset",
+      "coordinate_system",
+      "scoring",
+      "alignment_score",
+      "reference_aligned",
+      "query_aligned",
+      "events",
+      "summary",
+      "limitations"
+    ]
+  },
+  "preconditions": [
+    "A declared unambiguous reference-query sequence pair is available in the intended orientation.",
+    "A descriptive non-VCF-normalized comparison is appropriate for the stated scientific use."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room implementation of sequence mutation localization capability identified during product capability planning.",
+      "https://biopython.org/docs/latest/Tutorial/chapter_pairwise.html"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "sequence-difference-identity",
+      "severity": "fatal",
+      "description": "Block missing, empty, invalid or ambiguous declared sequence inputs and preserve their supplied orientations.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "sequence-difference-representation",
+      "severity": "fatal",
+      "description": "Record and validate global alignment scoring, Biopython version, reference coordinate offset, aligned sequences and zero-based half-open event intervals.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "sequence-difference-claim-boundary",
+      "severity": "major",
+      "description": "Descriptive pairwise events are not normalized VCF records, genomic calls, haplotypes, genotype evidence or clinical interpretations.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "Which descriptive substitutions, insertions and deletions distinguish the supplied query from its declared reference sequence under an explicit global alignment contract?"
+  ],
+  "schema_version": 1,
+  "title": "Localize descriptive sequence differences",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

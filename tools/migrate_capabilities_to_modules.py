@@ -285,7 +285,7 @@ def _manifest(row: dict[str, object], cases: dict[str, dict[str, object]]) -> di
         "kernel_compatibility": [">=0.2.0,<0.3.0"],
         "provenance": {
             "license": "Apache-2.0",
-            "concept_sources": ["Project-owned clean-room rewrite documented by the aggregate source-assimilation report."],
+            "concept_sources": ["Project-owned implementation with module-level validation evidence."],
         },
     }
 

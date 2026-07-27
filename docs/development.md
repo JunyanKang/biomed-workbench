@@ -38,7 +38,7 @@ These interfaces are for development, validation, and agent integration. End use
 - `biomed_workbench/orchestration/`: planning, compatibility-gated execution, quality checks, interpretation, and revision control.
 - `biomed_workbench/formats/`: shared format profiles and pre-execution metadata validation.
 - `biomed_workbench/services/`: bounded public scientific database clients and credential policy.
-- `tools/`: registry, routing, execution, scaffolding, validation, reconciliation, and installation verification.
+- `tools/`: registry, routing, execution, scaffolding, validation, evidence, and installation verification.
 - `tests/`: unit, contract, integration, release, and end-to-end checks.
 - `reports/`: release-safe generated evidence and verification summaries.
 
@@ -52,27 +52,6 @@ python3 tools/scaffold_bioinformatics_templates.py --check
 ```
 
 The generated registry is source-neutral and dynamically discovers valid modules. Do not add a new user-facing skill for each method, encode module names in the routing algorithm, vendor a source project, or introduce a path bridge to external code.
-
-## Source Reconciliation
-
-Source-study ledgers are private development evidence and are never runtime dependencies. Reconcile them into the release-safe summary before publication:
-
-```bash
-python3 tools/reconcile_sources.py --manifest .source-audit/manifest.jsonl --design-ledger .source-audit/rewrite-ledger.jsonl --capability-bindings .source-audit/capability-bindings.jsonl --private-output .source-audit/reconciliation-ledger.jsonl --public-output reports/source-reconciliation-summary.json
-```
-
-The full reconciliation command is required when source receipts, bindings, status counts, or
-assimilation conclusions change. For an ordinary plugin update that changes only the current
-skill, registry, or test snapshot, refresh the public snapshot without private receipt mutation:
-
-```bash
-python3 tools/refresh_source_reconciliation_snapshot.py
-```
-
-The bounded refresher validates the existing file totals, pending count, and receipt-root digest
-before replacing only `current_evidence`. It cannot mark a receipt implemented or superseded.
-
-Every source record must resolve to implemented, superseded, guidance, excluded, provenance, or a visible pending capability decision. Reading a source file is not accepted as implementation evidence.
 
 ## Release Discipline
 

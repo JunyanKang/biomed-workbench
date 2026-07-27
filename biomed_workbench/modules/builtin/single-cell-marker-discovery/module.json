@@ -1,81 +1,639 @@
 {
-  "schema_version": 1,
-  "id": "single-cell-marker-discovery",
-  "version": "1.1.0",
-  "title": "Discover and independently validate single-cell cluster markers",
-  "description": "Direct Codex to validate count-backed clustered single-cell data, freeze discovery and held-out biological samples before ranking, calculate raw-count detection evidence in each partition, and emit independently validated marker candidates without turning cell-level significance into donor-level inference or automatic cell-type labels.",
-  "module_type": "analysis",
-  "domains": ["omics", "statistics"],
-  "intents": ["discover single-cell cluster marker genes", "automatic marker discovery with sample stability", "rank markers for every single-cell cluster", "单细胞聚类自动 marker discovery 样本稳定性复核"],
-  "questions": ["Which genes distinguish each cluster in the observed cells and remain directionally supported across biological samples strongly enough to serve as annotation evidence?"],
-  "maturity": "experimental",
-  "entrypoint": "agent-generated-analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {
-    "objective": {"type": "string", "minLength": 12, "maxLength": 4000},
-    "input_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256},
-    "input_format": {"type": "string", "enum": ["h5ad"]},
-    "raw_count_location": {"type": "string", "minLength": 1, "maxLength": 256},
-    "cluster_key": {"type": "string", "minLength": 1, "maxLength": 128},
-    "biological_sample_key": {"type": "string", "minLength": 1, "maxLength": 128},
-    "validation_sample_ids": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 128}, "minItems": 1, "uniqueItems": true},
-    "requested_method": {"type": "string", "enum": ["wilcoxon", "t-test", "logreg"]},
-    "declared_thresholds": {"type": "object"},
-    "design_notes": {"type": "string", "minLength": 1, "maxLength": 8000}
-  }, "required": ["objective", "input_artifact_id", "input_format", "raw_count_location", "cluster_key", "biological_sample_key", "validation_sample_ids", "requested_method", "declared_thresholds", "design_notes"]},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {
-    "handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]}, "module": {"type": "object"},
-    "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "request_fields": {"type": "array"}, "languages": {"type": "array"},
-    "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"},
-    "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"},
-    "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}
-  }, "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]},
-  "input_artifacts": [{"name": "clustered_single_cell_counts", "artifact_type": "single_cell_analysis_object", "formats": [{"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["observations-by-variables"]}], "processing_levels": ["count-backed", "clustered", "quality-controlled"], "required_metadata": ["input-artifact-digest", "raw-count-location", "cluster-key", "biological-sample-key", "cell-accounting", "feature-identifier-namespace"]}],
-  "output_artifacts": [{"name": "marker_evidence", "artifact_type": "single_cell_marker_evidence", "formats": [
-    {"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["cluster-by-ranked-gene-evidence"]},
-    {"name": "inline-json", "versions": ["2"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["cluster-and-discovery-validation-sample-summary"]}
-  ], "processing_levels": ["ranked-in-discovery-samples", "held-out-sample-validated", "reload-validated"], "required_metadata": ["module-version", "method-version", "cluster-key", "sample-key", "discovery-sample-ids", "validation-sample-ids", "rank-score", "effect-size", "adjusted-p-value", "discovery-detection-fractions", "validation-detection-fractions", "discovery-sample-support", "validation-sample-support", "admission-status", "quality-gate-results"]}],
-  "assumptions": ["Clusters are analysis units for marker description, biological samples are split before analysis into discovery and held-out validation roles, cells are not independent experimental replicates, and marker evidence does not by itself establish a cell identity."],
-  "preconditions": ["The source H5AD has immutable integer-like raw counts, unique cells and features, a reviewed cluster field, at least two discovery biological samples plus predeclared held-out validation samples, adequate cells per cluster in both roles, and a new output location."],
-  "quality_gates": [
-    {"id": "marker-input-semantics", "severity": "fatal", "description": "Block when raw counts, cluster labels, biological samples, unique identifiers, source digest, or feature namespace cannot be established without guessing.", "blocks_interpretation": true},
-    {"id": "marker-cluster-accounting", "severity": "fatal", "description": "Every reviewed cluster must have adequate cells and a complete ranked output; excluded or undersized clusters require explicit status.", "blocks_interpretation": true},
-    {"id": "marker-effect-evidence", "severity": "fatal", "description": "Retain rank score, fold change, cell-level p-value, adjusted p-value, partition-specific raw-count detection fractions, and exact method parameters for every candidate; cell-level significance remains descriptive rather than donor-level inference.", "blocks_interpretation": true},
-    {"id": "marker-sample-stability", "severity": "major", "description": "Freeze discovery and validation sample identities before ranking, exclude validation samples from ranking and threshold selection, and require predeclared directional support without discordance in both partitions for independently validated markers.", "blocks_interpretation": true},
-    {"id": "marker-label-boundary", "severity": "fatal", "description": "Marker ranking cannot automatically assign cell-type labels or substitute for donor-aware condition inference, ontology review, negative markers, and reference mapping.", "blocks_interpretation": true},
-    {"id": "marker-output-reload", "severity": "fatal", "description": "Serialized marker tables must reload with stable cluster, gene, evidence, and admission fields while source counts remain unchanged.", "blocks_interpretation": true}
-  ],
-  "evidence_effects": ["ranks_cluster_specific_marker_candidates_in_discovery_samples", "adds_partition_specific_raw_count_detection_fractions", "adds_held_out_biological_sample_validation", "blocks_cell_level_pseudoreplication_claims", "blocks_automatic_label_assignment"],
-  "alternatives": [],
-  "complements": ["single-cell-reference-annotation", "single-cell-donor-inference", "single-cell-foundation-workflow"],
-  "tool_requirements": [{"name": "scanpy", "ecosystem": "python", "identity": "scanpy", "required": true, "tested_versions": ["1.10.4"], "allowed_versions": [">=1.10,<1.11"], "version_source": "https://scanpy.readthedocs.io/en/1.10.x/api/generated/scanpy.tl.rank_genes_groups.html", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('scanpy'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "alternative", "version_differences": [{"id": "scanpy-marker-ranking", "affected_versions": [">=1.10,<1.11"], "category": "behavior", "description": "rank_genes_groups methods, transformed-data assumptions, tie correction, and result fields are version- and parameter-dependent.", "compatibility_effect": "requires-parameter", "required_action": "Record test method, transformed matrix, group contrast, rank limit, seed, thresholds, and recomputed raw-count detection fractions.", "source": "https://scanpy.readthedocs.io/en/1.10.x/api/generated/scanpy.tl.rank_genes_groups.html"}], "platforms": ["any"]}],
-  "dependencies": [
-    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.10.20"], "allowed_versions": [">=3.10,<3.11"], "version_source": "https://www.python.org/downloads/release/python-31020/", "verified_at": "2026-07-15", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run the validated marker-discovery template in an existing project runtime.", "conflicts": [], "platforms": ["any"]},
-    {"name": "anndata", "ecosystem": "python", "identity": "anndata", "required": true, "tested_versions": ["0.10.8"], "allowed_versions": [">=0.10,<0.11"], "version_source": "https://anndata.readthedocs.io/en/0.10.x/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('anndata'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Read and validate sparse H5AD count objects and metadata.", "conflicts": [], "platforms": ["any"]}
-  ],
-  "compatibility_matrix": [{"id": "agent-protocol-1-scanpy-1104-marker-stability", "module_version": "1.1.0", "tool_versions": {"scanpy": [">=1.10,<1.11"]}, "dependency_versions": {"python": [">=3.10,<3.11"], "anndata": [">=0.10,<0.11"]}, "input_formats": {"clustered_single_cell_counts": ["h5ad@0.1.0"]}, "output_formats": {"marker_evidence": ["tab-separated-values@1", "inline-json@2"]}, "platforms": ["any"], "regression_evidence_ids": ["single-cell-marker-discovery-regression-v2"], "end_to_end_evidence_ids": ["single-cell-marker-discovery-e2e-v2"], "verified_at": "2026-07-23"}],
   "access": "agent_generated",
-  "mutability": "read_only",
-  "credentials": [],
-  "limitations": ["Validated execution covers Scanpy 1.10.4 cluster-versus-rest ranking on predeclared discovery samples, raw-count detection fractions, and posthoc directional validation in held-out biological samples. It describes observed clusters but does not establish cell identity, donor-level condition effects, causality, or marker specificity outside the tested cohort and tissue. Cell-level p-values are descriptive and are not experimental-unit inference."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned marker-evidence workflow combining transformed-expression ranking with raw-count and sample-stratified validation.", "https://scanpy.readthedocs.io/en/1.10.x/api/generated/scanpy.tl.rank_genes_groups.html"]},
   "agent_protocol": {
-    "schema_version": 1, "mode": "codex_generated_project_code", "languages": ["python", "notebook"],
-    "template_sections": [
-      {"id": "inspect-marker-design", "purpose": "Establish raw-count, cluster, sample, feature, split, and contrast semantics.", "required_logic": ["Inspect immutable H5AD, raw-count location, cluster labels, biological samples, cell and feature accounting, source digest, and prior annotations.", "Block guessed clusters or samples, noninteger counts, inadequate cluster sizes, or target labels used to tune markers.", "Predeclare discovery and validation sample identities, ranking method, contrast, rank depth, effect, detection, adjusted-p, and sample-support thresholds before inspecting marker outcomes."], "output_artifact_types": ["single_cell_marker_evidence"], "template_files": ["templates/discover_markers.py"]},
-      {"id": "rank-and-quantify", "purpose": "Rank cluster-versus-rest genes in discovery samples and add raw-count evidence.", "required_logic": ["Normalize and log-transform only a discovery-sample working object while preserving immutable raw counts and excluding held-out validation cells.", "Run the declared ranking method for every cluster and retain score, fold change, cell-level p-value, adjusted p-value and rank with a descriptive inferential-scope label.", "Recompute in-cluster and out-cluster detection fractions from raw counts rather than transformed values."], "output_artifact_types": ["single_cell_marker_evidence"], "template_files": ["templates/discover_markers.py"]},
-      {"id": "sample-stability", "purpose": "Evaluate marker direction in discovery and independently held-out biological samples.", "required_logic": ["Within each evaluable biological sample compare in-cluster and out-cluster raw-count detection for every frozen candidate.", "Record supporting, discordant and unevaluable samples separately for discovery and validation; validation samples cannot alter ranks or thresholds.", "Preserve unstable candidates and negative evidence; independently validate only candidates meeting predeclared support without discordance in both partitions."], "output_artifact_types": ["single_cell_marker_evidence"], "template_files": ["templates/discover_markers.py"]},
-      {"id": "reload-and-admit", "purpose": "Bind marker evidence to a reloadable table without assigning labels.", "required_logic": ["Reload the output table and reconcile every cluster, rank and gene field.", "Verify source digest and raw counts remain unchanged and record exact versions and parameters.", "Admit markers only as annotation evidence; require reference, ontology, positive and negative marker review before labels."], "output_artifact_types": ["single_cell_marker_evidence"], "template_files": ["templates/discover_markers.py"]}
+    "forbidden_actions": [
+      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Do not guess clusters or samples, overwrite raw counts, tune thresholds toward desired markers, use target labels during ranking, or change sample roles after observing marker outcomes.",
+      "Do not allow validation samples into ranking or threshold selection, treat cells as biological replicates for condition effects, or claim marker significance proves a cell identity.",
+      "Do not report generated code or unreloaded output as validated marker evidence."
     ],
+    "languages": [
+      "python",
+      "notebook"
+    ],
+    "mode": "codex_generated_project_code",
     "parameter_rules": [
-      {"id": "marker-test", "parameter": "method", "decision_inputs": ["data transformation", "cluster sizes", "sparsity", "rank objective"], "selection_rule": "Choose a supported cluster-versus-rest ranking method before inspecting desired genes and retain its assumptions.", "validation_rule": "Never compare methods by which one yields the preferred biology."},
-      {"id": "marker-admission", "parameter": "sample-split-and-marker-admission-thresholds", "decision_inputs": ["biological sample identity", "effect size", "adjusted p-value", "in/out detection", "discovery support", "validation support", "cluster size"], "selection_rule": "Freeze sample roles and apply predeclared discovery thresholds jointly; use held-out samples only for posthoc validation and retain all component evidence.", "validation_rule": "No candidate is admitted solely by p-value or average fold change, and no split or threshold is changed after validation outcomes are observed."}
+      {
+        "decision_inputs": [
+          "data transformation",
+          "cluster sizes",
+          "sparsity",
+          "rank objective"
+        ],
+        "id": "marker-test",
+        "parameter": "method",
+        "selection_rule": "Choose a supported cluster-versus-rest ranking method before inspecting desired genes and retain its assumptions.",
+        "validation_rule": "Never compare methods by which one yields the preferred biology."
+      },
+      {
+        "decision_inputs": [
+          "biological sample identity",
+          "effect size",
+          "adjusted p-value",
+          "in/out detection",
+          "discovery support",
+          "validation support",
+          "cluster size"
+        ],
+        "id": "marker-admission",
+        "parameter": "sample-split-and-marker-admission-thresholds",
+        "selection_rule": "Freeze sample roles and apply predeclared discovery thresholds jointly; use held-out samples only for posthoc validation and retain all component evidence.",
+        "validation_rule": "No candidate is admitted solely by p-value or average fold change, and no split or threshold is changed after validation outcomes are observed."
+      }
     ],
-    "preflight_checks": ["Inspect actual H5AD, raw-count location, cluster and sample fields, unique identifiers, cluster sizes, sample cross-tabulation and source digest.", "Detect exact Scanpy, AnnData and Python versions in an existing compatible runtime.", "Verify integer-like counts, adequate cells per cluster in both roles, immutable source data, new output paths, predeclared sample split and frozen thresholds."],
-    "postflight_checks": ["Reconcile every cluster to ranked rows and every ranked gene to the source feature namespace.", "Inspect scores, effects, descriptive cell-level adjusted p-values, partition-specific raw detection fractions, supporting and discordant samples, and independently validated-marker coverage.", "Verify validation samples were excluded from ranking and threshold selection, reload output, verify source digest, and block automatic label promotion."],
-    "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-artifact-sha256", "raw-count-location", "cluster-key", "sample-key", "discovery-sample-ids", "validation-sample-ids", "actual-tool-versions", "ranking-method", "frozen-thresholds", "rank-score", "effect-size", "descriptive-adjusted-p-value", "partition-specific-detection-fractions", "discovery-sample-support", "validation-sample-support", "admission-status", "output-artifact-sha256", "quality-gate-results"],
-    "forbidden_actions": ["Do not install, update, activate, create, or manage Python, R, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.", "Do not guess clusters or samples, overwrite raw counts, tune thresholds toward desired markers, use target labels during ranking, or change sample roles after observing marker outcomes.", "Do not allow validation samples into ranking or threshold selection, treat cells as biological replicates for condition effects, or claim marker significance proves a cell identity.", "Do not report generated code or unreloaded output as validated marker evidence."],
-    "requires_observed_execution": true
-  }
+    "postflight_checks": [
+      "Reconcile every cluster to ranked rows and every ranked gene to the source feature namespace.",
+      "Inspect scores, effects, descriptive cell-level adjusted p-values, partition-specific raw detection fractions, supporting and discordant samples, and independently validated-marker coverage.",
+      "Verify validation samples were excluded from ranking and threshold selection, reload output, verify source digest, and block automatic label promotion."
+    ],
+    "preflight_checks": [
+      "Inspect actual H5AD, raw-count location, cluster and sample fields, unique identifiers, cluster sizes, sample cross-tabulation and source digest.",
+      "Detect exact Scanpy, AnnData and Python versions in an existing compatible runtime.",
+      "Verify integer-like counts, adequate cells per cluster in both roles, immutable source data, new output paths, predeclared sample split and frozen thresholds."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "input-artifact-sha256",
+      "raw-count-location",
+      "cluster-key",
+      "sample-key",
+      "discovery-sample-ids",
+      "validation-sample-ids",
+      "actual-tool-versions",
+      "ranking-method",
+      "frozen-thresholds",
+      "rank-score",
+      "effect-size",
+      "descriptive-adjusted-p-value",
+      "partition-specific-detection-fractions",
+      "discovery-sample-support",
+      "validation-sample-support",
+      "admission-status",
+      "output-artifact-sha256",
+      "quality-gate-results"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-marker-design",
+        "output_artifact_types": [
+          "single_cell_marker_evidence"
+        ],
+        "purpose": "Establish raw-count, cluster, sample, feature, split, and contrast semantics.",
+        "required_logic": [
+          "Inspect immutable H5AD, raw-count location, cluster labels, biological samples, cell and feature accounting, source digest, and prior annotations.",
+          "Block guessed clusters or samples, noninteger counts, inadequate cluster sizes, or target labels used to tune markers.",
+          "Predeclare discovery and validation sample identities, ranking method, contrast, rank depth, effect, detection, adjusted-p, and sample-support thresholds before inspecting marker outcomes."
+        ],
+        "template_files": [
+          "templates/discover_markers.py"
+        ]
+      },
+      {
+        "id": "rank-and-quantify",
+        "output_artifact_types": [
+          "single_cell_marker_evidence"
+        ],
+        "purpose": "Rank cluster-versus-rest genes in discovery samples and add raw-count evidence.",
+        "required_logic": [
+          "Normalize and log-transform only a discovery-sample working object while preserving immutable raw counts and excluding held-out validation cells.",
+          "Run the declared ranking method for every cluster and retain score, fold change, cell-level p-value, adjusted p-value and rank with a descriptive inferential-scope label.",
+          "Recompute in-cluster and out-cluster detection fractions from raw counts rather than transformed values."
+        ],
+        "template_files": [
+          "templates/discover_markers.py"
+        ]
+      },
+      {
+        "id": "sample-stability",
+        "output_artifact_types": [
+          "single_cell_marker_evidence"
+        ],
+        "purpose": "Evaluate marker direction in discovery and independently held-out biological samples.",
+        "required_logic": [
+          "Within each evaluable biological sample compare in-cluster and out-cluster raw-count detection for every frozen candidate.",
+          "Record supporting, discordant and unevaluable samples separately for discovery and validation; validation samples cannot alter ranks or thresholds.",
+          "Preserve unstable candidates and negative evidence; independently validate only candidates meeting predeclared support without discordance in both partitions."
+        ],
+        "template_files": [
+          "templates/discover_markers.py"
+        ]
+      },
+      {
+        "id": "reload-and-admit",
+        "output_artifact_types": [
+          "single_cell_marker_evidence"
+        ],
+        "purpose": "Bind marker evidence to a reloadable table without assigning labels.",
+        "required_logic": [
+          "Reload the output table and reconcile every cluster, rank and gene field.",
+          "Verify source digest and raw counts remain unchanged and record exact versions and parameters.",
+          "Admit markers only as annotation evidence; require reference, ontology, positive and negative marker review before labels."
+        ],
+        "template_files": [
+          "templates/discover_markers.py"
+        ]
+      }
+    ]
+  },
+  "alternatives": [],
+  "assumptions": [
+    "Clusters are analysis units for marker description, biological samples are split before analysis into discovery and held-out validation roles, cells are not independent experimental replicates, and marker evidence does not by itself establish a cell identity."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "anndata": [
+          ">=0.10,<0.11"
+        ],
+        "python": [
+          ">=3.10,<3.11"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "single-cell-marker-discovery-e2e-v2"
+      ],
+      "id": "agent-protocol-1-scanpy-1104-marker-stability",
+      "input_formats": {
+        "clustered_single_cell_counts": [
+          "h5ad@0.1.0"
+        ]
+      },
+      "module_version": "1.1.0",
+      "output_formats": {
+        "marker_evidence": [
+          "tab-separated-values@1",
+          "inline-json@2"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "single-cell-marker-discovery-regression-v2"
+      ],
+      "tool_versions": {
+        "scanpy": [
+          ">=1.10,<1.11"
+        ]
+      },
+      "verified_at": "2026-07-23"
+    }
+  ],
+  "complements": [
+    "single-cell-reference-annotation",
+    "single-cell-donor-inference",
+    "single-cell-foundation-workflow"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.10,<3.11"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run the validated marker-discovery template in an existing project runtime.",
+      "required": true,
+      "tested_versions": [
+        "3.10.20"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-31020/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.10,<0.11"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "anndata",
+      "name": "anndata",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Read and validate sparse H5AD count objects and metadata.",
+      "required": true,
+      "tested_versions": [
+        "0.10.8"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('anndata'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://anndata.readthedocs.io/en/0.10.x/"
+    }
+  ],
+  "description": "Direct Codex to validate count-backed clustered single-cell data, freeze discovery and held-out biological samples before ranking, calculate raw-count detection evidence in each partition, and emit independently validated marker candidates without turning cell-level significance into donor-level inference or automatic cell-type labels.",
+  "domains": [
+    "omics",
+    "statistics"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "ranks_cluster_specific_marker_candidates_in_discovery_samples",
+    "adds_partition_specific_raw_count_detection_fractions",
+    "adds_held_out_biological_sample_validation",
+    "blocks_cell_level_pseudoreplication_claims",
+    "blocks_automatic_label_assignment"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "single-cell-marker-discovery",
+  "input_artifacts": [
+    {
+      "artifact_type": "single_cell_analysis_object",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip",
+            "lzf"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad",
+          "orientations": [
+            "observations-by-variables"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.1.0"
+          ]
+        }
+      ],
+      "name": "clustered_single_cell_counts",
+      "processing_levels": [
+        "count-backed",
+        "clustered",
+        "quality-controlled"
+      ],
+      "required_metadata": [
+        "input-artifact-digest",
+        "raw-count-location",
+        "cluster-key",
+        "biological-sample-key",
+        "cell-accounting",
+        "feature-identifier-namespace"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "biological_sample_key": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "cluster_key": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "declared_thresholds": {
+        "type": "object"
+      },
+      "design_notes": {
+        "maxLength": 8000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "input_artifact_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "input_format": {
+        "enum": [
+          "h5ad"
+        ],
+        "type": "string"
+      },
+      "objective": {
+        "maxLength": 4000,
+        "minLength": 12,
+        "type": "string"
+      },
+      "raw_count_location": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "requested_method": {
+        "enum": [
+          "wilcoxon",
+          "t-test",
+          "logreg"
+        ],
+        "type": "string"
+      },
+      "validation_sample_ids": {
+        "items": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      }
+    },
+    "required": [
+      "objective",
+      "input_artifact_id",
+      "input_format",
+      "raw_count_location",
+      "cluster_key",
+      "biological_sample_key",
+      "validation_sample_ids",
+      "requested_method",
+      "declared_thresholds",
+      "design_notes"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "discover single-cell cluster marker genes",
+    "automatic marker discovery with sample stability",
+    "rank markers for every single-cell cluster",
+    "\u5355\u7ec6\u80de\u805a\u7c7b\u81ea\u52a8 marker discovery \u6837\u672c\u7a33\u5b9a\u6027\u590d\u6838"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Validated execution covers Scanpy 1.10.4 cluster-versus-rest ranking on predeclared discovery samples, raw-count detection fractions, and posthoc directional validation in held-out biological samples. It describes observed clusters but does not establish cell identity, donor-level condition effects, causality, or marker specificity outside the tested cohort and tissue. Cell-level p-values are descriptive and are not experimental-unit inference."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "single_cell_marker_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none",
+            "gzip"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "cluster-by-ranked-gene-evidence"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "cluster-and-discovery-validation-sample-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "2"
+          ]
+        }
+      ],
+      "name": "marker_evidence",
+      "processing_levels": [
+        "ranked-in-discovery-samples",
+        "held-out-sample-validated",
+        "reload-validated"
+      ],
+      "required_metadata": [
+        "module-version",
+        "method-version",
+        "cluster-key",
+        "sample-key",
+        "discovery-sample-ids",
+        "validation-sample-ids",
+        "rank-score",
+        "effect-size",
+        "adjusted-p-value",
+        "discovery-detection-fractions",
+        "validation-detection-fractions",
+        "discovery-sample-support",
+        "validation-sample-support",
+        "admission-status",
+        "quality-gate-results"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "codex_generated_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The source H5AD has immutable integer-like raw counts, unique cells and features, a reviewed cluster field, at least two discovery biological samples plus predeclared held-out validation samples, adequate cells per cluster in both roles, and a new output location."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned marker-evidence workflow combining transformed-expression ranking with raw-count and sample-stratified validation.",
+      "https://scanpy.readthedocs.io/en/1.10.x/api/generated/scanpy.tl.rank_genes_groups.html"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block when raw counts, cluster labels, biological samples, unique identifiers, source digest, or feature namespace cannot be established without guessing.",
+      "id": "marker-input-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every reviewed cluster must have adequate cells and a complete ranked output; excluded or undersized clusters require explicit status.",
+      "id": "marker-cluster-accounting",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Retain rank score, fold change, cell-level p-value, adjusted p-value, partition-specific raw-count detection fractions, and exact method parameters for every candidate; cell-level significance remains descriptive rather than donor-level inference.",
+      "id": "marker-effect-evidence",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Freeze discovery and validation sample identities before ranking, exclude validation samples from ranking and threshold selection, and require predeclared directional support without discordance in both partitions for independently validated markers.",
+      "id": "marker-sample-stability",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Marker ranking cannot automatically assign cell-type labels or substitute for donor-aware condition inference, ontology review, negative markers, and reference mapping.",
+      "id": "marker-label-boundary",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Serialized marker tables must reload with stable cluster, gene, evidence, and admission fields while source counts remain unchanged.",
+      "id": "marker-output-reload",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which genes distinguish each cluster in the observed cells and remain directionally supported across biological samples strongly enough to serve as annotation evidence?"
+  ],
+  "schema_version": 1,
+  "title": "Discover and independently validate single-cell cluster markers",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.10,<1.11"
+      ],
+      "ecosystem": "python",
+      "identity": "scanpy",
+      "mismatch_policy": "alternative",
+      "name": "scanpy",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.10.4"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.10,<1.11"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parameter",
+          "description": "rank_genes_groups methods, transformed-data assumptions, tie correction, and result fields are version- and parameter-dependent.",
+          "id": "scanpy-marker-ranking",
+          "required_action": "Record test method, transformed matrix, group contrast, rank limit, seed, thresholds, and recomputed raw-count detection fractions.",
+          "source": "https://scanpy.readthedocs.io/en/1.10.x/api/generated/scanpy.tl.rank_genes_groups.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('scanpy'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scanpy.readthedocs.io/en/1.10.x/api/generated/scanpy.tl.rank_genes_groups.html"
+    }
+  ],
+  "version": "1.1.0"
 }

@@ -120,12 +120,12 @@ print(json.dumps(result))
         versions = reports["h5ad"]["versions"]
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
         return {
-            "schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": "1.0.0",
+            "schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": "1.1.0",
             "compatibility_row_id": "agent-protocol-1-squidpy-166-spatialdata-050-scanpy-1115",
             "registry_digest": registry.digest,
             "templates": {"spatial": {"name": TEMPLATE.name, "sha256": sha256(TEMPLATE)}},
             "tool_versions": {key: versions[key] for key in ("squidpy", "spatialdata", "scanpy")},
-            "dependency_versions": {key: versions[key] for key in ("python", "anndata", "numpy", "pandas", "scipy", "scikit-learn", "igraph", "zarr")},
+            "dependency_versions": {key: versions[key] for key in ("python", "anndata", "numpy", "pandas", "scipy", "scikit-learn", "igraph", "zarr", "setuptools")},
             "fixture": {"observations": 360, "biological_samples": 2, "observations_per_sample": 180, "genes": 60, "planted_zones": 3, "planted_spatial_genes": 3, "negative_control_genes": 3, "spatialdata_images": 1},
             "execution": {"h5ad_completed": True, "spatialdata_completed": True, "spatial_graph_completed": True, "neighborhood_completed": True, "cooccurrence_completed": True, "moran_completed": True, "domain_model_completed": True, "outputs_reloaded": True},
             "backend_summaries": {prefix: {"input": reports[prefix]["input"], "results": reports[prefix]["results"]} for prefix in reports},

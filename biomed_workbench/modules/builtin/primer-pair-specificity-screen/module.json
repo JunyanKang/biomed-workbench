@@ -1,0 +1,330 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The declared reference panel is the relevant finite specificity scope and exact full-length primer matching is an appropriate initial screen."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_primer_pair_specificity_screen.py",
+      "purpose": "Execute exact-match primer-pair specificity screening across a declared reference sequence panel.",
+      "quality_gate_ids": [
+        "specificity-panel-contract",
+        "specificity-product-accounting",
+        "specificity-claim-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-biopython-1.86-1.87-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ],
+        "biopython": [
+          ">=1.86,<1.88"
+        ]
+      },
+      "input_formats": {
+        "reference_panel": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "specificity_evidence": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "primer-pair-specificity-screen-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "primer-pair-specificity-screen-e2e-v1"
+      ],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "primer-design",
+    "sequence-inspect",
+    "sequence-pairwise-alignment"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    },
+    {
+      "name": "biopython",
+      "ecosystem": "python",
+      "identity": "biopython",
+      "required": true,
+      "tested_versions": [
+        "1.86",
+        "1.87"
+      ],
+      "allowed_versions": [
+        ">=1.86,<1.88"
+      ],
+      "version_source": "https://biopython.org/wiki/Download",
+      "verified_at": "2026-07-24",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version(\"biopython\"))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Execute the versioned PairwiseAligner implementation and retain its exact version in alignment evidence.",
+      "conflicts": [],
+      "platforms": [
+        "any"
+      ]
+    }
+  ],
+  "description": "Screen a declared PCR primer pair by exact-match amplicon enumeration across a finite user-supplied reference panel.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:screen_primer_pair_specificity",
+  "evidence_effects": [
+    "adds-primer-specificity-evidence",
+    "blocks-unqualified-specificity-claims"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "primer-pair-specificity-screen",
+  "input_artifacts": [
+    {
+      "artifact_type": "reference_sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "reference_panel",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "forward_primer": {
+        "type": "string",
+        "minLength": 10
+      },
+      "reverse_primer": {
+        "type": "string",
+        "minLength": 10
+      },
+      "reference_sequences": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object"
+        }
+      },
+      "intended_reference_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "max_products_per_reference": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1000
+      }
+    },
+    "required": [
+      "forward_primer",
+      "reverse_primer",
+      "reference_sequences",
+      "intended_reference_id"
+    ]
+  },
+  "intents": [
+    "screen PCR primer specificity",
+    "PCR primer pair",
+    "check primer pair against reference panel",
+    "筛查 PCR 引物对特异性"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This finite exact-match reference-panel screen is not genome-wide, mismatch-tolerant, thermodynamic or experimental specificity validation.",
+    "A panel-specific pass requires an appropriate broader reference search and experimental validation before specificity claims."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "primer_specificity_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "specificity_evidence",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "intended_reference_id": {
+        "type": "string"
+      },
+      "binding_policy": {
+        "type": "string"
+      },
+      "coordinate_system": {
+        "type": "string"
+      },
+      "reference_count": {
+        "type": "integer"
+      },
+      "reference_summaries": {
+        "type": "array"
+      },
+      "intended_product_count": {
+        "type": "integer"
+      },
+      "off_target_reference_ids": {
+        "type": "array"
+      },
+      "specificity_status": {
+        "type": "string"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "intended_reference_id",
+      "binding_policy",
+      "coordinate_system",
+      "reference_count",
+      "reference_summaries",
+      "intended_product_count",
+      "off_target_reference_ids",
+      "specificity_status",
+      "limitations"
+    ]
+  },
+  "preconditions": [
+    "A finite declared reference sequence panel and intended reference identity are available."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room implementation of PCR simulation capability identified during product capability planning."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "specificity-panel-contract",
+      "severity": "fatal",
+      "description": "Require unique declared references, a declared intended reference, and unambiguous primer sequences.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "specificity-product-accounting",
+      "severity": "major",
+      "description": "Retain every exact-match product per declared reference, including truncation state and reference topology.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "specificity-claim-boundary",
+      "severity": "major",
+      "description": "Block general specificity claims when the finite panel is incomplete, mismatch-tolerant screening is absent, or an off-target product is present.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "Which exact-match PCR amplicons are possible for the declared primer pair on the supplied linear or circular DNA template?"
+  ],
+  "schema_version": 1,
+  "title": "Screen primer-pair specificity in a reference panel",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "id": "patent-claim-structure-audit",
+  "version": "1.0.0",
+  "title": "Check Chinese patent claim structure",
+  "description": "Perform deterministic structural checks on bounded Chinese patent-claim text, including claim numbering, references, placeholders, transition phrasing, short claims, antecedent-basis cues, and result-oriented wording.",
+  "module_type": "validation",
+  "domains": ["publication"],
+  "intents": [
+    "patent claim structure audit",
+    "check Chinese patent claims",
+    "审计中文专利权利要求结构",
+    "检查专利权利要求编号和引用"
+  ],
+  "questions": ["Does the supplied Chinese claim text contain structural findings that must be resolved before formal professional review?"],
+  "entrypoint": "biomed_workbench.capabilities.publication:patent_claim_structure_audit",
+  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 10000000},
+  "maturity": "validated",
+  "input_artifacts": [{
+    "name": "chinese_patent_claims",
+    "artifact_type": "patent_claim_text",
+    "processing_levels": ["declared"],
+    "required_metadata": ["claim-language", "claim-draft-status"],
+    "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["numbered-claim-text"]}]
+  }],
+  "output_artifacts": [{
+    "name": "patent_claim_structure_report",
+    "artifact_type": "patent_claim_structure_quality_report",
+    "processing_levels": ["derived", "quality-gated"],
+    "required_metadata": ["module-version", "claim-count", "formal-review-status"],
+    "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["claim-by-structural-finding"]}]
+  }],
+  "preconditions": ["Chinese claim text is supplied as a bounded draft; the module does not draft, translate, retrieve, or infer missing claim text."],
+  "assumptions": ["Numbered claims use an Arabic numeral followed by a period, Chinese enumeration comma, or full-width period."],
+  "quality_gates": [
+    {"id": "patent-claim-number-and-reference-integrity", "severity": "major", "description": "Claim numbering must be consecutive; references must exist and point only to prior claims.", "blocks_interpretation": true},
+    {"id": "patent-formal-claim-placeholder-boundary", "severity": "major", "description": "Formal claim text must not contain confirmation placeholders.", "blocks_interpretation": true}
+  ],
+  "limitations": [
+    "This structural check is not legal advice or a conclusion on patentability, claim scope, formal sufficiency, enforceability, or filing readiness.",
+    "It does not determine whether a technical feature has source support; use patent-claim-support-audit for that separate gate.",
+    "Antecedent-basis cues, transition phrasing, and length are conservative warnings rather than legal conclusions; the module does not determine jurisdiction-specific drafting requirements or substantive legal defects from free-form claim language."
+  ],
+  "evidence_effects": ["qualifies-patent-claim-structure", "blocks-formal-review-on-major-structural-errors"],
+  "alternatives": [],
+  "complements": ["patent-disclosure-audit", "patent-claim-support-audit", "claim-evidence-integrity-audit"],
+  "tool_requirements": [],
+  "dependencies": [{
+    "name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true,
+    "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-23",
+    "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5,
+    "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute deterministic claim-text structure checks.", "conflicts": [], "platforms": ["any"]
+  }],
+  "compatibility_matrix": [{
+    "id": "patent-claim-structure-python-3143-inline-json-1", "module_version": "1.0.0", "tool_versions": {}, "dependency_versions": {"python": [">=3.14,<3.15"]},
+    "input_formats": {"chinese_patent_claims": ["inline-json@1"]}, "output_formats": {"patent_claim_structure_report": ["inline-json@1"]}, "platforms": ["any"],
+    "regression_evidence_ids": ["patent-claim-structure-audit-regression-v1"], "end_to_end_evidence_ids": ["patent-claim-structure-audit-e2e-v1"], "verified_at": "2026-07-23"
+  }],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {"type": "object", "additionalProperties": false, "properties": {"claims_text": {"type": "string", "minLength": 1, "maxLength": 500000}}, "required": ["claims_text"]},
+  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"claim_count": {"type": "integer"}, "claims": {"type": "array"}, "findings": {"type": "array"}, "ready_for_formal_review": {"type": "boolean"}, "limitations": {"type": "array"}}, "required": ["claim_count", "claims", "findings", "ready_for_formal_review", "limitations"]},
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room Chinese patent-claim structure capability informed by direct Nature skill review."]}
+}

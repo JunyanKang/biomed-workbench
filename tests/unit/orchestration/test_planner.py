@@ -78,6 +78,20 @@ def workflow_registry(payloads):
 
 
 class PlannerTests(unittest.TestCase):
+    def test_builtin_primer_selection_pcr_chain_is_serial_and_unambiguous(self):
+        from biomed_workbench.modules.index import BUILTIN_ROOT
+
+        base = inline_artifact("artifact-template", "sequence_set").to_dict()
+        base.pop("content_digest")
+        base["content"] = {"template": "GCGTACGATCGATGCTAGCTAGGCTAACGTTAGCGATCGTACGATCGATGCTAGCATCGATGCGTACGATCG"}
+        artifact = ScientificArtifact.create(**base)
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
+        request = PlanningRequest("request-pcr", "pcr_amplicon_evidence", (hypothesis().id,), ("pcr-product",))
+
+        plan = plan_research(state_with(artifact), registry, build_capability_graph(registry), (request,))
+
+        self.assertEqual(plan.plan_type, "serial")
+        self.assertEqual([node.module_id for node in plan.nodes], ["primer-design", "pcr-primer-pair-selection", "pcr-amplicon-simulation"])
     def test_builtin_single_plan_uses_exact_available_artifact_contract(self):
         from biomed_workbench.modules.index import BUILTIN_ROOT
 
@@ -153,6 +167,48 @@ class PlannerTests(unittest.TestCase):
         )
 
         self.assertEqual(tuple(node.module_id for node in plan.nodes), ("alternative-normalizer",))
+
+    def test_upstream_required_port_ignores_a_project_artifact_and_builds_its_declared_producer(self):
+        resolver = module_payload("resolve-identifier", "count_matrix", "resolved_identifier")
+        consumer = module_payload("retrieve-dependent-evidence", "resolved_identifier", "evidence_table")
+        consumer["input_artifacts"][0]["source_policy"] = "upstream_required"
+        temporary, registry = workflow_registry((resolver, consumer))
+        self.addCleanup(temporary.cleanup)
+        state = state_with(
+            inline_artifact("artifact-counts", "count_matrix"),
+            inline_artifact("artifact-untrusted-id", "resolved_identifier"),
+        )
+
+        plan = plan_research(
+            state,
+            registry,
+            build_capability_graph(registry),
+            (PlanningRequest("request-evidence", "evidence_table", (hypothesis().id,), ("identifier-evidence",)),),
+        )
+
+        self.assertEqual(plan.plan_type, "serial")
+        resolver_node, consumer_node = plan.nodes
+        self.assertEqual((resolver_node.module_id, consumer_node.module_id), ("resolve-identifier", "retrieve-dependent-evidence"))
+        self.assertNotIn("artifact-untrusted-id", consumer_node.input_bindings.values())
+        self.assertEqual(consumer_node.dependencies, (resolver_node.id,))
+
+    def test_builtin_ortholog_plan_requires_identifier_resolution_before_retrieval(self):
+        from biomed_workbench.modules.index import BUILTIN_ROOT
+
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
+        state = state_with(inline_artifact("artifact-gene-query", "database_query"))
+
+        plan = plan_research(
+            state,
+            registry,
+            build_capability_graph(registry),
+            (PlanningRequest("request-ortholog", "evidence_table", (hypothesis().id,), ("ortholog-record",)),),
+            compatible_module_ids=("gene-identifier-resolution", "gene-ortholog-evidence"),
+        )
+
+        self.assertEqual(plan.plan_type, "serial")
+        self.assertEqual(tuple(node.module_id for node in plan.nodes), ("gene-identifier-resolution", "gene-ortholog-evidence"))
+        self.assertEqual(plan.nodes[1].dependencies, (plan.nodes[0].id,))
 
 
 if __name__ == "__main__":

@@ -1,9 +1,22 @@
 {
-  "bioinformatics_module_count": 56,
-  "covered_module_count": 56,
+  "bioinformatics_module_count": 78,
+  "covered_module_count": 78,
   "passed": true,
-  "passing_module_count": 56,
+  "passing_module_count": 78,
   "records": [
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "aligned-protein-conservation",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_aligned_protein_conservation.py"
+      ]
+    },
     {
       "domains": [
         "omics"
@@ -32,6 +45,46 @@
     },
     {
       "domains": [
+        "omics"
+      ],
+      "errors": [],
+      "module_id": "assembly-reference-alignment",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_minimap2_assembly.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
+        "epigenomics"
+      ],
+      "errors": [],
+      "module_id": "bulk-chromatin-peak-calling",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/call_macs3_chromatin.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "cd-thermal-transition-summary",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_cd_thermal_transition_summary.py"
+      ]
+    },
+    {
+      "domains": [
         "molecular_design"
       ],
       "errors": [],
@@ -41,6 +94,48 @@
       "template_count": 1,
       "template_files": [
         "templates/filter_chemical_substructures.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
+        "statistics"
+      ],
+      "errors": [],
+      "module_id": "comparative-sequence-phylogeny",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_mafft_iqtree.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
+        "epigenomics"
+      ],
+      "errors": [],
+      "module_id": "cool-contact-evidence",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/extract_cool_contact_evidence.py"
+      ]
+    },
+    {
+      "domains": [
+        "clinical",
+        "omics"
+      ],
+      "errors": [],
+      "module_id": "copy-number-event-summary",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/audit_copy_number_events.py"
       ]
     },
     {
@@ -164,6 +259,33 @@
     },
     {
       "domains": [
+        "molecular_design",
+        "evidence"
+      ],
+      "errors": [],
+      "module_id": "genbank-coding-sequence-extraction",
+      "module_type": "transform",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_genbank_coding_sequence_extraction.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics"
+      ],
+      "errors": [],
+      "module_id": "genome-coordinate-liftover",
+      "module_type": "transform",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_crossmap_bed.py"
+      ]
+    },
+    {
+      "domains": [
         "molecular_design"
       ],
       "errors": [],
@@ -190,6 +312,20 @@
     },
     {
       "domains": [
+        "omics",
+        "genetics"
+      ],
+      "errors": [],
+      "module_id": "gwas-susie-fine-mapping",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_susie_rss_finemapping.R"
+      ]
+    },
+    {
+      "domains": [
         "omics"
       ],
       "errors": [],
@@ -199,6 +335,19 @@
       "template_count": 1,
       "template_files": [
         "templates/run_interval_overlap_bedtools.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "itc-single-site-binding",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_itc_single_site_binding.py"
       ]
     },
     {
@@ -213,6 +362,21 @@
       "template_count": 1,
       "template_files": [
         "templates/run_metagene_factorization_nmf.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
+        "genetics",
+        "population-genetics"
+      ],
+      "errors": [],
+      "module_id": "msprime-demographic-simulation",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/simulate_demography.py"
       ]
     },
     {
@@ -246,12 +410,64 @@
         "molecular_design"
       ],
       "errors": [],
+      "module_id": "open-reading-frame-annotation",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_open_reading_frame_annotation.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "pcr-amplicon-simulation",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_pcr_amplicon_simulation.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "pcr-primer-pair-selection",
+      "module_type": "design",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_pcr_primer_pair_selection.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
       "module_id": "primer-design",
       "module_type": "design",
       "passed": true,
       "template_count": 1,
       "template_files": [
         "templates/run_primer_design.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "primer-pair-specificity-screen",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_primer_pair_specificity_screen.py"
       ]
     },
     {
@@ -338,6 +554,46 @@
         "molecular_design"
       ],
       "errors": [],
+      "module_id": "rna-secondary-structure-summary",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_rna_secondary_structure_summary.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
+        "genetics"
+      ],
+      "errors": [],
+      "module_id": "rrblup-genomic-prediction",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_rrblup_grouped_prediction.R"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "sanger-verification-coverage",
+      "module_type": "design",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_sanger_verification_coverage.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
       "module_id": "sequence-back-translate",
       "module_type": "analysis",
       "passed": true,
@@ -357,6 +613,46 @@
       "template_count": 1,
       "template_files": [
         "templates/run_sequence_inspect.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
+        "epigenomics"
+      ],
+      "errors": [],
+      "module_id": "sequence-motif-enrichment",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_sequence_motif_enrichment.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "sequence-pairwise-alignment",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_sequence_pairwise_alignment.py"
+      ]
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "errors": [],
+      "module_id": "sequence-variant-localization",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_sequence_variant_localization.py"
       ]
     },
     {
@@ -546,9 +842,10 @@
       "module_id": "single-cell-multimodal-integration",
       "module_type": "analysis",
       "passed": true,
-      "template_count": 2,
+      "template_count": 3,
       "template_files": [
         "templates/fit_mofaplus.py",
+        "templates/prepare_10x_multiome.R",
         "templates/run_wnn.R"
       ]
     },
@@ -589,8 +886,9 @@
       "module_id": "single-cell-regulatory-network",
       "module_type": "analysis",
       "passed": true,
-      "template_count": 2,
+      "template_count": 3,
       "template_files": [
+        "templates/run_grnboost2_programs.py",
         "templates/run_pyscenic.py",
         "templates/score_scenicplus_eregulons.py"
       ]
@@ -771,6 +1069,6 @@
       ]
     }
   ],
-  "registry_digest": "c597256c183d84cb455cfb8769e0c5cbc2e0af4c398d4ba068544c7c6258d398",
+  "registry_digest": "5b11049405a9122b4fdc197a33f8417f320ca9dbdfd13b520ae2a80de2764bd1",
   "schema_version": 1
 }

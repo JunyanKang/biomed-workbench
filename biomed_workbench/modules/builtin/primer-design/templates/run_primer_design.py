@@ -29,12 +29,12 @@ from biomed_workbench.project_templates import (
 
 
 MODULE_ID = 'primer-design'
-MODULE_VERSION = '1.0.0'
+MODULE_VERSION = '1.1.0'
 ENTRYPOINT = 'biomed_workbench.capabilities.molecular:design_primers'
 REQUIRED_PARAMETER_FIELDS = ('template',)
 INPUT_ARTIFACT_PORTS = ('template',)
 OUTPUT_ARTIFACT_PORTS = ('primers',)
-QUALITY_GATE_IDS = ('primer-design-validity',)
+QUALITY_GATE_IDS = ('primer-design-input', 'primer3-candidate-accounting', 'primer-design-claim-boundary')
 
 
 def parse_args() -> argparse.Namespace:

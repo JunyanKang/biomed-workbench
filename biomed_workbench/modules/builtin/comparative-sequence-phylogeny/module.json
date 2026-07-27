@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "id": "comparative-sequence-phylogeny",
+  "version": "0.1.0",
+  "title": "Build reproducible comparative sequence alignments and phylogenetic evidence",
+  "description": "Direct Codex to validate homologous nucleotide or amino-acid FASTA records, execute MAFFT alignment and IQ-TREE inference in an existing compatible scientific environment, retain complete alignment, tree, model, support, sample, and version provenance, and refuse simulated haplotypes, divergence dates, orthology calls, or evolutionary conclusions unsupported by the supplied records and model.",
+  "module_type": "analysis",
+  "domains": ["omics", "statistics"],
+  "intents": ["comparative genomics alignment", "multiple sequence alignment phylogeny", "MAFFT IQ-TREE evolutionary analysis", "比较基因组 多序列比对 系统发育"],
+  "questions": ["Which relationships among a declared set of homologous sequences are supported by a validated alignment and explicitly configured substitution model, and which biological claims remain unidentifiable?"],
+  "maturity": "validated",
+  "entrypoint": "agent-generated-analysis",
+  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
+  "input_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "objective": {"type": "string", "minLength": 12, "maxLength": 4000},
+      "sequence_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256},
+      "sequence_type": {"type": "string", "enum": ["dna", "rna", "protein"]},
+      "homology_basis": {"type": "string", "enum": ["declared-orthologs", "declared-homologous-locus", "declared-gene-family", "declared-aligned-sequences"]},
+      "sample_metadata_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256},
+      "outgroup_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 256}},
+      "substitution_model": {"type": "string", "minLength": 1, "maxLength": 128},
+      "support_method": {"type": "string", "enum": ["ultrafast-bootstrap", "standard-bootstrap", "none-exploratory"]},
+      "support_replicates": {"type": "integer", "minimum": 0, "maximum": 10000},
+      "declared_thresholds": {"type": "object"},
+      "design_notes": {"type": "string", "minLength": 1, "maxLength": 8000}
+    },
+    "required": ["objective", "sequence_artifact_id", "sequence_type", "homology_basis", "sample_metadata_artifact_id", "outgroup_ids", "substitution_model", "support_method", "support_replicates", "declared_thresholds", "design_notes"]
+  },
+  "output_schema": {
+    "type": "object", "additionalProperties": false,
+    "properties": {
+      "handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]}, "module": {"type": "object"}, "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}
+    },
+    "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]
+  },
+  "input_artifacts": [
+    {"name": "homologous_sequence_records", "artifact_type": "homologous_sequence_collection", "formats": [{"name": "fasta", "versions": ["1"], "representations": ["text"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-if-identifier-derived"], "orientations": ["records-by-sequence"]}], "processing_levels": ["declared-homologous", "identifier-unique"], "required_metadata": ["source-artifact-digest", "sequence-type", "homology-basis", "record-identifiers", "species-or-sample-manifest"]},
+    {"name": "sequence_sample_metadata", "artifact_type": "comparative_sequence_metadata", "formats": [{"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-if-applicable"], "orientations": ["records-by-metadata-fields"]}], "processing_levels": ["reviewed"], "required_metadata": ["record-id", "taxon-or-sample-id", "source-provenance", "collection-or-assembly-context"]}
+  ],
+  "output_artifacts": [
+    {"name": "comparative_alignment_and_tree", "artifact_type": "comparative_sequence_evidence", "formats": [{"name": "fasta", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["alignment-columns"], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-if-applicable"], "orientations": ["records-by-alignment-columns"]}, {"name": "newick", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["tips-by-branching-relationships"]}, {"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["validation-and-provenance-summary"]}], "processing_levels": ["alignment-validated", "tree-reload-validated", "method-specific"], "required_metadata": ["input-digest", "record-accounting", "alignment-digest", "tree-digest", "tool-versions", "substitution-model", "support-method", "support-replicates", "quality-gate-results"]}
+  ],
+  "assumptions": ["The supplied sequences are independently established as homologous and the chosen sampling design supports the intended taxonomic or within-locus comparison."],
+  "preconditions": ["Records have unique stable identifiers; sequence type, homology basis, metadata, outgroup status, substitution model and support policy are declared before execution; all output paths are new."],
+  "quality_gates": [
+    {"id": "comparative-sequence-identity-and-homology", "severity": "fatal", "description": "Block when FASTA identifiers, sequence alphabet, duplicate records, sequence provenance, or declared homology basis are ambiguous; sequence similarity alone is not accepted as orthology proof.", "blocks_interpretation": true},
+    {"id": "comparative-alignment-completeness", "severity": "fatal", "description": "MAFFT output must reload with exactly the input record set, one common aligned length, finite nonempty residues, and an explicitly reported gap burden; failed alignment never falls back to position-wise comparison.", "blocks_interpretation": true},
+    {"id": "comparative-tree-model-and-support", "severity": "fatal", "description": "IQ-TREE output must retain the declared model, support method, replicate count, seed, and a reloadable tree whose tips match the alignment records; a tree without required support remains exploratory.", "blocks_interpretation": true},
+    {"id": "comparative-outgroup-and-claim-boundary", "severity": "major", "description": "Rooting requires declared, present and biologically appropriate outgroup records; topology does not by itself establish orthology, selection, species history, recombination, divergence time, or functional conservation.", "blocks_interpretation": true},
+    {"id": "comparative-output-provenance", "severity": "fatal", "description": "Reload alignment, tree, metadata join and report; reconcile every input record, tool version, parameter, digest and rejected record before scientific interpretation.", "blocks_interpretation": true}
+  ],
+  "evidence_effects": ["adds_alignment_validated_homology_comparison", "adds_model_and_support_bound_phylogenetic_evidence", "preserves_record_level_rejections_and_metadata_join", "blocks_simulated_haplotype_or_divergence_claims"],
+  "alternatives": ["multi-sample-variant-concordance"],
+  "complements": ["sequence-inspect", "variant-filter-vcf", "multi-sample-variant-concordance", "gene-evidence"],
+  "tool_requirements": [
+    {"name": "mafft", "ecosystem": "system", "identity": "mafft", "required": true, "tested_versions": ["7.526"], "allowed_versions": [">=7.520,<8"], "version_source": "https://mafft.cbrc.jp/alignment/software/", "verified_at": "2026-07-23", "version_probe": ["mafft", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "mafft-auto-and-thread-cli", "affected_versions": [">=7.520,<8"], "category": "behavior", "description": "Automatic strategy selection and command-line output behavior are release-coupled.", "compatibility_effect": "requires-parser", "required_action": "Capture exact command, output, version and record accounting; do not use an unvalidated fallback aligner.", "source": "https://mafft.cbrc.jp/alignment/software/"}], "platforms": ["any"]},
+    {"name": "iqtree", "ecosystem": "system", "identity": "iqtree3", "required": true, "tested_versions": ["3.1.2"], "allowed_versions": [">=3.1,<3.2"], "version_source": "https://iqtree.github.io/", "verified_at": "2026-07-23", "version_probe": ["iqtree3", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "iqtree3-model-support-and-treefile", "affected_versions": [">=3.1,<3.2"], "category": "output-format", "description": "Model reporting, support flags and treefile naming are release-coupled.", "compatibility_effect": "requires-parser", "required_action": "Retain the producer report and reload tree tips and support settings before use.", "source": "https://iqtree.github.io/"}], "platforms": ["any"]}
+  ],
+  "dependencies": [
+    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.12,<3.15"], "version_source": "https://www.python.org/downloads/", "verified_at": "2026-07-23", "version_probe": ["python3", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate FASTA records, invoke declared existing tools without shell execution, and serialize provenance.", "conflicts": [], "platforms": ["any"]},
+    {"name": "biopython", "ecosystem": "python", "identity": "biopython", "required": true, "tested_versions": ["1.86"], "allowed_versions": [">=1.86,<1.87"], "version_source": "https://biopython.org/wiki/Download", "verified_at": "2026-07-23", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('biopython'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Parse and reload FASTA alignments and Newick trees for complete record accounting.", "conflicts": [], "platforms": ["any"]}
+  ],
+  "compatibility_matrix": [{"id": "agent-protocol-1-mafft-7526-iqtree3-312-biopython-186", "module_version": "0.1.0", "tool_versions": {"mafft": [">=7.520,<8"], "iqtree": [">=3.1,<3.2"]}, "dependency_versions": {"python": [">=3.12,<3.15"], "biopython": [">=1.86,<1.87"]}, "input_formats": {"homologous_sequence_records": ["fasta@1"], "sequence_sample_metadata": ["tab-separated-values@1"]}, "output_formats": {"comparative_alignment_and_tree": ["fasta@1", "newick@1", "inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["comparative-sequence-phylogeny-regression-v1"], "end_to_end_evidence_ids": ["comparative-sequence-phylogeny-e2e-v1"], "verified_at": "2026-07-23"}],
+  "access": "agent_generated",
+  "mutability": "read_only",
+  "credentials": [],
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room replacement for comparative genomics and phylogeny capabilities identified during product capability planning.", "https://mafft.cbrc.jp/alignment/software/", "https://iqtree.github.io/", "https://biopython.org/"]},
+  "limitations": ["This module does not identify homologs or orthologs from arbitrary unrelated sequences, call variants from raw genomes, phase haplotypes, infer recombination, estimate divergence dates, or validate functional conservation. Compatibility and end-to-end evidence is provided for MAFFT-IQ-TREE workflows against declared public-data fixtures, with execution evidence required before biological interpretation is admitted."],
+  "agent_protocol": {
+    "schema_version": 1, "mode": "codex_generated_project_code", "languages": ["python", "notebook"],
+    "template_sections": [
+      {"id": "inspect-comparative-sequence-contract", "purpose": "Establish homologous records, metadata, outgroup and model semantics before alignment.", "required_logic": ["Inspect every FASTA identifier, sequence alphabet, length, source digest, metadata row and declared homology basis.", "Reject duplicate, empty, incompatible or ambiguity-unresolved records and freeze model, support and outgroup policy before inference."], "output_artifact_types": ["comparative_sequence_evidence"], "template_files": ["templates/run_mafft_iqtree.py"]},
+      {"id": "align-and-infer-tree", "purpose": "Execute declared alignment and phylogeny tools in an existing compatible runtime.", "required_logic": ["Run MAFFT and IQ-TREE only after version detection succeeds; retain commands, stdout, stderr, model, support settings and random seed.", "Never substitute direct position comparison, a synthetic tree, random haplotypes or a different tool after a failure."], "output_artifact_types": ["comparative_sequence_evidence"], "template_files": ["templates/run_mafft_iqtree.py"]},
+      {"id": "reload-and-bound-interpretation", "purpose": "Reload every output and limit biological interpretation to supported evidence.", "required_logic": ["Reload the alignment and tree, reconcile exact record identifiers, validate alignment length and metadata join, and preserve rejected records and reasons.", "Report topology and declared support only; separately state that orthology, selection, recombination, divergence time and function require independent evidence."], "output_artifact_types": ["comparative_sequence_evidence"], "template_files": ["templates/run_mafft_iqtree.py"]}
+    ],
+    "parameter_rules": [{"id": "comparative-model-and-support", "parameter": "substitution-model-support-outgroup", "decision_inputs": ["sequence-type", "homology-basis", "taxon-sampling", "outgroup-identity", "scientific-question"], "selection_rule": "Declare a biologically justified substitution model, support method and outgroup before execution.", "validation_rule": "Do not use desired topology, functional annotation or downstream outcome to tune the model or root."}],
+    "preflight_checks": ["Detect exact MAFFT, IQ-TREE, Python and Biopython versions in an existing scientific environment.", "Validate FASTA and metadata records, output paths, sequence type, homology basis, outgroup membership, model and support policy."],
+    "postflight_checks": ["Reload alignment, tree, metadata join and report; reconcile every input record, gap burden, tip set, command, version, model, support setting and digest."],
+    "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-fasta-sha256", "metadata-sha256", "record-accounting", "outgroup-ids", "substitution-model", "support-method", "support-replicates", "seed", "actual-tool-versions", "commands", "alignment-sha256", "tree-sha256", "quality-gates"],
+    "forbidden_actions": ["Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.", "Do not infer homology, orthology, outgroups, model, species context or metadata from names alone.", "Do not create simulated variants, haplotypes, trees, branch supports, divergence dates or fallback position-wise comparisons.", "Do not interpret topology as proof of orthology, selection, species history, recombination, divergence time or functional conservation."],
+    "requires_observed_execution": true
+  }
+}

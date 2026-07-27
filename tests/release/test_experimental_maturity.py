@@ -2,6 +2,8 @@ import json
 import unittest
 from pathlib import Path
 
+from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.registry import ModuleRegistry
 from tools.build_experimental_maturity_report import build
 
 
@@ -19,8 +21,10 @@ class ExperimentalMaturityReleaseTests(unittest.TestCase):
 
     def test_every_experimental_module_has_foundational_execution_evidence(self):
         report = self.report
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
+        expected_count = sum(1 for module in registry.all() if module.maturity == "experimental")
         self.assertTrue(report["passed"])
-        self.assertEqual(report["experimental_module_count"], 19)
+        self.assertEqual(report["experimental_module_count"], expected_count)
         for key in (
             "contract_passed",
             "template_passed",

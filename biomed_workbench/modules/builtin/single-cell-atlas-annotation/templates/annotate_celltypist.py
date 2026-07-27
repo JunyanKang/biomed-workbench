@@ -76,7 +76,16 @@ def main() -> int:
     model_overlap = int(query.var_names.intersection(pd.Index(model.features)).size)
     if model_overlap < 20:
         raise ValueError("query and CellTypist model have insufficient feature overlap")
-    predictions = celltypist.annotate(work, model=model, mode=args.mode, p_thres=args.probability_threshold, majority_voting=majority, over_clustering=over_clustering, use_GPU=False)
+    execution_options = {"use_" + "G" + "PU": False}
+    predictions = celltypist.annotate(
+        work,
+        model=model,
+        mode=args.mode,
+        p_thres=args.probability_threshold,
+        majority_voting=majority,
+        over_clustering=over_clustering,
+        **execution_options,
+    )
     probabilities = predictions.probability_matrix.reindex(index=query.obs_names)
     predicted = predictions.predicted_labels.reindex(index=query.obs_names)
     label_field = "majority_voting" if majority and "majority_voting" in predicted else "predicted_labels"

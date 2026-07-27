@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "kaplan-meier-with-censoring-and-reached-median",
+      "input": {
+        "durations": [5, 10, 10, 20],
+        "events": [1, 0, 1, 1]
+      },
+      "expected_subset": {
+        "n": 4,
+        "events": 3,
+        "median_survival": 10.0,
+        "method": "Kaplan-Meier product-limit estimate with Greenwood standard error"
+      }
+    }
+  ]
+}

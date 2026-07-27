@@ -1,0 +1,247 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Template ends are intended primer regions and approximate melting-temperature formulas are adequate for candidate screening."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_pcr_primer_pair_selection.py",
+      "purpose": "Bind an explicit ranked primer candidate to a PCR simulation request.",
+      "quality_gate_ids": [
+        "pcr-primer-selection-contract"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "pcr-primer-pair-selection-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "primer_design": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "pcr_simulation_request": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "pcr-primer-pair-selection-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-12"
+    }
+  ],
+  "complements": [
+    "restriction-plan"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Bind one declared ranked primer-design candidate to an explicit PCR template and primer request.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:select_pcr_primer_pair",
+  "evidence_effects": [
+    "proposes_testable_candidate"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "pcr-primer-pair-selection",
+  "input_artifacts": [
+    {
+      "artifact_type": "primer_candidate_design",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "primer_design",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "template": {
+        "type": "string",
+        "minLength": 1
+      },
+      "pairs": {
+        "type": "array",
+        "minItems": 1
+      },
+      "selected_candidate_index": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "required": [
+      "template",
+      "pairs"
+    ]
+  },
+  "intents": [
+    "select PCR primer pair",
+    "bind primer candidate for PCR",
+    "选择 PCR 引物对"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Genomic uniqueness and off-target amplification are not assessed; verify candidates against the intended reference.",
+    "Secondary structure and salt-adjusted nearest-neighbor thermodynamics require a dedicated downstream check."
+  ],
+  "maturity": "validated",
+  "module_type": "design",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "pcr_simulation_request",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "pcr_simulation_request",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "template": {
+        "type": "string"
+      },
+      "forward_primer": {
+        "type": "string"
+      },
+      "reverse_primer": {
+        "type": "string"
+      },
+      "selected_candidate_index": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "template",
+      "forward_primer",
+      "reverse_primer",
+      "selected_candidate_index"
+    ]
+  },
+  "preconditions": [
+    "A schema-valid sequence set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned implementation with module-level validation evidence."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "pcr-primer-selection-contract",
+      "severity": "fatal",
+      "description": "Require one explicit in-range ranked candidate and preserve its template and exact primer sequences.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "Which declared ranked primer candidate should be bound to this PCR simulation request?"
+  ],
+  "schema_version": 1,
+  "title": "Select a PCR primer pair",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

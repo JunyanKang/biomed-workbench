@@ -1,108 +1,1080 @@
 {
-  "schema_version": 1,
-  "id": "single-cell-atlas-annotation",
-  "version": "1.1.0",
-  "title": "Map and reconcile single-cell atlas annotations while retaining unknown states",
-  "description": "Direct Codex to inspect count-backed query cells and declared reference assets, execute CellTypist, Azimuth, or a popV expert ensemble in compatible existing scientific runtimes, reconcile comparable CellTypist, Azimuth, popV, SingleR, or scANVI evidence through ontology-aware weighted consensus, retain every method-specific label and confidence, preserve low-confidence or discordant cells as Unknown, and admit only reload-validated annotations that leave source counts and identities unchanged.",
-  "module_type": "analysis",
-  "domains": ["omics", "classification"],
-  "intents": ["CellTypist cell annotation", "Azimuth reference mapping", "popV consensus cell annotation", "single-cell atlas annotation with unknown retention", "单细胞 CellTypist Azimuth popV 图谱注释 未知细胞保留"],
-  "questions": ["Which query cells are supported by the declared reference atlas, which methods agree, and which cells must remain unknown because confidence, mapping quality, or expert consensus is inadequate?"],
-  "maturity": "experimental",
-  "entrypoint": "agent-generated-analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {
-    "objective": {"type": "string", "minLength": 12, "maxLength": 4000},
-    "query_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256},
-    "reference_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256},
-    "query_format": {"type": "string", "enum": ["h5ad", "seurat-rds"]},
-    "reference_format": {"type": "string", "enum": ["celltypist-model", "h5ad", "azimuth-reference"]},
-    "query_raw_count_location": {"type": "string", "minLength": 1, "maxLength": 256},
-    "requested_backends": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["celltypist", "azimuth", "popv"]}},
-    "reference_label_key": {"type": "string", "minLength": 1, "maxLength": 128},
-    "query_batch_key": {"type": "string", "minLength": 1, "maxLength": 128},
-    "reference_batch_key": {"type": "string", "minLength": 1, "maxLength": 128},
-    "unknown_label": {"type": "string", "minLength": 1, "maxLength": 128},
-    "declared_thresholds": {"type": "object"},
-    "reference_scope_notes": {"type": "string", "minLength": 1, "maxLength": 8000},
-    "design_notes": {"type": "string", "minLength": 1, "maxLength": 8000}
-  }, "required": ["objective", "query_artifact_id", "reference_artifact_id", "query_format", "reference_format", "query_raw_count_location", "requested_backends", "reference_label_key", "query_batch_key", "reference_batch_key", "unknown_label", "declared_thresholds", "reference_scope_notes", "design_notes"]},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {
-    "handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]}, "module": {"type": "object"},
-    "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "request_fields": {"type": "array"}, "languages": {"type": "array"},
-    "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"},
-    "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"},
-    "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}
-  }, "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]},
-  "input_artifacts": [
-    {"name": "query_single_cell_object", "artifact_type": "single_cell_analysis_object", "formats": [
-      {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["observations-by-variables"]},
-      {"name": "seurat-rds", "versions": ["5"], "representations": ["container", "sparse"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["features-by-observations"]}
-    ], "processing_levels": ["quality-controlled", "count-backed"], "required_metadata": ["input-artifact-digest", "raw-count-location", "feature-identifier-namespace", "species", "tissue", "developmental-stage", "assay", "cell-accounting"]},
-    {"name": "declared_reference_assets", "artifact_type": "single_cell_reference_object", "formats": [
-      {"name": "celltypist-model", "versions": ["1"], "representations": ["binary"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["feature-coefficient-by-label"]},
-      {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["observations-by-variables"]},
-      {"name": "azimuth-reference", "versions": ["1"], "representations": ["container", "binary"], "compression": ["none"], "required_indexes": ["idx.annoy"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["reference-latent-space"]}
-    ], "processing_levels": ["reviewed", "versioned", "labelled"], "required_metadata": ["reference-digest", "reference-version", "label-key", "feature-identifier-namespace", "species", "tissue", "developmental-stage", "assay", "known-missing-populations"]}
-  ],
-  "output_artifacts": [
-    {"name": "atlas_annotated_single_cell_object", "artifact_type": "single_cell_annotated_object", "formats": [
-      {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["observations-by-variables"]},
-      {"name": "seurat-rds", "versions": ["5"], "representations": ["container", "sparse"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["features-by-observations"]}
-    ], "processing_levels": ["reference-mapped", "confidence-reviewed", "unknown-preserving", "reload-validated"], "required_metadata": ["backend", "backend-version", "reference-digest", "raw-label", "confidence-or-consensus", "review-label", "mapping-status", "thresholds", "source-count-preservation", "quality-gate-results"]},
-    {"name": "atlas_annotation_report", "artifact_type": "single_cell_annotation_validation", "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["backend-and-quality-summary"]}], "processing_levels": ["method-specific", "cell-accounted", "reload-validated"], "required_metadata": ["query-digest", "reference-digest", "feature-overlap", "method-versions", "label-counts", "unknown-count", "quality-status"]}
-  ],
-  "assumptions": ["The declared reference is independently reviewed and biologically appropriate for the query; labels absent from the reference cannot be discovered by nearest-reference mapping and must remain unknown or be investigated independently."],
-  "preconditions": ["Query counts are immutable, nonnegative and integer-like; identifiers are unique; reference scope and missing populations are documented; feature namespace and overlap are established; thresholds are frozen before mapping; all outputs are new paths."],
-  "quality_gates": [
-    {"id": "atlas-input-and-reference-semantics", "severity": "fatal", "description": "Block when query counts, feature namespace, biological scope, reference identity, version, labels, missing populations, or source digests cannot be established without guessing.", "blocks_interpretation": true},
-    {"id": "atlas-feature-overlap", "severity": "fatal", "description": "Block inadequate or ambiguous query-reference feature overlap and require a declared, versioned homolog mapping when namespaces or species differ.", "blocks_interpretation": true},
-    {"id": "atlas-method-specific-evidence", "severity": "fatal", "description": "Retain CellTypist class probabilities, Azimuth prediction and mapping scores, and every popV expert label and available probability rather than collapsing evidence to one label.", "blocks_interpretation": true},
-    {"id": "atlas-cross-method-consensus", "severity": "fatal", "description": "Cross-method reconciliation requires comparable references, normalized confidence semantics, explicit canonical-label and Cell Ontology mappings, predeclared method weights, and complete raw evidence; ties, unmapped labels, insufficient methods, or inadequate support remain Unknown.", "blocks_interpretation": true},
-    {"id": "atlas-unknown-retention", "severity": "fatal", "description": "Low-confidence, low-mapping, preprocessing-omitted, or expert-discordant cells remain Unknown; no nearest known label is forced into the review field.", "blocks_interpretation": true},
-    {"id": "atlas-no-label-leakage", "severity": "fatal", "description": "Existing labels, expected markers, condition, or evaluation truth cannot tune the reference, thresholds, model, or mapping decision; evaluation occurs only after decisions are frozen.", "blocks_interpretation": true},
-    {"id": "atlas-cell-and-count-accounting", "severity": "fatal", "description": "Every source query cell must appear exactly once in output with a mapped or reason-coded not-mapped status, while raw counts, identifiers, and existing annotations remain unchanged.", "blocks_interpretation": true},
-    {"id": "atlas-output-reload", "severity": "fatal", "description": "Reload all output objects and tables and reconcile cells, counts, labels, scores, reference digests, parameters, and versions before admission.", "blocks_interpretation": true}
-  ],
-  "evidence_effects": ["adds_celltypist_probability_evidence", "adds_azimuth_mapping_evidence", "adds_popv_multi_expert_consensus", "reconciles_celltypist_azimuth_popv_singler_and_scanvi_evidence", "preserves_unknown_and_novel_states", "creates_reloadable_reference_annotation_artifacts"],
-  "alternatives": ["single-cell-reference-annotation"],
-  "complements": ["single-cell-marker-discovery", "single-cell-reference-annotation", "single-cell-generative-modeling", "single-cell-foundation-workflow"],
-  "tool_requirements": [
-    {"name": "CellTypist", "ecosystem": "python", "identity": "celltypist", "required": true, "tested_versions": ["1.7.1"], "allowed_versions": [">=1.7,<1.8"], "version_source": "https://celltypist.readthedocs.io/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('celltypist'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "celltypist-model-probability-api", "affected_versions": [">=1.7,<1.8"], "category": "api", "description": "Model feature metadata, probability matrices, majority voting, and annotate arguments are tied to the tested release.", "compatibility_effect": "requires-parser", "required_action": "Detect the API, preserve the complete probability matrix, and reload cell-aligned outputs.", "source": "https://celltypist.readthedocs.io/"}], "platforms": ["any"]},
-    {"name": "popV", "ecosystem": "python", "identity": "popv", "required": true, "tested_versions": ["0.6.1"], "allowed_versions": [">=0.6,<0.7"], "version_source": "https://popv.readthedocs.io/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('popv'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "popv-process-query-consensus-api", "affected_versions": [">=0.6,<0.7"], "category": "api", "description": "Process_Query metadata, expert names, prediction keys, probability outputs, and consensus counts are release-coupled.", "compatibility_effect": "requires-parser", "required_action": "Use detected expert names, preserve every expert result, and account for cells omitted by preprocessing.", "source": "https://popv.readthedocs.io/"}], "platforms": ["any"]},
-    {"name": "Azimuth", "ecosystem": "r", "identity": "Azimuth", "required": true, "tested_versions": ["0.5.1"], "allowed_versions": [">=0.5,<0.6"], "version_source": "https://github.com/satijalab/azimuth", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('Azimuth')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "azimuth-reference-and-mapping-api", "affected_versions": [">=0.5,<0.6"], "category": "api", "description": "Reference directory layout, homolog conversion, transfer fields, mapping scores, and UMAP projection are tied to Azimuth and Seurat releases.", "compatibility_effect": "requires-parser", "required_action": "Validate ref.Rds and idx.annoy, pin a local homolog table, and reload source counts and mapped metadata.", "source": "https://github.com/satijalab/azimuth"}], "platforms": ["any"]}
-  ],
-  "dependencies": [
-    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.12.11"], "allowed_versions": [">=3.12,<3.13"], "version_source": "https://www.python.org/downloads/", "verified_at": "2026-07-15", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run the validated CellTypist and popV templates in an existing scientific runtime.", "conflicts": [{"dependency": "xgboost", "versions": [">=3.3,<3.4"], "reason": "The popV XGboost expert produced a native segmentation fault in the observed macOS ARM Python 3.12 verification runtime.", "required_action": "Use the validated SVM, Random Forest, and CellTypist expert set on this profile, or establish a separate passing compatibility experiment before enabling XGboost.", "source": "https://popv.readthedocs.io/"}], "platforms": ["any"]},
-    {"name": "anndata", "ecosystem": "python", "identity": "anndata", "required": true, "tested_versions": ["0.12.19"], "allowed_versions": [">=0.12,<0.13"], "version_source": "https://anndata.readthedocs.io/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('anndata'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Read, annotate, serialize, and reload H5AD query and reference objects.", "conflicts": [], "platforms": ["any"]},
-    {"name": "scanpy", "ecosystem": "python", "identity": "scanpy", "required": true, "tested_versions": ["1.11.5"], "allowed_versions": [">=1.11,<1.12"], "version_source": "https://scanpy.readthedocs.io/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('scanpy'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Normalize a derived CellTypist working copy and provide popV preprocessing primitives.", "conflicts": [], "platforms": ["any"]},
-    {"name": "r", "ecosystem": "runtime", "identity": "r-runtime", "required": true, "tested_versions": ["4.3.2"], "allowed_versions": [">=4.3,<4.4"], "version_source": "https://cran.r-project.org/src/base/R-4/", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(getRversion()))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run the validated Azimuth mapping template in an existing scientific runtime.", "conflicts": [], "platforms": ["any"]},
-    {"name": "Seurat", "ecosystem": "r", "identity": "Seurat", "required": true, "tested_versions": ["5.2.1"], "allowed_versions": [">=5.2,<5.3"], "version_source": "https://satijalab.org/seurat/", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('Seurat')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Preserve Seurat counts and execute Azimuth anchor transfer and mapping scores.", "conflicts": [], "platforms": ["any"]}
-  ],
-  "compatibility_matrix": [{"id": "agent-protocol-1-celltypist-171-popv-061-azimuth-051-consensus", "module_version": "1.1.0", "tool_versions": {"CellTypist": [">=1.7,<1.8"], "popV": [">=0.6,<0.7"], "Azimuth": [">=0.5,<0.6"]}, "dependency_versions": {"python": [">=3.12,<3.13"], "anndata": [">=0.12,<0.13"], "scanpy": [">=1.11,<1.12"], "r": [">=4.3,<4.4"], "Seurat": [">=5.2,<5.3"]}, "input_formats": {"query_single_cell_object": ["h5ad@0.1.0", "seurat-rds@5"], "declared_reference_assets": ["celltypist-model@1", "h5ad@0.1.0", "azimuth-reference@1"]}, "output_formats": {"atlas_annotated_single_cell_object": ["h5ad@0.1.0", "seurat-rds@5"], "atlas_annotation_report": ["inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["single-cell-atlas-annotation-regression-v2"], "end_to_end_evidence_ids": ["single-cell-atlas-annotation-e2e-v2"], "verified_at": "2026-07-23"}],
   "access": "agent_generated",
-  "mutability": "read_only",
-  "credentials": [],
-  "limitations": ["Validated execution covers a declared CellTypist 1.7.1 model, a local Azimuth 0.5.1 reference plus homolog table, a popV 0.6.1 SVM, Random Forest, and CellTypist expert ensemble, and ontology-aware reconciliation of comparable CellTypist and popV outputs. The reconciliation contract can ingest Azimuth, SingleR, and scANVI evidence after project-specific confidence normalization and label mapping, but this compatibility row does not claim those five methods were jointly calibrated on a public atlas. It does not make nearest-reference labels ground truth, resolve novel continuous states, replace marker and ontology review, or validate popV XGboost on the observed macOS ARM profile. Environment and compute-resource management remain outside plugin scope."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned conservative atlas-mapping workflow with method-specific confidence, unknown retention, full cell accounting, and output reload validation.", "https://celltypist.readthedocs.io/", "https://github.com/satijalab/azimuth", "https://popv.readthedocs.io/"]},
   "agent_protocol": {
-    "schema_version": 1, "mode": "codex_generated_project_code", "languages": ["python", "r", "notebook"],
-    "template_sections": [
-      {"id": "inspect-atlas-contract", "purpose": "Establish query, reference, feature, biological-scope, and threshold semantics before mapping.", "required_logic": ["Inspect immutable counts, cells, features, assay, species, tissue, developmental stage, disease context, batch fields, existing labels, and source digests.", "Inspect reference version, annotation release, label definitions, training population, known missing populations, feature namespace, model or index integrity, and license.", "Freeze backend choice, homolog mapping, confidence normalization, canonical-label and ontology mapping, method weights, mapping thresholds, and consensus thresholds before viewing expected labels or evaluation truth."], "output_artifact_types": ["single_cell_annotation_validation"], "template_files": ["templates/annotate_celltypist.py", "templates/annotate_azimuth.R", "templates/annotate_popv.py", "templates/reconcile_annotation_consensus.py"]},
-      {"id": "execute-method-specific-mapping", "purpose": "Run one or more declared reference annotation backends without altering source data.", "required_logic": ["For CellTypist, normalize only a derived count copy and retain the complete class-probability matrix.", "For Azimuth, validate the local reference and Annoy index, use a versioned local homolog table, and retain prediction and mapping scores.", "For popV, retain each expert label and available probability, consensus count, and reason-coded status for cells omitted by preprocessing."], "output_artifact_types": ["single_cell_annotated_object", "single_cell_annotation_validation"], "template_files": ["templates/annotate_celltypist.py", "templates/annotate_azimuth.R", "templates/annotate_popv.py"]},
-      {"id": "retain-unknown-and-reconcile", "purpose": "Prevent forced atlas labels and preserve complete query-cell accounting.", "required_logic": ["Apply only predeclared confidence, mapping, or consensus thresholds and retain raw backend labels separately from review labels.", "Normalize confidence only from documented backend semantics, map labels to canonical names and Cell Ontology identifiers, and reconcile comparable CellTypist, Azimuth, popV, SingleR, or scANVI evidence without erasing method disagreement.", "Set low-confidence, low-mapping, unmapped-label, tied, insufficient-method, expert-discordant, or not-mapped cells to Unknown with status rather than deleting or forcing them.", "Use markers, ontology, cluster coherence, and independent biological evidence downstream; never tune mapping toward desired identities."], "output_artifact_types": ["single_cell_annotated_object", "single_cell_annotation_validation"], "template_files": ["templates/annotate_celltypist.py", "templates/annotate_azimuth.R", "templates/annotate_popv.py", "templates/reconcile_annotation_consensus.py"]},
-      {"id": "reload-evaluate-and-admit", "purpose": "Prove source preservation and evaluate only after annotation decisions are frozen.", "required_logic": ["Reload every H5AD, Seurat RDS, evidence table, consensus table, model record, and report; reconcile source cells, counts, existing fields, method evidence, ontology mappings, and reference digests.", "If independent truth exists, compute performance only after thresholds and outputs are frozen and stratify known versus absent-reference populations.", "Admit annotations only as reviewable reference evidence and route conflicts to marker, ontology, trajectory, or expert review."], "output_artifact_types": ["single_cell_annotated_object", "single_cell_annotation_validation"], "template_files": ["templates/annotate_celltypist.py", "templates/annotate_azimuth.R", "templates/annotate_popv.py", "templates/reconcile_annotation_consensus.py"]}
+    "forbidden_actions": [
+      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Do not guess reference scope, labels, species, tissue, feature identifiers, homolog mappings, annotation release, model provenance, or missing populations.",
+      "Do not use existing labels, expected markers, condition, desired biology, or evaluation truth to tune references, experts, or thresholds.",
+      "Do not collapse method-specific probabilities, scores, expert labels, disagreement, or preprocessing omissions into one unqualified label.",
+      "Do not delete low-confidence cells, overwrite source counts or labels, or force novel, transitional, discordant, or absent-reference populations into known classes.",
+      "Do not report an unexecuted backend, generated script, successful exit code, or unreloaded output as validated annotation evidence."
     ],
+    "languages": [
+      "python",
+      "r",
+      "notebook"
+    ],
+    "mode": "codex_generated_project_code",
     "parameter_rules": [
-      {"id": "atlas-reference-selection", "parameter": "reference-assets", "decision_inputs": ["species", "tissue", "developmental stage", "disease", "assay", "feature namespace", "reference populations", "annotation release"], "selection_rule": "Select a versioned, biologically matched reference and explicitly record populations it cannot represent.", "validation_rule": "Do not silently substitute a convenient public atlas for a mismatched reference."},
-      {"id": "atlas-backend-selection", "parameter": "requested-backends", "decision_inputs": ["reference format", "available reviewed assets", "query size", "batch structure", "need for expert consensus"], "selection_rule": "Choose CellTypist for a declared model, Azimuth for a compatible Seurat reference, or popV for declared multi-expert consensus; use multiple methods only when their references and labels are comparable.", "validation_rule": "Method disagreement remains evidence and cannot be averaged away."},
-      {"id": "atlas-unknown-thresholds", "parameter": "confidence-mapping-consensus-thresholds", "decision_inputs": ["reference class separation", "held-out validation", "novel-state objective", "mapping-score distribution", "expert count"], "selection_rule": "Freeze conservative thresholds from independent validation before examining desired query labels.", "validation_rule": "Report sensitivity and never optimize thresholds on the target biological conclusion."}
+      {
+        "decision_inputs": [
+          "species",
+          "tissue",
+          "developmental stage",
+          "disease",
+          "assay",
+          "feature namespace",
+          "reference populations",
+          "annotation release"
+        ],
+        "id": "atlas-reference-selection",
+        "parameter": "reference-assets",
+        "selection_rule": "Select a versioned, biologically matched reference and explicitly record populations it cannot represent.",
+        "validation_rule": "Do not silently substitute a convenient public atlas for a mismatched reference."
+      },
+      {
+        "decision_inputs": [
+          "reference format",
+          "available reviewed assets",
+          "query size",
+          "batch structure",
+          "need for expert consensus"
+        ],
+        "id": "atlas-backend-selection",
+        "parameter": "requested-backends",
+        "selection_rule": "Choose CellTypist for a declared model, Azimuth for a compatible Seurat reference, or popV for declared multi-expert consensus; use multiple methods only when their references and labels are comparable.",
+        "validation_rule": "Method disagreement remains evidence and cannot be averaged away."
+      },
+      {
+        "decision_inputs": [
+          "reference class separation",
+          "held-out validation",
+          "novel-state objective",
+          "mapping-score distribution",
+          "expert count"
+        ],
+        "id": "atlas-unknown-thresholds",
+        "parameter": "confidence-mapping-consensus-thresholds",
+        "selection_rule": "Freeze conservative thresholds from independent validation before examining desired query labels.",
+        "validation_rule": "Report sensitivity and never optimize thresholds on the target biological conclusion."
+      }
     ],
-    "preflight_checks": ["Inspect actual query and reference assets, counts, identifiers, feature namespace, species, tissue, developmental stage, assay, batches, labels, annotation release, known missing populations, and digests.", "Detect exact CellTypist, popV, Azimuth, AnnData, Scanpy, Python, R, Seurat and relevant backend versions in existing compatible runtimes.", "Validate model features, H5AD labels and count layers, Azimuth ref.Rds and idx.annoy, local homolog table, minimum overlap, batch sizes, new output paths, and frozen thresholds.", "Check the requested popV expert set against the compatibility record and do not enable a backend with an unresolved native-runtime conflict."],
-    "postflight_checks": ["Reconcile every source query cell to one output row and a mapped or reason-coded not-mapped state.", "Inspect complete CellTypist probabilities, Azimuth prediction and mapping scores, popV expert labels and probabilities, SingleR and scANVI evidence when supplied, normalized confidences, canonical labels, ontology identifiers, weighted consensus, raw labels, review labels, and Unknown counts.", "Reload outputs and verify source cells, features, counts, existing annotations, reference digests, parameters, method versions, evidence matrices, consensus table, and reason codes.", "Evaluate independent truth only after decisions are frozen and report absent-reference populations separately from known-class performance."],
-    "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "query-artifact-sha256", "reference-artifact-sha256", "reference-index-sha256", "homolog-table-sha256", "reference-version", "annotation-release", "feature-namespace", "feature-overlap", "actual-tool-versions", "backend-and-experts", "thresholds", "random-seed", "raw-labels", "method-specific-scores-and-probabilities", "review-labels", "mapping-status", "unknown-count", "source-count-preservation", "output-artifact-sha256", "quality-gate-results"],
-    "forbidden_actions": ["Do not install, update, activate, create, or manage Python, R, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.", "Do not guess reference scope, labels, species, tissue, feature identifiers, homolog mappings, annotation release, model provenance, or missing populations.", "Do not use existing labels, expected markers, condition, desired biology, or evaluation truth to tune references, experts, or thresholds.", "Do not collapse method-specific probabilities, scores, expert labels, disagreement, or preprocessing omissions into one unqualified label.", "Do not delete low-confidence cells, overwrite source counts or labels, or force novel, transitional, discordant, or absent-reference populations into known classes.", "Do not report an unexecuted backend, generated script, successful exit code, or unreloaded output as validated annotation evidence."],
-    "requires_observed_execution": true
-  }
+    "postflight_checks": [
+      "Reconcile every source query cell to one output row and a mapped or reason-coded not-mapped state.",
+      "Inspect complete CellTypist probabilities, Azimuth prediction and mapping scores, popV expert labels and probabilities, SingleR and scANVI evidence when supplied, normalized confidences, canonical labels, ontology identifiers, weighted consensus, raw labels, review labels, and Unknown counts.",
+      "Reload outputs and verify source cells, features, counts, existing annotations, reference digests, parameters, method versions, evidence matrices, consensus table, and reason codes.",
+      "Evaluate independent truth only after decisions are frozen and report absent-reference populations separately from known-class performance."
+    ],
+    "preflight_checks": [
+      "Inspect actual query and reference assets, counts, identifiers, feature namespace, species, tissue, developmental stage, assay, batches, labels, annotation release, known missing populations, and digests.",
+      "Detect exact CellTypist, popV, Azimuth, AnnData, Scanpy, Python, R, Seurat and relevant backend versions in existing compatible runtimes.",
+      "Validate model features, H5AD labels and count layers, Azimuth ref.Rds and idx.annoy, local homolog table, minimum overlap, batch sizes, new output paths, and frozen thresholds.",
+      "Check the requested popV expert set against the compatibility record and do not enable a backend with an unresolved native-runtime conflict."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "query-artifact-sha256",
+      "reference-artifact-sha256",
+      "reference-index-sha256",
+      "homolog-table-sha256",
+      "reference-version",
+      "annotation-release",
+      "feature-namespace",
+      "feature-overlap",
+      "actual-tool-versions",
+      "backend-and-experts",
+      "thresholds",
+      "random-seed",
+      "raw-labels",
+      "method-specific-scores-and-probabilities",
+      "review-labels",
+      "mapping-status",
+      "unknown-count",
+      "source-count-preservation",
+      "output-artifact-sha256",
+      "quality-gate-results"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-atlas-contract",
+        "output_artifact_types": [
+          "single_cell_annotation_validation"
+        ],
+        "purpose": "Establish query, reference, feature, biological-scope, and threshold semantics before mapping.",
+        "required_logic": [
+          "Inspect immutable counts, cells, features, assay, species, tissue, developmental stage, disease context, batch fields, existing labels, and source digests.",
+          "Inspect reference version, annotation release, label definitions, training population, known missing populations, feature namespace, model or index integrity, and license.",
+          "Freeze backend choice, homolog mapping, confidence normalization, canonical-label and ontology mapping, method weights, mapping thresholds, and consensus thresholds before viewing expected labels or evaluation truth."
+        ],
+        "template_files": [
+          "templates/annotate_celltypist.py",
+          "templates/annotate_azimuth.R",
+          "templates/annotate_popv.py",
+          "templates/reconcile_annotation_consensus.py"
+        ]
+      },
+      {
+        "id": "execute-method-specific-mapping",
+        "output_artifact_types": [
+          "single_cell_annotated_object",
+          "single_cell_annotation_validation"
+        ],
+        "purpose": "Run one or more declared reference annotation backends without altering source data.",
+        "required_logic": [
+          "For CellTypist, normalize only a derived count copy and retain the complete class-probability matrix.",
+          "For Azimuth, validate the local reference and Annoy index, use a versioned local homolog table, and retain prediction and mapping scores.",
+          "For popV, retain each expert label and available probability, consensus count, and reason-coded status for cells omitted by preprocessing."
+        ],
+        "template_files": [
+          "templates/annotate_celltypist.py",
+          "templates/annotate_azimuth.R",
+          "templates/annotate_popv.py"
+        ]
+      },
+      {
+        "id": "retain-unknown-and-reconcile",
+        "output_artifact_types": [
+          "single_cell_annotated_object",
+          "single_cell_annotation_validation"
+        ],
+        "purpose": "Prevent forced atlas labels and preserve complete query-cell accounting.",
+        "required_logic": [
+          "Apply only predeclared confidence, mapping, or consensus thresholds and retain raw backend labels separately from review labels.",
+          "Normalize confidence only from documented backend semantics, map labels to canonical names and Cell Ontology identifiers, and reconcile comparable CellTypist, Azimuth, popV, SingleR, or scANVI evidence without erasing method disagreement.",
+          "Set low-confidence, low-mapping, unmapped-label, tied, insufficient-method, expert-discordant, or not-mapped cells to Unknown with status rather than deleting or forcing them.",
+          "Use markers, ontology, cluster coherence, and independent biological evidence downstream; never tune mapping toward desired identities."
+        ],
+        "template_files": [
+          "templates/annotate_celltypist.py",
+          "templates/annotate_azimuth.R",
+          "templates/annotate_popv.py",
+          "templates/reconcile_annotation_consensus.py"
+        ]
+      },
+      {
+        "id": "reload-evaluate-and-admit",
+        "output_artifact_types": [
+          "single_cell_annotated_object",
+          "single_cell_annotation_validation"
+        ],
+        "purpose": "Prove source preservation and evaluate only after annotation decisions are frozen.",
+        "required_logic": [
+          "Reload every H5AD, Seurat RDS, evidence table, consensus table, model record, and report; reconcile source cells, counts, existing fields, method evidence, ontology mappings, and reference digests.",
+          "If independent truth exists, compute performance only after thresholds and outputs are frozen and stratify known versus absent-reference populations.",
+          "Admit annotations only as reviewable reference evidence and route conflicts to marker, ontology, trajectory, or expert review."
+        ],
+        "template_files": [
+          "templates/annotate_celltypist.py",
+          "templates/annotate_azimuth.R",
+          "templates/annotate_popv.py",
+          "templates/reconcile_annotation_consensus.py"
+        ]
+      }
+    ]
+  },
+  "alternatives": [
+    "single-cell-reference-annotation"
+  ],
+  "assumptions": [
+    "The declared reference is independently reviewed and biologically appropriate for the query; labels absent from the reference cannot be discovered by nearest-reference mapping and must remain unknown or be investigated independently."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "Seurat": [
+          ">=5.2,<5.3"
+        ],
+        "anndata": [
+          ">=0.12,<0.13"
+        ],
+        "python": [
+          ">=3.12,<3.13"
+        ],
+        "r": [
+          ">=4.3,<4.4"
+        ],
+        "scanpy": [
+          ">=1.11,<1.13"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "single-cell-atlas-annotation-e2e-v2"
+      ],
+      "id": "agent-protocol-1-celltypist-171-popv-061-azimuth-051-consensus",
+      "input_formats": {
+        "declared_reference_assets": [
+          "celltypist-model@1",
+          "h5ad@0.1.0",
+          "azimuth-reference@1"
+        ],
+        "query_single_cell_object": [
+          "h5ad@0.1.0",
+          "seurat-rds@5"
+        ]
+      },
+      "module_version": "1.1.0",
+      "output_formats": {
+        "atlas_annotated_single_cell_object": [
+          "h5ad@0.1.0",
+          "seurat-rds@5"
+        ],
+        "atlas_annotation_report": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "single-cell-atlas-annotation-regression-v2"
+      ],
+      "tool_versions": {
+        "Azimuth": [
+          ">=0.5,<0.6"
+        ],
+        "CellTypist": [
+          ">=1.7,<1.8"
+        ],
+        "popV": [
+          ">=0.6,<0.7"
+        ]
+      },
+      "verified_at": "2026-07-23"
+    }
+  ],
+  "complements": [
+    "single-cell-marker-discovery",
+    "single-cell-reference-annotation",
+    "single-cell-generative-modeling",
+    "single-cell-foundation-workflow"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.12,<3.13"
+      ],
+      "conflicts": [
+        {
+          "dependency": "xgboost",
+          "reason": "The popV XGboost expert produced a native segmentation fault in the observed macOS ARM Python 3.12 verification runtime.",
+          "required_action": "Use the validated SVM, Random Forest, and CellTypist expert set on this profile, or establish a separate passing compatibility experiment before enabling XGboost.",
+          "source": "https://popv.readthedocs.io/",
+          "versions": [
+            ">=3.3,<3.4"
+          ]
+        }
+      ],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run the validated CellTypist and popV templates in an existing scientific runtime.",
+      "required": true,
+      "tested_versions": [
+        "3.12.11"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.12,<0.13"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "anndata",
+      "name": "anndata",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Read, annotate, serialize, and reload H5AD query and reference objects.",
+      "required": true,
+      "tested_versions": [
+        "0.12.19"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('anndata'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://anndata.readthedocs.io/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.11,<1.13"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scanpy",
+      "name": "scanpy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Normalize a derived CellTypist working copy and provide popV preprocessing primitives.",
+      "required": true,
+      "tested_versions": [
+        "1.11.5",
+        "1.12"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('scanpy'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scanpy.readthedocs.io/"
+    },
+    {
+      "allowed_versions": [
+        ">=4.3,<4.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "r-runtime",
+      "name": "r",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run the validated Azimuth mapping template in an existing scientific runtime.",
+      "required": true,
+      "tested_versions": [
+        "4.3.2"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(getRversion()))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/src/base/R-4/"
+    },
+    {
+      "allowed_versions": [
+        ">=5.2,<5.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "Seurat",
+      "name": "Seurat",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Preserve Seurat counts and execute Azimuth anchor transfer and mapping scores.",
+      "required": true,
+      "tested_versions": [
+        "5.2.1"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('Seurat')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://satijalab.org/seurat/"
+    }
+  ],
+  "description": "Direct Codex to inspect count-backed query cells and declared reference assets, execute CellTypist, Azimuth, or a popV expert ensemble in compatible existing scientific runtimes, reconcile comparable CellTypist, Azimuth, popV, SingleR, or scANVI evidence through ontology-aware weighted consensus, retain every method-specific label and confidence, preserve low-confidence or discordant cells as Unknown, and admit only reload-validated annotations that leave source counts and identities unchanged.",
+  "domains": [
+    "omics",
+    "classification"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "adds_celltypist_probability_evidence",
+    "adds_azimuth_mapping_evidence",
+    "adds_popv_multi_expert_consensus",
+    "reconciles_celltypist_azimuth_popv_singler_and_scanvi_evidence",
+    "preserves_unknown_and_novel_states",
+    "creates_reloadable_reference_annotation_artifacts"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "single-cell-atlas-annotation",
+  "input_artifacts": [
+    {
+      "artifact_type": "single_cell_analysis_object",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip",
+            "lzf"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad",
+          "orientations": [
+            "observations-by-variables"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "seurat-rds",
+          "orientations": [
+            "features-by-observations"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "5"
+          ]
+        }
+      ],
+      "name": "query_single_cell_object",
+      "processing_levels": [
+        "quality-controlled",
+        "count-backed"
+      ],
+      "required_metadata": [
+        "input-artifact-digest",
+        "raw-count-location",
+        "feature-identifier-namespace",
+        "species",
+        "tissue",
+        "developmental-stage",
+        "assay",
+        "cell-accounting"
+      ]
+    },
+    {
+      "artifact_type": "single_cell_reference_object",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "celltypist-model",
+          "orientations": [
+            "feature-coefficient-by-label"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip",
+            "lzf"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad",
+          "orientations": [
+            "observations-by-variables"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "azimuth-reference",
+          "orientations": [
+            "reference-latent-space"
+          ],
+          "representations": [
+            "container",
+            "binary"
+          ],
+          "required_indexes": [
+            "idx.annoy"
+          ],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "declared_reference_assets",
+      "processing_levels": [
+        "reviewed",
+        "versioned",
+        "labelled"
+      ],
+      "required_metadata": [
+        "reference-digest",
+        "reference-version",
+        "label-key",
+        "feature-identifier-namespace",
+        "species",
+        "tissue",
+        "developmental-stage",
+        "assay",
+        "known-missing-populations"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "declared_thresholds": {
+        "type": "object"
+      },
+      "design_notes": {
+        "maxLength": 8000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "objective": {
+        "maxLength": 4000,
+        "minLength": 12,
+        "type": "string"
+      },
+      "query_artifact_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "query_batch_key": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "query_format": {
+        "enum": [
+          "h5ad",
+          "seurat-rds"
+        ],
+        "type": "string"
+      },
+      "query_raw_count_location": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "reference_artifact_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "reference_batch_key": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "reference_format": {
+        "enum": [
+          "celltypist-model",
+          "h5ad",
+          "azimuth-reference"
+        ],
+        "type": "string"
+      },
+      "reference_label_key": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "reference_scope_notes": {
+        "maxLength": 8000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "requested_backends": {
+        "items": {
+          "enum": [
+            "celltypist",
+            "azimuth",
+            "popv"
+          ],
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "unknown_label": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "query_artifact_id",
+      "reference_artifact_id",
+      "query_format",
+      "reference_format",
+      "query_raw_count_location",
+      "requested_backends",
+      "reference_label_key",
+      "query_batch_key",
+      "reference_batch_key",
+      "unknown_label",
+      "declared_thresholds",
+      "reference_scope_notes",
+      "design_notes"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "CellTypist cell annotation",
+    "Azimuth reference mapping",
+    "popV consensus cell annotation",
+    "single-cell atlas annotation with unknown retention",
+    "\u5355\u7ec6\u80de CellTypist Azimuth popV \u56fe\u8c31\u6ce8\u91ca \u672a\u77e5\u7ec6\u80de\u4fdd\u7559"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Validated execution covers a declared CellTypist 1.7.1 model, a local Azimuth 0.5.1 reference plus homolog table, a popV 0.6.1 SVM, Random Forest, and CellTypist expert ensemble, and ontology-aware reconciliation of comparable CellTypist and popV outputs. The reconciliation contract can ingest Azimuth, SingleR, and scANVI evidence after project-specific confidence normalization and label mapping, but this compatibility row does not claim those five methods were jointly calibrated on a public atlas. It does not make nearest-reference labels ground truth, resolve novel continuous states, replace marker and ontology review, or validate popV XGboost on the observed macOS ARM profile. Environment and compute-resource management remain outside plugin scope."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "single_cell_annotated_object",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip",
+            "lzf"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad",
+          "orientations": [
+            "observations-by-variables"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "seurat-rds",
+          "orientations": [
+            "features-by-observations"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "5"
+          ]
+        }
+      ],
+      "name": "atlas_annotated_single_cell_object",
+      "processing_levels": [
+        "reference-mapped",
+        "confidence-reviewed",
+        "unknown-preserving",
+        "reload-validated"
+      ],
+      "required_metadata": [
+        "backend",
+        "backend-version",
+        "reference-digest",
+        "raw-label",
+        "confidence-or-consensus",
+        "review-label",
+        "mapping-status",
+        "thresholds",
+        "source-count-preservation",
+        "quality-gate-results"
+      ]
+    },
+    {
+      "artifact_type": "single_cell_annotation_validation",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "backend-and-quality-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "atlas_annotation_report",
+      "processing_levels": [
+        "method-specific",
+        "cell-accounted",
+        "reload-validated"
+      ],
+      "required_metadata": [
+        "query-digest",
+        "reference-digest",
+        "feature-overlap",
+        "method-versions",
+        "label-counts",
+        "unknown-count",
+        "quality-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "codex_generated_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Query counts are immutable, nonnegative and integer-like; identifiers are unique; reference scope and missing populations are documented; feature namespace and overlap are established; thresholds are frozen before mapping; all outputs are new paths."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned conservative atlas-mapping workflow with method-specific confidence, unknown retention, full cell accounting, and output reload validation.",
+      "https://celltypist.readthedocs.io/",
+      "https://github.com/satijalab/azimuth",
+      "https://popv.readthedocs.io/"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block when query counts, feature namespace, biological scope, reference identity, version, labels, missing populations, or source digests cannot be established without guessing.",
+      "id": "atlas-input-and-reference-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Block inadequate or ambiguous query-reference feature overlap and require a declared, versioned homolog mapping when namespaces or species differ.",
+      "id": "atlas-feature-overlap",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Retain CellTypist class probabilities, Azimuth prediction and mapping scores, and every popV expert label and available probability rather than collapsing evidence to one label.",
+      "id": "atlas-method-specific-evidence",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Cross-method reconciliation requires comparable references, normalized confidence semantics, explicit canonical-label and Cell Ontology mappings, predeclared method weights, and complete raw evidence; ties, unmapped labels, insufficient methods, or inadequate support remain Unknown.",
+      "id": "atlas-cross-method-consensus",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Low-confidence, low-mapping, preprocessing-omitted, or expert-discordant cells remain Unknown; no nearest known label is forced into the review field.",
+      "id": "atlas-unknown-retention",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Existing labels, expected markers, condition, or evaluation truth cannot tune the reference, thresholds, model, or mapping decision; evaluation occurs only after decisions are frozen.",
+      "id": "atlas-no-label-leakage",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every source query cell must appear exactly once in output with a mapped or reason-coded not-mapped status, while raw counts, identifiers, and existing annotations remain unchanged.",
+      "id": "atlas-cell-and-count-accounting",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Reload all output objects and tables and reconcile cells, counts, labels, scores, reference digests, parameters, and versions before admission.",
+      "id": "atlas-output-reload",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which query cells are supported by the declared reference atlas, which methods agree, and which cells must remain unknown because confidence, mapping quality, or expert consensus is inadequate?"
+  ],
+  "schema_version": 1,
+  "title": "Map and reconcile single-cell atlas annotations while retaining unknown states",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.7,<1.8"
+      ],
+      "ecosystem": "python",
+      "identity": "celltypist",
+      "mismatch_policy": "block",
+      "name": "CellTypist",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.7.1"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.7,<1.8"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "Model feature metadata, probability matrices, majority voting, and annotate arguments are tied to the tested release.",
+          "id": "celltypist-model-probability-api",
+          "required_action": "Detect the API, preserve the complete probability matrix, and reload cell-aligned outputs.",
+          "source": "https://celltypist.readthedocs.io/"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('celltypist'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://celltypist.readthedocs.io/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.6,<0.7"
+      ],
+      "ecosystem": "python",
+      "identity": "popv",
+      "mismatch_policy": "block",
+      "name": "popV",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "0.6.1"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=0.6,<0.7"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "Process_Query metadata, expert names, prediction keys, probability outputs, and consensus counts are release-coupled.",
+          "id": "popv-process-query-consensus-api",
+          "required_action": "Use detected expert names, preserve every expert result, and account for cells omitted by preprocessing.",
+          "source": "https://popv.readthedocs.io/"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('popv'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://popv.readthedocs.io/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.5,<0.6"
+      ],
+      "ecosystem": "r",
+      "identity": "Azimuth",
+      "mismatch_policy": "block",
+      "name": "Azimuth",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "0.5.1"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=0.5,<0.6"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "Reference directory layout, homolog conversion, transfer fields, mapping scores, and UMAP projection are tied to Azimuth and Seurat releases.",
+          "id": "azimuth-reference-and-mapping-api",
+          "required_action": "Validate ref.Rds and idx.annoy, pin a local homolog table, and reload source counts and mapped metadata.",
+          "source": "https://github.com/satijalab/azimuth"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('Azimuth')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/satijalab/azimuth"
+    }
+  ],
+  "version": "1.1.0"
 }

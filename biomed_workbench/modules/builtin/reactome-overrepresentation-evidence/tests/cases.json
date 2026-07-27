@@ -1,0 +1,66 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "input_identifier_count": 2,
+        "pathway_count": 2,
+        "returned_pathway_count": 1,
+        "truncated": true,
+        "unmapped_identifier_count": 1
+      },
+      "http_fixtures": [
+        {
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "identifiersNotFound": 1,
+            "pathways": [
+              {
+                "entities": {
+                  "fdr": 0.00058,
+                  "found": 4,
+                  "pValue": 2.2e-06,
+                  "total": 86
+                },
+                "inDisease": false,
+                "name": "TP53 repair",
+                "species": {
+                  "name": "Homo sapiens"
+                },
+                "stId": "R-HSA-6796648"
+              },
+              {
+                "entities": {
+                  "fdr": 0.03,
+                  "found": 1,
+                  "pValue": 0.02,
+                  "total": 10
+                },
+                "name": "Later",
+                "stId": "R-HSA-000001"
+              }
+            ],
+            "summary": {
+              "token": "bounded-token",
+              "type": "OVERREPRESENTATION"
+            }
+          },
+          "method": "POST",
+          "request_text": "TP53\nBRCA1\n",
+          "status": 200,
+          "url": "https://reactome.org/AnalysisService/identifiers/"
+        }
+      ],
+      "input": {
+        "identifiers": [
+          "TP53",
+          "BRCA1"
+        ],
+        "max_pathways": 1
+      },
+      "name": "retain-reactome-mapping-and-ranked-pathway-statistics"
+    }
+  ],
+  "schema_version": 1
+}

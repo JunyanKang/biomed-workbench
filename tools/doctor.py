@@ -154,9 +154,9 @@ def _check_registry() -> Check:
 
 def _check_routing() -> Check:
     try:
-        from biomed_workbench.router import route
+        from biomed_workbench.research_plan import compile_research_plan
 
-        routed = route(
+        routed = compile_research_plan(
             "Validate donor-aware single-cell RNA analysis, revise the hypothesis, "
             "and prepare a publication-grade evidence package."
         )
@@ -169,7 +169,11 @@ def _check_routing() -> Check:
             details={"error_type": type(exc).__name__, "error": str(exc)},
         )
     selected = routed.get("selected_module_ids", [])
-    if not selected or routed.get("plan_type") not in {"single", "serial", "parallel", "mixed"}:
+    if (
+        not selected
+        or not routed.get("execution_layers")
+        or routed.get("plan_type") not in {"single", "serial", "parallel", "mixed"}
+    ):
         return Check(
             id="unified-routing",
             status="fail",
@@ -184,6 +188,7 @@ def _check_routing() -> Check:
         details={
             "matched_workflows": routed.get("matched_workflows", []),
             "selected_module_ids": selected,
+            "execution_layer_count": len(routed.get("execution_layers", [])),
         },
     )
 

@@ -1,0 +1,295 @@
+{
+  "access": "public_api",
+  "alternatives": [
+    "literature-evidence"
+  ],
+  "assumptions": [
+    "The declared symbol and species identify the intended current Ensembl gene record."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "ensembl-gene-evidence-e2e-v1"
+      ],
+      "id": "public-database-contract-2026-07-23-ensembl-gene-evidence",
+      "input_formats": {
+        "ensembl-gene-evidence-query": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "ensembl-gene-evidence-result": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "ensembl-gene-evidence-regression-v1"
+      ],
+      "tool_versions": {
+        "ensembl-rest-lookup-symbol": [
+          "==lookup-symbol-v1-observed-2026-07-23"
+        ]
+      },
+      "verified_at": "2026-07-23"
+    }
+  ],
+  "complements": [
+    "gene-identifier-resolution",
+    "gene-ortholog-evidence",
+    "variant-evidence",
+    "archs4-expression-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Resolve one explicit human or mouse gene symbol through Ensembl REST while preserving the current stable ID, assembly-aware interval, strand, biotype, canonical transcript, annotation version, source provenance, and an explicit not-found state.",
+  "domains": [
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.evidence:ensembl_gene_evidence",
+  "evidence_effects": [
+    "grounds-assembly-aware-ensembl-gene-identity"
+  ],
+  "execution": {
+    "kind": "service",
+    "max_output_bytes": 20000000,
+    "timeout_seconds": 90
+  },
+  "id": "ensembl-gene-evidence",
+  "input_artifacts": [
+    {
+      "artifact_type": "database_query",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "ensembl-gene-evidence-query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "gene_symbol": {
+        "maxLength": 64,
+        "minLength": 1,
+        "type": "string"
+      },
+      "species": {
+        "enum": [
+          "human",
+          "mouse"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "gene_symbol"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "Ensembl gene lookup",
+    "retrieve Ensembl gene coordinates",
+    "resolve Ensembl gene symbol",
+    "Ensembl\u57fa\u56e0\u5750\u6807\u67e5\u8be2"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This fixed lookup does not search aliases, map identifiers across annotation releases, select an analysis transcript or isoform, retrieve regulatory features, establish expression, disease relevance, function, or causality."
+  ],
+  "maturity": "validated",
+  "module_type": "data_source",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "evidence_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "ensembl-gene-evidence-result",
+      "processing_levels": [
+        "source-preserved",
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "service_contract",
+        "retrieval_time"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "found": {
+        "type": "boolean"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "provenance": {
+        "type": "object"
+      },
+      "record": {
+        "nullable": true,
+        "type": "object"
+      },
+      "requested_symbol": {
+        "type": "string"
+      },
+      "species": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "requested_symbol",
+      "species",
+      "found",
+      "record",
+      "provenance",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://rest.ensembl.org/documentation/info/symbol_lookup",
+      "Project-owned clean-room implementation and scientific validation contract."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "A found result must preserve a stable Ensembl gene ID, nonempty display name and assembly, a positive internally ordered coordinate interval, strand, and retrieval provenance; a 404 remains explicit rather than becoming a biological absence claim.",
+      "id": "ensembl-gene-evidence-validity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which current Ensembl gene record exactly matches this declared human or mouse symbol, and which assembly-aware coordinates does it report?"
+  ],
+  "schema_version": 1,
+  "title": "Resolve a bounded Ensembl gene record",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        "==lookup-symbol-v1-observed-2026-07-23"
+      ],
+      "ecosystem": "service",
+      "identity": "rest.ensembl.org/lookup/symbol",
+      "mismatch_policy": "block",
+      "name": "ensembl-rest-lookup-symbol",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "lookup-symbol-v1-observed-2026-07-23"
+      ],
+      "verified_at": "2026-07-23",
+      "version_differences": [
+        {
+          "affected_versions": [
+            "==lookup-symbol-v1-observed-2026-07-23"
+          ],
+          "category": "field",
+          "compatibility_effect": "requires-parser",
+          "description": "A symbol lookup returns one current Ensembl gene record with stable ID, display name, assembly, region, coordinates, strand, biotype, and optional canonical transcript fields.",
+          "id": "ensembl-symbol-lookup-identity-and-coordinate-fields",
+          "required_action": "Accept only an exact requested symbol lookup with a stable gene ID and internally ordered coordinate interval; preserve explicit not-found state and retrieval provenance.",
+          "source": "https://rest.ensembl.org/documentation/info/symbol_lookup"
+        }
+      ],
+      "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "version_probe": [
+        "biomed_workbench.services.public_databases:probe_ensembl_gene_lookup_contract"
+      ],
+      "version_probe_kind": "service_contract",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://rest.ensembl.org/documentation/info/symbol_lookup"
+    }
+  ],
+  "version": "1.0.0"
+}

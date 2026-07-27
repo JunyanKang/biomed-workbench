@@ -1,0 +1,331 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The feature table, locations, qualifiers, and declared translation table in the supplied GenBank record are appropriate for the requested sequence extraction."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_genbank_coding_sequence_extraction.py",
+      "purpose": "Execute and validate extract annotated genbank coding sequences against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "genbank-single-record-and-feature-contract",
+        "genbank-cds-interpretation-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "genbank-coding-sequence-extraction-e2e-v1"
+      ],
+      "id": "biopython-1.86-genbank-flatfile-1",
+      "input_formats": {
+        "genbank_record": [
+          "genbank@flatfile"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "coding_sequence_evidence": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "genbank-coding-sequence-extraction-regression-v1"
+      ],
+      "tool_versions": {
+        "biopython": [
+          ">=1.86,<1.87"
+        ]
+      },
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "ncbi-fetch",
+    "open-reading-frame-annotation",
+    "sequence-pairwise-alignment"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic GenBank feature extraction.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-24",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Extract exact CDS records for one declared identifier from one supplied GenBank record, retaining location, strand, translation-table, and translation-agreement evidence.",
+  "domains": [
+    "molecular_design",
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:extract_genbank_coding_sequences",
+  "evidence_effects": [
+    "extracts-annotation-bound-coding-sequence-evidence"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "genbank-coding-sequence-extraction",
+  "input_artifacts": [
+    {
+      "artifact_type": "annotated_sequence_record",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-record"
+          ],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "one-based-closed-feature-notation"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "genbank",
+          "orientations": [
+            "record-with-feature-table"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "flatfile"
+          ]
+        }
+      ],
+      "name": "genbank_record",
+      "processing_levels": [
+        "annotated",
+        "declared"
+      ],
+      "required_metadata": [
+        "record-identifier",
+        "assembly-or-construct-provenance"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "genbank_record": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "identifier": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "genbank_record",
+      "identifier"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "extract GenBank CDS",
+    "GenBank 注释记录提取",
+    "extract coding sequence",
+    "\u63d0\u53d6 GenBank \u7f16\u7801\u5e8f\u5217",
+    "\u63d0\u53d6 CDS"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module extracts annotated CDS features from one supplied record only. It does not search NCBI, resolve aliases, infer coding regions, select transcript isoforms, validate assembly identity, or establish biological function."
+  ],
+  "maturity": "validated",
+  "module_type": "transform",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "annotated_coding_sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-record"
+          ],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "inline-json",
+          "orientations": [
+            "cds-by-matched-qualifier"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "coding_sequence_evidence",
+      "processing_levels": [
+        "extracted",
+        "translation-checked"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "source-record-id",
+        "requested-identifier",
+        "translation-table"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "coding_sequences": {
+        "type": "array"
+      },
+      "coordinate_system": {
+        "type": "string"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "match_policy": {
+        "type": "string"
+      },
+      "matched_cds_count": {
+        "type": "integer"
+      },
+      "record_id": {
+        "type": "string"
+      },
+      "requested_identifier": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "record_id",
+      "requested_identifier",
+      "match_policy",
+      "coordinate_system",
+      "matched_cds_count",
+      "coding_sequences",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "One stable GenBank flatfile record and one exact CDS identifier are supplied."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room implementation for annotation-bound GenBank CDS extraction.",
+      "https://biopython.org/docs/latest/api/Bio.SeqIO.html"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require exactly one parseable GenBank record, exact qualifier matching, valid CDS locations, and a supported declared translation table.",
+      "id": "genbank-single-record-and-feature-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Retain explicit no-match and translation-disagreement states; do not promote an extracted CDS to validated gene identity or function.",
+      "id": "genbank-cds-interpretation-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which annotated CDS records in this declared GenBank record exactly match the requested identifier, and do their extracted translations agree with the annotation?"
+  ],
+  "schema_version": 1,
+  "title": "Extract annotated GenBank coding sequences",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.86,<1.87"
+      ],
+      "ecosystem": "python",
+      "identity": "biopython",
+      "mismatch_policy": "block",
+      "name": "biopython",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.86"
+      ],
+      "verified_at": "2026-07-24",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.86,<1.87"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parser",
+          "description": "SeqIO parses one GenBank record and FeatureLocation extraction preserves declared CDS strand and compound-part order.",
+          "id": "biopython-genbank-feature-parser-contract",
+          "required_action": "Block malformed or multi-record inputs and retain the exact source record with parsed output.",
+          "source": "https://biopython.org/docs/latest/api/Bio.SeqIO.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import Bio; print(Bio.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://biopython.org/wiki/Download"
+    }
+  ],
+  "version": "1.0.0"
+}

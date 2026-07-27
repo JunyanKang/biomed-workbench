@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "id": "msprime-demographic-simulation",
+  "version": "0.1.0",
+  "title": "Simulate a declared demographic history with msprime",
+  "description": "Direct Codex to turn a predeclared single-population demographic scenario into reloadable tree-sequence and VCF simulation evidence for method calibration or study design, without presenting it as empirical demographic inference.",
+  "module_type": "analysis",
+  "domains": ["omics", "genetics", "population-genetics"],
+  "intents": ["demographic simulation", "population history simulation", "coalescent simulation", "msprime", "群体历史模拟"],
+  "questions": ["What variation and genealogy are expected under this explicitly declared demographic scenario, and can the downstream method recover the planted conditions?"],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "execution": {"kind": "workflow", "timeout_seconds": 60, "max_output_bytes": 20000000},
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "demographic_scenario",
+      "artifact_type": "declared_demographic_simulation_parameters",
+      "processing_levels": ["predeclared", "frozen-before-execution"],
+      "required_metadata": ["source-sha256", "scientific-purpose", "model-family", "population-parameters", "sample-count", "sequence-length", "rates", "random-seed"],
+      "formats": [{"name": "json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["simulation-coordinate"], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["single-scenario"]}]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "demographic_simulation_evidence",
+      "artifact_type": "reloaded_coalescent_simulation_evidence",
+      "processing_levels": ["simulated", "reloaded"],
+      "required_metadata": ["module-version", "input-sha256", "msprime-version", "model-parameters", "seed", "tree-sequence-sha256", "vcf-sha256", "quality-gates"],
+      "formats": [
+        {"name": "tskit-trees", "versions": ["1"], "representations": ["binary"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["simulation-coordinate"], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["tree-sequence"]},
+        {"name": "vcf", "versions": ["4.3"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["simulation-coordinate"], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["variant-by-sample"]},
+        {"name": "normalized-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["scenario-by-output"]}
+      ]
+    }
+  ],
+  "preconditions": ["The scientific purpose, model family, population parameters, sample count, sequence length, rates, and random seed are frozen before simulation; all outputs use new non-symlink paths."],
+  "assumptions": ["The declared one-population constant, bottleneck, or expansion model is adequate for the intended calibration or design question, and recombination and mutation rates are suitable for the simulation scale."],
+  "quality_gates": [
+    {"id": "demography-parameter-contract", "severity": "fatal", "description": "Require exactly the model-specific positive parameters, a valid bottleneck time ordering, finite sequence and rate inputs, and a frozen positive seed.", "blocks_interpretation": true},
+    {"id": "demography-seed-and-output", "severity": "fatal", "description": "Require a recorded seed, a SHA-256-bound parameter file, and new non-symlink tree-sequence, VCF, and report outputs.", "blocks_interpretation": true},
+    {"id": "demography-reload", "severity": "fatal", "description": "Require successful msprime execution and reloadable tree-sequence, VCF, site-count, tree-count, diversity, version, and output hashes.", "blocks_interpretation": true},
+    {"id": "demography-claim-boundary", "severity": "major", "description": "Simulation supports conditional method calibration or design only; it does not infer, validate, or establish real population history or biological mechanism.", "blocks_interpretation": true}
+  ],
+  "limitations": ["This module supports only one-population constant, bottleneck, and expansion scenarios. It does not fit demographic models, estimate parameters from data, choose a model after inspecting output, simulate selection or structure, or establish empirical history. It does not manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure."],
+  "evidence_effects": ["adds-declared-demographic-simulation-evidence"],
+  "alternatives": [],
+  "complements": ["gwas-susie-fine-mapping", "rrblup-genomic-prediction", "multi-sample-variant-concordance"],
+  "tool_requirements": [
+    {
+      "name": "msprime", "ecosystem": "python", "identity": "msprime", "required": true,
+      "tested_versions": ["1.4.2"], "allowed_versions": [">=1.4,<1.5"], "version_source": "https://tskit.dev/msprime/docs/stable/",
+      "verified_at": "2026-07-23", "version_probe": ["python3", "-c", "import msprime; print(msprime.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block",
+      "version_differences": [{"id": "msprime-tree-sequence-and-vcf-contract", "affected_versions": [">=1.4,<1.5"], "category": "api", "description": "Demography construction, tree-sequence serialization, and VCF writer semantics are version coupled.", "compatibility_effect": "requires-parser", "required_action": "Record the observed msprime version and reload the tree sequence and report before downstream analysis.", "source": "https://tskit.dev/msprime/docs/stable/"}],
+      "platforms": ["any"]
+    }
+  ],
+  "dependencies": [
+    {"name": "Python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.10,<3.15"], "version_source": "https://www.python.org/downloads/", "verified_at": "2026-07-23", "version_probe": ["python3", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run a user-selected compatible msprime environment.", "conflicts": [], "platforms": ["any"]}
+  ],
+  "compatibility_matrix": [{"id": "agent-protocol-1-msprime-142-python-3143", "module_version": "0.1.0", "tool_versions": {"msprime": [">=1.4,<1.5"]}, "dependency_versions": {"Python": [">=3.10,<3.15"]}, "input_formats": {"demographic_scenario": ["json@1"]}, "output_formats": {"demographic_simulation_evidence": ["tskit-trees@1", "vcf@4.3", "normalized-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["msprime-demographic-simulation-regression-v1"], "end_to_end_evidence_ids": ["msprime-demographic-simulation-e2e-v1"], "verified_at": "2026-07-23"}],
+  "access": "agent_generated",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {"type": "object", "additionalProperties": false, "properties": {"objective": {"type": "string", "minLength": 12}, "model": {"type": "string", "enum": ["constant", "bottleneck", "expansion"]}, "population_parameters": {"type": "object", "minProperties": 1}, "sample_count": {"type": "integer", "minimum": 2, "maximum": 10000}, "sequence_length": {"type": "number", "exclusiveMinimum": 0}, "recombination_rate": {"type": "number", "minimum": 0}, "mutation_rate": {"type": "number", "exclusiveMinimum": 0}, "seed": {"type": "integer", "minimum": 1}, "design_notes": {"type": "string", "minLength": 1}}, "required": ["objective", "model", "population_parameters", "sample_count", "sequence_length", "recombination_rate", "mutation_rate", "seed", "design_notes"]},
+  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]}, "module": {"type": "object"}, "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}}, "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]},
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room implementation informed by the msprime documentation.", "https://tskit.dev/msprime/docs/stable/"]},
+  "code_templates": [{"path": "templates/simulate_demography.py", "language": "python", "purpose": "Create a parameter-bound, reloadable tree sequence, VCF, and simulation report for a declared demographic scenario.", "quality_gate_ids": ["demography-parameter-contract", "demography-seed-and-output", "demography-reload", "demography-claim-boundary"], "requires_adaptation": true}],
+  "agent_protocol": {
+    "schema_version": 1,
+    "mode": "codex_generated_project_code",
+    "languages": ["python", "notebook"],
+    "template_sections": [
+      {"id": "freeze-demographic-scenario", "purpose": "Validate the declared scenario before any random draw.", "required_logic": ["Persist objective, model family, exact parameters, rates, sample count, sequence length, seed, source digest, and simulation purpose before execution.", "Reject undeclared parameters, invalid timing, output overwrite, or post hoc selection of a preferred scenario."], "output_artifact_types": ["reloaded_coalescent_simulation_evidence"], "template_files": ["templates/simulate_demography.py"]},
+      {"id": "simulate-reload-and-bound", "purpose": "Produce and inspect independent simulation artifacts.", "required_logic": ["Record the msprime version, write tree-sequence and VCF outputs, reload their reportable properties, and bind all outputs to hashes.", "Keep claims conditional on the declared assumptions and require empirical validation for statements about real populations."], "output_artifact_types": ["reloaded_coalescent_simulation_evidence"], "template_files": ["templates/simulate_demography.py"]}
+    ],
+    "parameter_rules": [{"id": "model-specific-parameter-policy", "parameter": "population-parameters", "decision_inputs": ["predeclared-scientific-purpose", "model-family", "population-scale", "time-scale"], "selection_rule": "Use only parameters declared for the chosen constant, bottleneck, or expansion model before execution.", "validation_rule": "Reject extra or missing parameters; require strictly positive values and a bottleneck end time more recent than its start time."}],
+    "preflight_checks": ["Detect a compatible existing Python and msprime installation.", "Validate the frozen JSON scenario, rates, seed, output paths, model-specific values, and simulation-purpose boundary."],
+    "postflight_checks": ["Reload the emitted report and tree sequence, reconcile reported hashes, counts, diversity, msprime version, VCF presence, and declared assumptions."],
+    "provenance_fields": ["module-id", "module-version", "input-sha256", "model", "population-parameters", "rates", "seed", "Python-version", "msprime-version", "tree-sequence-sha256", "vcf-sha256", "quality-gates"],
+    "forbidden_actions": ["Do not install or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.", "Do not infer demographic history, estimate parameters from empirical data, select scenarios after viewing simulated output, or claim real biological history from simulations.", "Do not overwrite outputs or discard failed simulations without preserving the reason."],
+    "requires_observed_execution": true
+  }
+}

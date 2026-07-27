@@ -1,0 +1,431 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The two supplied sequences use the declared unambiguous alphabet and the chosen scoring contract is scientifically appropriate for the comparison."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_sequence_pairwise_alignment.py",
+      "purpose": "Execute deterministic global or local pairwise alignment against real project sequences with a declared Biopython scoring contract.",
+      "quality_gate_ids": [
+        "pairwise-sequence-identity",
+        "pairwise-scoring-contract",
+        "pairwise-claim-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-biopython-1.87-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ],
+        "biopython": [
+          ">=1.86,<1.88"
+        ]
+      },
+      "input_formats": {
+        "reference": [
+          "inline-json@1"
+        ],
+        "query": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "pairwise_alignment": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "sequence-pairwise-alignment-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "sequence-pairwise-alignment-e2e-v1"
+      ],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "sequence-inspect",
+    "comparative-sequence-phylogeny",
+    "assembly-reference-alignment"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    },
+    {
+      "name": "biopython",
+      "ecosystem": "python",
+      "identity": "biopython",
+      "required": true,
+      "tested_versions": [
+        "1.87"
+      ],
+      "allowed_versions": [
+        ">=1.86,<1.88"
+      ],
+      "version_source": "https://biopython.org/wiki/Download",
+      "verified_at": "2026-07-24",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version(\"biopython\"))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Execute the versioned PairwiseAligner implementation and retain its exact version in alignment evidence.",
+      "conflicts": [],
+      "platforms": [
+        "any"
+      ]
+    }
+  ],
+  "description": "Perform deterministic global or local pairwise alignment with an explicit Biopython scoring contract, aligned blocks, coverage, and claim boundaries.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:pairwise_sequence_alignment",
+  "evidence_effects": [
+    "adds-descriptive-pairwise-sequence-alignment"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "sequence-pairwise-alignment",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "reference",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    },
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "reference": {
+        "type": "string",
+        "minLength": 1
+      },
+      "query": {
+        "type": "string",
+        "minLength": 1
+      },
+      "alphabet": {
+        "type": "string",
+        "enum": [
+          "dna",
+          "rna",
+          "protein"
+        ]
+      },
+      "mode": {
+        "type": "string",
+        "enum": [
+          "global",
+          "local"
+        ]
+      },
+      "match_score": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 100
+      },
+      "mismatch_score": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 100
+      },
+      "open_gap_score": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 0
+      },
+      "extend_gap_score": {
+        "type": "number",
+        "minimum": -100,
+        "maximum": 0
+      }
+    },
+    "required": [
+      "reference",
+      "query"
+    ]
+  },
+  "intents": [
+    "pairwise sequence alignment",
+    "global sequence alignment",
+    "local sequence alignment",
+    "Align two biological sequences",
+    "两个生物序列比对",
+    "全局序列比对",
+    "局部序列比对"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This pairwise alignment does not establish homology, orthology, genomic placement, variant calls, or functional conservation.",
+    "Ambiguous residues are rejected so the declared scoring contract remains interpretable; use a validated ambiguity-aware method when that is scientifically required."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "sequence_alignment_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "pairwise_alignment",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "alphabet": {
+        "type": "string"
+      },
+      "mode": {
+        "type": "string"
+      },
+      "algorithm": {
+        "type": "string"
+      },
+      "biopython_version": {
+        "type": "string"
+      },
+      "scoring": {
+        "type": "object"
+      },
+      "reference_length": {
+        "type": "integer"
+      },
+      "query_length": {
+        "type": "integer"
+      },
+      "reference_aligned": {
+        "type": "string"
+      },
+      "query_aligned": {
+        "type": "string"
+      },
+      "alignment_length": {
+        "type": "integer"
+      },
+      "score": {
+        "type": "number"
+      },
+      "aligned_residue_pair_count": {
+        "type": "integer"
+      },
+      "exact_match_count": {
+        "type": "integer"
+      },
+      "mismatch_count": {
+        "type": "integer"
+      },
+      "gap_count": {
+        "type": "integer"
+      },
+      "identity_fraction": {
+        "type": "number"
+      },
+      "reference_coverage": {
+        "type": "number"
+      },
+      "query_coverage": {
+        "type": "number"
+      },
+      "coordinate_system": {
+        "type": "string"
+      },
+      "aligned_blocks": {
+        "type": "array"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "alphabet",
+      "mode",
+      "algorithm",
+      "biopython_version",
+      "scoring",
+      "reference_length",
+      "query_length",
+      "reference_aligned",
+      "query_aligned",
+      "alignment_length",
+      "score",
+      "aligned_residue_pair_count",
+      "exact_match_count",
+      "mismatch_count",
+      "gap_count",
+      "identity_fraction",
+      "reference_coverage",
+      "query_coverage",
+      "coordinate_system",
+      "aligned_blocks",
+      "limitations"
+    ]
+  },
+  "preconditions": [
+    "Two declared biological sequences are available in the same explicit DNA, RNA, or protein alphabet.",
+    "The requested global or local mode and scoring values are justified for the scientific comparison."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room implementation of pairwise alignment capability identified during product capability planning.",
+      "https://biopython.org/docs/latest/Tutorial/chapter_pairwise.html"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "pairwise-sequence-identity",
+      "severity": "fatal",
+      "description": "Block missing, empty, invalid, ambiguous, or alphabet-mismatched sequence inputs; preserve both declared input records.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "pairwise-scoring-contract",
+      "severity": "fatal",
+      "description": "Record and validate mode, every match/mismatch/gap score, Biopython version, and zero-based half-open coordinates before interpretation.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "pairwise-claim-boundary",
+      "severity": "major",
+      "description": "A two-sequence alignment alone cannot establish homology, orthology, genomic placement, variants, or function.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "Under a declared global or local scoring model, which residue positions align between these two unambiguous sequences and what are their identity, coverage, and gaps?"
+  ],
+  "schema_version": 1,
+  "title": "Align two biological sequences",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

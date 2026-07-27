@@ -1,0 +1,274 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The dot-bracket structure was produced or measured by a declared external method and is the representation to validate."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_rna_secondary_structure_summary.py",
+      "purpose": "Execute strict dot-bracket validation and RNA secondary-structure topology summary against declared project inputs.",
+      "quality_gate_ids": [
+        "rna-structure-notation",
+        "rna-structure-sequence-consistency",
+        "rna-structure-claim-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "input_formats": {
+        "rna_structure": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "rna_structure_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "rna-secondary-structure-summary-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "rna-secondary-structure-summary-e2e-v1"
+      ],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Validate one supplied RNA dot-bracket structure and summarize its base pairs, stems, pairing fraction and optional canonical or wobble pair classes.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:summarize_rna_secondary_structure",
+  "evidence_effects": [
+    "adds-rna-secondary-structure-summary"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "rna-secondary-structure-summary",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "rna_structure",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "dot_bracket": {
+        "type": "string",
+        "minLength": 1
+      },
+      "sequence": {
+        "type": "string",
+        "nullable": true
+      }
+    },
+    "required": [
+      "dot_bracket"
+    ]
+  },
+  "intents": [
+    "RNA secondary structure summary",
+    "validate dot bracket structure",
+    "RNA structure features",
+    "Validate and summarize RNA secondary structure",
+    "RNA 二级结构分析",
+    "dot bracket 结构验证"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This validates and summarizes a supplied secondary-structure representation; it does not predict folding, calculate thermodynamic free energy, infer kinetics, or validate structure experimentally.",
+    "Pseudoknot bracket classes are preserved as supplied notation, not independently inferred structural evidence."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "rna_secondary_structure_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "rna_structure_summary",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "length": {
+        "type": "integer"
+      },
+      "dot_bracket": {
+        "type": "string"
+      },
+      "sequence": {
+        "type": "string",
+        "nullable": true
+      },
+      "coordinate_system": {
+        "type": "string"
+      },
+      "base_pairs": {
+        "type": "array"
+      },
+      "stems": {
+        "type": "array"
+      },
+      "summary": {
+        "type": "object"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "length",
+      "dot_bracket",
+      "sequence",
+      "coordinate_system",
+      "base_pairs",
+      "stems",
+      "summary",
+      "limitations"
+    ]
+  },
+  "preconditions": [
+    "A schema-valid sequence set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room implementation of supplied RNA secondary-structure feature capability identified during product capability planning."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "rna-structure-notation",
+      "severity": "fatal",
+      "description": "Block empty, invalid, mismatched or unbalanced dot-bracket notation.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "rna-structure-sequence-consistency",
+      "severity": "fatal",
+      "description": "When sequence is supplied, require normalized RNA identity and exact sequence-structure length agreement.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "rna-structure-claim-boundary",
+      "severity": "major",
+      "description": "A supplied structure summary is not folding prediction, free-energy calculation, kinetic inference or experimental validation.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "What pairing and stem topology is represented by the supplied RNA dot-bracket structure, and is it consistent with the declared sequence?"
+  ],
+  "schema_version": 1,
+  "title": "Validate and summarize RNA secondary structure",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

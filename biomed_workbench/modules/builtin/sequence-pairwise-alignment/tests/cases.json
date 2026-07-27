@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "global-dna-single-deletion",
+      "input": {
+        "reference": "ACGT",
+        "query": "AGT",
+        "alphabet": "dna",
+        "mode": "global",
+        "match_score": 1.0,
+        "mismatch_score": -1.0,
+        "open_gap_score": -2.0,
+        "extend_gap_score": -0.5
+      },
+      "expected_subset": {
+        "alphabet": "dna",
+        "mode": "global",
+        "reference_aligned": "ACGT",
+        "query_aligned": "A-GT",
+        "exact_match_count": 3,
+        "mismatch_count": 0,
+        "gap_count": 1,
+        "identity_fraction": 1.0,
+        "coordinate_system": "zero-based half-open"
+      }
+    }
+  ]
+}

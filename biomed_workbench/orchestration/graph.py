@@ -149,6 +149,7 @@ def build_capability_graph(registry: ModuleRegistry) -> CapabilityGraph:
                             "formats": tuple(sorted(f"{fmt.name}@{version}" for fmt in port.formats for version in fmt.versions)),
                             "processing_levels": port.processing_levels,
                             "required_metadata": port.required_metadata,
+                            "source_policy": port.source_policy,
                         },
                     )
                 )

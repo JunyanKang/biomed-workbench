@@ -140,8 +140,8 @@
   "intents": [
     "survival analysis",
     "Estimate Kaplan-Meier survival",
-    "\u8fdb\u884c Kaplan-Meier \u751f\u5b58\u5206\u6790",
-    "\u751f\u5b58\u5206\u6790"
+    "进行 Kaplan-Meier 生存分析",
+    "生存分析"
   ],
   "kernel_compatibility": [
     ">=0.2.0,<0.3.0"
@@ -220,7 +220,7 @@
   ],
   "provenance": {
     "concept_sources": [
-      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+      "Project-owned implementation with module-level validation evidence."
     ],
     "license": "Apache-2.0"
   },
@@ -238,5 +238,16 @@
   "schema_version": 1,
   "title": "Estimate Kaplan-Meier survival",
   "tool_requirements": [],
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "code_templates": [
+    {
+      "path": "templates/run_kaplan_meier.py",
+      "language": "python",
+      "purpose": "Validate project survival inputs, run Kaplan-Meier analysis, check monotonic finite output, and serialize provenance-bound research results.",
+      "quality_gate_ids": [
+        "survival-analysis-validity"
+      ],
+      "requires_adaptation": true
+    }
+  ]
 }

@@ -1,0 +1,277 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The supplied protein sequences are already aligned under a declared, biologically appropriate alignment method."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_aligned_protein_conservation.py",
+      "purpose": "Execute per-column conservation summary against a declared protein multiple-sequence alignment.",
+      "quality_gate_ids": [
+        "protein-alignment-identity",
+        "protein-alignment-geometry",
+        "protein-conservation-claim-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "input_formats": {
+        "protein_alignment": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "protein_conservation_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "aligned-protein-conservation-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "aligned-protein-conservation-e2e-v1"
+      ],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Summarize coverage, consensus residues and Shannon entropy per column in a declared pre-aligned protein sequence set.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:summarize_aligned_protein_conservation",
+  "evidence_effects": [
+    "adds-aligned-protein-conservation-summary"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "aligned-protein-conservation",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "protein_alignment",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "sequences": {
+        "type": "array",
+        "minItems": 2,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "identifiers": {
+        "type": "array",
+        "nullable": true,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "required": [
+      "sequences"
+    ]
+  },
+  "intents": [
+    "aligned protein conservation",
+    "protein conservation analysis",
+    "summarize protein alignment conservation",
+    "Summarize aligned protein conservation",
+    "蛋白序列保守性分析",
+    "蛋白多序列对齐保守性"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This summarizes an already aligned input and does not establish homology, orthology, evolutionary selection, functional importance or structural conservation.",
+    "Gap handling and any upstream alignment settings remain part of the scientific contract and must be retained with this summary."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "protein_alignment_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "protein_conservation_summary",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "sequence_count": {
+        "type": "integer"
+      },
+      "identifiers": {
+        "type": "array"
+      },
+      "alignment_length": {
+        "type": "integer"
+      },
+      "coordinate_system": {
+        "type": "string"
+      },
+      "columns": {
+        "type": "array"
+      },
+      "summary": {
+        "type": "object"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "sequence_count",
+      "identifiers",
+      "alignment_length",
+      "coordinate_system",
+      "columns",
+      "summary",
+      "limitations"
+    ]
+  },
+  "preconditions": [
+    "A schema-valid sequence set is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room implementation of aligned protein conservation capability identified during product capability planning."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "protein-alignment-identity",
+      "severity": "fatal",
+      "description": "Block absent, duplicate, invalid or noncanonical protein records and preserve every declared identifier.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "protein-alignment-geometry",
+      "severity": "fatal",
+      "description": "Require one nonzero common aligned length and retain gap treatment and zero-based alignment-column coordinates.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "protein-conservation-claim-boundary",
+      "severity": "major",
+      "description": "Column conservation alone does not establish homology, orthology, selection, structural importance or function.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "Which columns of this declared protein alignment are covered and conserved, and what is their residue diversity?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize aligned protein conservation",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "blocks-forward-references-and-confirmation-placeholders",
+      "input": {"claims_text": "1. 一种方法，其特征在于，包括步骤A。\n2. 根据权利要求3所述的方法，其特征在于，步骤B[待确认：条件]。\n3. 根据权利要求1所述的方法，其特征在于，获得更优结果。"},
+      "expected_subset": {
+        "claim_count": 3,
+        "claims": [
+          {"number": 1, "text": "一种方法，其特征在于，包括步骤A。", "references": []},
+          {"number": 2, "text": "根据权利要求3所述的方法，其特征在于，步骤B[待确认：条件]。", "references": [3]},
+          {"number": 3, "text": "根据权利要求1所述的方法，其特征在于，获得更优结果。", "references": [1]}
+        ],
+        "ready_for_formal_review": false
+      }
+    },
+    {
+      "name": "admits-a-bounded-referenced-claim-set-for-review",
+      "input": {"claims_text": "1. 一种样品处理方法，其特征在于，包括获取样品并执行处理步骤。\n2. 根据权利要求1所述的方法，其特征在于，所述处理步骤包括在预设时间窗内记录输出。"},
+      "expected_subset": {
+        "claim_count": 2,
+        "claims": [
+          {"number": 1, "text": "一种样品处理方法，其特征在于，包括获取样品并执行处理步骤。", "references": []},
+          {"number": 2, "text": "根据权利要求1所述的方法，其特征在于，所述处理步骤包括在预设时间窗内记录输出。", "references": [1]}
+        ],
+        "findings": [],
+        "ready_for_formal_review": true
+      }
+    }
+  ]
+}

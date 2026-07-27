@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "prepare-homology-bounded-phylogeny",
+      "input": {
+        "objective": "Align declared homologous coding sequences and infer a support-bound tree without making untested orthology or divergence claims.",
+        "sequence_artifact_id": "declared-homologous-fasta",
+        "sequence_type": "dna",
+        "homology_basis": "declared-orthologs",
+        "sample_metadata_artifact_id": "sequence-metadata",
+        "outgroup_ids": ["outgroup_taxon"],
+        "substitution_model": "GTR+F+I+G4",
+        "support_method": "ultrafast-bootstrap",
+        "support_replicates": 1000,
+        "declared_thresholds": {"minimum_records": 4, "maximum_gap_fraction": 0.8},
+        "design_notes": "Homology and outgroup choice were independently curated before alignment; the tree will be interpreted only together with explicit support and external evidence."
+      },
+      "expected_subset": {
+        "handoff_type": "codex_generated_project_analysis",
+        "module": {"id": "comparative-sequence-phylogeny", "version": "0.1.0"},
+        "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}
+      }
+    }
+  ]
+}

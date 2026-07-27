@@ -48,7 +48,9 @@ def run(command: list[str], environment: dict[str, str], timeout: int = 240) -> 
 
 
 def verify(scientific_python: Path, rscript: Path, r_libs: Path) -> dict[str, object]:
-    python = scientific_python.expanduser().resolve(strict=True)
+    python = scientific_python.expanduser().absolute()
+    if not python.is_file() or not os.access(python, os.X_OK):
+        raise RuntimeError("scientific Python is not executable")
     r = rscript.expanduser().resolve(strict=True)
     libraries = r_libs.expanduser().resolve(strict=True)
     with tempfile.TemporaryDirectory(prefix="biomed-droplet-") as temporary:
@@ -103,11 +105,15 @@ def verify(scientific_python: Path, rscript: Path, r_libs: Path) -> dict[str, ob
         versions = json.loads(run([str(python), "-c", "import json,platform,torch,pyro;print(json.dumps({'python':platform.python_version(),'torch':torch.__version__,'pyro':pyro.__version__}))"], environment).stdout)
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
         return {
-            "schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": "1.0.0",
+            "schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": "1.1.0",
             "compatibility_row_id": ROW_ID, "registry_digest": registry.digest,
             "templates": {"r": {"name": R_TEMPLATE.name, "sha256": sha256(R_TEMPLATE)}, "cellbender": {"name": CELLBENDER_TEMPLATE.name, "sha256": sha256(CELLBENDER_TEMPLATE)}},
             "tool_versions": {"DropletUtils": r_reports["fixed"]["versions"]["DropletUtils"], "SoupX": r_reports["fixed"]["versions"]["SoupX"], "CellBender": cellbender["versions"]["cellbender"]},
-            "dependency_versions": {**versions, "r": r_reports["fixed"]["versions"]["R"]},
+            "dependency_versions": {
+                **versions,
+                "r": r_reports["fixed"]["versions"]["R"],
+                "digest": r_reports["fixed"]["versions"]["digest"],
+            },
             "fixtures": {"raw_droplets": 2000, "filtered_cells": 200, "features": 120, "source_digests": source_digests},
             "execution": {"emptydrops_completed": True, "soupx_fixed_completed": True, "soupx_auto_completed": True, "cellbender_completed": True, "outputs_reloaded": True, "cellbender_output_sha256": sha256(cellbender_output)},
             "scientific_summary": {"barcode_reconciliation_passed": True, "raw_counts_preserved": True, "methods_separated": True, "nonnegative_counts": True, "source_artifacts_immutable": True, "no_environment_or_compute_infrastructure_managed": True},

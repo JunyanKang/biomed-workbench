@@ -7,6 +7,8 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+from packaging.version import InvalidVersion
+from packaging.version import Version
 import os
 import subprocess
 import sys
@@ -49,6 +51,56 @@ def package_version(name: str) -> str:
 
 def version_tuple(value: str) -> tuple[int, ...]:
     return tuple(int(part) for part in value.split(".") if part.isdigit())
+
+
+def declared_scanpy_specs() -> list[str]:
+    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    specs: list[str] = []
+    for row in manifest.get("compatibility_matrix", []):
+        if row.get("id") != ROW_ID:
+            continue
+        for spec in row.get("tool_versions", {}).get("scanpy", ()):
+            specs.append(str(spec))
+        for spec in row.get("dependency_versions", {}).get("scanpy", ()):
+            specs.append(str(spec))
+        break
+    if specs:
+        return specs
+    return [">=1.10,<1.12"]
+
+
+def version_satisfies(version: str, spec: str) -> bool:
+    try:
+        parsed = Version(version)
+    except InvalidVersion:
+        return False
+    for clause in spec.split(","):
+        token = clause.strip()
+        if not token:
+            continue
+        if token.startswith(">="):
+            parsed_target = Version(token[2:])
+            if parsed < parsed_target:
+                return False
+        elif token.startswith(">"):
+            parsed_target = Version(token[1:])
+            if parsed <= parsed_target:
+                return False
+        elif token.startswith("<="):
+            parsed_target = Version(token[2:])
+            if parsed > parsed_target:
+                return False
+        elif token.startswith("<"):
+            parsed_target = Version(token[1:])
+            if parsed >= parsed_target:
+                return False
+        elif token.startswith("=="):
+            parsed_target = Version(token[2:])
+            if parsed != parsed_target:
+                return False
+        else:
+            return False
+    return True
 
 
 def download_source(destination: Path) -> None:
@@ -208,8 +260,11 @@ def run_template(work: Path, source: anndata.AnnData) -> tuple[dict[str, object]
 
 def verify(archive: Path | None = None) -> dict[str, object]:
     scanpy_version = package_version("scanpy")
-    if not (version_tuple("1.10") <= version_tuple(scanpy_version) < version_tuple("1.12")):
-        raise RuntimeError("public case requires the declared Scanpy >=1.10,<1.12 compatibility row")
+    accepted_specs = declared_scanpy_specs()
+    if not any(version_satisfies(scanpy_version, spec) for spec in accepted_specs):
+        raise RuntimeError(
+            f"public case requires the declared Scanpy compatibility spec(s) {accepted_specs}; observed={scanpy_version}"
+        )
     with tempfile.TemporaryDirectory(prefix="biomed-public-pbmc3k-") as temporary:
         work = Path(temporary)
         source_archive = archive.resolve(strict=True) if archive else work / "pbmc3k.tar.gz"

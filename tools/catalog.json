@@ -2,6 +2,43 @@
   "entries": [
     {
       "access": "offline",
+      "description": "Compare zero- and first-order potency-loss fits at multiple temperatures and predict time to a declared specification only when one kinetic model is supported across temperatures.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:fit_accelerated_stability",
+      "id": "accelerated-stability",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "observations": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 6,
+            "type": "array"
+          },
+          "specification_percent": {
+            "exclusiveMaximum": 100,
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "target_temperature_c": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "observations",
+          "target_temperature_c",
+          "specification_percent"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Fit accelerated stability and bounded Arrhenius extrapolation",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
       "description": "Separate event counts from affected-participant incidence while stratifying severity grade, seriousness, relatedness, and event term.",
       "entrypoint": "biomed_workbench.capabilities.research_quality:summarize_adverse_events",
       "id": "adverse-event-summary",
@@ -56,6 +93,42 @@
       "requirements": [],
       "title": "Summarize research adverse events",
       "workflow": "clinical"
+    },
+    {
+      "access": "offline",
+      "description": "Summarize coverage, consensus residues and Shannon entropy per column in a declared pre-aligned protein sequence set.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:summarize_aligned_protein_conservation",
+      "id": "aligned-protein-conservation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "identifiers": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "sequences": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 2,
+            "type": "array"
+          }
+        },
+        "required": [
+          "sequences"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize aligned protein conservation",
+      "workflow": "molecular_design"
     },
     {
       "access": "offline",
@@ -140,6 +213,160 @@
       "requirements": [],
       "title": "Retrieve AlphaFold DB structure and confidence evidence",
       "workflow": "evidence"
+    },
+    {
+      "access": "offline",
+      "description": "Calculate viable, early-apoptotic, late-apoptotic, necrotic, and total-apoptotic fractions from a declared compensated and reviewed quadrant table.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_annexin_viability_quadrants",
+      "id": "annexin-viability-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "quadrant_events": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "event_count": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "quadrant": {
+                  "enum": [
+                    "viable",
+                    "early_apoptotic",
+                    "late_apoptotic",
+                    "necrotic"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "quadrant",
+                "event_count"
+              ],
+              "type": "object"
+            },
+            "maxItems": 4,
+            "minItems": 4,
+            "type": "array"
+          }
+        },
+        "required": [
+          "quadrant_events"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize reviewed Annexin and viability-dye quadrants",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve bounded, source-preserved ARCHS4 tissue or cell-line summary statistics for one human or mouse gene while retaining public-resource and inferential limits.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:archs4_expression_evidence",
+      "id": "archs4-expression-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "atlas": {
+            "enum": [
+              "tissue",
+              "cellline"
+            ],
+            "type": "string"
+          },
+          "gene_symbol": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "max_records": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "species": {
+            "enum": [
+              "human",
+              "mouse"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "gene_symbol"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve ARCHS4 public expression context",
+      "workflow": "evidence"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to validate DNA FASTA identity and reference provenance, run minimap2 assembly-to-reference alignment in an existing compatible environment, reload PAF evidence, and preserve record-level alignment accounting. It rejects simulated variants, direct position-wise comparison, and biological claims beyond the observed alignment.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "assembly-reference-alignment",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "alignment_preset": {
+            "enum": [
+              "asm5",
+              "asm10",
+              "asm20"
+            ],
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "query_assembly": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "query_assembly_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_assembly": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_assembly_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "reference_assembly_artifact_id",
+          "query_assembly_artifact_id",
+          "reference_assembly",
+          "query_assembly",
+          "alignment_preset",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Align declared assembly sequences to a declared reference",
+      "workflow": "omics"
     },
     {
       "access": "offline",
@@ -329,6 +556,118 @@
     },
     {
       "access": "offline",
+      "description": "Integrate a user-parameterized logistic growth plus clearance scenario with bounded RK4 numerical checks, report equilibrium conditions, and label all trajectory values as simulated rather than measured evidence.",
+      "entrypoint": "biomed_workbench.capabilities.experiment:simulate_bacterial_population_scenario",
+      "id": "bacterial-population-scenario",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "carrying_capacity": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "clearance_rate_per_hour": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "duration_hours": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "growth_rate_per_hour": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "initial_population": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "output_steps": {
+            "maximum": 10001,
+            "minimum": 2,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "initial_population",
+          "growth_rate_per_hour",
+          "clearance_rate_per_hour",
+          "carrying_capacity",
+          "duration_hours"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Simulate a declared bacterial growth-and-clearance scenario",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
+      "description": "Preserve observed blank, control, and test absorbance measurements; calculate blank-corrected group summaries and control-normalized effect sizes; and block inferential claims without independent biological replication.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_crystal_violet_biofilm",
+      "id": "biofilm-crystal-violet",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "observations": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "absorbance": {
+                  "type": "number"
+                },
+                "group": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "replicate_id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "role": {
+                  "enum": [
+                    "blank",
+                    "control",
+                    "test"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "group",
+                "replicate_id",
+                "role",
+                "absorbance"
+              ],
+              "type": "object"
+            },
+            "minItems": 3,
+            "type": "array"
+          },
+          "replicate_level": {
+            "enum": [
+              "unspecified",
+              "technical",
+              "biological"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "observations"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize replicate-aware crystal-violet biofilm measurements",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
       "description": "Calculate confusion metrics, predictive values, accuracy, and tie-aware rank ROC AUC.",
       "entrypoint": "biomed_workbench.capabilities.clinical:biomarker_performance",
       "id": "biomarker-performance",
@@ -365,6 +704,363 @@
       "requirements": [],
       "title": "Evaluate binary biomarker performance",
       "workflow": "clinical"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to validate and execute MACS3 peak calling for bulk ChIP-seq, CUT&RUN, or CUT&Tag data with explicit assay, control, peak-shape, provenance, and output-reload contracts.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "bulk-chromatin-peak-calling",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "assay": {
+            "enum": [
+              "chip-seq",
+              "cutrun",
+              "cuttag"
+            ],
+            "type": "string"
+          },
+          "control_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "duplicate_policy": {
+            "enum": [
+              "all",
+              "auto"
+            ],
+            "type": "string"
+          },
+          "genome_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genome_size": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_format": {
+            "enum": [
+              "BAM",
+              "BED",
+              "BEDPE"
+            ],
+            "type": "string"
+          },
+          "nomodel_extsize": {
+            "maximum": 2000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "peak_mode": {
+            "enum": [
+              "narrow",
+              "broad"
+            ],
+            "type": "string"
+          },
+          "qvalue": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "type": "number"
+          },
+          "treatment_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "assay",
+          "treatment_artifact_id",
+          "input_format",
+          "genome_build",
+          "genome_size",
+          "peak_mode",
+          "qvalue",
+          "duplicate_policy",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Call bulk chromatin enrichment peaks",
+      "workflow": "omics"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve bounded, source-preserved discrete copy-number events for one exact gene in one exact public cBioPortal study through the required POST gene filter.",
+      "entrypoint": "biomed_workbench.capabilities.clinical:cbioportal_gene_copy_number",
+      "id": "cbioportal-gene-copy-number-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "event_type": {
+            "enum": [
+              "HOMDEL_AND_AMP",
+              "HOMDEL",
+              "AMP",
+              "GAIN",
+              "HETLOSS",
+              "DIPLOID",
+              "ALL"
+            ],
+            "type": "string"
+          },
+          "gene_symbol": {
+            "pattern": "^[A-Z][A-Z0-9-]{0,39}$",
+            "type": "string"
+          },
+          "max_records": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "study_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "study_id",
+          "gene_symbol"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve cBioPortal study-gene copy-number evidence",
+      "workflow": "clinical"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve bounded source-preserved mutation records for one exact gene in one exact public cBioPortal study, with explicit molecular-profile, sample-list, coordinate, genome-build and truncation context.",
+      "entrypoint": "biomed_workbench.capabilities.clinical:cbioportal_gene_mutations",
+      "id": "cbioportal-gene-mutation-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "gene_symbol": {
+            "pattern": "^[A-Z][A-Z0-9-]{0,39}$",
+            "type": "string"
+          },
+          "max_records": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "molecular_profile_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,199}$",
+            "type": "string"
+          },
+          "sample_list_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,199}$",
+            "type": "string"
+          },
+          "study_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "study_id",
+          "gene_symbol"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve cBioPortal study-gene mutation evidence",
+      "workflow": "clinical"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve one exact public cBioPortal cancer-genomics study record, including study identity, cancer type, declared reference genome, assay-specific cohort counts, and source provenance.",
+      "entrypoint": "biomed_workbench.capabilities.clinical:cbioportal_study_record",
+      "id": "cbioportal-study-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "study_id": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "study_id"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve cBioPortal cancer study evidence",
+      "workflow": "clinical"
+    },
+    {
+      "access": "offline",
+      "description": "Validate an ordered circular-dichroism thermal curve and calculate descriptive endpoint-normalized transition midpoint, width and monotonicity diagnostics.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:summarize_cd_thermal_transition",
+      "id": "cd-thermal-transition-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "signals": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "type": "array"
+          },
+          "temperatures_c": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "type": "array"
+          }
+        },
+        "required": [
+          "temperatures_c",
+          "signals"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize circular-dichroism thermal transition",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Summarize calibrated migration distance, speed, and directionality from declared cell trajectories.",
+      "entrypoint": "biomed_workbench.capabilities.imaging:summarize_cell_migration_tracks",
+      "id": "cell-migration-metrics",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "min_track_length": {
+            "minimum": 2,
+            "type": "integer"
+          },
+          "pixel_size_um": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "time_interval_min": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "tracks": {
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "tracks"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize cell migration metrics",
+      "workflow": "imaging"
+    },
+    {
+      "access": "offline",
+      "description": "Pool observed countable serial-dilution plate counts by plated-volume exposure, retain TNTC and out-of-range plates, calculate an exact Poisson confidence interval, and block interpretation when countable plates are heterogeneous.",
+      "entrypoint": "biomed_workbench.capabilities.experiment:enumerate_cfu_from_dilution_plates",
+      "id": "cfu-enumeration",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "countable_maximum": {
+            "minimum": 2,
+            "type": "integer"
+          },
+          "countable_minimum": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "plates": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "colony_count": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "count_status": {
+                  "enum": [
+                    "counted",
+                    "tntc",
+                    "invalid"
+                  ],
+                  "type": "string"
+                },
+                "dilution_factor": {
+                  "minimum": 1,
+                  "type": "number"
+                },
+                "plate_id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "plated_volume_ml": {
+                  "exclusiveMinimum": 0,
+                  "type": "number"
+                },
+                "replicate_id": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "plate_id",
+                "replicate_id",
+                "dilution_factor",
+                "plated_volume_ml",
+                "count_status"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "replicate_level": {
+            "enum": [
+              "unspecified",
+              "technical",
+              "biological"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "plates"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Estimate CFU per mL from observed dilution plates",
+      "workflow": "wetlab"
     },
     {
       "access": "public_api",
@@ -1493,6 +2189,48 @@
     },
     {
       "access": "offline",
+      "description": "Classify clinical research-assistant requests into allowed research support, review-required support, or hard-blocked clinical decision use before interpretation.",
+      "entrypoint": "biomed_workbench.capabilities.clinical:clinical_decision_boundary_audit",
+      "id": "clinical-decision-boundary-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence_items": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "has_qualified_clinician_review": {
+            "type": "boolean"
+          },
+          "intended_use": {
+            "enum": [
+              "research_support",
+              "clinical_decision_support",
+              "patient_specific_decision"
+            ],
+            "type": "string"
+          },
+          "request_text": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_text"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit clinical decision-support boundaries",
+      "workflow": "clinical"
+    },
+    {
+      "access": "offline",
       "description": "Redact direct identifier fields plus email and phone patterns while reporting residual privacy limits.",
       "entrypoint": "biomed_workbench.capabilities.clinical:deidentify_record",
       "id": "clinical-deidentify",
@@ -1758,6 +2496,165 @@
       "workflow": "clinical"
     },
     {
+      "access": "agent_generated",
+      "description": "Direct Codex to validate homologous nucleotide or amino-acid FASTA records, execute MAFFT alignment and IQ-TREE inference in an existing compatible scientific environment, retain complete alignment, tree, model, support, sample, and version provenance, and refuse simulated haplotypes, divergence dates, orthology calls, or evolutionary conclusions unsupported by the supplied records and model.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "comparative-sequence-phylogeny",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "homology_basis": {
+            "enum": [
+              "declared-orthologs",
+              "declared-homologous-locus",
+              "declared-gene-family",
+              "declared-aligned-sequences"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "outgroup_ids": {
+            "items": {
+              "maxLength": 256,
+              "minLength": 1,
+              "type": "string"
+            },
+            "type": "array",
+            "uniqueItems": true
+          },
+          "sample_metadata_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "sequence_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "sequence_type": {
+            "enum": [
+              "dna",
+              "rna",
+              "protein"
+            ],
+            "type": "string"
+          },
+          "substitution_model": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "support_method": {
+            "enum": [
+              "ultrafast-bootstrap",
+              "standard-bootstrap",
+              "none-exploratory"
+            ],
+            "type": "string"
+          },
+          "support_replicates": {
+            "maximum": 10000,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "objective",
+          "sequence_artifact_id",
+          "sequence_type",
+          "homology_basis",
+          "sample_metadata_artifact_id",
+          "outgroup_ids",
+          "substitution_model",
+          "support_method",
+          "support_replicates",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Build reproducible comparative sequence alignments and phylogenetic evidence",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Strictly read a project-supplied Cooler HDF5 contact map and explicitly typed regulatory BED table to produce bounded, descriptive cis enhancer-promoter contact candidates with reloadable provenance.",
+      "entrypoint": "biomed_workbench.capabilities.epigenomics:cool_contact_evidence",
+      "id": "cool-contact-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "cool_path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "max_candidates": {
+            "maximum": 100000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "regulatory_elements_path": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "cool_path",
+          "regulatory_elements_path"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Extract chromatin contact evidence from .cool",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Audit sample identity, declared cohort denominator, coverage, and categorical event composition for discrete copy-number records before downstream cancer inference.",
+      "entrypoint": "biomed_workbench.capabilities.clinical:copy_number_event_summary",
+      "id": "copy-number-event-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "records": {
+            "type": "array"
+          },
+          "sample_count": {
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "records",
+          "sample_count"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit discrete copy-number event coverage",
+      "workflow": "clinical"
+    },
+    {
       "access": "offline",
       "description": "Find SpCas9 NGG guide contexts on both strands and report transparent heuristic checks.",
       "entrypoint": "biomed_workbench.capabilities.molecular:crispr_guides",
@@ -1816,6 +2713,30 @@
       "requirements": [],
       "title": "Profile structured scientific rows",
       "workflow": "omics"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve bounded NCBI dbSNP summary evidence for one canonical rs identifier while preserving retrieval provenance and separating reference identity from clinical or population interpretation.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:dbsnp_rsid_evidence",
+      "id": "dbsnp-rsid-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "rsid": {
+            "pattern": "^rs[1-9][0-9]*$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rsid"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve dbSNP rsID reference evidence",
+      "workflow": "evidence"
     },
     {
       "access": "offline",
@@ -2009,6 +2930,43 @@
       "workflow": "omics"
     },
     {
+      "access": "offline",
+      "description": "Fit a constrained G0/G1, S, and G2/M DNA-content histogram and block phase interpretation when optimization, peak separation, or weighted residual diagnostics fail.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:fit_dna_content_phases",
+      "id": "dna-content-phase-fit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "bins": {
+            "maximum": 512,
+            "minimum": 32,
+            "type": "integer"
+          },
+          "dna_values": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 100000,
+            "minItems": 100,
+            "type": "array"
+          },
+          "minimum_peak_separation": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "dna_values"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Fit constrained DNA-content cell-cycle phase proportions",
+      "workflow": "wetlab"
+    },
+    {
       "access": "agent_generated",
       "description": "Validate and serialize DiffDock-style batch inputs and bounded inference parameters, then inventory pose outputs, preserve producer version and rank/confidence semantics, sanitize every ligand with RDKit, verify identity and 3D coordinates, quantify receptor clashes and pose diversity, and retain invalid or missing poses instead of ranking them away.",
       "entrypoint": "agent-generated-analysis",
@@ -2121,6 +3079,96 @@
     },
     {
       "access": "offline",
+      "description": "Calculate precursor-equivalent frequency, division index, proliferation index, and percent divided from a declared dye-dilution generation table without pretending that peak assignment was automated.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_dye_dilution_proliferation",
+      "id": "dye-dilution-proliferation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "generation_events": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "event_count": {
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                "generation": {
+                  "minimum": 0,
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "generation",
+                "event_count"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "generation_events"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Quantify CFSE or CellTrace proliferation from reviewed generations",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
+      "description": "Summarize one electrophysiology time trace with baseline, sampling regularity, peak amplitude, time-to-peak, threshold crossings, and explicit interpretation limits.",
+      "entrypoint": "biomed_workbench.capabilities.biophysics:electrophysiology_trace_summary",
+      "id": "electrophysiology-trace-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "baseline_window_ms": {
+            "type": "number"
+          },
+          "polarity": {
+            "enum": [
+              "positive",
+              "negative"
+            ],
+            "type": "string"
+          },
+          "signal": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 5,
+            "type": "array"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "time_ms": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 5,
+            "type": "array"
+          }
+        },
+        "required": [
+          "time_ms",
+          "signal"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize electrophysiology traces",
+      "workflow": "imaging"
+    },
+    {
+      "access": "offline",
       "description": "Calculate one-sided hypergeometric enrichment and BH correction against an explicit background.",
       "entrypoint": "biomed_workbench.capabilities.omics:enrichment_analysis",
       "id": "enrichment-analysis",
@@ -2157,6 +3205,38 @@
       "requirements": [],
       "title": "Run gene-set overrepresentation",
       "workflow": "omics"
+    },
+    {
+      "access": "public_api",
+      "description": "Resolve one explicit human or mouse gene symbol through Ensembl REST while preserving the current stable ID, assembly-aware interval, strand, biotype, canonical transcript, annotation version, source provenance, and an explicit not-found state.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:ensembl_gene_evidence",
+      "id": "ensembl-gene-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "gene_symbol": {
+            "maxLength": 64,
+            "minLength": 1,
+            "type": "string"
+          },
+          "species": {
+            "enum": [
+              "human",
+              "mouse"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "gene_symbol"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Resolve a bounded Ensembl gene record",
+      "workflow": "evidence"
     },
     {
       "access": "offline",
@@ -2257,6 +3337,37 @@
     },
     {
       "access": "offline",
+      "description": "Parse one FCS 2.0, 3.0, or 3.1 file into an unsampled event table, channel labels, and a deliberately small acquisition metadata subset.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:import_fcs_events",
+      "id": "fcs-event-import",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "fcs_base64": {
+            "minLength": 16,
+            "type": "string"
+          },
+          "fcs_path": {
+            "minLength": 5,
+            "type": "string"
+          },
+          "max_events": {
+            "maximum": 100000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Import an FCS event table for declared downstream gating",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
       "description": "Require a claim, data source, and plot form for every uniquely labeled figure panel.",
       "entrypoint": "biomed_workbench.capabilities.publication:figure_specification",
       "id": "figure-specification",
@@ -2286,6 +3397,46 @@
       "requirements": [],
       "title": "Specify a scientific figure",
       "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Fit a transparent ordinary-least-squares cosinor model for one predeclared period, retaining amplitude, acrophase, residual diagnostics, sampling coverage, and interpretation limits.",
+      "entrypoint": "biomed_workbench.capabilities.rhythm:fit_fixed_period_cosinor",
+      "id": "fixed-period-cosinor",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "period": {
+            "default": 24.0,
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "time": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 6,
+            "type": "array"
+          },
+          "values": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 6,
+            "type": "array"
+          }
+        },
+        "required": [
+          "time",
+          "values"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Fit declared-period cosinor rhythm",
+      "workflow": "clinical"
     },
     {
       "access": "offline",
@@ -2339,6 +3490,129 @@
       "workflow": "wetlab"
     },
     {
+      "access": "offline",
+      "description": "Apply explicit fluorescence-channel rules to event indices retained by reviewed parent gates and report descriptive pattern frequencies without inferring cell identity or diagnosis.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_flow_immunophenotypes",
+      "id": "flow-immunophenotype-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "control_review": {
+            "additionalProperties": false,
+            "properties": {
+              "compensation_reviewed": {
+                "type": "boolean"
+              },
+              "panel_identity": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "sample_identity": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "threshold_basis_reviewed": {
+                "type": "boolean"
+              },
+              "transformation_declared": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "panel_identity",
+              "sample_identity",
+              "compensation_reviewed",
+              "transformation_declared",
+              "threshold_basis_reviewed"
+            ],
+            "type": "object"
+          },
+          "events": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "gates": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "population_rules": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "conditions": {
+                  "minProperties": 1,
+                  "type": "object"
+                },
+                "name": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "parent_gate": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "parent_gate",
+                "conditions"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "events",
+          "gates",
+          "population_rules",
+          "control_review"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Quantify reviewed flow-cytometry fluorescence-rule patterns",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
+      "description": "Extract exact CDS records for one declared identifier from one supplied GenBank record, retaining location, strand, translation-table, and translation-agreement evidence.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:extract_genbank_coding_sequences",
+      "id": "genbank-coding-sequence-extraction",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "genbank_record": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "identifier": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "genbank_record",
+          "identifier"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Extract annotated GenBank coding sequences",
+      "workflow": "molecular_design"
+    },
+    {
       "access": "public_api",
       "description": "Resolve gene records and linked protein, ClinVar, and PubMed identifiers in one bounded workflow.",
       "entrypoint": "biomed_workbench.capabilities.evidence:gene_evidence",
@@ -2372,6 +3646,220 @@
       "workflow": "evidence"
     },
     {
+      "access": "public_api",
+      "description": "Resolve an exact gene symbol and declared organism to one reusable NCBI Gene ID while retaining candidate records and blocking unresolved or ambiguous mappings.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:resolve_gene_identifier",
+      "id": "gene-identifier-resolution",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "gene": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "organism": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "gene"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Resolve a stable NCBI Gene identifier",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve bounded NCBI Datasets ortholog records from one stable source Gene ID to one declared target taxon, preserving source identity, returned target records, missing results, and retrieval provenance without claiming functional equivalence.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:gene_ortholog_evidence",
+      "id": "gene-ortholog-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "gene_id": {
+            "pattern": "^[1-9][0-9]*$",
+            "type": "string"
+          },
+          "max_records": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "target_taxon_id": {
+            "maximum": 9999999,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "gene_id",
+          "target_taxon_id"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve NCBI Gene ortholog evidence",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve bounded Enrichr library metadata so a project can select and freeze a gene-set resource before local enrichment analysis.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:gene_set_library_catalog",
+      "id": "gene-set-library-catalog",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "category_id": {
+            "maximum": 10000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "max_libraries": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Discover public gene-set libraries",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve a bounded, provenance-bearing Enrichr gene-set library snapshot for explicit local enrichment analysis without submitting project genes to a third-party service.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:gene_set_library_membership",
+      "id": "gene-set-library-membership",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "library_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "max_members_per_term": {
+            "maximum": 10000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "max_terms": {
+            "maximum": 5000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "library_name"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve public gene-set library membership",
+      "workflow": "evidence"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to validate coordinate semantics and immutable UCSC chain provenance, run CrossMap on BED intervals in an existing compatible environment, and retain mapped, split, and unmapped records with complete record accounting. It never guesses assemblies, silently drops unmapped intervals, or represents coordinate conversion as biological homology evidence.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "genome-coordinate-liftover",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "chain_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "chain_source_url": {
+            "pattern": "^https://.*$",
+            "type": "string"
+          },
+          "coordinate_convention": {
+            "enum": [
+              "zero-based-half-open"
+            ],
+            "type": "string"
+          },
+          "declared_thresholds": {
+            "type": "object"
+          },
+          "design_notes": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "interval_artifact_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "maxLength": 4000,
+            "minLength": 12,
+            "type": "string"
+          },
+          "source_assembly": {
+            "maxLength": 128,
+            "minLength": 2,
+            "type": "string"
+          },
+          "split_mapping_policy": {
+            "enum": [
+              "retain-and-flag",
+              "block-downstream",
+              "predeclared-aggregation"
+            ],
+            "type": "string"
+          },
+          "target_assembly": {
+            "maxLength": 128,
+            "minLength": 2,
+            "type": "string"
+          },
+          "unmapped_policy": {
+            "enum": [
+              "retain-and-report",
+              "block-if-any"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "interval_artifact_id",
+          "source_assembly",
+          "target_assembly",
+          "chain_artifact_id",
+          "chain_source_url",
+          "coordinate_convention",
+          "split_mapping_policy",
+          "unmapped_policy",
+          "declared_thresholds",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Convert declared genomic intervals between reference assemblies",
+      "workflow": "omics"
+    },
+    {
       "access": "offline",
       "description": "Report N-linked sequons, proline-blocked sequons, serine/threonine-rich windows, local sequence context, coordinates, and inference limits.",
       "entrypoint": "biomed_workbench.capabilities.biochemical_design:scan_glycosylation",
@@ -2399,6 +3887,30 @@
       "requirements": [],
       "title": "Scan protein glycosylation contexts",
       "workflow": "molecular_design"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve fixed-field gnomAD GRCh38 gene identity and aggregate loss-of-function constraint metrics for one bounded gene symbol.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:gnomad_gene_constraint_evidence",
+      "id": "gnomad-gene-constraint-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "gene_symbol": {
+            "pattern": "^[A-Z][A-Z0-9-]{0,39}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "gene_symbol"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve gnomAD gene constraint evidence",
+      "workflow": "evidence"
     },
     {
       "access": "offline",
@@ -2464,24 +3976,61 @@
     },
     {
       "access": "offline",
-      "description": "Estimate maximum log-phase growth rate and doubling time from positive measurements.",
+      "description": "Blank-correct replicate-level OD measurements, fit logistic and modified Gompertz curves, compare them by AICc, retain residual and replicate diagnostics, and block condition-level interpretation when biological replication is not declared.",
       "entrypoint": "biomed_workbench.capabilities.experiment:growth_curve_summary",
       "id": "growth-curve",
       "input_schema": {
         "additionalProperties": false,
         "properties": {
+          "blank_od": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "observations": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "od": {
+                  "type": "number"
+                },
+                "replicate_id": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "time_hours": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "time_hours",
+                "od",
+                "replicate_id"
+              ],
+              "type": "object"
+            },
+            "minItems": 6,
+            "type": "array"
+          },
+          "replicate_level": {
+            "enum": [
+              "unspecified",
+              "technical",
+              "biological"
+            ],
+            "type": "string"
+          },
           "times": {
             "items": {
               "type": "number"
             },
-            "minItems": 3,
+            "minItems": 4,
             "type": "array"
           },
           "values": {
             "items": {
               "type": "number"
             },
-            "minItems": 3,
+            "minItems": 4,
             "type": "array"
           },
           "window": {
@@ -2489,17 +4038,119 @@
             "type": "integer"
           }
         },
-        "required": [
-          "times",
-          "values"
-        ],
+        "required": [],
         "type": "object"
       },
       "kind": "python",
       "mutability": "read_only",
       "requirements": [],
-      "title": "Summarize a growth curve",
+      "title": "Fit replicate-preserving bacterial growth curves",
       "workflow": "wetlab"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to prepare, validate, execute, reload and interpret a SuSiE-RSS fine-mapping analysis from pre-harmonized locus summary statistics and exactly aligned LD evidence.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "gwas-susie-fine-mapping",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "credible_set_coverage": {
+            "exclusiveMaximum": 1,
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genome_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ld_matrix_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "ld_reference_notes": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "maximum_effects": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "sample_size": {
+            "minimum": 100,
+            "type": "integer"
+          },
+          "summary_statistics_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "trait_type": {
+            "enum": [
+              "quantitative",
+              "binary",
+              "other"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "summary_statistics_artifact_id",
+          "ld_matrix_artifact_id",
+          "genome_build",
+          "trait_type",
+          "sample_size",
+          "maximum_effects",
+          "credible_set_coverage",
+          "ld_reference_notes",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Fine-map a GWAS locus with SuSiE-RSS",
+      "workflow": "omics"
+    },
+    {
+      "access": "public_api",
+      "description": "Resolve bounded declared HPO identifiers through the public ontology service while retaining exact identifiers, definitions, synonyms, hierarchy counts, provenance, and explicit not-found states.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:hpo_term_evidence",
+      "id": "hpo-term-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "hpo_ids": {
+            "items": {
+              "pattern": "^HP:[0-9]{7}$",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "hpo_ids"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Resolve Human Phenotype Ontology terms",
+      "workflow": "evidence"
     },
     {
       "access": "offline",
@@ -2588,7 +4239,7 @@
     },
     {
       "access": "offline",
-      "description": "Threshold a small image and measure connected-component area, centroid, bounds, perimeter, and circularity.",
+      "description": "Threshold a small image and measure connected-component area, centroid, bounds, perimeter, circularity, and transparent second-moment shape descriptors.",
       "entrypoint": "biomed_workbench.capabilities.imaging:segment_components",
       "id": "image-segment",
       "input_schema": {
@@ -2633,6 +4284,45 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Segment image components",
+      "workflow": "imaging"
+    },
+    {
+      "access": "offline",
+      "description": "Register two equal-shape 2D images by exhaustive bounded integer translation and overlap mean-squared-error diagnostics.",
+      "entrypoint": "biomed_workbench.capabilities.imaging:register_image_translation",
+      "id": "image-translation-registration",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "fixed": {
+            "minItems": 1,
+            "type": "array"
+          },
+          "max_shift_pixels": {
+            "maximum": 200,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "minimum_overlap_fraction": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "type": "number"
+          },
+          "moving": {
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fixed",
+          "moving"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Register 2D images by integer translation",
       "workflow": "imaging"
     },
     {
@@ -2722,6 +4412,61 @@
       "requirements": [],
       "title": "Intersect declared genomic interval sets",
       "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Fit a dilution-aware one-site equilibrium model to declared integrated ITC injection heats, retaining fitted thermodynamics, residuals, uncertainty, and fit-boundary diagnostics.",
+      "entrypoint": "biomed_workbench.capabilities.biophysics:fit_itc_single_site_binding",
+      "id": "itc-single-site-binding",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "cell_macromolecule_um": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "cell_volume_ul": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "injection_volumes_ul": {
+            "items": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "minItems": 8,
+            "type": "array"
+          },
+          "integrated_heats_ucal": {
+            "items": {
+              "type": "number"
+            },
+            "minItems": 8,
+            "type": "array"
+          },
+          "syringe_ligand_um": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "temperature_k": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "injection_volumes_ul",
+          "integrated_heats_ucal",
+          "cell_macromolecule_um",
+          "syringe_ligand_um",
+          "cell_volume_ul"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Fit one-site ITC binding",
+      "workflow": "molecular_design"
     },
     {
       "access": "public_api",
@@ -2877,6 +4622,88 @@
     },
     {
       "access": "offline",
+      "description": "Audit declared medical imaging metadata for minimal completeness and privacy-risk signals before downstream interpretation.",
+      "entrypoint": "biomed_workbench.capabilities.imaging:medical_metadata_audit",
+      "id": "medical-imaging-metadata-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "declare_modality": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metadata": {
+            "minProperties": 1,
+            "type": "object"
+          },
+          "minimum_required_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "metadata"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit medical imaging metadata",
+      "workflow": "imaging"
+    },
+    {
+      "access": "offline",
+      "description": "Compute deterministic voxel-level quality and intensity summary statistics for declared 3D medical-image tensors.",
+      "entrypoint": "biomed_workbench.capabilities.imaging:medical_volume_summary",
+      "id": "medical-imaging-volume-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "mm_per_voxel": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "required_voxel_order": {
+            "enum": [
+              "z-y-x",
+              "z-y-x-mm",
+              "xyz"
+            ],
+            "type": "string"
+          },
+          "volume": {
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "volume"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize medical imaging volume quality",
+      "workflow": "imaging"
+    },
+    {
+      "access": "offline",
       "description": "Factorize a declared nonnegative normalized feature-by-sample matrix across candidate ranks and deterministic restarts, select a stable parsimonious rank within an explicit reconstruction-error gap, and independently validate metagene loadings, sample exposures, assignments, reconstruction, convergence, stability, and component redundancy.",
       "entrypoint": "scientific-command",
       "id": "metagene-factorization-nmf",
@@ -2890,6 +4717,75 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Discover stable metagene programs with multi-start NMF",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to turn a predeclared single-population demographic scenario into reloadable tree-sequence and VCF simulation evidence for method calibration or study design, without presenting it as empirical demographic inference.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "msprime-demographic-simulation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "model": {
+            "enum": [
+              "constant",
+              "bottleneck",
+              "expansion"
+            ],
+            "type": "string"
+          },
+          "mutation_rate": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "population_parameters": {
+            "minProperties": 1,
+            "type": "object"
+          },
+          "recombination_rate": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "sample_count": {
+            "maximum": 10000,
+            "minimum": 2,
+            "type": "integer"
+          },
+          "seed": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "sequence_length": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "objective",
+          "model",
+          "population_parameters",
+          "sample_count",
+          "sequence_length",
+          "recombination_rate",
+          "mutation_rate",
+          "seed",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Simulate a declared demographic history with msprime",
       "workflow": "omics"
     },
     {
@@ -3199,6 +5095,234 @@
     },
     {
       "access": "offline",
+      "description": "Find complete start-to-stop open reading frames on one or both DNA strands under a declared NCBI genetic code, preserving coding orientation and forward-sequence coordinates.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:annotate_open_reading_frames",
+      "id": "open-reading-frame-annotation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "filter_nested": {
+            "type": "boolean"
+          },
+          "min_length": {
+            "maximum": 100000000,
+            "minimum": 3,
+            "type": "integer"
+          },
+          "search_reverse": {
+            "type": "boolean"
+          },
+          "sequence": {
+            "minLength": 3,
+            "type": "string"
+          },
+          "translation_table": {
+            "maximum": 33,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sequence"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Annotate complete open reading frames",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve fixed-field, source-resolved Open Targets evidence for one Ensembl target and one disease ontology identifier while retaining service total, returned-page truncation, datasource, datatype, score, study, literature, and local-filter limitations.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:opentargets_target_disease_evidence",
+      "id": "opentargets-target-disease-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "data_types": {
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "disease_id": {
+            "pattern": "^[A-Za-z][A-Za-z0-9]*_[0-9]+$",
+            "type": "string"
+          },
+          "ensembl_gene_id": {
+            "pattern": "^ENS[A-Za-z]*G[0-9]{11}$",
+            "type": "string"
+          },
+          "max_records": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ensembl_gene_id",
+          "disease_id"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve bounded Open Targets target-disease evidence",
+      "workflow": "evidence"
+    },
+    {
+      "access": "offline",
+      "description": "Perform deterministic structural checks on bounded Chinese patent-claim text, including claim numbering, references, placeholders, transition phrasing, short claims, antecedent-basis cues, and result-oriented wording.",
+      "entrypoint": "biomed_workbench.capabilities.publication:patent_claim_structure_audit",
+      "id": "patent-claim-structure-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "claims_text": {
+            "maxLength": 500000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "claims_text"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Check Chinese patent claim structure",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Map formal patent-claim features to stable source blocks and block claims that depend on unsupported or confirmation-pending technical features.",
+      "entrypoint": "biomed_workbench.capabilities.publication:patent_claim_support_audit",
+      "id": "patent-claim-support-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "claims": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "feature_ids": {
+                  "items": {
+                    "pattern": "^T[0-9]{3,}$",
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "id": {
+                  "pattern": "^CL[0-9]{3,}$",
+                  "type": "string"
+                },
+                "text": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "text",
+                "feature_ids"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "features": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "pattern": "^T[0-9]{3,}$",
+                  "type": "string"
+                },
+                "source_ids": {
+                  "items": {
+                    "pattern": "^[PEFC][0-9]{3,}$",
+                    "type": "string"
+                  },
+                  "minItems": 1,
+                  "type": "array",
+                  "uniqueItems": true
+                },
+                "support_state": {
+                  "enum": [
+                    "explicit",
+                    "inherent",
+                    "needs-confirmation",
+                    "unsupported"
+                  ],
+                  "type": "string"
+                },
+                "text": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "text",
+                "support_state",
+                "source_ids"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "source_blocks": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "pattern": "^[PEFC][0-9]{3,}$",
+                  "type": "string"
+                },
+                "text": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "text"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "source_blocks",
+          "features",
+          "claims"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit source support for patent claim features",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
       "description": "Check inventive concept, essential features, enablement examples, alternatives, and prior-art evidence.",
       "entrypoint": "biomed_workbench.capabilities.publication:patent_disclosure_audit",
       "id": "patent-disclosure-audit",
@@ -3254,6 +5378,99 @@
     },
     {
       "access": "offline",
+      "description": "Check a structured patent draft for cross-field source traceability, claim-feature evidence links, terminology, formulas, figures, specification sections, and delivery quality thresholds.",
+      "entrypoint": "biomed_workbench.capabilities.publication:patent_draft_readiness_audit",
+      "id": "patent-draft-readiness-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "draft": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "draft"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit structured patent draft readiness",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Render one bounded, validated Chinese patent method flowchart as a portable black-and-white SVG with deterministic layout and parseability gates.",
+      "entrypoint": "biomed_workbench.capabilities.publication:render_patent_flowchart_svg",
+      "id": "patent-flowchart-svg",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "figure": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "figure"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Render a patent-style SVG flowchart",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Enumerate exact-match linear or circular PCR amplicons from a declared DNA template and primer pair, preserving binding intervals, topology and every candidate product.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:simulate_pcr_amplicons",
+      "id": "pcr-amplicon-simulation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "circular": {
+            "type": "boolean"
+          },
+          "forward_primer": {
+            "minLength": 10,
+            "type": "string"
+          },
+          "max_products": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "reverse_primer": {
+            "minLength": 10,
+            "type": "string"
+          },
+          "selected_candidate_index": {
+            "minimum": 0,
+            "nullable": true,
+            "type": "integer"
+          },
+          "template": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "template",
+          "forward_primer",
+          "reverse_primer"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Simulate exact-match PCR amplicons",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
       "description": "Calculate per-reaction and overage-adjusted PCR component volumes with conservation checks.",
       "entrypoint": "biomed_workbench.capabilities.experiment:pcr_mix",
       "id": "pcr-plan",
@@ -3290,6 +5507,75 @@
       "requirements": [],
       "title": "Calculate a PCR master mix",
       "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
+      "description": "Bind one declared ranked primer-design candidate to an explicit PCR template and primer request.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:select_pcr_primer_pair",
+      "id": "pcr-primer-pair-selection",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "pairs": {
+            "minItems": 1,
+            "type": "array"
+          },
+          "selected_candidate_index": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "template": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "template",
+          "pairs"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Select a PCR primer pair",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Convert one accessible PDF into bounded page-level text, extraction diagnostics, navigational metadata, and immutable provenance before scientific synthesis.",
+      "entrypoint": "biomed_workbench.capabilities.publication:extract_pdf_evidence",
+      "id": "pdf-evidence-extraction",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "document_base64": {
+            "minLength": 8,
+            "type": "string"
+          },
+          "document_path": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "max_chars_per_page": {
+            "maximum": 50000,
+            "minimum": 200,
+            "type": "integer"
+          },
+          "max_pages": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Extract page-addressable PDF evidence",
+      "workflow": "evidence"
     },
     {
       "access": "offline",
@@ -3357,7 +5643,66 @@
     },
     {
       "access": "offline",
-      "description": "Rank facing primer pairs with explicit thermodynamic approximations and validation limits.",
+      "description": "Create a publication-facing presentation plan and execution graph that binds findings, slide outputs, peer-response states, and review modules into a bounded delivery workflow.",
+      "entrypoint": "biomed_workbench.capabilities.publication:presentation_delivery_plan",
+      "id": "presentation-delivery-plan",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "available_modules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "figures": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "key_findings": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "manuscript_inputs": {
+            "type": "object"
+          },
+          "project_goal": {
+            "type": "string"
+          },
+          "reviewer_feedback": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "storyline": {
+            "type": "string"
+          },
+          "target_audience": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_goal",
+          "target_audience",
+          "storyline",
+          "key_findings"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Build a presentation delivery plan",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Use Primer3 nearest-neighbor thermodynamics to rank facing PCR primer pairs with retained candidate metrics and validation limits.",
       "entrypoint": "biomed_workbench.capabilities.molecular:design_primers",
       "id": "primer-design",
       "input_schema": {
@@ -3398,6 +5743,102 @@
       "requirements": [],
       "title": "Design PCR primer candidates",
       "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Screen a declared PCR primer pair by exact-match amplicon enumeration across a finite user-supplied reference panel.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:screen_primer_pair_specificity",
+      "id": "primer-pair-specificity-screen",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "forward_primer": {
+            "minLength": 10,
+            "type": "string"
+          },
+          "intended_reference_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "max_products_per_reference": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "reference_sequences": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "reverse_primer": {
+            "minLength": 10,
+            "type": "string"
+          }
+        },
+        "required": [
+          "forward_primer",
+          "reverse_primer",
+          "reference_sequences",
+          "intended_reference_id"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Screen primer-pair specificity in a reference panel",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve accession-bound IUPred2A residue-level disorder tendencies and transparent score-threshold spans through a bounded public REST contract.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:protein_disorder_evidence",
+      "id": "protein-disorder-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "minimum_span_length": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "prediction_type": {
+            "enum": [
+              "long",
+              "short",
+              "glob"
+            ],
+            "type": "string"
+          },
+          "score_threshold": {
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number"
+          },
+          "uniprot_accessions": {
+            "items": {
+              "maxLength": 20,
+              "minLength": 6,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "uniprot_accessions"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve protein disorder tendency evidence",
+      "workflow": "evidence"
     },
     {
       "access": "agent_generated",
@@ -3570,6 +6011,139 @@
       "requirements": [],
       "title": "Aggregate sequencing quality reports across samples",
       "workflow": "omics"
+    },
+    {
+      "access": "public_api",
+      "description": "Resolve bounded declared GO identifiers through QuickGO while retaining exact terms, aspect, definitions, synonyms, provenance, and explicit not-found states.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:quickgo_term_evidence",
+      "id": "quickgo-term-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "go_ids": {
+            "items": {
+              "pattern": "^GO:[0-9]{7}$",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "go_ids"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Resolve Gene Ontology terms",
+      "workflow": "evidence"
+    },
+    {
+      "access": "offline",
+      "description": "Calculate reviewed organ-level percent injected dose per gram, observed-interval trapezoidal AUC, and matching-time tumor-to-blood ratios while preserving calibration, decay-correction, and biological-replication boundaries.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_radiotracer_biodistribution",
+      "id": "radiotracer-biodistribution",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "blood_organ": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "measurements": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "replicate_level": {
+            "enum": [
+              "unspecified",
+              "technical",
+              "biological"
+            ],
+            "type": "string"
+          },
+          "tumor_organ": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "measurements"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize radiotracer biodistribution",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "public_api",
+      "description": "Submit one explicit, bounded identifier set to the Reactome Analysis Service and preserve service-side mapping loss, ranked pathway statistics, FDR, truncation, analysis token, and strict limits on scientific interpretation.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:reactome_overrepresentation_evidence",
+      "id": "reactome-overrepresentation-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "identifiers": {
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 5000,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "max_pathways": {
+            "maximum": 500,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "identifiers"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve bounded Reactome gene-set overrepresentation context",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Retrieve one exact Reactome stable pathway record while preserving its versioned identity, species, release context, disease and inference flags, linked GO biological-process context, provenance, and explicit not-found state.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:reactome_pathway_evidence",
+      "id": "reactome-pathway-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "pathway_id": {
+            "pattern": "^R-[A-Za-z]{3}-[1-9][0-9]{0,11}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pathway_id"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Resolve a bounded Reactome pathway record",
+      "workflow": "evidence"
     },
     {
       "access": "offline",
@@ -3841,18 +6415,24 @@
     },
     {
       "access": "offline",
-      "description": "Locate selected restriction motifs with explicit one-based coordinates.",
+      "description": "Locate selected restriction motifs with explicit one-based coordinates and, when requested, predict exact-motif digest fragments on declared linear or circular DNA.",
       "entrypoint": "biomed_workbench.capabilities.molecular:restriction_sites",
       "id": "restriction-plan",
       "input_schema": {
         "additionalProperties": false,
         "properties": {
+          "circular": {
+            "type": "boolean"
+          },
           "enzymes": {
             "items": {
               "type": "string"
             },
             "nullable": true,
             "type": "array"
+          },
+          "include_digest": {
+            "type": "boolean"
           },
           "sequence": {
             "minLength": 1,
@@ -3949,6 +6529,153 @@
       "requirements": [],
       "title": "Build a claim-linked manuscript assessment",
       "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Validate one supplied RNA dot-bracket structure and summarize its base pairs, stems, pairing fraction and optional canonical or wobble pair classes.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:summarize_rna_secondary_structure",
+      "id": "rna-secondary-structure-summary",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "dot_bracket": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sequence": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "dot_bracket"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Validate and summarize RNA secondary structure",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Direct Codex to validate project genotype, phenotype and externally declared group folds, run grouped held-out RR-BLUP prediction, and reload fold-wise performance without training-test leakage.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "rrblup-genomic-prediction",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "fold_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "folding_rationale": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "genome_or_marker_panel": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genotype_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "phenotype_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "trait_name": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "genotype_artifact_id",
+          "phenotype_artifact_id",
+          "fold_artifact_id",
+          "trait_name",
+          "genome_or_marker_panel",
+          "folding_rationale",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Evaluate grouped held-out RR-BLUP genomic prediction",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Plan declared-primer and explicitly designed Sanger read coverage for one non-wrapping target interval on a supplied linear DNA template.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:plan_sanger_verification_coverage",
+      "id": "sanger-verification-coverage",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "coverage_overlap": {
+            "maximum": 1999,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "existing_primers": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "max_new_primers": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "primer_length": {
+            "maximum": 40,
+            "minimum": 14,
+            "type": "integer"
+          },
+          "read_length": {
+            "maximum": 2000,
+            "minimum": 100,
+            "type": "integer"
+          },
+          "target_end": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "target_start": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "template": {
+            "minLength": 40,
+            "type": "string"
+          }
+        },
+        "required": [
+          "template",
+          "target_start",
+          "target_end"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Plan Sanger verification coverage",
+      "workflow": "molecular_design"
     },
     {
       "access": "codex_native",
@@ -4161,6 +6888,181 @@
       "requirements": [],
       "title": "Inspect a biological sequence",
       "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Scan declared foreground and background DNA sequences against versioned known PWM motifs, test per-sequence enrichment, and preserve threshold, background, and provenance boundaries.",
+      "entrypoint": "biomed_workbench.capabilities.epigenomics:sequence_motif_enrichment",
+      "id": "sequence-motif-enrichment",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "background_sequences": {
+            "items": {
+              "minLength": 3,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "foreground_sequences": {
+            "items": {
+              "minLength": 3,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "motifs": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "threshold": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "foreground_sequences",
+          "background_sequences",
+          "motifs"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Test known sequence motif enrichment",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Perform deterministic global or local pairwise alignment with an explicit Biopython scoring contract, aligned blocks, coverage, and claim boundaries.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:pairwise_sequence_alignment",
+      "id": "sequence-pairwise-alignment",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "alphabet": {
+            "enum": [
+              "dna",
+              "rna",
+              "protein"
+            ],
+            "type": "string"
+          },
+          "extend_gap_score": {
+            "maximum": 0,
+            "minimum": -100,
+            "type": "number"
+          },
+          "match_score": {
+            "maximum": 100,
+            "minimum": -100,
+            "type": "number"
+          },
+          "mismatch_score": {
+            "maximum": 100,
+            "minimum": -100,
+            "type": "number"
+          },
+          "mode": {
+            "enum": [
+              "global",
+              "local"
+            ],
+            "type": "string"
+          },
+          "open_gap_score": {
+            "maximum": 0,
+            "minimum": -100,
+            "type": "number"
+          },
+          "query": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reference",
+          "query"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Align two biological sequences",
+      "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Globally align two unambiguous sequences and report descriptive substitutions, insertions and deletions with explicit reference intervals, scoring and alignment evidence.",
+      "entrypoint": "biomed_workbench.capabilities.molecular:localize_sequence_variants",
+      "id": "sequence-variant-localization",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "alphabet": {
+            "enum": [
+              "dna",
+              "rna",
+              "protein"
+            ],
+            "type": "string"
+          },
+          "extend_gap_score": {
+            "maximum": 0,
+            "minimum": -100,
+            "type": "number"
+          },
+          "match_score": {
+            "maximum": 100,
+            "minimum": -100,
+            "type": "number"
+          },
+          "mismatch_score": {
+            "maximum": 100,
+            "minimum": -100,
+            "type": "number"
+          },
+          "open_gap_score": {
+            "maximum": 0,
+            "minimum": -100,
+            "type": "number"
+          },
+          "query": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_coordinate_offset": {
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reference",
+          "query"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Localize descriptive sequence differences",
+      "workflow": "molecular_design"
     },
     {
       "access": "agent_generated",
@@ -5158,7 +8060,7 @@
     },
     {
       "access": "agent_generated",
-      "description": "Direct Codex to inspect a real count-backed h5ad and biological design, adapt and execute a project-specific scVI or scANVI model in the user's existing scientific environment, compare the latent space with an unchanged PCA baseline, validate scANVI by stratified label holdout, retain reviewed and unknown labels, save and reload both model and h5ad artifacts, and block models that mix batches by erasing biology or cannot generalize to withheld labels.",
+      "description": "Direct Codex to inspect a real count-backed h5ad and biological design, adapt and execute a project-specific scVI or scANVI model in the user scientific environment, compare the latent space with an unchanged PCA baseline, validate scANVI by stratified label holdout, optionally generate bounded Bayesian change-mode cell-level differential-expression evidence after model admission, retain reviewed and unknown labels, save and reload both model and h5ad artifacts, and block models that mix batches by erasing biology or cannot generalize to withheld labels.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-generative-modeling",
       "input_schema": {
@@ -5168,6 +8070,9 @@
             "maxLength": 128,
             "minLength": 1,
             "type": "string"
+          },
+          "bayesian_de": {
+            "type": "object"
           },
           "biological_sample_key": {
             "maxLength": 128,
@@ -5357,6 +8262,7 @@
           },
           "input_format": {
             "enum": [
+              "tenx-hdf5",
               "seurat-rds",
               "h5mu"
             ],
@@ -5468,7 +8374,7 @@
     },
     {
       "access": "agent_generated",
-      "description": "Direct Codex to inspect real query and reviewed reference h5ad objects, align their declared feature namespace, execute SingleR in the user's existing R environment, reconcile cell-level scores and pruning with cluster consensus, independent positive and negative marker contracts, and transitive Cell Ontology constraints, preserve source labels and raw counts, retain conflicts as unknown, write annotation fields to a new h5ad, and reload the result before admitting annotations.",
+      "description": "Direct Codex to inspect real query and reviewed reference h5ad objects, align their declared feature namespace, execute SingleR in the user's existing R environment, reconcile complete finite cell-level score matrices and pruning with cluster consensus, independent positive and negative marker contracts, and transitive Cell Ontology constraints, preserve all source artifacts and raw counts, retain conflicts or absent-reference populations as unknown, and reload the result before admitting annotations.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-reference-annotation",
       "input_schema": {
@@ -5829,7 +8735,7 @@
     },
     {
       "access": "agent_generated",
-      "description": "Direct Codex to infer declared branch topology independently with Slingshot and Monocle3, validate direction against withheld time, fit tradeSeq lineage-weighted GAMs, and retain association, pattern, start-versus-end, and differential-end statistics with complete cell and count accounting.",
+      "description": "Direct Codex to infer one or more declared lineages independently with Slingshot and Monocle3, validate direction against external time, fit tradeSeq lineage-weighted GAMs, and retain association, pattern, start-versus-end, and differential-end statistics with complete cell and count accounting.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-trajectory-topology",
       "input_schema": {
@@ -6066,7 +8972,7 @@
       "kind": "python",
       "mutability": "read_only",
       "requirements": [],
-      "title": "Audit source review windows without overstating currentness",
+      "title": "Audit citation freshness windows without overstating currentness",
       "workflow": "evidence"
     },
     {
@@ -7235,6 +10141,67 @@
       "workflow": "omics"
     },
     {
+      "access": "public_api",
+      "description": "Retrieve identity-critical, source-preserved UniProtKB fields for one exact accession without arbitrary endpoint access or model-generated API requests.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:uniprot_protein_evidence",
+      "id": "uniprot-protein-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "accession": {
+            "maxLength": 20,
+            "minLength": 6,
+            "type": "string"
+          }
+        },
+        "required": [
+          "accession"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve UniProtKB protein identity evidence",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Map one to 500 exact UniProtKB accessions to Ensembl gene identifiers through a bounded asynchronous UniProt job while retaining per-accession success or loss, job state, poll count, and service provenance.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:uniprot_to_ensembl_evidence",
+      "id": "uniprot-to-ensembl-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "accessions": {
+            "items": {
+              "maxLength": 20,
+              "minLength": 6,
+              "type": "string"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "max_polls": {
+            "maximum": 30,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accessions"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Map bounded UniProt accessions to Ensembl gene IDs",
+      "workflow": "evidence"
+    },
+    {
       "access": "offline",
       "description": "Guide and execute HTSlib bgzip decompression of a digest-bound VCF 4.5 BGZF+TBI bundle and verify byte-exact recovery of the coordinate-sorted VCF document for downstream filtering and analysis.",
       "entrypoint": "scientific-command",
@@ -7390,9 +10357,89 @@
       "requirements": [],
       "title": "Summarize structured variants",
       "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Normalize manually reviewed Western blot target-band ROIs by background, optional matched loading control, and declared reference lanes while preserving technical and biological repetition boundaries.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_western_blot_densitometry",
+      "id": "western-blot-densitometry",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "measurements": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "reference_lane_ids": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "replicate_level": {
+            "enum": [
+              "unspecified",
+              "technical",
+              "biological"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "measurements",
+          "reference_lane_ids"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Quantify reviewed Western blot bands",
+      "workflow": "wetlab"
+    },
+    {
+      "access": "offline",
+      "description": "Retain animal-level longitudinal tumor volumes, declared endpoint changes, and descriptive tumor-growth inhibition against a control group.",
+      "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_xenograft_tumor_growth",
+      "id": "xenograft-tumor-growth",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "control_group": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "endpoint_time_days": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "observations": {
+            "items": {
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "observations",
+          "control_group"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Summarize xenograft tumor growth and endpoint TGI",
+      "workflow": "wetlab"
     }
   ],
-  "entry_count": 108,
+  "entry_count": 174,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

@@ -1,153 +1,1192 @@
 {
-  "schema_version": 1,
-  "id": "single-cell-regulatory-network",
-  "version": "1.0.0",
-  "title": "Infer and score single-cell regulatory networks with pySCENIC and SCENIC+",
-  "description": "Direct Codex to validate count-backed expression, paired chromatin accessibility, TF, motif-ranking, motif-annotation, and region-gene evidence; execute GRNBoost2, cisTarget pruning, regulon construction, AUCell, and SCENIC+ eRegulon scoring in compatible existing scientific runtimes; preserve method-specific gene and region evidence; and admit only source-bound, reload-validated regulatory results without converting association into causality.",
-  "module_type": "analysis",
-  "domains": ["omics", "statistics"],
-  "intents": ["pySCENIC GRNBoost2 cisTarget AUCell", "SCENIC+ enhancer regulon scoring", "single-cell gene regulatory network", "单细胞 SCENIC SCENIC+ 调控网络 eRegulon"],
-  "questions": ["Which TF-target regulons and paired RNA-accessibility eRegulons are supported by explicit coexpression, motif, region-gene, and cell-level activity evidence?"],
-  "entrypoint": "agent-generated-analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "maturity": "experimental",
-  "input_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "objective": {"type": "string", "minLength": 12},
-      "expression_artifact_id": {"type": "string", "minLength": 1},
-      "accessibility_artifact_id": {"type": "string", "minLength": 1},
-      "requested_backends": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["pyscenic", "scenicplus"]}},
-      "tf_resource": {"type": "string", "minLength": 1},
-      "motif_resources": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-      "eregulon_evidence_fields": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-      "cell_identity_policy": {"type": "string", "enum": ["exact-paired-cells"]},
-      "declared_thresholds": {"type": "object"},
-      "design_notes": {"type": "string"}
-    },
-    "required": ["objective", "expression_artifact_id", "accessibility_artifact_id", "requested_backends", "tf_resource", "motif_resources", "eregulon_evidence_fields", "cell_identity_policy", "declared_thresholds", "design_notes"]
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Do not guess TFs, silently intersect cells or features, substitute unmatched motif resources, overwrite source counts, invent missing motif or region-gene evidence, or tune against desired labels.",
+      "Do not collapse pySCENIC and SCENIC+ scores, call coexpression direct binding, call eRegulon concordance causality, or report generated or unreloaded outputs as evidence."
+    ],
+    "languages": [
+      "python",
+      "notebook"
+    ],
+    "mode": "codex_generated_project_code",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "species",
+          "genome build",
+          "gene identifiers",
+          "region identifiers",
+          "motif collection",
+          "ranking universe"
+        ],
+        "id": "regulatory-resource-selection",
+        "parameter": "ranking-and-motif-resources",
+        "selection_rule": "Use only versioned species- and genome-matched resources whose gene universe and coordinate system are explicitly reconciled to the project.",
+        "validation_rule": "Hash every resource and block missing genes, invalid rankings, unresolved coordinates or annotation-free motifs."
+      },
+      {
+        "decision_inputs": [
+          "RNA-only question",
+          "paired RNA-ATAC availability",
+          "motif evidence",
+          "region-gene evidence"
+        ],
+        "id": "regulatory-backend-selection",
+        "parameter": "backend",
+        "selection_rule": "Use pySCENIC for expression-based motif-pruned regulons and SCENIC+ only when paired chromatin and complete eRegulon evidence exist.",
+        "validation_rule": "Keep each backend's outputs separate and report disagreement."
+      }
+    ],
+    "postflight_checks": [
+      "Reload and reconcile every source and output artifact, cell, feature, regulon, target, signature, parameter, version and digest.",
+      "Review regulon target support, motif enrichment, AUCell coverage, gene-region concordance and claim scope before downstream use."
+    ],
+    "preflight_checks": [
+      "Inspect matrices, raw counts, cells, feature identifiers, transformations, TFs, species, genome build, motif resources, ranking permutations, eRegulon evidence and output paths.",
+      "Detect exact pySCENIC, SCENIC+, Python and dependency versions in existing runtimes and require a validated compatibility profile."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "input-sha256",
+      "TF-resource-sha256",
+      "motif-ranking-sha256",
+      "motif-annotation-sha256",
+      "eregulon-evidence-sha256",
+      "species",
+      "genome-build",
+      "parameters",
+      "actual-tool-versions",
+      "output-sha256",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-regulatory-contract",
+        "output_artifact_types": [
+          "single_cell_regulatory_network_evidence"
+        ],
+        "purpose": "Establish cells, matrices, TFs, resources and claim scope.",
+        "required_logic": [
+          "Inspect actual expression and accessibility objects, raw counts, transformations, cells, features, species, genome build, TF list, ranking universe, motif annotations, region-gene evidence and digests.",
+          "Freeze backend-specific parameters and evidence fields before execution."
+        ],
+        "template_files": [
+          "templates/run_grnboost2_programs.py",
+          "templates/run_pyscenic.py",
+          "templates/score_scenicplus_eregulons.py"
+        ]
+      },
+      {
+        "id": "infer-pre-motif-programs",
+        "output_artifact_types": [
+          "single_cell_regulatory_network_evidence"
+        ],
+        "purpose": "Infer reviewable TF coexpression programs when production motif resources are not yet available.",
+        "required_logic": [
+          "Run GRNBoost2 and AUCell with a declared TF list while withholding evaluation labels and retain complete adjacency, target-weight and cell-activity evidence.",
+          "Label outputs as coexpression programs, not motif-pruned regulons, and require species-matched cisTarget resources before promotion to regulons."
+        ],
+        "template_files": [
+          "templates/run_grnboost2_programs.py"
+        ]
+      },
+      {
+        "id": "infer-pyscenic-regulons",
+        "output_artifact_types": [
+          "single_cell_regulatory_network_evidence"
+        ],
+        "purpose": "Infer coexpression and motif-pruned regulons.",
+        "required_logic": [
+          "Run GRNBoost2 with a bounded in-process Dask client, retain complete adjacencies, construct coexpression modules and prune them against the exact declared cisTarget ranking and annotation resources.",
+          "Construct regulons and score every cell with AUCell while retaining target weights, motif contexts and parameters."
+        ],
+        "template_files": [
+          "templates/run_pyscenic.py"
+        ]
+      },
+      {
+        "id": "score-scenicplus-eregulons",
+        "output_artifact_types": [
+          "single_cell_regulatory_network_evidence"
+        ],
+        "purpose": "Score paired RNA and chromatin eRegulon activity.",
+        "required_logic": [
+          "Require exact paired cells plus explicit TF, gene, region, motif, region-gene and TF-gene evidence for every eRegulon row.",
+          "Score gene- and region-based signatures independently and retain their per-eRegulon concordance rather than averaging them."
+        ],
+        "template_files": [
+          "templates/score_scenicplus_eregulons.py"
+        ]
+      },
+      {
+        "id": "reload-and-admit",
+        "output_artifact_types": [
+          "single_cell_regulatory_network_evidence"
+        ],
+        "purpose": "Verify source preservation and regulatory evidence boundaries.",
+        "required_logic": [
+          "Reload all adjacency, coexpression-program, enrichment, regulon, gene-AUC, region-AUC, concordance and validated-eRegulon outputs and reconcile source hashes.",
+          "Admit method-specific association evidence only; require independent experiments or replicated temporal evidence for causal claims."
+        ],
+        "template_files": [
+          "templates/run_grnboost2_programs.py",
+          "templates/run_pyscenic.py",
+          "templates/score_scenicplus_eregulons.py"
+        ]
+      }
+    ]
   },
-  "output_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]},
-      "module": {"type": "object"},
-      "request_digest": {"type": "string"},
-      "request_fields": {"type": "array"},
-      "languages": {"type": "array"},
-      "code_plan": {"type": "array"},
-      "parameter_rules": {"type": "array"},
-      "preflight_checks": {"type": "array"},
-      "postflight_checks": {"type": "array"},
-      "provenance_fields": {"type": "array"},
-      "forbidden_actions": {"type": "array"},
-      "tool_profiles": {"type": "array"},
-      "dependency_profiles": {"type": "array"},
-      "quality_gate_ids": {"type": "array"},
-      "execution_policy": {"type": "object"}
-    },
-    "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]
-  },
-  "input_artifacts": [
-    {
-      "name": "single_cell_regulatory_inputs",
-      "artifact_type": "single_cell_regulatory_input_bundle",
-      "formats": [
-        {"name": "tab-separated-values", "versions": ["1"], "representations": ["text", "sparse"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": ["declared-genomic-intervals-or-expression-feature-axis"], "genome_build_policy": "declared", "genome_builds": ["declared-in-project", "not-applicable-for-expression"], "annotation_releases": ["declared-in-project"], "orientations": ["cells-by-genes", "cells-by-regions", "motifs-by-ranked-genes", "eregulon-evidence-rows"]},
-        {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": ["declared-genomic-intervals"], "genome_build_policy": "declared", "genome_builds": ["declared-in-project"], "annotation_releases": ["declared-in-project"], "orientations": ["cells-by-features"]},
-        {"name": "h5mu", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": ["declared-genomic-intervals"], "genome_build_policy": "declared", "genome_builds": ["declared-in-project"], "annotation_releases": ["declared-in-project"], "orientations": ["cells-by-features-per-modality"]}
-      ],
-      "processing_levels": ["count-backed", "quality-controlled", "paired-cell", "resource-annotated"],
-      "required_metadata": ["source-digests", "raw-count-location", "cell-accounting", "feature-identifiers", "species", "genome-build", "TF-resource-digest", "motif-ranking-digest", "motif-annotation-digest", "region-gene-evidence", "transformations"]
-    }
+  "alternatives": [
+    "single-cell-marker-discovery"
   ],
-  "output_artifacts": [
-    {
-      "name": "regulatory_network_evidence",
-      "artifact_type": "single_cell_regulatory_network_evidence",
-      "formats": [
-        {"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["inherited-genomic-intervals"], "genome_build_policy": "declared", "genome_builds": ["inherited-from-input"], "annotation_releases": ["inherited-from-input"], "orientations": ["TF-by-target", "cell-by-regulon", "cell-by-eregulon", "eregulon-concordance"]},
-        {"name": "json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["regulons-and-quality-summary"]}
-      ],
-      "processing_levels": ["coexpression-inferred", "motif-pruned", "activity-scored", "reload-validated"],
-      "required_metadata": ["backend", "source-digests", "resource-digests", "TF-target-weights", "motif-enrichment", "gene-AUC", "region-AUC", "region-gene-evidence", "parameters", "versions", "quality-status"]
-    }
-  ],
-  "preconditions": ["Expression values are finite and nonnegative with immutable source counts available; TF identities and species-matched motif resources are declared; pySCENIC rankings span the exact expression gene universe; SCENIC+ receives identical RNA and ATAC cells in identical order plus explicit motif and region-gene evidence; output paths are new."],
-  "assumptions": ["GRNBoost2 edges are predictive coexpression, cisTarget adds motif-enrichment support, AUCell estimates relative cell-level signature activity, and SCENIC+ scores supplied evidence-backed eRegulons; none alone proves direct binding, enhancer causality, or condition-level regulation."],
-  "quality_gates": [
-    {"id": "regulatory-input-and-resource-semantics", "severity": "fatal", "description": "Block unless cells, genes, regions, raw counts, transformations, TFs, species, genome build, motif resources, ranking universe, annotations and source digests are explicit and structurally valid.", "blocks_interpretation": true},
-    {"id": "regulatory-grn-and-motif-separation", "severity": "fatal", "description": "Retain GRNBoost2 adjacency, coexpression modules, motif enrichment and pruned regulons as distinct evidence layers; do not relabel coexpression as motif-supported regulation.", "blocks_interpretation": true},
-    {"id": "regulatory-aucell-accounting", "severity": "fatal", "description": "AUCell must score every source cell against every admitted regulon with finite output and declared ranking/AUC parameters.", "blocks_interpretation": true},
-    {"id": "regulatory-eregulon-evidence", "severity": "fatal", "description": "Every SCENIC+ eRegulon requires explicit TF, motif, region, region-gene and TF-gene evidence and minimum unique gene and region targets.", "blocks_interpretation": true},
-    {"id": "regulatory-paired-modality-accounting", "severity": "fatal", "description": "SCENIC+ RNA and ATAC matrices must retain exactly the same unique cells in the same order; silent intersections, reordering and missing-modality imputation are prohibited.", "blocks_interpretation": true},
-    {"id": "regulatory-method-and-claim-boundary", "severity": "major", "description": "pySCENIC regulons and SCENIC+ eRegulons remain method-specific evidence; causal, condition-level and lineage claims require independent perturbation, replication or temporal support.", "blocks_interpretation": true},
-    {"id": "regulatory-source-and-output-reload", "severity": "fatal", "description": "Reload every output and reconcile cells, features, regulons, eRegulons, parameters, versions, resources, source hashes and output hashes before admission.", "blocks_interpretation": true}
-  ],
-  "evidence_effects": ["adds_grnboost2_adjacencies", "adds_cistarget_pruned_regulons", "adds_regulon_aucell_activity", "adds_scenicplus_gene_and_region_eregulon_activity"],
-  "alternatives": ["single-cell-marker-discovery"],
-  "complements": ["single-cell-atac-regulatory", "single-cell-multimodal-integration", "single-cell-donor-inference", "single-cell-trajectory-topology"],
-  "tool_requirements": [
-    {"name": "pyscenic", "ecosystem": "python", "identity": "pyscenic", "required": true, "tested_versions": ["0.12.1"], "allowed_versions": [">=0.12.1,<0.13"], "version_source": "https://pyscenic.readthedocs.io/en/stable/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('pyscenic'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "pyscenic-numpy-ranking-api", "affected_versions": [">=0.12.1,<0.13"], "category": "api", "description": "pySCENIC 0.12.1 uses legacy NumPy aliases and version-coupled ctxcore ranking and pruning APIs.", "compatibility_effect": "requires-parser", "required_action": "Detect NumPy, ctxcore, arboreto, Dask and pySCENIC together and execute a compatibility fixture before project analysis.", "source": "https://pyscenic.readthedocs.io/en/stable/installation.html"}], "platforms": ["any"]},
-    {"name": "scenicplus", "ecosystem": "python", "identity": "scenicplus", "required": true, "tested_versions": ["1.0a2"], "allowed_versions": ["1.0a2"], "version_source": "https://scenicplus.readthedocs.io/en/stable/api.html", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('scenicplus'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "scenicplus-eregulon-api", "affected_versions": ["1.0a2"], "category": "api", "description": "SCENIC+ eRegulon table fields, enrichment outputs and pinned scientific dependencies are pre-release and version-coupled.", "compatibility_effect": "requires-parser", "required_action": "Validate required eRegulon fields and reload gene- and region-based outputs under the observed release.", "source": "https://scenicplus.readthedocs.io/en/stable/api.html"}], "platforms": ["any"]}
-  ],
-  "dependencies": [
-    {"name": "python-pyscenic", "ecosystem": "runtime", "identity": "python-pyscenic-runtime", "required": true, "tested_versions": ["3.10.18"], "allowed_versions": [">=3.10,<3.11"], "version_source": "https://www.python.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import platform; print(platform.python_version())"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute the validated pySCENIC compatibility profile.", "conflicts": [], "platforms": ["any"]},
-    {"name": "arboreto", "ecosystem": "python", "identity": "arboreto", "required": true, "tested_versions": ["0.1.6"], "allowed_versions": [">=0.1.6,<0.2"], "version_source": "https://github.com/aertslab/arboreto", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('arboreto'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Infer GRNBoost2 TF-target adjacencies.", "conflicts": [], "platforms": ["any"]},
-    {"name": "ctxcore", "ecosystem": "python", "identity": "ctxcore", "required": true, "tested_versions": ["0.2.0"], "allowed_versions": [">=0.2,<0.3"], "version_source": "https://github.com/aertslab/ctxcore", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('ctxcore'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Load and query motif ranking databases.", "conflicts": [], "platforms": ["any"]},
-    {"name": "numpy-pyscenic", "ecosystem": "python", "identity": "numpy", "required": true, "tested_versions": ["1.23.5"], "allowed_versions": [">=1.23,<1.24"], "version_source": "https://numpy.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import numpy; print(numpy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide the pySCENIC-compatible array API.", "conflicts": [], "platforms": ["any"]},
-    {"name": "pandas-pyscenic", "ecosystem": "python", "identity": "pandas", "required": true, "tested_versions": ["1.5.3"], "allowed_versions": [">=1.5,<1.6"], "version_source": "https://pandas.pydata.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import pandas; print(pandas.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Represent expression, ranking and enrichment tables.", "conflicts": [], "platforms": ["any"]},
-    {"name": "scipy-pyscenic", "ecosystem": "python", "identity": "scipy", "required": true, "tested_versions": ["1.10.1"], "allowed_versions": [">=1.10,<1.11"], "version_source": "https://scipy.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import scipy; print(scipy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide numerical routines for pySCENIC.", "conflicts": [], "platforms": ["any"]},
-    {"name": "dask", "ecosystem": "python", "identity": "dask", "required": true, "tested_versions": ["2023.5.0"], "allowed_versions": [">=2023.5,<2023.6"], "version_source": "https://docs.dask.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import dask; print(dask.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run bounded in-process GRNBoost2 scheduling.", "conflicts": [], "platforms": ["any"]},
-    {"name": "distributed", "ecosystem": "python", "identity": "distributed", "required": true, "tested_versions": ["2023.5.0"], "allowed_versions": [">=2023.5,<2023.6"], "version_source": "https://distributed.dask.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import distributed; print(distributed.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide the in-process Dask client used by GRNBoost2.", "conflicts": [], "platforms": ["any"]},
-    {"name": "python-scenicplus", "ecosystem": "runtime", "identity": "python-scenicplus-runtime", "required": true, "tested_versions": ["3.11.15"], "allowed_versions": [">=3.11,<3.12"], "version_source": "https://www.python.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import platform; print(platform.python_version())"], "version_probe_kind": "command", "version_probe_timeout_seconds": 10, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute the validated SCENIC+ compatibility profile.", "conflicts": [], "platforms": ["any"]},
-    {"name": "pycistopic", "ecosystem": "python", "identity": "pycistopic", "required": true, "tested_versions": ["2.0a0"], "allowed_versions": ["2.0a0"], "version_source": "https://github.com/aertslab/pycisTopic", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('pycistopic'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide SCENIC+ chromatin-topic compatibility.", "conflicts": [], "platforms": ["any"]},
-    {"name": "numpy-scenicplus", "ecosystem": "python", "identity": "numpy", "required": true, "tested_versions": ["1.26.4"], "allowed_versions": [">=1.26,<1.27"], "version_source": "https://numpy.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import numpy; print(numpy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide the SCENIC+ numerical API.", "conflicts": [], "platforms": ["any"]},
-    {"name": "pandas-scenicplus", "ecosystem": "python", "identity": "pandas", "required": true, "tested_versions": ["1.5.3"], "allowed_versions": [">=1.5,<1.6"], "version_source": "https://pandas.pydata.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import pandas; print(pandas.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Represent SCENIC+ eRegulon and AUC tables.", "conflicts": [], "platforms": ["any"]},
-    {"name": "scipy-scenicplus", "ecosystem": "python", "identity": "scipy", "required": true, "tested_versions": ["1.12.0"], "allowed_versions": [">=1.12,<1.13"], "version_source": "https://scipy.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import scipy; print(scipy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide SCENIC+ enrichment statistics.", "conflicts": [], "platforms": ["any"]},
-    {"name": "scikit-learn-scenicplus", "ecosystem": "python", "identity": "scikit-learn", "required": true, "tested_versions": ["1.3.2"], "allowed_versions": [">=1.3,<1.4"], "version_source": "https://scikit-learn.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import sklearn; print(sklearn.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide SCENIC+ ranking and model utilities.", "conflicts": [], "platforms": ["any"]},
-    {"name": "tables", "ecosystem": "python", "identity": "tables", "required": true, "tested_versions": ["3.10.2"], "allowed_versions": [">=3.10,<3.11"], "version_source": "https://www.pytables.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import tables; print(tables.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Support SCENIC+ table persistence compatibility.", "conflicts": [], "platforms": ["any"]}
+  "assumptions": [
+    "GRNBoost2 edges are predictive coexpression, cisTarget adds motif-enrichment support, AUCell estimates relative cell-level signature activity, and SCENIC+ scores supplied evidence-backed eRegulons; none alone proves direct binding, enhancer causality, or condition-level regulation."
   ],
   "compatibility_matrix": [
     {
+      "dependency_versions": {
+        "arboreto": [
+          ">=0.1.6,<0.2"
+        ],
+        "ctxcore": [
+          ">=0.2,<0.3"
+        ],
+        "dask": [
+          ">=2023.5,<2023.6"
+        ],
+        "distributed": [
+          ">=2023.5,<2023.6"
+        ],
+        "numpy-pyscenic": [
+          ">=1.23,<1.24"
+        ],
+        "numpy-scenicplus": [
+          ">=1.26,<1.27"
+        ],
+        "pandas-pyscenic": [
+          ">=1.5,<1.6"
+        ],
+        "pandas-scenicplus": [
+          ">=1.5,<1.6"
+        ],
+        "pycistopic": [
+          "2.0a0"
+        ],
+        "python-pyscenic": [
+          ">=3.10,<3.11"
+        ],
+        "python-scenicplus": [
+          ">=3.11,<3.12"
+        ],
+        "scikit-learn-scenicplus": [
+          ">=1.3,<1.4"
+        ],
+        "scipy-pyscenic": [
+          ">=1.10,<1.11"
+        ],
+        "scipy-scenicplus": [
+          ">=1.12,<1.13"
+        ],
+        "setuptools-pyscenic": [
+          ">=80,<81"
+        ],
+        "tables": [
+          ">=3.10,<3.11"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "single-cell-regulatory-network-e2e-v1",
+        "gse96583-regulatory-program-v1"
+      ],
       "id": "agent-protocol-1-pyscenic-0121-scenicplus-10a2",
-      "module_version": "1.0.0",
-      "tool_versions": {"pyscenic": [">=0.12.1,<0.13"], "scenicplus": ["1.0a2"]},
-      "dependency_versions": {"python-pyscenic": [">=3.10,<3.11"], "arboreto": [">=0.1.6,<0.2"], "ctxcore": [">=0.2,<0.3"], "numpy-pyscenic": [">=1.23,<1.24"], "pandas-pyscenic": [">=1.5,<1.6"], "scipy-pyscenic": [">=1.10,<1.11"], "dask": [">=2023.5,<2023.6"], "distributed": [">=2023.5,<2023.6"], "python-scenicplus": [">=3.11,<3.12"], "pycistopic": ["2.0a0"], "numpy-scenicplus": [">=1.26,<1.27"], "pandas-scenicplus": [">=1.5,<1.6"], "scipy-scenicplus": [">=1.12,<1.13"], "scikit-learn-scenicplus": [">=1.3,<1.4"], "tables": [">=3.10,<3.11"]},
-      "input_formats": {"single_cell_regulatory_inputs": ["tab-separated-values@1", "h5ad@0.1.0", "h5mu@0.1.0"]},
-      "output_formats": {"regulatory_network_evidence": ["tab-separated-values@1", "json@1"]},
-      "platforms": ["any"],
-      "regression_evidence_ids": ["single-cell-regulatory-network-regression-v1"],
-      "end_to_end_evidence_ids": ["single-cell-regulatory-network-e2e-v1"],
-      "verified_at": "2026-07-15"
+      "input_formats": {
+        "single_cell_regulatory_inputs": [
+          "tab-separated-values@1",
+          "h5ad@0.1.0",
+          "h5mu@0.1.0"
+        ]
+      },
+      "module_version": "1.1.0",
+      "output_formats": {
+        "regulatory_network_evidence": [
+          "tab-separated-values@1",
+          "json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "single-cell-regulatory-network-regression-v1"
+      ],
+      "tool_versions": {
+        "pyscenic": [
+          ">=0.12.1,<0.13"
+        ],
+        "scenicplus": [
+          "1.0a2"
+        ]
+      },
+      "verified_at": "2026-07-23"
     }
   ],
-  "access": "agent_generated",
-  "mutability": "read_only",
+  "complements": [
+    "single-cell-atac-regulatory",
+    "single-cell-multimodal-integration",
+    "single-cell-donor-inference",
+    "single-cell-trajectory-topology"
+  ],
   "credentials": [],
-  "limitations": ["Validated execution covers pySCENIC GRNBoost2, a declared table-backed cisTarget ranking resource, motif pruning, AUCell, and SCENIC+ scoring of already evidence-backed eRegulons. Project analyses still require species- and genome-matched production ranking and motif resources, experimentally defensible region-gene evidence, donor-aware downstream inference, and independent validation. The module does not establish direct binding or causal regulation and does not manage environments or compute infrastructure."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned regulatory workflow preserving independent coexpression, motif, region-gene and activity evidence.", "https://pyscenic.readthedocs.io/en/stable/", "https://scenicplus.readthedocs.io/en/stable/api.html"]},
-  "agent_protocol": {
-    "schema_version": 1,
-    "mode": "codex_generated_project_code",
-    "languages": ["python", "notebook"],
-    "template_sections": [
-      {"id": "inspect-regulatory-contract", "purpose": "Establish cells, matrices, TFs, resources and claim scope.", "required_logic": ["Inspect actual expression and accessibility objects, raw counts, transformations, cells, features, species, genome build, TF list, ranking universe, motif annotations, region-gene evidence and digests.", "Freeze backend-specific parameters and evidence fields before execution."], "output_artifact_types": ["single_cell_regulatory_network_evidence"], "template_files": ["templates/run_pyscenic.py", "templates/score_scenicplus_eregulons.py"]},
-      {"id": "infer-pyscenic-regulons", "purpose": "Infer coexpression and motif-pruned regulons.", "required_logic": ["Run GRNBoost2 with a bounded in-process Dask client, retain complete adjacencies, construct coexpression modules and prune them against the exact declared cisTarget ranking and annotation resources.", "Construct regulons and score every cell with AUCell while retaining target weights, motif contexts and parameters."], "output_artifact_types": ["single_cell_regulatory_network_evidence"], "template_files": ["templates/run_pyscenic.py"]},
-      {"id": "score-scenicplus-eregulons", "purpose": "Score paired RNA and chromatin eRegulon activity.", "required_logic": ["Require exact paired cells plus explicit TF, gene, region, motif, region-gene and TF-gene evidence for every eRegulon row.", "Score gene- and region-based signatures independently and retain their per-eRegulon concordance rather than averaging them."], "output_artifact_types": ["single_cell_regulatory_network_evidence"], "template_files": ["templates/score_scenicplus_eregulons.py"]},
-      {"id": "reload-and-admit", "purpose": "Verify source preservation and regulatory evidence boundaries.", "required_logic": ["Reload all adjacency, enrichment, regulon, gene-AUC, region-AUC, concordance and validated-eRegulon outputs and reconcile source hashes.", "Admit method-specific association evidence only; require independent experiments or replicated temporal evidence for causal claims."], "output_artifact_types": ["single_cell_regulatory_network_evidence"], "template_files": ["templates/run_pyscenic.py", "templates/score_scenicplus_eregulons.py"]}
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.10,<3.11"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-pyscenic-runtime",
+      "name": "python-pyscenic",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated pySCENIC compatibility profile.",
+      "required": true,
+      "tested_versions": [
+        "3.10.18"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import platform; print(platform.python_version())"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://www.python.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.1.6,<0.2"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "arboreto",
+      "name": "arboreto",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Infer GRNBoost2 TF-target adjacencies.",
+      "required": true,
+      "tested_versions": [
+        "0.1.6"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('arboreto'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/aertslab/arboreto"
+    },
+    {
+      "allowed_versions": [
+        ">=0.2,<0.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "ctxcore",
+      "name": "ctxcore",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Load and query motif ranking databases.",
+      "required": true,
+      "tested_versions": [
+        "0.2.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('ctxcore'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/aertslab/ctxcore"
+    },
+    {
+      "allowed_versions": [
+        ">=1.23,<1.24"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "numpy",
+      "name": "numpy-pyscenic",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide the pySCENIC-compatible array API.",
+      "required": true,
+      "tested_versions": [
+        "1.23.5"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import numpy; print(numpy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://numpy.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.5,<1.6"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "pandas",
+      "name": "pandas-pyscenic",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Represent expression, ranking and enrichment tables.",
+      "required": true,
+      "tested_versions": [
+        "1.5.3"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import pandas; print(pandas.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://pandas.pydata.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.10,<1.11"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scipy",
+      "name": "scipy-pyscenic",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide numerical routines for pySCENIC.",
+      "required": true,
+      "tested_versions": [
+        "1.10.1"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import scipy; print(scipy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scipy.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=2023.5,<2023.6"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "dask",
+      "name": "dask",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run bounded in-process GRNBoost2 scheduling.",
+      "required": true,
+      "tested_versions": [
+        "2023.5.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import dask; print(dask.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://docs.dask.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=2023.5,<2023.6"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "distributed",
+      "name": "distributed",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide the in-process Dask client used by GRNBoost2.",
+      "required": true,
+      "tested_versions": [
+        "2023.5.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import distributed; print(distributed.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://distributed.dask.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=80,<81"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "setuptools",
+      "name": "setuptools-pyscenic",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide pkg_resources required by ctxcore 0.2.0 and pySCENIC 0.12.1.",
+      "required": true,
+      "tested_versions": [
+        "80.9.0"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('setuptools'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://setuptools.pypa.io/"
+    },
+    {
+      "allowed_versions": [
+        ">=3.11,<3.12"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-scenicplus-runtime",
+      "name": "python-scenicplus",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated SCENIC+ compatibility profile.",
+      "required": true,
+      "tested_versions": [
+        "3.11.15"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import platform; print(platform.python_version())"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://www.python.org/"
+    },
+    {
+      "allowed_versions": [
+        "2.0a0"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "pycistopic",
+      "name": "pycistopic",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide SCENIC+ chromatin-topic compatibility.",
+      "required": true,
+      "tested_versions": [
+        "2.0a0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('pycistopic'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/aertslab/pycisTopic"
+    },
+    {
+      "allowed_versions": [
+        ">=1.26,<1.27"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "numpy",
+      "name": "numpy-scenicplus",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide the SCENIC+ numerical API.",
+      "required": true,
+      "tested_versions": [
+        "1.26.4"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import numpy; print(numpy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://numpy.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.5,<1.6"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "pandas",
+      "name": "pandas-scenicplus",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Represent SCENIC+ eRegulon and AUC tables.",
+      "required": true,
+      "tested_versions": [
+        "1.5.3"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import pandas; print(pandas.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://pandas.pydata.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.12,<1.13"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scipy",
+      "name": "scipy-scenicplus",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide SCENIC+ enrichment statistics.",
+      "required": true,
+      "tested_versions": [
+        "1.12.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import scipy; print(scipy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scipy.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.3,<1.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scikit-learn",
+      "name": "scikit-learn-scenicplus",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide SCENIC+ ranking and model utilities.",
+      "required": true,
+      "tested_versions": [
+        "1.3.2"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import sklearn; print(sklearn.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scikit-learn.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=3.10,<3.11"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "tables",
+      "name": "tables",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Support SCENIC+ table persistence compatibility.",
+      "required": true,
+      "tested_versions": [
+        "3.10.2"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import tables; print(tables.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://www.pytables.org/"
+    }
+  ],
+  "description": "Direct Codex to validate count-backed expression, paired chromatin accessibility, TF, motif-ranking, motif-annotation, and region-gene evidence; execute GRNBoost2, cisTarget pruning, regulon construction, AUCell, and SCENIC+ eRegulon scoring in compatible existing scientific runtimes; preserve method-specific gene and region evidence; and admit only source-bound, reload-validated regulatory results without converting association into causality.",
+  "domains": [
+    "omics",
+    "statistics"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "adds_grnboost2_adjacencies",
+    "adds_cistarget_pruned_regulons",
+    "adds_regulon_aucell_activity",
+    "adds_scenicplus_gene_and_region_eregulon_activity"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "single-cell-regulatory-network",
+  "input_artifacts": [
+    {
+      "artifact_type": "single_cell_regulatory_input_bundle",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip"
+          ],
+          "coordinate_systems": [
+            "declared-genomic-intervals-or-expression-feature-axis"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project",
+            "not-applicable-for-expression"
+          ],
+          "name": "tab-separated-values",
+          "orientations": [
+            "cells-by-genes",
+            "cells-by-regions",
+            "motifs-by-ranked-genes",
+            "eregulon-evidence-rows"
+          ],
+          "representations": [
+            "text",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip",
+            "lzf"
+          ],
+          "coordinate_systems": [
+            "declared-genomic-intervals"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "h5ad",
+          "orientations": [
+            "cells-by-features"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip"
+          ],
+          "coordinate_systems": [
+            "declared-genomic-intervals"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "h5mu",
+          "orientations": [
+            "cells-by-features-per-modality"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.1.0"
+          ]
+        }
+      ],
+      "name": "single_cell_regulatory_inputs",
+      "processing_levels": [
+        "count-backed",
+        "quality-controlled",
+        "paired-cell",
+        "resource-annotated"
+      ],
+      "required_metadata": [
+        "source-digests",
+        "raw-count-location",
+        "cell-accounting",
+        "feature-identifiers",
+        "species",
+        "genome-build",
+        "TF-resource-digest",
+        "motif-ranking-digest",
+        "motif-annotation-digest",
+        "region-gene-evidence",
+        "transformations"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "accessibility_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "cell_identity_policy": {
+        "enum": [
+          "exact-paired-cells"
+        ],
+        "type": "string"
+      },
+      "declared_thresholds": {
+        "type": "object"
+      },
+      "design_notes": {
+        "type": "string"
+      },
+      "eregulon_evidence_fields": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "type": "array",
+        "uniqueItems": true
+      },
+      "expression_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "motif_resources": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "requested_backends": {
+        "items": {
+          "enum": [
+            "pyscenic",
+            "scenicplus"
+          ],
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "tf_resource": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "expression_artifact_id",
+      "accessibility_artifact_id",
+      "requested_backends",
+      "tf_resource",
+      "motif_resources",
+      "eregulon_evidence_fields",
+      "cell_identity_policy",
+      "declared_thresholds",
+      "design_notes"
     ],
-    "parameter_rules": [
-      {"id": "regulatory-resource-selection", "parameter": "ranking-and-motif-resources", "decision_inputs": ["species", "genome build", "gene identifiers", "region identifiers", "motif collection", "ranking universe"], "selection_rule": "Use only versioned species- and genome-matched resources whose gene universe and coordinate system are explicitly reconciled to the project.", "validation_rule": "Hash every resource and block missing genes, invalid rankings, unresolved coordinates or annotation-free motifs."},
-      {"id": "regulatory-backend-selection", "parameter": "backend", "decision_inputs": ["RNA-only question", "paired RNA-ATAC availability", "motif evidence", "region-gene evidence"], "selection_rule": "Use pySCENIC for expression-based motif-pruned regulons and SCENIC+ only when paired chromatin and complete eRegulon evidence exist.", "validation_rule": "Keep each backend's outputs separate and report disagreement."}
+    "type": "object"
+  },
+  "intents": [
+    "pySCENIC GRNBoost2 cisTarget AUCell",
+    "SCENIC+ enhancer regulon scoring",
+    "single-cell gene regulatory network",
+    "\u5355\u7ec6\u80de SCENIC SCENIC+ \u8c03\u63a7\u7f51\u7edc eRegulon"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Validated execution covers pySCENIC GRNBoost2, a declared table-backed cisTarget ranking resource, motif pruning, AUCell, and SCENIC+ scoring of already evidence-backed eRegulons. The public GSE96583 case validates label-withheld GRNBoost2 coexpression programs, AUCell scoring, and paired-condition external review, but deliberately does not call those programs motif-pruned regulons because no production cisTarget ranking resource is supplied. Project analyses still require species- and genome-matched production ranking and motif resources, experimentally defensible region-gene evidence, donor-aware downstream inference, and independent validation. The module does not establish direct binding or causal regulation and does not manage environments or compute infrastructure."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "single_cell_regulatory_network_evidence",
+      "formats": [
+        {
+          "annotation_releases": [
+            "inherited-from-input"
+          ],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "inherited-genomic-intervals"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "inherited-from-input"
+          ],
+          "name": "tab-separated-values",
+          "orientations": [
+            "TF-by-target",
+            "cell-by-regulon",
+            "cell-by-eregulon",
+            "eregulon-concordance"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "json",
+          "orientations": [
+            "regulons-and-quality-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "regulatory_network_evidence",
+      "processing_levels": [
+        "coexpression-inferred",
+        "motif-pruned",
+        "activity-scored",
+        "reload-validated"
+      ],
+      "required_metadata": [
+        "backend",
+        "source-digests",
+        "resource-digests",
+        "TF-target-weights",
+        "motif-enrichment",
+        "gene-AUC",
+        "region-AUC",
+        "region-gene-evidence",
+        "parameters",
+        "versions",
+        "quality-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "codex_generated_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
     ],
-    "preflight_checks": ["Inspect matrices, raw counts, cells, feature identifiers, transformations, TFs, species, genome build, motif resources, ranking permutations, eRegulon evidence and output paths.", "Detect exact pySCENIC, SCENIC+, Python and dependency versions in existing runtimes and require a validated compatibility profile."],
-    "postflight_checks": ["Reload and reconcile every source and output artifact, cell, feature, regulon, target, signature, parameter, version and digest.", "Review regulon target support, motif enrichment, AUCell coverage, gene-region concordance and claim scope before downstream use."],
-    "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-sha256", "TF-resource-sha256", "motif-ranking-sha256", "motif-annotation-sha256", "eregulon-evidence-sha256", "species", "genome-build", "parameters", "actual-tool-versions", "output-sha256", "quality-gates"],
-    "forbidden_actions": ["Do not install, update, activate, create, or manage Python, R, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.", "Do not guess TFs, silently intersect cells or features, substitute unmatched motif resources, overwrite source counts, invent missing motif or region-gene evidence, or tune against desired labels.", "Do not collapse pySCENIC and SCENIC+ scores, call coexpression direct binding, call eRegulon concordance causality, or report generated or unreloaded outputs as evidence."],
-    "requires_observed_execution": true
-  }
+    "type": "object"
+  },
+  "preconditions": [
+    "Expression values are finite and nonnegative with immutable source counts available; TF identities and species-matched motif resources are declared; pySCENIC rankings span the exact expression gene universe; SCENIC+ receives identical RNA and ATAC cells in identical order plus explicit motif and region-gene evidence; output paths are new."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned regulatory workflow preserving independent coexpression, motif, region-gene and activity evidence.",
+      "https://pyscenic.readthedocs.io/en/stable/",
+      "https://scenicplus.readthedocs.io/en/stable/api.html"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block unless cells, genes, regions, raw counts, transformations, TFs, species, genome build, motif resources, ranking universe, annotations and source digests are explicit and structurally valid.",
+      "id": "regulatory-input-and-resource-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Retain GRNBoost2 adjacency, coexpression modules, motif enrichment and pruned regulons as distinct evidence layers; do not relabel coexpression as motif-supported regulation.",
+      "id": "regulatory-grn-and-motif-separation",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "AUCell must score every source cell against every admitted regulon with finite output and declared ranking/AUC parameters.",
+      "id": "regulatory-aucell-accounting",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every SCENIC+ eRegulon requires explicit TF, motif, region, region-gene and TF-gene evidence and minimum unique gene and region targets.",
+      "id": "regulatory-eregulon-evidence",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "SCENIC+ RNA and ATAC matrices must retain exactly the same unique cells in the same order; silent intersections, reordering and missing-modality imputation are prohibited.",
+      "id": "regulatory-paired-modality-accounting",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "pySCENIC regulons and SCENIC+ eRegulons remain method-specific evidence; causal, condition-level and lineage claims require independent perturbation, replication or temporal support.",
+      "id": "regulatory-method-and-claim-boundary",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Reload every output and reconcile cells, features, regulons, eRegulons, parameters, versions, resources, source hashes and output hashes before admission.",
+      "id": "regulatory-source-and-output-reload",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which TF-target regulons and paired RNA-accessibility eRegulons are supported by explicit coexpression, motif, region-gene, and cell-level activity evidence?"
+  ],
+  "schema_version": 1,
+  "title": "Infer and score single-cell regulatory networks with pySCENIC and SCENIC+",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=0.12.1,<0.13"
+      ],
+      "ecosystem": "python",
+      "identity": "pyscenic",
+      "mismatch_policy": "block",
+      "name": "pyscenic",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "0.12.1"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=0.12.1,<0.13"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "pySCENIC 0.12.1 uses legacy NumPy aliases and version-coupled ctxcore ranking and pruning APIs.",
+          "id": "pyscenic-numpy-ranking-api",
+          "required_action": "Detect NumPy, ctxcore, arboreto, Dask and pySCENIC together and execute a compatibility fixture before project analysis.",
+          "source": "https://pyscenic.readthedocs.io/en/stable/installation.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('pyscenic'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://pyscenic.readthedocs.io/en/stable/"
+    },
+    {
+      "allowed_versions": [
+        "1.0a2"
+      ],
+      "ecosystem": "python",
+      "identity": "scenicplus",
+      "mismatch_policy": "block",
+      "name": "scenicplus",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.0a2"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            "1.0a2"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "SCENIC+ eRegulon table fields, enrichment outputs and pinned scientific dependencies are pre-release and version-coupled.",
+          "id": "scenicplus-eregulon-api",
+          "required_action": "Validate required eRegulon fields and reload gene- and region-based outputs under the observed release.",
+          "source": "https://scenicplus.readthedocs.io/en/stable/api.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('scenicplus'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scenicplus.readthedocs.io/en/stable/api.html"
+    }
+  ],
+  "version": "1.1.0"
 }

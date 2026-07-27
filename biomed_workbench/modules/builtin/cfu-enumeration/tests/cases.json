@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "pools-countable-observed-plates-and-retains-censored-plates",
+      "input": {
+        "replicate_level": "biological",
+        "plates": [
+          {"plate_id": "d4-a", "replicate_id": "culture-a", "dilution_factor": 10000, "plated_volume_ml": 0.1, "count_status": "counted", "colony_count": 92},
+          {"plate_id": "d4-b", "replicate_id": "culture-b", "dilution_factor": 10000, "plated_volume_ml": 0.1, "count_status": "counted", "colony_count": 96},
+          {"plate_id": "d5-a", "replicate_id": "culture-a", "dilution_factor": 100000, "plated_volume_ml": 0.1, "count_status": "counted", "colony_count": 11},
+          {"plate_id": "d3-a", "replicate_id": "culture-a", "dilution_factor": 1000, "plated_volume_ml": 0.1, "count_status": "tntc"}
+        ]
+      },
+      "expected_subset": {
+        "estimate_admissible": true,
+        "enumeration_status": "estimated",
+        "countable_plate_count": 2,
+        "total_plate_count": 4,
+        "replicate_design_status": "multiple-replicates-retained"
+      }
+    }
+  ]
+}

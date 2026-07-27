@@ -1,0 +1,293 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "One selected zero- or first-order kinetic model is appropriate across every supplied temperature."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_accelerated_stability.py",
+      "purpose": "Execute bounded accelerated-stability fitting with project-bound provenance.",
+      "quality_gate_ids": [
+        "stability-observation-contract",
+        "stability-extrapolation-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "numpy": [
+          ">=2.4,<2.5"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "accelerated-stability-e2e-v1"
+      ],
+      "id": "numpy-2.4.4-inline-json-1",
+      "input_formats": {
+        "stability_observations": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "stability_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "accelerated-stability-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "immunoassay-quantification"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=2.4,<2.5"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "numpy",
+      "name": "numpy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Fit bounded linear kinetic and Arrhenius relationships.",
+      "required": true,
+      "tested_versions": [
+        "2.4.4"
+      ],
+      "verified_at": "2026-07-24",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import numpy; print(numpy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://numpy.org/"
+    }
+  ],
+  "description": "Compare zero- and first-order potency-loss fits at multiple temperatures and predict time to a declared specification only when one kinetic model is supported across temperatures.",
+  "domains": [
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.quantitative_assays:fit_accelerated_stability",
+  "evidence_effects": [
+    "fits-bounded-accelerated-stability-evidence"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "accelerated-stability",
+  "input_artifacts": [
+    {
+      "artifact_type": "accelerated_stability_potency_measurements",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "elapsed-days"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "temperature-by-time-and-potency"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "stability_observations",
+      "processing_levels": [
+        "assay-qualified",
+        "temperature-declared"
+      ],
+      "required_metadata": [
+        "assay-method",
+        "storage-condition",
+        "container-closure",
+        "sampling-schedule",
+        "acceptance-specification"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "observations": {
+        "items": {
+          "type": "object"
+        },
+        "minItems": 6,
+        "type": "array"
+      },
+      "specification_percent": {
+        "exclusiveMaximum": 100,
+        "exclusiveMinimum": 0,
+        "type": "number"
+      },
+      "target_temperature_c": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "observations",
+      "target_temperature_c",
+      "specification_percent"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "accelerated stability analysis",
+    "Arrhenius stability extrapolation",
+    "predict potency shelf life",
+    "\u52a0\u901f\u7a33\u5b9a\u6027\u5206\u6790",
+    "Arrhenius \u7a33\u5b9a\u6027\u5916\u63a8"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module does not validate a stability-indicating assay, correct temperature excursions, establish shelf life, or replace formal regulatory stability evaluation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "accelerated_stability_model_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "elapsed-days"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "temperature-fit-and-target-prediction"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "stability_summary",
+      "processing_levels": [
+        "model-selected",
+        "arrhenius-extrapolated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "target-temperature",
+        "specification",
+        "kinetic-model",
+        "quality-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "arrhenius_slope": {
+        "type": "number"
+      },
+      "predicted_degradation_rate_per_day": {
+        "type": "number"
+      },
+      "predicted_time_to_specification_days": {
+        "type": "number"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "selected_kinetic_model": {
+        "type": "string"
+      },
+      "specification_percent": {
+        "type": "number"
+      },
+      "target_temperature_c": {
+        "type": "number"
+      },
+      "temperature_fits": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "target_temperature_c",
+      "specification_percent",
+      "temperature_fits",
+      "selected_kinetic_model",
+      "arrhenius_slope",
+      "predicted_degradation_rate_per_day",
+      "predicted_time_to_specification_days",
+      "quality_gates"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "At least two temperatures and three distinct timepoints at every temperature are supplied with a valid potency assay and declared specification."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room accelerated-stability implementation."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require finite potency in (0,100], nonnegative time, temperatures above absolute zero, at least two temperatures, and three distinct timepoints per temperature.",
+      "id": "stability-observation-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Block use as a release or expiry decision without assay specificity, storage, container, residual, excursion, batch, replicate, and regulatory review.",
+      "id": "stability-extrapolation-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What model-bound stability trend and target-temperature time-to-specification are supported by these declared potency measurements?"
+  ],
+  "schema_version": 1,
+  "title": "Fit accelerated stability and bounded Arrhenius extrapolation",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

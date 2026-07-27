@@ -12,15 +12,15 @@
         ]
       },
       "end_to_end_evidence_ids": [
-        "image-segment-e2e-v1"
+        "image-segment-e2e-v2"
       ],
-      "id": "python-3.14.3-inline-json-1",
+      "id": "python-3.14.3-inline-json-2",
       "input_formats": {
         "image": [
           "inline-json@1"
         ]
       },
-      "module_version": "1.0.0",
+      "module_version": "1.1.0",
       "output_formats": {
         "segmentation": [
           "inline-json@1"
@@ -30,10 +30,10 @@
         "any"
       ],
       "regression_evidence_ids": [
-        "image-segment-regression-v1"
+        "image-segment-regression-v2"
       ],
       "tool_versions": {},
-      "verified_at": "2026-07-12"
+      "verified_at": "2026-07-24"
     }
   ],
   "complements": [
@@ -67,7 +67,7 @@
       "version_source": "https://www.python.org/downloads/release/python-3143/"
     }
   ],
-  "description": "Threshold a small image and measure connected-component area, centroid, bounds, perimeter, and circularity.",
+  "description": "Threshold a small image and measure connected-component area, centroid, bounds, perimeter, circularity, and transparent second-moment shape descriptors.",
   "domains": [
     "imaging"
   ],
@@ -161,7 +161,7 @@
     ">=0.2.0,<0.3.0"
   ],
   "limitations": [
-    "Numeric image summaries do not replace acquisition calibration, blinded sampling, biological replication, and expert review."
+    "Numeric image summaries do not replace acquisition calibration, blinded sampling, biological replication, and expert review. Second-moment axes and orientation describe segmented pixel geometry only; they do not establish cytoskeletal architecture, cell polarity, tissue mechanics, or a biological mechanism."
   ],
   "maturity": "validated",
   "module_type": "analysis",
@@ -226,7 +226,7 @@
         "type": "array"
       },
       "threshold": {
-        "type": "integer"
+        "type": "number"
       }
     },
     "required": [
@@ -246,7 +246,7 @@
   ],
   "provenance": {
     "concept_sources": [
-      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+      "Project-owned implementation with module-level validation evidence."
     ],
     "license": "Apache-2.0"
   },
@@ -264,5 +264,5 @@
   "schema_version": 1,
   "title": "Segment image components",
   "tool_requirements": [],
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

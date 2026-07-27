@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch
 
-from biomed_workbench.capabilities.evidence import gene_evidence, literature_evidence, variant_evidence
+from biomed_workbench.capabilities.evidence import dbsnp_rsid_evidence, gene_evidence, literature_evidence, resolve_gene_identifier, variant_evidence
 from biomed_workbench.services.eutils import LinkResult, SearchResult, SummaryResult
 
 
@@ -39,6 +39,67 @@ class EvidenceCapabilityTests(unittest.TestCase):
 
         self.assertEqual(result["variant_records"][0]["uid"], "123")
         self.assertEqual(result["linked"]["gene"]["ids"], ["7157"])
+
+    def test_dbsnp_rsid_evidence_preserves_exact_reference_identifier(self):
+        client = self._client()
+        client.search.return_value = SearchResult("snp", 1, ("12345",), "rs12345", None, None)
+        client.summary.return_value = SummaryResult("snp", ({"uid": "12345", "snp_id": "rs12345", "title": "Reference SNP"},))
+
+        with patch("biomed_workbench.capabilities.evidence.EUtilitiesClient", return_value=client):
+            result = dbsnp_rsid_evidence("RS12345")
+
+        self.assertEqual(result["rsid"], "rs12345")
+        self.assertEqual(result["resolution_status"], "resolved")
+        self.assertEqual(result["records"][0]["uid"], "12345")
+
+    def test_gene_identifier_resolution_requires_one_exact_current_symbol(self):
+        client = self._client()
+        client.search.return_value = SearchResult("gene", 2, ("7157", "999"), "TP53", None, None)
+        client.summary.return_value = SummaryResult(
+            "gene",
+            (
+                {"uid": "7157", "name": "TP53", "description": "tumor protein p53", "organism": {"taxid": 9606, "commonname": "human", "scientificname": "Homo sapiens"}},
+                {"uid": "999", "name": "TP53P1", "description": "pseudogene", "organism": {"taxid": 9606, "commonname": "human", "scientificname": "Homo sapiens"}},
+            ),
+        )
+
+        result = resolve_gene_identifier("TP53", "human", client=client)
+
+        self.assertEqual(result["resolution_status"], "resolved")
+        self.assertEqual(result["resolved"]["gene_id"], "7157")
+        self.assertEqual(len(result["candidates"]), 2)
+
+    def test_gene_identifier_resolution_keeps_ambiguous_candidates_unusable(self):
+        client = self._client()
+        client.search.return_value = SearchResult("gene", 2, ("1", "2"), "ABC", None, None)
+        client.summary.return_value = SummaryResult(
+            "gene",
+            (
+                {"uid": "1", "name": "ABC", "organism": {"taxid": 9606, "commonname": "human", "scientificname": "Homo sapiens"}},
+                {"uid": "2", "nomenclaturesymbol": "ABC", "organism": {"taxid": 9606, "commonname": "human", "scientificname": "Homo sapiens"}},
+            ),
+        )
+
+        result = resolve_gene_identifier("ABC", "human", client=client)
+
+        self.assertEqual(result["resolution_status"], "ambiguous")
+        self.assertIsNone(result["resolved"])
+        self.assertTrue(result["warnings"])
+
+    def test_gene_identifier_resolution_rejects_an_exact_symbol_from_the_wrong_species(self):
+        client = self._client()
+        client.search.return_value = SearchResult("gene", 1, ("22059",), "Trp53", None, None)
+        client.summary.return_value = SummaryResult(
+            "gene",
+            (
+                {"uid": "22059", "name": "TP53", "organism": {"taxid": 10090, "commonname": "house mouse", "scientificname": "Mus musculus"}},
+            ),
+        )
+
+        result = resolve_gene_identifier("TP53", "human", client=client)
+
+        self.assertEqual(result["resolution_status"], "not_found")
+        self.assertIsNone(result["resolved"])
 
     def test_literature_evidence_keeps_query_translation_and_records(self):
         client = self._client()

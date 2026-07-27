@@ -1,0 +1,325 @@
+{
+  "access": "public_api",
+  "alternatives": [],
+  "assumptions": [
+    "A gene symbol plus organism may be insufficient to establish one database identity; ambiguity is preserved rather than resolved by rank."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "gene-identifier-resolution-e2e-v1"
+      ],
+      "id": "eutils-gene-identifier-resolution-2026-03-04-python-3-14-3",
+      "input_formats": {
+        "gene_symbol_query": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "0.1.0",
+      "output_formats": {
+        "resolved_gene_identifier": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "gene-identifier-resolution-regression-v1"
+      ],
+      "tool_versions": {
+        "ncbi-eutils": [
+          "contract-2026-03-04"
+        ]
+      },
+      "verified_at": "2026-07-12"
+    }
+  ],
+  "complements": [
+    "gene-evidence",
+    "gene-ortholog-evidence"
+  ],
+  "credentials": [
+    "NCBI_API_KEY"
+  ],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Resolve an exact gene symbol and declared organism to one reusable NCBI Gene ID while retaining candidate records and blocking unresolved or ambiguous mappings.",
+  "domains": [
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.evidence:resolve_gene_identifier",
+  "evidence_effects": [
+    "resolves-stable-ncbi-gene-identifier"
+  ],
+  "execution": {
+    "kind": "service",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 60
+  },
+  "id": "gene-identifier-resolution",
+  "input_artifacts": [
+    {
+      "artifact_type": "database_query",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "gene_symbol_query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "gene": {
+        "type": "string",
+        "minLength": 1
+      },
+      "organism": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "required": [
+      "gene"
+    ]
+  },
+  "intents": [
+    "resolve NCBI Gene identifier",
+    "resolve stable gene identifier",
+    "解析稳定基因标识",
+    "基因符号标准化"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Identifier resolution does not establish orthology, function, expression, phenotype, mechanism, isoform equivalence, or suitability for cross-species feature conversion."
+  ],
+  "maturity": "validated",
+  "module_type": "data_source",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "resolved_gene_identifier",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "resolved_gene_identifier",
+      "processing_levels": [
+        "exact-symbol-resolved"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "resolution-status",
+        "ncbi-gene-id",
+        "taxon-id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "query": {
+        "type": "string"
+      },
+      "match_count": {
+        "type": "integer"
+      },
+      "resolution_status": {
+        "enum": [
+          "resolved",
+          "ambiguous",
+          "not_found"
+        ]
+      },
+      "resolved": {
+        "type": "object",
+        "nullable": true
+      },
+      "candidates": {
+        "type": "array"
+      },
+      "provenance": {
+        "type": "object"
+      },
+      "warnings": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "query",
+      "match_count",
+      "resolution_status",
+      "resolved",
+      "candidates",
+      "provenance",
+      "warnings"
+    ]
+  },
+  "preconditions": [
+    "A nonempty gene symbol and organism are declared; a stable Gene ID is emitted only after exact-symbol resolution yields one current candidate."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned implementation with module-level validation evidence."
+    ],
+    "license": "Apache-2.0"
+  },
+  "code_templates": [
+    {
+      "path": "templates/resolve_gene_identifier.py",
+      "language": "python",
+      "purpose": "Resolve an exact gene symbol through the registered bounded NCBI workflow and write a reviewable JSON result.",
+      "quality_gate_ids": [
+        "gene-identifier-exactness",
+        "gene-identifier-ambiguity"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "quality_gates": [
+    {
+      "id": "gene-identifier-exactness",
+      "severity": "fatal",
+      "description": "Only one current record matching the exact declared gene symbol or nomenclature symbol may yield a reusable Gene ID.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "gene-identifier-ambiguity",
+      "severity": "major",
+      "description": "No Gene ID may be passed downstream when the result is absent or has multiple exact candidates; retain candidates for review.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "Which one current NCBI Gene ID, if any, is justified by the declared gene symbol and organism?"
+  ],
+  "schema_version": 1,
+  "title": "Resolve a stable NCBI Gene identifier",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        "==contract-2026-03-04"
+      ],
+      "ecosystem": "service",
+      "identity": "eutils.ncbi.nlm.nih.gov/entrez/eutils",
+      "mismatch_policy": "block",
+      "name": "ncbi-eutils",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "contract-2026-03-04"
+      ],
+      "verified_at": "2026-07-12",
+      "version_differences": [
+        {
+          "affected_versions": [
+            "==contract-2026-03-04"
+          ],
+          "category": "field",
+          "compatibility_effect": "requires-parser",
+          "description": "ESummary 2.0 uses database-specific document-summary schemas.",
+          "id": "esummary-database-fields",
+          "required_action": "Validate and parse fields against the selected Entrez database response schema.",
+          "source": "https://www.ncbi.nlm.nih.gov/books/NBK25499/"
+        },
+        {
+          "affected_versions": [
+            "==contract-2026-03-04"
+          ],
+          "category": "output-format",
+          "compatibility_effect": "requires-format",
+          "description": "EFetch output depends on database, return type, and return mode.",
+          "id": "efetch-return-format",
+          "required_action": "Bind database, rettype, and retmode to an explicitly validated output format.",
+          "source": "https://www.ncbi.nlm.nih.gov/books/NBK25499/"
+        }
+      ],
+      "version_pattern": "(contract-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "version_probe": [
+        "biomed_workbench.services.eutils:probe_eutils_contract"
+      ],
+      "version_probe_kind": "service_contract",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://www.ncbi.nlm.nih.gov/books/NBK25499/"
+    }
+  ],
+  "version": "0.1.0"
+}

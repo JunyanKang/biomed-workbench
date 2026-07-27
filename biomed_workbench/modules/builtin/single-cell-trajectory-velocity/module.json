@@ -1,125 +1,916 @@
 {
-  "schema_version": 1,
-  "id": "single-cell-trajectory-velocity",
-  "version": "1.0.0",
-  "title": "Infer and validate RNA velocity, pseudotime, and latent time",
-  "description": "Direct Codex to inspect a real count-backed h5ad with spliced and unspliced layers, biological samples, independent experimental time, and root and terminal anchors; adapt and execute scVelo dynamical modeling in the user's existing environment; generate velocity, velocity graph, UMAP vectors, velocity pseudotime, and latent time; validate direction against withheld time and anchors; preserve source counts and identifiers; and block unsupported temporal interpretation.",
-  "module_type": "analysis",
-  "domains": ["omics", "statistics"],
-  "intents": ["run scVelo RNA velocity and latent time", "infer trajectory and velocity pseudotime", "validate RNA velocity direction with experimental time", "scVelo RNA velocity 拟时序和潜在时间方向验证"],
-  "questions": ["Does splicing kinetics support a reproducible and independently directed cellular trajectory rather than an attractive but unvalidated arrow field?"],
-  "maturity": "experimental",
-  "entrypoint": "agent-generated-analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "input_schema": {
-    "type": "object", "additionalProperties": false,
-    "properties": {
-      "objective": {"type": "string", "minLength": 12, "maxLength": 4000},
-      "input_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256},
-      "input_format": {"type": "string", "enum": ["h5ad"]},
-      "spliced_layer": {"type": "string", "minLength": 1, "maxLength": 128},
-      "unspliced_layer": {"type": "string", "minLength": 1, "maxLength": 128},
-      "biological_sample_key": {"type": "string", "minLength": 1, "maxLength": 128},
-      "experimental_time_key": {"type": "string", "minLength": 1, "maxLength": 128},
-      "root_score_key": {"type": "string", "minLength": 1, "maxLength": 128},
-      "terminal_score_key": {"type": "string", "minLength": 1, "maxLength": 128},
-      "declared_thresholds": {"type": "object"},
-      "design_notes": {"type": "string", "minLength": 1, "maxLength": 8000}
-    },
-    "required": ["objective", "input_artifact_id", "input_format", "spliced_layer", "unspliced_layer", "biological_sample_key", "experimental_time_key", "root_score_key", "terminal_score_key", "declared_thresholds", "design_notes"]
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Do not fabricate, infer, or silently convert spliced and unspliced counts from total expression.",
+      "Do not use experimental time, desired lineage, annotations, markers, conditions, or conclusions to select genes or tune the model.",
+      "Do not infer direction from UMAP layout, arrows, root choice alone, or one pseudotime correlation.",
+      "Do not overwrite source layers, h5ad objects, cells, genes, samples, anchors, or provenance.",
+      "Do not treat cells as condition-level replicates or velocity as proof of lineage causality.",
+      "Do not report generated code, an unreloaded object, or a blocked direction as validated trajectory evidence."
+    ],
+    "languages": [
+      "python",
+      "notebook"
+    ],
+    "mode": "codex_generated_project_code",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "spliced counts",
+          "unspliced counts",
+          "gene detection",
+          "kinetic fit",
+          "cell count"
+        ],
+        "id": "velocity-gene-foundation",
+        "parameter": "hvg-modeled-gene-and-fit-thresholds",
+        "selection_rule": "Declare minimum HVG, finite-fit, and velocity-gene counts before model results.",
+        "validation_rule": "Do not cherry-pick genes by agreement with desired direction."
+      },
+      {
+        "decision_inputs": [
+          "cell count",
+          "state continuity",
+          "rare states",
+          "batch design"
+        ],
+        "id": "velocity-neighborhood",
+        "parameter": "pca-and-neighbors",
+        "selection_rule": "Choose a stable local neighborhood before velocity graph construction.",
+        "validation_rule": "Repeat justified neighboring values and block unstable direction."
+      },
+      {
+        "decision_inputs": [
+          "experimental time",
+          "root evidence",
+          "terminal evidence",
+          "sampling density"
+        ],
+        "id": "velocity-direction",
+        "parameter": "time-correlation-and-anchor-separation",
+        "selection_rule": "Predeclare temporal correlations and normalized root-terminal separation required for direction.",
+        "validation_rule": "Withhold experimental time from fitting and block direction when independent checks fail."
+      },
+      {
+        "decision_inputs": [
+          "velocity coherence",
+          "transition confidence",
+          "state coverage"
+        ],
+        "id": "velocity-confidence",
+        "parameter": "minimum-median-confidence",
+        "selection_rule": "Declare a confidence floor separately from temporal direction.",
+        "validation_rule": "An attractive UMAP vector field cannot substitute for confidence or time validation."
+      }
+    ],
+    "postflight_checks": [
+      "Inspect modeled genes, finite fits, velocity layers, graph, pseudotime, latent time, confidence, and warnings.",
+      "Recompute time correlations and root-terminal separation independently from fields withheld during fitting.",
+      "Reconcile all source cells, genes, samples, anchors, spliced and unspliced counts, derived fields, parameters, versions, and digests after reload.",
+      "Keep cell-level trajectory interpretation separate from donor-level condition inference and from causal lineage claims."
+    ],
+    "preflight_checks": [
+      "Inspect real spliced/unspliced counts, quantification provenance, sample design, time, roots, terminals, batches, states, feature namespace, and source object.",
+      "Detect scVelo, Scanpy, AnnData, NumPy, pandas, SciPy, scikit-learn, Numba, UMAP, and Python versions in the existing scientific environment.",
+      "Verify unique identifiers, layer alignment, integer-like counts, multiple samples, time coverage, nonoverlapping anchors, source immutability, and new output paths.",
+      "Freeze normalization, HVG, PCA, neighbors, dynamics iterations, seed, direction and confidence thresholds, and reload checks."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "input-h5ad-sha256",
+      "spliced-layer",
+      "unspliced-layer",
+      "quantification-provenance",
+      "sample-key",
+      "experimental-time-key",
+      "root-score-key",
+      "terminal-score-key",
+      "actual-tool-versions",
+      "actual-dependency-versions",
+      "preprocessing-parameters",
+      "dynamics-parameters",
+      "random-seed",
+      "modeled-genes",
+      "time-correlations",
+      "root-terminal-separation",
+      "velocity-confidence",
+      "output-h5ad-sha256",
+      "quality-gate-results"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-splicing-temporal-design",
+        "output_artifact_types": [
+          "single_cell_trajectory_validation"
+        ],
+        "purpose": "Establish whether velocity and directional trajectory inference are identifiable.",
+        "required_logic": [
+          "Inspect real spliced and unspliced layers, quantification provenance, cells, genes, samples, time, root and terminal evidence, batches, cell states, and source digest.",
+          "Block missing or non-count layers, one-sample designs, ambiguous anchors, inadequate temporal coverage, and guessed direction.",
+          "Freeze preprocessing, model, genes, neighbors, anchors, direction thresholds, confidence thresholds, and outputs before execution."
+        ],
+        "template_files": [
+          "templates/run_velocity.py"
+        ]
+      },
+      {
+        "id": "fit-dynamical-velocity",
+        "output_artifact_types": [
+          "single_cell_trajectory_object",
+          "single_cell_trajectory_validation"
+        ],
+        "purpose": "Execute the detected scVelo dynamical API without modifying source counts.",
+        "required_logic": [
+          "Normalize working copies, select HVGs, compute PCA, neighbors, moments, dynamics, velocity, graph, UMAP vectors, velocity pseudotime, latent time, and confidence using version-correct calls.",
+          "Keep experimental time out of model fitting and use only declared root and terminal scores for orientation.",
+          "Retain failed fit genes and warnings rather than selecting genes from desired temporal behavior."
+        ],
+        "template_files": [
+          "templates/run_velocity.py"
+        ]
+      },
+      {
+        "id": "validate-direction-confidence",
+        "output_artifact_types": [
+          "single_cell_trajectory_validation"
+        ],
+        "purpose": "Test whether the inferred direction is independently supported.",
+        "required_logic": [
+          "Compute Spearman correlations of latent time and velocity pseudotime with withheld experimental time.",
+          "Require root cells to precede terminal cells and median velocity confidence to pass predeclared thresholds.",
+          "Block temporal interpretation when any direction or confidence gate fails even if the embedding arrows appear coherent."
+        ],
+        "template_files": [
+          "templates/run_velocity.py"
+        ]
+      },
+      {
+        "id": "merge-reload-and-admit",
+        "output_artifact_types": [
+          "single_cell_trajectory_object",
+          "single_cell_trajectory_validation"
+        ],
+        "purpose": "Write derived trajectory fields to a new full-feature h5ad and verify source preservation.",
+        "required_logic": [
+          "Merge velocity layers, graph, UMAP vectors, pseudotimes, confidence, fit fields, parameters, and quality status into a copy of the full source object.",
+          "Reload cells, genes, spliced and unspliced counts, sample and anchor fields, trajectory fields, graph, versions, thresholds, and digest.",
+          "Admit only observed direction-validated outputs and keep blocked runs as non-evidentiary model history."
+        ],
+        "template_files": [
+          "templates/run_velocity.py"
+        ]
+      }
+    ]
   },
-  "output_schema": {
-    "type": "object", "additionalProperties": false,
-    "properties": {
-      "handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]},
-      "module": {"type": "object"}, "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "request_fields": {"type": "array"},
-      "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"},
-      "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"},
-      "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"},
-      "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}
-    },
-    "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]
-  },
-  "input_artifacts": [{
-    "name": "splicing_kinetics_object", "artifact_type": "single_cell_splicing_object",
-    "formats": [{"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["observations-by-variables"]}],
-    "processing_levels": ["quality-controlled", "spliced-unspliced-counted", "root-terminal-anchored"],
-    "required_metadata": ["input-artifact-digest", "spliced-layer", "unspliced-layer", "biological-sample-key", "experimental-time-key", "root-score-key", "terminal-score-key", "feature-identifier-namespace", "annotation-release", "cell-accounting", "quantification-provenance"]
-  }],
-  "output_artifacts": [
+  "alternatives": [],
+  "assumptions": [
+    "Spliced and unspliced layers contain aligned integer-like molecule counts; biological samples are independently prepared; experimental time and root and terminal anchors are external to model fitting; the process is sufficiently sampled and connected for a one-trajectory direction check; and cell-level pseudotime is descriptive rather than a condition-level replicate."
+  ],
+  "compatibility_matrix": [
     {
-      "name": "trajectory_velocity_object", "artifact_type": "single_cell_trajectory_object",
-      "formats": [{"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-from-input"], "orientations": ["observations-by-variables"]}],
-      "processing_levels": ["dynamical-velocity-modeled", "direction-validated", "reload-validated"],
-      "required_metadata": ["velocity-layer", "velocity-graph", "velocity-umap", "velocity-pseudotime", "latent-time", "velocity-confidence", "modeled-genes", "root-and-terminal-validation", "experimental-time-withheld-from-fitting", "raw-layer-checks", "quality-status"]
-    },
-    {
-      "name": "trajectory_velocity_validation", "artifact_type": "single_cell_trajectory_validation",
-      "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["model-by-direction-confidence-and-quality"]}],
-      "processing_levels": ["derived"],
-      "required_metadata": ["model-parameters", "modeled-and-finite-fit-genes", "time-correlations", "root-terminal-separation", "velocity-confidence", "source-preservation", "reload-validation", "quality-gate-results", "artifact-digests"]
+      "dependency_versions": {
+        "anndata": [
+          ">=0.12,<0.13"
+        ],
+        "numba": [
+          ">=0.66,<0.67"
+        ],
+        "numpy": [
+          ">=1.26,<1.27"
+        ],
+        "pandas": [
+          ">=2.3,<2.4"
+        ],
+        "python": [
+          ">=3.11,<3.12"
+        ],
+        "scikit-learn": [
+          ">=1.9,<1.10"
+        ],
+        "scipy": [
+          ">=1.15,<1.16"
+        ],
+        "umap-learn": [
+          ">=0.5.12,<0.6"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "single-cell-trajectory-velocity-e2e-v1",
+        "gastrulation-erythroid-scvelo-v1"
+      ],
+      "id": "agent-protocol-1-scvelo-034-scanpy-1115",
+      "input_formats": {
+        "splicing_kinetics_object": [
+          "h5ad@0.1.0"
+        ]
+      },
+      "module_version": "1.1.0",
+      "output_formats": {
+        "trajectory_velocity_object": [
+          "h5ad@0.1.0"
+        ],
+        "trajectory_velocity_validation": [
+          "inline-json@2"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "single-cell-trajectory-velocity-regression-v1"
+      ],
+      "tool_versions": {
+        "scanpy": [
+          ">=1.11,<1.12"
+        ],
+        "scvelo": [
+          ">=0.3.4,<0.4"
+        ]
+      },
+      "verified_at": "2026-07-23"
     }
   ],
-  "assumptions": ["Spliced and unspliced layers contain aligned integer-like molecule counts; biological samples are independently prepared; experimental time and root and terminal anchors are external to model fitting; the process is sufficiently sampled and connected for a one-trajectory direction check; and cell-level pseudotime is descriptive rather than a condition-level replicate."],
-  "preconditions": ["Codex can inspect the real h5ad, quantification provenance, sample and temporal design, root and terminal evidence, and existing scientific environment; outputs are new; and no environment or compute-infrastructure management is required."],
-  "quality_gates": [
-    {"id": "velocity-input-and-layer-semantics", "severity": "fatal", "description": "Block when spliced or unspliced counts, cells, genes, samples, quantification method, feature namespace, temporal metadata, anchors, or source digest cannot be established without guessing.", "blocks_interpretation": true},
-    {"id": "velocity-dynamics-fit", "severity": "fatal", "description": "Require predeclared minimum highly variable, finite-fit, and velocity-gene counts and finite velocity outputs from the detected dynamical API.", "blocks_interpretation": true},
-    {"id": "velocity-independent-direction", "severity": "fatal", "description": "Experimental time withheld from fitting must correlate with latent time and velocity pseudotime, and declared root cells must precede terminal cells by the predeclared margin.", "blocks_interpretation": true},
-    {"id": "velocity-confidence", "severity": "major", "description": "Median velocity confidence and graph structure must satisfy declared thresholds; visually coherent arrows alone do not support direction.", "blocks_interpretation": true},
-    {"id": "velocity-source-preservation", "severity": "fatal", "description": "Source cells, genes, spliced and unspliced counts, sample identities, anchors, and input h5ad remain immutable while derived fields are written to a new object.", "blocks_interpretation": true},
-    {"id": "velocity-output-reload", "severity": "fatal", "description": "The output must reload with velocity layers, graph, UMAP vectors, pseudotime, latent time, confidence, fit fields, source identities, raw counts, parameters, versions, and quality status intact.", "blocks_interpretation": true}
+  "complements": [
+    "single-cell-foundation-workflow",
+    "single-cell-batch-integration",
+    "single-cell-reference-annotation",
+    "single-cell-donor-inference"
   ],
-  "evidence_effects": ["estimates_rna_velocity_from_splicing_kinetics", "derives_velocity_pseudotime_and_latent_time", "tests_direction_against_withheld_time_and_anchors", "blocks_unvalidated_arrow_field_interpretation"],
-  "alternatives": [],
-  "complements": ["single-cell-foundation-workflow", "single-cell-batch-integration", "single-cell-reference-annotation", "single-cell-donor-inference"],
-  "tool_requirements": [
-    {"name": "scvelo", "ecosystem": "python", "identity": "scvelo", "required": true, "tested_versions": ["0.3.4"], "allowed_versions": [">=0.3.4,<0.4"], "version_source": "https://scvelo.readthedocs.io/en/stable/release_notes/", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import scvelo; print(scvelo.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "scvelo-034-preprocessing-and-dynamics-api", "affected_versions": [">=0.3.4,<0.4"], "category": "api", "description": "filter_and_normalize no longer accepts the legacy n_top_genes shortcut; moments, recover_dynamics, velocity graph, pseudotime, latent time, and embedding fields are tied to this release.", "compatibility_effect": "requires-parser", "required_action": "Call normalization, log transform, HVG selection, PCA, neighbors, moments, dynamics, and direction methods separately and reload all fields.", "source": "https://scvelo.readthedocs.io/en/stable/release_notes/"}], "platforms": ["any"]},
-    {"name": "scanpy", "ecosystem": "python", "identity": "scanpy", "required": true, "tested_versions": ["1.11.5"], "allowed_versions": [">=1.11,<1.12"], "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import scanpy; print(scanpy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "scanpy-neighbor-umap-h5ad", "affected_versions": [">=1.11,<1.12"], "category": "behavior", "description": "HVG, PCA, neighbor, UMAP, and h5ad serialization behavior are version-coupled.", "compatibility_effect": "requires-parameter", "required_action": "Record parameters and reload representation, graph, and output fields.", "source": "https://scanpy.readthedocs.io/en/stable/release-notes/"}], "platforms": ["any"]}
-  ],
-  "dependencies": [
-    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-13", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate the request and emit the Agent protocol; this is not the scientific velocity runtime.", "conflicts": [], "platforms": ["any"]},
-    {"name": "anndata", "ecosystem": "python", "identity": "anndata", "required": true, "tested_versions": ["0.11.4"], "allowed_versions": [">=0.11,<0.12"], "version_source": "https://anndata.readthedocs.io/en/stable/release-notes/", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import anndata; print(anndata.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Preserve h5ad layers, graphs, trajectories, fit fields, and source identities.", "conflicts": [], "platforms": ["any"]},
-    {"name": "numpy", "ecosystem": "python", "identity": "numpy", "required": true, "tested_versions": ["1.26.4"], "allowed_versions": [">=1.26,<1.27"], "version_source": "https://numpy.org/doc/1.26/release.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import numpy; print(numpy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate count, fit, velocity, confidence, and direction arrays.", "conflicts": [], "platforms": ["any"]},
-    {"name": "pandas", "ecosystem": "python", "identity": "pandas", "required": true, "tested_versions": ["2.3.3"], "allowed_versions": [">=2.3,<2.4"], "version_source": "https://pandas.pydata.org/docs/whatsnew/", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import pandas; print(pandas.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate sample, time, root, terminal, and fit metadata.", "conflicts": [], "platforms": ["any"]},
-    {"name": "scipy", "ecosystem": "python", "identity": "scipy", "required": true, "tested_versions": ["1.15.3"], "allowed_versions": [">=1.15,<1.16"], "version_source": "https://docs.scipy.org/doc/scipy/release.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import scipy; print(scipy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Preserve sparse layers and compute temporal rank correlations.", "conflicts": [], "platforms": ["any"]},
-    {"name": "scikit-learn", "ecosystem": "python", "identity": "sklearn", "required": true, "tested_versions": ["1.7.2"], "allowed_versions": [">=1.7,<1.8"], "version_source": "https://scikit-learn.org/stable/whats_new/v1.7.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import sklearn; print(sklearn.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Support validated PCA and neighborhood dependencies.", "conflicts": [], "platforms": ["any"]},
-    {"name": "numba", "ecosystem": "python", "identity": "numba", "required": true, "tested_versions": ["0.65.1"], "allowed_versions": [">=0.65,<0.66"], "version_source": "https://numba.readthedocs.io/en/stable/release-notes.html", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import numba; print(numba.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute detected Scanpy and scVelo compiled numerical kernels.", "conflicts": [], "platforms": ["any"]},
-    {"name": "umap-learn", "ecosystem": "python", "identity": "umap", "required": true, "tested_versions": ["0.5.12"], "allowed_versions": [">=0.5.12,<0.6"], "version_source": "https://pypi.org/project/umap-learn/0.5.12/", "verified_at": "2026-07-13", "version_probe": ["python3", "-c", "import umap; print(umap.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Create the descriptive embedding on which velocity vectors are serialized; it is not a direction gate.", "conflicts": [], "platforms": ["any"]}
-  ],
-  "compatibility_matrix": [{
-    "id": "agent-protocol-1-scvelo-034-scanpy-1115",
-    "module_version": "1.0.0",
-    "tool_versions": {"scvelo": [">=0.3.4,<0.4"], "scanpy": [">=1.11,<1.12"]},
-    "dependency_versions": {"python": [">=3.14,<3.15"], "anndata": [">=0.11,<0.12"], "numpy": [">=1.26,<1.27"], "pandas": [">=2.3,<2.4"], "scipy": [">=1.15,<1.16"], "scikit-learn": [">=1.7,<1.8"], "numba": [">=0.65,<0.66"], "umap-learn": [">=0.5.12,<0.6"]},
-    "input_formats": {"splicing_kinetics_object": ["h5ad@0.1.0"]},
-    "output_formats": {"trajectory_velocity_object": ["h5ad@0.1.0"], "trajectory_velocity_validation": ["inline-json@1"]},
-    "platforms": ["any"], "regression_evidence_ids": ["single-cell-trajectory-velocity-regression-v1"], "end_to_end_evidence_ids": ["single-cell-trajectory-velocity-e2e-v1"], "verified_at": "2026-07-13"
-  }],
-  "access": "agent_generated",
-  "mutability": "read_only",
   "credentials": [],
-  "limitations": ["The validated row covers one connected scVelo dynamical trajectory with integer spliced and unspliced counts, multiple samples, known experimental time, and root and terminal anchors. It does not establish lineage causality, condition-level inference, branch topology, fate probabilities, optimal transport, metabolic labeling, or CellRank, Slingshot, monocle3, and tradeSeq execution. Direction is blocked when external time or anchor validation fails, and execution infrastructure remains outside plugin scope."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned Codex-native trajectory workflow synthesized from validated scVelo APIs and independent temporal-direction requirements.", "https://scvelo.readthedocs.io/en/stable/"]},
-  "agent_protocol": {
-    "schema_version": 1, "mode": "codex_generated_project_code", "languages": ["python", "notebook"],
-    "template_sections": [
-      {"id": "inspect-splicing-temporal-design", "purpose": "Establish whether velocity and directional trajectory inference are identifiable.", "required_logic": ["Inspect real spliced and unspliced layers, quantification provenance, cells, genes, samples, time, root and terminal evidence, batches, cell states, and source digest.", "Block missing or non-count layers, one-sample designs, ambiguous anchors, inadequate temporal coverage, and guessed direction.", "Freeze preprocessing, model, genes, neighbors, anchors, direction thresholds, confidence thresholds, and outputs before execution."], "output_artifact_types": ["single_cell_trajectory_validation"], "template_files": ["templates/run_velocity.py"]},
-      {"id": "fit-dynamical-velocity", "purpose": "Execute the detected scVelo dynamical API without modifying source counts.", "required_logic": ["Normalize working copies, select HVGs, compute PCA, neighbors, moments, dynamics, velocity, graph, UMAP vectors, velocity pseudotime, latent time, and confidence using version-correct calls.", "Keep experimental time out of model fitting and use only declared root and terminal scores for orientation.", "Retain failed fit genes and warnings rather than selecting genes from desired temporal behavior."], "output_artifact_types": ["single_cell_trajectory_object", "single_cell_trajectory_validation"], "template_files": ["templates/run_velocity.py"]},
-      {"id": "validate-direction-confidence", "purpose": "Test whether the inferred direction is independently supported.", "required_logic": ["Compute Spearman correlations of latent time and velocity pseudotime with withheld experimental time.", "Require root cells to precede terminal cells and median velocity confidence to pass predeclared thresholds.", "Block temporal interpretation when any direction or confidence gate fails even if the embedding arrows appear coherent."], "output_artifact_types": ["single_cell_trajectory_validation"], "template_files": ["templates/run_velocity.py"]},
-      {"id": "merge-reload-and-admit", "purpose": "Write derived trajectory fields to a new full-feature h5ad and verify source preservation.", "required_logic": ["Merge velocity layers, graph, UMAP vectors, pseudotimes, confidence, fit fields, parameters, and quality status into a copy of the full source object.", "Reload cells, genes, spliced and unspliced counts, sample and anchor fields, trajectory fields, graph, versions, thresholds, and digest.", "Admit only observed direction-validated outputs and keep blocked runs as non-evidentiary model history."], "output_artifact_types": ["single_cell_trajectory_object", "single_cell_trajectory_validation"], "template_files": ["templates/run_velocity.py"]}
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.11,<3.12"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute and validate the observed scVelo trajectory workflow.",
+      "required": true,
+      "tested_versions": [
+        "3.11.15"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.12,<0.13"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "anndata",
+      "name": "anndata",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Preserve h5ad layers, graphs, trajectories, fit fields, and source identities.",
+      "required": true,
+      "tested_versions": [
+        "0.12.19"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import anndata; print(anndata.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://anndata.readthedocs.io/en/stable/release-notes/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.26,<1.27"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "numpy",
+      "name": "numpy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Validate count, fit, velocity, confidence, and direction arrays.",
+      "required": true,
+      "tested_versions": [
+        "1.26.4"
+      ],
+      "verified_at": "2026-07-13",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import numpy; print(numpy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://numpy.org/doc/1.26/release.html"
+    },
+    {
+      "allowed_versions": [
+        ">=2.3,<2.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "pandas",
+      "name": "pandas",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Validate sample, time, root, terminal, and fit metadata.",
+      "required": true,
+      "tested_versions": [
+        "2.3.3"
+      ],
+      "verified_at": "2026-07-13",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import pandas; print(pandas.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://pandas.pydata.org/docs/whatsnew/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.15,<1.16"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scipy",
+      "name": "scipy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Preserve sparse layers and compute temporal rank correlations.",
+      "required": true,
+      "tested_versions": [
+        "1.15.3"
+      ],
+      "verified_at": "2026-07-13",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import scipy; print(scipy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://docs.scipy.org/doc/scipy/release.html"
+    },
+    {
+      "allowed_versions": [
+        ">=1.9,<1.10"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "sklearn",
+      "name": "scikit-learn",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Support validated PCA and neighborhood dependencies.",
+      "required": true,
+      "tested_versions": [
+        "1.9.0"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import sklearn; print(sklearn.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scikit-learn.org/stable/whats_new/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.66,<0.67"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "numba",
+      "name": "numba",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute detected Scanpy and scVelo compiled numerical kernels.",
+      "required": true,
+      "tested_versions": [
+        "0.66.0"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import numba; print(numba.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://numba.readthedocs.io/en/stable/release-notes.html"
+    },
+    {
+      "allowed_versions": [
+        ">=0.5.12,<0.6"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "umap",
+      "name": "umap-learn",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Create the descriptive embedding on which velocity vectors are serialized; it is not a direction gate.",
+      "required": true,
+      "tested_versions": [
+        "0.5.12"
+      ],
+      "verified_at": "2026-07-13",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import umap; print(umap.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://pypi.org/project/umap-learn/0.5.12/"
+    }
+  ],
+  "description": "Direct Codex to inspect a real count-backed h5ad with spliced and unspliced layers, biological samples, independent experimental time, and root and terminal anchors; adapt and execute scVelo dynamical modeling in the user's existing environment; generate velocity, velocity graph, UMAP vectors, velocity pseudotime, and latent time; validate direction against withheld time and anchors; preserve source counts and identifiers; and block unsupported temporal interpretation.",
+  "domains": [
+    "omics",
+    "statistics"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "estimates_rna_velocity_from_splicing_kinetics",
+    "derives_velocity_pseudotime_and_latent_time",
+    "tests_direction_against_withheld_time_and_anchors",
+    "blocks_unvalidated_arrow_field_interpretation"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "single-cell-trajectory-velocity",
+  "input_artifacts": [
+    {
+      "artifact_type": "single_cell_splicing_object",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip",
+            "lzf"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad",
+          "orientations": [
+            "observations-by-variables"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.1.0"
+          ]
+        }
+      ],
+      "name": "splicing_kinetics_object",
+      "processing_levels": [
+        "quality-controlled",
+        "spliced-unspliced-counted",
+        "root-terminal-anchored"
+      ],
+      "required_metadata": [
+        "input-artifact-digest",
+        "spliced-layer",
+        "unspliced-layer",
+        "biological-sample-key",
+        "experimental-time-key",
+        "root-score-key",
+        "terminal-score-key",
+        "feature-identifier-namespace",
+        "annotation-release",
+        "cell-accounting",
+        "quantification-provenance"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "biological_sample_key": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "declared_thresholds": {
+        "type": "object"
+      },
+      "design_notes": {
+        "maxLength": 8000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "experimental_time_key": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "input_artifact_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "input_format": {
+        "enum": [
+          "h5ad"
+        ],
+        "type": "string"
+      },
+      "objective": {
+        "maxLength": 4000,
+        "minLength": 12,
+        "type": "string"
+      },
+      "root_score_key": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "spliced_layer": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "terminal_score_key": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "unspliced_layer": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "input_artifact_id",
+      "input_format",
+      "spliced_layer",
+      "unspliced_layer",
+      "biological_sample_key",
+      "experimental_time_key",
+      "root_score_key",
+      "terminal_score_key",
+      "declared_thresholds",
+      "design_notes"
     ],
-    "parameter_rules": [
-      {"id": "velocity-gene-foundation", "parameter": "hvg-modeled-gene-and-fit-thresholds", "decision_inputs": ["spliced counts", "unspliced counts", "gene detection", "kinetic fit", "cell count"], "selection_rule": "Declare minimum HVG, finite-fit, and velocity-gene counts before model results.", "validation_rule": "Do not cherry-pick genes by agreement with desired direction."},
-      {"id": "velocity-neighborhood", "parameter": "pca-and-neighbors", "decision_inputs": ["cell count", "state continuity", "rare states", "batch design"], "selection_rule": "Choose a stable local neighborhood before velocity graph construction.", "validation_rule": "Repeat justified neighboring values and block unstable direction."},
-      {"id": "velocity-direction", "parameter": "time-correlation-and-anchor-separation", "decision_inputs": ["experimental time", "root evidence", "terminal evidence", "sampling density"], "selection_rule": "Predeclare temporal correlations and normalized root-terminal separation required for direction.", "validation_rule": "Withhold experimental time from fitting and block direction when independent checks fail."},
-      {"id": "velocity-confidence", "parameter": "minimum-median-confidence", "decision_inputs": ["velocity coherence", "transition confidence", "state coverage"], "selection_rule": "Declare a confidence floor separately from temporal direction.", "validation_rule": "An attractive UMAP vector field cannot substitute for confidence or time validation."}
+    "type": "object"
+  },
+  "intents": [
+    "run scVelo RNA velocity and latent time",
+    "infer trajectory and velocity pseudotime",
+    "validate RNA velocity direction with experimental time",
+    "scVelo RNA velocity \u62df\u65f6\u5e8f\u548c\u6f5c\u5728\u65f6\u95f4\u65b9\u5411\u9a8c\u8bc1"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "The validated row covers one connected scVelo dynamical trajectory with integer spliced and unspliced counts, multiple samples, known experimental time, and root and terminal anchors. Public evidence covers the mouse-gastrulation erythroid lineage with 27 samples and seven stages; it is source-, lineage-, runtime-, parameter-, and gate-specific. It does not establish lineage causality, condition-level inference, branch topology, fate probabilities, optimal transport, metabolic labeling, or CellRank, Slingshot, monocle3, and tradeSeq execution. Direction is blocked when external time or anchor validation fails, and execution infrastructure remains outside plugin scope."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "single_cell_trajectory_object",
+      "formats": [
+        {
+          "annotation_releases": [
+            "inherited-from-input"
+          ],
+          "compression": [
+            "none",
+            "gzip",
+            "lzf"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad",
+          "orientations": [
+            "observations-by-variables"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.1.0"
+          ]
+        }
+      ],
+      "name": "trajectory_velocity_object",
+      "processing_levels": [
+        "dynamical-velocity-modeled",
+        "direction-validated",
+        "reload-validated"
+      ],
+      "required_metadata": [
+        "velocity-layer",
+        "velocity-graph",
+        "velocity-umap",
+        "velocity-pseudotime",
+        "latent-time",
+        "velocity-confidence",
+        "modeled-genes",
+        "root-and-terminal-validation",
+        "experimental-time-withheld-from-fitting",
+        "raw-layer-checks",
+        "quality-status"
+      ]
+    },
+    {
+      "artifact_type": "single_cell_trajectory_validation",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "model-by-direction-confidence-and-quality"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "2"
+          ]
+        }
+      ],
+      "name": "trajectory_velocity_validation",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "model-parameters",
+        "modeled-and-finite-fit-genes",
+        "time-correlations",
+        "root-terminal-separation",
+        "velocity-confidence",
+        "source-preservation",
+        "reload-validation",
+        "quality-gate-results",
+        "artifact-digests"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "codex_generated_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
     ],
-    "preflight_checks": ["Inspect real spliced/unspliced counts, quantification provenance, sample design, time, roots, terminals, batches, states, feature namespace, and source object.", "Detect scVelo, Scanpy, AnnData, NumPy, pandas, SciPy, scikit-learn, Numba, UMAP, and Python versions in the existing scientific environment.", "Verify unique identifiers, layer alignment, integer-like counts, multiple samples, time coverage, nonoverlapping anchors, source immutability, and new output paths.", "Freeze normalization, HVG, PCA, neighbors, dynamics iterations, seed, direction and confidence thresholds, and reload checks."],
-    "postflight_checks": ["Inspect modeled genes, finite fits, velocity layers, graph, pseudotime, latent time, confidence, and warnings.", "Recompute time correlations and root-terminal separation independently from fields withheld during fitting.", "Reconcile all source cells, genes, samples, anchors, spliced and unspliced counts, derived fields, parameters, versions, and digests after reload.", "Keep cell-level trajectory interpretation separate from donor-level condition inference and from causal lineage claims."],
-    "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-h5ad-sha256", "spliced-layer", "unspliced-layer", "quantification-provenance", "sample-key", "experimental-time-key", "root-score-key", "terminal-score-key", "actual-tool-versions", "actual-dependency-versions", "preprocessing-parameters", "dynamics-parameters", "random-seed", "modeled-genes", "time-correlations", "root-terminal-separation", "velocity-confidence", "output-h5ad-sha256", "quality-gate-results"],
-    "forbidden_actions": ["Do not install, update, activate, create, or manage Python, R, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.", "Do not fabricate, infer, or silently convert spliced and unspliced counts from total expression.", "Do not use experimental time, desired lineage, annotations, markers, conditions, or conclusions to select genes or tune the model.", "Do not infer direction from UMAP layout, arrows, root choice alone, or one pseudotime correlation.", "Do not overwrite source layers, h5ad objects, cells, genes, samples, anchors, or provenance.", "Do not treat cells as condition-level replicates or velocity as proof of lineage causality.", "Do not report generated code, an unreloaded object, or a blocked direction as validated trajectory evidence."],
-    "requires_observed_execution": true
-  }
+    "type": "object"
+  },
+  "preconditions": [
+    "Codex can inspect the real h5ad, quantification provenance, sample and temporal design, root and terminal evidence, and existing scientific environment; outputs are new; and no environment or compute-infrastructure management is required."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned Codex-native trajectory workflow synthesized from validated scVelo APIs and independent temporal-direction requirements.",
+      "https://scvelo.readthedocs.io/en/stable/"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block when spliced or unspliced counts, cells, genes, samples, quantification method, feature namespace, temporal metadata, anchors, or source digest cannot be established without guessing.",
+      "id": "velocity-input-and-layer-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require predeclared minimum highly variable, finite-fit, and velocity-gene counts and finite velocity outputs from the detected dynamical API.",
+      "id": "velocity-dynamics-fit",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Experimental time withheld from fitting must correlate with latent time and velocity pseudotime, and declared root cells must precede terminal cells by the predeclared margin.",
+      "id": "velocity-independent-direction",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Median velocity confidence and graph structure must satisfy declared thresholds; visually coherent arrows alone do not support direction.",
+      "id": "velocity-confidence",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Source cells, genes, spliced and unspliced counts, sample identities, anchors, and input h5ad remain immutable while derived fields are written to a new object.",
+      "id": "velocity-source-preservation",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "The output must reload with velocity layers, graph, UMAP vectors, pseudotime, latent time, confidence, fit fields, source identities, raw counts, parameters, versions, and quality status intact.",
+      "id": "velocity-output-reload",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Does splicing kinetics support a reproducible and independently directed cellular trajectory rather than an attractive but unvalidated arrow field?"
+  ],
+  "schema_version": 1,
+  "title": "Infer and validate RNA velocity, pseudotime, and latent time",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=0.3.4,<0.4"
+      ],
+      "ecosystem": "python",
+      "identity": "scvelo",
+      "mismatch_policy": "block",
+      "name": "scvelo",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "0.3.4"
+      ],
+      "verified_at": "2026-07-13",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=0.3.4,<0.4"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "filter_and_normalize no longer accepts the legacy n_top_genes shortcut; moments, recover_dynamics, velocity graph, pseudotime, latent time, and embedding fields are tied to this release.",
+          "id": "scvelo-034-preprocessing-and-dynamics-api",
+          "required_action": "Call normalization, log transform, HVG selection, PCA, neighbors, moments, dynamics, and direction methods separately and reload all fields.",
+          "source": "https://scvelo.readthedocs.io/en/stable/release_notes/"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import scvelo; print(scvelo.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scvelo.readthedocs.io/en/stable/release_notes/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.11,<1.12"
+      ],
+      "ecosystem": "python",
+      "identity": "scanpy",
+      "mismatch_policy": "block",
+      "name": "scanpy",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.11.5"
+      ],
+      "verified_at": "2026-07-13",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.11,<1.12"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parameter",
+          "description": "HVG, PCA, neighbor, UMAP, and h5ad serialization behavior are version-coupled.",
+          "id": "scanpy-neighbor-umap-h5ad",
+          "required_action": "Record parameters and reload representation, graph, and output fields.",
+          "source": "https://scanpy.readthedocs.io/en/stable/release-notes/"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import scanpy; print(scanpy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/"
+    }
+  ],
+  "version": "1.1.0"
 }

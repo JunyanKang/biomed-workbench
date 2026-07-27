@@ -2,6 +2,9 @@
 
 ## Scientific Role
 
+- NCBI Gene ortholog records can provide a bounded source-to-target mapping for declared Gene IDs and taxa; they remain database evidence rather than functional-equivalence evidence.
+- Stable Gene IDs are resolved only after exact symbol-and-organism matching; ambiguous candidates remain unresolved and cannot silently feed downstream database calls.
+
 This capability area establishes the evidence landscape before, during, and after analysis. It combines retrieval with identifier reconciliation, source-specific interpretation, contradiction tracking, citation support checks, and freshness review. Retrieved records remain source evidence; they are not automatically promoted into biological conclusions.
 
 ## Supported Capabilities
@@ -12,6 +15,12 @@ This capability area establishes the evidence landscape before, during, and afte
 - Resolve DOI-centred citation records across Crossref and Europe PMC while preserving disagreements.
 - Retrieve version-aware bioRxiv and medRxiv histories without collapsing preprint revisions.
 - Audit citation metadata, citation resolution, assertion coverage, and claim-evidence fit.
+- Retrieve bounded dbSNP reference-variant identity evidence for a canonical rs identifier, while keeping clinical, population, and genome-build interpretation outside the identity record.
+- Retrieve fixed-field gnomAD GRCh38 aggregate gene-constraint context, preserving the distinction between population depletion metrics and clinical or causal interpretation.
+- Retrieve an exact public cBioPortal cancer-genomics study record, preserving study identity, cancer type, reference genome and assay-specific cohort counts without treating those metadata as patient-level results or clinical evidence.
+- Retrieve bounded cBioPortal mutation records for one declared gene and public study, resolving the mutation profile and sample list explicitly, preserving coordinate/build context, and marking capped results as non-exhaustive.
+- Retrieve bounded cBioPortal discrete copy-number events through the required POST gene filter, preserving categorical event meaning and marking locally capped records as non-exhaustive.
+- Audit discrete copy-number cohort coverage against a declared eligible denominator; only complete, non-truncated source evidence can enter the serial adaptation-to-audit path, and the result remains descriptive rather than purity, ploidy, focality, or clinical inference.
 - Separate an identifier-keyed miss, a title-only coverage gap, an upstream outage, and a genuinely unresolved record.
 
 Representative modules include `literature-evidence`, `citation-record-resolution`, `preprint-evidence`, `citation-audit`, `citation-resolution-adjudication`, and `assertion-citation-coverage-audit`.
@@ -19,13 +28,14 @@ Representative modules include `literature-evidence`, `citation-record-resolutio
 ### Public biomedical databases
 
 - Search, summarize, fetch, and link NCBI Entrez records.
-- Build gene and variant evidence bundles without erasing database identity or missing records.
+- Resolve exact gene symbols to stable NCBI Gene IDs, then build gene, ortholog, and variant evidence without erasing database identity or missing records.
 - Retrieve chemical identity and descriptors from PubChem with ambiguity checks.
 - Retrieve design-aware ClinicalTrials.gov studies with bounded pagination and explicit truncation.
 - Search RCSB PDB and retrieve entry, polymer-entity, and bound-ligand evidence.
 - Retrieve AlphaFold DB model coverage and confidence metadata while separating predictions from experiments.
+- Retrieve IUPred2A accession-bound disorder tendency profiles while retaining residue alignment, threshold policy, and a strict prediction-versus-validation boundary.
 
-Representative modules include `ncbi-search`, `ncbi-fetch`, `ncbi-link`, `gene-evidence`, `variant-evidence`, `chemical-evidence`, `clinical-trial-evidence`, `structure-search`, `structure-evidence`, and `alphafold-structure-evidence`.
+Representative modules include `ncbi-search`, `ncbi-fetch`, `ncbi-link`, `gene-identifier-resolution`, `gene-evidence`, `gene-ortholog-evidence`, `variant-evidence`, `chemical-evidence`, `clinical-trial-evidence`, `structure-search`, `structure-evidence`, `alphafold-structure-evidence`, and `protein-disorder-evidence`.
 
 ### Evidence governance
 

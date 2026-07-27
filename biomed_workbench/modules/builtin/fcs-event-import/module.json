@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "id": "fcs-event-import",
+  "version": "1.0.0",
+  "title": "Import an FCS event table for declared downstream gating",
+  "description": "Parse one FCS 2.0, 3.0, or 3.1 file into an unsampled event table, channel labels, and a deliberately small acquisition metadata subset.",
+  "module_type": "analysis",
+  "domains": ["wetlab"],
+  "intents": ["import FCS flow cytometry file", "Import FCS flow cytometry data and apply a gating plan", "read FCS events", "导入 FCS 流式细胞术文件", "读取流式事件数据"],
+  "questions": ["Can this declared FCS file be parsed into a complete event table suitable for transparent downstream gating?"],
+  "entrypoint": "biomed_workbench.capabilities.quantitative_assays:import_fcs_events",
+  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 10000000},
+  "maturity": "validated",
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "input_artifacts": [{
+    "name": "fcs_file",
+    "artifact_type": "flow_cytometry_acquisition",
+    "processing_levels": ["raw"],
+    "required_metadata": ["source-sha256", "sample-identity", "panel-identity"],
+    "formats": [{"name": "fcs", "versions": ["2.0", "3.0", "3.1"], "representations": ["binary"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["event-by-channel"]}]
+  }],
+  "output_artifacts": [{
+    "name": "events",
+    "artifact_type": "cytometry_event_table",
+    "processing_levels": ["source-preserved", "parsed"],
+    "required_metadata": ["module_version", "compatibility_row_id", "source_name", "fcs_version", "event_count", "channels"],
+    "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["event-by-channel"]}]
+  }],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "fcs_path": {"type": "string", "minLength": 5},
+      "fcs_base64": {"type": "string", "minLength": 16},
+      "max_events": {"type": "integer", "minimum": 1, "maximum": 100000}
+    },
+    "required": []
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "source_name": {"type": "string"},
+      "fcs_version": {"type": "string"},
+      "event_count": {"type": "integer"},
+      "channels": {"type": "array"},
+      "metadata": {"type": "object"},
+      "events": {"type": "array"},
+      "quality_gates": {"type": "array"}
+    },
+    "required": ["source_name", "fcs_version", "event_count", "channels", "metadata", "events", "quality_gates"]
+  },
+  "preconditions": ["A single readable, unencrypted FCS file is available and its sample, panel, and acquisition context are declared."],
+  "assumptions": ["The FCS event values are stored in the acquisition's declared scale; importing does not compensate, transform, clean, or biologically interpret them."],
+  "quality_gates": [
+    {"id": "fcs-import-completeness", "severity": "fatal", "description": "Reject malformed FCS payloads, duplicated or missing channel labels, inconsistent event lengths, empty files, and files above the declared complete JSON handoff limit.", "blocks_interpretation": true},
+    {"id": "fcs-import-interpretation-boundary", "severity": "major", "description": "Require compensation, transformation, controls, gating provenance, biological replicate identity, and the raw acquisition file before interpreting population frequencies.", "blocks_interpretation": true}
+  ],
+  "limitations": ["This module does not compensate spillover, transform channels, remove debris or doublets, perform manual or automated gates, infer cell identity, write FCS files, or silently subsample events. For large acquisitions it deliberately stops rather than changing the denominator."],
+  "evidence_effects": ["preserves_cytometry_measurement"],
+  "alternatives": [],
+  "complements": ["flow-cytometry-summary"],
+  "tool_requirements": [{
+    "name": "flowio",
+    "ecosystem": "python",
+    "identity": "flowio",
+    "required": true,
+    "tested_versions": ["1.4.0"],
+    "allowed_versions": [">=1.4,<1.5"],
+    "version_source": "https://pypi.org/project/FlowIO/",
+    "verified_at": "2026-07-24",
+    "version_probe": ["python", "-c", "import flowio; print(flowio.__version__)"],
+    "version_probe_kind": "command",
+    "version_probe_timeout_seconds": 5,
+    "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+    "mismatch_policy": "block",
+    "version_differences": [{"id": "flowio-fcs-parser-contract", "affected_versions": [">=1.4,<1.5"], "category": "input-format", "description": "The FlowData parser determines FCS header/text offset handling and channel/event extraction.", "compatibility_effect": "requires-parser", "required_action": "Record FlowIO version and preserve the original FCS digest before downstream gating.", "source": "https://pypi.org/project/FlowIO/"}],
+    "platforms": ["any"]
+  }],
+  "dependencies": [{
+    "name": "python",
+    "ecosystem": "runtime",
+    "identity": "python-runtime",
+    "required": true,
+    "tested_versions": ["3.14.3"],
+    "allowed_versions": [">=3.14,<3.15"],
+    "version_source": "https://www.python.org/downloads/release/python-3143/",
+    "verified_at": "2026-07-24",
+    "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"],
+    "version_probe_kind": "python_callable",
+    "version_probe_timeout_seconds": 5,
+    "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+    "purpose": "Execute the validated FCS import implementation.",
+    "conflicts": [],
+    "platforms": ["any"]
+  }],
+  "compatibility_matrix": [{
+    "id": "python-3.14.3-flowio-1.4-fcs-1",
+    "module_version": "1.0.0",
+    "tool_versions": {"flowio": [">=1.4,<1.5"]},
+    "dependency_versions": {"python": [">=3.14,<3.15"]},
+    "input_formats": {"fcs_file": ["fcs@2.0", "fcs@3.0", "fcs@3.1"]},
+    "output_formats": {"events": ["inline-json@1"]},
+    "platforms": ["any"],
+    "regression_evidence_ids": ["fcs-event-import-regression-v1"],
+    "end_to_end_evidence_ids": ["fcs-event-import-e2e-v1"],
+    "verified_at": "2026-07-24"
+  }],
+  "code_templates": [{"path": "templates/run_fcs_event_import.py", "language": "python", "purpose": "Execute a declared FCS import and preserve its module-bound result envelope.", "quality_gate_ids": ["fcs-import-completeness", "fcs-import-interpretation-boundary"], "requires_adaptation": true}],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned implementation with module-level validation evidence.", "https://pypi.org/project/FlowIO/"]}
+}

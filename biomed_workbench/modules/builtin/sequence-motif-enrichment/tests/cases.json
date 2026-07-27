@@ -1,0 +1,4 @@
+{
+  "schema_version": 1,
+  "cases": [{"name": "known-acgt-pwm-is-enriched-in-foreground", "input": {"foreground_sequences": ["TTACGTAA", "GGACGTCC", "ACGTGGGG", "TTTACGTA"], "background_sequences": ["TTTTTTTT", "CCCCCCCC", "GGGGGGGG", "TATATATA"], "motifs": [{"id": "ACGT", "matrix": {"A": [10, 0, 0, 0], "C": [0, 10, 0, 0], "G": [0, 0, 10, 0], "T": [0, 0, 0, 10]}}], "threshold": 0.8}, "expected_subset": {"foreground_sequence_count": 4, "background_sequence_count": 4, "motif_count": 1, "threshold": 0.8}}]
+}

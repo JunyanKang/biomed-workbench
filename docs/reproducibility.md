@@ -34,7 +34,7 @@ Shared profiles cover foundational sequencing, alignment, variant, interval, exp
 
 ## Published Verification
 
-The [`reports/`](../reports/) directory contains release-safe summaries for compatibility execution, bioinformatics template coverage, public database checks, structural and single-cell verification, deterministic evidence, plugin installation, and source reconciliation. Reports preserve concrete verification results without exposing private source paths or credentials.
+The [`reports/`](../reports/) directory contains release-safe summaries for compatibility execution, bioinformatics template coverage, public database checks, structural and single-cell verification, deterministic evidence, plugin installation, and public-data acceptance cases. Reports preserve concrete verification results without exposing private source paths or credentials.
 
 The detailed baseline table is generated from the module registry and compatibility reports rather than duplicated in this guide. This keeps user documentation readable while preserving machine-verifiable evidence at the source of truth.
 

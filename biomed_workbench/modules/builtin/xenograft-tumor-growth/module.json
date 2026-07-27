@@ -1,0 +1,286 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The control group and endpoint were declared independently of the observed outcome."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_xenograft_tumor_growth.py",
+      "purpose": "Execute animal-level xenograft growth accounting with project-bound provenance.",
+      "quality_gate_ids": [
+        "xenograft-animal-longitudinal-contract",
+        "xenograft-tgi-interpretation-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "xenograft-tumor-growth-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "xenograft_observations": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "xenograft_growth_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "xenograft-tumor-growth-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "dose-response",
+    "cohort-summary"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic animal-level summary.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-24",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Retain animal-level longitudinal tumor volumes, declared endpoint changes, and descriptive tumor-growth inhibition against a control group.",
+  "domains": [
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_xenograft_tumor_growth",
+  "evidence_effects": [
+    "summarizes-animal-level-xenograft-growth"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "xenograft-tumor-growth",
+  "input_artifacts": [
+    {
+      "artifact_type": "xenograft_animal_measurements",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "elapsed-days"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "animal-by-time-and-volume"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "xenograft_observations",
+      "processing_levels": [
+        "animal-level",
+        "longitudinal"
+      ],
+      "required_metadata": [
+        "study-design",
+        "volume-method",
+        "randomization-and-blinding-policy",
+        "endpoint-policy",
+        "treatment-exposure"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "control_group": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "endpoint_time_days": {
+        "minimum": 0,
+        "type": "number"
+      },
+      "observations": {
+        "items": {
+          "type": "object"
+        },
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "observations",
+      "control_group"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "xenograft tumor growth inhibition",
+    "xenograft TGI",
+    "analyze xenograft tumor volumes",
+    "\u5f02\u79cd\u79fb\u690d\u80bf\u7624\u751f\u957f\u6291\u5236",
+    "\u80bf\u7624\u751f\u957f\u6291\u5236\u7387"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module does not impute missing animals, perform survival or toxicity analysis, test treatment effects, infer causality, or make efficacy claims."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "xenograft_tumor_growth_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "elapsed-days"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "group-trajectory-and-animal-endpoint-change"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "xenograft_growth_summary",
+      "processing_levels": [
+        "animal-preserved",
+        "endpoint-summarized"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "control-group",
+        "endpoint-time",
+        "quality-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "animal_count": {
+        "type": "integer"
+      },
+      "animal_endpoint_changes": {
+        "type": "array"
+      },
+      "control_group": {
+        "type": "string"
+      },
+      "endpoint_group_summary": {
+        "type": "array"
+      },
+      "endpoint_time_days": {
+        "type": "number"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "trajectory": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "control_group",
+      "endpoint_time_days",
+      "animal_count",
+      "trajectory",
+      "animal_endpoint_changes",
+      "endpoint_group_summary",
+      "quality_gates"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Each animal has one stable group and unique nonnegative volume measurement at each declared time."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room animal-level xenograft growth implementation."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require stable animal group identity, unique animal-time measurements, an observed control group, and a declared endpoint.",
+      "id": "xenograft-animal-longitudinal-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "TGI requires matched baseline and endpoint observations with positive control growth; randomization, blinding, exclusions, treatment exposure, toxicity, survival, and biological inference require review.",
+      "id": "xenograft-tgi-interpretation-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What animal-level tumor growth and endpoint TGI are supported by the declared xenograft observations?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize xenograft tumor growth and endpoint TGI",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

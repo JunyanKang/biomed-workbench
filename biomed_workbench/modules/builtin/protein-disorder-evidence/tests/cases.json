@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "retrieve-residue-aligned-disorder-profile",
+      "input": {"uniprot_accessions": ["P04637"], "prediction_type": "long", "score_threshold": 0.5, "minimum_span_length": 2},
+      "http_fixtures": [{"url": "https://iupred2a.elte.hu/iupred2a/long/P04637.json", "status": 200, "headers": {"Content-Type": "application/json"}, "json": {"sequence": "MEEPQ", "type": "long", "iupred2": [0.1, 0.6, 0.8, 0.4, 0.7]}}],
+      "expected_subset": {"requested_count": 1, "found_count": 1, "not_found_count": 0}
+    }
+  ]
+}

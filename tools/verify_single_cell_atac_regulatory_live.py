@@ -149,7 +149,7 @@ def verify(python: Path, rscript: Path) -> dict[str, object]:
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
         versions = regulatory["versions"]
         return {
-            "schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": "1.0.0",
+            "schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": "1.1.0",
             "compatibility_row_id": "agent-protocol-1-macs3-304-signac-116-chromvar-124-motifmatchr-124", "registry_digest": registry.digest,
             "templates": {
                 "macs3": {"name": MACS3_TEMPLATE.name, "sha256": sha256(MACS3_TEMPLATE)},

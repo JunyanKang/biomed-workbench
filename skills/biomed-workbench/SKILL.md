@@ -39,10 +39,11 @@ Before the first operation in a newly installed or updated package, run the boun
 "$WORKBENCH_ROOT/tools/workbench" doctor --strict
 ```
 
-Route the objective:
+Compile the objective into one agent-ready research plan. This is the default entry after the health check; it exposes dependency layers, input/output contracts, parameter schema, packaged execution templates, quality gates, and unresolved project inputs without claiming that any analysis has run:
 
 ```bash
 "$WORKBENCH_ROOT/tools/workbench" route "USER OBJECTIVE"
+"$WORKBENCH_ROOT/tools/workbench" plan "USER OBJECTIVE"
 ```
 
 Inspect an exact capability contract or refine a broad route:
@@ -107,6 +108,7 @@ Inspect every returned image at full resolution against the handoff gates. Gener
 ## Guardrails
 
 - Do not expose, echo, persist, or serialize credentials. Pass optional credentials only through their documented environment variables.
+- Do not manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure as a scientific capability.
 - Require explicit permission for any capability whose contract is not `read_only`; preserve the exact approved scope.
 - De-identify clinical data before downstream analysis and treat re-identification risk as a limitation, not a formatting issue.
 - Validate sequence alphabet and orientation, genome assembly, species, units, group labels, missingness, sample independence, image dimensions, and clinical endpoint definitions as applicable.

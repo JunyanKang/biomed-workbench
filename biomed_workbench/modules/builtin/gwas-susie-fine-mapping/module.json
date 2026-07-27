@@ -1,0 +1,621 @@
+{
+    "schema_version": 1,
+    "id": "gwas-susie-fine-mapping",
+    "version": "0.1.0",
+    "title": "Fine-map a GWAS locus with SuSiE-RSS",
+    "description": "Direct Codex to prepare, validate, execute, reload and interpret a SuSiE-RSS fine-mapping analysis from pre-harmonized locus summary statistics and exactly aligned LD evidence.",
+    "module_type": "analysis",
+    "domains": [
+        "omics",
+        "genetics"
+    ],
+    "intents": [
+        "GWAS fine mapping",
+        "SuSiE RSS",
+        "credible set",
+        "posterior inclusion probability",
+        "GWAS \u7cbe\u7ec6\u5b9a\u4f4d"
+    ],
+    "questions": [
+        "Which variants receive model- and LD-reference-dependent posterior inclusion probabilities and credible-set membership in one predeclared GWAS locus after strict harmonization and convergence checks?"
+    ],
+    "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+    "execution": {
+        "kind": "workflow",
+        "timeout_seconds": 30,
+        "max_output_bytes": 2000000
+    },
+    "maturity": "validated",
+    "input_artifacts": [
+        {
+            "name": "locus_summary_statistics",
+            "artifact_type": "gwas_locus_summary_statistics",
+            "processing_levels": [
+                "harmonized",
+                "locus-restricted"
+            ],
+            "required_metadata": [
+                "source-sha256",
+                "genome-build",
+                "trait-definition",
+                "effect-allele-convention",
+                "sample-size",
+                "association-model",
+                "variant-identifier-policy"
+            ],
+            "formats": [
+                {
+                    "name": "tsv",
+                    "versions": [
+                        "1"
+                    ],
+                    "representations": [
+                        "text"
+                    ],
+                    "compression": [
+                        "none"
+                    ],
+                    "required_indexes": [],
+                    "coordinate_systems": [
+                        "declared-variant-build"
+                    ],
+                    "genome_build_policy": "declared",
+                    "genome_builds": [
+                        "declared-in-project"
+                    ],
+                    "annotation_releases": [],
+                    "orientations": [
+                        "one-row-per-variant"
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "ld_correlation_matrix",
+            "artifact_type": "variant_ld_correlation_matrix",
+            "processing_levels": [
+                "allele-aligned",
+                "ancestry-matched"
+            ],
+            "required_metadata": [
+                "source-sha256",
+                "genome-build",
+                "reference-panel-identity",
+                "reference-panel-ancestry",
+                "variant-order",
+                "allele-alignment-policy"
+            ],
+            "formats": [
+                {
+                    "name": "tsv",
+                    "versions": [
+                        "1"
+                    ],
+                    "representations": [
+                        "text"
+                    ],
+                    "compression": [
+                        "none"
+                    ],
+                    "required_indexes": [],
+                    "coordinate_systems": [
+                        "same-as-summary-statistics"
+                    ],
+                    "genome_build_policy": "declared",
+                    "genome_builds": [
+                        "same-as-summary-statistics"
+                    ],
+                    "annotation_releases": [],
+                    "orientations": [
+                        "variant-by-variant-correlation"
+                    ]
+                }
+            ]
+        }
+    ],
+    "output_artifacts": [
+        {
+            "name": "fine_mapping_evidence",
+            "artifact_type": "gwas_fine_mapping_evidence",
+            "processing_levels": [
+                "fitted",
+                "convergence-checked",
+                "reloaded"
+            ],
+            "required_metadata": [
+                "module-version",
+                "summary-sha256",
+                "ld-sha256",
+                "susieR-version",
+                "sample-size",
+                "L",
+                "credible-set-coverage",
+                "LD-diagnostics",
+                "output-sha256",
+                "quality-gates"
+            ],
+            "formats": [
+                {
+                    "name": "normalized-json",
+                    "versions": [
+                        "1"
+                    ],
+                    "representations": [
+                        "structured"
+                    ],
+                    "compression": [
+                        "none"
+                    ],
+                    "required_indexes": [],
+                    "coordinate_systems": [
+                        "inherited-variant-build"
+                    ],
+                    "genome_build_policy": "declared",
+                    "genome_builds": [
+                        "inherited-from-input"
+                    ],
+                    "annotation_releases": [],
+                    "orientations": [
+                        "variant-by-posterior-evidence"
+                    ]
+                }
+            ]
+        }
+    ],
+    "preconditions": [
+        "The locus was selected independently of desired results; summary statistics and LD have identical ordered variant identifiers, harmonized effect alleles, compatible build and ancestry; sample size, maximum effects, coverage and output path are declared before fitting."
+    ],
+    "assumptions": [
+        "The requested locus is adequately represented by the supplied LD reference and SuSiE-RSS sparse-effect model. This assumption is examined but never proved by the model output."
+    ],
+    "quality_gates": [
+        {
+            "id": "finemap-harmonization",
+            "severity": "fatal",
+            "description": "Block unless variant identifiers, order, build, alleles, beta, standard error, p value, sample size and LD reference provenance are complete and mutually compatible.",
+            "blocks_interpretation": true
+        },
+        {
+            "id": "finemap-ld-validity",
+            "severity": "fatal",
+            "description": "Require a finite symmetric unit-diagonal positive-semidefinite LD correlation matrix exactly ordered to the summary statistics; reject a mismatched or ill-conditioned matrix rather than repair it silently.",
+            "blocks_interpretation": true
+        },
+        {
+            "id": "finemap-convergence-and-credible-set",
+            "severity": "fatal",
+            "description": "Require detected compatible susieR/digest/jsonlite versions, model convergence, reloaded PIP and credible-set outputs, declared coverage/purity policy, and retained LD diagnostics.",
+            "blocks_interpretation": true
+        },
+        {
+            "id": "finemap-claim-boundary",
+            "severity": "major",
+            "description": "PIPs and credible sets are not causal variants, causal genes, colocalization, mechanism, clinical interpretation or functional validation.",
+            "blocks_interpretation": true
+        }
+    ],
+    "limitations": [
+        "This module does not select loci, harmonize alleles, generate LD, impute variants, estimate heritability, perform colocalization, select a gene, or establish causality. It does not install or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure."
+    ],
+    "evidence_effects": [
+        "adds-reloaded-susie-rss-pip-and-credible-set-evidence",
+        "preserves-summary-LD-harmonization-and-convergence-policy"
+    ],
+    "alternatives": [],
+    "complements": [
+        "gene-identifier-resolution",
+        "gene-ortholog-evidence",
+        "genome-coordinate-liftover"
+    ],
+    "tool_requirements": [
+        {
+            "name": "susieR",
+            "ecosystem": "r",
+            "identity": "susieR",
+            "required": true,
+            "tested_versions": [
+                "0.14.2"
+            ],
+            "allowed_versions": [
+                ">=0.14,<0.15"
+            ],
+            "version_source": "https://stephenslab.github.io/susieR/reference/susie_rss.html",
+            "verified_at": "2026-07-23",
+            "version_probe": [
+                "Rscript",
+                "-e",
+                "cat(as.character(packageVersion('susieR')))"
+            ],
+            "version_probe_kind": "command",
+            "version_probe_timeout_seconds": 30,
+            "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+            "mismatch_policy": "block",
+            "version_differences": [
+                {
+                    "id": "susie-rss-summary-statistics-interface",
+                    "affected_versions": [
+                        ">=0.14,<0.15"
+                    ],
+                    "category": "behavior",
+                    "description": "susie_rss accepts z scores, correlation matrix and recommended sample size; convergence and credible-set construction are version-coupled.",
+                    "compatibility_effect": "requires-parser",
+                    "required_action": "Record exact version, fit settings, convergence, coverage and LD diagnostics, and block incompatible interfaces.",
+                    "source": "https://stephenslab.github.io/susieR/reference/susie_rss.html"
+                }
+            ],
+            "platforms": [
+                "any"
+            ]
+        }
+    ],
+    "dependencies": [
+        {
+            "name": "R",
+            "ecosystem": "runtime",
+            "identity": "R-runtime",
+            "required": true,
+            "tested_versions": [
+                "4.5.1"
+            ],
+            "allowed_versions": [
+                ">=4.4,<4.6"
+            ],
+            "version_source": "https://cran.r-project.org/",
+            "verified_at": "2026-07-23",
+            "version_probe": [
+                "Rscript",
+                "--version"
+            ],
+            "version_probe_kind": "command",
+            "version_probe_timeout_seconds": 30,
+            "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+            "purpose": "Run a project-supplied SuSiE-RSS script in an existing scientific environment.",
+            "conflicts": [],
+            "platforms": [
+                "any"
+            ]
+        },
+        {
+            "name": "digest",
+            "ecosystem": "r",
+            "identity": "digest",
+            "required": true,
+            "tested_versions": [
+                "0.6.37"
+            ],
+            "allowed_versions": [
+                ">=0.6,<0.7"
+            ],
+            "version_source": "https://cran.r-project.org/package=digest",
+            "verified_at": "2026-07-23",
+            "version_probe": [
+                "Rscript",
+                "-e",
+                "cat(as.character(packageVersion('digest')))"
+            ],
+            "version_probe_kind": "command",
+            "version_probe_timeout_seconds": 30,
+            "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+            "purpose": "Bind immutable source files to SHA-256 provenance.",
+            "conflicts": [],
+            "platforms": [
+                "any"
+            ]
+        },
+        {
+            "name": "jsonlite",
+            "ecosystem": "r",
+            "identity": "jsonlite",
+            "required": true,
+            "tested_versions": [
+                "2.0.0"
+            ],
+            "allowed_versions": [
+                ">=2.0,<2.1"
+            ],
+            "version_source": "https://cran.r-project.org/package=jsonlite",
+            "verified_at": "2026-07-23",
+            "version_probe": [
+                "Rscript",
+                "-e",
+                "cat(as.character(packageVersion('jsonlite')))"
+            ],
+            "version_probe_kind": "command",
+            "version_probe_timeout_seconds": 30,
+            "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+            "purpose": "Emit reloadable structured results.",
+            "conflicts": [],
+            "platforms": [
+                "any"
+            ]
+        }
+    ],
+    "compatibility_matrix": [
+        {
+            "id": "agent-protocol-1-susier-0142-r-451",
+            "module_version": "0.1.0",
+            "tool_versions": {
+                "susieR": [
+                    ">=0.14,<0.15"
+                ]
+            },
+            "dependency_versions": {
+                "R": [
+                    ">=4.4,<4.6"
+                ],
+                "digest": [
+                    ">=0.6,<0.7"
+                ],
+                "jsonlite": [
+                    ">=2.0,<2.1"
+                ]
+            },
+            "input_formats": {
+                "locus_summary_statistics": [
+                    "tsv@1"
+                ],
+                "ld_correlation_matrix": [
+                    "tsv@1"
+                ]
+            },
+            "output_formats": {
+                "fine_mapping_evidence": [
+                    "normalized-json@1"
+                ]
+            },
+            "platforms": [
+                "any"
+            ],
+            "regression_evidence_ids": [
+                "gwas-susie-fine-mapping-regression-v1"
+            ],
+            "end_to_end_evidence_ids": [
+                "gwas-susie-fine-mapping-e2e-v1"
+            ],
+            "verified_at": "2026-07-23"
+        }
+    ],
+    "access": "agent_generated",
+    "mutability": "read_only",
+    "credentials": [],
+    "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "objective": {
+                "type": "string",
+                "minLength": 12
+            },
+            "summary_statistics_artifact_id": {
+                "type": "string",
+                "minLength": 1
+            },
+            "ld_matrix_artifact_id": {
+                "type": "string",
+                "minLength": 1
+            },
+            "genome_build": {
+                "type": "string",
+                "minLength": 1
+            },
+            "trait_type": {
+                "type": "string",
+                "enum": [
+                    "quantitative",
+                    "binary",
+                    "other"
+                ]
+            },
+            "sample_size": {
+                "type": "integer",
+                "minimum": 100
+            },
+            "maximum_effects": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+            },
+            "credible_set_coverage": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "exclusiveMaximum": 1
+            },
+            "ld_reference_notes": {
+                "type": "string",
+                "minLength": 12
+            },
+            "design_notes": {
+                "type": "string",
+                "minLength": 1
+            }
+        },
+        "required": [
+            "objective",
+            "summary_statistics_artifact_id",
+            "ld_matrix_artifact_id",
+            "genome_build",
+            "trait_type",
+            "sample_size",
+            "maximum_effects",
+            "credible_set_coverage",
+            "ld_reference_notes",
+            "design_notes"
+        ]
+    },
+    "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "handoff_type": {
+                "type": "string",
+                "enum": [
+                    "codex_generated_project_analysis"
+                ]
+            },
+            "module": {
+                "type": "object"
+            },
+            "request_digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+            },
+            "request_fields": {
+                "type": "array"
+            },
+            "languages": {
+                "type": "array"
+            },
+            "code_plan": {
+                "type": "array"
+            },
+            "parameter_rules": {
+                "type": "array"
+            },
+            "preflight_checks": {
+                "type": "array"
+            },
+            "postflight_checks": {
+                "type": "array"
+            },
+            "provenance_fields": {
+                "type": "array"
+            },
+            "forbidden_actions": {
+                "type": "array"
+            },
+            "tool_profiles": {
+                "type": "array"
+            },
+            "dependency_profiles": {
+                "type": "array"
+            },
+            "quality_gate_ids": {
+                "type": "array"
+            },
+            "execution_policy": {
+                "type": "object"
+            }
+        },
+        "required": [
+            "handoff_type",
+            "module",
+            "request_digest",
+            "request_fields",
+            "languages",
+            "code_plan",
+            "parameter_rules",
+            "preflight_checks",
+            "postflight_checks",
+            "provenance_fields",
+            "forbidden_actions",
+            "tool_profiles",
+            "dependency_profiles",
+            "quality_gate_ids",
+            "execution_policy"
+        ]
+    },
+    "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+    ],
+    "provenance": {
+        "license": "Apache-2.0",
+        "concept_sources": [
+            "Independent clean-room replacement for an unreliable fine-mapping capability identified during product capability planning.",
+            "https://stephenslab.github.io/susieR/reference/susie_rss.html"
+        ]
+    },
+    "code_templates": [
+        {
+            "path": "templates/run_susie_rss_finemapping.R",
+            "language": "r",
+            "purpose": "Validate, run and serialize a constrained SuSiE-RSS fine-mapping analysis.",
+            "quality_gate_ids": [
+                "finemap-harmonization",
+                "finemap-ld-validity",
+                "finemap-convergence-and-credible-set",
+                "finemap-claim-boundary"
+            ],
+            "requires_adaptation": true
+        }
+    ],
+    "agent_protocol": {
+        "schema_version": 1,
+        "mode": "codex_generated_project_code",
+        "languages": [
+            "R",
+            "notebook"
+        ],
+        "template_sections": [
+            {
+                "id": "freeze-finemapping-contract",
+                "purpose": "Validate locus, allele, LD and parameter identity before fitting.",
+                "required_logic": [
+                    "Inspect exact ordered variant IDs, effect alleles, build, association model, sample size, LD reference ancestry and immutable digests.",
+                    "Reject summary-statistic/LD mismatch, implicit allele harmonization, non-PSD LD, mutable outputs and result-driven locus selection."
+                ],
+                "output_artifact_types": [
+                    "gwas_fine_mapping_evidence"
+                ],
+                "template_files": [
+                    "templates/run_susie_rss_finemapping.R"
+                ]
+            },
+            {
+                "id": "fit-reload-and-bound",
+                "purpose": "Run SuSiE-RSS and preserve model-bounded posterior evidence.",
+                "required_logic": [
+                    "Detect R packages and versions, run frozen L and coverage settings, require convergence, reload PIPs and credible sets, and retain LD eigenvalue diagnostics.",
+                    "Do not transform PIP or credible-set membership into causal, gene, colocalization or clinical claims."
+                ],
+                "output_artifact_types": [
+                    "gwas_fine_mapping_evidence"
+                ],
+                "template_files": [
+                    "templates/run_susie_rss_finemapping.R"
+                ]
+            }
+        ],
+        "parameter_rules": [
+            {
+                "id": "fine-mapping-prior-and-complexity",
+                "parameter": "maximum-effects-and-credible-set-coverage",
+                "decision_inputs": [
+                    "locus-width",
+                    "LD-structure",
+                    "independent-signal-prior",
+                    "trait-and-sample-design"
+                ],
+                "selection_rule": "Declare L and credible-set coverage before inspecting PIPs or credible sets; conduct an explicit sensitivity run when scientifically warranted.",
+                "validation_rule": "Do not increase L or alter coverage until a desired variant enters a credible set."
+            }
+        ],
+        "preflight_checks": [
+            "Detect R, susieR, digest and jsonlite versions in an existing compatible scientific environment.",
+            "Validate summary/LD variant order, alleles, numerical fields, build, sample size, ancestry compatibility, matrix properties and new output path."
+        ],
+        "postflight_checks": [
+            "Reload result JSON and reconcile source SHA-256 digests, versions, sample size, L, coverage, convergence, PIPs, credible sets and LD diagnostics."
+        ],
+        "provenance_fields": [
+            "module-id",
+            "module-version",
+            "summary-sha256",
+            "ld-sha256",
+            "build",
+            "trait-definition",
+            "LD-reference",
+            "R-version",
+            "susieR-version",
+            "parameters",
+            "convergence",
+            "output-sha256",
+            "quality-gates"
+        ],
+        "forbidden_actions": [
+            "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+            "Do not harmonize alleles, repair LD, impute variants, choose loci or tune L/coverage after observing results.",
+            "Do not call posterior evidence a causal variant, causal gene, colocalized signal, clinical result or biological mechanism without independent evidence."
+        ],
+        "requires_observed_execution": true
+    }
+}

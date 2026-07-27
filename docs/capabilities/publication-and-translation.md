@@ -11,7 +11,7 @@ This capability area turns the research record into a coherent, reviewable, and 
 - Build a content-addressed manuscript revision base and apply review-driven patches with parent-child lineage.
 - Keep untouched manuscript blocks unchanged and verify claimed analysis, experiment, figure, citation, and response locations.
 
-Representative modules include `figure-specification`, `manuscript-audit`, `citation-audit`, `assertion-citation-coverage-audit`, `claim-evidence-integrity-audit`, `manuscript-revision-base`, and `manuscript-revision-lineage`.
+Representative modules include `figure-specification`, `manuscript-audit`, `citation-audit`, `assertion-citation-coverage-audit`, `claim-evidence-integrity-audit`, `manuscript-revision-base`, `manuscript-revision-lineage`, and `presentation-delivery-plan`.
 
 ## Peer Review And Revision
 
@@ -25,10 +25,15 @@ Representative modules include `reviewer-assessment`, `response-matrix`, and `re
 ## Translation And Intellectual Property
 
 - Audit research invention disclosures for evidence, novelty framing, enabling support, contributors, and unresolved ownership or disclosure questions.
+- Trace each proposed claim feature to declared source blocks and keep `explicit`, `inherent`, `needs-confirmation`, and `unsupported` support states separate.
+- Prevent formal-claim drafting from silently carrying features that remain unsupported or require confirmation; retain those features as explicit follow-up work instead.
+- Check bounded Chinese claim drafts for consecutive numbering, forward or missing references, confirmation placeholders, and result-oriented wording before formal review.
+- Validate structured patent drafts across their source map, evidence ledger, claim-feature map, terminology, formulas, figures, specification, abstract, and declared delivery thresholds.
+- Render a bounded, quality-gated method flowchart as a portable black-and-white SVG for technical draft review.
 - Connect molecular, omics, clinical, and experimental evidence to translational hypotheses without collapsing prediction into validation.
 - Prepare a research package suitable for manuscript, review, response, patent, or presentation workflows while preserving audience-specific boundaries.
 
-The principal dedicated module is `patent-disclosure-audit`, combined with the evidence and analysis modules relevant to the project.
+Dedicated modules are `patent-disclosure-audit` for disclosure readiness, `patent-claim-support-audit` for source-to-feature-to-claim admission, `patent-claim-structure-audit` for bounded Chinese claim-text structure checks, `patent-draft-readiness-audit` for cross-field draft quality, and `patent-flowchart-svg` for draft flowchart delivery. They are used with the evidence and analysis modules relevant to the project; none provides legal conclusions.
 
 ## Quality Gates
 
@@ -36,4 +41,11 @@ A citation marker is not proof of claim support. A completed analysis is not aut
 
 ## Typical Deliverables
 
-Figure plans, manuscripts, methods, evidence tables, reviewer reports, response letters, response matrices, revision lineages, citation and claim audits, patent disclosures, presentation plans, and final research packages with visible limitations.
+Figure plans, manuscripts, methods, evidence tables, reviewer reports, response letters, response matrices, revision lineages, citation and claim audits, patent disclosures, presentation delivery plans, and final research packages with visible limitations.
+
+`presentation-delivery-plan` is the publication-facing single entry for planning and orchestration. It binds:
+
+- audience-driven storyline design,
+- key findings/evidence mapping,
+- slide-by-module execution planning with serial/parallel strategy,
+- gap-driven quality gates for unresolved reviewers, evidence, and reproducibility controls.

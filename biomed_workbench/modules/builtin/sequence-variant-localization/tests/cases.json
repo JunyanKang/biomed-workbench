@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "localizes-single-substitution",
+      "input": {
+        "reference": "ACGT",
+        "query": "ATGT",
+        "reference_coordinate_offset": 100
+      },
+      "expected_subset": {
+        "coordinate_system": "zero-based half-open on supplied reference sequence plus declared offset",
+        "summary": {
+          "event_count": 1,
+          "substitution_count": 1,
+          "insertion_count": 0,
+          "deletion_count": 0
+        }
+      }
+    }
+  ]
+}

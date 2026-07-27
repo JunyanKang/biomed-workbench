@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "finds-forward-and-reverse-complete-orfs",
+      "input": {
+        "sequence": "ATGAAATAATTATTTCAT",
+        "min_length": 9,
+        "search_reverse": true,
+        "filter_nested": false,
+        "translation_table": 1
+      },
+      "expected_subset": {
+        "sequence_length": 18,
+        "translation_table": 1,
+        "coordinate_system": "zero-based half-open on supplied forward DNA sequence",
+        "summary": {
+          "total_orf_count": 2,
+          "forward_orf_count": 1,
+          "reverse_orf_count": 1
+        }
+      }
+    }
+  ]
+}

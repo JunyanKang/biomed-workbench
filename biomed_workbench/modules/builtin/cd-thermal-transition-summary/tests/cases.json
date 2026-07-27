@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "interpolates-monotonic-transition",
+      "input": {
+        "temperatures_c": [
+          20,
+          30,
+          40,
+          50,
+          60
+        ],
+        "signals": [
+          10,
+          20,
+          50,
+          80,
+          90
+        ]
+      },
+      "expected_subset": {
+        "temperature_unit": "C",
+        "signal_direction": "increasing",
+        "summary": {
+          "transition_midpoint_c": 40,
+          "transition_width_c": 24,
+          "monotonicity_violation_count": 0
+        }
+      }
+    }
+  ]
+}

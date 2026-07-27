@@ -1,0 +1,110 @@
+{
+  "analysis": {
+    "alignment": {
+      "aligned_columns": 110,
+      "gap_fraction": 0.03636363636363636,
+      "path": "alignment.fasta",
+      "record_count": 4,
+      "sha256": "19644853edd653cf0c54fd370b1de47c5adf3fd9b8310b5c88ed9b06a1dc690c"
+    },
+    "commands": {
+      "iqtree": {
+        "argv": [
+          "iqtree3",
+          "-s",
+          "/tmp/workdir/output/alignment.fasta",
+          "-m",
+          "LG+G4",
+          "-pre",
+          "/tmp/workdir/output/iqtree",
+          "-seed",
+          "17",
+          "-nt",
+          "1",
+          "-redo",
+          "-B",
+          "1000"
+        ],
+        "returncode": 0,
+        "stderr": ""
+      },
+      "mafft": {
+        "argv": [
+          "mafft",
+          "--auto",
+          "--thread",
+          "1",
+          "tests/fixtures/comparative-sequence-phylogeny/cytochrome-c-uniprot.fasta"
+        ],
+        "returncode": 0,
+        "stderr": "outputhat23=16\ntreein = 0\ncompacttree = 0\nstacksize: 8176 kb\nrescale = 1\nAll-to-all alignment.\n    0 / 4 (by thread   0) \ntbfast-pair (aa) Version 7.526\nalg=L, model=BLOSUM62, 2.00, -0.10, +0.10, noshift, amax=0.0\n1 thread(s)\n\noutputhat23=16\nLoading 'hat3.seed' ... \ndone.\nWriting hat3 for iterative refinement\nrescale = 1\nGap Penalty = -1.53, +0.00, +0.00\ntbutree = 1, compacttree = 0\nConstructing a UPGMA tree ... \n\n    0 / 4\ndone.\n\nProgressive alignment ... \n\nSTEP     1 /3 (thread    0) \nSTEP     2 /3 (thread    0) \nSTEP     3 /3 (thread    0) \ndone.\ntbfast (aa) Version 7.526\nalg=A, model=BLOSUM62, 1.53, -0.00, -0.00, noshift, amax=0.0\n1 thread(s)\n\nminimumweight = 0.000010\nautosubalignment = 0.000000\nnthread = 1\nrandomseed = 0\nblosum 62 / kimura 200\npoffset = 0\nniter = 16\nsueff_global = 0.100000\nnadd = 16\nLoading 'hat3' ... done.\nrescale = 1\n\n\n    0 / 4\nSegment   1/  1    1- 111\n001-0000-0 (thread    1) identical     \n\n001-0001-1 (thread    1) identical     \n\n001-0002-0 (thread    1) identical     \n\n001-0003-1 (thread    1) identical     \n\n001-0004-1 (thread    1) identical     \n001-0004-1 (thread    1) better     \n\n002-0000-0 (thread    1) identical     \n\n002-0001-1 (thread    1) identical     \n\n002-0002-0 (thread    1) identical     \n\n002-0003-1 (thread    1) identical     \n\n002-0004-1 (thread    1) identical     \n\nConverged.\ndone\ndvtditr (aa) Version 7.526\nalg=A, model=BLOSUM62, 1.53, -0.00, -0.00, noshift, amax=0.0\n1 thread(s)\n\n\nStrategy:\n L-INS-i (Probably most accurate, very slow)\n Iterative refinement method (<16) with LOCAL pairwise alignment information\n\nIf unsure which option to use, try 'mafft --auto input > output'.\nFor more information, see 'mafft --help', 'mafft --man' and the mafft page.\n\nThe default gap scoring scheme has been changed in version 7.110 (2013 Oct).\nIt tends to insert more gaps into gap-rich regions than previous versions.\nTo disable this change, add the --leavegappyregion option.\n\n"
+      }
+    },
+    "input": {
+      "fasta_sha256": "f13fb3870f6be188b3960fe8dfc9180b271b1eb1220860590eaf3a043e58f2b2",
+      "metadata_sha256": "62578965b87fd53a55efc603e69e5a43424b1822c63b25d2b63295bee01d22c1",
+      "record_ids": [
+        "horse_cycs",
+        "human_cycs",
+        "mouse_cycs",
+        "yeast_cyc1"
+      ],
+      "sequence_type": "protein"
+    },
+    "limitations": [
+      "The tree is method-specific evidence, not proof of orthology, selection, recombination, divergence time, species history, or functional conservation.",
+      "The template validates outgroup presence but does not choose or biologically validate an outgroup."
+    ],
+    "module_id": "comparative-sequence-phylogeny",
+    "module_version": "0.1.0",
+    "parameters": {
+      "model": "LG+G4",
+      "outgroup_ids": [
+        "yeast_cyc1"
+      ],
+      "seed": 17,
+      "support_method": "ultrafast-bootstrap",
+      "support_replicates": 1000,
+      "threads": 1
+    },
+    "passed": true,
+    "quality_gate_ids": [
+      "comparative-sequence-identity-and-homology",
+      "comparative-alignment-completeness",
+      "comparative-tree-model-and-support",
+      "comparative-outgroup-and-claim-boundary",
+      "comparative-output-provenance"
+    ],
+    "tool_versions": {
+      "iqtree": "IQ-TREE single-core version 3.1.2 for MacOS ARM 64-bit built May  7 2026\nDeveloped by Bui Quang Minh, Thomas Wong, Nhan Ly-Trong, Huaiyan Ren\nContributed by Lam-Tung Nguyen, Dominik Schrempf, Chris Bielow,\nOlga Chernomor, Michael Woodhams, Diep Thi Hoang, Heiko Schmidt",
+      "mafft": "v7.526 (2024/Apr/26)"
+    },
+    "tree": {
+      "outgroups_present": [
+        "yeast_cyc1"
+      ],
+      "path": "iqtree.treefile",
+      "rooted_in_template": false,
+      "sha256": "abcf16ec73ae1a6725dd7041f6f7cff4625f6174672fa78481c2b740bddf0304",
+      "tip_count": 4
+    }
+  },
+  "case_id": "uniprot-cytochrome-c-phylogeny-v1",
+  "fixture_sha256": "f13fb3870f6be188b3960fe8dfc9180b271b1eb1220860590eaf3a043e58f2b2",
+  "metadata_sha256": "62578965b87fd53a55efc603e69e5a43424b1822c63b25d2b63295bee01d22c1",
+  "module_id": "comparative-sequence-phylogeny",
+  "module_manifest_sha256": "e03444607c2ef09b7995ac1acd3bf3204f2463c8550982aad27c0a7c49374069",
+  "module_version": "0.1.0",
+  "passed": true,
+  "scientific_boundary": [
+    "This case validates record-preserving alignment and method-specific tree production, not orthology, species history, divergence time, selection, recombination, or functional conservation.",
+    "The yeast record is a declared outgroup for presence validation; the case does not establish biological outgroup appropriateness for another project."
+  ],
+  "source_records": [
+    "UniProt:P99999",
+    "UniProt:P62897",
+    "UniProt:P00004",
+    "UniProt:P00044"
+  ],
+  "template_sha256": "d8a62330c8d03cf934e61f07be51fcd4d4b90aa1444d1b85add1d7e3cb0463f8"
+}

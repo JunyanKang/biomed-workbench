@@ -42,7 +42,7 @@ def _specs() -> dict[str, dict[str, object]]:
             "output_properties": {"query": {"type": "object"}, "total_count": {"type": "integer"}, "returned_count": {"type": "integer"}, "records_truncated": {"type": "boolean"}, "records": {"type": "array"}, "provenance": {"type": "object"}, "limitations": {"type": "array"}},
             "output_required": ["query", "total_count", "returned_count", "records_truncated", "records", "provenance", "limitations"],
             "quality": "Every result must preserve a valid unique PDB identifier; page offsets, total_count, returned count, model scope, and truncation must reconcile.",
-            "limitations": ["Search relevance is not validation of assembly, construct, local model quality, or biological relevance."],
+            "limitations": ["Search relevance is not validation of assembly, construct, model quality, or biological relevance."],
             "effect": "grounds-structure-discovery-evidence",
         },
         "structure-polymer-entities": {

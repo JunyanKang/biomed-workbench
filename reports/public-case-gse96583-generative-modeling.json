@@ -1,0 +1,195 @@
+{
+  "case_id": "gse96583-heldout-donor-generative-modeling-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "all_models_and_outputs_reloaded": true,
+    "blocked_modes": {
+      "scanvi": [
+        "batch_mixing_gain"
+      ],
+      "scvi": [
+        "batch_mixing_gain"
+      ]
+    },
+    "eligible_modes": [],
+    "heldout_query_donor_evaluation": {
+      "accuracy": 0.9275,
+      "balanced_accuracy": 0.7215223357009348,
+      "cells": 400,
+      "macro_f1": 0.7371960345390608,
+      "prediction_counts": {
+        "B cells": 47,
+        "CD14+ Monocytes": 75,
+        "CD4 T cells": 212,
+        "CD8 T cells": 18,
+        "Dendritic cells": 4,
+        "FCGR3A+ Monocytes": 11,
+        "NK cells": 33
+      },
+      "truth_counts": {
+        "B cells": 44,
+        "CD14+ Monocytes": 70,
+        "CD4 T cells": 208,
+        "CD8 T cells": 19,
+        "Dendritic cells": 5,
+        "FCGR3A+ Monocytes": 15,
+        "Megakaryocytes": 5,
+        "NK cells": 34
+      }
+    },
+    "mode_results": {
+      "scanvi": {
+        "heldout_annotation_metrics": {
+          "balanced_accuracy": 0.803020718316771,
+          "cells": 240,
+          "macro_f1": 0.7840700960111463,
+          "prediction_counts": {
+            "B cells": 25,
+            "CD14+ Monocytes": 60,
+            "CD4 T cells": 85,
+            "CD8 T cells": 21,
+            "Dendritic cells": 2,
+            "FCGR3A+ Monocytes": 22,
+            "Megakaryocytes": 6,
+            "NK cells": 19
+          },
+          "truth_counts": {
+            "B cells": 21,
+            "CD14+ Monocytes": 65,
+            "CD4 T cells": 88,
+            "CD8 T cells": 20,
+            "Dendritic cells": 4,
+            "FCGR3A+ Monocytes": 19,
+            "Megakaryocytes": 3,
+            "NK cells": 20
+          }
+        },
+        "metric_deltas": {
+          "batch_neighbor_entropy_gain": -0.025786369110169294,
+          "known_label_neighbor_purity_loss": -0.14178904914315127
+        },
+        "quality_gates": {
+          "batch_mixing_gain": false,
+          "h5ad_reload_valid": true,
+          "heldout_annotation_valid": true,
+          "label_graph_connected": true,
+          "label_purity_preserved": true,
+          "latent_finite": true,
+          "model_reload_valid": true,
+          "raw_counts_preserved": true,
+          "reviewed_and_unknown_labels_preserved": true
+        },
+        "quality_status": "blocked",
+        "source_immutable": true
+      },
+      "scvi": {
+        "heldout_annotation_metrics": null,
+        "metric_deltas": {
+          "batch_neighbor_entropy_gain": -0.01756981756837539,
+          "known_label_neighbor_purity_loss": -0.02192838498217764
+        },
+        "quality_gates": {
+          "batch_mixing_gain": false,
+          "h5ad_reload_valid": true,
+          "heldout_annotation_valid": true,
+          "label_graph_connected": true,
+          "label_purity_preserved": true,
+          "latent_finite": true,
+          "model_reload_valid": true,
+          "raw_counts_preserved": true,
+          "reviewed_and_unknown_labels_preserved": true
+        },
+        "quality_status": "blocked",
+        "source_immutable": true
+      }
+    },
+    "selected_mode": null,
+    "source_artifacts_immutable": true
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-scvi-120-scanpy-1115-torch-241",
+    "id": "single-cell-generative-modeling",
+    "manifest_sha256": "5911cc8abf7e61855afb66df4da553c1175eee80c96caf7f6f6c461ab7e3d3af",
+    "registry_digest": "5b11049405a9122b4fdc197a33f8417f320ca9dbdfd13b520ae2a80de2764bd1",
+    "template_sha256": "ca4aec7a67c422c360111be73b5f03d65ab6b2128b695b4aedb0df316d532e60",
+    "version": "1.2.0"
+  },
+  "parameters": {
+    "cell_selection": "up to 100 cells per donor-condition sample by stable SHA-256 order without labels",
+    "feature_selection": "2500 genes ranked by detection count then total count without labels",
+    "maximum_label_purity_loss": 0.15,
+    "minimum_batch_entropy_gain": 0.0,
+    "minimum_heldout_macro_f1": 0.7,
+    "minimum_label_connectivity": 0.7,
+    "n_hidden": 64,
+    "n_latent": 10,
+    "n_neighbors": 20,
+    "scanvi_epochs": 40,
+    "scvi_epochs": 60,
+    "seed": 437
+  },
+  "passed": true,
+  "quality_gates": {
+    "admission_decision_matches_all_model_gates": "pass",
+    "base_scvi_label_isolation": "pass",
+    "held_out_donor_labels_absent_from_input": "pass",
+    "internal_hidden_label_validation": "pass",
+    "label_blind_cell_and_feature_selection": "pass",
+    "no_forced_model_selection": "pass",
+    "official_sources_immutable": "pass",
+    "source_output_and_model_reload": "pass",
+    "unseen_donor_prediction_accuracy": "pass"
+  },
+  "runtime": {
+    "anndata": "0.12.19",
+    "lightning": "2.6.5",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "python": "3.11.15",
+    "scanpy": "1.11.5",
+    "scikit-learn": "1.9.0",
+    "scipy": "1.15.3",
+    "scvi-tools": "1.2.0",
+    "torch": "2.4.1"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "Publisher labels for donors 1256 and 1488 are absent from the input H5AD and are joined only after both models and outputs are frozen.",
+    "The base scVI model is trained on metadata from which reviewed labels are physically removed; scANVI sees only the six-donor training labels and its own deterministic internal holdout.",
+    "A model is admitted only if every mixing, conservation, annotation, source, and reload gate passes; reviewable suggestions may be evaluated even when no model is selected.",
+    "Donor is modeled as the batch only for representation and annotation benchmarking; raw counts and donor identities remain authoritative for donor-aware inference.",
+    "This public result is source-, split-, runtime-, parameter-, and gate-specific and does not justify automatic annotation without review."
+  ],
+  "source": {
+    "accession": "GSE96583",
+    "files": {
+      "archive": {
+        "filename": "GSE96583_RAW.tar",
+        "sha256": "e5d41a3248a813f99d68fd5c9eb9773de7f46a83680a67f4a02d683b8955fe80"
+      },
+      "genes": {
+        "filename": "GSE96583_batch2.genes.tsv.gz",
+        "sha256": "93aa4e9b530ef9d6411ca129b416324c5cc1cc5a01a1fa6ed4f4a845480ed3ca"
+      },
+      "metadata": {
+        "filename": "GSE96583_batch2.total.tsne.df.tsv.gz",
+        "sha256": "1d57e72e92ca8695250e88cc0f1c3fa8c0be1175d974f8b427c58f1274dc6c09"
+      }
+    },
+    "validation": {
+      "biological_samples": 16,
+      "donors": 8,
+      "metadata_barcode_normalizations": {
+        "ctrl": 0,
+        "stim": 313
+      },
+      "query_cells": 400,
+      "query_donors": [
+        "1256",
+        "1488"
+      ],
+      "selected_cells": 1600,
+      "selected_genes": 2500
+    }
+  }
+}

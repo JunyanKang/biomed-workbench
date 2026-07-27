@@ -9,12 +9,19 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.registry import ModuleRegistry
+
+
 MODULE_ID = "single-cell-reference-annotation"
-MODULE_VERSION = "1.0.0"
+MODULE_VERSION = "1.1.0"
 ROW_ID = "agent-protocol-1-singler-241-scanpy-1115-r-432"
 MODULE_ROOT = ROOT / "biomed_workbench" / "modules" / "builtin" / MODULE_ID
 PYTHON_TEMPLATE = MODULE_ROOT / "templates" / "annotate_reference.py"
@@ -33,7 +40,9 @@ def run(command: list[str], environment: dict[str, str], timeout: int = 600) -> 
 
 
 def verify(scientific_python: Path, rscript: Path) -> dict[str, object]:
-    python = scientific_python.expanduser().resolve(strict=True)
+    python = scientific_python.expanduser().absolute()
+    if not python.is_file():
+        raise FileNotFoundError(f"scientific Python is absent: {python}")
     r_executable = rscript.expanduser().resolve(strict=True)
     if not os.access(python, os.X_OK) or not os.access(r_executable, os.X_OK):
         raise RuntimeError("scientific Python or Rscript is not executable")
@@ -137,7 +146,8 @@ with open({str(ontology)!r}, 'w', encoding='utf-8') as handle: json.dump(ontolog
         analysis = json.loads(analysis_report_path.read_text(encoding="utf-8"))
         groups = analysis["annotation"]["group_results"]
         if not (
-            analysis["quality_status"] == "passed"
+            analysis["schema_version"] == 2
+            and analysis["quality_status"] == "passed"
             and analysis["input"]["query_cells"] == 280
             and analysis["input"]["reference_cells"] == 180
             and analysis["input"]["common_genes"] == 120
@@ -147,21 +157,25 @@ with open({str(ontology)!r}, 'w', encoding='utf-8') as handle: json.dump(ontolog
             and analysis["evaluation"]["known_cell_accuracy"] == 1.0
             and analysis["evaluation"]["unknown_retention_fraction"] == 1.0
             and all(analysis["quality_gates"].values())
+            and analysis["quality_gates"]["complete_finite_score_matrix"] is True
+            and analysis["quality_gates"]["source_artifacts_immutable"] is True
             and all(groups[group]["accepted"] for group in ("cluster_T", "cluster_B", "cluster_M"))
             and groups["cluster_unknown"]["accepted"] is False
             and groups["cluster_unknown"]["quality_checks"]["ontology_allowed"] is False
         ):
             raise RuntimeError(f"reference annotation failed expected scientific behavior: {json.dumps(analysis, sort_keys=True)[:5000]}")
         versions = analysis["versions"]
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
         return {
             "schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": MODULE_VERSION,
             "compatibility_row_id": ROW_ID,
+            "registry_digest": registry.digest,
             "templates": {
                 "annotate_reference": {"name": PYTHON_TEMPLATE.name, "sha256": sha256(PYTHON_TEMPLATE)},
                 "run_singler": {"name": R_TEMPLATE.name, "sha256": sha256(R_TEMPLATE)},
             },
             "tool_versions": {"SingleR": versions["SingleR"], "scanpy": versions["scanpy"]},
-            "dependency_versions": {key: versions[key] for key in ("anndata", "numpy", "pandas", "scipy", "scikit-learn", "r", "Matrix", "BiocParallel", "jsonlite")},
+            "dependency_versions": {key: versions[key] for key in ("python", "anndata", "numpy", "pandas", "scipy", "scikit-learn", "r", "Matrix", "BiocParallel", "jsonlite")},
             "fixture": {"query_sha256": sha256(query), "reference_sha256": sha256(reference), "query_cells": 280, "reference_cells": 180, "genes": 120, "known_query_cells": 240, "unknown_query_cells": 40},
             "execution": {"singler_completed": True, "output_sha256": sha256(output), "analysis_report_sha256": sha256(analysis_report_path)},
             "results": {
@@ -174,7 +188,9 @@ with open({str(ontology)!r}, 'w', encoding='utf-8') as handle: json.dump(ontolog
                 "singler_reference_mapping_executed": True, "marker_contracts_applied": True,
                 "ontology_ancestor_constraints_applied": True, "unknown_population_retained": True,
                 "existing_labels_and_raw_counts_preserved": True, "evaluation_labels_posthoc_only": True,
-                "annotated_h5ad_reloaded": True, "no_environment_or_compute_infrastructure_managed": True,
+                "annotated_h5ad_reloaded": True, "complete_finite_score_matrix_retained": True,
+                "all_source_artifacts_immutable": True,
+                "no_environment_or_compute_infrastructure_managed": True,
             },
         }
 

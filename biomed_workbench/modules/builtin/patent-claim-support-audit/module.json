@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "id": "patent-claim-support-audit",
+  "version": "1.0.0",
+  "title": "Audit source support for patent claim features",
+  "description": "Map formal patent-claim features to stable source blocks and block claims that depend on unsupported or confirmation-pending technical features.",
+  "module_type": "validation",
+  "domains": ["publication"],
+  "intents": [
+    "patent claim support audit",
+    "map patent claim features to source evidence",
+    "审计专利主张的来源支持",
+    "核对技术特征与专利主张证据映射"
+  ],
+  "questions": [
+    "Does every technical feature used in a proposed formal patent claim have declared, reviewable source support?"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.publication:patent_claim_support_audit",
+  "execution": {
+    "kind": "python",
+    "timeout_seconds": 30,
+    "max_output_bytes": 10000000
+  },
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "claim_support_map",
+      "artifact_type": "patent_claim_support_map",
+      "processing_levels": ["declared", "source-linked"],
+      "required_metadata": ["evidence-scope", "feature-scope", "claim-scope"],
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["source-feature-claim-map"]
+        }
+      ]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "claim_support_quality_report",
+      "artifact_type": "patent_claim_support_quality_report",
+      "processing_levels": ["derived", "quality-gated"],
+      "required_metadata": ["module-version", "support-states", "claim-admission-status"],
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["claim-by-support-decision"]
+        }
+      ]
+    }
+  ],
+  "preconditions": [
+    "The user supplies reviewable source blocks, bounded technical features, and proposed claims; the module does not infer missing source text or features."
+  ],
+  "assumptions": [
+    "A source block is an accurately transcribed or extracted research record and has been retained with its original context outside this bounded audit output."
+  ],
+  "quality_gates": [
+    {
+      "id": "patent-claim-source-map-completeness",
+      "severity": "fatal",
+      "description": "Every feature must have a unique identifier, nonempty text, an allowed support state, and one or more declared source-block identifiers.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "patent-formal-claim-support-boundary",
+      "severity": "major",
+      "description": "A formal claim is blocked when any mapped feature is unsupported or still needs confirmation; explicit and inherent support remain distinct.",
+      "blocks_interpretation": true
+    }
+  ],
+  "limitations": [
+    "This source-support audit is a drafting control, not legal advice, inventorship determination, patentability opinion, prior-art conclusion, freedom-to-operate analysis, jurisdiction-specific filing guidance, or filing guarantee.",
+    "The module does not retrieve, authenticate, interpret, or establish completeness of the supplied source materials."
+  ],
+  "evidence_effects": ["qualifies-patent-feature-support", "blocks-unsupported-formal-claims"],
+  "alternatives": [],
+  "complements": ["patent-disclosure-audit", "claim-evidence-integrity-audit", "literature-evidence"],
+  "tool_requirements": [],
+  "dependencies": [
+    {
+      "name": "python",
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "required": true,
+      "tested_versions": ["3.14.3"],
+      "allowed_versions": [">=3.14,<3.15"],
+      "version_source": "https://www.python.org/downloads/release/python-3143/",
+      "verified_at": "2026-07-23",
+      "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Execute deterministic source-feature-claim support checks.",
+      "conflicts": [],
+      "platforms": ["any"]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "patent-claim-support-python-3143-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {"python": [">=3.14,<3.15"]},
+      "input_formats": {"claim_support_map": ["inline-json@1"]},
+      "output_formats": {"claim_support_quality_report": ["inline-json@1"]},
+      "platforms": ["any"],
+      "regression_evidence_ids": ["patent-claim-support-audit-regression-v1"],
+      "end_to_end_evidence_ids": ["patent-claim-support-audit-e2e-v1"],
+      "verified_at": "2026-07-23"
+    }
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "source_blocks": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {"id": {"type": "string", "pattern": "^[PEFC][0-9]{3,}$"}, "text": {"type": "string", "minLength": 1}},
+          "required": ["id", "text"]
+        }
+      },
+      "features": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "pattern": "^T[0-9]{3,}$"},
+            "text": {"type": "string", "minLength": 1},
+            "support_state": {"type": "string", "enum": ["explicit", "inherent", "needs-confirmation", "unsupported"]},
+            "source_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^[PEFC][0-9]{3,}$"}, "uniqueItems": true}
+          },
+          "required": ["id", "text", "support_state", "source_ids"]
+        }
+      },
+      "claims": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {"type": "string", "pattern": "^CL[0-9]{3,}$"},
+            "text": {"type": "string", "minLength": 1},
+            "feature_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^T[0-9]{3,}$"}, "uniqueItems": true}
+          },
+          "required": ["id", "text", "feature_ids"]
+        }
+      }
+    },
+    "required": ["source_blocks", "features", "claims"]
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "source_block_count": {"type": "integer"},
+      "features": {"type": "array"},
+      "claims": {"type": "array"},
+      "findings": {"type": "array"},
+      "ready_for_formal_claims": {"type": "boolean"},
+      "limitations": {"type": "array"}
+    },
+    "required": ["source_block_count", "features", "claims", "findings", "ready_for_formal_claims", "limitations"]
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {
+    "license": "Apache-2.0",
+    "concept_sources": ["Independent clean-room patent source-to-claim support capability informed by direct Nature skill review."]
+  }
+}

@@ -1,0 +1,323 @@
+{
+  "case_id": "gse96583-crossed-batch-integration-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "all_cells_accounted": true,
+    "blocked_methods": {
+      "scanorama": [
+        "batch_mixing_gain",
+        "label_purity_preserved"
+      ]
+    },
+    "counterfactual_harmony_embedding_numerically_invariant": true,
+    "counterfactual_harmony_max_absolute_tolerance": 1e-06,
+    "counterfactual_max_absolute_difference": 0.0,
+    "counterfactual_pca_exact": true,
+    "counterfactual_pca_max_absolute_difference": 0.0,
+    "eligible_methods": [
+      "bbknn",
+      "harmony"
+    ],
+    "method_results": {
+      "bbknn": {
+        "baseline_metrics": {
+          "batch_neighbor_entropy": 0.802079419536044,
+          "batch_silhouette": -0.04738255590200424,
+          "label_graph_connectivity": {
+            "B cells|ctrl": 0.99,
+            "B cells|stim": 0.9837662337662337,
+            "CD14+ Monocytes|ctrl": 0.9870967741935484,
+            "CD14+ Monocytes|stim": 1.0,
+            "CD4 T cells|ctrl": 0.9961240310077519,
+            "CD4 T cells|stim": 0.9984555984555985,
+            "CD8 T cells|ctrl": 0.9867109634551495,
+            "CD8 T cells|stim": 0.9875,
+            "Dendritic cells|ctrl": 0.9333333333333333,
+            "Dendritic cells|stim": 0.821917808219178,
+            "FCGR3A+ Monocytes|ctrl": 0.95,
+            "FCGR3A+ Monocytes|stim": 0.9613733905579399,
+            "Megakaryocytes|ctrl": 0.4716981132075472,
+            "Megakaryocytes|stim": 0.5416666666666666,
+            "NK cells|ctrl": 0.9728506787330317,
+            "NK cells|stim": 0.9855595667870036
+          },
+          "label_neighbor_purity": 0.8103359375,
+          "label_silhouette": 0.12844783067703247,
+          "mean_label_graph_connectivity": 0.9105033223989365
+        },
+        "identity_preserved": true,
+        "integrated_metrics": {
+          "batch_neighbor_entropy": 0.9730096311564995,
+          "batch_silhouette": -0.04738255590200424,
+          "label_graph_connectivity": {
+            "B cells|ctrl": 0.9966666666666667,
+            "B cells|stim": 0.9837662337662337,
+            "CD14+ Monocytes|ctrl": 0.9987096774193548,
+            "CD14+ Monocytes|stim": 0.9986225895316805,
+            "CD4 T cells|ctrl": 0.9992248062015504,
+            "CD4 T cells|stim": 0.9992277992277993,
+            "CD8 T cells|ctrl": 0.9900332225913622,
+            "CD8 T cells|stim": 0.9875,
+            "Dendritic cells|ctrl": 0.95,
+            "Dendritic cells|stim": 0.821917808219178,
+            "FCGR3A+ Monocytes|ctrl": 0.975,
+            "FCGR3A+ Monocytes|stim": 0.9699570815450643,
+            "Megakaryocytes|ctrl": 0.4528301886792453,
+            "Megakaryocytes|stim": 0.5416666666666666,
+            "NK cells|ctrl": 0.9864253393665159,
+            "NK cells|stim": 0.9783393501805054
+          },
+          "label_neighbor_purity": 0.798984375,
+          "label_silhouette": 0.12844783067703247,
+          "mean_label_graph_connectivity": 0.914367964378864
+        },
+        "metric_deltas": {
+          "batch_neighbor_entropy_gain": 0.17093021162045552,
+          "label_neighbor_purity_loss": 0.011351562500000023
+        },
+        "quality_gates": {
+          "batch_mixing_gain": true,
+          "label_graph_connected": true,
+          "label_purity_preserved": true,
+          "label_spans_multiple_batches": true,
+          "raw_counts_preserved": true,
+          "unknown_labels_retained": true
+        },
+        "quality_status": "passed",
+        "reload_validated": true,
+        "source_immutable": true
+      },
+      "harmony": {
+        "baseline_metrics": {
+          "batch_neighbor_entropy": 0.802079419536044,
+          "batch_silhouette": -0.04738255590200424,
+          "label_graph_connectivity": {
+            "B cells|ctrl": 0.99,
+            "B cells|stim": 0.9837662337662337,
+            "CD14+ Monocytes|ctrl": 0.9870967741935484,
+            "CD14+ Monocytes|stim": 1.0,
+            "CD4 T cells|ctrl": 0.9961240310077519,
+            "CD4 T cells|stim": 0.9984555984555985,
+            "CD8 T cells|ctrl": 0.9867109634551495,
+            "CD8 T cells|stim": 0.9875,
+            "Dendritic cells|ctrl": 0.9333333333333333,
+            "Dendritic cells|stim": 0.821917808219178,
+            "FCGR3A+ Monocytes|ctrl": 0.95,
+            "FCGR3A+ Monocytes|stim": 0.9613733905579399,
+            "Megakaryocytes|ctrl": 0.4716981132075472,
+            "Megakaryocytes|stim": 0.5416666666666666,
+            "NK cells|ctrl": 0.9728506787330317,
+            "NK cells|stim": 0.9855595667870036
+          },
+          "label_neighbor_purity": 0.8103359375,
+          "label_silhouette": 0.12844783067703247,
+          "mean_label_graph_connectivity": 0.9105033223989365
+        },
+        "identity_preserved": true,
+        "integrated_metrics": {
+          "batch_neighbor_entropy": 0.851846564988918,
+          "batch_silhouette": -0.046646859496831894,
+          "label_graph_connectivity": {
+            "B cells|ctrl": 0.99,
+            "B cells|stim": 0.9837662337662337,
+            "CD14+ Monocytes|ctrl": 0.9793548387096774,
+            "CD14+ Monocytes|stim": 0.9820936639118457,
+            "CD4 T cells|ctrl": 0.9914728682170543,
+            "CD4 T cells|stim": 0.9961389961389961,
+            "CD8 T cells|ctrl": 0.9800664451827242,
+            "CD8 T cells|stim": 0.9791666666666666,
+            "Dendritic cells|ctrl": 0.9333333333333333,
+            "Dendritic cells|stim": 0.821917808219178,
+            "FCGR3A+ Monocytes|ctrl": 0.955,
+            "FCGR3A+ Monocytes|stim": 0.9570815450643777,
+            "Megakaryocytes|ctrl": 0.4716981132075472,
+            "Megakaryocytes|stim": 0.5416666666666666,
+            "NK cells|ctrl": 0.9819004524886877,
+            "NK cells|stim": 0.9783393501805054
+          },
+          "label_neighbor_purity": 0.7963515624999999,
+          "label_silhouette": 0.1279064416885376,
+          "mean_label_graph_connectivity": 0.9076873113595934
+        },
+        "metric_deltas": {
+          "batch_neighbor_entropy_gain": 0.04976714545287397,
+          "label_neighbor_purity_loss": 0.013984375000000049
+        },
+        "quality_gates": {
+          "batch_mixing_gain": true,
+          "label_graph_connected": true,
+          "label_purity_preserved": true,
+          "label_spans_multiple_batches": true,
+          "raw_counts_preserved": true,
+          "unknown_labels_retained": true
+        },
+        "quality_status": "passed",
+        "reload_validated": true,
+        "source_immutable": true
+      },
+      "scanorama": {
+        "baseline_metrics": {
+          "batch_neighbor_entropy": 0.802079419536044,
+          "batch_silhouette": -0.04738255590200424,
+          "label_graph_connectivity": {
+            "B cells|ctrl": 0.99,
+            "B cells|stim": 0.9837662337662337,
+            "CD14+ Monocytes|ctrl": 0.9870967741935484,
+            "CD14+ Monocytes|stim": 1.0,
+            "CD4 T cells|ctrl": 0.9961240310077519,
+            "CD4 T cells|stim": 0.9984555984555985,
+            "CD8 T cells|ctrl": 0.9867109634551495,
+            "CD8 T cells|stim": 0.9875,
+            "Dendritic cells|ctrl": 0.9333333333333333,
+            "Dendritic cells|stim": 0.821917808219178,
+            "FCGR3A+ Monocytes|ctrl": 0.95,
+            "FCGR3A+ Monocytes|stim": 0.9613733905579399,
+            "Megakaryocytes|ctrl": 0.4716981132075472,
+            "Megakaryocytes|stim": 0.5416666666666666,
+            "NK cells|ctrl": 0.9728506787330317,
+            "NK cells|stim": 0.9855595667870036
+          },
+          "label_neighbor_purity": 0.8103359375,
+          "label_silhouette": 0.12844783067703247,
+          "mean_label_graph_connectivity": 0.9105033223989365
+        },
+        "identity_preserved": true,
+        "integrated_metrics": {
+          "batch_neighbor_entropy": 0.7296315011429658,
+          "batch_silhouette": -0.04735698586682135,
+          "label_graph_connectivity": {
+            "B cells|ctrl": 0.9533333333333334,
+            "B cells|stim": 0.8733766233766234,
+            "CD14+ Monocytes|ctrl": 0.9561290322580646,
+            "CD14+ Monocytes|stim": 0.9710743801652892,
+            "CD4 T cells|ctrl": 0.9689922480620154,
+            "CD4 T cells|stim": 0.9776061776061776,
+            "CD8 T cells|ctrl": 0.7840531561461794,
+            "CD8 T cells|stim": 0.7583333333333333,
+            "Dendritic cells|ctrl": 0.5166666666666667,
+            "Dendritic cells|stim": 0.3424657534246575,
+            "FCGR3A+ Monocytes|ctrl": 0.83,
+            "FCGR3A+ Monocytes|stim": 0.8326180257510729,
+            "Megakaryocytes|ctrl": 0.4528301886792453,
+            "Megakaryocytes|stim": 0.3125,
+            "NK cells|ctrl": 0.918552036199095,
+            "NK cells|stim": 0.8989169675090253
+          },
+          "label_neighbor_purity": 0.583453125,
+          "label_silhouette": 0.030847264845715587,
+          "mean_label_graph_connectivity": 0.7717154951569237
+        },
+        "metric_deltas": {
+          "batch_neighbor_entropy_gain": -0.07244791839307818,
+          "label_neighbor_purity_loss": 0.22688281249999998
+        },
+        "quality_gates": {
+          "batch_mixing_gain": false,
+          "label_graph_connected": true,
+          "label_purity_preserved": false,
+          "label_spans_multiple_batches": true,
+          "raw_counts_preserved": true,
+          "unknown_labels_retained": true
+        },
+        "quality_status": "blocked",
+        "reload_validated": true,
+        "source_immutable": true
+      }
+    },
+    "selected_method": "bbknn",
+    "selection_rule": "maximum batch entropy gain among methods passing all frozen mixing, conservation, source, and reload gates",
+    "source_artifacts_immutable": true
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-scanpy-1104-harmony-020-scanorama-174-bbknn-160",
+    "id": "single-cell-batch-integration",
+    "manifest_sha256": "05e7a3d71c8c1489c282232b95efcc1507de33b10a3fbb0618e9af8c29469264",
+    "registry_digest": "5b11049405a9122b4fdc197a33f8417f320ca9dbdfd13b520ae2a80de2764bd1",
+    "template_sha256": "569dbf5db22bf4f311ac1dfb4c58052bbeb3d2885776189d8ead478039123377",
+    "version": "1.1.0"
+  },
+  "parameters": {
+    "batch_key": "donor",
+    "biological_sample_key": "donor:condition",
+    "maximum_cells_per_sample": 400,
+    "maximum_label_purity_loss": 0.1,
+    "methods": [
+      "harmony",
+      "scanorama",
+      "bbknn"
+    ],
+    "minimum_batch_entropy_gain": 0.02,
+    "minimum_label_connectivity": 0.7,
+    "n_neighbors": 20,
+    "n_pcs": 30,
+    "n_top_genes": 2500,
+    "posthoc_evaluation_label": "publisher cell type crossed with condition",
+    "sample_selection": "up to 400 cells per donor-condition sample by stable SHA-256 order without evaluation labels",
+    "seed": 96583
+  },
+  "passed": true,
+  "quality_gates": {
+    "all_outputs_reloaded_and_counts_preserved": "pass",
+    "at_least_one_eligible_method": "pass",
+    "cell_type_condition_strata_span_donors": "pass",
+    "counterfactual_label_invariance": "pass",
+    "crossed_donor_condition_design": "pass",
+    "evaluation_labels_removed_before_backends": "pass",
+    "one_frozen_baseline": "pass",
+    "selected_batch_mixing_gain": "pass",
+    "selected_biology_preserved": "pass",
+    "source_identity_and_immutability": "pass"
+  },
+  "runtime": {
+    "anndata": "0.10.8",
+    "bbknn": "1.6.0",
+    "harmonypy": "0.2.0",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "python": "3.10.18",
+    "scanorama": "1.7.4",
+    "scanpy": "1.10.4",
+    "scikit-learn": "1.7.2",
+    "scipy": "1.13.1",
+    "umap-learn": "0.5.12"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "Donor is treated as the integration batch while donor-condition remains the biological sample; condition is not declared as a batch.",
+    "Publisher cell type crossed with condition is used only after each backend has completed, so conservation requires both identity and stimulation state.",
+    "The template physically removes evaluation labels from backend-visible AnnData metadata before feature selection, PCA, Harmony, Scanorama, BBKNN, neighbors, and UMAP.",
+    "Under a single-thread numerical runtime, a counterfactual label permutation produced an exactly identical PCA representation and a Harmony representation with maximum absolute difference no greater than 1e-6.",
+    "Method eligibility is dataset- and parameter-specific; the selected method is not a universal recommendation and downstream donor-aware inference still uses raw counts."
+  ],
+  "source": {
+    "accession": "GSE96583",
+    "files": {
+      "archive": {
+        "filename": "GSE96583_RAW.tar",
+        "sha256": "e5d41a3248a813f99d68fd5c9eb9773de7f46a83680a67f4a02d683b8955fe80"
+      },
+      "genes": {
+        "filename": "GSE96583_batch2.genes.tsv.gz",
+        "sha256": "93aa4e9b530ef9d6411ca129b416324c5cc1cc5a01a1fa6ed4f4a845480ed3ca"
+      },
+      "metadata": {
+        "filename": "GSE96583_batch2.total.tsne.df.tsv.gz",
+        "sha256": "1d57e72e92ca8695250e88cc0f1c3fa8c0be1175d974f8b427c58f1274dc6c09"
+      }
+    },
+    "source_validation": {
+      "biological_samples": 16,
+      "conditions": 2,
+      "donors": 8,
+      "evaluation_strata": 16,
+      "genes": 35635,
+      "metadata_barcode_normalizations": {
+        "ctrl": 0,
+        "stim": 313
+      },
+      "minimum_donors_per_stratum": 8,
+      "published_singlets_with_cell_type": 24673,
+      "selected_cells": 6400
+    }
+  }
+}

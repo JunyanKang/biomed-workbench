@@ -87,7 +87,7 @@ def audit_claim_evidence_integrity(
     constraint_assessments: list[dict[str, Any]],
     audit_provenance: dict[str, Any],
 ) -> dict[str, Any]:
-    """Audit claim emission, source review, experiment execution, and evidence direction."""
+    """Audit claim emission, primary-evidence review, experiment execution, and evidence direction."""
     if not isinstance(declared_claims, list) or not 1 <= len(declared_claims) <= 10000:
         raise ValueError("declared_claims must contain 1 to 10000 records")
     declared: dict[str, dict[str, Any]] = {}
@@ -142,7 +142,7 @@ def audit_claim_evidence_integrity(
         if citation["metadata_verified_against_original"] and (
             not citation["source_acquired"] or citation["verification_method"] not in {"original_source_review", "manual_source_review"}
         ):
-            _add_issue(global_issues, "CITATION_METADATA_PROVENANCE_CONTRADICTION", "major", [identifier], "Metadata cannot be declared verified against the original without an acquired source and an original-source review method.")
+            _add_issue(global_issues, "CITATION_METADATA_PROVENANCE_CONTRADICTION", "major", [identifier], "Metadata cannot be declared verified against the original without an acquired source and an original-primary-evidence review method.")
         if citation["claim_content_reviewed"] and (
             not citation["source_acquired"]
             or citation["retrieval_status"] != "completed"

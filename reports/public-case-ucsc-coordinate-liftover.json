@@ -1,0 +1,57 @@
+{
+  "analysis": {
+    "chain_sha256": "64e8f0ff6ae267aa9f0fb0deab8c798530cb8374484a8d2793a257fc37fc9ace",
+    "claim_boundary": "Coordinate mapping does not establish allele, gene, peak, regulatory, orthology, or functional equivalence.",
+    "command": {
+      "argument_roles": [
+        "declared-chain",
+        "declared-input-bed",
+        "new-output-bed"
+      ],
+      "subcommand": "bed",
+      "tool": "CrossMap"
+    },
+    "coordinate_convention": "zero-based-half-open",
+    "input_sha256": "36f4cb858caf0d288e8c7228b4c762b5be67f4f7a28f23a85571809e87001ed0",
+    "module_id": "genome-coordinate-liftover",
+    "module_version": "0.1.0",
+    "passed": true,
+    "policies": {
+      "split_mapping": "retain-and-flag",
+      "unmapped": "retain-and-report"
+    },
+    "quality_gate_ids": [
+      "liftover-coordinate-and-assembly-identity",
+      "liftover-chain-integrity",
+      "liftover-record-accounting",
+      "liftover-downstream-claim-boundary"
+    ],
+    "records": {
+      "input": 2,
+      "mapped": 1,
+      "split_mapped": 0,
+      "split_mapped_ids": [],
+      "unmapped": 1,
+      "unmapped_ids": [
+        "outside_chain_prefix"
+      ]
+    },
+    "source_assembly": "hg19",
+    "target_assembly": "hg38",
+    "tool_versions": {
+      "CrossMap": "CrossMap 0.7.0"
+    }
+  },
+  "case_id": "ucsc-hg19-hg38-coordinate-liftover-v1",
+  "chain_fixture_sha256": "64e8f0ff6ae267aa9f0fb0deab8c798530cb8374484a8d2793a257fc37fc9ace",
+  "interval_fixture_sha256": "36f4cb858caf0d288e8c7228b4c762b5be67f4f7a28f23a85571809e87001ed0",
+  "module_id": "genome-coordinate-liftover",
+  "module_manifest_sha256": "6e3559a8001bee746c349bf8e9257bc423ee4b71a660541b177f26848cdb37e7",
+  "passed": true,
+  "scientific_boundary": [
+    "The fixture verifies chain-bound coordinate conversion and explicit unmapped-record preservation.",
+    "It does not establish that any biological feature, variant allele, gene, peak, or regulatory element is equivalent between assemblies."
+  ],
+  "source": "UCSC hg19ToHg38.over.chain.gz public release header and first mapping block",
+  "template_sha256": "ecf250753f4d03d46aff22168d43ec40f3e3fb278d071f4dbdbfa75e243c2d02"
+}

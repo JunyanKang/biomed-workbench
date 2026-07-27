@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "selects-a-diagnostic-bound-curve-from-biological-replicates",
+      "input": {
+        "blank_od": 0.05,
+        "replicate_level": "biological",
+        "observations": [
+          {"time_hours": 0, "od": 0.102, "replicate_id": "culture-a"},
+          {"time_hours": 0, "od": 0.098, "replicate_id": "culture-b"},
+          {"time_hours": 1, "od": 0.125, "replicate_id": "culture-a"},
+          {"time_hours": 1, "od": 0.121, "replicate_id": "culture-b"},
+          {"time_hours": 2, "od": 0.194, "replicate_id": "culture-a"},
+          {"time_hours": 2, "od": 0.188, "replicate_id": "culture-b"},
+          {"time_hours": 3, "od": 0.386, "replicate_id": "culture-a"},
+          {"time_hours": 3, "od": 0.378, "replicate_id": "culture-b"},
+          {"time_hours": 4, "od": 0.762, "replicate_id": "culture-a"},
+          {"time_hours": 4, "od": 0.751, "replicate_id": "culture-b"},
+          {"time_hours": 5, "od": 1.093, "replicate_id": "culture-a"},
+          {"time_hours": 5, "od": 1.081, "replicate_id": "culture-b"},
+          {"time_hours": 6, "od": 1.245, "replicate_id": "culture-a"},
+          {"time_hours": 6, "od": 1.236, "replicate_id": "culture-b"}
+        ]
+      },
+      "expected_subset": {
+        "fit_admissible": true,
+        "interpretation_status": "eligible-for-growth-curve-interpretation",
+        "replicate_design_status": "complete-at-every-timepoint",
+        "distinct_timepoint_count": 7
+      }
+    }
+  ]
+}

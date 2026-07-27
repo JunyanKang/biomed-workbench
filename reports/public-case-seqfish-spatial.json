@@ -1,0 +1,123 @@
+{
+  "case_id": "seqfish-embryo-spatial-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "admitted_spatial_genes": [
+      "Dlk1",
+      "Shisa2",
+      "Msx1",
+      "Tead2",
+      "Podxl",
+      "Fzd2",
+      "Lin28a",
+      "Marcks",
+      "Lef1",
+      "Sox4",
+      "Col4a1",
+      "Myh9",
+      "Setd1a",
+      "Tjp2",
+      "Fgfr1",
+      "Kmt2d",
+      "Pcgf2"
+    ],
+    "cooccurrence_rows": 1296,
+    "cross_sample_edges": 0,
+    "domains": 9,
+    "highly_variable_genes": 250,
+    "moran_genes": 20,
+    "moran_q_column": "pval_sim_fdr_bh",
+    "moran_rows": 40,
+    "neighborhood_rows": 144,
+    "outputs_reloaded": true,
+    "principal_components": 25,
+    "source_artifact_immutable": true,
+    "spatial_edges": 5968,
+    "spatial_gene_support": {
+      "Col4a1": 1,
+      "Dlk1": 1,
+      "Fgfr1": 1,
+      "Fzd2": 1,
+      "Kmt2d": 1,
+      "Lef1": 1,
+      "Lin28a": 1,
+      "Marcks": 1,
+      "Msx1": 1,
+      "Myh9": 1,
+      "Pcgf2": 1,
+      "Podxl": 1,
+      "Setd1a": 1,
+      "Shisa2": 1,
+      "Sox4": 1,
+      "Tead2": 1,
+      "Tjp2": 1
+    }
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-squidpy-166-spatialdata-050-scanpy-1115",
+    "id": "single-cell-spatial-analysis",
+    "manifest_sha256": "44097d3ca79d0dee81d2199c0f5347dd0db5eadc723d7e721cf2a71621d0b699",
+    "registry_digest": "5b11049405a9122b4fdc197a33f8417f320ca9dbdfd13b520ae2a80de2764bd1",
+    "template_sha256": "21633bf67cac255d0b864e71904ce263ec0a03271500a755eb93456fa1797dbc",
+    "version": "1.1.0"
+  },
+  "parameters": {
+    "cooccurrence_intervals": 10,
+    "coordinate_weight": 2.0,
+    "delaunay": false,
+    "domain_hvgs": 250,
+    "domain_neighbors": 15,
+    "domain_pcs": 25,
+    "domain_resolution": 0.5,
+    "minimum_moran": 0.1,
+    "minimum_supporting_samples": 1,
+    "n_spatial_neighbors": 6,
+    "permutations": 99,
+    "radius": null,
+    "seed": 20260723,
+    "svg_fdr": 0.05
+  },
+  "passed": true,
+  "quality_gates": {
+    "integer_counts_coordinates_and_labels_preserved": "pass",
+    "label_blind_spatially_coherent_selection": "pass",
+    "official_source_identity": "pass",
+    "single_sample_boundary": "pass",
+    "spatial_statistics_domains_and_reload": "pass"
+  },
+  "runtime": {
+    "anndata": "0.12.19",
+    "igraph": "0.11.9",
+    "numpy": "2.4.6",
+    "pandas": "2.3.3",
+    "python": "3.12.11",
+    "scanpy": "1.11.5",
+    "scikit-learn": "1.9.0",
+    "scipy": "1.18.0",
+    "setuptools": "80.9.0",
+    "spatialdata": "0.5.0",
+    "squidpy": "1.6.6",
+    "zarr": "2.18.7"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "The public source contains one embryo, so this case validates spatial methods and within-embryo structure rather than biological replication or condition inference.",
+    "The spatially coherent subset and Moran candidate genes are selected without reviewed cell-type labels.",
+    "A minimum supporting-sample value of one is explicit; admitted genes are single-embryo spatial candidates, not replicated spatial genes.",
+    "Neighborhood enrichment, co-occurrence, Moran statistics, and exploratory domains do not establish lineage, interaction, or causal regulation."
+  ],
+  "source": {
+    "dataset": "Squidpy SeqFISH mouse embryo",
+    "filename": "seqfish.h5ad",
+    "sha256": "7e544c0ede7538067537da69c52748ad01522ef7fc8691e077fd73c9434019f7",
+    "url": "https://ndownloader.figshare.com/files/26098403",
+    "validation": {
+      "reviewed_cell_types": 12,
+      "selected_genes": 351,
+      "selected_observations": 2000,
+      "selection": "nearest observations to the source-coordinate median with stable-hash tie breaking and no cell-type labels",
+      "source_genes": 351,
+      "source_observations": 19416
+    }
+  }
+}

@@ -1,0 +1,320 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The supplied trace is already exported as aligned time and signal vectors from one recording channel.",
+    "Baseline window, polarity, threshold, stimulation protocol, units, clamp mode, and replicate identity are project-level metadata reviewed outside this scalar summary."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "electrophysiology-trace-summary-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "electrophysiology_trace": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "electrophysiology_trace_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "electrophysiology-trace-summary-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-27"
+    }
+  ],
+  "complements": [
+    "fixed-period-cosinor",
+    "point-tracking",
+    "data-profile"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Compute deterministic one-trace summary statistics.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-27",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Summarize one electrophysiology time trace with baseline, sampling regularity, peak amplitude, time-to-peak, threshold crossings, and explicit interpretation limits.",
+  "domains": [
+    "imaging",
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.biophysics:electrophysiology_trace_summary",
+  "evidence_effects": [
+    "quantifies-one-electrophysiology-trace-with-boundary"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "electrophysiology-trace-summary",
+  "input_artifacts": [
+    {
+      "artifact_type": "electrophysiology_trace",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "elapsed-milliseconds"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "time-by-signal"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "electrophysiology_trace",
+      "processing_levels": [
+        "exported"
+      ],
+      "required_metadata": [
+        "signal-units",
+        "clamp-mode-or-recording-mode"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "baseline_window_ms": {
+        "type": "number"
+      },
+      "polarity": {
+        "enum": [
+          "positive",
+          "negative"
+        ],
+        "type": "string"
+      },
+      "signal": {
+        "items": {
+          "type": "number"
+        },
+        "minItems": 5,
+        "type": "array"
+      },
+      "threshold": {
+        "type": "number"
+      },
+      "time_ms": {
+        "items": {
+          "type": "number"
+        },
+        "minItems": 5,
+        "type": "array"
+      }
+    },
+    "required": [
+      "time_ms",
+      "signal"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "electrophysiology trace summary",
+    "patch clamp trace summary",
+    "voltage trace peak and threshold crossing",
+    "电生理轨迹摘要",
+    "膜电位峰值和阈值 crossing"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module summarizes one exported trace only; it does not classify spikes, estimate channel kinetics, correct acquisition artifacts, infer synaptic physiology, or diagnose cell state."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "electrophysiology_trace_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "elapsed-milliseconds"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "electrophysiology_trace_summary",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "baseline": {
+        "type": "number"
+      },
+      "limitations": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "median_sampling_interval_ms": {
+        "type": "number"
+      },
+      "observation_count": {
+        "type": "integer"
+      },
+      "peak_amplitude_from_baseline": {
+        "type": "number"
+      },
+      "polarity": {
+        "type": "string"
+      },
+      "quality_status": {
+        "enum": [
+          "passed",
+          "review-required"
+        ],
+        "type": "string"
+      },
+      "sampling_jitter_fraction": {
+        "type": "number"
+      },
+      "threshold": {
+        "type": "number"
+      },
+      "threshold_crossing_count": {
+        "type": "integer"
+      },
+      "threshold_crossings": {
+        "type": "array"
+      },
+      "time_end_ms": {
+        "type": "number"
+      },
+      "time_start_ms": {
+        "type": "number"
+      },
+      "time_to_peak_ms": {
+        "type": "number"
+      },
+      "trace_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "trace_count",
+      "observation_count",
+      "time_start_ms",
+      "time_end_ms",
+      "median_sampling_interval_ms",
+      "sampling_jitter_fraction",
+      "baseline",
+      "polarity",
+      "peak_amplitude_from_baseline",
+      "time_to_peak_ms",
+      "threshold",
+      "threshold_crossing_count",
+      "threshold_crossings",
+      "quality_status",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "One schema-valid exported electrophysiology trace is available with declared units and recording context."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned trace-summary capability derived from source-neutral electrophysiology quality-boundary requirements."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Sampling must be near-regular and the peak must exceed baseline under the declared polarity before summary values support downstream interpretation.",
+      "id": "electrophysiology-trace-quality",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Trace summary cannot be upgraded to spike classification, cell identity, channel kinetics, or disease-state inference without a project-specific protocol and validation.",
+      "id": "electrophysiology-interpretation-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What baseline, peak, sampling, and threshold-crossing summary is supported by this one exported electrophysiology trace?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize electrophysiology traces",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

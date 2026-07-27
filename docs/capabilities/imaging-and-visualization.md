@@ -2,6 +2,8 @@
 
 ## Scientific Role
 
+- Register equal-shape 2D images by a bounded integer translation with explicit overlap and MSE diagnostics; this is a baseline alignment check, not affine or deformable registration.
+
 This capability area supports quantitative image analysis and faithful scientific communication. Analytical image outputs remain tied to source arrays and declared measurement semantics; communication assets are explicitly separated from evidence-generating analysis.
 
 ## Quantitative Imaging
@@ -10,8 +12,9 @@ This capability area supports quantitative image analysis and faithful scientifi
 - Segment image components using explicit parameters and return measurable component outputs.
 - Measure two-channel colocalization while retaining the assumptions and channel pairing.
 - Track declared points across frames and preserve trajectory-level results.
+- Convert calibrated trajectories into path length, net displacement, speed, and directionality while retaining track-length exclusions and claim boundaries.
 
-Representative modules include `image-profile`, `image-segment`, `image-colocalization`, and `point-tracking`.
+Representative modules include `image-profile`, `image-segment`, `image-colocalization`, `point-tracking`, and `cell-migration-metrics`.
 
 ## Scientific Visualization
 
@@ -26,7 +29,7 @@ Representative modules include `figure-specification`, `scientific-illustration-
 
 Rendered communication assets cannot replace primary measurements. Chroma-key output is not accepted as evidence for segmentation, morphology, localization, intensity, or colocalization. Image generation cannot invent scientific observations. Figure specifications must preserve the direction, uncertainty, statistical unit, and source of each plotted claim.
 
-The current registry provides general image analysis and scientific visualization modules; it does not yet claim a dedicated spatial-transcriptomics analysis stack or complete microscopy-file ecosystem. Those capabilities require dedicated input contracts, templates, and quality evidence before they can be advertised as implemented.
+The current registry provides general image analysis and scientific visualization modules; for spatial transcriptomics analysis, see the dedicated omics workflow in `single-cell-spatial-analysis` (documented under [spatial-analysis.md](spatial-analysis.md)). The microscopy-file workflow itself remains scoped: we focus on robust assay-specific evidence pipelines (profiles, masks, co-localization, trajectories, and figures) and do not claim to fully own native microscopy-reader vendor ecosystems.
 
 ## Typical Deliverables
 

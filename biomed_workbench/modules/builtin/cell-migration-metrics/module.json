@@ -1,0 +1,250 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Frame coordinates share one scale and nearest-neighbor displacement does not exceed the declared bound."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "point-tracking-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "tracks": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "migration_metrics": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "point-tracking-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-12"
+    }
+  ],
+  "complements": [
+    "point-tracking"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Summarize calibrated migration distance, speed, and directionality from declared cell trajectories.",
+  "domains": [
+    "imaging"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.imaging:summarize_cell_migration_tracks",
+  "evidence_effects": [
+    "adds-cell-migration-evidence"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "cell-migration-metrics",
+  "input_artifacts": [
+    {
+      "artifact_type": "trajectory",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "tracks",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": [],
+      "source_policy": "upstream_required"
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "tracks": {
+        "type": "array",
+        "minItems": 1
+      },
+      "pixel_size_um": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      },
+      "time_interval_min": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      },
+      "min_track_length": {
+        "type": "integer",
+        "minimum": 2
+      }
+    },
+    "required": [
+      "tracks"
+    ]
+  },
+  "intents": [
+    "cell migration metrics",
+    "summarize cell trajectories",
+    "细胞迁移轨迹定量"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Crossings, missed detections, motion models, and gap closing are not resolved."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "cell_migration_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "migration_metrics",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "track_metrics": {
+        "type": "array"
+      },
+      "included_track_count": {
+        "type": "integer"
+      },
+      "calibration": {
+        "type": "object"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "track_metrics",
+      "included_track_count",
+      "calibration",
+      "limitations"
+    ]
+  },
+  "preconditions": [
+    "A schema-valid image measurements is available for the declared scientific scope."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned implementation with module-level validation evidence."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "migration-calibration",
+      "severity": "fatal",
+      "description": "Require positive pixel and time calibration.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "Which detections can be linked into bounded nearest-neighbor trajectories across frames?"
+  ],
+  "schema_version": 1,
+  "title": "Summarize cell migration metrics",
+  "tool_requirements": [],
+  "version": "1.0.0",
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_cell_migration_metrics.py",
+      "purpose": "Execute calibrated migration metric summaries.",
+      "quality_gate_ids": [
+        "migration-calibration"
+      ],
+      "requires_adaptation": true
+    }
+  ]
+}

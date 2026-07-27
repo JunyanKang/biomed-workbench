@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from ..kernel.evidence import EvidenceRecord
+from ..kernel.identity import digest_value
 from ..kernel.plans import PlanNode, ResearchDAG
 from ..kernel.state import ProjectState, apply_event
 from ..modules.compatibility import EnvironmentSnapshot
@@ -63,6 +64,93 @@ class ResearchController:
         self._evidence_mapper = evidence_mapper or (lambda _execution, _node, _state: ())
         self._replanner = replanner
         self._policy = policy or ControllerPolicy()
+
+    def _declared_alternative_replan(
+        self,
+        state: ProjectState,
+        parent: ResearchDAG,
+        _executions: tuple[NodeExecution, ...],
+        _findings: tuple[QualityFinding, ...],
+    ) -> ResearchDAG | None:
+        """Replace one blocked node only when its manifest declares a port-compatible alternative."""
+        attempted_modules = {
+            node.module_id
+            for plan in state.plans
+            for node in plan.nodes
+            if node.status in {"blocked", "failed"}
+        }
+        blocked = tuple(node for node in parent.nodes if node.status in {"blocked", "failed"})
+        for original in blocked:
+            source = self._registry.get(original.module_id)
+            for alternative_id in source.alternatives:
+                if alternative_id in attempted_modules:
+                    continue
+                alternative = self._registry.get(alternative_id)
+                if not self._replacement_is_compatible(source, alternative):
+                    continue
+                replacement_id = f"node-{alternative.id}-{digest_value({'parent': parent.id, 'node': original.id})[:10]}"
+                replacement = PlanNode(
+                    id=replacement_id,
+                    module_id=alternative.id,
+                    input_bindings=original.input_bindings,
+                    dependencies=original.dependencies,
+                    branch_id=original.branch_id,
+                    target_hypothesis_ids=original.target_hypothesis_ids,
+                    expected_evidence_types=original.expected_evidence_types,
+                    expected_output_artifact_types=original.expected_output_artifact_types,
+                    planned_output_artifact_ids=original.planned_output_artifact_ids,
+                    compatibility_row_candidates=tuple(row.id for row in alternative.compatibility_matrix),
+                    status="pending",
+                    attempt=0,
+                )
+                nodes = []
+                for node in parent.nodes:
+                    if node.id == original.id:
+                        nodes.append(replacement)
+                    else:
+                        dependencies = tuple(replacement_id if dependency == original.id else dependency for dependency in node.dependencies)
+                        nodes.append(
+                            PlanNode(
+                                **{
+                                    **node.__dict__,
+                                    "dependencies": dependencies,
+                                }
+                            )
+                        )
+                plan_type = self._plan_type(tuple(nodes))
+                return ResearchDAG.create(
+                    id=f"plan-{digest_value({'parent': parent.id, 'replacement': replacement_id})[:20]}",
+                    objective=parent.objective,
+                    nodes=tuple(nodes),
+                    required_output_artifact_types=parent.required_output_artifact_types,
+                    plan_type=plan_type,
+                    revision=parent.revision + 1,
+                    parent_plan_id=parent.id,
+                    rationale=(
+                        "A blocked module was replaced by its manifest-declared, port-compatible alternative.",
+                        "Completed upstream artifacts and all remaining dependency bindings were retained for reproducible continuation.",
+                    ),
+                )
+        return None
+
+    @staticmethod
+    def _replacement_is_compatible(source: ModuleManifest, alternative: ModuleManifest) -> bool:
+        return (
+            source.input_artifacts == alternative.input_artifacts
+            and source.output_artifacts == alternative.output_artifacts
+        )
+
+    @staticmethod
+    def _plan_type(nodes: tuple[PlanNode, ...]) -> str:
+        has_dependencies = any(node.dependencies for node in nodes)
+        root_branches = {node.branch_id for node in nodes if not node.dependencies}
+        if len(nodes) == 1:
+            return "single"
+        if has_dependencies and len(root_branches) > 1:
+            return "mixed"
+        if has_dependencies:
+            return "serial"
+        return "parallel"
 
     @staticmethod
     def _active_plan(state: ProjectState) -> ResearchDAG:
@@ -182,8 +270,9 @@ class ResearchController:
                 break
 
         active = self._active_plan(state)
-        if stop_reason in {"blocked", "failed"} and self._replanner is not None and active.revision < self._policy.max_plan_revisions:
-            revised = self._replanner(state, active, tuple(executions), tuple(findings))
+        if stop_reason in {"blocked", "failed"} and active.revision < self._policy.max_plan_revisions:
+            replanner = self._replanner or self._declared_alternative_replan
+            revised = replanner(state, active, tuple(executions), tuple(findings))
             if revised is not None:
                 if revised.parent_plan_id != active.id or revised.revision != active.revision + 1:
                     raise ValueError("replanner must create the next child revision of the active plan")

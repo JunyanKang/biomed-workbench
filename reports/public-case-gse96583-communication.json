@@ -1,0 +1,109 @@
+{
+  "case_id": "gse96583-sample-aware-communication-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "method": "liana-cellphonedb",
+    "minimum_significant_sample_support": 6,
+    "observed_sample_runs": 16,
+    "outputs_reloaded": true,
+    "p_value_maximum": 1.0,
+    "p_value_minimum": 0.0,
+    "p_value_unique_count": 101,
+    "posthoc_biological_sanity": {
+      "ccl2_ccr1_or_ccr5_observed": true,
+      "stimulated_cxcl10_cxcr3_observed": true,
+      "used_as_quality_gate": false,
+      "used_for_threshold_selection": false
+    },
+    "replicate_summary_rows": 867,
+    "replicated_by_condition": {
+      "ctrl": 87,
+      "stim": 98
+    },
+    "replicated_interactions": 185,
+    "sample_interaction_rows": 3870,
+    "source_artifacts_immutable": true
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-python-communication",
+    "id": "single-cell-communication",
+    "manifest_sha256": "f40ff53f9f7d635c68b8c473ba701eed0776105f12a18770c9fd006f535cef5b",
+    "registry_digest": "5b11049405a9122b4fdc197a33f8417f320ca9dbdfd13b520ae2a80de2764bd1",
+    "template_sha256": "f49ae16291adbcb5a7259238e3dc6fa5077628626a6247af2fd7f4b525e0b1c8",
+    "version": "1.1.0"
+  },
+  "parameters": {
+    "cell_selection": "up to 100 cells per donor-condition-cell-type stratum by stable SHA-256 order",
+    "expression_proportion": 0.1,
+    "fdr": 0.05,
+    "feature_selection": "genes detected in at least 20 selected cells without condition-based ranking",
+    "minimum_cells": 10,
+    "minimum_samples": 6,
+    "p_value_floor_for_combination": 0.009900990099009901,
+    "permutations": 100,
+    "seed": 551
+  },
+  "passed": true,
+  "quality_gates": {
+    "all_biological_samples_executed": "pass",
+    "both_conditions_retain_replicated_evidence": "pass",
+    "official_sources_immutable": "pass",
+    "published_singlets_and_annotations_accounted": "pass",
+    "replication_requires_independent_sample_significance": "pass",
+    "sample_cell_type_design_predeclared": "pass",
+    "source_and_outputs_reload": "pass",
+    "true_permutation_p_values_observed": "pass"
+  },
+  "runtime": {
+    "anndata": "0.11.4",
+    "liana": "1.7.3",
+    "python": "3.11.15",
+    "scanpy": "1.11.5"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "Publisher cell types define the communication populations and are not treated as validation truth for interaction significance.",
+    "Each donor-condition sample is analyzed independently; cells are never used as condition-level replicates.",
+    "Replicated interactions require within-sample FDR support in at least six independent samples plus BH-controlled Fisher combination within condition.",
+    "Zero permutation p values are conservatively floored at 1/(permutations+1) before cross-sample combination.",
+    "The public case validates the LIANA CellPhoneDB method; direct CellPhoneDB, CellChat, and NicheNet backends retain separate executable fixture evidence.",
+    "Ligand-receptor coexpression supports communication hypotheses but does not establish physical contact, signal direction in vivo, or causality.",
+    "Control and stimulated results are summarized separately; this case does not perform a formal between-condition interaction test."
+  ],
+  "source": {
+    "accession": "GSE96583",
+    "files": {
+      "archive": {
+        "filename": "GSE96583_RAW.tar",
+        "sha256": "e5d41a3248a813f99d68fd5c9eb9773de7f46a83680a67f4a02d683b8955fe80"
+      },
+      "genes": {
+        "filename": "GSE96583_batch2.genes.tsv.gz",
+        "sha256": "93aa4e9b530ef9d6411ca129b416324c5cc1cc5a01a1fa6ed4f4a845480ed3ca"
+      },
+      "metadata": {
+        "filename": "GSE96583_batch2.total.tsne.df.tsv.gz",
+        "sha256": "1d57e72e92ca8695250e88cc0f1c3fa8c0be1175d974f8b427c58f1274dc6c09"
+      }
+    },
+    "validation": {
+      "biological_samples": 16,
+      "cell_types": [
+        "B cells",
+        "CD4 T cells",
+        "CD14+ Monocytes",
+        "NK cells"
+      ],
+      "conditions": 2,
+      "donors": 8,
+      "maximum_cells_per_sample_cell_type": 100,
+      "metadata_barcode_normalizations": {
+        "ctrl": 0,
+        "stim": 313
+      },
+      "minimum_cells_per_sample_cell_type": 19,
+      "selected_cells": 5857,
+      "selected_genes": 9471
+    }
+  }
+}

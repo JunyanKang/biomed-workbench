@@ -1,148 +1,993 @@
 {
-  "schema_version": 1,
-  "id": "single-cell-spatial-analysis",
-  "version": "1.0.0",
-  "title": "Analyze spatial single-cell and spot transcriptomes with Squidpy and SpatialData",
-  "description": "Direct Codex to validate count-backed h5ad or SpatialData Zarr tables, coordinate units, biological samples, annotations, images and shapes; build sample-isolated spatial graphs; execute neighborhood enrichment, per-sample co-occurrence, global and sample-level Moran permutation tests, replicated spatial-gene admission, and joint expression-spatial domain discovery; and retain reload-validated outputs without treating spots or cells as condition-level replicates.",
-  "module_type": "analysis",
-  "domains": ["omics", "imaging", "statistics"],
-  "intents": ["Squidpy spatial transcriptomics analysis", "SpatialData Zarr spatial omics", "Moran spatial variable genes and spatial domains", "空间转录组 邻域 富集 共现 Moran 空间域"],
-  "questions": ["Which neighborhoods, co-occurrences, spatially autocorrelated genes and expression-spatial domains replicate across declared biological samples while preserving coordinate and image provenance?"],
-  "entrypoint": "agent-generated-analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "maturity": "experimental",
-  "input_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "objective": {"type": "string", "minLength": 12},
-      "input_artifact_id": {"type": "string", "minLength": 1},
-      "input_format": {"type": "string", "enum": ["h5ad", "spatialdata-zarr"]},
-      "table_name": {"type": "string"},
-      "sample_key": {"type": "string", "minLength": 1},
-      "cluster_key": {"type": "string", "minLength": 1},
-      "spatial_key": {"type": "string", "minLength": 1},
-      "coordinate_unit": {"type": "string", "minLength": 1},
-      "spatial_gene_candidates": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-      "declared_thresholds": {"type": "object"},
-      "design_notes": {"type": "string"}
-    },
-    "required": ["objective", "input_artifact_id", "input_format", "table_name", "sample_key", "cluster_key", "spatial_key", "coordinate_unit", "spatial_gene_candidates", "declared_thresholds", "design_notes"]
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Do not guess coordinate units, combine sample coordinate systems, create cross-sample spatial edges, silently intersect observations, overwrite source counts or imagery, use reviewed labels during domain fitting, or tune against desired labels.",
+      "Do not use cells or spots as condition replicates, call Moran autocorrelation causality, call exploratory domains cell types, or report generated or unreloaded outputs as evidence."
+    ],
+    "languages": [
+      "python",
+      "notebook"
+    ],
+    "mode": "codex_generated_project_code",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "platform geometry",
+          "coordinate unit",
+          "spot or cell density",
+          "sample layout",
+          "expected interaction scale"
+        ],
+        "id": "spatial-graph-selection",
+        "parameter": "neighbors-radius-delaunay",
+        "selection_rule": "Select a graph from observed platform geometry and physical scale and build it independently within each sample.",
+        "validation_rule": "Require zero cross-sample edges and review degree, distance, connectivity and sensitivity to neighboring parameter values."
+      },
+      {
+        "decision_inputs": [
+          "candidate genes",
+          "sample count",
+          "graph",
+          "permutations",
+          "effect threshold"
+        ],
+        "id": "spatial-gene-admission",
+        "parameter": "moran-effect-fdr-sample-support",
+        "selection_rule": "Use declared candidates and require global multiplicity control plus concordant effect support in the declared minimum number of samples.",
+        "validation_rule": "Report every tested gene globally and per sample, including failed and discordant candidates."
+      }
+    ],
+    "postflight_checks": [
+      "Reconcile source cells, genes, counts, coordinates, graph edges and every output after reload.",
+      "Review graph sensitivity, neighborhood and co-occurrence structure, global and per-sample Moran evidence, SVG replication, domain stability and sample composition before interpretation."
+    ],
+    "preflight_checks": [
+      "Inspect actual format, table, counts, observations, genes, samples, annotations, coordinates, units, image and shape provenance, transformations and output paths.",
+      "Detect exact Squidpy, SpatialData, Scanpy, Python and dependency versions in an existing scientific runtime and require a validated compatibility profile."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "source-sha256",
+      "source-count-sha256",
+      "input-format",
+      "SpatialData-elements",
+      "coordinate-system",
+      "coordinate-unit",
+      "sample-key",
+      "cluster-key",
+      "graph-parameters",
+      "permutation-parameters",
+      "SVG-gates",
+      "domain-parameters",
+      "actual-tool-versions",
+      "output-sha256",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-spatial-contract",
+        "output_artifact_types": [
+          "spatial_single_cell_analysis_evidence"
+        ],
+        "purpose": "Establish counts, samples, coordinates, annotations and spatial elements.",
+        "required_logic": [
+          "Inspect the actual H5AD or SpatialData table, raw counts, cells or spots, genes, sample identity, annotations, coordinates, units, coordinate systems, images, labels, points, shapes, transformations and source digests.",
+          "Freeze graph, permutation, SVG and domain parameters before execution."
+        ],
+        "template_files": [
+          "templates/run_spatial_analysis.py"
+        ]
+      },
+      {
+        "id": "compute-sample-aware-spatial-statistics",
+        "output_artifact_types": [
+          "spatial_single_cell_analysis_evidence"
+        ],
+        "purpose": "Build spatial evidence without cross-sample geometry.",
+        "required_logic": [
+          "Build the spatial graph independently within biological samples and prove zero cross-sample edges.",
+          "Run sample-restricted neighborhood permutations, per-sample co-occurrence and global plus sample-level Moran permutation tests with multiplicity correction."
+        ],
+        "template_files": [
+          "templates/run_spatial_analysis.py"
+        ]
+      },
+      {
+        "id": "discover-spatial-domains",
+        "output_artifact_types": [
+          "spatial_single_cell_analysis_evidence"
+        ],
+        "purpose": "Create exploratory expression-spatial domains without label leakage.",
+        "required_logic": [
+          "Select variable genes, calculate expression PCs, standardize coordinates within samples and construct a frozen joint representation.",
+          "Run explicit igraph Leiden without cluster labels and retain post hoc evaluation separately."
+        ],
+        "template_files": [
+          "templates/run_spatial_analysis.py"
+        ]
+      },
+      {
+        "id": "reload-and-admit",
+        "output_artifact_types": [
+          "spatial_single_cell_analysis_evidence"
+        ],
+        "purpose": "Verify source preservation and inferential boundaries.",
+        "required_logic": [
+          "Reload every object and table and reconcile counts, cells, genes, coordinates, graphs, spatial genes, domains, versions, parameters and digests.",
+          "Require at least two independent biological samples for replicated spatial-gene status; label single-sample outputs as spatial candidates and keep condition inference at the biological-sample level."
+        ],
+        "template_files": [
+          "templates/run_spatial_analysis.py"
+        ]
+      }
+    ]
   },
-  "output_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]},
-      "module": {"type": "object"},
-      "request_digest": {"type": "string"},
-      "request_fields": {"type": "array"},
-      "languages": {"type": "array"},
-      "code_plan": {"type": "array"},
-      "parameter_rules": {"type": "array"},
-      "preflight_checks": {"type": "array"},
-      "postflight_checks": {"type": "array"},
-      "provenance_fields": {"type": "array"},
-      "forbidden_actions": {"type": "array"},
-      "tool_profiles": {"type": "array"},
-      "dependency_profiles": {"type": "array"},
-      "quality_gate_ids": {"type": "array"},
-      "execution_policy": {"type": "object"}
-    },
-    "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]
-  },
-  "input_artifacts": [
-    {
-      "name": "spatial_expression_object",
-      "artifact_type": "spatial_single_cell_or_spot_object",
-      "formats": [
-        {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip", "lzf"], "required_indexes": [], "coordinate_systems": ["declared-two-dimensional-spatial-coordinate-system"], "genome_build_policy": "declared", "genome_builds": ["declared-in-project-or-not-applicable"], "annotation_releases": ["declared-in-project"], "orientations": ["observations-by-genes"]},
-        {"name": "spatialdata-zarr", "versions": ["0.5"], "representations": ["container", "structured", "sparse"], "compression": ["zarr"], "required_indexes": [], "coordinate_systems": ["SpatialData-coordinate-system"], "genome_build_policy": "declared", "genome_builds": ["declared-in-project-or-not-applicable"], "annotation_releases": ["declared-in-project"], "orientations": ["tables-images-labels-points-shapes"]}
-      ],
-      "processing_levels": ["count-backed", "quality-controlled", "spatially-registered", "annotated"],
-      "required_metadata": ["source-digest", "raw-count-location", "observation-identities", "gene-identifiers", "sample-key", "cluster-key", "coordinate-key", "coordinate-unit", "image-shape-table-provenance", "transformations"]
-    }
+  "alternatives": [
+    "single-cell-foundation-workflow"
   ],
-  "output_artifacts": [
-    {
-      "name": "spatial_analysis_evidence",
-      "artifact_type": "spatial_single_cell_analysis_evidence",
-      "formats": [
-        {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["gzip"], "required_indexes": ["spatial-connectivities"], "coordinate_systems": ["inherited-two-dimensional-spatial-coordinate-system"], "genome_build_policy": "declared", "genome_builds": ["inherited-from-input"], "annotation_releases": ["inherited-from-input"], "orientations": ["observations-by-genes"]},
-        {"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["graph-edges", "cluster-pairs", "gene-statistics", "observation-domains"]},
-        {"name": "json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["spatial-quality-summary"]}
-      ],
-      "processing_levels": ["spatial-graph", "permutation-tested", "sample-replicated", "domain-clustered", "reload-validated"],
-      "required_metadata": ["source-digest", "source-count-digest", "coordinate-unit", "sample-isolated-graph", "neighborhood-enrichment", "sample-cooccurrence", "Moran-statistics", "spatial-gene-support", "domain-model", "versions", "quality-status"]
-    }
-  ],
-  "preconditions": ["Every observation has a unique identity, integer-like immutable counts, finite two-dimensional coordinates in a declared unit, a biological-sample identity and a reviewed cluster label; each sample has enough observations for its declared graph; requested genes are present; output paths are new."],
-  "assumptions": ["Spatial graph and co-occurrence depend on platform geometry, coordinate units and graph parameters; Moran's I describes spatial autocorrelation; joint expression-spatial Leiden domains are exploratory; none provides condition-level inference without independent biological samples and a separate sample-level model."],
-  "quality_gates": [
-    {"id": "spatial-input-coordinate-semantics", "severity": "fatal", "description": "Block unless format, table, counts, cells or spots, genes, sample identity, cluster identity, finite two-dimensional coordinates, coordinate unit and SpatialData element provenance are explicit.", "blocks_interpretation": true},
-    {"id": "spatial-sample-isolated-graph", "severity": "fatal", "description": "The primary spatial graph must be constructed within biological samples and contain no cross-sample edges; graph method and distance parameters must use the declared coordinate unit.", "blocks_interpretation": true},
-    {"id": "spatial-neighborhood-and-cooccurrence", "severity": "fatal", "description": "Neighborhood enrichment requires sample-restricted permutations and co-occurrence must be computed independently within each biological sample with complete cluster and distance-bin accounting.", "blocks_interpretation": true},
-    {"id": "spatial-gene-replication", "severity": "fatal", "description": "Spatial genes require finite global and sample-level Moran statistics, permutation-derived multiplicity control, a declared effect threshold and support in the declared minimum number of biological samples.", "blocks_interpretation": true},
-    {"id": "spatial-domain-no-label-leakage", "severity": "fatal", "description": "Joint expression-spatial domains must use only frozen expression and coordinate representations; reviewed cluster labels may be used only for post hoc evaluation.", "blocks_interpretation": true},
-    {"id": "spatial-experimental-unit-boundary", "severity": "fatal", "description": "Cells or spots cannot be used as independent condition replicates; condition comparisons require a separate sample-aware inferential design.", "blocks_interpretation": true},
-    {"id": "spatial-source-and-output-reload", "severity": "fatal", "description": "Reload and reconcile counts, observations, genes, coordinates, graphs, tables, domains, versions, parameters and source/output digests before admission.", "blocks_interpretation": true}
-  ],
-  "evidence_effects": ["adds_sample_isolated_spatial_graph", "adds_neighborhood_and_cooccurrence_evidence", "adds_replicated_spatial_genes", "adds_joint_expression_spatial_domains"],
-  "alternatives": ["single-cell-foundation-workflow"],
-  "complements": ["single-cell-marker-discovery", "single-cell-donor-inference", "single-cell-communication", "single-cell-regulatory-network"],
-  "tool_requirements": [
-    {"name": "squidpy", "ecosystem": "python", "identity": "squidpy", "required": true, "tested_versions": ["1.6.6"], "allowed_versions": [">=1.6.6,<1.7"], "version_source": "https://github.com/scverse/squidpy", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('squidpy'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "squidpy-scanpy-private-api", "affected_versions": [">=1.6.6,<1.7"], "category": "api", "description": "Squidpy 1.6.6 imports a Scanpy plotting helper that changed in Scanpy 1.12 and therefore requires a validated Scanpy compatibility range.", "compatibility_effect": "breaking", "required_action": "Detect Squidpy and Scanpy together and block unvalidated combinations before project execution.", "source": "https://github.com/scverse/squidpy"}], "platforms": ["any"]},
-    {"name": "spatialdata", "ecosystem": "python", "identity": "spatialdata", "required": true, "tested_versions": ["0.5.0"], "allowed_versions": [">=0.5,<0.6"], "version_source": "https://spatialdata.scverse.org/en/latest/api/SpatialData.html", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('spatialdata'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "spatialdata-zarr-format", "affected_versions": [">=0.5,<0.6"], "category": "input-format", "description": "SpatialData element models, table associations and Zarr raster formats are release-coupled.", "compatibility_effect": "requires-parser", "required_action": "Read with the observed SpatialData release and preserve named image, label, point, shape and table elements.", "source": "https://spatialdata.scverse.org/en/latest/api/SpatialData.html"}], "platforms": ["any"]},
-    {"name": "scanpy", "ecosystem": "python", "identity": "scanpy", "required": true, "tested_versions": ["1.11.5"], "allowed_versions": [">=1.11.5,<1.12"], "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/index.html", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('scanpy'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "scanpy-domain-neighbor-api", "affected_versions": [">=1.11.5,<1.12"], "category": "behavior", "description": "PCA, neighbor and igraph Leiden defaults are release-coupled.", "compatibility_effect": "requires-parameter", "required_action": "Record HVGs, PCs, neighbors, coordinate weight, Leiden flavor, iterations, resolution and seed.", "source": "https://scanpy.readthedocs.io/en/stable/release-notes/index.html"}], "platforms": ["any"]}
-  ],
-  "dependencies": [
-    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.12.11"], "allowed_versions": [">=3.12,<3.13"], "version_source": "https://www.python.org/", "verified_at": "2026-07-15", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute spatial analysis in an existing scientific runtime.", "conflicts": [], "platforms": ["any"]},
-    {"name": "anndata", "ecosystem": "python", "identity": "anndata", "required": true, "tested_versions": ["0.12.19"], "allowed_versions": [">=0.12,<0.13"], "version_source": "https://anndata.readthedocs.io/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('anndata'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Represent count-backed spatial tables and reload H5AD outputs.", "conflicts": [], "platforms": ["any"]},
-    {"name": "numpy", "ecosystem": "python", "identity": "numpy", "required": true, "tested_versions": ["2.4.6"], "allowed_versions": [">=2.4,<2.5"], "version_source": "https://numpy.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import numpy; print(numpy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate coordinates and construct joint representations.", "conflicts": [], "platforms": ["any"]},
-    {"name": "pandas", "ecosystem": "python", "identity": "pandas", "required": true, "tested_versions": ["2.3.3"], "allowed_versions": [">=2.3,<2.4"], "version_source": "https://pandas.pydata.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import pandas; print(pandas.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Serialize graph, neighborhood, co-occurrence, Moran and domain tables.", "conflicts": [], "platforms": ["any"]},
-    {"name": "scipy", "ecosystem": "python", "identity": "scipy", "required": true, "tested_versions": ["1.18.0"], "allowed_versions": [">=1.18,<1.19"], "version_source": "https://scipy.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import scipy; print(scipy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Preserve sparse counts and spatial graphs.", "conflicts": [], "platforms": ["any"]},
-    {"name": "scikit-learn", "ecosystem": "python", "identity": "scikit-learn", "required": true, "tested_versions": ["1.9.0"], "allowed_versions": [">=1.9,<2.0"], "version_source": "https://scikit-learn.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import sklearn; print(sklearn.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Provide neighborhood and post hoc validation metrics.", "conflicts": [], "platforms": ["any"]},
-    {"name": "igraph", "ecosystem": "python", "identity": "igraph", "required": true, "tested_versions": ["0.11.9"], "allowed_versions": [">=0.11,<0.12"], "version_source": "https://igraph.org/python/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import igraph; print(igraph.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute the explicit igraph Leiden spatial-domain model.", "conflicts": [], "platforms": ["any"]},
-    {"name": "zarr", "ecosystem": "python", "identity": "zarr", "required": true, "tested_versions": ["2.18.7"], "allowed_versions": [">=2.18,<2.19"], "version_source": "https://zarr.readthedocs.io/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import zarr; print(zarr.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Read SpatialData stores under the validated format profile.", "conflicts": [], "platforms": ["any"]}
+  "assumptions": [
+    "Spatial graph and co-occurrence depend on platform geometry, coordinate units and graph parameters; Moran's I describes spatial autocorrelation; joint expression-spatial Leiden domains are exploratory; none provides condition-level inference without independent biological samples and a separate sample-level model."
   ],
   "compatibility_matrix": [
     {
+      "dependency_versions": {
+        "anndata": [
+          ">=0.12,<0.13"
+        ],
+        "igraph": [
+          ">=0.11,<0.12"
+        ],
+        "numpy": [
+          ">=2.4,<2.5"
+        ],
+        "pandas": [
+          ">=2.3,<2.4"
+        ],
+        "python": [
+          ">=3.12,<3.13"
+        ],
+        "scikit-learn": [
+          ">=1.9,<2.0"
+        ],
+        "scipy": [
+          ">=1.18,<1.19"
+        ],
+        "setuptools": [
+          ">=80,<81"
+        ],
+        "zarr": [
+          ">=2.18,<2.19"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "single-cell-spatial-analysis-e2e-v1",
+        "seqfish-embryo-spatial-v1"
+      ],
       "id": "agent-protocol-1-squidpy-166-spatialdata-050-scanpy-1115",
-      "module_version": "1.0.0",
-      "tool_versions": {"squidpy": [">=1.6.6,<1.7"], "spatialdata": [">=0.5,<0.6"], "scanpy": [">=1.11.5,<1.12"]},
-      "dependency_versions": {"python": [">=3.12,<3.13"], "anndata": [">=0.12,<0.13"], "numpy": [">=2.4,<2.5"], "pandas": [">=2.3,<2.4"], "scipy": [">=1.18,<1.19"], "scikit-learn": [">=1.9,<2.0"], "igraph": [">=0.11,<0.12"], "zarr": [">=2.18,<2.19"]},
-      "input_formats": {"spatial_expression_object": ["h5ad@0.1.0", "spatialdata-zarr@0.5"]},
-      "output_formats": {"spatial_analysis_evidence": ["h5ad@0.1.0", "tab-separated-values@1", "json@1"]},
-      "platforms": ["any"],
-      "regression_evidence_ids": ["single-cell-spatial-analysis-regression-v1"],
-      "end_to_end_evidence_ids": ["single-cell-spatial-analysis-e2e-v1"],
-      "verified_at": "2026-07-15"
+      "input_formats": {
+        "spatial_expression_object": [
+          "h5ad@0.1.0",
+          "spatialdata-zarr@0.5"
+        ]
+      },
+      "module_version": "1.1.0",
+      "output_formats": {
+        "spatial_analysis_evidence": [
+          "h5ad@0.1.0",
+          "tab-separated-values@1",
+          "json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "single-cell-spatial-analysis-regression-v1"
+      ],
+      "tool_versions": {
+        "scanpy": [
+          ">=1.11.5,<1.12"
+        ],
+        "spatialdata": [
+          ">=0.5,<0.6"
+        ],
+        "squidpy": [
+          ">=1.6.6,<1.7"
+        ]
+      },
+      "verified_at": "2026-07-23"
     }
   ],
-  "access": "agent_generated",
-  "mutability": "read_only",
+  "complements": [
+    "single-cell-marker-discovery",
+    "single-cell-donor-inference",
+    "single-cell-communication",
+    "single-cell-regulatory-network"
+  ],
   "credentials": [],
-  "limitations": ["Validated execution covers count-backed point/spot tables with finite two-dimensional coordinates, sample-isolated generic-neighbor graphs, annotated neighborhood enrichment, sample-level co-occurrence, Moran-based replicated spatial genes and exploratory expression-spatial Leiden domains. Platform-specific segmentation, image feature extraction, deconvolution, 3D geometry, continuous spatial models and sample-level condition inference require additional project-specific modules or code. The module records image and shape provenance but does not alter source imagery and does not manage environments or compute infrastructure."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned sample-aware spatial transcriptomics workflow.", "https://github.com/scverse/squidpy", "https://spatialdata.scverse.org/en/latest/api/SpatialData.html"]},
-  "agent_protocol": {
-    "schema_version": 1,
-    "mode": "codex_generated_project_code",
-    "languages": ["python", "notebook"],
-    "template_sections": [
-      {"id": "inspect-spatial-contract", "purpose": "Establish counts, samples, coordinates, annotations and spatial elements.", "required_logic": ["Inspect the actual H5AD or SpatialData table, raw counts, cells or spots, genes, sample identity, annotations, coordinates, units, coordinate systems, images, labels, points, shapes, transformations and source digests.", "Freeze graph, permutation, SVG and domain parameters before execution."], "output_artifact_types": ["spatial_single_cell_analysis_evidence"], "template_files": ["templates/run_spatial_analysis.py"]},
-      {"id": "compute-sample-aware-spatial-statistics", "purpose": "Build spatial evidence without cross-sample geometry.", "required_logic": ["Build the spatial graph independently within biological samples and prove zero cross-sample edges.", "Run sample-restricted neighborhood permutations, per-sample co-occurrence and global plus sample-level Moran permutation tests with multiplicity correction."], "output_artifact_types": ["spatial_single_cell_analysis_evidence"], "template_files": ["templates/run_spatial_analysis.py"]},
-      {"id": "discover-spatial-domains", "purpose": "Create exploratory expression-spatial domains without label leakage.", "required_logic": ["Select variable genes, calculate expression PCs, standardize coordinates within samples and construct a frozen joint representation.", "Run explicit igraph Leiden without cluster labels and retain post hoc evaluation separately."], "output_artifact_types": ["spatial_single_cell_analysis_evidence"], "template_files": ["templates/run_spatial_analysis.py"]},
-      {"id": "reload-and-admit", "purpose": "Verify source preservation and inferential boundaries.", "required_logic": ["Reload every object and table and reconcile counts, cells, genes, coordinates, graphs, spatial genes, domains, versions, parameters and digests.", "Admit spatial-gene evidence only after sample replication and keep condition inference at the biological-sample level."], "output_artifact_types": ["spatial_single_cell_analysis_evidence"], "template_files": ["templates/run_spatial_analysis.py"]}
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.12,<3.13"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute spatial analysis in an existing scientific runtime.",
+      "required": true,
+      "tested_versions": [
+        "3.12.11"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.12,<0.13"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "anndata",
+      "name": "anndata",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Represent count-backed spatial tables and reload H5AD outputs.",
+      "required": true,
+      "tested_versions": [
+        "0.12.19"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('anndata'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://anndata.readthedocs.io/"
+    },
+    {
+      "allowed_versions": [
+        ">=2.4,<2.5"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "numpy",
+      "name": "numpy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Validate coordinates and construct joint representations.",
+      "required": true,
+      "tested_versions": [
+        "2.4.6"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import numpy; print(numpy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://numpy.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=2.3,<2.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "pandas",
+      "name": "pandas",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Serialize graph, neighborhood, co-occurrence, Moran and domain tables.",
+      "required": true,
+      "tested_versions": [
+        "2.3.3"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import pandas; print(pandas.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://pandas.pydata.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.18,<1.19"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scipy",
+      "name": "scipy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Preserve sparse counts and spatial graphs.",
+      "required": true,
+      "tested_versions": [
+        "1.18.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import scipy; print(scipy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scipy.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.9,<2.0"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scikit-learn",
+      "name": "scikit-learn",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide neighborhood and post hoc validation metrics.",
+      "required": true,
+      "tested_versions": [
+        "1.9.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import sklearn; print(sklearn.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scikit-learn.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.11,<0.12"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "igraph",
+      "name": "igraph",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the explicit igraph Leiden spatial-domain model.",
+      "required": true,
+      "tested_versions": [
+        "0.11.9"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import igraph; print(igraph.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://igraph.org/python/"
+    },
+    {
+      "allowed_versions": [
+        ">=2.18,<2.19"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "zarr",
+      "name": "zarr",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Read SpatialData stores under the validated format profile.",
+      "required": true,
+      "tested_versions": [
+        "2.18.7"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import zarr; print(zarr.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://zarr.readthedocs.io/"
+    },
+    {
+      "allowed_versions": [
+        ">=80,<81"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "setuptools",
+      "name": "setuptools",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide pkg_resources required by the validated SpatialData dependency chain.",
+      "required": true,
+      "tested_versions": [
+        "80.9.0"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('setuptools'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://setuptools.pypa.io/"
+    }
+  ],
+  "description": "Direct Codex to validate count-backed h5ad or SpatialData Zarr tables, coordinate units, biological samples, annotations, images and shapes; build sample-isolated spatial graphs; execute neighborhood enrichment, per-sample co-occurrence, global and sample-level Moran permutation tests, replicated spatial-gene admission, and joint expression-spatial domain discovery; and retain reload-validated outputs without treating spots or cells as condition-level replicates.",
+  "domains": [
+    "omics",
+    "imaging",
+    "statistics"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "adds_sample_isolated_spatial_graph",
+    "adds_neighborhood_and_cooccurrence_evidence",
+    "adds_replicated_spatial_genes",
+    "adds_joint_expression_spatial_domains"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "single-cell-spatial-analysis",
+  "input_artifacts": [
+    {
+      "artifact_type": "spatial_single_cell_or_spot_object",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip",
+            "lzf"
+          ],
+          "coordinate_systems": [
+            "declared-two-dimensional-spatial-coordinate-system"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project-or-not-applicable"
+          ],
+          "name": "h5ad",
+          "orientations": [
+            "observations-by-genes"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "zarr"
+          ],
+          "coordinate_systems": [
+            "SpatialData-coordinate-system"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project-or-not-applicable"
+          ],
+          "name": "spatialdata-zarr",
+          "orientations": [
+            "tables-images-labels-points-shapes"
+          ],
+          "representations": [
+            "container",
+            "structured",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.5"
+          ]
+        }
+      ],
+      "name": "spatial_expression_object",
+      "processing_levels": [
+        "count-backed",
+        "quality-controlled",
+        "spatially-registered",
+        "annotated"
+      ],
+      "required_metadata": [
+        "source-digest",
+        "raw-count-location",
+        "observation-identities",
+        "gene-identifiers",
+        "sample-key",
+        "cluster-key",
+        "coordinate-key",
+        "coordinate-unit",
+        "image-shape-table-provenance",
+        "transformations"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "cluster_key": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "coordinate_unit": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "declared_thresholds": {
+        "type": "object"
+      },
+      "design_notes": {
+        "type": "string"
+      },
+      "input_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "input_format": {
+        "enum": [
+          "h5ad",
+          "spatialdata-zarr"
+        ],
+        "type": "string"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "sample_key": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "spatial_gene_candidates": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "spatial_key": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "table_name": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "input_artifact_id",
+      "input_format",
+      "table_name",
+      "sample_key",
+      "cluster_key",
+      "spatial_key",
+      "coordinate_unit",
+      "spatial_gene_candidates",
+      "declared_thresholds",
+      "design_notes"
     ],
-    "parameter_rules": [
-      {"id": "spatial-graph-selection", "parameter": "neighbors-radius-delaunay", "decision_inputs": ["platform geometry", "coordinate unit", "spot or cell density", "sample layout", "expected interaction scale"], "selection_rule": "Select a graph from observed platform geometry and physical scale and build it independently within each sample.", "validation_rule": "Require zero cross-sample edges and review degree, distance, connectivity and sensitivity to neighboring parameter values."},
-      {"id": "spatial-gene-admission", "parameter": "moran-effect-fdr-sample-support", "decision_inputs": ["candidate genes", "sample count", "graph", "permutations", "effect threshold"], "selection_rule": "Use declared candidates and require global multiplicity control plus concordant effect support in the declared minimum number of samples.", "validation_rule": "Report every tested gene globally and per sample, including failed and discordant candidates."}
+    "type": "object"
+  },
+  "intents": [
+    "Squidpy spatial transcriptomics analysis",
+    "SpatialData Zarr spatial omics",
+    "Moran spatial variable genes and spatial domains",
+    "\u7a7a\u95f4\u8f6c\u5f55\u7ec4 \u90bb\u57df \u5bcc\u96c6 \u5171\u73b0 Moran \u7a7a\u95f4\u57df"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Validated execution covers count-backed point/spot tables with finite two-dimensional coordinates, sample-isolated generic-neighbor graphs, annotated neighborhood enrichment, sample-level co-occurrence, Moran-based spatial candidates and exploratory expression-spatial Leiden domains. Replicated spatial-gene status requires at least two independent biological samples; the public SeqFISH case has one embryo and therefore validates execution and within-embryo structure only. Platform-specific segmentation, image feature extraction, deconvolution, 3D geometry, continuous spatial models and sample-level condition inference require additional project-specific modules or code. The module records image and shape provenance but does not alter source imagery and does not manage environments or compute infrastructure."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "spatial_single_cell_analysis_evidence",
+      "formats": [
+        {
+          "annotation_releases": [
+            "inherited-from-input"
+          ],
+          "compression": [
+            "gzip"
+          ],
+          "coordinate_systems": [
+            "inherited-two-dimensional-spatial-coordinate-system"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "inherited-from-input"
+          ],
+          "name": "h5ad",
+          "orientations": [
+            "observations-by-genes"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [
+            "spatial-connectivities"
+          ],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "graph-edges",
+            "cluster-pairs",
+            "gene-statistics",
+            "observation-domains"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "json",
+          "orientations": [
+            "spatial-quality-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "spatial_analysis_evidence",
+      "processing_levels": [
+        "spatial-graph",
+        "permutation-tested",
+        "sample-replicated",
+        "domain-clustered",
+        "reload-validated"
+      ],
+      "required_metadata": [
+        "source-digest",
+        "source-count-digest",
+        "coordinate-unit",
+        "sample-isolated-graph",
+        "neighborhood-enrichment",
+        "sample-cooccurrence",
+        "Moran-statistics",
+        "spatial-gene-support",
+        "domain-model",
+        "versions",
+        "quality-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "codex_generated_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
     ],
-    "preflight_checks": ["Inspect actual format, table, counts, observations, genes, samples, annotations, coordinates, units, image and shape provenance, transformations and output paths.", "Detect exact Squidpy, SpatialData, Scanpy, Python and dependency versions in an existing scientific runtime and require a validated compatibility profile."],
-    "postflight_checks": ["Reconcile source cells, genes, counts, coordinates, graph edges and every output after reload.", "Review graph sensitivity, neighborhood and co-occurrence structure, global and per-sample Moran evidence, SVG replication, domain stability and sample composition before interpretation."],
-    "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "source-sha256", "source-count-sha256", "input-format", "SpatialData-elements", "coordinate-system", "coordinate-unit", "sample-key", "cluster-key", "graph-parameters", "permutation-parameters", "SVG-gates", "domain-parameters", "actual-tool-versions", "output-sha256", "quality-gates"],
-    "forbidden_actions": ["Do not install, update, activate, create, or manage Python, R, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.", "Do not guess coordinate units, combine sample coordinate systems, create cross-sample spatial edges, silently intersect observations, overwrite source counts or imagery, use reviewed labels during domain fitting, or tune against desired labels.", "Do not use cells or spots as condition replicates, call Moran autocorrelation causality, call exploratory domains cell types, or report generated or unreloaded outputs as evidence."],
-    "requires_observed_execution": true
-  }
+    "type": "object"
+  },
+  "preconditions": [
+    "Every observation has a unique identity, integer-like immutable counts, finite two-dimensional coordinates in a declared unit, a biological-sample identity and a reviewed cluster label; each sample has enough observations for its declared graph; requested genes are present; output paths are new."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned sample-aware spatial transcriptomics workflow.",
+      "https://github.com/scverse/squidpy",
+      "https://spatialdata.scverse.org/en/latest/api/SpatialData.html"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block unless format, table, counts, cells or spots, genes, sample identity, cluster identity, finite two-dimensional coordinates, coordinate unit and SpatialData element provenance are explicit.",
+      "id": "spatial-input-coordinate-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "The primary spatial graph must be constructed within biological samples and contain no cross-sample edges; graph method and distance parameters must use the declared coordinate unit.",
+      "id": "spatial-sample-isolated-graph",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Neighborhood enrichment requires sample-restricted permutations and co-occurrence must be computed independently within each biological sample with complete cluster and distance-bin accounting.",
+      "id": "spatial-neighborhood-and-cooccurrence",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Spatial genes require finite global and sample-level Moran statistics, permutation-derived multiplicity control, a declared effect threshold and support in the declared minimum number of biological samples.",
+      "id": "spatial-gene-replication",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Joint expression-spatial domains must use only frozen expression and coordinate representations; reviewed cluster labels may be used only for post hoc evaluation.",
+      "id": "spatial-domain-no-label-leakage",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Cells or spots cannot be used as independent condition replicates; condition comparisons require a separate sample-aware inferential design.",
+      "id": "spatial-experimental-unit-boundary",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Reload and reconcile counts, observations, genes, coordinates, graphs, tables, domains, versions, parameters and source/output digests before admission.",
+      "id": "spatial-source-and-output-reload",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which neighborhoods, co-occurrences, spatially autocorrelated genes and expression-spatial domains replicate across declared biological samples while preserving coordinate and image provenance?"
+  ],
+  "schema_version": 1,
+  "title": "Analyze spatial single-cell and spot transcriptomes with Squidpy and SpatialData",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.6.6,<1.7"
+      ],
+      "ecosystem": "python",
+      "identity": "squidpy",
+      "mismatch_policy": "block",
+      "name": "squidpy",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.6.6"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.6.6,<1.7"
+          ],
+          "category": "api",
+          "compatibility_effect": "breaking",
+          "description": "Squidpy 1.6.6 imports a Scanpy plotting helper that changed in Scanpy 1.12 and therefore requires a validated Scanpy compatibility range.",
+          "id": "squidpy-scanpy-private-api",
+          "required_action": "Detect Squidpy and Scanpy together and block unvalidated combinations before project execution.",
+          "source": "https://github.com/scverse/squidpy"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('squidpy'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/scverse/squidpy"
+    },
+    {
+      "allowed_versions": [
+        ">=0.5,<0.6"
+      ],
+      "ecosystem": "python",
+      "identity": "spatialdata",
+      "mismatch_policy": "block",
+      "name": "spatialdata",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "0.5.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=0.5,<0.6"
+          ],
+          "category": "input-format",
+          "compatibility_effect": "requires-parser",
+          "description": "SpatialData element models, table associations and Zarr raster formats are release-coupled.",
+          "id": "spatialdata-zarr-format",
+          "required_action": "Read with the observed SpatialData release and preserve named image, label, point, shape and table elements.",
+          "source": "https://spatialdata.scverse.org/en/latest/api/SpatialData.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('spatialdata'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://spatialdata.scverse.org/en/latest/api/SpatialData.html"
+    },
+    {
+      "allowed_versions": [
+        ">=1.11.5,<1.12"
+      ],
+      "ecosystem": "python",
+      "identity": "scanpy",
+      "mismatch_policy": "block",
+      "name": "scanpy",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.11.5"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.11.5,<1.12"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parameter",
+          "description": "PCA, neighbor and igraph Leiden defaults are release-coupled.",
+          "id": "scanpy-domain-neighbor-api",
+          "required_action": "Record HVGs, PCs, neighbors, coordinate weight, Leiden flavor, iterations, resolution and seed.",
+          "source": "https://scanpy.readthedocs.io/en/stable/release-notes/index.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('scanpy'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/index.html"
+    }
+  ],
+  "version": "1.1.0"
 }

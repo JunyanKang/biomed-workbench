@@ -117,7 +117,7 @@ def run_liana(sample: anndata.AnnData, args: argparse.Namespace) -> pd.DataFrame
 
     sc.pp.normalize_total(sample, target_sum=10000)
     sc.pp.log1p(sample)
-    result = li.mt.rank_aggregate(
+    result = li.mt.cellphonedb(
         sample,
         groupby=args.cell_type_key,
         resource_name="consensus",
@@ -135,19 +135,17 @@ def run_liana(sample: anndata.AnnData, args: argparse.Namespace) -> pd.DataFrame
     required = {"source", "target", "ligand_complex", "receptor_complex"}
     if not required <= set(result):
         raise ValueError("LIANA result lacks required sender, receiver, ligand, or receptor fields")
-    magnitude = next((name for name in ("magnitude_rank", "lr_means", "magnitude") if name in result), None)
-    specificity = next((name for name in ("specificity_rank", "cellphone_pvals", "specificity") if name in result), None)
-    if magnitude is None:
-        raise ValueError("LIANA result lacks a recognized interaction magnitude")
+    if "lr_means" not in result or "cellphone_pvals" not in result:
+        raise ValueError("LIANA CellPhoneDB result lacks mean and permutation p-value fields")
     output = pd.DataFrame(
         {
             "sender": result["source"].astype(str),
             "receiver": result["target"].astype(str),
             "ligand": result["ligand_complex"].astype(str),
             "receptor": result["receptor_complex"].astype(str),
-            "score": pd.to_numeric(result[magnitude], errors="coerce"),
-            "p_value": pd.to_numeric(result[specificity], errors="coerce") if specificity else np.nan,
-            "method": "liana-rank-aggregate",
+            "score": pd.to_numeric(result["lr_means"], errors="coerce"),
+            "p_value": pd.to_numeric(result["cellphone_pvals"], errors="coerce"),
+            "method": "liana-cellphonedb",
         }
     )
     return output.replace([np.inf, -np.inf], np.nan).dropna(subset=["score"])
@@ -238,25 +236,35 @@ def summarize_replicates(interactions: pd.DataFrame, args: argparse.Namespace) -
     keys = ["condition", "method", "sender", "receiver", "ligand", "receptor"]
     rows = []
     for identity, frame in interactions.groupby(keys, observed=True, sort=True):
-        pvalues = frame["p_value"].dropna().clip(lower=np.finfo(float).tiny, upper=1)
+        pvalues = frame["p_value"].dropna().clip(
+            lower=1 / (args.permutations + 1), upper=1
+        )
         combined = float(combine_pvalues(pvalues, method="fisher").pvalue) if len(pvalues) >= args.minimum_samples else math.nan
         rows.append(
             {
                 **dict(zip(keys, identity, strict=True)),
                 "sample_support": int(frame["sample"].nunique()),
+                "significant_sample_support": int(
+                    (frame["within_sample_fdr"] <= args.fdr).sum()
+                ),
                 "median_score": float(frame["score"].median()),
                 "combined_p_value": combined,
             }
         )
     result = pd.DataFrame(rows)
     result["fdr"] = result.groupby(["condition", "method"], observed=True)["combined_p_value"].transform(adjust_bh)
-    result["replicated"] = (result["sample_support"] >= args.minimum_samples) & (result["fdr"] <= args.fdr)
+    result["replicated"] = (
+        (result["sample_support"] >= args.minimum_samples)
+        & (result["significant_sample_support"] >= args.minimum_samples)
+        & (result["fdr"] <= args.fdr)
+    )
     return result
 
 
 def main() -> int:
     args = parse_args()
     source = Path(args.input_h5ad).resolve(strict=True)
+    source_digest = sha256(source)
     output_directory = Path(args.output_directory).resolve()
     report_path = Path(args.report).resolve()
     if output_directory.exists() or report_path.exists():
@@ -302,8 +310,8 @@ def main() -> int:
     sample_counts = metadata.groupby(args.condition_key, observed=True)[args.sample_key].nunique().to_dict()
     condition_inference_allowed = bool(sample_counts) and min(sample_counts.values()) >= args.minimum_samples
     report = {
-        "schema_version": 1,
-        "input": {"sha256": sha256(source), "cells": adata.n_obs, "genes": adata.n_vars},
+        "schema_version": 2,
+        "input": {"filename": source.name, "sha256": source_digest, "cells": adata.n_obs, "genes": adata.n_vars},
         "design": {"sample_counts_by_condition": sample_counts, "condition_inference_allowed": condition_inference_allowed},
         "methods": list(methods),
         "sample_runs": sample_records,
@@ -315,8 +323,24 @@ def main() -> int:
             "status": "passed" if condition_inference_allowed and bool(summary["replicated"].any()) else "descriptive-only",
             "replicated_interaction_count": int(summary["replicated"].sum()),
             "source_counts_preserved": bool((counts != sparse.csr_matrix(raw_counts(adata, args.raw_count_location))).nnz == 0),
+            "source_immutable": sha256(source) == source_digest,
         },
-        "parameters": vars(args),
+        "parameters": {
+            "method": args.method,
+            "cell_type_key": args.cell_type_key,
+            "sample_key": args.sample_key,
+            "condition_key": args.condition_key,
+            "raw_count_location": args.raw_count_location,
+            "species": args.species,
+            "cellphonedb_database_filename": None if not args.cellphonedb_database else Path(args.cellphonedb_database).name,
+            "minimum_cells": args.minimum_cells,
+            "minimum_samples": args.minimum_samples,
+            "expression_proportion": args.expression_proportion,
+            "permutations": args.permutations,
+            "fdr": args.fdr,
+            "seed": args.seed,
+            "jobs": args.jobs,
+        },
         "versions": {
             "python": platform.python_version(),
             "anndata": version("anndata"),
@@ -326,8 +350,15 @@ def main() -> int:
         },
     }
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+    reloaded_interactions = pd.read_csv(interactions_path, sep="\t")
     reloaded = pd.read_csv(summary_path, sep="\t")
-    if len(reloaded) != len(summary) or sha256(source) != report["input"]["sha256"]:
+    if (
+        len(reloaded_interactions) != len(interactions)
+        or len(reloaded) != len(summary)
+        or sha256(source) != source_digest
+        or not report["quality"]["source_counts_preserved"]
+        or not report["quality"]["source_immutable"]
+    ):
         raise ValueError("communication output reload or source preservation failed")
     return 0
 

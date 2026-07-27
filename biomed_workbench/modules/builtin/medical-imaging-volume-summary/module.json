@@ -1,0 +1,303 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Volume arrays are declared as ordered z-y-x tensors and intensity values are already harmonized to a comparable float scale."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "medical-imaging-volume-summary-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "volume": [
+          "inline-json@1",
+          "nifti@1",
+          "dcmstack@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "volume_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "medical-imaging-volume-summary-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-26"
+    }
+  ],
+  "complements": [
+    "medical-imaging-metadata-audit"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-26",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Compute deterministic voxel-level quality and intensity summary statistics for declared 3D medical-image tensors.",
+  "domains": [
+    "imaging"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.imaging:medical_volume_summary",
+  "evidence_effects": [
+    "adds-medical-volume-summary-evidence"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "medical-imaging-volume-summary",
+  "input_artifacts": [
+    {
+      "artifact_type": "medical_imaging_volume",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "scanner-space"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "z-y-x"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "scanner-space"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "nifti",
+          "orientations": [
+            "scanner-space"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "scanner-space"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "dcmstack",
+          "orientations": [
+            "scanner-space"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "volume",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "volume": {
+        "type": "array",
+        "minItems": 1
+      },
+      "mm_per_voxel": {
+        "type": ["array", "null"],
+        "items": {
+          "type": "number"
+        },
+        "minItems": 3,
+        "maxItems": 3
+      },
+      "required_voxel_order": {
+        "enum": [
+          "z-y-x",
+          "z-y-x-mm",
+          "xyz"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "volume"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "medical imaging volume summary",
+    "medical volume statistics",
+    "summarize 3D medical volume",
+    "DICOM/CT/MRI volume summary",
+    "NIfTI volume quality summary",
+    "DICOM影像体积摘要",
+    "体积统计"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "No DICOM parsing, NIfTI header normalization, denoising, registration, or bias-field correction is performed.",
+    "Numeric summaries are tensor-level checks and cannot replace sequence-context interpretation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "medical_volume_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "scanner-space"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "volume_summary",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "intensity": {
+        "type": "object"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "shape": {
+        "type": "array"
+      },
+      "voxel_geometry": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "shape",
+      "voxel_geometry",
+      "intensity",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A valid 3D tensor and declared voxel scale are available for inspection in the requested project context."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room rewrite informed by internal capability alignment from imaging scope."
+    ],
+    "license": "Apache-2.0"
+  },
+  "questions": [
+    "What are the shape, spatial voxel scale, and intensity quality signals of the declared medical imaging volume?"
+  ],
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require a nonempty 3D tensor and declared positive voxel spacing.",
+      "id": "medical-volume-structure",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require a bounded numeric output contract with explicit quality-flag provenance.",
+      "id": "medical-volume-output-contract",
+      "severity": "fatal"
+    }
+  ],
+  "schema_version": 1,
+  "title": "Summarize medical imaging volume quality",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

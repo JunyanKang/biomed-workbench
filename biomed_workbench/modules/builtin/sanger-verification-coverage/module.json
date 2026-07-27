@@ -1,0 +1,348 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "A linearized template and non-wrapping target interval are declared; read reach is a planning parameter, not observed sequencing performance."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_sanger_verification_coverage.py",
+      "purpose": "Execute an explicit Sanger verification coverage plan against a declared linear DNA template.",
+      "quality_gate_ids": [
+        "sanger-target-contract",
+        "sanger-coverage-accounting",
+        "sanger-claim-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "biopython": [
+          ">=1.86,<1.87"
+        ],
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "sanger-verification-coverage-e2e-v1"
+      ],
+      "id": "python-3.14.3-biopython-1.86-inline-json-1",
+      "input_formats": {
+        "template": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "verification_plan": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "sanger-verification-coverage-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "primer-design",
+    "pcr-amplicon-simulation",
+    "sequence-inspect"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.86,<1.87"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "biopython",
+      "name": "biopython",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Import and execute the clean-room molecular capability module under its validated dependency contract.",
+      "required": true,
+      "tested_versions": [
+        "1.86"
+      ],
+      "verified_at": "2026-07-24",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version(\"biopython\"))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://biopython.org/wiki/Download"
+    }
+  ],
+  "description": "Plan declared-primer and explicitly designed Sanger read coverage for one non-wrapping target interval on a supplied linear DNA template.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:plan_sanger_verification_coverage",
+  "evidence_effects": [
+    "proposes-sequence-verification-plan"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "sanger-verification-coverage",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "template",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "template": {
+        "type": "string",
+        "minLength": 40
+      },
+      "target_start": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "target_end": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "existing_primers": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      },
+      "read_length": {
+        "type": "integer",
+        "minimum": 100,
+        "maximum": 2000
+      },
+      "primer_length": {
+        "type": "integer",
+        "minimum": 14,
+        "maximum": 40
+      },
+      "coverage_overlap": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 1999
+      },
+      "max_new_primers": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      }
+    },
+    "required": [
+      "template",
+      "target_start",
+      "target_end"
+    ]
+  },
+  "intents": [
+    "plan Sanger verification coverage",
+    "design plasmid sequencing coverage",
+    "设计质粒测序验证覆盖"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Expected read coverage is a plan based on exact binding and a declared read length, not evidence of sequencing success.",
+    "Targets that cross a circular origin, primer uniqueness, secondary structure, chromatogram quality and construct identity require separate validated checks."
+  ],
+  "maturity": "validated",
+  "module_type": "design",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "sanger_verification_coverage_plan",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "verification_plan",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "template_length": {
+        "type": "integer"
+      },
+      "target_interval": {
+        "type": "object"
+      },
+      "coordinate_system": {
+        "type": "string"
+      },
+      "read_length": {
+        "type": "integer"
+      },
+      "coverage_overlap": {
+        "type": "integer"
+      },
+      "recommended_primers": {
+        "type": "array"
+      },
+      "merged_target_coverage": {
+        "type": "array"
+      },
+      "uncovered_intervals": {
+        "type": "array"
+      },
+      "target_fully_covered": {
+        "type": "boolean"
+      },
+      "candidate_count": {
+        "type": "integer"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "template_length",
+      "target_interval",
+      "coordinate_system",
+      "read_length",
+      "coverage_overlap",
+      "recommended_primers",
+      "merged_target_coverage",
+      "uncovered_intervals",
+      "target_fully_covered",
+      "candidate_count",
+      "limitations"
+    ]
+  },
+  "preconditions": [
+    "A schema-valid linear DNA template and one non-wrapping target interval are declared."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned implementation with module-level validation evidence."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "sanger-target-contract",
+      "severity": "fatal",
+      "description": "Require a declared nonempty zero-based half-open target interval within an unambiguous linear template.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "sanger-coverage-accounting",
+      "severity": "major",
+      "description": "Preserve every selected primer binding interval, expected read coverage, merged target coverage and every uncovered interval.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "sanger-claim-boundary",
+      "severity": "major",
+      "description": "Block sequence-confirmation claims from planned coverage alone; chromatogram review remains required.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "Which declared ranked primer candidate should be bound to this PCR simulation request?"
+  ],
+  "schema_version": 1,
+  "title": "Plan Sanger verification coverage",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

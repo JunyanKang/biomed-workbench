@@ -33,6 +33,9 @@ case "$command_name" in
     route)
         exec "$PYTHON_EXECUTABLE" "$WORKBENCH_ROOT/tools/route_task.py" "$@"
         ;;
+    plan)
+        exec "$PYTHON_EXECUTABLE" "$WORKBENCH_ROOT/tools/plan_research.py" "$@"
+        ;;
     search)
         exec "$PYTHON_EXECUTABLE" "$WORKBENCH_ROOT/tools/search_tools.py" "$@"
         ;;
@@ -46,6 +49,7 @@ case "$command_name" in
         printf '%s\n' \
             'Usage: tools/workbench doctor [--strict]' \
             '       tools/workbench route "SCIENTIFIC OBJECTIVE"' \
+            '       tools/workbench plan "SCIENTIFIC OBJECTIVE"' \
             '       tools/workbench search [--id CAPABILITY_ID | SEARCH TERMS]' \
             '       tools/workbench run CAPABILITY_ID --input JSON' \
             '       tools/workbench validate [--release]'

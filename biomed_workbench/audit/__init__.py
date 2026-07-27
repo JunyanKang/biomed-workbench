@@ -1,17 +1,7 @@
-"""Release-audit helpers kept separate from the operational plugin runtime."""
+"""Public release-audit namespace.
 
-from .source_reconciliation import ReconciliationError, reconcile_ledgers
-from .source_policy import SourcePolicyError, apply_scope_policy, refine_ledger, refine_rows
-from .source_bindings import SourceBindingError, apply_binding_rule_files, apply_binding_rules
+Source-repository assimilation ledgers and review tools are intentionally kept
+outside the publishable plugin package.
+"""
 
-__all__ = [
-    "ReconciliationError",
-    "SourcePolicyError",
-    "SourceBindingError",
-    "apply_binding_rule_files",
-    "apply_binding_rules",
-    "apply_scope_policy",
-    "reconcile_ledgers",
-    "refine_ledger",
-    "refine_rows",
-]
+__all__: list[str] = []

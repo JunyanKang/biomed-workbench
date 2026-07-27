@@ -1,0 +1,43 @@
+{
+  "cases": [
+    {
+      "name": "blocks-a-formal-claim-with-confirmation-pending-feature",
+      "input": {
+        "source_blocks": [
+          {"id": "P001", "text": "A method applies a defined perturbation at a declared developmental interval."},
+          {"id": "E001", "text": "The observed assay result supports the stated response under the recorded conditions."}
+        ],
+        "features": [
+          {"id": "T001", "text": "Apply the declared perturbation during the stated interval.", "support_state": "explicit", "source_ids": ["P001"]},
+          {"id": "T002", "text": "Use the result as a universal therapeutic effect.", "support_state": "needs-confirmation", "source_ids": ["E001"]}
+        ],
+        "claims": [
+          {"id": "CL001", "text": "A method comprising the declared perturbation step.", "feature_ids": ["T001"]},
+          {"id": "CL002", "text": "A method comprising the universal therapeutic effect.", "feature_ids": ["T002"]}
+        ]
+      },
+      "expected_subset": {
+        "source_block_count": 2,
+        "claims": [
+          {"id": "CL001", "text": "A method comprising the declared perturbation step.", "feature_ids": ["T001"], "status": "admissible"},
+          {"id": "CL002", "text": "A method comprising the universal therapeutic effect.", "feature_ids": ["T002"], "status": "blocked"}
+        ],
+        "ready_for_formal_claims": false
+      }
+    },
+    {
+      "name": "admits-an-explicitly-supported-formal-claim",
+      "input": {
+        "source_blocks": [{"id": "F001", "text": "The figure explicitly records the required process condition."}],
+        "features": [{"id": "T001", "text": "The required process condition.", "support_state": "explicit", "source_ids": ["F001"]}],
+        "claims": [{"id": "CL001", "text": "A method comprising the required process condition.", "feature_ids": ["T001"]}]
+      },
+      "expected_subset": {
+        "claims": [{"id": "CL001", "text": "A method comprising the required process condition.", "feature_ids": ["T001"], "status": "admissible"}],
+        "findings": [],
+        "ready_for_formal_claims": true
+      }
+    }
+  ],
+  "schema_version": 1
+}

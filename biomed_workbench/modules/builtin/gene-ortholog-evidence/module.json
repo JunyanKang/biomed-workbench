@@ -1,0 +1,303 @@
+{
+  "access": "public_api",
+  "alternatives": [],
+  "assumptions": [
+    "Gene symbol and organism identify the intended Entrez gene and database links are interpreted as associations, not proof."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "gene-ortholog-evidence-e2e-v1"
+      ],
+      "id": "ncbi-datasets-gene-orthologs-v2-python-3143",
+      "input_formats": {
+        "resolved_source_gene_identifier": [
+          "normalized-json@1"
+        ]
+      },
+      "module_version": "0.1.0",
+      "output_formats": {
+        "ortholog_evidence": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "gene-ortholog-evidence-regression-v1"
+      ],
+      "tool_versions": {
+        "ncbi-datasets-gene-api": [
+          "==v2-observed-2026-07-23"
+        ]
+      },
+      "verified_at": "2026-07-12"
+    }
+  ],
+  "complements": [
+    "gene-evidence",
+    "gene-identifier-resolution",
+    "comparative-sequence-phylogeny"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Retrieve bounded NCBI Datasets ortholog records from one stable source Gene ID to one declared target taxon, preserving source identity, returned target records, missing results, and retrieval provenance without claiming functional equivalence.",
+  "domains": [
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.evidence:gene_ortholog_evidence",
+  "evidence_effects": [
+    "retrieves-versioned-ncbi-gene-ortholog-records"
+  ],
+  "execution": {
+    "kind": "service",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 60
+  },
+  "id": "gene-ortholog-evidence",
+  "input_artifacts": [
+    {
+      "artifact_type": "resolved_gene_identifier",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "resolved_source_gene_identifier",
+      "processing_levels": [
+        "exact-symbol-resolved"
+      ],
+      "required_metadata": [
+        "resolution-status",
+        "ncbi-gene-id",
+        "taxon-id"
+      ],
+      "source_policy": "upstream_required"
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "gene_id": {
+        "type": "string",
+        "pattern": "^[1-9][0-9]*$"
+      },
+      "target_taxon_id": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 9999999
+      },
+      "max_records": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      }
+    },
+    "required": [
+      "gene_id",
+      "target_taxon_id"
+    ]
+  },
+  "intents": [
+    "gene ortholog evidence",
+    "map NCBI Gene orthologs",
+    "跨物种基因同源映射",
+    "同源基因证据"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Returned NCBI ortholog records are database evidence, not a claim of one-to-one functional equivalence, conserved regulation, expression equivalence, or suitability for cross-species feature conversion."
+  ],
+  "maturity": "validated",
+  "module_type": "data_source",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "evidence_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "ortholog_evidence",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "source-gene-id",
+        "target-taxon-id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "source": {
+        "type": "object"
+      },
+      "target_taxon_id": {
+        "type": "string"
+      },
+      "orthologs": {
+        "type": "array"
+      },
+      "total_target_orthologs": {
+        "type": "integer"
+      },
+      "truncated": {
+        "type": "boolean"
+      },
+      "provenance": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "source",
+      "target_taxon_id",
+      "orthologs",
+      "total_target_orthologs",
+      "truncated",
+      "provenance"
+    ]
+  },
+  "preconditions": [
+    "A source Gene ID is emitted by a passed exact-symbol resolution artifact and the target taxon is explicitly declared."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned implementation with module-level validation evidence."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "ortholog-source-and-target-identity",
+      "severity": "fatal",
+      "blocks_interpretation": true,
+      "description": "The source Gene ID, target taxon and returned records must be retained and internally consistent."
+    },
+    {
+      "id": "ortholog-claim-boundary",
+      "severity": "major",
+      "blocks_interpretation": true,
+      "description": "Database orthology does not establish functional, regulatory, expression, phenotype or cell-state equivalence."
+    }
+  ],
+  "questions": [
+    "Which NCBI Gene ortholog records connect one declared source Gene ID to a declared target taxon?"
+  ],
+  "schema_version": 1,
+  "title": "Retrieve NCBI Gene ortholog evidence",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        "==v2-observed-2026-07-23"
+      ],
+      "ecosystem": "service",
+      "identity": "api.ncbi.nlm.nih.gov/datasets/v2/gene",
+      "mismatch_policy": "block",
+      "name": "ncbi-datasets-gene-api",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "v2-observed-2026-07-23"
+      ],
+      "verified_at": "2026-07-12",
+      "version_differences": [],
+      "version_pattern": "(contract-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "version_probe": [
+        "biomed_workbench.services.eutils:probe_eutils_contract"
+      ],
+      "version_probe_kind": "service_contract",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://www.ncbi.nlm.nih.gov/datasets/docs/v2/reference-docs/rest-api/"
+    }
+  ],
+  "version": "0.1.0",
+  "code_templates": [
+    {
+      "path": "templates/retrieve_ncbi_gene_orthologs.py",
+      "language": "python",
+      "purpose": "Retrieve bounded NCBI Gene ortholog evidence for comparative genomics planning while preserving identity, provenance, and claim boundaries.",
+      "quality_gate_ids": [
+        "ortholog-source-and-target-identity",
+        "ortholog-claim-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ]
+}

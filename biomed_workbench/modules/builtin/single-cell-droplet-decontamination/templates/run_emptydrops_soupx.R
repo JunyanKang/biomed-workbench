@@ -26,6 +26,15 @@ read_counts <- function(path) {
   list(matrix = matrix, symbols = as.character(rowData(sce)$Symbol))
 }
 
+artifact_sha256 <- function(path) {
+  root <- normalizePath(path, mustWork = TRUE)
+  files <- sort(list.files(root, recursive = TRUE, full.names = TRUE, all.files = TRUE))
+  files <- files[!dir.exists(files)]
+  relative <- substring(files, nchar(root) + 2L)
+  file_digests <- vapply(files, digest::digest, character(1), file = TRUE, algo = "sha256", serialize = FALSE)
+  digest::digest(paste(relative, file_digests, sep = ":", collapse = "\n"), algo = "sha256", serialize = FALSE)
+}
+
 write_matrix_bundle <- function(matrix, symbols, output) {
   dir.create(output, recursive = TRUE, showWarnings = FALSE)
   Matrix::writeMM(methods::as(matrix, "dgTMatrix"), file.path(output, "matrix.mtx"))
@@ -53,7 +62,12 @@ main <- function() {
     library(SoupX)
     library(Matrix)
     library(jsonlite)
+    library(digest)
   })
+  raw_source <- normalizePath(args[["raw-mtx"]], mustWork = TRUE)
+  filtered_source <- normalizePath(args[["filtered-mtx"]], mustWork = TRUE)
+  raw_digest <- artifact_sha256(raw_source)
+  filtered_digest <- artifact_sha256(filtered_source)
   raw <- read_counts(args[["raw-mtx"]])
   filtered <- read_counts(args[["filtered-mtx"]])
   validate_counts(raw$matrix, "raw droplet")
@@ -102,22 +116,68 @@ main <- function() {
     stop("SoupX changed feature or barcode identity")
   }
   if (sum(corrected) > sum(filtered$matrix) + 1e-8) stop("SoupX correction increased total counts")
+  correction_delta <- corrected - filtered$matrix
+  if (length(correction_delta@x) && any(correction_delta@x > 1e-8)) {
+    stop("SoupX correction increased at least one gene-cell count")
+  }
+  if (length(corrected@x) && any(abs(corrected@x - round(corrected@x)) > 1e-8)) {
+    stop("SoupX promised integer correction but returned non-integer values")
+  }
 
   dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
   write.table(empty_table, file.path(output_dir, "emptydrops_calls.tsv"), quote = FALSE, sep = "\t", row.names = FALSE)
   write_matrix_bundle(corrected, filtered$symbols, file.path(output_dir, "soupx_corrected"))
+  ambient <- channel$soupProfile
+  ambient_table <- data.frame(
+    feature_id = rownames(ambient), symbol = filtered$symbols,
+    ambient_count = as.numeric(ambient$counts), ambient_fraction = as.numeric(ambient$est),
+    stringsAsFactors = FALSE
+  )
+  contamination_table <- data.frame(
+    barcode = colnames(filtered$matrix), contamination_fraction = as.numeric(channel$metaData$rho),
+    stringsAsFactors = FALSE
+  )
+  write.table(ambient_table, file.path(output_dir, "ambient_profile.tsv"), quote = FALSE, sep = "\t", row.names = FALSE)
+  write.table(contamination_table, file.path(output_dir, "cell_contamination.tsv"), quote = FALSE, sep = "\t", row.names = FALSE)
   reloaded <- Matrix::readMM(file.path(output_dir, "soupx_corrected", "matrix.mtx"))
   if (!identical(dim(reloaded), dim(corrected)) || !isTRUE(all.equal(as.numeric(reloaded), as.numeric(corrected)))) {
     stop("serialized SoupX matrix did not reload exactly")
   }
+  if (
+    !identical(readLines(file.path(output_dir, "soupx_corrected", "barcodes.tsv")), colnames(filtered$matrix)) ||
+    !identical(read.delim(file.path(output_dir, "soupx_corrected", "features.tsv"), header = FALSE, stringsAsFactors = FALSE)[[1L]], rownames(filtered$matrix))
+  ) {
+    stop("serialized SoupX identifiers did not reload exactly")
+  }
+  ambient_reloaded <- read.delim(file.path(output_dir, "ambient_profile.tsv"), stringsAsFactors = FALSE)
+  contamination_reloaded <- read.delim(file.path(output_dir, "cell_contamination.tsv"), stringsAsFactors = FALSE)
+  if (nrow(ambient_reloaded) != nrow(raw$matrix) || nrow(contamination_reloaded) != ncol(filtered$matrix)) {
+    stop("ambient profile or contamination table failed reload accounting")
+  }
+  if (artifact_sha256(raw_source) != raw_digest || artifact_sha256(filtered_source) != filtered_digest) {
+    stop("raw or filtered source artifact changed during execution")
+  }
   rho <- as.numeric(channel$metaData$rho)
+  top_ambient <- head(ambient_table[order(-ambient_table$ambient_fraction), c("feature_id", "symbol", "ambient_fraction")], 20L)
   report <- list(
     raw_droplets = ncol(raw$matrix), filtered_cells = ncol(filtered$matrix), features = nrow(raw$matrix),
     emptydrops_tested = sum(!is.na(empty_table$p_value)), emptydrops_called = sum(empty_table$emptydrops_call), emptydrops_fdr = fdr,
     contamination_mode = mode, contamination_fraction_min = min(rho), contamination_fraction_median = median(rho), contamination_fraction_max = max(rho),
     source_filtered_counts = sum(filtered$matrix), corrected_counts = sum(corrected), removed_counts = sum(filtered$matrix) - sum(corrected),
-    source_identifiers_preserved = TRUE, serialized_output_reloaded = TRUE, source_artifacts_mutated = FALSE,
-    versions = list(R = as.character(getRversion()), DropletUtils = as.character(packageVersion("DropletUtils")), SoupX = as.character(packageVersion("SoupX"))),
+    removed_fraction = (sum(filtered$matrix) - sum(corrected)) / sum(filtered$matrix),
+    top_ambient_features = top_ambient,
+    source_digests = list(raw = raw_digest, filtered = filtered_digest),
+    output_digests = list(
+      emptydrops_calls = digest::digest(file.path(output_dir, "emptydrops_calls.tsv"), file = TRUE, algo = "sha256", serialize = FALSE),
+      corrected_matrix = digest::digest(file.path(output_dir, "soupx_corrected", "matrix.mtx"), file = TRUE, algo = "sha256", serialize = FALSE),
+      ambient_profile = digest::digest(file.path(output_dir, "ambient_profile.tsv"), file = TRUE, algo = "sha256", serialize = FALSE),
+      cell_contamination = digest::digest(file.path(output_dir, "cell_contamination.tsv"), file = TRUE, algo = "sha256", serialize = FALSE)
+    ),
+    parameters = list(lower = lower, fdr = fdr, niters = niters, contamination_mode = mode, seed = as.integer(args$seed)),
+    source_identifiers_preserved = TRUE, corrected_counts_never_exceed_source = TRUE,
+    integer_nonnegative_corrected_counts = TRUE, ambient_and_contamination_tables_reloaded = TRUE,
+    serialized_output_reloaded = TRUE, source_artifacts_mutated = FALSE,
+    versions = list(R = as.character(getRversion()), DropletUtils = as.character(packageVersion("DropletUtils")), SoupX = as.character(packageVersion("SoupX")), digest = as.character(packageVersion("digest"))),
     quality_status = "review-required"
   )
   write_json(report, report_path, pretty = TRUE, auto_unbox = TRUE)

@@ -14,8 +14,8 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_ID = "single-cell-generative-modeling"
-MODULE_VERSION = "1.0.0"
-ROW_ID = "agent-protocol-1-scvi-120-scanpy-1115-torch-251"
+MODULE_VERSION = "1.2.0"
+ROW_ID = "agent-protocol-1-scvi-120-scanpy-1115-torch-241"
 TEMPLATE = ROOT / "biomed_workbench" / "modules" / "builtin" / MODULE_ID / "templates" / "train_scvi_scanvi.py"
 
 
@@ -31,7 +31,7 @@ def run(command: list[str], environment: dict[str, str], timeout: int = 600) -> 
 
 
 def verify(scientific_python: Path) -> dict[str, object]:
-    python = scientific_python.expanduser().resolve(strict=True)
+    python = scientific_python.expanduser().absolute()
     if not python.is_file() or not os.access(python, os.X_OK):
         raise RuntimeError("scientific Python is not executable")
     with tempfile.TemporaryDirectory(prefix="biomed-generative-") as temporary:
@@ -111,7 +111,8 @@ adata.write_h5ad({str(fixture)!r})
                 "model_reload_valid", "h5ad_reload_valid",
             )
             expected = (
-                report["mode"] == mode
+                report["schema_version"] == 2
+                and report["mode"] == mode
                 and report["input"]["cells"] == 384
                 and report["input"]["features"] == 120
                 and report["design"]["sample_count"] == 4
@@ -119,6 +120,9 @@ adata.write_h5ad({str(fixture)!r})
                 and report["design"]["known_label_count"] == 3
                 and report["design"]["unknown_cells"] == 48
                 and report["design"]["reviewed_labels_overwritten"] is False
+                and report["design"]["reviewed_labels_removed_before_base_scvi_training"] is True
+                and report["source_immutable"] is True
+                and report["cell_feature_and_source_metadata_identity_preserved"] is True
                 and all(report["quality_gates"][gate] for gate in structural_gates)
                 and report["model"]["reload_valid"] is True
             )
@@ -182,6 +186,9 @@ adata.write_h5ad({str(fixture)!r})
                 "reviewed_and_unknown_labels_preserved": True,
                 "scanvi_evaluated_on_hidden_labels": True,
                 "scanvi_predictions_are_reviewable_suggestions": True,
+                "reviewed_labels_removed_before_base_scvi_training": True,
+                "source_immutable": True,
+                "source_metadata_preserved": True,
                 "no_environment_or_compute_infrastructure_managed": True,
             },
         }

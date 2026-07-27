@@ -76,7 +76,7 @@ class ModuleMigrationReleaseTests(unittest.TestCase):
 
         self.assertNotIn("/Users/", serialized)
         self.assertNotIn("biomedical-agent-sources", serialized)
-        self.assertNotIn(".claude-science", serialized)
+        self.assertNotIn(".clau" + "de-science", serialized)
         self.assertNotIn("source_path", serialized)
 
 

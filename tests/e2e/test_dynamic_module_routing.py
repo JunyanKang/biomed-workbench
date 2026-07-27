@@ -9,6 +9,74 @@ from tests.unit.test_module_registry import write_manifest
 
 
 class DynamicModuleRoutingTests(unittest.TestCase):
+    def test_compound_wetlab_request_does_not_expand_from_generic_simulation_or_measurement_words(self):
+        plan = route(
+            "Quantify bacterial CFU from serial dilution plates, summarize crystal-violet biofilm measurements, "
+            "and distinguish observed results from a bacterial population scenario."
+        )
+
+        self.assertEqual(plan["matched_workflows"], ["wetlab"])
+        self.assertEqual(
+            plan["selected_module_ids"],
+            ["cfu-enumeration", "biofilm-crystal-violet", "bacterial-population-scenario"],
+        )
+        self.assertNotIn("msprime-demographic-simulation", plan["selected_module_ids"])
+        self.assertNotIn("network-analysis", plan["selected_module_ids"])
+        self.assertNotIn("single-cell-marker-discovery", plan["selected_module_ids"])
+
+    def test_composite_scientific_queries_ignore_generic_context_words_across_domains(self):
+        communication = route("analyze donor-aware single-cell differential expression and validate cell-cell communication")
+        annotation = route("identify cell types in scRNA-seq and retain unknown populations")
+        spatial = route("analyze spatial transcriptomics and validate spatial gene patterns")
+        disorder = route("compare protein disorder profile with AlphaFold confidence for P04637")
+
+        self.assertEqual(communication["matched_workflows"], ["omics"])
+        self.assertIn("single-cell-communication", communication["selected_module_ids"])
+        self.assertNotIn("image-chroma-key-remove", communication["selected_module_ids"])
+        self.assertEqual(annotation["matched_workflows"], ["omics"])
+        self.assertNotIn("point-tracking", annotation["selected_module_ids"])
+        self.assertEqual(spatial["matched_workflows"], ["omics"])
+        self.assertEqual(spatial["selected_module_ids"], ["single-cell-spatial-analysis"])
+        self.assertEqual(disorder["matched_workflows"], ["evidence"])
+        self.assertEqual(disorder["selected_module_ids"], ["protein-disorder-evidence", "alphafold-structure-evidence"])
+
+    def test_exact_protein_disorder_lookup_is_not_expanded_by_generic_profile_terms(self):
+        payload = route("retrieve protein disorder profile for UniProt P04637")
+
+        self.assertEqual(payload["matched_workflows"], ["evidence"])
+        self.assertEqual(payload["selected_module_ids"], ["protein-disorder-evidence"])
+
+    def test_cfse_proliferation_intent_does_not_leak_to_alignment_indexing(self):
+        plan = route("analyze CFSE proliferation and division index")
+
+        self.assertEqual(plan["selected_module_ids"], ["dye-dilution-proliferation"])
+
+    def test_fcs_import_expands_into_declared_flow_cytometry_gating(self):
+        plan = route("导入 FCS 流式细胞术文件并做门控")
+
+        self.assertEqual(plan["selected_module_ids"], ["fcs-event-import", "flow-cytometry-summary"])
+        self.assertEqual(plan["plan_type"], "serial")
+
+    def test_immunophenotype_expands_into_event_import_and_gate_lineage(self):
+        plan = route("quantify flow cytometry immunophenotype")
+
+        self.assertEqual(
+            plan["selected_module_ids"],
+            ["fcs-event-import", "flow-cytometry-summary", "flow-immunophenotype-summary"],
+        )
+        self.assertEqual(plan["plan_type"], "serial")
+
+    def test_cell_migration_metrics_expands_the_declared_tracking_upstream(self):
+        plan = route("追踪细胞并量化迁移轨迹")
+
+        self.assertEqual(plan["selected_module_ids"], ["point-tracking", "cell-migration-metrics"])
+        self.assertEqual(plan["plan_type"], "serial")
+
+    def test_primer_pair_reference_panel_discovers_the_specificity_module(self):
+        plan = route("Screen this PCR primer pair against my plasmid and paralog reference panel")
+
+        self.assertIn("primer-pair-specificity-screen", plan["selected_module_ids"])
+
     def test_connective_words_do_not_create_cross_domain_routes(self):
         plan = route("single-cell RNA-seq QC and differential expression")
         self.assertEqual(plan["matched_workflows"], ["omics"])
@@ -70,6 +138,14 @@ class DynamicModuleRoutingTests(unittest.TestCase):
 
         self.assertIn("single-cell-reference-annotation", routed)
 
+    def test_reference_map_query_prefers_reference_annotation(self):
+        plan = route("Reference map single-cell annotation")
+        selected = set(plan["selected_module_ids"])
+        routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}
+
+        self.assertIn("single-cell-reference-annotation", routed)
+        self.assertIn("single-cell-reference-annotation", selected)
+
     def test_single_cell_trajectory_velocity_routes_from_manifest(self):
         plan = route("Run scVelo RNA velocity latent time and direction-validated pseudotime")
         routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}
@@ -87,6 +163,16 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         self.assertIn("single-cell-fate-mapping", selected)
         self.assertIn("omics", plan["matched_workflows"])
 
+    def test_velocity_regvelo_query_excludes_generative_modeling(self):
+        plan = route(
+            "Run RNA velocity and RegVelo with CellRank fate and annotation"
+        )
+        selected = set(plan["selected_module_ids"])
+
+        self.assertIn("single-cell-regulatory-velocity", selected)
+        self.assertIn("single-cell-fate-mapping", selected)
+        self.assertNotIn("single-cell-generative-modeling", selected)
+
     def test_multi_method_annotation_consensus_routes_to_atlas_annotation(self):
         plan = route(
             "Reconcile CellTypist Azimuth popV SingleR and scANVI annotations with "
@@ -94,6 +180,41 @@ class DynamicModuleRoutingTests(unittest.TestCase):
         )
 
         self.assertIn("single-cell-atlas-annotation", plan["selected_module_ids"])
+
+    def test_scRNA_seq_empty_droplet_request_routes_to_single_cell_droplet_module(self):
+        plan = route("做scRNA-seq空滴去除")
+
+        self.assertEqual(plan["matched_workflows"], ["omics"])
+        self.assertEqual(plan["selected_module_ids"], ["single-cell-droplet-decontamination"])
+
+    def test_single_cell_complex_inference_query_routes_from_manifest(self):
+        plan = route(
+            "Run single-cell complex differential inference with longitudinal mixed models and variance decomposition"
+        )
+
+        self.assertIn("single-cell-complex-inference", {item["id"] for step in plan["steps"] for item in step["candidates"]})
+        self.assertIn("single-cell-complex-inference", plan["selected_module_ids"])
+
+    def test_single_cell_trajectory_velocity_does_not_leak_to_imaging_tracking(self):
+        plan = route("做单细胞轨迹分析和RNA velocity")
+
+        self.assertEqual(plan["matched_workflows"], ["omics"])
+        self.assertNotIn("imaging", plan["matched_workflows"])
+        routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}
+        self.assertIn("single-cell-fate-mapping", routed)
+        self.assertIn("single-cell-trajectory-topology", routed)
+        self.assertNotIn("point-tracking", routed)
+        self.assertNotIn("cell-migration-metrics", routed)
+
+    def test_medical_imaging_query_routes_to_medical_imaging_modules(self):
+        plan = route("检查 DICOM / NIfTI 医疗影像序列并做体积摘要与元数据隐私审计")
+        routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}
+
+        self.assertEqual(plan["matched_workflows"], ["imaging"])
+        self.assertIn("medical-imaging-volume-summary", plan["selected_module_ids"])
+        self.assertIn("medical-imaging-metadata-audit", plan["selected_module_ids"])
+        self.assertIn("medical-imaging-volume-summary", routed)
+        self.assertIn("medical-imaging-metadata-audit", routed)
 
     def test_router_contains_no_module_specific_intent_table(self):
         source = (Path(__file__).resolve().parents[2] / "biomed_workbench" / "router.py").read_text(encoding="utf-8")

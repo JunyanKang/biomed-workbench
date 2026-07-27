@@ -2,7 +2,7 @@
   "access": "offline",
   "alternatives": [],
   "assumptions": [
-    "Template ends are intended primer regions and approximate melting-temperature formulas are adequate for candidate screening."
+    "Primer3 nearest-neighbor calculations are appropriate for candidate screening when the user supplies an unambiguous intended template and reviews the declared chemistry settings."
   ],
   "code_templates": [
     {
@@ -10,7 +10,9 @@
       "path": "templates/run_primer_design.py",
       "purpose": "Execute and validate design pcr primer candidates against real project inputs and the module compatibility contract.",
       "quality_gate_ids": [
-        "primer-design-validity"
+        "primer-design-input",
+        "primer3-candidate-accounting",
+        "primer-design-claim-boundary"
       ],
       "requires_adaptation": true
     }
@@ -20,18 +22,24 @@
       "dependency_versions": {
         "python": [
           ">=3.14,<3.15"
+        ],
+        "biopython": [
+          ">=1.86,<1.88"
+        ],
+        "primer3-py": [
+          ">=2.3,<2.4"
         ]
       },
       "end_to_end_evidence_ids": [
         "primer-design-e2e-v1"
       ],
-      "id": "python-3.14.3-inline-json-1",
+      "id": "python-3.14.3-biopython-1.87-primer3-py-2.3.0-inline-json-1",
       "input_formats": {
         "template": [
           "inline-json@1"
         ]
       },
-      "module_version": "1.0.0",
+      "module_version": "1.1.0",
       "output_formats": {
         "primers": [
           "inline-json@1"
@@ -44,7 +52,7 @@
         "primer-design-regression-v1"
       ],
       "tool_versions": {},
-      "verified_at": "2026-07-12"
+      "verified_at": "2026-07-24"
     }
   ],
   "complements": [
@@ -76,9 +84,63 @@
       "version_probe_kind": "python_callable",
       "version_probe_timeout_seconds": 5,
       "version_source": "https://www.python.org/downloads/release/python-3143/"
+    },
+    {
+      "name": "biopython",
+      "ecosystem": "python",
+      "identity": "biopython",
+      "required": true,
+      "tested_versions": [
+        "1.87"
+      ],
+      "allowed_versions": [
+        ">=1.86,<1.88"
+      ],
+      "version_source": "https://biopython.org/wiki/Download",
+      "verified_at": "2026-07-24",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version(\"biopython\"))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Import and execute the molecular capability module under its validated dependency contract.",
+      "conflicts": [],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "primer3-py",
+      "ecosystem": "python",
+      "identity": "primer3-py",
+      "required": true,
+      "tested_versions": [
+        "2.3.0"
+      ],
+      "allowed_versions": [
+        ">=2.3,<2.4"
+      ],
+      "version_source": "https://pypi.org/project/primer3-py/",
+      "verified_at": "2026-07-24",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version(\"primer3-py\"))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Calculate versioned nearest-neighbor PCR-primer thermodynamics and ranked candidates.",
+      "conflicts": [],
+      "platforms": [
+        "any"
+      ]
     }
   ],
-  "description": "Rank facing primer pairs with explicit thermodynamic approximations and validation limits.",
+  "description": "Use Primer3 nearest-neighbor thermodynamics to rank facing PCR primer pairs with retained candidate metrics and validation limits.",
   "domains": [
     "molecular_design"
   ],
@@ -160,21 +222,21 @@
   "intents": [
     "primer design",
     "Design PCR primer candidates",
-    "\u8bbe\u8ba1 PCR \u5f15\u7269\u5019\u9009"
+    "设计 PCR 引物候选"
   ],
   "kernel_compatibility": [
     ">=0.2.0,<0.3.0"
   ],
   "limitations": [
     "Genomic uniqueness and off-target amplification are not assessed; verify candidates against the intended reference.",
-    "Secondary structure and salt-adjusted nearest-neighbor thermodynamics require a dedicated downstream check."
+    "Primer3 candidate thermodynamics do not establish target specificity, genomic uniqueness, sample-template integrity, polymerase compatibility, or PCR success."
   ],
   "maturity": "validated",
   "module_type": "design",
   "mutability": "read_only",
   "output_artifacts": [
     {
-      "artifact_type": "candidate_design",
+      "artifact_type": "primer_candidate_design",
       "formats": [
         {
           "annotation_releases": [],
@@ -221,13 +283,21 @@
       },
       "tm_method": {
         "type": "string"
+      },
+      "template": {
+        "type": "string"
+      },
+      "primer3_version": {
+        "type": "string"
       }
     },
     "required": [
       "limitations",
       "pairs",
       "template_length",
-      "tm_method"
+      "tm_method",
+      "template",
+      "primer3_version"
     ],
     "type": "object"
   },
@@ -236,23 +306,35 @@
   ],
   "provenance": {
     "concept_sources": [
-      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+      "Project-owned implementation with module-level validation evidence."
     ],
     "license": "Apache-2.0"
   },
   "quality_gates": [
     {
-      "blocks_interpretation": true,
-      "description": "Sequence identity, coordinate convention, model approximations, off-target scope, and orthogonal validation needs are reviewed.",
-      "id": "primer-design-validity",
-      "severity": "major"
+      "id": "primer-design-input",
+      "severity": "fatal",
+      "description": "Require an unambiguous declared DNA template and bounded Primer3 size, temperature and product constraints.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "primer3-candidate-accounting",
+      "severity": "major",
+      "description": "Retain Primer3 version, thermodynamic method, coordinates, pair penalty, self-complementarity and hairpin metrics for every candidate.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "primer-design-claim-boundary",
+      "severity": "major",
+      "description": "Block PCR-success or target-specificity claims without reference-aware uniqueness checks and experimental validation.",
+      "blocks_interpretation": true
     }
   ],
   "questions": [
-    "Which facing primer pairs best satisfy length, approximate melting temperature, GC, and homopolymer constraints?"
+    "Which facing primer pairs best satisfy declared length and Primer3 thermodynamic constraints before reference-aware specificity review?"
   ],
   "schema_version": 1,
   "title": "Design PCR primer candidates",
   "tool_requirements": [],
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

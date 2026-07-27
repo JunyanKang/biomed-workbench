@@ -21,6 +21,7 @@ VERSION_DIFFERENCE_CATEGORIES = frozenset({"parameter", "api", "field", "default
 COMPATIBILITY_EFFECTS = frozenset({"informational", "requires-parameter", "requires-parser", "requires-format", "breaking"})
 GENOME_BUILD_POLICIES = frozenset({"not_applicable", "required", "declared", "any_validated"})
 REPRESENTATIONS = frozenset({"structured", "text", "binary", "sparse", "container"})
+INPUT_SOURCE_POLICIES = frozenset({"project_input", "project_or_upstream", "upstream_required"})
 ALLOWED_CREDENTIALS = frozenset({"NCBI_API_KEY"})
 
 _ID_RE = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
@@ -51,6 +52,7 @@ class ArtifactPort:
     formats: tuple[FormatContract, ...]
     processing_levels: tuple[str, ...]
     required_metadata: tuple[str, ...]
+    source_policy: str = "project_input"
 
 
 @dataclass(frozen=True)
@@ -228,6 +230,7 @@ class ModuleManifest:
 _MANIFEST_FIELDS = frozenset(ModuleManifest.__dataclass_fields__)
 _FORMAT_FIELDS = frozenset(FormatContract.__dataclass_fields__)
 _ARTIFACT_FIELDS = frozenset(ArtifactPort.__dataclass_fields__)
+_REQUIRED_ARTIFACT_FIELDS = _ARTIFACT_FIELDS - {"source_policy"}
 _QUALITY_FIELDS = frozenset(QualityGate.__dataclass_fields__)
 _EXECUTION_BASE_FIELDS = frozenset({"kind", "timeout_seconds", "max_output_bytes"})
 _TOOL_FIELDS = frozenset(ToolRequirement.__dataclass_fields__)
@@ -415,7 +418,12 @@ def _format(value: Any, location: str) -> FormatContract:
 
 def _artifact(value: Any, location: str) -> ArtifactPort:
     payload = _object(value, location)
-    _exact_fields(payload, _ARTIFACT_FIELDS, location)
+    extra = sorted(set(payload) - _ARTIFACT_FIELDS)
+    missing = sorted(_REQUIRED_ARTIFACT_FIELDS - set(payload))
+    if extra:
+        raise ValueError(f"unsupported {location} fields: {', '.join(extra)}")
+    if missing:
+        raise ValueError(f"missing {location} fields: {', '.join(missing)}")
     name = _text(payload["name"], f"{location}.name")
     artifact_type = _text(payload["artifact_type"], f"{location}.artifact_type")
     if not _NAME_RE.fullmatch(name) or not _NAME_RE.fullmatch(artifact_type):
@@ -425,12 +433,16 @@ def _artifact(value: Any, location: str) -> ArtifactPort:
     formats = tuple(_format(item, f"{location}.formats[{index}]") for index, item in enumerate(payload["formats"]))
     if len({item.name for item in formats}) != len(formats):
         raise ValueError(f"{location}.formats contains duplicate names")
+    source_policy = _text(payload.get("source_policy", "project_input"), f"{location}.source_policy")
+    if source_policy not in INPUT_SOURCE_POLICIES:
+        raise ValueError(f"{location}.source_policy is unsupported")
     return ArtifactPort(
         name=name,
         artifact_type=artifact_type,
         formats=formats,
         processing_levels=_strings(payload["processing_levels"], f"{location}.processing_levels"),
         required_metadata=_strings(payload["required_metadata"], f"{location}.required_metadata", allow_empty=True),
+        source_policy=source_policy,
     )
 
 
@@ -942,6 +954,7 @@ def _artifact_dict(value: ArtifactPort) -> dict[str, object]:
         "formats": [_format_dict(item) for item in value.formats],
         "processing_levels": list(value.processing_levels),
         "required_metadata": list(value.required_metadata),
+        "source_policy": value.source_policy,
     }
 
 

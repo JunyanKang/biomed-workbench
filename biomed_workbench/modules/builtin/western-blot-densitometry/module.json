@@ -1,0 +1,289 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Target-band and optional loading-control ROIs, areas, backgrounds, reference lanes, and replicate identities were reviewed before this calculation."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_western_blot_densitometry.py",
+      "purpose": "Execute reviewed Western blot ROI normalization and preserve its project-bound provenance.",
+      "quality_gate_ids": [
+        "western-blot-reviewed-roi-contract",
+        "western-blot-interpretation-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "western-blot-densitometry-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "reviewed_blot_rois": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "western_blot_summary": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "western-blot-densitometry-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "image-segment",
+    "immunoassay-quantification"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic reviewed-ROI accounting.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-24",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Normalize manually reviewed Western blot target-band ROIs by background, optional matched loading control, and declared reference lanes while preserving technical and biological repetition boundaries.",
+  "domains": [
+    "wetlab"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_western_blot_densitometry",
+  "evidence_effects": [
+    "summarizes-reviewed-western-blot-roi-measurements"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "western-blot-densitometry",
+  "input_artifacts": [
+    {
+      "artifact_type": "reviewed_blot_roi_measurements",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "image-pixel-roi"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "lane-by-target-and-control-measurement"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "reviewed_blot_rois",
+      "processing_levels": [
+        "roi-reviewed",
+        "background-declared"
+      ],
+      "required_metadata": [
+        "original-image-digest",
+        "target-antibody",
+        "exposure-and-saturation-review",
+        "roi-review-policy",
+        "sample-provenance"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "measurements": {
+        "items": {
+          "type": "object"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "reference_lane_ids": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "replicate_level": {
+        "enum": [
+          "unspecified",
+          "technical",
+          "biological"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "measurements",
+      "reference_lane_ids"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "Western blot densitometry",
+    "quantify Western blot bands",
+    "Western blot \u6761\u5e26\u5b9a\u91cf",
+    "\u86cb\u767d\u5370\u8ff9\u7070\u5ea6\u5206\u6790"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module does not detect bands from an image, select ROIs, assess saturation, remove background automatically, choose loading controls, infer protein abundance, or perform condition-level significance testing."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "western_blot_densitometry_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "lane-identity"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "lane-and-condition-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "western_blot_summary",
+      "processing_levels": [
+        "background-corrected",
+        "reference-normalized"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "reference-lanes",
+        "replicate-level",
+        "quality-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "condition_summary": {
+        "type": "array"
+      },
+      "lanes": {
+        "type": "array"
+      },
+      "quality_gates": {
+        "type": "array"
+      },
+      "reference_lane_ids": {
+        "type": "array"
+      },
+      "reference_mean_normalized_intensity": {
+        "type": "number"
+      },
+      "replicate_level": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "reference_lane_ids",
+      "reference_mean_normalized_intensity",
+      "replicate_level",
+      "lanes",
+      "condition_summary",
+      "quality_gates"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Every lane has a unique identity, a declared condition, reviewed target ROI intensity, background-per-pixel, area, and one or more declared reference lanes."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room reviewed-ROI Western blot accounting implementation."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require unique reviewed lane identities, positive background-corrected target signal, declared reference lanes, and complete matched loading-control fields whenever normalization is requested.",
+      "id": "western-blot-reviewed-roi-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require original-image, ROI, exposure, saturation, antibody, loading-control, and biological-replication review before biological or condition-level interpretation.",
+      "id": "western-blot-interpretation-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What reviewed background-corrected and reference-normalized Western blot signal is supported by these declared lanes?"
+  ],
+  "schema_version": 1,
+  "title": "Quantify reviewed Western blot bands",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "tp53-human-to-mouse-ortholog",
+      "input": {
+        "gene_id": "7157",
+        "target_taxon_id": 10090,
+        "max_records": 10
+      },
+      "expected_subset": {
+        "source": {
+          "gene_id": "7157",
+          "symbol": "TP53",
+          "tax_id": "9606"
+        },
+        "target_taxon_id": "10090",
+        "total_target_orthologs": 1,
+        "truncated": false
+      },
+      "http_fixtures": [
+        {
+          "method": "GET",
+          "url": "https://api.ncbi.nlm.nih.gov/datasets/v2/gene/id/7157/orthologs",
+          "status": 200,
+          "headers": {
+            "Content-Type": "application/json"
+          },
+          "json": {
+            "reports": [
+              {
+                "gene": {
+                  "gene_id": "7157",
+                  "symbol": "TP53",
+                  "tax_id": "9606",
+                  "taxname": "Homo sapiens",
+                  "ensembl_gene_ids": [
+                    "ENSG00000141510"
+                  ]
+                }
+              },
+              {
+                "gene": {
+                  "gene_id": "22059",
+                  "symbol": "Trp53",
+                  "tax_id": "10090",
+                  "taxname": "Mus musculus",
+                  "ensembl_gene_ids": [
+                    "ENSMUSG00000059552"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

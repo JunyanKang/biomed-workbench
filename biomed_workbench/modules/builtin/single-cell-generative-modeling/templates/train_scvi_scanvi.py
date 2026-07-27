@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import platform
+import random
 from importlib.metadata import version
 from pathlib import Path
 
@@ -55,6 +56,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--minimum-heldout-macro-f1", type=float, required=True)
     parser.add_argument("--suggestion-confidence", type=float, required=True)
     parser.add_argument("--seed", type=int, required=True)
+    parser.add_argument("--de-group-key", default="none")
+    parser.add_argument("--de-group1", default="")
+    parser.add_argument("--de-group2", default="")
+    parser.add_argument("--de-delta", type=float, default=0.25)
+    parser.add_argument("--de-top-genes", type=int, default=50)
     return parser.parse_args()
 
 
@@ -106,6 +112,88 @@ def metadata_frame(adata: anndata.AnnData, fields: list[str]) -> pd.DataFrame:
         if frame[field].eq("").any():
             raise ValueError(f"metadata field contains empty values: {field}")
     return frame
+
+
+def h5ad_safe_frame(frame: pd.DataFrame, *, preserve_missing: bool = True) -> pd.DataFrame:
+    """Normalize string-like metadata before AnnData HDF5 serialization."""
+    sanitized = frame.copy()
+    sanitized.index = pd.Index(np.asarray(sanitized.index, dtype=object).astype(str), name=sanitized.index.name)
+    for column in sanitized.columns:
+        dtype = str(sanitized[column].dtype).lower()
+        if dtype != "object" and "string" not in dtype:
+            continue
+        missing = sanitized[column].isna()
+        values = np.array(sanitized[column].astype(object).where(~missing, None), dtype=object, copy=True)
+        values[~missing.to_numpy()] = np.asarray(sanitized.loc[~missing, column].astype(str), dtype=object)
+        if not preserve_missing:
+            values[missing.to_numpy()] = "nan"
+        sanitized[column] = pd.Categorical(values)
+    return sanitized
+
+
+def sanitize_h5ad_metadata(adata: anndata.AnnData) -> dict[str, int]:
+    """Preserve metadata values while removing unsupported Arrow string arrays."""
+    counts = {"obs_columns": int(adata.obs.shape[1]), "var_columns": int(adata.var.shape[1])}
+    adata.obs = h5ad_safe_frame(adata.obs, preserve_missing=False)
+    adata.var = h5ad_safe_frame(adata.var, preserve_missing=False)
+    return counts
+
+
+def bayesian_de_summary(model, model_adata: anndata.AnnData, args: argparse.Namespace) -> dict[str, object]:
+    """Run a bounded cell-level scVI DE contrast after model admission only."""
+    if args.de_group_key == "none":
+        if args.de_group1 or args.de_group2:
+            raise ValueError("DE group values require --de-group-key")
+        return {"status": "not_requested", "evidence_level": "not_applicable"}
+    if not args.de_group_key.strip() or not args.de_group1.strip():
+        raise ValueError("requested Bayesian DE requires --de-group-key and --de-group1")
+    if args.de_group2 == "rest":
+        raise ValueError("use an empty --de-group2 for one-versus-all; 'rest' is not an scvi-tools category")
+    if not 0 < args.de_delta <= 5 or not 1 <= args.de_top_genes <= 500:
+        raise ValueError("Bayesian DE delta or result bound is invalid")
+    if args.de_group_key not in model_adata.obs:
+        raise ValueError("Bayesian DE group key is absent from model metadata")
+    groups = model_adata.obs[args.de_group_key].astype(str)
+    if args.de_group1 not in set(groups):
+        raise ValueError("Bayesian DE group1 is absent from model metadata")
+    if args.de_group2 and args.de_group2 not in set(groups):
+        raise ValueError("Bayesian DE group2 is absent from model metadata")
+    table = model.differential_expression(
+        groupby=args.de_group_key,
+        group1=args.de_group1,
+        group2=args.de_group2 or None,
+        mode="change",
+        delta=args.de_delta,
+    )
+    required_columns = {"proba_de", "lfc_mean", "bayes_factor", "group1", "group2"}
+    missing = sorted(required_columns - set(table.columns))
+    if missing:
+        raise RuntimeError(f"scvi-tools change-mode DE lacks required fields: {', '.join(missing)}")
+    ranked = table.sort_values("proba_de", ascending=False).head(args.de_top_genes).reset_index()
+    index_column = ranked.columns[0]
+    records = [
+        {
+            "feature": str(row[index_column]),
+            "proba_de": float(row["proba_de"]),
+            "lfc_mean": float(row["lfc_mean"]),
+            "bayes_factor": float(row["bayes_factor"]),
+            "group1": str(row["group1"]),
+            "group2": str(row["group2"]),
+        }
+        for _, row in ranked.iterrows()
+    ]
+    return {
+        "status": "completed",
+        "evidence_level": "exploratory_cell_level",
+        "group_key": args.de_group_key,
+        "group1": args.de_group1,
+        "group2": args.de_group2 or "all-other-cells",
+        "mode": "change",
+        "delta": args.de_delta,
+        "tested_features": int(table.shape[0]),
+        "top_features": records,
+        "interpretation_boundary": "This is model-based cell-level evidence and cannot substitute for pseudobulk or donor-aware condition inference.",
+    }
 
 
 def neighbors(representation: np.ndarray, count: int) -> np.ndarray:
@@ -210,6 +298,7 @@ def train_kwargs(args: argparse.Namespace, epochs: int) -> dict[str, object]:
 def main() -> int:
     args = parse_args()
     source = Path(args.input_h5ad).resolve(strict=True)
+    source_digest = file_sha256(source)
     output = Path(args.output_h5ad)
     model_dir = Path(args.model_dir)
     report_path = Path(args.report)
@@ -249,8 +338,14 @@ def main() -> int:
     counts = get_counts(source_adata, args.raw_count_location)
     validate_counts(counts)
     original_counts = sparse.csr_matrix(counts, dtype=np.int64)
-    adata = anndata.AnnData(X=original_counts.copy(), obs=source_adata.obs.copy(), var=source_adata.var.copy())
+    model_obs = source_adata.obs.drop(columns=[args.reviewed_label_key]).copy()
+    if args.reviewed_label_key in model_obs:
+        raise RuntimeError("reviewed labels remain visible to base scVI training")
+    adata = anndata.AnnData(X=original_counts.copy(), obs=model_obs, var=source_adata.var.copy())
     adata.layers["counts"] = original_counts.copy()
+    random.seed(args.seed)
+    np.random.seed(args.seed)
+    torch.manual_seed(args.seed)
     scvi.settings.seed = args.seed
     SCVI.setup_anndata(adata, layer="counts", batch_key=args.batch_key)
     base_model = SCVI(
@@ -336,6 +431,7 @@ def main() -> int:
     raw_preserved = (sparse.csr_matrix(get_counts(output_adata, args.raw_count_location)) != original_counts).nnz == 0
 
     selected_model.save(str(model_dir), overwrite=False, save_anndata=False)
+    metadata_serialization = sanitize_h5ad_metadata(output_adata)
     output_adata.uns["biomed_generative_model"] = {
         "mode": args.mode,
         "latent_key": latent_key,
@@ -343,6 +439,7 @@ def main() -> int:
         "unknown_label": args.unknown_label,
         "reviewed_labels_overwritten": False,
         "quality_status": "pending_reload",
+        "metadata_serialization": metadata_serialization,
     }
     output_adata.write_h5ad(output)
     reloaded_adata = sc.read_h5ad(output)
@@ -357,6 +454,13 @@ def main() -> int:
         and "connectivities" in reloaded_adata.obsp
         and (sparse.csr_matrix(get_counts(reloaded_adata, args.raw_count_location)) != original_counts).nnz == 0
         and np.array_equal(reloaded_adata.obs[args.reviewed_label_key].astype(str).to_numpy(), labels)
+        and all(
+            np.array_equal(
+                reloaded_adata.obs[column].astype(str).to_numpy(),
+                source_adata.obs[column].astype(str).to_numpy(),
+            )
+            for column in source_adata.obs.columns
+        )
     )
     gates = {
         "latent_finite": bool(np.isfinite(selected_latent).all()),
@@ -370,6 +474,15 @@ def main() -> int:
         "heldout_annotation_valid": args.mode == "scvi" or float(holdout_metrics["macro_f1"]) >= args.minimum_heldout_macro_f1,
     }
     quality_status = "passed" if all(gates.values()) else "blocked"
+    bayesian_de = (
+        bayesian_de_summary(selected_model, selected_adata, args)
+        if quality_status == "passed"
+        else {
+            "status": "blocked_by_model_quality_gates",
+            "evidence_level": "not_admitted",
+            "interpretation_boundary": "Bayesian DE was not run because the generative model failed one or more required quality gates.",
+        }
+    )
     output_adata.uns["biomed_generative_model"]["quality_status"] = quality_status
     output_adata.write_h5ad(output)
     final_reloaded_adata = sc.read_h5ad(output)
@@ -384,7 +497,7 @@ def main() -> int:
         raise RuntimeError("model or h5ad reload validation failed")
 
     report = {
-        "schema_version": 1,
+        "schema_version": 2,
         "mode": args.mode,
         "quality_status": quality_status,
         "input": {"filename": source.name, "sha256": file_sha256(source), "cells": output_adata.n_obs, "features": output_adata.n_vars, "raw_count_location": args.raw_count_location},
@@ -398,6 +511,7 @@ def main() -> int:
             "known_label_count": len(set(labels[known].tolist())),
             "unknown_cells": int((~known).sum()),
             "reviewed_labels_overwritten": False,
+            "reviewed_labels_removed_before_base_scvi_training": True,
         },
         "parameters": {
             "n_hidden": args.n_hidden, "n_latent": args.n_latent, "n_layers": args.n_layers,
@@ -405,13 +519,16 @@ def main() -> int:
             "scvi_epochs": args.scvi_epochs, "scanvi_epochs": args.scanvi_epochs,
             "batch_size": args.batch_size, "train_size": args.train_size,
             "holdout_fraction": args.holdout_fraction, "n_neighbors": args.n_neighbors,
-            "seed": args.seed,
+            "seed": args.seed, "de_group_key": args.de_group_key, "de_group1": args.de_group1,
+            "de_group2": args.de_group2 or "all-other-cells", "de_delta": args.de_delta,
+            "de_top_genes": args.de_top_genes,
         },
         "baseline_metrics": baseline,
         "modeled_metrics": modeled,
         "metric_deltas": {"batch_neighbor_entropy_gain": entropy_gain, "known_label_neighbor_purity_loss": purity_loss},
         "heldout_annotation_metrics": holdout_metrics,
         "prediction_summary": prediction_summary,
+        "bayesian_differential_expression": bayesian_de,
         "quality_thresholds": {
             "minimum_batch_entropy_gain": args.minimum_batch_entropy_gain,
             "maximum_label_purity_loss": args.maximum_label_purity_loss,
@@ -420,6 +537,8 @@ def main() -> int:
             "suggestion_confidence": args.suggestion_confidence,
         },
         "quality_gates": gates,
+        "source_immutable": file_sha256(source) == source_digest,
+        "cell_feature_and_source_metadata_identity_preserved": True,
         "output": {"filename": output.name, "sha256": file_sha256(output), "latent_key": latent_key},
         "model": {"directory_name": model_dir.name, "sha256": tree_sha256(model_dir), "reload_valid": True},
         "versions": {
@@ -429,6 +548,8 @@ def main() -> int:
             "lightning": version("lightning"),
         },
     }
+    if not report["source_immutable"]:
+        raise RuntimeError("source H5AD changed during generative modeling")
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({"mode": args.mode, "quality_status": quality_status, "entropy_gain": entropy_gain, "purity_loss": purity_loss, "heldout_macro_f1": None if holdout_metrics is None else holdout_metrics["macro_f1"]}, sort_keys=True))
     return 0

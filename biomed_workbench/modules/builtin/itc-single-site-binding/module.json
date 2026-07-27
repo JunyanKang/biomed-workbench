@@ -1,0 +1,389 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The supplied heats are integrated per injection and a one-site equilibrium model is scientifically justified for this one experiment."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_itc_single_site_binding.py",
+      "purpose": "Execute and validate fit one-site itc binding against real project inputs and the module compatibility contract.",
+      "quality_gate_ids": [
+        "itc-integrated-input-contract",
+        "itc-fit-boundary-and-residual-review"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "numpy": [
+          ">=2.5,<2.6"
+        ],
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "itc-single-site-binding-e2e-v1"
+      ],
+      "id": "scipy-1.17.1-numpy-2.5.1-inline-json-1",
+      "input_formats": {
+        "itc_integrated_heats": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "itc_binding_fit": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "itc-single-site-binding-regression-v1"
+      ],
+      "tool_versions": {
+        "scipy": [
+          ">=1.17,<1.18"
+        ]
+      },
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "enzyme-kinetics",
+    "structure-ligands"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=2.5,<2.6"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "numpy",
+      "name": "numpy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Represent integrated heat vectors and fit residuals.",
+      "required": true,
+      "tested_versions": [
+        "2.5.1"
+      ],
+      "verified_at": "2026-07-24",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import numpy; print(numpy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://numpy.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute bounded numerical fitting.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-24",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Fit a dilution-aware one-site equilibrium model to declared integrated ITC injection heats, retaining fitted thermodynamics, residuals, uncertainty, and fit-boundary diagnostics.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.biophysics:fit_itc_single_site_binding",
+  "evidence_effects": [
+    "fits-model-bound-itc-thermodynamic-evidence"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 60
+  },
+  "id": "itc-single-site-binding",
+  "input_artifacts": [
+    {
+      "artifact_type": "itc_integrated_heat_series",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "injection-order"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "injection-by-integrated-heat"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "itc_integrated_heats",
+      "processing_levels": [
+        "integrated",
+        "declared"
+      ],
+      "required_metadata": [
+        "instrument-export-or-integration-provenance",
+        "heat-unit",
+        "injection-volume-unit",
+        "cell-concentration",
+        "syringe-concentration",
+        "temperature"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "cell_macromolecule_um": {
+        "exclusiveMinimum": 0,
+        "type": "number"
+      },
+      "cell_volume_ul": {
+        "exclusiveMinimum": 0,
+        "type": "number"
+      },
+      "injection_volumes_ul": {
+        "items": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "minItems": 8,
+        "type": "array"
+      },
+      "integrated_heats_ucal": {
+        "items": {
+          "type": "number"
+        },
+        "minItems": 8,
+        "type": "array"
+      },
+      "syringe_ligand_um": {
+        "exclusiveMinimum": 0,
+        "type": "number"
+      },
+      "temperature_k": {
+        "exclusiveMinimum": 0,
+        "type": "number"
+      }
+    },
+    "required": [
+      "injection_volumes_ul",
+      "integrated_heats_ucal",
+      "cell_macromolecule_um",
+      "syringe_ligand_um",
+      "cell_volume_ul"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "fit ITC binding",
+    "ITC single-site binding",
+    "ITC \u70ed\u529b\u5b66\u62df\u5408",
+    "\u7b49\u6e29\u6ef4\u5b9a\u91cf\u70ed\u62df\u5408"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module fits one integrated-heat experiment under a one-site model. It does not integrate raw thermograms, choose models, perform global or Bayesian fitting, correct concentration error, establish stoichiometry, or validate binding biology."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "itc_binding_fit_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "injection-order"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "fit-parameters-and-injection-residuals"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "itc_binding_fit",
+      "processing_levels": [
+        "fitted",
+        "residual-checked"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "model-identity",
+        "input-units",
+        "quality-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "fit_diagnostics": {
+        "type": "object"
+      },
+      "injection_count": {
+        "type": "integer"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "model": {
+        "type": "string"
+      },
+      "parameter_standard_errors": {
+        "nullable": true,
+        "type": "array"
+      },
+      "parameters": {
+        "type": "object"
+      },
+      "predicted_heats_ucal": {
+        "type": "array"
+      },
+      "residuals_ucal": {
+        "type": "array"
+      },
+      "temperature_k": {
+        "type": "number"
+      }
+    },
+    "required": [
+      "model",
+      "temperature_k",
+      "injection_count",
+      "parameters",
+      "parameter_standard_errors",
+      "predicted_heats_ucal",
+      "residuals_ucal",
+      "fit_diagnostics",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "At least eight ordered, finite integrated heats and matching injection volumes are supplied with declared cell, syringe, volume, and temperature units."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned transparent one-site ITC fit implementation.",
+      "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require matched ordered injections, finite values, declared positive concentrations and temperature, and injection volumes below ten percent of the cell volume.",
+      "id": "itc-integrated-input-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Block automatic interpretation when optimization fails, a parameter reaches its bound, or residual and replicate diagnostics are not reviewed.",
+      "id": "itc-fit-boundary-and-residual-review",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "What one-site binding parameters and residual diagnostics are supported by these declared integrated ITC injection heats?"
+  ],
+  "schema_version": 1,
+  "title": "Fit one-site ITC binding",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.17,<1.18"
+      ],
+      "ecosystem": "python",
+      "identity": "scipy",
+      "mismatch_policy": "block",
+      "name": "scipy",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.17.1"
+      ],
+      "verified_at": "2026-07-24",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.17,<1.18"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "least_squares returns bounded optimization parameters, Jacobian, termination status, and message used by the residual and uncertainty checks.",
+          "id": "scipy-least-squares-result-contract",
+          "required_action": "Block nonconverged fits and preserve residuals, bounds, and actual SciPy version.",
+          "source": "https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.least_squares.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import scipy; print(scipy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://docs.scipy.org/doc/scipy/"
+    }
+  ],
+  "version": "1.0.0"
+}

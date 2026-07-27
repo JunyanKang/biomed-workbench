@@ -7,20 +7,34 @@ This capability area connects sequence, chemical, and structural observations to
 ## Sequence And Construct Design
 
 - Inspect DNA, RNA, or protein sequences and preserve declared alphabet and orientation.
+- Align two unambiguous DNA, RNA, or protein sequences with a declared global or local scoring contract, exact Biopython version, zero-based half-open aligned blocks, identity, coverage, and gap accounting.
+- Find complete start-to-stop ORFs on one or both unambiguous DNA strands under an explicit NCBI genetic code, retaining coding orientation and forward-sequence coordinates.
+- Localize descriptive substitutions, insertions, and deletions from a real global alignment while retaining its scoring contract and reference-coordinate offset; this remains distinct from genomic VCF calling.
+- Enumerate exact-match PCR products on declared linear or circular templates, retaining binding sites, topology, complete candidate amplicons and any result cap.
+- Bind one explicit ranked primer-design candidate to a PCR request before simulation; candidate selection remains a traceable decision rather than an implicit downstream default.
+- Screen a chosen primer pair across a declared finite reference panel, retaining all exact-match products and blocking unsupported general-specificity claims.
+- Plan linear Sanger-verification coverage with each selected primer's binding interval, orientation, expected read reach, merged target coverage, and explicit uncovered intervals.
+- Validate and summarize supplied RNA dot-bracket structures with base-pair, stem and optional sequence-pair-class accounting; it does not replace folding prediction or experimental structure determination.
+- Summarize per-column coverage, consensus and diversity from a declared pre-aligned protein sequence set while retaining the upstream alignment as part of the evidence contract.
+- Summarize a processed circular-dichroism thermal transition with interpolated midpoint, width and monotonicity diagnostics, without treating it as structural deconvolution or thermodynamic fitting.
+- Fit one declared series of integrated ITC heats to a dilution-aware one-site model, retaining thermodynamic parameters, residuals, uncertainty, convergence and boundary diagnostics; see [one-site ITC binding](itc-single-site-binding.md).
 - Back-translate proteins under explicit codon choices.
-- Discover CRISPR guide candidates and PCR primer candidates for subsequent review.
-- Map restriction sites and audit Golden Gate assembly plans.
+- Discover Primer3 thermodynamics-ranked PCR primer candidates and CRISPR guide candidates for subsequent review.
+- Map restriction sites, predict supported exact-motif restriction digest fragments, and audit Golden Gate assembly plans.
 - Scan protein glycosylation contexts and summarize steady-state enzyme kinetics.
 
-Representative modules include `sequence-inspect`, `sequence-back-translate`, `crispr-design`, `primer-design`, `restriction-plan`, `golden-gate-plan`, `glycosylation-scan`, and `enzyme-kinetics`.
+Representative modules include `sequence-inspect`, `sequence-pairwise-alignment`, `sequence-variant-localization`, `open-reading-frame-annotation`, `rna-secondary-structure-summary`, `aligned-protein-conservation`, `cd-thermal-transition-summary`, `primer-design`, `pcr-primer-pair-selection`, `pcr-amplicon-simulation`, `primer-pair-specificity-screen`, `sanger-verification-coverage`, `sequence-back-translate`, `crispr-design`, `restriction-plan`, `golden-gate-plan`, `glycosylation-scan`, and `enzyme-kinetics`.
+
+- Extract annotation-bound CDS sequences from one declared GenBank record, retaining exact matching qualifiers, feature coordinates, strand, translation table, and translation agreement. See [GenBank coding sequence extraction](genbank-coding-sequence-extraction.md).
 
 ## Molecular Evidence
 
 - Resolve compound identity and descriptors from PubChem with namespace and ambiguity checks.
 - Retrieve RCSB entry, polymer-entity, and ligand evidence while preserving deposited identifiers.
 - Retrieve AlphaFold DB model records, sequence coverage, provider version, release date, and confidence resources without treating predicted structures as experiments.
+- Retrieve accession-bound IUPred2A residue-level disorder tendency profiles and declared score-threshold spans without treating a prediction as structural or functional validation.
 
-Representative modules include `chemical-evidence`, `structure-search`, `structure-evidence`, `structure-polymer-entities`, `structure-ligands`, and `alphafold-structure-evidence`.
+Representative modules include `chemical-evidence`, `structure-search`, `structure-evidence`, `structure-polymer-entities`, `structure-ligands`, `alphafold-structure-evidence`, and `protein-disorder-evidence`.
 
 ## Structure Analysis
 

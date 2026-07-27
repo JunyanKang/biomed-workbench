@@ -1,0 +1,337 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The supplied template and primers are intended DNA sequences and exact sequence matching is the appropriate pre-experimental screen."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_pcr_amplicon_simulation.py",
+      "purpose": "Execute exact-match linear or circular PCR amplicon enumeration against real project DNA and primer inputs.",
+      "quality_gate_ids": [
+        "pcr-sequence-identity",
+        "pcr-binding-policy",
+        "pcr-claim-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-biopython-1.86-1.87-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ],
+        "biopython": [
+          ">=1.86,<1.88"
+        ]
+      },
+      "input_formats": {
+        "pcr_request": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "pcr_amplicons": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "pcr-amplicon-simulation-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "pcr-amplicon-simulation-e2e-v1"
+      ],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "primer-design",
+    "sequence-inspect",
+    "sequence-pairwise-alignment"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    },
+    {
+      "name": "biopython",
+      "ecosystem": "python",
+      "identity": "biopython",
+      "required": true,
+      "tested_versions": [
+        "1.86",
+        "1.87"
+      ],
+      "allowed_versions": [
+        ">=1.86,<1.88"
+      ],
+      "version_source": "https://biopython.org/wiki/Download",
+      "verified_at": "2026-07-24",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version(\"biopython\"))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Execute the versioned PairwiseAligner implementation and retain its exact version in alignment evidence.",
+      "conflicts": [],
+      "platforms": [
+        "any"
+      ]
+    }
+  ],
+  "description": "Enumerate exact-match linear or circular PCR amplicons from a declared DNA template and primer pair, preserving binding intervals, topology and every candidate product.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:simulate_pcr_amplicons",
+  "evidence_effects": [
+    "adds-in-silico-pcr-amplicon-evidence"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "pcr-amplicon-simulation",
+  "input_artifacts": [
+    {
+      "artifact_type": "pcr_simulation_request",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "pcr_request",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "template": {
+        "type": "string",
+        "minLength": 1
+      },
+      "forward_primer": {
+        "type": "string",
+        "minLength": 10
+      },
+      "reverse_primer": {
+        "type": "string",
+        "minLength": 10
+      },
+      "circular": {
+        "type": "boolean"
+      },
+      "max_products": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1000
+      },
+      "selected_candidate_index": {
+        "type": "integer",
+        "minimum": 0,
+        "nullable": true
+      }
+    },
+    "required": [
+      "template",
+      "forward_primer",
+      "reverse_primer"
+    ]
+  },
+  "intents": [
+    "PCR amplicon simulation",
+    "simulate PCR product",
+    "validate PCR primers on template",
+    "Simulate exact-match PCR amplicons",
+    "PCR 扩增产物模拟",
+    "验证引物扩增产物"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This exact-match sequence simulation does not model annealing temperature, salt, polymerase chemistry, secondary structure, primer dimers, genomic off-targets, amplification efficiency, or experimental yield.",
+    "A listed in-silico amplicon is not evidence that PCR will succeed; retain template provenance and validate the chosen product experimentally."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "pcr_amplicon_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "pcr_amplicons",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "template_length": {
+        "type": "integer"
+      },
+      "circular": {
+        "type": "boolean"
+      },
+      "binding_policy": {
+        "type": "string"
+      },
+      "coordinate_system": {
+        "type": "string"
+      },
+      "forward_binding_site_count": {
+        "type": "integer"
+      },
+      "reverse_binding_site_count": {
+        "type": "integer"
+      },
+      "products": {
+        "type": "array"
+      },
+      "truncated": {
+        "type": "boolean"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "selected_candidate_index": {
+        "type": "integer",
+        "nullable": true
+      }
+    },
+    "required": [
+      "template_length",
+      "circular",
+      "binding_policy",
+      "coordinate_system",
+      "forward_binding_site_count",
+      "reverse_binding_site_count",
+      "products",
+      "truncated",
+      "limitations",
+      "selected_candidate_index"
+    ]
+  },
+  "preconditions": [
+    "A declared unambiguous DNA template and a forward/reverse primer pair are available.",
+    "The intended template topology and exact-match screening scope are declared."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room implementation of PCR simulation capability identified during product capability planning."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "pcr-sequence-identity",
+      "severity": "fatal",
+      "description": "Block missing, short, invalid or ambiguous template and primer sequences and preserve their declared orientations.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "pcr-binding-policy",
+      "severity": "fatal",
+      "description": "Record exact full-length binding policy, reverse-primer complement orientation, topology, all binding intervals, product cap and truncation state.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "pcr-claim-boundary",
+      "severity": "major",
+      "description": "Exact in-silico products are not evidence of annealing, off-target specificity, amplification efficiency or experimental PCR success.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "Which exact-match PCR amplicons are possible for the declared primer pair on the supplied linear or circular DNA template?"
+  ],
+  "schema_version": 1,
+  "title": "Simulate exact-match PCR amplicons",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

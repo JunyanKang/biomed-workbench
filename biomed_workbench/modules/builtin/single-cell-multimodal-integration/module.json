@@ -1,66 +1,1093 @@
 {
-  "schema_version": 1,
-  "id": "single-cell-multimodal-integration",
-  "version": "1.0.0",
-  "title": "Integrate paired RNA, ATAC, and protein modalities with WNN and MOFA+",
-  "description": "Direct Codex to validate paired multimodal cells and immutable count layers, execute Seurat WNN separately for RNA+ATAC or RNA+ADT, fit MOFA+ across two or more declared model matrices, preserve cell-specific modality weights, graphs, factors, feature loadings and view-wise variance, and admit only reload-validated outputs without treating integration as biological truth.",
-  "module_type": "analysis",
-  "domains": ["omics", "statistics"],
-  "intents": ["RNA ATAC WNN integration", "CITE-seq RNA ADT WNN", "MOFA+ multimodal factor analysis", "单细胞 RNA ATAC CITE-seq WNN MOFA+ 多组学整合"],
-  "questions": ["Which paired-cell neighborhoods and latent factors are jointly supported across RNA, chromatin accessibility, and protein views while retaining modality-specific evidence and uncertainty?"],
-  "entrypoint": "agent-generated-analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "maturity": "experimental",
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {"objective": {"type": "string", "minLength": 12}, "input_artifact_id": {"type": "string", "minLength": 1}, "input_format": {"type": "string", "enum": ["seurat-rds", "h5mu"]}, "modalities": {"type": "array", "minItems": 2, "uniqueItems": true}, "cell_identity_policy": {"type": "string", "enum": ["exact-paired-cells"]}, "requested_backends": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "enum": ["wnn", "mofaplus"]}}, "declared_model_layers": {"type": "object"}, "declared_thresholds": {"type": "object"}, "design_notes": {"type": "string"}}, "required": ["objective", "input_artifact_id", "input_format", "modalities", "cell_identity_policy", "requested_backends", "declared_model_layers", "declared_thresholds", "design_notes"]},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]}, "module": {"type": "object"}, "request_digest": {"type": "string"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}}, "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]},
-  "input_artifacts": [{"name": "paired_multimodal_single_cell_object", "artifact_type": "single_cell_multimodal_object", "formats": [{"name": "seurat-rds", "versions": ["5"], "representations": ["container", "sparse"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["features-by-cells"]}, {"name": "h5mu", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["cells-by-features-per-modality"]}], "processing_levels": ["count-backed", "paired-cell", "quality-controlled"], "required_metadata": ["input-digest", "modality-names", "raw-count-locations", "model-matrix-locations", "cell-accounting", "feature-namespaces", "genome-build-if-applicable", "assay-provenance"]}],
-  "output_artifacts": [{"name": "multimodal_integration_evidence", "artifact_type": "single_cell_multimodal_evidence", "formats": [{"name": "seurat-rds", "versions": ["5"], "representations": ["container", "sparse"], "compression": ["none", "gzip"], "required_indexes": ["weighted-neighbor"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-from-input"], "orientations": ["features-by-cells"]}, {"name": "mofa-hdf5", "versions": ["1"], "representations": ["container"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["views-groups-factors"]}, {"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["cell-by-weight-or-factor", "feature-by-loading", "view-by-factor"]}, {"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["backend-model-quality-summary"]}], "processing_levels": ["multimodal-integrated", "modality-resolved", "reload-validated"], "required_metadata": ["backend", "modality-preprocessing", "cell-identity-policy", "modality-weights", "neighbor-graphs", "factors", "feature-loadings", "variance-explained", "versions", "quality-status"]}],
-  "preconditions": ["Every modality has unique feature identities, immutable source counts, identical cells in identical order, at least 15 informative cells and features, declared model matrices and transformations, and new output paths."],
-  "assumptions": ["WNN cell weights describe local neighborhood usefulness and MOFA+ factors describe variance in declared model matrices; neither automatically establishes cell identity, causal regulation, or condition-level inference."],
-  "quality_gates": [
-    {"id": "multimodal-cell-alignment", "severity": "fatal", "description": "All requested modalities must contain exactly the same unique cells in the same order; no silent intersection, imputation, or duplication is allowed.", "blocks_interpretation": true},
-    {"id": "multimodal-matrix-semantics", "severity": "fatal", "description": "Raw counts, WNN preprocessing, MOFA+ model layers, feature namespaces and assay provenance must be explicit and finite.", "blocks_interpretation": true},
-    {"id": "multimodal-wnn-weights-graphs", "severity": "fatal", "description": "WNN requires bounded finite cell-specific modality weights that sum to one plus reloadable weighted KNN, SNN, neighbor, UMAP and cluster fields.", "blocks_interpretation": true},
-    {"id": "multimodal-mofa-factors", "severity": "fatal", "description": "MOFA+ requires finite factors, feature loadings and view-wise factor variance for every declared view after nonconstant-feature filtering.", "blocks_interpretation": true},
-    {"id": "multimodal-backend-separation", "severity": "fatal", "description": "WNN neighborhoods and MOFA+ latent factors remain method-specific evidence and cannot be collapsed into one unqualified integrated state.", "blocks_interpretation": true},
-    {"id": "multimodal-source-and-output-reload", "severity": "fatal", "description": "Reload every object and table and reconcile cells, source counts, graphs, weights, factors, loadings, variance, parameters, versions and digests.", "blocks_interpretation": true}
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Do not silently intersect or reorder cells, guess transformations, overwrite source counts, impute absent modalities, tune factors or clusters toward desired labels, or treat integration as biological truth.",
+      "Do not collapse WNN weights and MOFA+ factors into one score or report generated or unreloaded outputs as evidence."
+    ],
+    "languages": [
+      "r",
+      "python",
+      "notebook"
+    ],
+    "mode": "codex_generated_project_code",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "paired modalities",
+          "local-neighborhood objective",
+          "global-factor objective",
+          "missingness"
+        ],
+        "id": "multimodal-backend",
+        "parameter": "backend",
+        "selection_rule": "Use WNN for paired local neighborhoods and MOFA+ for view-resolved latent factors; run both only when both questions are justified.",
+        "validation_rule": "Method disagreement remains evidence and is never averaged away."
+      }
+    ],
+    "postflight_checks": [
+      "Reconcile every source cell and count and inspect WNN weights, graphs, neighbors, UMAP and clusters.",
+      "Inspect MOFA+ convergence, factors, loadings, view-wise variance and complete HDF5/table reloads."
+    ],
+    "preflight_checks": [
+      "Inspect actual Seurat RDS or H5MU, paired cell order, modality counts and layers, feature namespaces, transformations, assay provenance, dimensions and output paths.",
+      "Detect exact Seurat, Signac, MOFA+, R, Python and dependency versions in existing runtimes."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "input-sha256",
+      "modalities",
+      "cell-identity-policy",
+      "raw-count-locations",
+      "model-layers",
+      "preprocessing",
+      "dimensions",
+      "neighbor-parameters",
+      "mofa-options",
+      "actual-tool-versions",
+      "output-sha256",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-multimodal-contract",
+        "output_artifact_types": [
+          "single_cell_multimodal_evidence"
+        ],
+        "purpose": "Establish paired cells, counts, transformations, features and backend scope.",
+        "required_logic": [
+          "Inspect every modality, cell order, raw counts, model layers, feature namespaces, assay provenance, genome build where relevant, source digests and missingness.",
+          "Freeze WNN preprocessing and dimensions or MOFA+ model layers, features, factors and convergence parameters before execution."
+        ],
+        "template_files": [
+          "templates/prepare_10x_multiome.R",
+          "templates/run_wnn.R",
+          "templates/fit_mofaplus.py"
+        ]
+      },
+      {
+        "id": "fit-wnn",
+        "output_artifact_types": [
+          "single_cell_multimodal_evidence"
+        ],
+        "purpose": "Build RNA+ATAC or RNA+ADT weighted neighborhoods.",
+        "required_logic": [
+          "Use log-normalized RNA PCA, TF-IDF/LSI for ATAC with the first component excluded, or CLR/PCA for ADT.",
+          "Retain both cell-specific modality weights, weighted KNN/SNN, weighted neighbor, UMAP and cluster fields."
+        ],
+        "template_files": [
+          "templates/run_wnn.R"
+        ]
+      },
+      {
+        "id": "fit-mofaplus",
+        "output_artifact_types": [
+          "single_cell_multimodal_evidence"
+        ],
+        "purpose": "Fit shared latent factors without losing view-specific loadings.",
+        "required_logic": [
+          "Use only declared finite model matrices, remove constant features, preserve exact paired cells and scale views explicitly.",
+          "Retain factors, every view's feature loadings, view-factor variance explained and the complete HDF5 model."
+        ],
+        "template_files": [
+          "templates/fit_mofaplus.py"
+        ]
+      },
+      {
+        "id": "reload-and-admit",
+        "output_artifact_types": [
+          "single_cell_multimodal_evidence"
+        ],
+        "purpose": "Verify source preservation and method-specific evidence.",
+        "required_logic": [
+          "Reload all objects and tables and reconcile cells, counts, graphs, weights, factors, loadings, variance, parameters, versions and digests.",
+          "Use independent truth only after parameters are frozen and never collapse WNN and MOFA+ outputs into one score."
+        ],
+        "template_files": [
+          "templates/prepare_10x_multiome.R",
+          "templates/run_wnn.R",
+          "templates/fit_mofaplus.py"
+        ]
+      }
+    ]
+  },
+  "alternatives": [
+    "single-cell-batch-integration",
+    "single-cell-generative-modeling"
   ],
-  "evidence_effects": ["adds_rna_atac_wnn", "adds_citeseq_rna_adt_wnn", "adds_mofaplus_shared_factors", "preserves_modality_specific_weights_and_loadings"],
-  "alternatives": ["single-cell-batch-integration", "single-cell-generative-modeling"],
-  "complements": ["single-cell-foundation-workflow", "single-cell-donor-inference", "single-cell-marker-discovery"],
-  "tool_requirements": [
-    {"name": "Seurat", "ecosystem": "r", "identity": "Seurat", "required": true, "tested_versions": ["5.2.1"], "allowed_versions": [">=5.2,<5.3"], "version_source": "https://satijalab.org/seurat/reference/findmultimodalneighbors", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('Seurat')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "seurat-wnn-api", "affected_versions": [">=5.2,<5.3"], "category": "api", "description": "FindMultiModalNeighbors graph names, modality weights, UMAP neighbor inputs and clustering fields are release-coupled.", "compatibility_effect": "requires-parser", "required_action": "Record reductions and dimensions and reload all weights, graphs, neighbors, clusters and counts.", "source": "https://satijalab.org/seurat/reference/findmultimodalneighbors"}], "platforms": ["any"]},
-    {"name": "Signac", "ecosystem": "r", "identity": "Signac", "required": true, "tested_versions": ["1.16.0"], "allowed_versions": [">=1.16,<1.17"], "version_source": "https://stuartlab.org/signac/reference/index.html", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('Signac')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "signac-tfidf-lsi-api", "affected_versions": [">=1.16,<1.17"], "category": "behavior", "description": "TF-IDF, top-feature and LSI fields used by RNA+ATAC WNN are release-coupled.", "compatibility_effect": "requires-parameter", "required_action": "Record TF-IDF, selected features, LSI rank and excluded depth-correlated first component.", "source": "https://stuartlab.org/signac/reference/index.html"}], "platforms": ["any"]},
-    {"name": "mofapy2", "ecosystem": "python", "identity": "mofapy2", "required": true, "tested_versions": ["0.7.4"], "allowed_versions": [">=0.7,<0.8"], "version_source": "https://biofam.github.io/MOFA2/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('mofapy2'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "mofapy2-entrypoint-hdf5", "affected_versions": [">=0.7,<0.8"], "category": "output-format", "description": "Entry-point options and HDF5 factor, weight and variance paths are release-coupled.", "compatibility_effect": "requires-parser", "required_action": "Detect the release and reload factor, weight and variance datasets from the saved model.", "source": "https://biofam.github.io/MOFA2/"}], "platforms": ["any"]}
+  "assumptions": [
+    "WNN cell weights describe local neighborhood usefulness and MOFA+ factors describe variance in declared model matrices; neither automatically establishes cell identity, causal regulation, or condition-level inference."
   ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "Matrix": [
+          ">=1.6,<1.7"
+        ],
+        "anndata": [
+          ">=0.13,<0.14"
+        ],
+        "digest": [
+          ">=0.6.39,<0.7"
+        ],
+        "h5py": [
+          ">=3.16,<3.17"
+        ],
+        "jsonlite": [
+          ">=2.0,<2.1"
+        ],
+        "mudata": [
+          ">=0.3,<0.4"
+        ],
+        "numpy": [
+          ">=2.5,<2.6"
+        ],
+        "pandas": [
+          ">=3.0,<3.1"
+        ],
+        "python": [
+          ">=3.12,<3.13"
+        ],
+        "r": [
+          ">=4.3,<4.4"
+        ],
+        "scipy": [
+          ">=1.18,<1.19"
+        ],
+        "uwot": [
+          ">=0.2,<0.3"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "single-cell-multimodal-integration-e2e-v1",
+        "pbmc-multiome-10k-integration-v1"
+      ],
+      "id": "agent-protocol-1-seurat-521-signac-116-mofapy2-074",
+      "input_formats": {
+        "paired_multimodal_single_cell_object": [
+          "tenx-hdf5@3",
+          "seurat-rds@5",
+          "h5mu@0.1.0"
+        ]
+      },
+      "module_version": "1.1.0",
+      "output_formats": {
+        "multimodal_integration_evidence": [
+          "seurat-rds@5",
+          "mofa-hdf5@1",
+          "tab-separated-values@1",
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "single-cell-multimodal-integration-regression-v1"
+      ],
+      "tool_versions": {
+        "Seurat": [
+          ">=5.2,<5.3"
+        ],
+        "Signac": [
+          ">=1.16,<1.17"
+        ],
+        "mofapy2": [
+          ">=0.7,<0.8"
+        ]
+      },
+      "verified_at": "2026-07-23"
+    }
+  ],
+  "complements": [
+    "single-cell-foundation-workflow",
+    "single-cell-donor-inference",
+    "single-cell-marker-discovery"
+  ],
+  "credentials": [],
   "dependencies": [
-    {"name": "r", "ecosystem": "runtime", "identity": "r-runtime", "required": true, "tested_versions": ["4.3.2"], "allowed_versions": [">=4.3,<4.4"], "version_source": "https://cran.r-project.org/", "verified_at": "2026-07-15", "version_probe": ["Rscript", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run WNN in an existing scientific runtime.", "conflicts": [], "platforms": ["any"]},
-    {"name": "Matrix", "ecosystem": "r", "identity": "Matrix", "required": true, "tested_versions": ["1.6.5"], "allowed_versions": [">=1.6,<1.7"], "version_source": "https://cran.r-project.org/package=Matrix", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('Matrix')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Preserve sparse assay and graph matrices.", "conflicts": [], "platforms": ["any"]},
-    {"name": "uwot", "ecosystem": "r", "identity": "uwot", "required": true, "tested_versions": ["0.2.4"], "allowed_versions": [">=0.2,<0.3"], "version_source": "https://cran.r-project.org/package=uwot", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('uwot')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Create WNN UMAP from the weighted neighbor object.", "conflicts": [], "platforms": ["any"]},
-    {"name": "jsonlite", "ecosystem": "r", "identity": "jsonlite", "required": true, "tested_versions": ["2.0.0"], "allowed_versions": [">=2.0,<2.1"], "version_source": "https://cran.r-project.org/package=jsonlite", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('jsonlite')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Serialize WNN diagnostics.", "conflicts": [], "platforms": ["any"]},
-    {"name": "digest", "ecosystem": "r", "identity": "digest", "required": true, "tested_versions": ["0.6.39"], "allowed_versions": [">=0.6.39,<0.7"], "version_source": "https://cran.r-project.org/package=digest", "verified_at": "2026-07-15", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('digest')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Bind source and WNN outputs to digests.", "conflicts": [], "platforms": ["any"]},
-    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.12.11"], "allowed_versions": [">=3.12,<3.13"], "version_source": "https://www.python.org/", "verified_at": "2026-07-15", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run MOFA+ in an existing scientific runtime.", "conflicts": [], "platforms": ["any"]},
-    {"name": "mudata", "ecosystem": "python", "identity": "mudata", "required": true, "tested_versions": ["0.3.10"], "allowed_versions": [">=0.3,<0.4"], "version_source": "https://mudata.readthedocs.io/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('mudata'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Read paired H5MU views and declared model layers.", "conflicts": [], "platforms": ["any"]},
-    {"name": "anndata", "ecosystem": "python", "identity": "anndata", "required": true, "tested_versions": ["0.13.2"], "allowed_versions": [">=0.13,<0.14"], "version_source": "https://anndata.readthedocs.io/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('anndata'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Represent each H5MU view.", "conflicts": [], "platforms": ["any"]},
-    {"name": "numpy", "ecosystem": "python", "identity": "numpy", "required": true, "tested_versions": ["2.5.1"], "allowed_versions": [">=2.5,<2.6"], "version_source": "https://numpy.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('numpy'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate and extract MOFA+ matrices.", "conflicts": [], "platforms": ["any"]},
-    {"name": "pandas", "ecosystem": "python", "identity": "pandas", "required": true, "tested_versions": ["3.0.3"], "allowed_versions": [">=3.0,<3.1"], "version_source": "https://pandas.pydata.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('pandas'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Serialize factors, weights and variance tables.", "conflicts": [], "platforms": ["any"]},
-    {"name": "scipy", "ecosystem": "python", "identity": "scipy", "required": true, "tested_versions": ["1.18.0"], "allowed_versions": [">=1.18,<1.19"], "version_source": "https://scipy.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('scipy'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Read sparse H5MU model matrices.", "conflicts": [], "platforms": ["any"]},
-    {"name": "h5py", "ecosystem": "python", "identity": "h5py", "required": true, "tested_versions": ["3.16.0"], "allowed_versions": [">=3.16,<3.17"], "version_source": "https://www.h5py.org/", "verified_at": "2026-07-15", "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('h5py'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Reload MOFA+ HDF5 factors, weights and variance explained.", "conflicts": [], "platforms": ["any"]}
+    {
+      "allowed_versions": [
+        ">=4.3,<4.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "r-runtime",
+      "name": "r",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run WNN in an existing scientific runtime.",
+      "required": true,
+      "tested_versions": [
+        "4.3.2"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.6,<1.7"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "Matrix",
+      "name": "Matrix",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Preserve sparse assay and graph matrices.",
+      "required": true,
+      "tested_versions": [
+        "1.6.5"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('Matrix')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=Matrix"
+    },
+    {
+      "allowed_versions": [
+        ">=0.2,<0.3"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "uwot",
+      "name": "uwot",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Create WNN UMAP from the weighted neighbor object.",
+      "required": true,
+      "tested_versions": [
+        "0.2.4"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('uwot')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=uwot"
+    },
+    {
+      "allowed_versions": [
+        ">=2.0,<2.1"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "jsonlite",
+      "name": "jsonlite",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Serialize WNN diagnostics.",
+      "required": true,
+      "tested_versions": [
+        "2.0.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('jsonlite')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=jsonlite"
+    },
+    {
+      "allowed_versions": [
+        ">=0.6.39,<0.7"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "digest",
+      "name": "digest",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Bind source and WNN outputs to digests.",
+      "required": true,
+      "tested_versions": [
+        "0.6.39"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('digest')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=digest"
+    },
+    {
+      "allowed_versions": [
+        ">=3.12,<3.13"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run MOFA+ in an existing scientific runtime.",
+      "required": true,
+      "tested_versions": [
+        "3.12.11"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.3,<0.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "mudata",
+      "name": "mudata",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Read paired H5MU views and declared model layers.",
+      "required": true,
+      "tested_versions": [
+        "0.3.10"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('mudata'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://mudata.readthedocs.io/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.13,<0.14"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "anndata",
+      "name": "anndata",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Represent each H5MU view.",
+      "required": true,
+      "tested_versions": [
+        "0.13.2"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('anndata'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://anndata.readthedocs.io/"
+    },
+    {
+      "allowed_versions": [
+        ">=2.5,<2.6"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "numpy",
+      "name": "numpy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Validate and extract MOFA+ matrices.",
+      "required": true,
+      "tested_versions": [
+        "2.5.1"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('numpy'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://numpy.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=3.0,<3.1"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "pandas",
+      "name": "pandas",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Serialize factors, weights and variance tables.",
+      "required": true,
+      "tested_versions": [
+        "3.0.3"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('pandas'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://pandas.pydata.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.18,<1.19"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scipy",
+      "name": "scipy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Read sparse H5MU model matrices.",
+      "required": true,
+      "tested_versions": [
+        "1.18.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('scipy'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scipy.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=3.16,<3.17"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "h5py",
+      "name": "h5py",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Reload MOFA+ HDF5 factors, weights and variance explained.",
+      "required": true,
+      "tested_versions": [
+        "3.16.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('h5py'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://www.h5py.org/"
+    }
   ],
-  "compatibility_matrix": [{"id": "agent-protocol-1-seurat-521-signac-116-mofapy2-074", "module_version": "1.0.0", "tool_versions": {"Seurat": [">=5.2,<5.3"], "Signac": [">=1.16,<1.17"], "mofapy2": [">=0.7,<0.8"]}, "dependency_versions": {"r": [">=4.3,<4.4"], "Matrix": [">=1.6,<1.7"], "uwot": [">=0.2,<0.3"], "jsonlite": [">=2.0,<2.1"], "digest": [">=0.6.39,<0.7"], "python": [">=3.12,<3.13"], "mudata": [">=0.3,<0.4"], "anndata": [">=0.13,<0.14"], "numpy": [">=2.5,<2.6"], "pandas": [">=3.0,<3.1"], "scipy": [">=1.18,<1.19"], "h5py": [">=3.16,<3.17"]}, "input_formats": {"paired_multimodal_single_cell_object": ["seurat-rds@5", "h5mu@0.1.0"]}, "output_formats": {"multimodal_integration_evidence": ["seurat-rds@5", "mofa-hdf5@1", "tab-separated-values@1", "inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["single-cell-multimodal-integration-regression-v1"], "end_to_end_evidence_ids": ["single-cell-multimodal-integration-e2e-v1"], "verified_at": "2026-07-15"}],
-  "access": "agent_generated", "mutability": "read_only", "credentials": [],
-  "limitations": ["Validated execution covers paired RNA+ATAC and RNA+ADT WNN and a three-view Gaussian MOFA+ model on declared transformed layers. It does not infer missing modalities, repair unpaired cells, establish causal cross-modal regulation, replace ATAC motif or peak-to-gene analysis, or provide donor-level condition inference. Environment and compute-resource management remain outside plugin scope."],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned paired multimodal workflow retaining method-specific WNN and MOFA+ evidence.", "https://satijalab.org/seurat/reference/findmultimodalneighbors", "https://stuartlab.org/signac/reference/index.html", "https://biofam.github.io/MOFA2/"]},
-  "agent_protocol": {"schema_version": 1, "mode": "codex_generated_project_code", "languages": ["r", "python", "notebook"], "template_sections": [
-    {"id": "inspect-multimodal-contract", "purpose": "Establish paired cells, counts, transformations, features and backend scope.", "required_logic": ["Inspect every modality, cell order, raw counts, model layers, feature namespaces, assay provenance, genome build where relevant, source digests and missingness.", "Freeze WNN preprocessing and dimensions or MOFA+ model layers, features, factors and convergence parameters before execution."], "output_artifact_types": ["single_cell_multimodal_evidence"], "template_files": ["templates/run_wnn.R", "templates/fit_mofaplus.py"]},
-    {"id": "fit-wnn", "purpose": "Build RNA+ATAC or RNA+ADT weighted neighborhoods.", "required_logic": ["Use log-normalized RNA PCA, TF-IDF/LSI for ATAC with the first component excluded, or CLR/PCA for ADT.", "Retain both cell-specific modality weights, weighted KNN/SNN, weighted neighbor, UMAP and cluster fields."], "output_artifact_types": ["single_cell_multimodal_evidence"], "template_files": ["templates/run_wnn.R"]},
-    {"id": "fit-mofaplus", "purpose": "Fit shared latent factors without losing view-specific loadings.", "required_logic": ["Use only declared finite model matrices, remove constant features, preserve exact paired cells and scale views explicitly.", "Retain factors, every view's feature loadings, view-factor variance explained and the complete HDF5 model."], "output_artifact_types": ["single_cell_multimodal_evidence"], "template_files": ["templates/fit_mofaplus.py"]},
-    {"id": "reload-and-admit", "purpose": "Verify source preservation and method-specific evidence.", "required_logic": ["Reload all objects and tables and reconcile cells, counts, graphs, weights, factors, loadings, variance, parameters, versions and digests.", "Use independent truth only after parameters are frozen and never collapse WNN and MOFA+ outputs into one score."], "output_artifact_types": ["single_cell_multimodal_evidence"], "template_files": ["templates/run_wnn.R", "templates/fit_mofaplus.py"]}],
-    "parameter_rules": [{"id": "multimodal-backend", "parameter": "backend", "decision_inputs": ["paired modalities", "local-neighborhood objective", "global-factor objective", "missingness"], "selection_rule": "Use WNN for paired local neighborhoods and MOFA+ for view-resolved latent factors; run both only when both questions are justified.", "validation_rule": "Method disagreement remains evidence and is never averaged away."}],
-    "preflight_checks": ["Inspect actual Seurat RDS or H5MU, paired cell order, modality counts and layers, feature namespaces, transformations, assay provenance, dimensions and output paths.", "Detect exact Seurat, Signac, MOFA+, R, Python and dependency versions in existing runtimes."],
-    "postflight_checks": ["Reconcile every source cell and count and inspect WNN weights, graphs, neighbors, UMAP and clusters.", "Inspect MOFA+ convergence, factors, loadings, view-wise variance and complete HDF5/table reloads."],
-    "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-sha256", "modalities", "cell-identity-policy", "raw-count-locations", "model-layers", "preprocessing", "dimensions", "neighbor-parameters", "mofa-options", "actual-tool-versions", "output-sha256", "quality-gates"],
-    "forbidden_actions": ["Do not install, update, activate, create, or manage Python, R, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.", "Do not silently intersect or reorder cells, guess transformations, overwrite source counts, impute absent modalities, tune factors or clusters toward desired labels, or treat integration as biological truth.", "Do not collapse WNN weights and MOFA+ factors into one score or report generated or unreloaded outputs as evidence."],
-    "requires_observed_execution": true}
+  "description": "Direct Codex to validate paired multimodal cells and immutable count layers, execute Seurat WNN separately for RNA+ATAC or RNA+ADT, fit MOFA+ across two or more declared model matrices, preserve cell-specific modality weights, graphs, factors, feature loadings and view-wise variance, and admit only reload-validated outputs without treating integration as biological truth.",
+  "domains": [
+    "omics",
+    "statistics"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "adds_rna_atac_wnn",
+    "adds_citeseq_rna_adt_wnn",
+    "adds_mofaplus_shared_factors",
+    "preserves_modality_specific_weights_and_loadings"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "single-cell-multimodal-integration",
+  "input_artifacts": [
+    {
+      "artifact_type": "single_cell_multimodal_object",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [
+            "feature-type-declared"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "tenx-hdf5",
+          "orientations": [
+            "features-by-barcodes"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "3"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "seurat-rds",
+          "orientations": [
+            "features-by-cells"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "5"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5mu",
+          "orientations": [
+            "cells-by-features-per-modality"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.1.0"
+          ]
+        }
+      ],
+      "name": "paired_multimodal_single_cell_object",
+      "processing_levels": [
+        "count-backed",
+        "paired-cell",
+        "quality-controlled"
+      ],
+      "required_metadata": [
+        "input-digest",
+        "modality-names",
+        "raw-count-locations",
+        "model-matrix-locations",
+        "cell-accounting",
+        "feature-namespaces",
+        "genome-build-if-applicable",
+        "assay-provenance"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "cell_identity_policy": {
+        "enum": [
+          "exact-paired-cells"
+        ],
+        "type": "string"
+      },
+      "declared_model_layers": {
+        "type": "object"
+      },
+      "declared_thresholds": {
+        "type": "object"
+      },
+      "design_notes": {
+        "type": "string"
+      },
+      "input_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "input_format": {
+        "enum": [
+          "tenx-hdf5",
+          "seurat-rds",
+          "h5mu"
+        ],
+        "type": "string"
+      },
+      "modalities": {
+        "minItems": 2,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "requested_backends": {
+        "items": {
+          "enum": [
+            "wnn",
+            "mofaplus"
+          ],
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      }
+    },
+    "required": [
+      "objective",
+      "input_artifact_id",
+      "input_format",
+      "modalities",
+      "cell_identity_policy",
+      "requested_backends",
+      "declared_model_layers",
+      "declared_thresholds",
+      "design_notes"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "RNA ATAC WNN integration",
+    "CITE-seq RNA ADT WNN",
+    "MOFA+ multimodal factor analysis",
+    "\u5355\u7ec6\u80deRNA+ATAC\u6570\u636e",
+    "\u5355\u7ec6\u80de RNA ATAC CITE-seq WNN MOFA+ \u591a\u7ec4\u5b66\u6574\u5408"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Validated execution covers public 10x RNA+ATAC HDF5 preparation, RNA+ATAC and RNA+ADT WNN, and Gaussian MOFA+ models on declared transformed layers. It does not infer missing modalities, repair unpaired cells, establish causal cross-modal regulation, replace ATAC motif or peak-to-gene analysis, or provide donor-level condition inference. Environment and compute-resource management remain outside plugin scope."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "single_cell_multimodal_evidence",
+      "formats": [
+        {
+          "annotation_releases": [
+            "inherited-from-input"
+          ],
+          "compression": [
+            "none",
+            "gzip"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "seurat-rds",
+          "orientations": [
+            "features-by-cells"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [
+            "weighted-neighbor"
+          ],
+          "versions": [
+            "5"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none",
+            "gzip"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "mofa-hdf5",
+          "orientations": [
+            "views-groups-factors"
+          ],
+          "representations": [
+            "container"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "cell-by-weight-or-factor",
+            "feature-by-loading",
+            "view-by-factor"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "backend-model-quality-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "multimodal_integration_evidence",
+      "processing_levels": [
+        "multimodal-integrated",
+        "modality-resolved",
+        "reload-validated"
+      ],
+      "required_metadata": [
+        "backend",
+        "modality-preprocessing",
+        "cell-identity-policy",
+        "modality-weights",
+        "neighbor-graphs",
+        "factors",
+        "feature-loadings",
+        "variance-explained",
+        "versions",
+        "quality-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "codex_generated_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Every modality has unique feature identities, immutable source counts, identical cells in identical order, at least 15 informative cells and features, declared model matrices and transformations, and new output paths."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned paired multimodal workflow retaining method-specific WNN and MOFA+ evidence.",
+      "https://satijalab.org/seurat/reference/findmultimodalneighbors",
+      "https://stuartlab.org/signac/reference/index.html",
+      "https://biofam.github.io/MOFA2/"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "All requested modalities must contain exactly the same unique cells in the same order; no silent intersection, imputation, or duplication is allowed.",
+      "id": "multimodal-cell-alignment",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Raw counts, WNN preprocessing, MOFA+ model layers, feature namespaces and assay provenance must be explicit and finite.",
+      "id": "multimodal-matrix-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "WNN requires bounded finite cell-specific modality weights that sum to one plus reloadable weighted KNN, SNN, neighbor, UMAP and cluster fields.",
+      "id": "multimodal-wnn-weights-graphs",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "MOFA+ requires finite factors, feature loadings and view-wise factor variance for every declared view after nonconstant-feature filtering.",
+      "id": "multimodal-mofa-factors",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "WNN neighborhoods and MOFA+ latent factors remain method-specific evidence and cannot be collapsed into one unqualified integrated state.",
+      "id": "multimodal-backend-separation",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Reload every object and table and reconcile cells, source counts, graphs, weights, factors, loadings, variance, parameters, versions and digests.",
+      "id": "multimodal-source-and-output-reload",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which paired-cell neighborhoods and latent factors are jointly supported across RNA, chromatin accessibility, and protein views while retaining modality-specific evidence and uncertainty?"
+  ],
+  "schema_version": 1,
+  "title": "Integrate paired RNA, ATAC, and protein modalities with WNN and MOFA+",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=5.2,<5.3"
+      ],
+      "ecosystem": "r",
+      "identity": "Seurat",
+      "mismatch_policy": "block",
+      "name": "Seurat",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "5.2.1"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=5.2,<5.3"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "FindMultiModalNeighbors graph names, modality weights, UMAP neighbor inputs and clustering fields are release-coupled.",
+          "id": "seurat-wnn-api",
+          "required_action": "Record reductions and dimensions and reload all weights, graphs, neighbors, clusters and counts.",
+          "source": "https://satijalab.org/seurat/reference/findmultimodalneighbors"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('Seurat')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://satijalab.org/seurat/reference/findmultimodalneighbors"
+    },
+    {
+      "allowed_versions": [
+        ">=1.16,<1.17"
+      ],
+      "ecosystem": "r",
+      "identity": "Signac",
+      "mismatch_policy": "block",
+      "name": "Signac",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.16.0"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.16,<1.17"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parameter",
+          "description": "TF-IDF, top-feature and LSI fields used by RNA+ATAC WNN are release-coupled.",
+          "id": "signac-tfidf-lsi-api",
+          "required_action": "Record TF-IDF, selected features, LSI rank and excluded depth-correlated first component.",
+          "source": "https://stuartlab.org/signac/reference/index.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('Signac')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://stuartlab.org/signac/reference/index.html"
+    },
+    {
+      "allowed_versions": [
+        ">=0.7,<0.8"
+      ],
+      "ecosystem": "python",
+      "identity": "mofapy2",
+      "mismatch_policy": "block",
+      "name": "mofapy2",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "0.7.4"
+      ],
+      "verified_at": "2026-07-15",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=0.7,<0.8"
+          ],
+          "category": "output-format",
+          "compatibility_effect": "requires-parser",
+          "description": "Entry-point options and HDF5 factor, weight and variance paths are release-coupled.",
+          "id": "mofapy2-entrypoint-hdf5",
+          "required_action": "Detect the release and reload factor, weight and variance datasets from the saved model.",
+          "source": "https://biofam.github.io/MOFA2/"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('mofapy2'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://biofam.github.io/MOFA2/"
+    }
+  ],
+  "version": "1.1.0"
 }

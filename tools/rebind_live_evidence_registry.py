@@ -95,15 +95,19 @@ def main() -> int:
     reports = args.report or sorted((ROOT / "reports").glob("*-live-verification.json"))
     rebound = []
     skipped = []
+    blocked = []
     for path in reports:
         data = json.loads(path.read_text(encoding="utf-8"))
         if "registry_digest" not in data:
             skipped.append(path.name)
             continue
-        if rebind(path, registry):
-            rebound.append(path.name)
-    print(json.dumps({"registry_digest": registry.digest, "rebound": rebound, "skipped": skipped}, sort_keys=True))
-    return 0
+        try:
+            if rebind(path, registry):
+                rebound.append(path.name)
+        except RuntimeError as exc:
+            blocked.append({"report": path.name, "reason": str(exc)})
+    print(json.dumps({"blocked": blocked, "registry_digest": registry.digest, "rebound": rebound, "skipped": skipped}, sort_keys=True))
+    return 1 if blocked else 0
 
 
 if __name__ == "__main__":

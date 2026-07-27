@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "selects-first-pair",
+      "input": {
+        "template": "ACGTACGTACGTACGTACGT",
+        "pairs": [
+          {
+            "forward": {
+              "sequence": "ACGTACGTAC"
+            },
+            "reverse": {
+              "sequence": "GTACGTACGT"
+            }
+          }
+        ]
+      },
+      "expected_subset": {
+        "selected_candidate_index": 0,
+        "forward_primer": "ACGTACGTAC"
+      }
+    }
+  ]
+}

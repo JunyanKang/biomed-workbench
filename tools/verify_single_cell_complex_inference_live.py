@@ -22,7 +22,7 @@ from biomed_workbench.modules.registry import ModuleRegistry
 
 
 MODULE_ID = "single-cell-complex-inference"
-MODULE_VERSION = "1.0.0"
+MODULE_VERSION = "1.1.0"
 ROW_ID = "agent-protocol-1-dream-1325-speckle-120"
 MODULE_ROOT = BUILTIN_ROOT / MODULE_ID
 PREPARE = MODULE_ROOT / "templates" / "prepare_inference_inputs.py"

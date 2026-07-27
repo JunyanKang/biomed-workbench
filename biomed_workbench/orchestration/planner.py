@@ -144,10 +144,14 @@ def plan_research(
                 warning_risk = 0
                 feasible = True
                 for input_port in manifest.input_artifacts:
-                    matched = sorted(
-                        (artifact for artifact in available if _artifact_matches_port(artifact, input_port)),
-                        key=lambda artifact: (_QUALITY_RANK[artifact.quality_status], artifact.id),
-                    )
+                    matched = ()
+                    if input_port.source_policy != "upstream_required":
+                        matched = tuple(
+                            sorted(
+                                (artifact for artifact in available if _artifact_matches_port(artifact, input_port)),
+                                key=lambda artifact: (_QUALITY_RANK[artifact.quality_status], artifact.id),
+                            )
+                        )
                     if matched:
                         selected = matched[0]
                         input_bindings[input_port.name] = selected.id

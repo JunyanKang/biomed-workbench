@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "flags-low-depth-and-high-mitochondrial-cells",
+      "input": {
+        "genes": ["MT-A", "B", "C"],
+        "cells": ["c1", "c2"],
+        "matrix": [[5, 0], [5, 1], [0, 1]],
+        "mitochondrial_prefixes": ["MT-"],
+        "min_counts": 3,
+        "min_genes": 1,
+        "max_mito_percent": 40
+      },
+      "expected_subset": {
+        "flagged_cell_count": 2,
+        "thresholds": {
+          "min_counts": 3,
+          "min_genes": 1,
+          "max_mito_percent": 40
+        }
+      }
+    }
+  ]
+}

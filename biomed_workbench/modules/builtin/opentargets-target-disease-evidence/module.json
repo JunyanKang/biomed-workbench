@@ -1,0 +1,328 @@
+{
+  "access": "public_api",
+  "alternatives": [
+    "literature-evidence"
+  ],
+  "assumptions": [
+    "The declared Ensembl target and disease ontology identifier are appropriate for a source-integrated association evidence lookup."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "opentargets-target-disease-evidence-e2e-v1"
+      ],
+      "id": "public-database-contract-2026-07-23-opentargets-target-disease-evidence",
+      "input_formats": {
+        "opentargets-target-disease-evidence-query": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "opentargets-target-disease-evidence-result": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "opentargets-target-disease-evidence-regression-v1"
+      ],
+      "tool_versions": {
+        "open-targets-platform-graphql": [
+          "==disease-evidences-v4-observed-2026-07-23"
+        ]
+      },
+      "verified_at": "2026-07-23"
+    }
+  ],
+  "complements": [
+    "ensembl-gene-evidence",
+    "uniprot-to-ensembl-evidence",
+    "variant-evidence",
+    "literature-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Retrieve fixed-field, source-resolved Open Targets evidence for one Ensembl target and one disease ontology identifier while retaining service total, returned-page truncation, datasource, datatype, score, study, literature, and local-filter limitations.",
+  "domains": [
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.evidence:opentargets_target_disease_evidence",
+  "evidence_effects": [
+    "adds-bounded-source-resolved-target-disease-evidence"
+  ],
+  "execution": {
+    "kind": "service",
+    "max_output_bytes": 20000000,
+    "timeout_seconds": 90
+  },
+  "id": "opentargets-target-disease-evidence",
+  "input_artifacts": [
+    {
+      "artifact_type": "database_query",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "opentargets-target-disease-evidence-query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "data_types": {
+        "items": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        },
+        "maxItems": 30,
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "disease_id": {
+        "pattern": "^[A-Za-z][A-Za-z0-9]*_[0-9]+$",
+        "type": "string"
+      },
+      "ensembl_gene_id": {
+        "pattern": "^ENS[A-Za-z]*G[0-9]{11}$",
+        "type": "string"
+      },
+      "max_records": {
+        "maximum": 500,
+        "minimum": 1,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "ensembl_gene_id",
+      "disease_id"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "Open Targets target disease evidence",
+    "target disease association evidence",
+    "Open Targets gene disease evidence",
+    "Open Targets\u9776\u70b9\u75be\u75c5\u8bc1\u636e"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Open Targets evidence and scores are source-integrated context, not proof of mechanism, clinical validity, actionability, treatment response, or causality. The current service no longer filters datatypes server-side; any such selection is local to the bounded returned page."
+  ],
+  "maturity": "validated",
+  "module_type": "data_source",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "evidence_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "opentargets-target-disease-evidence-result",
+      "processing_levels": [
+        "source-preserved",
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "service_contract",
+        "retrieval_time"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "data_types": {
+        "nullable": true,
+        "type": "array"
+      },
+      "disease_id": {
+        "type": "string"
+      },
+      "disease_name": {
+        "nullable": true,
+        "type": "string"
+      },
+      "ensembl_gene_id": {
+        "type": "string"
+      },
+      "evidence": {
+        "type": "array"
+      },
+      "found": {
+        "type": "boolean"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "provenance": {
+        "type": "object"
+      },
+      "returned_count": {
+        "type": "integer"
+      },
+      "total_count": {
+        "type": "integer"
+      },
+      "truncated": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "ensembl_gene_id",
+      "disease_id",
+      "data_types",
+      "found",
+      "total_count",
+      "returned_count",
+      "truncated",
+      "evidence",
+      "provenance",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "A schema-valid, bounded database query is available and public HTTPS access is permitted."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://platform-docs.opentargets.org/data-access/graphql-api",
+      "Project-owned clean-room implementation and scientific validation contract."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require exact target and disease identifiers, a nonnegative service total, fixed source rows with nonnegative scores, an explicit returned-page truncation state, and a declared local-only filter mode when data types are supplied.",
+      "id": "opentargets-target-disease-evidence-validity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which source-resolved Open Targets evidence records are currently returned for this exact Ensembl target and disease identifier?"
+  ],
+  "schema_version": 1,
+  "title": "Retrieve bounded Open Targets target-disease evidence",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        "==disease-evidences-v4-observed-2026-07-23"
+      ],
+      "ecosystem": "service",
+      "identity": "api.platform.opentargets.org/api/v4/graphql",
+      "mismatch_policy": "block",
+      "name": "open-targets-platform-graphql",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "disease-evidences-v4-observed-2026-07-23"
+      ],
+      "verified_at": "2026-07-23",
+      "version_differences": [
+        {
+          "affected_versions": [
+            "==disease-evidences-v4-observed-2026-07-23"
+          ],
+          "category": "api",
+          "compatibility_effect": "breaking",
+          "description": "Disease evidence accepts an Ensembl target list and bounded size, exposes aggregate count and source rows, and no longer accepts the historical datatypes argument.",
+          "id": "opentargets-disease-evidences-fixed-fields",
+          "required_action": "Use only the fixed query, retain total count and source fields, and label any declared datatype selection as local filtering of the bounded returned page rather than an exhaustive server-side result.",
+          "source": "https://platform-docs.opentargets.org/data-access/graphql-api"
+        }
+      ],
+      "version_pattern": "([a-z0-9-]+-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "version_probe": [
+        "biomed_workbench.services.public_databases:probe_opentargets_evidence_contract"
+      ],
+      "version_probe_kind": "service_contract",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://platform-docs.opentargets.org/data-access/graphql-api"
+    }
+  ],
+  "version": "1.0.0"
+}

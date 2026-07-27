@@ -1,639 +1,74 @@
 {
-  "schema_version": 1,
-  "id": "single-cell-regulatory-velocity",
-  "version": "1.1.0",
-  "title": "Infer GRN-informed regulatory velocity with RegVelo",
-  "description": "Direct Codex to inspect explicitly declared integer-count or nonnegative-continuous spliced and unspliced single-cell layers plus a versioned target-by-regulator network; execute RegVelo 0.4.2 with bounded dense working layers, multiple model modes or seeds, model persistence, reload validation, and explicit uncertainty and causal-claim boundaries; then hand validated dynamics to trajectory, fate-mapping, and perturbation-hypothesis workflows.",
-  "module_type": "analysis",
-  "domains": ["omics", "statistics"],
-  "intents": [
-    "run RegVelo regulatory velocity",
-    "infer GRN-informed RNA velocity and latent time",
-    "compare hard and soft regulatory constraints",
-    "predict transcription factor perturbation effects as hypotheses",
-    "RegVelo GRN先验 RNA velocity 潜在时间和转录因子扰动"
-  ],
-  "questions": [
-    "Does an independently defined regulatory network improve reproducible dynamic-state inference beyond unconstrained RNA velocity, and which regulator perturbations merit experimental testing?"
-  ],
-  "maturity": "experimental",
-  "entrypoint": "agent-generated-analysis",
-  "execution": {
-    "kind": "workflow",
-    "timeout_seconds": 30,
-    "max_output_bytes": 2000000
-  },
-  "input_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "objective": {"type": "string", "minLength": 12, "maxLength": 4000},
-      "input_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256},
-      "input_format": {"type": "string", "enum": ["h5ad-plus-grn-tsv"]},
-      "spliced_layer": {"type": "string", "minLength": 1, "maxLength": 128},
-      "unspliced_layer": {"type": "string", "minLength": 1, "maxLength": 128},
-      "layer_semantics": {"type": "string", "enum": ["integer-counts", "nonnegative-continuous"]},
-      "grn_orientation": {"type": "string", "enum": ["targets-by-regulators"]},
-      "requested_model_modes": {
-        "type": "array",
-        "items": {"type": "string", "enum": ["hard", "soft"]},
-        "minItems": 1,
-        "uniqueItems": true
-      },
-      "declared_thresholds": {"type": "object"},
-      "design_notes": {"type": "string", "minLength": 1, "maxLength": 8000}
-    },
-    "required": [
-      "objective",
-      "input_artifact_id",
-      "input_format",
-      "spliced_layer",
-      "unspliced_layer",
-      "layer_semantics",
-      "grn_orientation",
-      "requested_model_modes",
-      "declared_thresholds",
-      "design_notes"
-    ]
-  },
-  "output_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]},
-      "module": {"type": "object"},
-      "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-      "request_fields": {"type": "array"},
-      "languages": {"type": "array"},
-      "code_plan": {"type": "array"},
-      "parameter_rules": {"type": "array"},
-      "preflight_checks": {"type": "array"},
-      "postflight_checks": {"type": "array"},
-      "provenance_fields": {"type": "array"},
-      "forbidden_actions": {"type": "array"},
-      "tool_profiles": {"type": "array"},
-      "dependency_profiles": {"type": "array"},
-      "quality_gate_ids": {"type": "array"},
-      "execution_policy": {"type": "object"}
-    },
-    "required": [
-      "handoff_type",
-      "module",
-      "request_digest",
-      "request_fields",
-      "languages",
-      "code_plan",
-      "parameter_rules",
-      "preflight_checks",
-      "postflight_checks",
-      "provenance_fields",
-      "forbidden_actions",
-      "tool_profiles",
-      "dependency_profiles",
-      "quality_gate_ids",
-      "execution_policy"
-    ]
-  },
-  "input_artifacts": [
-    {
-      "name": "splicing_and_regulatory_prior",
-      "artifact_type": "single_cell_splicing_and_regulatory_prior",
-      "formats": [
-        {
-          "name": "h5ad-plus-grn-tsv",
-          "versions": ["1"],
-          "representations": ["container", "sparse"],
-          "compression": ["none", "gzip", "lzf"],
-          "required_indexes": ["cell-id", "feature-id", "target-id", "regulator-id"],
-          "coordinate_systems": [],
-          "genome_build_policy": "not_applicable",
-          "genome_builds": [],
-          "annotation_releases": ["declared-in-project"],
-          "orientations": ["cells-by-genes-plus-targets-by-regulators"]
-        }
-      ],
-      "processing_levels": ["quality-controlled", "splicing-quantified", "layer-semantics-declared", "prior-grn-frozen"],
-      "required_metadata": [
-        "input-artifact-digest",
-        "prior-grn-digest",
-        "spliced-layer",
-        "unspliced-layer",
-        "layer-semantics",
-        "feature-identifier-namespace",
-        "grn-orientation",
-        "grn-construction-provenance",
-        "cell-accounting",
-        "quantification-provenance"
-      ]
-    }
-  ],
-  "output_artifacts": [
-    {
-      "name": "regulatory_velocity_object",
-      "artifact_type": "single_cell_regulatory_velocity_object",
-      "formats": [
-        {
-          "name": "h5ad",
-          "versions": ["0.1.0"],
-          "representations": ["container", "sparse"],
-          "compression": ["none", "gzip", "lzf"],
-          "required_indexes": [],
-          "coordinate_systems": [],
-          "genome_build_policy": "not_applicable",
-          "genome_builds": [],
-          "annotation_releases": ["inherited-from-input"],
-          "orientations": ["observations-by-variables"]
-        }
-      ],
-      "processing_levels": ["grn-informed-velocity-modeled", "stability-reviewed", "reload-validated"],
-      "required_metadata": [
-        "regvelo-velocity-layer",
-        "regvelo-latent-time-layer",
-        "regvelo-latent-representation",
-        "prior-grn-digest",
-        "model-mode",
-        "model-seed",
-        "source-preservation",
-        "quality-status"
-      ]
-    },
-    {
-      "name": "regulatory_velocity_validation",
-      "artifact_type": "single_cell_regulatory_velocity_validation",
-      "formats": [
-        {
-          "name": "inline-json",
-          "versions": ["1"],
-          "representations": ["structured"],
-          "compression": ["none"],
-          "required_indexes": [],
-          "coordinate_systems": [],
-          "genome_build_policy": "not_applicable",
-          "genome_builds": [],
-          "annotation_releases": [],
-          "orientations": ["run-by-mode-seed-stability-and-quality"]
-        }
-      ],
-      "processing_levels": ["derived"],
-      "required_metadata": [
-        "model-parameters",
-        "training-history",
-        "mode-and-seed-comparison",
-        "finite-output-checks",
-        "model-reload-validation",
-        "source-preservation",
-        "actual-versions",
-        "artifact-digests",
-        "causal-claim-boundary"
-      ]
-    }
-  ],
-  "assumptions": [
-    "Spliced and unspliced layers are aligned and explicitly declared as either integer-like molecule counts or finite nonnegative continuous abundances with documented preprocessing; the prior network has the same feature namespace and target-by-regulator orientation; selected cells cover a sufficiently connected dynamic process; and model-based perturbations generate testable hypotheses rather than causal proof."
-  ],
-  "preconditions": [
-    "Codex can inspect the real h5ad, layer semantics and preprocessing provenance, prior-GRN construction and digest, feature namespace, biological design, existing scientific runtime, and available memory; outputs are new; and no environment or compute-infrastructure management is required."
-  ],
-  "quality_gates": [
-    {
-      "id": "regvelo-layer-and-identity-semantics",
-      "severity": "fatal",
-      "description": "Block when spliced or unspliced layer semantics, preprocessing, cells, features, identifiers, quantification provenance, or source digests cannot be established without guessing; integer-count mode rejects fractional values while continuous mode still requires finite nonnegative values and explicit provenance.",
-      "blocks_interpretation": true
-    },
-    {
-      "id": "regvelo-grn-contract",
-      "severity": "fatal",
-      "description": "Require a finite target-by-regulator matrix, exact feature-namespace reconciliation, explicit self-edge handling, independently frozen provenance, minimum regulator and edge counts, and the square gene-aligned representation required by RegVelo 0.4.2.",
-      "blocks_interpretation": true
-    },
-    {
-      "id": "regvelo-dense-memory-budget",
-      "severity": "fatal",
-      "description": "Estimate dense spliced and unspliced working-layer memory before conversion and block analyses above the project-declared budget; never silently densify a large object.",
-      "blocks_interpretation": true
-    },
-    {
-      "id": "regvelo-training-and-stability",
-      "severity": "fatal",
-      "description": "Require finite training histories and velocity, latent-time, and latent-state outputs; save and reload every admitted model; and retain comparisons across declared model modes or random seeds.",
-      "blocks_interpretation": true
-    },
-    {
-      "id": "regvelo-baseline-and-direction",
-      "severity": "major",
-      "description": "When scientific conclusions depend on direction or method advantage, compare against an unconstrained velocity baseline and independently withheld time, root, terminal, or lineage evidence rather than selecting the visually preferred result.",
-      "blocks_interpretation": true
-    },
-    {
-      "id": "regvelo-fate-and-perturbation-boundary",
-      "severity": "fatal",
-      "description": "CellRank terminal-state choices and perturbation settings require sensitivity analysis; in-silico regulator effects are model-dependent hypotheses and cannot be reported as causal or experimentally validated.",
-      "blocks_interpretation": true
-    },
-    {
-      "id": "regvelo-source-and-output-reload",
-      "severity": "fatal",
-      "description": "Source h5ad and GRN remain immutable; derived objects, models, parameters, histories, versions, mode comparisons, and quality status must reload with complete cell and feature accounting.",
-      "blocks_interpretation": true
-    }
-  ],
-  "evidence_effects": [
-    "estimates_grn_informed_rna_velocity",
-    "derives_gene_resolved_latent_time_and_latent_state",
-    "compares_regulatory_constraint_modes_and_seeds",
-    "generates_reviewable_regulator_perturbation_hypotheses",
-    "blocks_unvalidated_causal_and_directional_claims"
-  ],
-  "alternatives": ["single-cell-trajectory-velocity"],
-  "complements": [
-    "single-cell-trajectory-velocity",
-    "single-cell-regulatory-network",
-    "single-cell-atac-regulatory",
-    "single-cell-fate-mapping",
-    "single-cell-trajectory-topology",
-    "single-cell-multimodal-integration"
-  ],
-  "tool_requirements": [
-    {
-      "name": "RegVelo",
-      "ecosystem": "python",
-      "identity": "regvelo",
-      "required": true,
-      "tested_versions": ["0.4.2"],
-      "allowed_versions": [">=0.4.2,<0.5"],
-      "version_source": "https://github.com/theislab/regvelo/releases/tag/v0.4.2",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('regvelo'))"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "mismatch_policy": "block",
-      "version_differences": [
-        {
-          "id": "regvelo-042-dense-layers-square-grn",
-          "affected_versions": [">=0.4.2,<0.5"],
-          "category": "behavior",
-          "description": "Observed RegVelo 0.4.2 initialization requires dense spliced and unspliced working arrays and a square gene-aligned GRN tensor even when the declared prior is rectangular; explicitly passing n_latent or n_hidden also triggers duplicate-keyword failures in the model constructor.",
-          "compatibility_effect": "requires-parameter",
-          "required_action": "Preflight dense memory, preserve source sparse layers, build an explicit square working matrix, retain the original target and regulator identities, use the validated default 10-dimensional latent and 256-unit hidden architecture, and record all representations.",
-          "source": "https://github.com/theislab/regvelo/tree/v0.4.2"
-        }
-      ],
-      "platforms": ["any"]
-    }
-  ],
-  "dependencies": [
-    {
-      "name": "python",
-      "ecosystem": "runtime",
-      "identity": "python-runtime",
-      "required": true,
-      "tested_versions": ["3.11.14"],
-      "allowed_versions": [">=3.11,<3.12"],
-      "version_source": "https://www.python.org/downloads/",
-      "verified_at": "2026-07-23",
-      "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"],
-      "version_probe_kind": "python_callable",
-      "version_probe_timeout_seconds": 5,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Run the observed RegVelo compatibility profile.",
-      "conflicts": [],
-      "platforms": ["any"]
-    },
-    {
-      "name": "anndata",
-      "ecosystem": "python",
-      "identity": "anndata",
-      "required": true,
-      "tested_versions": ["0.12.19"],
-      "allowed_versions": [">=0.12,<0.13"],
-      "version_source": "https://anndata.readthedocs.io/en/stable/release-notes/",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import anndata; print(anndata.__version__)"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Preserve count layers, regulatory velocity outputs, identifiers, and provenance.",
-      "conflicts": [],
-      "platforms": ["any"]
-    },
-    {
-      "name": "numpy",
-      "ecosystem": "python",
-      "identity": "numpy",
-      "required": true,
-      "tested_versions": ["1.26.4"],
-      "allowed_versions": [">=1.26,<2"],
-      "version_source": "https://numpy.org/doc/1.26/release.html",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import numpy; print(numpy.__version__)"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Execute the validated numerical ABI profile and finite-output checks.",
-      "conflicts": [],
-      "platforms": ["any"]
-    },
-    {
-      "name": "pandas",
-      "ecosystem": "python",
-      "identity": "pandas",
-      "required": true,
-      "tested_versions": ["2.3.3"],
-      "allowed_versions": [">=2.3,<2.4"],
-      "version_source": "https://pandas.pydata.org/docs/whatsnew/",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import pandas; print(pandas.__version__)"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Validate and align target-by-regulator network matrices.",
-      "conflicts": [],
-      "platforms": ["any"]
-    },
-    {
-      "name": "scipy",
-      "ecosystem": "python",
-      "identity": "scipy",
-      "required": true,
-      "tested_versions": ["1.15.3"],
-      "allowed_versions": [">=1.15,<1.16"],
-      "version_source": "https://docs.scipy.org/doc/scipy/release.html",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import scipy; print(scipy.__version__)"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Preserve sparse source layers and validated scientific dependencies.",
-      "conflicts": [],
-      "platforms": ["any"]
-    },
-    {
-      "name": "scvelo",
-      "ecosystem": "python",
-      "identity": "scvelo",
-      "required": true,
-      "tested_versions": ["0.3.4"],
-      "allowed_versions": [">=0.3.4,<0.4"],
-      "version_source": "https://scvelo.readthedocs.io/en/stable/release_notes/",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import scvelo; print(scvelo.__version__)"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Supply the RNA-velocity data model used by RegVelo and baseline comparison.",
-      "conflicts": [],
-      "platforms": ["any"]
-    },
-    {
-      "name": "scvi-tools",
-      "ecosystem": "python",
-      "identity": "scvi-tools",
-      "required": true,
-      "tested_versions": ["1.2.0"],
-      "allowed_versions": [">=1.0,<1.2.1"],
-      "version_source": "https://docs.scvi-tools.org/en/stable/release_notes/",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('scvi-tools'))"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Provide the model lifecycle, training, persistence, and reload APIs used by RegVelo.",
-      "conflicts": [],
-      "platforms": ["any"]
-    },
-    {
-      "name": "cellrank",
-      "ecosystem": "python",
-      "identity": "cellrank",
-      "required": true,
-      "tested_versions": ["2.0.7"],
-      "allowed_versions": [">=2.0,<2.1"],
-      "version_source": "https://cellrank.readthedocs.io/en/stable/release_notes.html",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import cellrank; print(cellrank.__version__)"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Support downstream fate-probability and terminal-state sensitivity analysis.",
-      "conflicts": [],
-      "platforms": ["any"]
-    },
-    {
-      "name": "torch",
-      "ecosystem": "python",
-      "identity": "torch",
-      "required": true,
-      "tested_versions": ["2.4.1"],
-      "allowed_versions": [">=2.4,<2.5"],
-      "version_source": "https://pytorch.org/blog/",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import torch; print(torch.__version__)"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Execute the validated RegVelo model profile.",
-      "conflicts": [],
-      "platforms": ["any"]
-    },
-    {
-      "name": "torchode",
-      "ecosystem": "python",
-      "identity": "torchode",
-      "required": true,
-      "tested_versions": ["1.0.1"],
-      "allowed_versions": [">=1.0,<1.1"],
-      "version_source": "https://pypi.org/project/torchode/",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import importlib.metadata; print(importlib.metadata.version('torchode'))"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Provide the differential-equation dependency used by RegVelo.",
-      "conflicts": [],
-      "platforms": ["any"]
-    },
-    {
-      "name": "jax",
-      "ecosystem": "python",
-      "identity": "jax",
-      "required": true,
-      "tested_versions": ["0.4.35"],
-      "allowed_versions": [">=0.4.35,<0.5"],
-      "version_source": "https://docs.jax.dev/en/latest/changelog.html",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import jax; print(jax.__version__)"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Maintain the validated CellRank and scvi-tools import profile.",
-      "conflicts": [],
-      "platforms": ["any"]
-    },
-    {
-      "name": "jaxlib",
-      "ecosystem": "python",
-      "identity": "jaxlib",
-      "required": true,
-      "tested_versions": ["0.4.35"],
-      "allowed_versions": [">=0.4.35,<0.5"],
-      "version_source": "https://docs.jax.dev/en/latest/changelog.html",
-      "verified_at": "2026-07-23",
-      "version_probe": ["python3", "-c", "import jaxlib; print(jaxlib.__version__)"],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Match the validated JAX binary interface.",
-      "conflicts": [],
-      "platforms": ["any"]
-    }
-  ],
-  "compatibility_matrix": [
-    {
-      "id": "agent-protocol-1-regvelo-042-python-311-layer-semantics",
-      "module_version": "1.1.0",
-      "tool_versions": {
-        "RegVelo": [">=0.4.2,<0.5"]
-      },
-      "dependency_versions": {
-        "python": [">=3.11,<3.12"],
-        "anndata": [">=0.12,<0.13"],
-        "numpy": [">=1.26,<2"],
-        "pandas": [">=2.3,<2.4"],
-        "scipy": [">=1.15,<1.16"],
-        "scvelo": [">=0.3.4,<0.4"],
-        "scvi-tools": [">=1.0,<1.2.1"],
-        "cellrank": [">=2.0,<2.1"],
-        "torch": [">=2.4,<2.5"],
-        "torchode": [">=1.0,<1.1"],
-        "jax": [">=0.4.35,<0.5"],
-        "jaxlib": [">=0.4.35,<0.5"]
-      },
-      "input_formats": {
-        "splicing_and_regulatory_prior": ["h5ad-plus-grn-tsv@1"]
-      },
-      "output_formats": {
-        "regulatory_velocity_object": ["h5ad@0.1.0"],
-        "regulatory_velocity_validation": ["inline-json@1"]
-      },
-      "platforms": ["any"],
-      "regression_evidence_ids": ["single-cell-regulatory-velocity-regression-v2"],
-      "end_to_end_evidence_ids": ["single-cell-regulatory-velocity-e2e-v2"],
-      "verified_at": "2026-07-23"
-    }
-  ],
   "access": "agent_generated",
-  "mutability": "read_only",
-  "credentials": [],
-  "limitations": [
-    "The validated row covers RegVelo 0.4.2 integer-count and nonnegative-continuous layer semantics on bounded dense working copies with a square gene-aligned prior, hard or soft constraints, velocity, latent time, latent representation, model persistence, and reload inference. Public zebrafish neural-crest evidence supports execution and withheld-stage direction for one exact official H5AD, GRN, preprocessing, and runtime profile, while hard-versus-soft velocity disagreement remains a sensitivity warning. It does not establish universal biological direction, causal transcription-factor effects, experimental perturbation validation, optimal terminal states, portability, or superiority to scVelo or VeloVI on a user's dataset. Full CellRank perturbation analysis requires independently justified terminal states and project-specific sensitivity testing."
-  ],
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {
-    "license": "Apache-2.0",
-    "concept_sources": [
-      "Project-owned Codex-native workflow synthesized from documented RegVelo APIs and independently defined scientific quality gates.",
-      "https://github.com/theislab/regvelo/releases/tag/v0.4.2",
-      "https://regvelo.readthedocs.io/",
-      "https://doi.org/10.1016/j.cell.2026.04.022"
-    ]
-  },
   "agent_protocol": {
-    "schema_version": 1,
-    "mode": "codex_generated_project_code",
-    "languages": ["python", "notebook"],
-    "template_sections": [
-      {
-        "id": "inspect-splicing-grn-design",
-        "purpose": "Establish whether GRN-informed regulatory velocity is scientifically and computationally identifiable.",
-        "required_logic": [
-          "Inspect the real spliced and unspliced layers, quantification provenance, cells, genes, biological samples, independent direction evidence, prior-GRN construction, feature namespace, target and regulator orientation, edge distribution, and artifact digests.",
-          "Block undeclared or invalid layer semantics, guessed feature mapping, circular GRNs constructed from the conclusion being tested, inadequate dynamic coverage, and missing source provenance; never relabel fractional abundance as integer counts.",
-          "Estimate dense working-layer memory before execution and freeze model modes, seeds, regularization, baseline, direction tests, fate settings, and outputs."
-        ],
-        "output_artifact_types": ["single_cell_regulatory_velocity_validation"],
-        "template_files": ["templates/run_regvelo.py"]
-      },
-      {
-        "id": "fit-regulatory-velocity",
-        "purpose": "Execute RegVelo 0.4.2 with version-correct GRN and layer handling.",
-        "required_logic": [
-          "Preserve source sparse layers, validate them under the declared integer-count or nonnegative-continuous semantics, and create only a bounded dense working copy because the observed 0.4.2 model path does not accept sparse layer arrays.",
-          "Align the declared target-by-regulator prior to exact feature identifiers, remove declared self edges, construct the square gene-aligned working tensor, and retain the original GRN digest and orientation.",
-          "Train every declared hard or soft constraint and random-seed run, retain complete histories and warnings, and compute velocity, gene-resolved latent time, and latent representation."
-        ],
-        "output_artifact_types": ["single_cell_regulatory_velocity_object", "single_cell_regulatory_velocity_validation"],
-        "template_files": ["templates/run_regvelo.py"]
-      },
-      {
-        "id": "compare-direction-and-stability",
-        "purpose": "Determine whether regulatory dynamics are stable and independently supported.",
-        "required_logic": [
-          "Compare velocity outputs across model modes or seeds and retain discordance rather than selecting the desired result.",
-          "When direction or method advantage is claimed, compare against scVelo or VeloVI and independently withheld time, root, terminal, lineage, or perturbation evidence.",
-          "Block interpretation when training, finite-output, stability, baseline, or independent-direction gates fail."
-        ],
-        "output_artifact_types": ["single_cell_regulatory_velocity_validation"],
-        "template_files": ["templates/run_regvelo.py"]
-      },
-      {
-        "id": "compose-fate-and-perturbation-hypotheses",
-        "purpose": "Connect admitted regulatory velocity to CellRank fate analysis and regulator prioritization.",
-        "required_logic": [
-          "Pass only admitted velocity fields to the fate-mapping module and perform terminal-state, kernel-weight, and neighborhood sensitivity analyses.",
-          "Run RegVelo perturbation simulation only for predeclared regulators and compare baseline versus perturbed fate probabilities with complete cell and regulator accounting.",
-          "Label every perturbation effect as a model-dependent experimental hypothesis until independently validated."
-        ],
-        "output_artifact_types": ["single_cell_regulatory_velocity_validation"],
-        "template_files": ["templates/run_regvelo.py"]
-      },
-      {
-        "id": "persist-reload-and-admit",
-        "purpose": "Produce traceable models and derived artifacts without altering the source.",
-        "required_logic": [
-          "Save and reload every model before admitting its output and write primary velocity, latent time, latent representation, parameters, mode comparisons, versions, and quality status to a new h5ad and report.",
-          "Verify source and GRN digests, cell and feature identities, original splicing layers and declared semantics, derived fields, model files, and output reload.",
-          "Admit only observed executions; generated code, package import, or a successful process exit without scientific checks is not evidence."
-        ],
-        "output_artifact_types": ["single_cell_regulatory_velocity_object", "single_cell_regulatory_velocity_validation"],
-        "template_files": ["templates/run_regvelo.py"]
-      }
+    "forbidden_actions": [
+      "Do not install, update, activate, create, or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure.",
+      "Do not guess layer semantics, describe fractional abundance as integer counts, or guess feature identifiers, homologs, GRN direction, regulator identities, edge provenance, time direction, root or terminal states, or perturbation mechanism.",
+      "Do not silently densify a large object, pass sparse arrays into the observed RegVelo 0.4.2 initializer, or pass a rectangular network tensor as the model skeleton.",
+      "Do not use phenotype, desired fate, expected regulator, evaluation truth, or visual appearance to select genes, GRN edges, modes, seeds, terminal states, or thresholds.",
+      "Do not overwrite source splicing layers, identifiers, annotations, h5ad, or GRN; do not discard failed modes, unstable runs, warnings, null perturbations, or discordant baselines.",
+      "Do not report generated code, successful import, successful exit, or unreloaded model as validated regulatory velocity evidence.",
+      "Do not describe inferred direction, CellRank fate, or RegVelo in-silico perturbation as lineage causality or experimental validation."
     ],
+    "languages": [
+      "python",
+      "notebook"
+    ],
+    "mode": "codex_generated_project_code",
     "parameter_rules": [
       {
+        "decision_inputs": [
+          "layer semantics",
+          "quantification and preprocessing provenance",
+          "feature namespace",
+          "prior source",
+          "edge provenance",
+          "regulator coverage",
+          "memory budget"
+        ],
         "id": "regvelo-feature-and-grn-selection",
         "parameter": "feature-set-and-prior-grn",
-        "decision_inputs": ["layer semantics", "quantification and preprocessing provenance", "feature namespace", "prior source", "edge provenance", "regulator coverage", "memory budget"],
         "selection_rule": "Freeze genes and the independently constructed target-by-regulator network from declared provenance and compatibility before fitting; retain all exclusions with reasons.",
         "validation_rule": "Require exact identifier reconciliation, edge accounting, no guessed homolog or symbol mapping, and an explicit square working-matrix transformation."
       },
       {
+        "decision_inputs": [
+          "dataset size",
+          "prior confidence",
+          "training stability",
+          "independent time or anchors",
+          "baseline objective"
+        ],
         "id": "regvelo-model-comparison",
         "parameter": "constraint-mode-regularization-seeds-and-baseline",
-        "decision_inputs": ["dataset size", "prior confidence", "training stability", "independent time or anchors", "baseline objective"],
         "selection_rule": "Predeclare hard or soft constraints, regularization, at least two seeds or modes, and an unconstrained baseline when method-dependent claims are planned.",
         "validation_rule": "Retain all runs and require finite histories, model reload, stability summaries, and independent direction checks before interpretation."
       },
       {
+        "decision_inputs": [
+          "biological hypothesis",
+          "regulator expression",
+          "GRN support",
+          "terminal-state evidence",
+          "CellRank sensitivity"
+        ],
         "id": "regvelo-perturbation-scope",
         "parameter": "regulators-terminal-states-and-fate-kernel",
-        "decision_inputs": ["biological hypothesis", "regulator expression", "GRN support", "terminal-state evidence", "CellRank sensitivity"],
         "selection_rule": "Predeclare regulator candidates and terminal states from independent evidence, then compare baseline and perturbed fate predictions across plausible settings.",
         "validation_rule": "Report sensitivity, preserve null and discordant effects, and prohibit causal wording without experimental perturbation evidence."
       }
-    ],
-    "preflight_checks": [
-      "Inspect actual h5ad and GRN artifacts, source digests, declared spliced and unspliced layer semantics, quantification and preprocessing provenance, unique cells and genes, biological design, feature namespace, target and regulator identities, GRN orientation, edge provenance, self-edge policy, and independent direction evidence.",
-      "Detect exact RegVelo, Python, AnnData, NumPy, pandas, SciPy, scVelo, scvi-tools, CellRank, torch, torchode, JAX, and jaxlib versions in the existing scientific runtime.",
-      "Block NumPy 2 or incompatible JAX profiles for the validated 0.4.2 row, sparse-array passage into the observed model initializer, rectangular model tensors, guessed mappings, stale outputs, and dense working sets above the declared memory budget.",
-      "Freeze model modes, seeds, regularization, epochs, baseline, independent-direction gates, terminal-state sensitivity, perturbation candidates, and output locations before execution."
     ],
     "postflight_checks": [
       "Reconcile all cells, genes, regulators, GRN edges, model runs, failed runs, warnings, and derived arrays.",
       "Require finite velocity, latent-time, latent-state, and training-history outputs; compare declared modes or seeds; and retain discordance.",
       "Save and reload every model, reload the derived h5ad and report, and verify source splicing layers under their declared semantics, identities, digests, GRN provenance, parameters, versions, and causal-claim boundary.",
       "For direction, fate, or perturbation claims, verify the declared scVelo or VeloVI baseline, withheld direction evidence, CellRank terminal-state sensitivity, and baseline-versus-perturbed fate comparison."
+    ],
+    "preflight_checks": [
+      "Inspect actual h5ad and GRN artifacts, source digests, declared spliced and unspliced layer semantics, quantification and preprocessing provenance, unique cells and genes, biological design, feature namespace, target and regulator identities, GRN orientation, edge provenance, self-edge policy, and independent direction evidence.",
+      "Detect exact RegVelo, Python, AnnData, NumPy, pandas, SciPy, scVelo, scvi-tools, CellRank, torch, torchode, JAX, and jaxlib versions in the existing scientific runtime.",
+      "Block NumPy 2 or incompatible JAX profiles for the validated 0.4.2 row, sparse-array passage into the observed model initializer, rectangular model tensors, guessed mappings, stale outputs, and dense working sets above the declared memory budget.",
+      "Freeze model modes, seeds, regularization, epochs, baseline, independent-direction gates, terminal-state sensitivity, perturbation candidates, and output locations before execution."
     ],
     "provenance_fields": [
       "module-id",
@@ -659,15 +94,928 @@
       "model-and-output-artifact-digests",
       "quality-gate-results"
     ],
-    "forbidden_actions": [
-      "Do not install, update, activate, create, or manage Python, Conda, container, CPU, GPU, Slurm, remote, or local-model infrastructure.",
-      "Do not guess layer semantics, describe fractional abundance as integer counts, or guess feature identifiers, homologs, GRN direction, regulator identities, edge provenance, time direction, root or terminal states, or perturbation mechanism.",
-      "Do not silently densify a large object, pass sparse arrays into the observed RegVelo 0.4.2 initializer, or pass a rectangular network tensor as the model skeleton.",
-      "Do not use phenotype, desired fate, expected regulator, evaluation truth, or visual appearance to select genes, GRN edges, modes, seeds, terminal states, or thresholds.",
-      "Do not overwrite source splicing layers, identifiers, annotations, h5ad, or GRN; do not discard failed modes, unstable runs, warnings, null perturbations, or discordant baselines.",
-      "Do not report generated code, successful import, successful exit, or unreloaded model as validated regulatory velocity evidence.",
-      "Do not describe inferred direction, CellRank fate, or RegVelo in-silico perturbation as lineage causality or experimental validation."
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-splicing-grn-design",
+        "output_artifact_types": [
+          "single_cell_regulatory_velocity_validation"
+        ],
+        "purpose": "Establish whether GRN-informed regulatory velocity is scientifically and computationally identifiable.",
+        "required_logic": [
+          "Inspect the real spliced and unspliced layers, quantification provenance, cells, genes, biological samples, independent direction evidence, prior-GRN construction, feature namespace, target and regulator orientation, edge distribution, and artifact digests.",
+          "Block undeclared or invalid layer semantics, guessed feature mapping, circular GRNs constructed from the conclusion being tested, inadequate dynamic coverage, and missing source provenance; never relabel fractional abundance as integer counts.",
+          "Estimate dense working-layer memory before execution and freeze model modes, seeds, regularization, baseline, direction tests, fate settings, and outputs."
+        ],
+        "template_files": [
+          "templates/run_regvelo.py"
+        ]
+      },
+      {
+        "id": "fit-regulatory-velocity",
+        "output_artifact_types": [
+          "single_cell_regulatory_velocity_object",
+          "single_cell_regulatory_velocity_validation"
+        ],
+        "purpose": "Execute RegVelo 0.4.2 with version-correct GRN and layer handling.",
+        "required_logic": [
+          "Preserve source sparse layers, validate them under the declared integer-count or nonnegative-continuous semantics, and create only a bounded dense working copy because the observed 0.4.2 model path does not accept sparse layer arrays.",
+          "Align the declared target-by-regulator prior to exact feature identifiers, remove declared self edges, construct the square gene-aligned working tensor, and retain the original GRN digest and orientation.",
+          "Train every declared hard or soft constraint and random-seed run, retain complete histories and warnings, and compute velocity, gene-resolved latent time, and latent representation."
+        ],
+        "template_files": [
+          "templates/run_regvelo.py"
+        ]
+      },
+      {
+        "id": "compare-direction-and-stability",
+        "output_artifact_types": [
+          "single_cell_regulatory_velocity_validation"
+        ],
+        "purpose": "Determine whether regulatory dynamics are stable and independently supported.",
+        "required_logic": [
+          "Compare velocity outputs across model modes or seeds and retain discordance rather than selecting the desired result.",
+          "When direction or method advantage is claimed, compare against scVelo or VeloVI and independently withheld time, root, terminal, lineage, or perturbation evidence.",
+          "Block interpretation when training, finite-output, stability, baseline, or independent-direction gates fail."
+        ],
+        "template_files": [
+          "templates/run_regvelo.py"
+        ]
+      },
+      {
+        "id": "compose-fate-and-perturbation-hypotheses",
+        "output_artifact_types": [
+          "single_cell_regulatory_velocity_validation"
+        ],
+        "purpose": "Connect admitted regulatory velocity to CellRank fate analysis and regulator prioritization.",
+        "required_logic": [
+          "Pass only admitted velocity fields to the fate-mapping module and perform terminal-state, kernel-weight, and neighborhood sensitivity analyses.",
+          "Run RegVelo perturbation simulation only for predeclared regulators and compare baseline versus perturbed fate probabilities with complete cell and regulator accounting.",
+          "Label every perturbation effect as a model-dependent experimental hypothesis until independently validated."
+        ],
+        "template_files": [
+          "templates/run_regvelo.py"
+        ]
+      },
+      {
+        "id": "persist-reload-and-admit",
+        "output_artifact_types": [
+          "single_cell_regulatory_velocity_object",
+          "single_cell_regulatory_velocity_validation"
+        ],
+        "purpose": "Produce traceable models and derived artifacts without altering the source.",
+        "required_logic": [
+          "Save and reload every model before admitting its output and write primary velocity, latent time, latent representation, parameters, mode comparisons, versions, and quality status to a new h5ad and report.",
+          "Verify source and GRN digests, cell and feature identities, original splicing layers and declared semantics, derived fields, model files, and output reload.",
+          "Admit only observed executions; generated code, package import, or a successful process exit without scientific checks is not evidence."
+        ],
+        "template_files": [
+          "templates/run_regvelo.py"
+        ]
+      }
+    ]
+  },
+  "alternatives": [
+    "single-cell-trajectory-velocity"
+  ],
+  "assumptions": [
+    "Spliced and unspliced layers are aligned and explicitly declared as either integer-like molecule counts or finite nonnegative continuous abundances with documented preprocessing; the prior network has the same feature namespace and target-by-regulator orientation; selected cells cover a sufficiently connected dynamic process; and model-based perturbations generate testable hypotheses rather than causal proof."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "anndata": [
+          ">=0.12,<0.13"
+        ],
+        "cellrank": [
+          ">=2.0,<2.1"
+        ],
+        "jax": [
+          ">=0.4.35,<0.5"
+        ],
+        "jaxlib": [
+          ">=0.4.35,<0.5"
+        ],
+        "numpy": [
+          ">=1.26,<2"
+        ],
+        "pandas": [
+          ">=2.3,<2.4"
+        ],
+        "python": [
+          ">=3.11,<3.12"
+        ],
+        "scipy": [
+          ">=1.15,<1.16"
+        ],
+        "scvelo": [
+          ">=0.3.4,<0.4"
+        ],
+        "scvi-tools": [
+          ">=1.0,<1.2.1"
+        ],
+        "torch": [
+          ">=2.4,<2.5"
+        ],
+        "torchode": [
+          ">=1.0,<1.1"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "single-cell-regulatory-velocity-e2e-v2"
+      ],
+      "id": "agent-protocol-1-regvelo-042-python-311-layer-semantics",
+      "input_formats": {
+        "splicing_and_regulatory_prior": [
+          "h5ad-plus-grn-tsv@1"
+        ]
+      },
+      "module_version": "1.1.0",
+      "output_formats": {
+        "regulatory_velocity_object": [
+          "h5ad@0.1.0"
+        ],
+        "regulatory_velocity_validation": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "single-cell-regulatory-velocity-regression-v2"
+      ],
+      "tool_versions": {
+        "RegVelo": [
+          ">=0.4.2,<0.5"
+        ]
+      },
+      "verified_at": "2026-07-23"
+    }
+  ],
+  "complements": [
+    "single-cell-trajectory-velocity",
+    "single-cell-regulatory-network",
+    "single-cell-atac-regulatory",
+    "single-cell-fate-mapping",
+    "single-cell-trajectory-topology",
+    "single-cell-multimodal-integration"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.11,<3.12"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run the observed RegVelo compatibility profile.",
+      "required": true,
+      "tested_versions": [
+        "3.11.14"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.12,<0.13"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "anndata",
+      "name": "anndata",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Preserve count layers, regulatory velocity outputs, identifiers, and provenance.",
+      "required": true,
+      "tested_versions": [
+        "0.12.19"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import anndata; print(anndata.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://anndata.readthedocs.io/en/stable/release-notes/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.26,<2"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "numpy",
+      "name": "numpy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated numerical ABI profile and finite-output checks.",
+      "required": true,
+      "tested_versions": [
+        "1.26.4"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import numpy; print(numpy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://numpy.org/doc/1.26/release.html"
+    },
+    {
+      "allowed_versions": [
+        ">=2.3,<2.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "pandas",
+      "name": "pandas",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Validate and align target-by-regulator network matrices.",
+      "required": true,
+      "tested_versions": [
+        "2.3.3"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import pandas; print(pandas.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://pandas.pydata.org/docs/whatsnew/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.15,<1.16"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scipy",
+      "name": "scipy",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Preserve sparse source layers and validated scientific dependencies.",
+      "required": true,
+      "tested_versions": [
+        "1.15.3"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import scipy; print(scipy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://docs.scipy.org/doc/scipy/release.html"
+    },
+    {
+      "allowed_versions": [
+        ">=0.3.4,<0.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scvelo",
+      "name": "scvelo",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Supply the RNA-velocity data model used by RegVelo and baseline comparison.",
+      "required": true,
+      "tested_versions": [
+        "0.3.4"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import scvelo; print(scvelo.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scvelo.readthedocs.io/en/stable/release_notes/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.0,<1.2.1"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "scvi-tools",
+      "name": "scvi-tools",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide the model lifecycle, training, persistence, and reload APIs used by RegVelo.",
+      "required": true,
+      "tested_versions": [
+        "1.2.0"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('scvi-tools'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://docs.scvi-tools.org/en/stable/release_notes/"
+    },
+    {
+      "allowed_versions": [
+        ">=2.0,<2.1"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "cellrank",
+      "name": "cellrank",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Support downstream fate-probability and terminal-state sensitivity analysis.",
+      "required": true,
+      "tested_versions": [
+        "2.0.7"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import cellrank; print(cellrank.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cellrank.readthedocs.io/en/stable/release_notes.html"
+    },
+    {
+      "allowed_versions": [
+        ">=2.4,<2.5"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "torch",
+      "name": "torch",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated RegVelo model profile.",
+      "required": true,
+      "tested_versions": [
+        "2.4.1"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import torch; print(torch.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://pytorch.org/blog/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.0,<1.1"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "torchode",
+      "name": "torchode",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Provide the differential-equation dependency used by RegVelo.",
+      "required": true,
+      "tested_versions": [
+        "1.0.1"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('torchode'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://pypi.org/project/torchode/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.4.35,<0.5"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "jax",
+      "name": "jax",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Maintain the validated CellRank and scvi-tools import profile.",
+      "required": true,
+      "tested_versions": [
+        "0.4.35"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import jax; print(jax.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://docs.jax.dev/en/latest/changelog.html"
+    },
+    {
+      "allowed_versions": [
+        ">=0.4.35,<0.5"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "jaxlib",
+      "name": "jaxlib",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Match the validated JAX binary interface.",
+      "required": true,
+      "tested_versions": [
+        "0.4.35"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import jaxlib; print(jaxlib.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://docs.jax.dev/en/latest/changelog.html"
+    }
+  ],
+  "description": "Direct Codex to inspect explicitly declared integer-count or nonnegative-continuous spliced and unspliced single-cell layers plus a versioned target-by-regulator network; execute RegVelo 0.4.2 with bounded dense working layers, multiple model modes or seeds, model persistence, reload validation, and explicit uncertainty and causal-claim boundaries; then hand validated dynamics to trajectory, fate-mapping, and perturbation-hypothesis workflows.",
+  "domains": [
+    "omics",
+    "statistics"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "estimates_grn_informed_rna_velocity",
+    "derives_gene_resolved_latent_time_and_latent_state",
+    "compares_regulatory_constraint_modes_and_seeds",
+    "generates_reviewable_regulator_perturbation_hypotheses",
+    "blocks_unvalidated_causal_and_directional_claims"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "single-cell-regulatory-velocity",
+  "input_artifacts": [
+    {
+      "artifact_type": "single_cell_splicing_and_regulatory_prior",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "none",
+            "gzip",
+            "lzf"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad-plus-grn-tsv",
+          "orientations": [
+            "cells-by-genes-plus-targets-by-regulators"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [
+            "cell-id",
+            "feature-id",
+            "target-id",
+            "regulator-id"
+          ],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "splicing_and_regulatory_prior",
+      "processing_levels": [
+        "quality-controlled",
+        "splicing-quantified",
+        "layer-semantics-declared",
+        "prior-grn-frozen"
+      ],
+      "required_metadata": [
+        "input-artifact-digest",
+        "prior-grn-digest",
+        "spliced-layer",
+        "unspliced-layer",
+        "layer-semantics",
+        "feature-identifier-namespace",
+        "grn-orientation",
+        "grn-construction-provenance",
+        "cell-accounting",
+        "quantification-provenance"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "declared_thresholds": {
+        "type": "object"
+      },
+      "design_notes": {
+        "maxLength": 8000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "grn_orientation": {
+        "enum": [
+          "targets-by-regulators"
+        ],
+        "type": "string"
+      },
+      "input_artifact_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "input_format": {
+        "enum": [
+          "h5ad-plus-grn-tsv"
+        ],
+        "type": "string"
+      },
+      "layer_semantics": {
+        "enum": [
+          "integer-counts",
+          "nonnegative-continuous"
+        ],
+        "type": "string"
+      },
+      "objective": {
+        "maxLength": 4000,
+        "minLength": 12,
+        "type": "string"
+      },
+      "requested_model_modes": {
+        "items": {
+          "enum": [
+            "hard",
+            "soft"
+          ],
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "spliced_layer": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "unspliced_layer": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "input_artifact_id",
+      "input_format",
+      "spliced_layer",
+      "unspliced_layer",
+      "layer_semantics",
+      "grn_orientation",
+      "requested_model_modes",
+      "declared_thresholds",
+      "design_notes"
     ],
-    "requires_observed_execution": true
-  }
+    "type": "object"
+  },
+  "intents": [
+    "run RegVelo regulatory velocity",
+    "infer GRN-informed RNA velocity and latent time",
+    "compare hard and soft regulatory constraints",
+    "predict transcription factor perturbation effects as hypotheses",
+    "RegVelo GRN\u5148\u9a8c RNA velocity \u6f5c\u5728\u65f6\u95f4\u548c\u8f6c\u5f55\u56e0\u5b50\u6270\u52a8"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "The validated row covers RegVelo 0.4.2 integer-count and nonnegative-continuous layer semantics on bounded dense working copies with a square gene-aligned prior, hard or soft constraints, velocity, latent time, latent representation, model persistence, and reload inference. Public zebrafish neural-crest evidence supports execution and withheld-stage direction for one exact official H5AD, GRN, preprocessing, and runtime profile, while hard-versus-soft velocity disagreement remains a sensitivity warning. It does not establish universal biological direction, causal transcription-factor effects, experimental perturbation validation, optimal terminal states, portability, or superiority to scVelo or VeloVI on a user's dataset. Full CellRank perturbation analysis requires independently justified terminal states and project-specific sensitivity testing."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "single_cell_regulatory_velocity_object",
+      "formats": [
+        {
+          "annotation_releases": [
+            "inherited-from-input"
+          ],
+          "compression": [
+            "none",
+            "gzip",
+            "lzf"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad",
+          "orientations": [
+            "observations-by-variables"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.1.0"
+          ]
+        }
+      ],
+      "name": "regulatory_velocity_object",
+      "processing_levels": [
+        "grn-informed-velocity-modeled",
+        "stability-reviewed",
+        "reload-validated"
+      ],
+      "required_metadata": [
+        "regvelo-velocity-layer",
+        "regvelo-latent-time-layer",
+        "regvelo-latent-representation",
+        "prior-grn-digest",
+        "model-mode",
+        "model-seed",
+        "source-preservation",
+        "quality-status"
+      ]
+    },
+    {
+      "artifact_type": "single_cell_regulatory_velocity_validation",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "run-by-mode-seed-stability-and-quality"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "regulatory_velocity_validation",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "model-parameters",
+        "training-history",
+        "mode-and-seed-comparison",
+        "finite-output-checks",
+        "model-reload-validation",
+        "source-preservation",
+        "actual-versions",
+        "artifact-digests",
+        "causal-claim-boundary"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "codex_generated_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Codex can inspect the real h5ad, layer semantics and preprocessing provenance, prior-GRN construction and digest, feature namespace, biological design, existing scientific runtime, and available memory; outputs are new; and no environment or compute-infrastructure management is required."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned Codex-native workflow synthesized from documented RegVelo APIs and independently defined scientific quality gates.",
+      "https://github.com/theislab/regvelo/releases/tag/v0.4.2",
+      "https://regvelo.readthedocs.io/",
+      "https://doi.org/10.1016/j.cell.2026.04.022"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block when spliced or unspliced layer semantics, preprocessing, cells, features, identifiers, quantification provenance, or source digests cannot be established without guessing; integer-count mode rejects fractional values while continuous mode still requires finite nonnegative values and explicit provenance.",
+      "id": "regvelo-layer-and-identity-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require a finite target-by-regulator matrix, exact feature-namespace reconciliation, explicit self-edge handling, independently frozen provenance, minimum regulator and edge counts, and the square gene-aligned representation required by RegVelo 0.4.2.",
+      "id": "regvelo-grn-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Estimate dense spliced and unspliced working-layer memory before conversion and block analyses above the project-declared budget; never silently densify a large object.",
+      "id": "regvelo-dense-memory-budget",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require finite training histories and velocity, latent-time, and latent-state outputs; save and reload every admitted model; and retain comparisons across declared model modes or random seeds.",
+      "id": "regvelo-training-and-stability",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "When scientific conclusions depend on direction or method advantage, compare against an unconstrained velocity baseline and independently withheld time, root, terminal, or lineage evidence rather than selecting the visually preferred result.",
+      "id": "regvelo-baseline-and-direction",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "CellRank terminal-state choices and perturbation settings require sensitivity analysis; in-silico regulator effects are model-dependent hypotheses and cannot be reported as causal or experimentally validated.",
+      "id": "regvelo-fate-and-perturbation-boundary",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Source h5ad and GRN remain immutable; derived objects, models, parameters, histories, versions, mode comparisons, and quality status must reload with complete cell and feature accounting.",
+      "id": "regvelo-source-and-output-reload",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Does an independently defined regulatory network improve reproducible dynamic-state inference beyond unconstrained RNA velocity, and which regulator perturbations merit experimental testing?"
+  ],
+  "schema_version": 1,
+  "title": "Infer GRN-informed regulatory velocity with RegVelo",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=0.4.2,<0.5"
+      ],
+      "ecosystem": "python",
+      "identity": "regvelo",
+      "mismatch_policy": "block",
+      "name": "RegVelo",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "0.4.2"
+      ],
+      "verified_at": "2026-07-23",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=0.4.2,<0.5"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parameter",
+          "description": "Observed RegVelo 0.4.2 initialization requires dense spliced and unspliced working arrays and a square gene-aligned GRN tensor even when the declared prior is rectangular; explicitly passing n_latent or n_hidden also triggers duplicate-keyword failures in the model constructor.",
+          "id": "regvelo-042-dense-layers-square-grn",
+          "required_action": "Preflight dense memory, preserve source sparse layers, build an explicit square working matrix, retain the original target and regulator identities, use the validated default 10-dimensional latent and 256-unit hidden architecture, and record all representations.",
+          "source": "https://github.com/theislab/regvelo/tree/v0.4.2"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('regvelo'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/theislab/regvelo/releases/tag/v0.4.2"
+    }
+  ],
+  "version": "1.1.0"
 }

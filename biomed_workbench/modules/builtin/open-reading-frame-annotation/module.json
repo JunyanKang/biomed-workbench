@@ -1,0 +1,324 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The supplied sequence is unambiguous DNA and the declared NCBI genetic code is appropriate for the biological system."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_open_reading_frame_annotation.py",
+      "purpose": "Execute complete ORF discovery against real project DNA under a declared genetic code and strand policy.",
+      "quality_gate_ids": [
+        "orf-sequence-identity",
+        "orf-genetic-code-contract",
+        "orf-claim-boundary"
+      ],
+      "requires_adaptation": true
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-biopython-1.87-inline-json-1",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ],
+        "biopython": [
+          ">=1.86,<1.88"
+        ]
+      },
+      "input_formats": {
+        "sequence": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "open_reading_frames": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "open-reading-frame-annotation-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "open-reading-frame-annotation-e2e-v1"
+      ],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "complements": [
+    "sequence-inspect",
+    "sequence-pairwise-alignment"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the validated module implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-12",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    },
+    {
+      "name": "biopython",
+      "ecosystem": "python",
+      "identity": "biopython",
+      "required": true,
+      "tested_versions": [
+        "1.87"
+      ],
+      "allowed_versions": [
+        ">=1.86,<1.88"
+      ],
+      "version_source": "https://biopython.org/wiki/Download",
+      "verified_at": "2026-07-24",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version(\"biopython\"))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Execute the versioned PairwiseAligner implementation and retain its exact version in alignment evidence.",
+      "conflicts": [],
+      "platforms": [
+        "any"
+      ]
+    }
+  ],
+  "description": "Find complete start-to-stop open reading frames on one or both DNA strands under a declared NCBI genetic code, preserving coding orientation and forward-sequence coordinates.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.molecular:annotate_open_reading_frames",
+  "evidence_effects": [
+    "adds-descriptive-open-reading-frame-evidence"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "open-reading-frame-annotation",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequence_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "sequence",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "sequence": {
+        "type": "string",
+        "minLength": 3
+      },
+      "min_length": {
+        "type": "integer",
+        "minimum": 3,
+        "maximum": 100000000
+      },
+      "search_reverse": {
+        "type": "boolean"
+      },
+      "filter_nested": {
+        "type": "boolean"
+      },
+      "translation_table": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 33
+      }
+    },
+    "required": [
+      "sequence"
+    ]
+  },
+  "intents": [
+    "open reading frame annotation",
+    "ORF annotation",
+    "find open reading frames",
+    "Annotate complete open reading frames",
+    "开放阅读框注释",
+    "查找 ORF"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "ORF discovery is not gene, transcript, promoter, operon, plasmid-feature, expression, or functional annotation.",
+    "Only complete start-to-stop ORFs under the declared genetic code are reported; partial coding regions and ambiguous DNA require a separately validated analysis."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "sequence_annotation",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "open_reading_frames",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "sequence_length": {
+        "type": "integer"
+      },
+      "translation_table": {
+        "type": "integer"
+      },
+      "translation_table_name": {
+        "type": "string"
+      },
+      "search_reverse": {
+        "type": "boolean"
+      },
+      "filter_nested": {
+        "type": "boolean"
+      },
+      "coordinate_system": {
+        "type": "string"
+      },
+      "orfs": {
+        "type": "array"
+      },
+      "summary": {
+        "type": "object"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "sequence_length",
+      "translation_table",
+      "translation_table_name",
+      "search_reverse",
+      "filter_nested",
+      "coordinate_system",
+      "orfs",
+      "summary",
+      "limitations"
+    ]
+  },
+  "preconditions": [
+    "A declared unambiguous DNA sequence is available in supplied-forward orientation.",
+    "The selected genetic code and reporting policies are appropriate for the scientific context."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room implementation of ORF discovery capability identified during product capability planning.",
+      "https://biopython.org/docs/latest/api/Bio.Data.CodonTable.html"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "id": "orf-sequence-identity",
+      "severity": "fatal",
+      "description": "Block missing, empty, invalid or ambiguous DNA and preserve the exact supplied sequence orientation.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "orf-genetic-code-contract",
+      "severity": "fatal",
+      "description": "Record and validate the NCBI translation table, minimum length, strand policy, nested-ORF policy and zero-based half-open coordinate convention.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "orf-claim-boundary",
+      "severity": "major",
+      "description": "An ORF list alone cannot establish genes, transcripts, plasmid features, expression, regulation or function.",
+      "blocks_interpretation": true
+    }
+  ],
+  "questions": [
+    "Which complete start-to-stop open reading frames occur on the declared DNA sequence under a stated genetic code, and what are their strand, frame and coordinates?"
+  ],
+  "schema_version": 1,
+  "title": "Annotate complete open reading frames",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

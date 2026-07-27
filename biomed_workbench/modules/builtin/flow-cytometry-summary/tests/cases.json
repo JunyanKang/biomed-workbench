@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "applies-parent-linked-rectangular-gates",
+      "input": {
+        "events": [
+          {"FSC-A": 100.0, "SSC-A": 30.0, "CD3-A": 5.0},
+          {"FSC-A": 120.0, "SSC-A": 35.0, "CD3-A": 12.0},
+          {"FSC-A": 10.0, "SSC-A": 5.0, "CD3-A": 20.0}
+        ],
+        "gates": [
+          {"name": "cells", "parent": "all", "conditions": {"FSC-A": {"min": 50.0}, "SSC-A": {"min": 20.0}}},
+          {"name": "cd3_positive", "parent": "cells", "conditions": {"CD3-A": {"min": 10.0}}}
+        ]
+      },
+      "expected_subset": {
+        "input_event_count": 3,
+        "gate_order": ["cells", "cd3_positive"]
+      }
+    }
+  ]
+}

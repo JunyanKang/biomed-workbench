@@ -154,7 +154,7 @@ print(json.dumps({{'minimum_gene_region_pearson':float(c.pearson.min()),'minimum
             "schema_version": 1,
             "passed": True,
             "module_id": MODULE_ID,
-            "module_version": "1.0.0",
+            "module_version": "1.1.0",
             "compatibility_row_id": "agent-protocol-1-pyscenic-0121-scenicplus-10a2",
             "registry_digest": registry.digest,
             "templates": {
@@ -165,7 +165,7 @@ print(json.dumps({{'minimum_gene_region_pearson':float(c.pearson.min()),'minimum
             "dependency_versions": {
                 "python-pyscenic": pv["python"], "arboreto": pv["arboreto"], "ctxcore": pv["ctxcore"],
                 "numpy-pyscenic": pv["numpy"], "pandas-pyscenic": pv["pandas"], "scipy-pyscenic": pv["scipy"],
-                "dask": pv["dask"], "distributed": pv["distributed"], "python-scenicplus": sv["python"],
+                "dask": pv["dask"], "distributed": pv["distributed"], "setuptools-pyscenic": pv["setuptools"], "python-scenicplus": sv["python"],
                 "pycistopic": sv["pycistopic"], "numpy-scenicplus": sv["numpy"], "pandas-scenicplus": sv["pandas"],
                 "scipy-scenicplus": sv["scipy"], "scikit-learn-scenicplus": sv["scikit-learn"], "tables": sv["tables"],
             },

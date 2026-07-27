@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "id": "cfu-enumeration",
+  "version": "1.0.0",
+  "title": "Estimate CFU per mL from observed dilution plates",
+  "description": "Pool observed countable serial-dilution plate counts by plated-volume exposure, retain TNTC and out-of-range plates, calculate an exact Poisson confidence interval, and block interpretation when countable plates are heterogeneous.",
+  "module_type": "analysis",
+  "domains": ["wetlab"],
+  "intents": ["enumerate bacterial CFU", "analyze dilution plate colony counts", "calculate CFU per mL", "serial dilution colony count", "菌落计数 CFU", "稀释涂布 CFU/mL"],
+  "questions": ["What CFU per mL estimate is supported by observed, countable dilution-plate measurements and their diagnostic agreement?"],
+  "entrypoint": "biomed_workbench.capabilities.experiment:enumerate_cfu_from_dilution_plates",
+  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 10000000},
+  "maturity": "validated",
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "input_artifacts": [
+    {
+      "name": "dilution_plate_observations",
+      "artifact_type": "microbial_colony_count_table",
+      "processing_levels": ["observed", "reviewed"],
+      "required_metadata": ["sample-identity", "dilution-definition", "plated-volume-unit", "medium-and-incubation", "plate-identity", "replicate-level"],
+      "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["plate-by-observed-colony-count"]}]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "cfu_summary",
+      "artifact_type": "microbial_cfu_enumeration_summary",
+      "processing_levels": ["derived", "diagnostic-bound"],
+      "required_metadata": ["module_version", "compatibility_row_id", "estimate-status", "countable-range-policy", "replicate-level"],
+      "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["cfu-estimate-with-plate-diagnostics"]}]
+    }
+  ],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "plates": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "plate_id": {"type": "string", "minLength": 1},
+            "replicate_id": {"type": "string", "minLength": 1},
+            "dilution_factor": {"type": "number", "minimum": 1},
+            "plated_volume_ml": {"type": "number", "exclusiveMinimum": 0},
+            "count_status": {"type": "string", "enum": ["counted", "tntc", "invalid"]},
+            "colony_count": {"type": "integer", "minimum": 0}
+          },
+          "required": ["plate_id", "replicate_id", "dilution_factor", "plated_volume_ml", "count_status"]
+        }
+      },
+      "countable_minimum": {"type": "integer", "minimum": 1},
+      "countable_maximum": {"type": "integer", "minimum": 2},
+      "replicate_level": {"type": "string", "enum": ["unspecified", "technical", "biological"]}
+    },
+    "required": ["plates"]
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "estimate_admissible": {"type": "boolean"},
+      "enumeration_status": {"type": "string"},
+      "comparative_interpretation_status": {"type": "string"},
+      "cfu_per_ml": {"type": "number", "nullable": true},
+      "confidence_interval_95": {"type": "object", "nullable": true},
+      "countable_plate_count": {"type": "integer"},
+      "total_plate_count": {"type": "integer"},
+      "replicate_level": {"type": "string"},
+      "replicate_design_status": {"type": "string"},
+      "heterogeneity": {"type": "object", "nullable": true},
+      "plate_results": {"type": "array"},
+      "quality_gates": {"type": "array"}
+    },
+    "required": ["estimate_admissible", "enumeration_status", "comparative_interpretation_status", "cfu_per_ml", "confidence_interval_95", "countable_plate_count", "total_plate_count", "replicate_level", "replicate_design_status", "heterogeneity", "plate_results", "quality_gates"]
+  },
+  "preconditions": ["Plate observations are actual counts from one declared sample and dilution convention, with plated volumes in mL and retained plate-level identities.", "The user has declared the countable range appropriate for the plating method and organism; the default 25 to 250 colonies is not universal."],
+  "assumptions": ["Countable plate counts are conditionally Poisson around one CFU concentration per mL after accounting for cumulative dilution and plated volume.", "The selected countable range and culture conditions are suitable for the declared organism and assay."],
+  "quality_gates": [
+    {"id": "cfu-observed-plate-contract", "severity": "fatal", "description": "Require unique plate identities, observed count states, finite cumulative dilution factors, positive plated volumes, and numeric counts only for explicitly counted plates.", "blocks_interpretation": true},
+    {"id": "cfu-countable-range-policy", "severity": "fatal", "description": "Use only declared countable plates for the primary estimate while retaining TNTC, invalid, low-count, and high-count plates as reason-coded diagnostics.", "blocks_interpretation": true},
+    {"id": "cfu-heterogeneity-and-claim-boundary", "severity": "major", "description": "Block a pooled estimate when countable plates show strong extra-Poisson heterogeneity, and block condition or fitness claims without independent biological replication and a design-aware comparison.", "blocks_interpretation": true}
+  ],
+  "limitations": ["This module does not count colonies from images, detect contamination, infer viability, infer organism identity, choose incubation conditions, impute uncountable plates, or convert CFU to cells.", "It estimates one declared sample concentration; it does not perform condition-level inference or validate plating recovery efficiency."],
+  "evidence_effects": ["adds_diagnostic_bound_cfu_enumeration"],
+  "alternatives": [],
+  "complements": ["dilution-plan", "growth-curve"],
+  "tool_requirements": [
+    {"name": "scipy", "ecosystem": "python", "identity": "scipy", "required": true, "tested_versions": ["1.17.1"], "allowed_versions": [">=1.17,<1.18"], "version_source": "https://scipy.org/", "verified_at": "2026-07-24", "version_probe": ["python3", "-c", "import scipy; print(scipy.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "scipy-chi-square-cfu-diagnostics", "affected_versions": [">=1.17,<1.18"], "category": "api", "description": "Chi-square quantiles and survival probabilities produce the exact Poisson interval and countable-plate heterogeneity diagnostic.", "compatibility_effect": "requires-parser", "required_action": "Record SciPy version with the plate-level result.", "source": "https://docs.scipy.org/doc/scipy/"}], "platforms": ["any"]}
+  ],
+  "dependencies": [
+    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.14,<3.15"], "version_source": "https://www.python.org/downloads/release/python-3143/", "verified_at": "2026-07-24", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute observed-plate CFU enumeration.", "conflicts": [], "platforms": ["any"]}
+  ],
+  "compatibility_matrix": [
+    {"id": "python-3.14.3-scipy-1.17-inline-json-1", "module_version": "1.0.0", "tool_versions": {"scipy": [">=1.17,<1.18"]}, "dependency_versions": {"python": [">=3.14,<3.15"]}, "input_formats": {"dilution_plate_observations": ["inline-json@1"]}, "output_formats": {"cfu_summary": ["inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["cfu-enumeration-regression-v1"], "end_to_end_evidence_ids": ["cfu-enumeration-e2e-v1"], "verified_at": "2026-07-24"}
+  ],
+  "code_templates": [
+    {"path": "templates/run_cfu_enumeration.py", "language": "python", "purpose": "Execute observed-plate CFU enumeration with a project-bound request and diagnostic-status validation.", "quality_gate_ids": ["cfu-observed-plate-contract", "cfu-countable-range-policy", "cfu-heterogeneity-and-claim-boundary"], "requires_adaptation": true}
+  ],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned clean-room CFU enumeration implementation with observed-count, dilution-exposure, censored-plate, uncertainty, and heterogeneity contracts."]}
+}

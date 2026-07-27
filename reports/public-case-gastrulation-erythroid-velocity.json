@@ -1,0 +1,133 @@
+{
+  "case_id": "gastrulation-erythroid-scvelo-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "all_outputs_reloaded": true,
+    "confidence": {
+      "maximum": 0.9643706323397497,
+      "median_velocity_confidence": 0.8729175440083976,
+      "minimum": 0.5576053008114026
+    },
+    "direction_validation": {
+      "experimental_time_key": "embryonic_day",
+      "experimental_time_removed_before_backend_execution": true,
+      "experimental_time_used_for_fitting": false,
+      "latent_time_spearman": 0.8506715083670341,
+      "root_cells": 226,
+      "root_mean_latent_time": 0.04470936789627919,
+      "root_terminal_separation": 0.902658602308017,
+      "terminal_cells": 224,
+      "terminal_mean_latent_time": 0.9473679702042962,
+      "velocity_pseudotime_spearman": 0.8603213534152805
+    },
+    "exact_repeat_fields": {
+      "latent_time": {
+        "exactly_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "missing_value_mask_equal": true
+      },
+      "velocity": {
+        "exactly_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "missing_value_mask_equal": true
+      },
+      "velocity_pseudotime": {
+        "exactly_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "missing_value_mask_equal": true
+      }
+    },
+    "independent_template_runs": 2,
+    "model": {
+      "finite_fit_genes": 117,
+      "max_dynamics_iterations": 20,
+      "mode": "dynamical",
+      "modeled_genes": 104,
+      "n_neighbors": 30,
+      "n_pcs": 30,
+      "seed": 20260723,
+      "selected_hvgs": 500
+    },
+    "source_artifact_immutable": true
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-scvelo-034-scanpy-1115",
+    "id": "single-cell-trajectory-velocity",
+    "manifest_sha256": "3a6bc2d318e63d862caa5f55ed40ef215d2127536b46b0abf2ee9502af5c32f4",
+    "registry_digest": "5b11049405a9122b4fdc197a33f8417f320ca9dbdfd13b520ae2a80de2764bd1",
+    "template_sha256": "0ce11ce5a22c765ef00117342a7999f94c1bb34ff28e2ade9ca7ed055afd42f8",
+    "version": "1.1.0"
+  },
+  "parameters": {
+    "max_dynamics_iterations": 20,
+    "minimum_latent_time_correlation": 0.15,
+    "minimum_median_velocity_confidence": 0.4,
+    "minimum_modeled_genes": 80,
+    "minimum_root_terminal_separation": 0.15,
+    "minimum_velocity_pseudotime_correlation": 0.1,
+    "n_neighbors": 30,
+    "n_pcs": 30,
+    "n_top_genes": 500,
+    "sample_selection": "up to 60 cells per published sample by stable SHA-256 order without stage or cell-type labels",
+    "seed": 20260723
+  },
+  "passed": true,
+  "quality_gates": {
+    "exact_repeat": "pass",
+    "experimental_stage_removed_before_fitting": "pass",
+    "independent_root_terminal_direction": "pass",
+    "integer_spliced_and_unspliced_counts": "pass",
+    "label_blind_sample_balancing": "pass",
+    "minimum_dynamical_gene_coverage": "pass",
+    "multiple_samples_and_stages": "pass",
+    "official_source_identity": "pass",
+    "source_and_output_preservation": "pass",
+    "velocity_confidence": "pass",
+    "withheld_stage_direction": "pass"
+  },
+  "runtime": {
+    "anndata": "0.12.19",
+    "numba": "0.66.0",
+    "numpy": "1.26.4",
+    "pandas": "2.3.3",
+    "python": "3.11.15",
+    "scanpy": "1.11.5",
+    "scikit-learn": "1.9.0",
+    "scipy": "1.15.3",
+    "scvelo": "0.3.4",
+    "umap-learn": "0.5.12"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "Embryonic stage is physically absent from backend-visible metadata during preprocessing, kinetic fitting, velocity graph construction, and latent-time inference; it is joined only for postfit direction evaluation.",
+    "Published Blood progenitors 1 and Erythroid3 annotations provide independent root and terminal anchors for orientation, not labels for kinetic parameter fitting.",
+    "The 27 published samples and seven developmental stages support direction validation, but cells are not treated as independent condition-level replicates.",
+    "This case validates the recorded erythroid lineage, runtime, parameters, and gates; it does not establish lineage causality or universal scVelo performance."
+  ],
+  "source": {
+    "dataset": "mouse gastrulation erythroid lineage",
+    "filename": "erythroid_lineage.h5ad",
+    "publisher": "Pijuan-Sala et al.; scVelo public dataset",
+    "sha256": "0af49504137dc8dc930a19e3534243a121da1ddddbe28ebc5fab0470294d60d4",
+    "url": "https://ndownloader.figshare.com/files/27686871",
+    "validation": {
+      "embryonic_stages": [
+        "E7.0",
+        "E7.25",
+        "E7.5",
+        "E7.75",
+        "E8.0",
+        "E8.25",
+        "E8.5"
+      ],
+      "root_cells": 226,
+      "samples": 27,
+      "selected_cells": 1234,
+      "source_cells": 9815,
+      "source_genes": 53801,
+      "spliced_integer_like": true,
+      "terminal_cells": 224,
+      "unspliced_integer_like": true
+    }
+  }
+}

@@ -12,15 +12,15 @@
         ]
       },
       "end_to_end_evidence_ids": [
-        "flow-cytometry-summary-e2e-v1"
+        "flow-cytometry-summary-e2e-v2"
       ],
-      "id": "python-3.14.3-inline-json-1",
+      "id": "python-3.14.3-inline-json-gate-lineage-1",
       "input_formats": {
         "events": [
           "inline-json@1"
         ]
       },
-      "module_version": "1.0.0",
+      "module_version": "1.1.0",
       "output_formats": {
         "gating_summary": [
           "inline-json@1"
@@ -30,7 +30,7 @@
         "any"
       ],
       "regression_evidence_ids": [
-        "flow-cytometry-summary-regression-v1"
+        "flow-cytometry-summary-regression-v2"
       ],
       "tool_versions": {},
       "verified_at": "2026-07-12"
@@ -93,7 +93,7 @@
           "genome_builds": [],
           "name": "inline-json",
           "orientations": [
-            "request-object"
+            "event-by-channel"
           ],
           "representations": [
             "structured"
@@ -105,6 +105,7 @@
         }
       ],
       "name": "events",
+      "source_policy": "upstream_required",
       "processing_levels": [
         "declared"
       ],
@@ -154,8 +155,10 @@
   "intents": [
     "flow cytometry summary",
     "Apply a sequential flow-cytometry gating plan",
+    "Import FCS flow cytometry data and apply a gating plan",
     "\u6c47\u603b\u6d41\u5f0f\u7ec6\u80de\u672f\u95e8\u63a7\u7ed3\u679c",
-    "\u6d41\u5f0f\u95e8\u63a7"
+    "\u6d41\u5f0f\u95e8\u63a7",
+    "\u5bfc\u5165 FCS \u6d41\u5f0f\u7ec6\u80de\u672f\u6587\u4ef6\u5e76\u505a\u95e8\u63a7"
   ],
   "kernel_compatibility": [
     ">=0.2.0,<0.3.0"
@@ -168,7 +171,7 @@
   "mutability": "read_only",
   "output_artifacts": [
     {
-      "artifact_type": "statistical_summary",
+      "artifact_type": "cytometry_gate_summary",
       "formats": [
         {
           "annotation_releases": [],
@@ -197,7 +200,9 @@
       ],
       "required_metadata": [
         "module_version",
-        "compatibility_row_id"
+        "compatibility_row_id",
+        "gate_order",
+        "event_indices"
       ]
     }
   ],
@@ -234,7 +239,7 @@
   ],
   "provenance": {
     "concept_sources": [
-      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+      "Project-owned implementation with module-level validation evidence."
     ],
     "license": "Apache-2.0"
   },
@@ -252,5 +257,5 @@
   "schema_version": 1,
   "title": "Apply a sequential flow-cytometry gating plan",
   "tool_requirements": [],
-  "version": "1.0.0"
+  "version": "1.1.0"
 }

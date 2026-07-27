@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "id": "gnomad-gene-constraint-evidence",
+  "version": "0.1.0",
+  "title": "Retrieve gnomAD gene constraint evidence",
+  "description": "Retrieve fixed-field gnomAD GRCh38 gene identity and aggregate loss-of-function constraint metrics for one bounded gene symbol.",
+  "module_type": "data_source",
+  "domains": [
+    "evidence",
+    "omics"
+  ],
+  "intents": [
+    "gnomAD gene constraint",
+    "LOEUF gene evidence",
+    "gnomAD基因约束",
+    "查询基因LOEUF"
+  ],
+  "questions": [
+    "What current gnomAD GRCh38 aggregate constraint context is returned for this exact gene symbol?"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.evidence:gnomad_gene_constraint_evidence",
+  "execution": {
+    "kind": "service",
+    "timeout_seconds": 60,
+    "max_output_bytes": 10000000
+  },
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "gnomad_gene_query",
+      "artifact_type": "gene_identifier_query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": [
+        "constraint-interpretation-context"
+      ],
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": [
+            "1"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "compression": [
+            "none"
+          ],
+          "required_indexes": [],
+          "coordinate_systems": [
+            "1-based-closed"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "GRCh38"
+          ],
+          "annotation_releases": [],
+          "orientations": [
+            "request-object"
+          ]
+        }
+      ]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "gnomad_gene_constraint_evidence",
+      "artifact_type": "gene_constraint_evidence",
+      "processing_levels": [
+        "retrieved",
+        "source-preserved"
+      ],
+      "required_metadata": [
+        "module-version",
+        "service-contract-version",
+        "reference-genome",
+        "gene-id"
+      ],
+      "formats": [
+        {
+          "name": "normalized-json",
+          "versions": [
+            "1"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "compression": [
+            "none"
+          ],
+          "required_indexes": [],
+          "coordinate_systems": [
+            "1-based-closed"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "GRCh38"
+          ],
+          "annotation_releases": [
+            "observed-service-contract"
+          ],
+          "orientations": [
+            "gene-by-constraint-record"
+          ]
+        }
+      ]
+    }
+  ],
+  "preconditions": [
+    "One bounded uppercase HGNC-style gene symbol is declared."
+  ],
+  "assumptions": [
+    "The gnomAD GraphQL response preserves an exact GRCh38 gene identity."
+  ],
+  "quality_gates": [
+    {
+      "id": "gnomad-exact-gene-identity",
+      "severity": "major",
+      "description": "Only accept a response preserving the requested gene symbol and a nonempty gene ID.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "gnomad-constraint-boundary",
+      "severity": "major",
+      "description": "Aggregate constraint metrics are not clinical, causal, individual-risk, or treatment conclusions.",
+      "blocks_interpretation": true
+    }
+  ],
+  "limitations": [
+    "Gene constraint metrics do not establish disease causality, variant pathogenicity, individual risk, gene essentiality, or therapeutic actionability."
+  ],
+  "evidence_effects": [
+    "adds-source-preserved-gnomad-gene-constraint"
+  ],
+  "alternatives": [],
+  "complements": [
+    "gene-evidence",
+    "variant-evidence",
+    "dbsnp-rsid-evidence"
+  ],
+  "tool_requirements": [],
+  "dependencies": [
+    {
+      "name": "python",
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "version_source": "https://www.python.org/downloads/release/python-3143/",
+      "verified_at": "2026-07-24",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Run bounded HTTPS GraphQL retrieval.",
+      "conflicts": [],
+      "platforms": [
+        "any"
+      ]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "gnomad-gene-constraint-grch38-2026-07-24",
+      "module_version": "0.1.0",
+      "tool_versions": {},
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "input_formats": {
+        "gnomad_gene_query": [
+          "inline-json@1"
+        ]
+      },
+      "output_formats": {
+        "gnomad_gene_constraint_evidence": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "gnomad-gene-constraint-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "gnomad-gene-constraint-e2e-v1"
+      ],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "access": "public_api",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "gene_symbol": {
+        "type": "string",
+        "pattern": "^[A-Z][A-Z0-9-]{0,39}$"
+      }
+    },
+    "required": [
+      "gene_symbol"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "gene_symbol": {
+        "type": "string"
+      },
+      "reference_genome": {
+        "type": "string"
+      },
+      "found": {
+        "type": "boolean"
+      },
+      "gene": {
+        "type": "object",
+        "nullable": true
+      },
+      "constraint": {
+        "type": "object",
+        "nullable": true
+      },
+      "provenance": {
+        "type": "object"
+      },
+      "limitations": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "gene_symbol",
+      "reference_genome",
+      "found",
+      "gene",
+      "constraint",
+      "provenance",
+      "limitations"
+    ]
+  },
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "provenance": {
+    "license": "Apache-2.0",
+    "concept_sources": [
+      "Independent clean-room gnomAD constraint capability informed by direct official API schema observation."
+    ]
+  }
+}

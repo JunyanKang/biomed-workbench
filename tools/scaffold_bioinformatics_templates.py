@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Create deterministic module-local templates for uncovered bioinformatics modules."""
+"""Create a conservative baseline template only for uncovered bioinformatics modules."""
 
 from __future__ import annotations
 
@@ -128,13 +128,14 @@ if __name__ == "__main__":
 '''
 
 
-def scaffold(*, check: bool) -> tuple[int, list[str]]:
+def scaffold(*, check: bool, root: Path = BUILTIN_ROOT) -> tuple[int, list[str]]:
+    """Fill absent templates without replacing module-owned scientific implementations."""
     changed = []
     covered = 0
-    for manifest_path in sorted(BUILTIN_ROOT.glob("*/module.json")):
+    for manifest_path in sorted(root.glob("*/module.json")):
         payload = json.loads(manifest_path.read_text(encoding="utf-8"))
         manifest = parse_manifest(payload)
-        if not is_bioinformatics_module(manifest) or manifest.agent_protocol is not None:
+        if not is_bioinformatics_module(manifest) or manifest.agent_protocol is not None or manifest.code_templates:
             continue
         template_name = f"run_{_identifier(manifest.id)}.py"
         relative = f"templates/{template_name}"

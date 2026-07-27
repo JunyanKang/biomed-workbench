@@ -1,0 +1,50 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "replicate_level": "biological"
+      },
+      "input": {
+        "blood_organ": "blood",
+        "measurements": [
+          {
+            "injected_dose_bq": 1000.0,
+            "organ": "tumor",
+            "sample_id": "mouse-1",
+            "time_hours": 1.0,
+            "tissue_activity_bq": 20.0,
+            "tissue_mass_g": 0.2
+          },
+          {
+            "injected_dose_bq": 1000.0,
+            "organ": "blood",
+            "sample_id": "mouse-1",
+            "time_hours": 1.0,
+            "tissue_activity_bq": 10.0,
+            "tissue_mass_g": 0.5
+          },
+          {
+            "injected_dose_bq": 1000.0,
+            "organ": "tumor",
+            "sample_id": "mouse-2",
+            "time_hours": 4.0,
+            "tissue_activity_bq": 10.0,
+            "tissue_mass_g": 0.2
+          },
+          {
+            "injected_dose_bq": 1000.0,
+            "organ": "blood",
+            "sample_id": "mouse-2",
+            "time_hours": 4.0,
+            "tissue_activity_bq": 2.0,
+            "tissue_mass_g": 0.5
+          }
+        ],
+        "replicate_level": "biological",
+        "tumor_organ": "tumor"
+      },
+      "name": "calculates-percent-id-per-gram-and-observed-auc"
+    }
+  ],
+  "schema_version": 1
+}

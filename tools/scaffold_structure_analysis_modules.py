@@ -479,7 +479,7 @@ def _manifest(module_id: str, spec: dict[str, object]) -> dict[str, object]:
             "preflight_checks": list(spec["preflight"]),
             "postflight_checks": list(spec["postflight"]),
             "provenance_fields": ["module-version", "compatibility-row-id", "source-artifact-digests", "input-format-and-producer-version", "tool-and-dependency-versions", "model-chain-and-record-scope", "parameters", "quality-gate-results", "output-artifact-digests"],
-            "forbidden_actions": list(spec["forbidden"]) + ["Do not install or manage environments, containers, accelerators, schedulers, remote runtimes, or local models from inside an analysis template."],
+            "forbidden_actions": list(spec["forbidden"]) + ["Do not install or manage dependency environments, execution infrastructure, remote job systems, or model-hosting infrastructure from inside an analysis template."],
             "requires_observed_execution": True,
         },
     }

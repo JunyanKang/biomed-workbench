@@ -1,247 +1,234 @@
 {
-  "access": "offline",
-  "alternatives": [],
-  "assumptions": [
-    "Positive measurements contain a log-linear phase that can be approximated by a sliding window."
+  "schema_version": 1,
+  "id": "growth-curve",
+  "version": "2.0.0",
+  "title": "Fit replicate-preserving bacterial growth curves",
+  "description": "Blank-correct replicate-level OD measurements, fit logistic and modified Gompertz curves, compare them by AICc, retain residual and replicate diagnostics, and block condition-level interpretation when biological replication is not declared.",
+  "module_type": "analysis",
+  "domains": ["wetlab"],
+  "intents": [
+    "fit bacterial growth curve",
+    "analyze bacterial OD growth curve",
+    "compare logistic and Gompertz growth models",
+    "analyze growth rate and lag phase",
+    "细菌生长曲线拟合",
+    "OD 生长曲线分析"
   ],
-  "compatibility_matrix": [
-    {
-      "dependency_versions": {
-        "python": [
-          ">=3.14,<3.15"
-        ]
-      },
-      "end_to_end_evidence_ids": [
-        "growth-curve-e2e-v1"
-      ],
-      "id": "python-3.14.3-inline-json-1",
-      "input_formats": {
-        "growth_series": [
-          "inline-json@1"
-        ]
-      },
-      "module_version": "1.0.0",
-      "output_formats": {
-        "growth_summary": [
-          "inline-json@1"
-        ]
-      },
-      "platforms": [
-        "any"
-      ],
-      "regression_evidence_ids": [
-        "growth-curve-regression-v1"
-      ],
-      "tool_versions": {},
-      "verified_at": "2026-07-12"
-    }
-  ],
-  "complements": [],
-  "credentials": [],
-  "dependencies": [
-    {
-      "allowed_versions": [
-        ">=3.14,<3.15"
-      ],
-      "conflicts": [],
-      "ecosystem": "runtime",
-      "identity": "python-runtime",
-      "name": "python",
-      "platforms": [
-        "any"
-      ],
-      "purpose": "Execute the validated module implementation.",
-      "required": true,
-      "tested_versions": [
-        "3.14.3"
-      ],
-      "verified_at": "2026-07-12",
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "version_probe": [
-        "biomed_workbench.modules.compatibility:probe_python_runtime"
-      ],
-      "version_probe_kind": "python_callable",
-      "version_probe_timeout_seconds": 5,
-      "version_source": "https://www.python.org/downloads/release/python-3143/"
-    }
-  ],
-  "description": "Estimate maximum log-phase growth rate and doubling time from positive measurements.",
-  "domains": [
-    "wetlab"
+  "questions": [
+    "Which declared empirical growth curve is best supported by the replicate-level OD measurements, and are its fit and replication diagnostics sufficient for the requested interpretation?"
   ],
   "entrypoint": "biomed_workbench.capabilities.experiment:growth_curve_summary",
-  "evidence_effects": [
-    "supports_experimental_execution_or_measurement"
-  ],
-  "execution": {
-    "kind": "python",
-    "max_output_bytes": 10000000,
-    "timeout_seconds": 30
-  },
-  "id": "growth-curve",
+  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 10000000},
+  "maturity": "validated",
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
   "input_artifacts": [
     {
-      "artifact_type": "assay_table",
+      "name": "growth_measurements",
+      "artifact_type": "microbial_growth_assay_table",
+      "processing_levels": ["raw", "blank-declared"],
+      "required_metadata": ["sample-identity", "organism-or-culture-identity", "measurement-unit", "instrument-identity", "plate-layout-or-vessel-layout", "replicate-level"],
       "formats": [
         {
-          "annotation_releases": [],
-          "compression": [
-            "none"
-          ],
+          "name": "inline-json",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
           "coordinate_systems": [],
           "genome_build_policy": "not_applicable",
           "genome_builds": [],
-          "name": "inline-json",
-          "orientations": [
-            "request-object"
-          ],
-          "representations": [
-            "structured"
-          ],
-          "required_indexes": [],
-          "versions": [
-            "1"
-          ]
-        }
-      ],
-      "name": "growth_series",
-      "processing_levels": [
-        "declared"
-      ],
-      "required_metadata": []
-    }
-  ],
-  "input_schema": {
-    "additionalProperties": false,
-    "properties": {
-      "times": {
-        "items": {
-          "type": "number"
-        },
-        "minItems": 3,
-        "type": "array"
-      },
-      "values": {
-        "items": {
-          "type": "number"
-        },
-        "minItems": 3,
-        "type": "array"
-      },
-      "window": {
-        "minimum": 2,
-        "type": "integer"
-      }
-    },
-    "required": [
-      "times",
-      "values"
-    ],
-    "type": "object"
-  },
-  "intents": [
-    "growth curve",
-    "Summarize a growth curve",
-    "\u5206\u6790\u751f\u957f\u66f2\u7ebf\u548c\u500d\u589e\u65f6\u95f4"
-  ],
-  "kernel_compatibility": [
-    ">=0.2.0,<0.3.0"
-  ],
-  "limitations": [
-    "Calculated plans require assay controls, instrument calibration, replicate design, and laboratory validation."
-  ],
-  "maturity": "validated",
-  "module_type": "analysis",
-  "mutability": "read_only",
-  "output_artifacts": [
-    {
-      "artifact_type": "statistical_summary",
-      "formats": [
-        {
           "annotation_releases": [],
-          "compression": [
-            "none"
-          ],
-          "coordinate_systems": [],
-          "genome_build_policy": "not_applicable",
-          "genome_builds": [],
-          "name": "inline-json",
-          "orientations": [
-            "module-output"
-          ],
-          "representations": [
-            "structured"
-          ],
-          "required_indexes": [],
-          "versions": [
-            "1"
-          ]
+          "orientations": ["observation-by-timepoint-and-replicate"]
         }
-      ],
-      "name": "growth_summary",
-      "processing_levels": [
-        "derived"
-      ],
-      "required_metadata": [
-        "module_version",
-        "compatibility_row_id"
       ]
     }
   ],
-  "output_schema": {
-    "additionalProperties": false,
-    "properties": {
-      "doubling_time": {
-        "type": "number"
-      },
-      "log_phase_end_time": {
-        "type": "number"
-      },
-      "log_phase_start_time": {
-        "type": "number"
-      },
-      "max_growth_rate_per_time": {
-        "type": "number"
-      },
-      "method": {
-        "type": "string"
-      },
-      "window": {
-        "type": "integer"
-      }
-    },
-    "required": [
-      "doubling_time",
-      "log_phase_end_time",
-      "log_phase_start_time",
-      "max_growth_rate_per_time",
-      "method",
-      "window"
-    ],
-    "type": "object"
-  },
-  "preconditions": [
-    "A schema-valid assay table is available for the declared scientific scope."
-  ],
-  "provenance": {
-    "concept_sources": [
-      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
-    ],
-    "license": "Apache-2.0"
-  },
-  "quality_gates": [
+  "output_artifacts": [
     {
-      "blocks_interpretation": true,
-      "description": "Controls, calibration range, replicate structure, units, transfer assumptions, and assay-specific uncertainty are reviewed.",
-      "id": "growth-curve-validity",
-      "severity": "major"
+      "name": "growth_curve_summary",
+      "artifact_type": "microbial_growth_curve_summary",
+      "processing_levels": ["model-derived", "diagnostic-bound"],
+      "required_metadata": ["module_version", "compatibility_row_id", "fit-status", "replicate-level", "blank-correction-policy"],
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["curve-summary-with-model-diagnostics"]
+        }
+      ]
     }
   ],
-  "questions": [
-    "What maximum log-phase growth rate and doubling time are supported by the measured series?"
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "observations": {
+        "type": "array",
+        "minItems": 6,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "time_hours": {"type": "number"},
+            "od": {"type": "number"},
+            "replicate_id": {"type": "string", "minLength": 1}
+          },
+          "required": ["time_hours", "od", "replicate_id"]
+        }
+      },
+      "blank_od": {"type": "number", "minimum": 0},
+      "replicate_level": {"type": "string", "enum": ["unspecified", "technical", "biological"]},
+      "times": {"type": "array", "minItems": 4, "items": {"type": "number"}},
+      "values": {"type": "array", "minItems": 4, "items": {"type": "number"}},
+      "window": {"type": "integer", "minimum": 2}
+    },
+    "required": []
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "fit_admissible": {"type": "boolean"},
+      "fit_status": {"type": "string"},
+      "interpretation_status": {"type": "string"},
+      "selected_model": {"type": "string"},
+      "model_candidates": {"type": "array"},
+      "selected_model_summary": {"type": "object"},
+      "replicate_level": {"type": "string"},
+      "replicate_design_status": {"type": "string"},
+      "blank_correction": {"type": "object"},
+      "input_observation_count": {"type": "integer"},
+      "distinct_timepoint_count": {"type": "integer"},
+      "timepoint_summary": {"type": "array"},
+      "max_growth_rate_per_time": {"type": "number", "nullable": true},
+      "doubling_time": {"type": "number", "nullable": true},
+      "log_phase_start_time": {"type": "number", "nullable": true},
+      "log_phase_end_time": {"type": "number", "nullable": true},
+      "window": {"type": "integer"},
+      "method": {"type": "string"},
+      "quality_gates": {"type": "array"}
+    },
+    "required": ["fit_admissible", "fit_status", "interpretation_status", "selected_model", "model_candidates", "selected_model_summary", "replicate_level", "replicate_design_status", "blank_correction", "input_observation_count", "distinct_timepoint_count", "timepoint_summary", "max_growth_rate_per_time", "doubling_time", "log_phase_start_time", "log_phase_end_time", "window", "method", "quality_gates"]
+  },
+  "preconditions": [
+    "Measurements use one declared OD or equivalent growth-readout unit, an explicit blank policy, stable culture identity, stable instrument settings, and retained replicate-level rows.",
+    "At least four distinct timepoints and enough retained observations exist to compare four-parameter logistic and modified Gompertz models."
   ],
-  "schema_version": 1,
-  "title": "Summarize a growth curve",
-  "tool_requirements": [],
-  "version": "1.0.0"
+  "assumptions": [
+    "A sigmoidal empirical curve is suitable for the supplied culture interval after blank correction.",
+    "Logistic and modified Gompertz comparisons are descriptive model selection, not evidence that either model is a mechanistic account of growth."
+  ],
+  "quality_gates": [
+    {
+      "id": "growth-curve-input-contract",
+      "severity": "fatal",
+      "description": "Require finite, duplicate-free replicate-level time and OD measurements, a nonnegative declared blank correction, four distinct timepoints, and nontrivial post-blank dynamic range.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "growth-curve-fit-diagnostics",
+      "severity": "fatal",
+      "description": "Block curve interpretation unless at least one declared model converges and the selected model reaches the declared residual-quality threshold; retain both candidate diagnostics for review.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "growth-curve-replication-boundary",
+      "severity": "major",
+      "description": "Block strain, treatment, fitness, viability, or causal claims unless independently cultured biological replicates, layout review, and an appropriate between-condition model are declared outside this per-curve fit.",
+      "blocks_interpretation": true
+    }
+  ],
+  "limitations": [
+    "This module does not infer species identity, detect contamination, normalize plate effects, replace blank or positive controls, select a mechanistic growth model, estimate colony-forming units, or perform treatment comparisons.",
+    "AICc is used only to compare the two declared empirical models on the supplied observations. It does not validate extrapolation, causality, or biological reproducibility.",
+    "Legacy times/values requests remain supported for continuity but have no repeated-measurement evidence and therefore remain blocked for biological interpretation."
+  ],
+  "evidence_effects": ["adds_diagnostic_bound_growth_curve_summary"],
+  "alternatives": [],
+  "complements": ["dose-response", "immunoassay-quantification", "qpcr-relative-expression"],
+  "tool_requirements": [
+    {
+      "name": "scipy",
+      "ecosystem": "python",
+      "identity": "scipy",
+      "required": true,
+      "tested_versions": ["1.17.1"],
+      "allowed_versions": [">=1.17,<1.18"],
+      "version_source": "https://scipy.org/",
+      "verified_at": "2026-07-24",
+      "version_probe": ["python3", "-c", "import scipy; print(scipy.__version__)"],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [
+        {
+          "id": "scipy-curve-fit-growth-models",
+          "affected_versions": [">=1.17,<1.18"],
+          "category": "api",
+          "description": "Bounded nonlinear least-squares convergence and covariance estimates determine whether model diagnostics can be emitted.",
+          "compatibility_effect": "requires-parser",
+          "required_action": "Record SciPy version and retain both model diagnostics with the accepted curve summary.",
+          "source": "https://docs.scipy.org/doc/scipy/"
+        }
+      ],
+      "platforms": ["any"]
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "python",
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "required": true,
+      "tested_versions": ["3.14.3"],
+      "allowed_versions": [">=3.14,<3.15"],
+      "version_source": "https://www.python.org/downloads/release/python-3143/",
+      "verified_at": "2026-07-24",
+      "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Execute replicate-preserving growth-curve fitting.",
+      "conflicts": [],
+      "platforms": ["any"]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-scipy-1.17-inline-json-1",
+      "module_version": "2.0.0",
+      "tool_versions": {"scipy": [">=1.17,<1.18"]},
+      "dependency_versions": {"python": [">=3.14,<3.15"]},
+      "input_formats": {"growth_measurements": ["inline-json@1"]},
+      "output_formats": {"growth_curve_summary": ["inline-json@1"]},
+      "platforms": ["any"],
+      "regression_evidence_ids": ["growth-curve-regression-v2"],
+      "end_to_end_evidence_ids": ["growth-curve-e2e-v2"],
+      "verified_at": "2026-07-24"
+    }
+  ],
+  "code_templates": [
+    {
+      "path": "templates/run_growth_curve.py",
+      "language": "python",
+      "purpose": "Execute replicate-preserving bacterial growth-curve fitting with a project-bound request and diagnostic status validation.",
+      "quality_gate_ids": ["growth-curve-input-contract", "growth-curve-fit-diagnostics", "growth-curve-replication-boundary"],
+      "requires_adaptation": true
+    }
+  ],
+  "provenance": {
+    "license": "Apache-2.0",
+    "concept_sources": ["Project-owned clean-room bacterial growth-curve implementation with explicit blank, replication, model-comparison, and residual-quality boundaries."]
+  }
 }

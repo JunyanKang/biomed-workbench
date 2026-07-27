@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "binary-biomarker-threshold-and-tie-aware-auc",
+      "input": {
+        "labels": [1, 0, 1, 0],
+        "scores": [0.9, 0.1, 0.4, 0.8],
+        "threshold": 0.5
+      },
+      "expected_subset": {
+        "threshold": 0.5,
+        "sensitivity": 0.5,
+        "specificity": 0.5,
+        "positive_predictive_value": 0.5,
+        "negative_predictive_value": 0.5,
+        "accuracy": 0.5,
+        "roc_auc": 0.75,
+        "confusion": {
+          "true_positive": 1,
+          "false_positive": 1,
+          "true_negative": 1,
+          "false_negative": 1
+        }
+      }
+    }
+  ]
+}

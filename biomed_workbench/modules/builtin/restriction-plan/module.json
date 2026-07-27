@@ -76,7 +76,7 @@
       "version_source": "https://www.python.org/downloads/release/python-3143/"
     }
   ],
-  "description": "Locate selected restriction motifs with explicit one-based coordinates.",
+  "description": "Locate selected restriction motifs with explicit one-based coordinates and, when requested, predict exact-motif digest fragments on declared linear or circular DNA.",
   "domains": [
     "molecular_design"
   ],
@@ -132,6 +132,12 @@
         "nullable": true,
         "type": "array"
       },
+      "include_digest": {
+        "type": "boolean"
+      },
+      "circular": {
+        "type": "boolean"
+      },
       "sequence": {
         "minLength": 1,
         "type": "string"
@@ -144,8 +150,10 @@
   },
   "intents": [
     "restriction plan",
+    "restriction digest",
     "Map restriction enzyme sites",
-    "\u5b9a\u4f4d\u9650\u5236\u6027\u5185\u5207\u9176\u4f4d\u70b9"
+    "\u5b9a\u4f4d\u9650\u5236\u6027\u5185\u5207\u9176\u4f4d\u70b9",
+    "\u6a21\u62df\u9650\u5236\u6027\u9176\u5207"
   ],
   "kernel_compatibility": [
     ">=0.2.0,<0.3.0"
@@ -197,6 +205,9 @@
       "coordinate_system": {
         "type": "string"
       },
+      "digest": {
+        "type": "object"
+      },
       "sequence_length": {
         "type": "integer"
       },
@@ -220,7 +231,7 @@
   ],
   "provenance": {
     "concept_sources": [
-      "Project-owned clean-room rewrite documented by the aggregate source-assimilation report."
+      "Project-owned implementation with module-level validation evidence."
     ],
     "license": "Apache-2.0"
   },
@@ -233,7 +244,8 @@
     }
   ],
   "questions": [
-    "Where do the selected restriction motifs occur in the supplied DNA sequence?"
+    "Where do the selected restriction motifs occur in the supplied DNA sequence?",
+    "What exact-motif restriction fragments are predicted for this declared linear or circular DNA sequence?"
   ],
   "schema_version": 1,
   "title": "Map restriction enzyme sites",

@@ -46,9 +46,12 @@ class SingleCellBatchIntegrationEvidenceTests(unittest.TestCase):
 
         self.assertEqual(report["fixture"]["unknown_cells"], 40)
         self.assertTrue(summary["labels_used_only_for_posthoc_evaluation"])
+        self.assertTrue(summary["evaluation_labels_removed_before_backend_execution"])
         self.assertTrue(summary["one_frozen_baseline_used"])
         self.assertTrue(summary["unknown_cells_retained"])
         self.assertTrue(summary["raw_counts_preserved"])
+        self.assertTrue(summary["source_immutable"])
+        self.assertTrue(summary["cell_feature_and_metadata_identity_preserved"])
         self.assertTrue(summary["eligible_method_selected_without_umap_scoring"])
 
     def test_report_contains_no_machine_path_or_credential(self):

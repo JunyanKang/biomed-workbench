@@ -101,6 +101,7 @@ def validate_sample_semantics(metadata: pd.DataFrame, sample_key: str, fields: l
 def main() -> int:
     args = parse_args()
     source = Path(args.input_h5ad).resolve(strict=True)
+    source_digest = sha256(source)
     outputs = [Path(args.output_counts), Path(args.output_pseudobulk_metadata), Path(args.output_composition), Path(args.report)]
     if len({path.resolve() for path in outputs}) != len(outputs):
         raise ValueError("output paths must be distinct")
@@ -201,13 +202,34 @@ def main() -> int:
     if not np.array_equal(reconciliation["cell_count"], reconciliation["total_cells"]) or not np.allclose(reconciliation["proportion"], 1.0):
         raise RuntimeError("composition counts and proportions do not reconcile by sample")
     composition.to_csv(outputs[2], sep="\t", index=False)
+    reloaded_counts = pd.read_csv(outputs[0], sep="\t")
+    reloaded_pseudobulk = pd.read_csv(outputs[1], sep="\t")
+    reloaded_composition = pd.read_csv(outputs[2], sep="\t")
+    if (
+        reloaded_counts.shape != (adata.n_vars, len(pseudobulk) + 1)
+        or len(reloaded_pseudobulk) != len(pseudobulk)
+        or len(reloaded_composition) != len(composition)
+        or int(reloaded_counts.drop(columns=["gene_id"]).to_numpy().sum())
+        != int(counts.sum())
+        or set(reloaded_pseudobulk["pseudobulk_id"]) != set(pseudobulk_ids)
+        or not np.allclose(
+            reloaded_composition.groupby("biological_sample", observed=True)[
+                "proportion"
+            ].sum(),
+            1.0,
+        )
+    ):
+        raise RuntimeError("serialized inference inputs failed reload accounting")
+    source_immutable = sha256(source) == source_digest
+    if not source_immutable:
+        raise RuntimeError("source h5ad changed during inference preparation")
 
     report = {
-        "schema_version": 1,
-        "input": {"filename": source.name, "sha256": sha256(source), "cells": int(adata.n_obs), "features": int(adata.n_vars), "raw_count_location": args.raw_count_location, "raw_count_sum": int(counts.sum())},
+        "schema_version": 2,
+        "input": {"filename": source.name, "sha256": source_digest, "cells": int(adata.n_obs), "features": int(adata.n_vars), "raw_count_location": args.raw_count_location, "raw_count_sum": int(counts.sum()), "source_immutable": source_immutable},
         "design": {"sample_key": args.sample_key, "subject_key": args.subject_key, "cell_type_key": args.cell_type_key, "condition_key": args.condition_key, "time_key": args.time_key, "categorical_covariates": categorical, "continuous_covariates": continuous, "biological_samples": len(samples), "subjects": int(sample_design[args.subject_key].nunique()), "repeated_subjects": repeated_subjects},
         "thresholds": {"min_cells_per_pseudobulk": args.min_cells_per_pseudobulk, "min_library_size": args.min_library_size},
-        "accounting": {"input_cells": int(adata.n_obs), "assigned_cells": int(assignment.sum()), "pseudobulks": len(pseudobulk), "eligible_pseudobulks": int(pseudobulk["eligible"].sum()), "excluded_pseudobulks": int((~pseudobulk["eligible"]).sum()), "aggregate_count_sum": int(aggregate.sum()), "composition_rows": len(composition), "zero_count_composition_rows": int((composition["cell_count"] == 0).sum()), "all_cells_accounted": True, "raw_counts_conserved": True, "composition_grid_complete": True, "sample_compositions_sum_to_one": True},
+        "accounting": {"input_cells": int(adata.n_obs), "assigned_cells": int(assignment.sum()), "pseudobulks": len(pseudobulk), "eligible_pseudobulks": int(pseudobulk["eligible"].sum()), "excluded_pseudobulks": int((~pseudobulk["eligible"]).sum()), "aggregate_count_sum": int(aggregate.sum()), "composition_rows": len(composition), "zero_count_composition_rows": int((composition["cell_count"] == 0).sum()), "all_cells_accounted": True, "raw_counts_conserved": True, "composition_grid_complete": True, "sample_compositions_sum_to_one": True, "serialized_outputs_reloaded": True},
         "outputs": {"counts_filename": outputs[0].name, "counts_sha256": sha256(outputs[0]), "pseudobulk_metadata_filename": outputs[1].name, "pseudobulk_metadata_sha256": sha256(outputs[1]), "composition_filename": outputs[2].name, "composition_sha256": sha256(outputs[2])},
         "versions": {"python": platform.python_version(), "anndata": importlib.metadata.version("anndata"), "numpy": importlib.metadata.version("numpy"), "pandas": importlib.metadata.version("pandas"), "scipy": importlib.metadata.version("scipy")},
     }

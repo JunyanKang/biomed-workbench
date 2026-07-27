@@ -1,0 +1,175 @@
+{
+  "case_id": "pbmc-multiome-10k-integration-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "mofaplus": {
+      "factor_variance": {
+        "Factor1": 1.2246175769045926,
+        "Factor2": 1.2678564159802395,
+        "Factor3": 1.1352323525751595,
+        "Factor4": 1.6908016648226565e-34,
+        "Factor5": 2.9994184120293672e-33,
+        "Factor6": 3.5643461150454407e-32
+      },
+      "variance_explained_rows": 2,
+      "weight_rows": 240
+    },
+    "outputs_reloaded": true,
+    "source_artifact_immutable": true,
+    "wnn": {
+      "RNA_weight": {
+        "maximum": 0.9923,
+        "mean": 0.5809,
+        "median": 0.558,
+        "minimum": 0.3898
+      },
+      "clusters": 4,
+      "secondary_weight": {
+        "maximum": 0.6102,
+        "mean": 0.4191,
+        "median": 0.442,
+        "minimum": 0.0077
+      },
+      "wknn_nonzero": 17346,
+      "wsnn_nonzero": 49990
+    }
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-seurat-521-signac-116-mofapy2-074",
+    "id": "single-cell-multimodal-integration",
+    "manifest_sha256": "557a5217e81d11c844a0bd5b502e60cca9543085b5f08a3fa0ba5a3d73a1b821",
+    "registry_digest": "5b11049405a9122b4fdc197a33f8417f320ca9dbdfd13b520ae2a80de2764bd1",
+    "template_sha256": {
+      "fit_mofaplus.py": "2277ee46a4d6c124375e2ee3156fc090ea98dede1670b266b0fae8f1318a06d5",
+      "prepare_10x_multiome.R": "ab62ac89a5f6a6ff60cc119661b920d9d2cab626e52c6ea71cf8437ead0ae345",
+      "run_wnn.R": "1b9986b9e5f19c8eb908d5c83441bbae37085ef2dc7109a7115dbac37cf6bba3"
+    },
+    "version": "1.1.0"
+  },
+  "parameters": {
+    "mofa_views": [
+      "RNA log-normalized counts",
+      "ATAC TF-IDF"
+    ],
+    "mofaplus": {
+      "accelerated_mode": false,
+      "center_groups": true,
+      "convergence_mode": "fast",
+      "factors_requested": 6,
+      "factors_retained": 6,
+      "iterations": 100,
+      "scale_views": true,
+      "seed": 20260723
+    },
+    "wnn": {
+      "k_nn": 20,
+      "knn_range": 60,
+      "resolution": 0.5,
+      "rna_assay": "RNA",
+      "rna_dims": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "secondary_assay": "ATAC",
+      "secondary_dims": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21
+      ],
+      "seed": 20260723
+    }
+  },
+  "passed": true,
+  "quality_gates": {
+    "label_blind_cell_and_feature_selection": "pass",
+    "mofaplus_factors_views_and_reload": "pass",
+    "official_source_identity": "pass",
+    "paired_rna_atac_counts_preserved": "pass",
+    "wnn_graph_weights_clusters_and_reload": "pass"
+  },
+  "runtime": {
+    "mofaplus": {
+      "anndata": "0.13.2",
+      "h5py": "3.16.0",
+      "mofapy2": "0.7.4",
+      "mudata": "0.3.10",
+      "numpy": "2.5.1",
+      "pandas": "3.0.5",
+      "python": "3.12.11",
+      "scipy": "1.18.0"
+    },
+    "prepare": {
+      "Matrix": "1.6.5",
+      "R": "4.3.2",
+      "Seurat": "5.2.1",
+      "Signac": "1.16.0",
+      "digest": "0.6.39",
+      "jsonlite": "2.0.0"
+    },
+    "wnn": {
+      "Matrix": "1.6.5",
+      "R": "4.3.2",
+      "Seurat": "5.2.1",
+      "Signac": "1.16.0",
+      "digest": "0.6.39",
+      "jsonlite": "2.0.0",
+      "uwot": "0.2.4"
+    }
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "The public case validates paired-cell RNA+ATAC representation and source-preserving execution, not biological annotation or treatment inference.",
+    "Cells and features are selected without cluster labels; resulting WNN clusters are exploratory and are not evaluated against a tuned label set.",
+    "MOFA+ uses explicitly recorded log-normalized RNA and TF-IDF ATAC views under a Gaussian likelihood and does not infer missing modalities.",
+    "WNN modality weights and MOFA+ factors are representation evidence, not causal cross-modal regulation."
+  ],
+  "source": {
+    "dataset": "10x PBMC 10k Multiome ATAC + Gene Expression",
+    "filename": "pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5",
+    "sha256": "03f946fc11984e6d4e8bf9a5d5904654c3d8b6b5776e08b7962796a9cb81c48d",
+    "url": "https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5",
+    "validation": {
+      "selected_atac_features": 1000,
+      "selected_cells": 600,
+      "selected_rna_features": 800,
+      "selection": "stable barcode hash and detected-cell/total-count feature ranking without cluster labels",
+      "source_cells": 11909,
+      "source_features": 144978
+    }
+  }
+}

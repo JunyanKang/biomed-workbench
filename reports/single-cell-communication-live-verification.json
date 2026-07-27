@@ -5,7 +5,8 @@
   "compatibility_rows": [
     {
       "end_to_end_evidence_ids": [
-        "single-cell-communication-python-e2e-v1"
+        "single-cell-communication-python-e2e-v1",
+        "public-gse96583-sample-aware-communication-v1"
       ],
       "id": "agent-protocol-1-python-communication",
       "regression_evidence_ids": [
@@ -27,8 +28,8 @@
     "cellphonedb_completed": true,
     "liana_completed": true,
     "nichenet_completed": true,
-    "python_report_sha256": "08b4e90eccd91ba29e70c18c952e63ae1024e46ab751449a4a72438a807b0e9b",
-    "r_report_sha256": "f8249e2b6131d1bdc627eeeaba1f55fed7a7e1879358b1a5c0471adc4c626b0e"
+    "python_report_sha256": "2e001866380bc424cbadde8a4546055c1880d5c015bc5d4603b0fe19af67d46b",
+    "r_report_sha256": "f739aa5506ad6f6f8f1a96ea183d96004023112a65648c6c98dada6a6efcccee"
   },
   "fixture": {
     "biological_samples": 4,
@@ -38,17 +39,17 @@
     "sha256": "53b1ef9939829e0b3a25a62c5626b7dcaa7beba4ce5423be755e84908b36fafb"
   },
   "module_id": "single-cell-communication",
-  "module_version": "1.0.0",
+  "module_version": "1.1.0",
   "passed": true,
   "python_backends": {
     "methods": [
       "cellphonedb-statistical",
-      "liana-rank-aggregate"
+      "liana-cellphonedb"
     ],
     "quality_status": "passed",
     "replicate_summary_rows": 1672,
-    "replicated_interactions": 241,
-    "report_sha256": "08b4e90eccd91ba29e70c18c952e63ae1024e46ab751449a4a72438a807b0e9b",
+    "replicated_interactions": 128,
+    "report_sha256": "2e001866380bc424cbadde8a4546055c1880d5c015bc5d4603b0fe19af67d46b",
     "sample_interaction_rows": 3408
   },
   "r_backends": {
@@ -60,9 +61,9 @@
     "nichenet_ligand_rows": 2,
     "nichenet_target_link_rows": 16,
     "quality_status": "observed",
-    "report_sha256": "f8249e2b6131d1bdc627eeeaba1f55fed7a7e1879358b1a5c0471adc4c626b0e"
+    "report_sha256": "f739aa5506ad6f6f8f1a96ea183d96004023112a65648c6c98dada6a6efcccee"
   },
-  "registry_digest": "c597256c183d84cb455cfb8769e0c5cbc2e0af4c398d4ba068544c7c6258d398",
+  "registry_digest": "5b11049405a9122b4fdc197a33f8417f320ca9dbdfd13b520ae2a80de2764bd1",
   "schema_version": 1,
   "scientific_summary": {
     "all_four_backends_executed": true,
@@ -82,8 +83,18 @@
     },
     "run_liana_cellphonedb": {
       "name": "run_liana_cellphonedb.py",
-      "sha256": "ebb9c2fa9ffb66ffa34dc7987d6ed61dfbbe8cc3a22aefd5cd804020d70d512e"
+      "sha256": "f49ae16291adbcb5a7259238e3dc6fa5077628626a6247af2fd7f4b525e0b1c8"
     }
+  },
+  "tool_versions": {
+    "CellChat": "2.2.0",
+    "anndata": "0.11.4",
+    "cellchat": "2.2.0",
+    "cellphonedb": "5.0.1",
+    "liana": "1.7.3",
+    "nichenetr": "2.2.1.1",
+    "python": "3.11.15",
+    "scanpy": "1.11.5"
   },
   "versions": {
     "CellChat": "2.2.0",
@@ -92,7 +103,7 @@
     "cellphonedb": "5.0.1",
     "liana": "1.7.3",
     "nichenetr": "2.2.1.1",
-    "python": "3.10.20",
+    "python": "3.11.15",
     "scanpy": "1.11.5"
   }
 }

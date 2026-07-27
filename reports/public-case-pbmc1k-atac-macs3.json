@@ -1,0 +1,137 @@
+{
+  "case_id": "pbmc1k-atac-macs3-v1",
+  "case_type": "public-data-end-to-end",
+  "execution": {
+    "accounting": {
+      "allowlist_barcodes": 300,
+      "allowlist_barcodes_absent_from_fragments": [],
+      "excluded_fragment_count": 34266590,
+      "excluded_records": 15908972,
+      "observed_barcodes": 234716,
+      "selected_barcodes": 300,
+      "selected_fragment_count": 8932258,
+      "selected_records": 3795000,
+      "total_fragment_count": 43198848,
+      "total_records": 19703972
+    },
+    "outputs": {
+      "narrow_peak": {
+        "chromosomes": {
+          "chr1": 9091,
+          "chr10": 4373,
+          "chr11": 4819,
+          "chr12": 4972,
+          "chr13": 2339,
+          "chr14": 3212,
+          "chr15": 2967,
+          "chr16": 3285,
+          "chr17": 4675,
+          "chr18": 1858,
+          "chr19": 4162,
+          "chr2": 7215,
+          "chr20": 2539,
+          "chr21": 1141,
+          "chr22": 1958,
+          "chr3": 6020,
+          "chr4": 4278,
+          "chr5": 4843,
+          "chr6": 5813,
+          "chr7": 4850,
+          "chr8": 3959,
+          "chr9": 3795,
+          "chrX": 2450,
+          "chrY": 112
+        },
+        "rows": 94726,
+        "sha256": "9374fb0b14b8f6d69e7e98a143fdb180be4fef1c22f1cffee2b917dc182cc8b1"
+      },
+      "peaks_xls_sha256": "6bb715cf00a7c43a75edceffe3fbc71c5fb92b0e899bac51be255d6feaf8a796",
+      "summits": {
+        "chromosomes": {
+          "chr1": 9091,
+          "chr10": 4373,
+          "chr11": 4819,
+          "chr12": 4972,
+          "chr13": 2339,
+          "chr14": 3212,
+          "chr15": 2967,
+          "chr16": 3285,
+          "chr17": 4675,
+          "chr18": 1858,
+          "chr19": 4162,
+          "chr2": 7215,
+          "chr20": 2539,
+          "chr21": 1141,
+          "chr22": 1958,
+          "chr3": 6020,
+          "chr4": 4278,
+          "chr5": 4843,
+          "chr6": 5813,
+          "chr7": 4850,
+          "chr8": 3959,
+          "chr9": 3795,
+          "chrX": 2450,
+          "chrY": 112
+        },
+        "rows": 94726,
+        "sha256": "c47042ca59962367bc3fdd718e6c02d58974198d686788a4b0c42fa2fe86dde1"
+      }
+    },
+    "outputs_reloaded": true,
+    "source_artifacts_immutable": true
+  },
+  "module": {
+    "compatibility_row_id": "agent-protocol-1-macs3-304-signac-116-chromvar-124-motifmatchr-124",
+    "id": "single-cell-atac-regulatory",
+    "manifest_sha256": "40275cb3c3095f1fe5981a5121eaa61b15167957be215516879ca64bd930b312",
+    "registry_digest": "5b11049405a9122b4fdc197a33f8417f320ca9dbdfd13b520ae2a80de2764bd1",
+    "template_sha256": "a135a1404f21075d5353e0f28480119a1af36f27e8786e55736f0e54befb33da",
+    "version": "1.1.0"
+  },
+  "parameters": {
+    "call_summits": true,
+    "format": "FRAG",
+    "genome_size": "hs",
+    "keep_duplicates": "all",
+    "name": "pbmc1k",
+    "qvalue": 0.01
+  },
+  "passed": true,
+  "quality_gates": {
+    "all_selected_barcodes_observed": "pass",
+    "fragment_accounting_reconciled": "pass",
+    "label_blind_filtered_cell_selection": "pass",
+    "macs3_peaks_summits_and_reload": "pass",
+    "official_source_identity": "pass"
+  },
+  "runtime": {
+    "MACS3": "3.0.4"
+  },
+  "schema_version": 1,
+  "scientific_boundaries": [
+    "This public case validates real 10x fragment parsing, barcode accounting, FRAG-mode MACS3 peak calling, summit output, and reload.",
+    "The public PBMC1k dataset is ATAC-only; sequence-backed motif matching, chromVAR deviations, and paired-RNA LinkPeaks remain covered by the complete executable fixture rather than being fabricated from absent RNA.",
+    "Aggregate peaks depend on the selected cells, genome build, genome-size model, and MACS3 parameters and are not donor-level differential accessibility.",
+    "Peak-to-gene correlation and motif evidence do not establish direct binding or causal regulation."
+  ],
+  "source": {
+    "dataset": "10x PBMC 1k single-cell ATAC Next GEM v1.1",
+    "files": {
+      "fragments": {
+        "filename": "atac_pbmc_1k_nextgem_fragments.tsv.gz",
+        "sha256": "391176fa39181a96822ade86468d58a8e058f52751866048669d77a988c38bb7",
+        "url": "https://cf.10xgenomics.com/samples/cell-atac/1.1.0/atac_pbmc_1k_nextgem/atac_pbmc_1k_nextgem_fragments.tsv.gz"
+      },
+      "peak_matrix": {
+        "filename": "atac_pbmc_1k_nextgem_filtered_peak_bc_matrix.h5",
+        "sha256": "40a1a361760c8072143d1e3678a5ef807a1a15bcd240fdbea08be857a19ec380",
+        "url": "https://cf.10xgenomics.com/samples/cell-atac/1.1.0/atac_pbmc_1k_nextgem/atac_pbmc_1k_nextgem_filtered_peak_bc_matrix.h5"
+      }
+    },
+    "validation": {
+      "filtered_cells": 1195,
+      "selected_cells": 300,
+      "selection": "stable barcode hash without peak or cell labels"
+    }
+  }
+}

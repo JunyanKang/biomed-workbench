@@ -297,6 +297,90 @@ class ResearchControllerTests(unittest.TestCase):
         self.assertEqual(tuple(execution.module_id for execution in result.executions), ("primary-normalizer", "alternative-normalizer"))
         self.assertEqual(len(result.state.plans), 2)
 
+    def test_default_controller_replaces_a_blocked_node_with_a_port_compatible_declared_alternative(self):
+        primary = module_payload("primary-normalizer", "count_matrix", "normalized_matrix", alternatives=("alternative-normalizer",))
+        alternative = module_payload("alternative-normalizer", "count_matrix", "normalized_matrix")
+        temporary, registry = workflow_registry((primary, alternative))
+        self.addCleanup(temporary.cleanup)
+        state = state_with(inline_artifact("artifact-counts", "count_matrix"))
+        initial = plan_research(
+            state,
+            registry,
+            build_capability_graph(registry),
+            (PlanningRequest("request-normalized", "normalized_matrix", (hypothesis().id,), ("cell-state-association",)),),
+            compatible_module_ids=("primary-normalizer",),
+        )
+
+        def executor(current_state, _plan, node, active_registry, **_kwargs):
+            if node.module_id == "primary-normalizer":
+                return NodeExecution(
+                    node.id,
+                    node.module_id,
+                    "1.0.0",
+                    "blocked",
+                    None,
+                    tuple(node.input_bindings.values()),
+                    (),
+                    (),
+                    (),
+                    ("UNVALIDATED_DEPENDENCY_VERSION",),
+                    {},
+                    "CompatibilityError",
+                )
+            return completed_execution(current_state, node, active_registry)
+
+        result = ResearchController(
+            registry,
+            environment_provider=lambda _manifest: None,
+            node_executor=executor,
+            policy=ControllerPolicy(max_plan_revisions=2, max_node_attempts=1, parallel_workers=1, stop_on_fatal=True),
+        ).advance(state, initial)
+
+        self.assertEqual(result.stop_reason, "plan_completed")
+        self.assertEqual(result.active_plan.parent_plan_id, initial.id)
+        self.assertEqual(tuple(execution.module_id for execution in result.executions), ("primary-normalizer", "alternative-normalizer"))
+
+    def test_default_controller_does_not_cycle_between_reciprocal_alternatives(self):
+        primary = module_payload("primary-normalizer", "count_matrix", "normalized_matrix", alternatives=("alternative-normalizer",))
+        alternative = module_payload("alternative-normalizer", "count_matrix", "normalized_matrix", alternatives=("primary-normalizer",))
+        temporary, registry = workflow_registry((primary, alternative))
+        self.addCleanup(temporary.cleanup)
+        state = state_with(inline_artifact("artifact-counts", "count_matrix"))
+        initial = plan_research(
+            state,
+            registry,
+            build_capability_graph(registry),
+            (PlanningRequest("request-normalized", "normalized_matrix", (hypothesis().id,), ("cell-state-association",)),),
+            compatible_module_ids=("primary-normalizer",),
+        )
+
+        def executor(_current_state, _plan, node, _active_registry, **_kwargs):
+            return NodeExecution(
+                node.id,
+                node.module_id,
+                "1.0.0",
+                "blocked",
+                None,
+                tuple(node.input_bindings.values()),
+                (),
+                (),
+                (),
+                ("UNVALIDATED_DEPENDENCY_VERSION",),
+                {},
+                "CompatibilityError",
+            )
+
+        result = ResearchController(
+            registry,
+            environment_provider=lambda _manifest: None,
+            node_executor=executor,
+            policy=ControllerPolicy(max_plan_revisions=3, max_node_attempts=1, parallel_workers=1, stop_on_fatal=True),
+        ).advance(state, initial)
+
+        self.assertEqual(result.stop_reason, "blocked")
+        self.assertEqual(tuple(execution.module_id for execution in result.executions), ("primary-normalizer", "alternative-normalizer"))
+        self.assertEqual(len(result.state.plans), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
