@@ -9,6 +9,12 @@ This capability area establishes the evidence landscape before, during, and afte
 
 ## Supported Capabilities
 
+### Unified evidence and database program
+
+For broad evidence requests, the workbench stages the plan so that identifier resolution and citation-record resolution happen before source-specific retrieval, derived evidence, freshness checks, and publication-facing citation audit. This prevents downstream modules from silently treating a symbol, title, DOI, rsID, pathway ID, study ID, or protein accession as already resolved.
+
+The unified plan can combine NCBI Entrez and Gene records, UniProt and Ensembl identity, dbSNP, gnomAD, HPO, GO, Reactome, cBioPortal, Open Targets, Crossref, Europe PMC, bioRxiv or medRxiv, PubChem, ClinicalTrials.gov, RCSB PDB, AlphaFold, and protein-disorder evidence. Each selected module reports its own input contract, output fields, compatibility row, quality gates, optional credentials, and unresolved states. The workbench keeps identifier misses, ambiguous candidates, upstream outages, truncated retrieval, stale records, and cross-source disagreements visible.
+
 ### Literature and citation evidence
 
 - Search and retrieve biomedical literature with explicit query and date context.

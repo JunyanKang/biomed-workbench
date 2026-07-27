@@ -102,6 +102,81 @@ class ResearchPlanTests(unittest.TestCase):
         self.assertIn("single-cell-regulatory-network", modules["single-cell-regulatory-velocity"]["depends_on"])
         self.assertIn("single-cell-regulatory-velocity", modules["response-matrix"]["depends_on"])
 
+    def test_publication_program_is_staged_from_figures_to_response_and_delivery(self):
+        plan = compile_research_plan(
+            "audit manuscript claims figures methods citations reviewer concerns response matrix "
+            "patent readiness presentation delivery from analysis evidence"
+        )
+
+        modules = {item["id"]: item for item in plan["modules"]}
+        self.assertEqual(plan["plan_type"], "mixed")
+        self.assertEqual(plan["execution_layers"][0]["module_ids"], ["figure-specification"])
+        self.assertTrue(
+            {"manuscript-audit", "citation-audit", "reviewer-assessment"}
+            <= set(plan["execution_layers"][1]["module_ids"])
+        )
+        self.assertEqual(plan["execution_layers"][2]["module_ids"], ["response-matrix"])
+        self.assertTrue(
+            {"patent-draft-readiness-audit", "presentation-delivery-plan"}
+            <= set(plan["execution_layers"][3]["module_ids"])
+        )
+        self.assertIn("reviewer-assessment", modules["response-matrix"]["depends_on"])
+        self.assertIn("response-matrix", modules["presentation-delivery-plan"]["depends_on"])
+        for module_id in ("manuscript-audit", "citation-audit", "reviewer-assessment", "response-matrix"):
+            self.assertTrue(modules[module_id]["compatibility_row_ids"], module_id)
+            self.assertTrue(modules[module_id]["quality_gate_ids"], module_id)
+
+    def test_database_evidence_program_separates_identity_records_and_audits(self):
+        plan = compile_research_plan(
+            "Resolve TP53 identifiers across UniProt Ensembl dbSNP gnomAD HPO GO Reactome "
+            "cBioPortal Crossref Europe PMC and prepare evidence synthesis with freshness and citation checks",
+            per_workflow=10,
+        )
+
+        modules = {item["id"]: item for item in plan["modules"]}
+        self.assertEqual(plan["plan_type"], "mixed")
+        self.assertIn("citation-record-resolution", plan["execution_layers"][0]["module_ids"])
+        self.assertTrue(
+            {"dbsnp-rsid-evidence", "gnomad-gene-constraint-evidence", "hpo-term-evidence", "quickgo-term-evidence", "reactome-pathway-evidence"}
+            <= set(plan["execution_layers"][1]["module_ids"])
+        )
+        self.assertIn("source-freshness-audit", modules)
+        self.assertIn("gnomad-gene-constraint-evidence", modules["source-freshness-audit"]["depends_on"])
+        self.assertIn("citation-record-resolution", modules["citation-audit"]["depends_on"])
+        for module_id in ("citation-record-resolution", "dbsnp-rsid-evidence", "gnomad-gene-constraint-evidence", "source-freshness-audit"):
+            self.assertTrue(modules[module_id]["compatibility_row_ids"], module_id)
+
+    def test_molecular_design_program_orders_primer_selection_before_specificity_and_amplicons(self):
+        plan = compile_research_plan(
+            "design PCR primers then select the primer pair screen primer specificity and simulate PCR amplicons"
+        )
+
+        modules = {item["id"]: item for item in plan["modules"]}
+        self.assertEqual(plan["plan_type"], "mixed")
+        self.assertEqual(plan["execution_layers"][0]["module_ids"], ["pcr-primer-pair-selection"])
+        self.assertEqual(
+            set(plan["execution_layers"][1]["module_ids"]),
+            {"primer-pair-specificity-screen", "pcr-amplicon-simulation"},
+        )
+        self.assertIn("pcr-primer-pair-selection", modules["primer-pair-specificity-screen"]["depends_on"])
+        self.assertIn("pcr-primer-pair-selection", modules["pcr-amplicon-simulation"]["depends_on"])
+        for module_id in ("pcr-primer-pair-selection", "primer-pair-specificity-screen", "pcr-amplicon-simulation"):
+            self.assertTrue(modules[module_id]["execution_templates"], module_id)
+            self.assertTrue(modules[module_id]["quality_gate_ids"], module_id)
+
+    def test_omics_and_statistics_program_orders_qc_before_inference_and_secondary_synthesis(self):
+        plan = compile_research_plan("run expression QC differential expression enrichment NMF and network analysis")
+
+        modules = {item["id"]: item for item in plan["modules"]}
+        self.assertEqual(plan["plan_type"], "mixed")
+        self.assertEqual(plan["execution_layers"][0]["module_ids"], ["expression-qc"])
+        self.assertTrue({"differential-expression", "network-analysis"} <= set(plan["execution_layers"][1]["module_ids"]))
+        self.assertIn("expression-qc", modules["differential-expression"]["depends_on"])
+        self.assertIn("expression-qc", modules["network-analysis"]["depends_on"])
+        for module_id in ("expression-qc", "differential-expression", "network-analysis"):
+            self.assertTrue(modules[module_id]["execution_templates"], module_id)
+            self.assertTrue(modules[module_id]["quality_gate_ids"], module_id)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -4,6 +4,12 @@
 
 This capability area turns the research record into a coherent, reviewable, and traceable scientific package. It links claims to evidence and analysis artifacts, preserves negative and unresolved findings, and treats revision as a verifiable transformation rather than a prose promise.
 
+## Unified Publication Program
+
+For broad manuscript, response, patent, or presentation requests, the workbench compiles a staged publication program. Figure specification and manuscript structure are established first; citation, assertion, temporal, claim-evidence, manuscript, and reviewer audits then challenge the package; response matrices and revision lineage organize required changes; patent and presentation modules only use the admitted evidence and unresolved-issue state.
+
+This staged plan prevents a polished deliverable from bypassing evidence checks. It also keeps manuscript revision, reviewer response, patent readiness, and presentation delivery as separate outputs with different quality gates rather than treating them as one generic writing task.
+
 ## Scientific Figures And Manuscripts
 
 - Specify figures from scientific claims, source artifacts, uncertainty, and panel-level validation needs.

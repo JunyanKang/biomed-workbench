@@ -4,6 +4,12 @@
 
 This capability area connects sequence, chemical, and structural observations to testable molecular hypotheses. It keeps design calculations, database evidence, predicted structures, experimental structures, docking outputs, and validation plans distinct so that confidence in one layer is not mistaken for evidence in another.
 
+## Unified Molecular Program
+
+For broad molecular-design requests, the workbench stages the plan from sequence and record inspection to design, verification, structural assessment, docking review, and chemical filtering. PCR workflows keep primer candidate selection upstream of finite-panel specificity screening and amplicon simulation. Structure workflows keep deposited or predicted coordinate evidence separate from quality assessment, chain comparison, visualization, docking interpretation, and chemical identity filtering.
+
+The staged plan is a design and review program, not experimental confirmation. It exposes the selected module contracts, template sections, compatibility evidence, and quality gates so Codex can adapt the correct project-owned code and keep unsupported molecular claims out of downstream manuscripts or patent materials.
+
 ## Sequence And Construct Design
 
 - Inspect DNA, RNA, or protein sequences and preserve declared alphabet and orientation.

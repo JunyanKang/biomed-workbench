@@ -4,6 +4,12 @@
 
 This capability area supports structured clinical analysis, translational evidence, experimental calculations, assay interpretation, and report quality. It is intended for research workflows and does not replace clinical judgment, regulated systems, or laboratory validation.
 
+## Unified Statistics And Clinical Program
+
+For broad statistics, modelling, and translational requests, the workbench stages the plan from cohort or matrix profiling to inferential analyses, model evaluation, adverse-event summaries, and clinical or report-boundary audits. Survival analysis, biomarker performance, classification gold-set evaluation, cosinor modelling, differential expression, dose response, growth curves, and qPCR remain separate modules with their own input contracts and quality gates.
+
+The plan preserves experimental units, denominators, censoring, threshold dependence, missingness, and model limitations. Clinical translation modules can summarize and audit research evidence, but they block patient-specific diagnosis, treatment, triage, prognosis, or regulated clinical decision support.
+
 ## Clinical And Translational Analysis
 
 - Summarize research cohorts with explicit denominators and variable availability.

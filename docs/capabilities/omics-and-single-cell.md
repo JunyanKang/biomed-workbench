@@ -4,6 +4,12 @@
 
 This capability area coordinates sequencing data from input and design validation through statistical analysis, biological interpretation, hypothesis revision, and publication delivery. The workbench treats biological replication, immutable raw measurements, reference identity, and observed output checks as first-class requirements.
 
+## Unified Bulk Omics And Epigenomics Program
+
+For broad bulk sequencing, expression, variant, ATAC, motif, NMF, or multi-omics requests, the workbench stages the plan from data profiling and read-level QC to alignment, sorting, alignment qualification, variant or interval handling, chromatin or expression analysis, secondary synthesis, and publication-facing interpretation. Independent branches can run in parallel, but downstream modules receive explicit dependencies when they rely on QC, aligned records, filtered intervals, peak calls, expression matrices, or admitted statistical outputs.
+
+This keeps FASTQ, BAM/CRAM, VCF, BED, count matrices, peak sets, motif resources, NMF programs, and gene-set outputs under one interface without pretending that all formats or tools are interchangeable. Each selected module declares the accepted artifact formats, version boundaries, required metadata, templates, quality gates, and unresolved project inputs.
+
 ## Unified Single-Cell Research Program
 
 For broad single-cell or single-cell multi-omics questions, Biomed Workbench does not expose a menu of separate skills. The single `biomed-workbench` entrypoint routes the objective into a staged research plan with declared module contracts, input and output artifacts, compatibility rows, templates, quality gates, unresolved project inputs, and an explicit boundary between planning and observed evidence.

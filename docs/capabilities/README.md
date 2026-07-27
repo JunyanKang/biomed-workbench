@@ -19,6 +19,16 @@ Every project is represented as a dependency-aware research graph. Independent e
 
 Routing is dynamic. A literature question may require one database module, while a translational omics project may combine study-design checks, multiple analysis branches, mechanistic evidence, figure production, manuscript drafting, and adversarial review. The user invokes the same `biomed-workbench` skill in both cases.
 
+For v1.0, broad horizontal requests are compiled into staged programs rather than flat module lists:
+
+- evidence and database programs separate identifier resolution, source retrieval, derived evidence, freshness review, and citation or claim audit;
+- publication programs move from figure and manuscript structure through citation, claim, reviewer, response, patent, and presentation checks;
+- molecular programs move from sequence inspection through design, verification, structural assessment, docking, and chemical filtering;
+- statistics and clinical programs move from cohort or data profiling through inferential models and boundary audits;
+- omics programs move from read and matrix quality through alignment, variant or interval handling, expression and chromatin analysis, synthesis, and publication-facing interpretation.
+
+The plan remains non-evidentiary until real project inputs are inspected, templates are adapted in the project workspace, outputs are reloaded, and module quality gates admit the observed artifacts.
+
 ## Scientific Quality Boundaries
 
 The workbench is designed to refuse false confidence. It distinguishes:
