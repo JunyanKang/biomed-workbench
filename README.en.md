@@ -71,7 +71,9 @@ Read the complete design in [Scientific Evidence Map](docs/scientific-evidence-m
 
 ## From molecules to tissue, from data to argument
 
-The current registry contains **194 scientific modules**. Registration means that a scientific contract exists; the observed acceptance surface is defined separately by the backend, version, dataset, and reloaded artifacts recorded in each public-data case.
+The current registry contains **194 scientific modules** spanning the major layers of research from knowledge building to scientific delivery. Evidence, databases, and literature establish what is known, contested, or missing; data analysis connects bulk, single-cell, spatial, and cross-scale studies; molecular and structural biology, clinical and experimental research, and imaging and visualization support mechanistic reasoning, experimental measurement, and morphological or spatial evidence; publication and translation turn reviewed results into narratives suited to particular audiences, journals, and applications.
+
+Within the data-analysis layer, capabilities are further organized by data scale, measurement family, and tool role. Targets, antibodies, internal references, specificity treatments, and normalization strategies remain properties of an experimental or analytical design rather than being promoted to separate omics categories. Module registration establishes the scientific contract; the capability that can actually be claimed is defined by the backend, version, study design, and reloaded artifacts recorded in each public-data case.
 
 | Research layer | Representative released capabilities |
 | --- | --- |
