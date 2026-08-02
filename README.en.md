@@ -105,21 +105,6 @@ Explore the full capability map: [中文](docs/capabilities/README.zh-CN.md) · 
 - **Artifacts are re-verifiable.** Actual software versions, seeds, parameters, code, and checksums accompany results; serialized objects are reloaded before delivery.
 - **Figures and prose share a source.** Figure elements, captions, results text, and DOI records derive from the same validated evidence map.
 
-## Current observed execution baseline
-
-The release distinguishes a parameterized contract from an observed scientific run. The following entry points executed their external workflows and reopened native outputs before temporary data were removed.
-
-| Entry point | Current observed acceptance |
-| --- | --- |
-| ATAC-seq and DNase-seq | ENCODE `ENCSR356KRQ` and `ENCSR000EOT`, each retaining two biological replicates; complete ENCODE ATAC 2.2.3 peak, signal, and QC outputs reloaded |
-| Ribo-seq, GRO/PRO-seq, iCLIP, WGBS, and Hi-C | Pinned nf-core/riboseq 1.2.0, nascent 2.3.0, clipseq 1.0.0, methylseq 4.2.0, and hic 2.1.0 runs with 174, 50, 22, 52, and 14 scientific files reloaded, respectively |
-| NET-seq | Public `SRR12840066` against sacCer3; UMI/adapter handling, unique alignment, BAM, and strand-specific end tracks executed and reloaded |
-| RIP-seq | RIPSeeker 1.28.0 official PRC2 data; two RIP libraries and one control; two fixed-seed executions produced byte-identical 59-region and native-R outputs |
-| LACE-seq | Public Ago2 `SRR10173391` and IgG `SRR10173407`; Cutadapt 1.15, Bowtie 1.2.3, rRNA filtering, whole-read IgG subtraction, and strand-aware cluster calling executed |
-| Tangram | Complete test pair from a pinned Tangram repository commit; 26,431 reference cells, 18 cell classes, 9,852 spatial locations, and 249 shared genes; native mapping model and normalized projection reloaded |
-
-Evidence renewal follows the class of change. Scientific implementation, parameter semantics, input handling, or output recognition changes require recomputation; runtime-policy changes require targeted compatibility retesting; module metadata changes require reviewed scope reissue; documentation or unrelated global-registry changes do not invalidate a run produced by the same executor. The current machine decision is recorded in [`reports/scientific-evidence-revalidation.json`](reports/scientific-evidence-revalidation.json).
-
 ## Start in Codex
 
 After installation, describe the project objective directly. Researchers do not need to memorize module IDs or assemble internal skills.
@@ -146,6 +131,7 @@ A researcher may simply ask an agent to “configure my NCBI API key.” The age
 
 ## Documentation
 
+- Release notes and version acceptance: [中文](docs/releases/README.zh-CN.md) · [English](docs/releases/README.md)
 - Scientific evidence maps and bilingual reports: [中文](docs/scientific-evidence-map.zh-CN.md) · [English](docs/scientific-evidence-map.md)
 - Capability map: [中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)
 - Usage: [中文](docs/using-biomed-workbench.zh-CN.md) · [English](docs/using-biomed-workbench.md)

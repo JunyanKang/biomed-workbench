@@ -107,21 +107,6 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 - **产物可重验：** 实际软件版本、随机种子、参数、代码和文件校验指纹随结果登记，序列化对象在交付前重新读取。
 - **图与文字同源：** 图中各部分、图注、结果段落和 DOI 从同一张证据地图派生，降低不同交付物之间的叙述漂移。
 
-## 当前版本的真实执行基线
-
-本次发布把“已经写入参数契约”和“已经完成真实运行”分开记录。下列入口均执行了外部科学流程，重新读取原生结果，并在清理测试数据前发布路径中立的校验证据。
-
-| 分析入口 | 当前真实验收 |
-| --- | --- |
-| ATAC-seq 与 DNase-seq | ENCODE `ENCSR356KRQ` 与 `ENCSR000EOT`，各保留两个生物学重复；完整 ENCODE ATAC 2.2.3 工作流、峰、信号和质量报告均已重读 |
-| Ribo-seq、GRO/PRO-seq、iCLIP、WGBS、Hi-C | 固定的 nf-core/riboseq 1.2.0、nascent 2.3.0、clipseq 1.0.0、methylseq 4.2.0 与 hic 2.1.0；分别重读 174、50、22、52 与 14 个科学结果文件 |
-| NET-seq | 公开 `SRR12840066` 与 sacCer3；完成 UMI/接头处理、唯一比对、BAM 和正负链末端轨道重读 |
-| RIP-seq | RIPSeeker 1.28.0 官方 PRC2 数据；两个 RIP 与一个对照，固定随机种子的两次独立运行得到逐字节一致的 59 个区域和原生 R 对象 |
-| LACE-seq | 公开 Ago2 `SRR10173391` 与 IgG `SRR10173407`；Cutadapt 1.15、Bowtie 1.2.3、rRNA 过滤、全读段 IgG 扣除和链特异簇识别已完整执行 |
-| Tangram | Tangram 1.0.4 官方仓库固定提交的完整测试数据；26,431 个参考细胞、18 类细胞、9,852 个空间位置和 249 个共同基因，映射模型与归一化结果均已重读 |
-
-科学证据按变化类型续期：执行代码、参数语义、输入处理或结果识别变化才触发重新计算；运行依赖变化只复验受影响的兼容层；模块说明或成熟度变化审查并换发模块范围；README 或无关模块使全局摘要变化时，不会重跑已经由相同执行器验证的流程。当前分类结果见 [`reports/scientific-evidence-revalidation.json`](reports/scientific-evidence-revalidation.json)。
-
 ## 在 Codex 中开始研究
 
 安装后，直接描述项目目标。用户无需记忆模块名称，也无需手工拼接内部 skill。
@@ -150,6 +135,7 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 
 ## 文档索引
 
+- 发布说明与版本验收：[中文](docs/releases/README.zh-CN.md) · [English](docs/releases/README.md)
 - 科学证据地图与双语报告：[中文](docs/scientific-evidence-map.zh-CN.md) · [English](docs/scientific-evidence-map.md)
 - 能力地图：[中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)
 - Bulk 测序分类与流程：[中文](docs/capabilities/bulk-sequencing-assays.zh-CN.md) · [English](docs/capabilities/bulk-sequencing-assays.md)
