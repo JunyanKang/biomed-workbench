@@ -1,0 +1,1147 @@
+{
+  "schema_version": 1,
+  "id": "spatial-multimethod-inference",
+  "version": "1.0.0",
+  "title": "Benchmark spatial deconvolution, projection, domains and distance-constrained communication",
+  "description": "Run cell2location, RCTD, Stereoscope, SPOTlight, CARD, SpatialDWLS, DestVI or Tangram under method-specific assumptions; compare projections with truth-qualified JSD and held-out diagnostics; benchmark BayesSpace, SpaGCN and STAGATE domains without label leakage; and test COMMOT distance-constrained ligand-receptor communication separately within biological samples.",
+  "module_type": "analysis",
+  "domains": [
+    "omics",
+    "spatial-omics",
+    "systems-biology"
+  ],
+  "intents": [
+    "cell2location",
+    "RCTD",
+    "Stereoscope",
+    "SPOTlight",
+    "CARD",
+    "SpatialDWLS",
+    "DestVI",
+    "Tangram",
+    "JSD",
+    "BayesSpace",
+    "SpaGCN",
+    "STAGATE",
+    "COMMOT",
+    "spatial deconvolution",
+    "cell-to-space projection",
+    "spatial domains",
+    "distance constrained communication",
+    "空间解卷积",
+    "空间投射",
+    "空间区域比较",
+    "空间通讯"
+  ],
+  "questions": [
+    "Which spot-deconvolution or cell-to-space projection method matches the platform, resolution and biological question; which estimates survive reference, held-out-gene and method sensitivity checks; which spatial domains are stable under label-blind benchmarks; and which ligand-receptor hypotheses survive an explicit physical-distance constraint across samples?"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "execution": {
+    "kind": "workflow",
+    "timeout_seconds": 30,
+    "max_output_bytes": 2000000
+  },
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "spatial_expression",
+      "artifact_type": "coordinate_explicit_spatial_expression",
+      "source_policy": "project_or_upstream",
+      "processing_levels": [
+        "quality-controlled",
+        "sample-annotated",
+        "coordinate-explicit"
+      ],
+      "required_metadata": [
+        "sample-key",
+        "coordinate-system",
+        "coordinate-unit",
+        "count-layer",
+        "source-sha256"
+      ],
+      "formats": [
+        {
+          "name": "h5ad",
+          "versions": [
+            "0.1.0"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "compression": [
+            "internal"
+          ],
+          "required_indexes": [
+            "observation-id",
+            "feature-id"
+          ],
+          "coordinate_systems": [
+            "declared-spatial"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project-or-not-applicable"
+          ],
+          "annotation_releases": [],
+          "orientations": [
+            "location-by-gene"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "single_cell_reference",
+      "artifact_type": "annotated_single_cell_reference",
+      "source_policy": "project_or_upstream",
+      "processing_levels": [
+        "quality-controlled",
+        "cell-type-annotated",
+        "count-preserved"
+      ],
+      "required_metadata": [
+        "cell-type-key",
+        "sample-or-batch-key",
+        "annotation-method",
+        "source-sha256"
+      ],
+      "formats": [
+        {
+          "name": "h5ad",
+          "versions": [
+            "0.1.0"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "compression": [
+            "internal"
+          ],
+          "required_indexes": [
+            "cell-id",
+            "feature-id"
+          ],
+          "coordinate_systems": [
+            "cell-identity-index"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project-or-not-applicable"
+          ],
+          "annotation_releases": [],
+          "orientations": [
+            "cell-by-gene"
+          ]
+        }
+      ]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "spatial_inference_evidence",
+      "artifact_type": "spatial_inference_evidence",
+      "processing_levels": [
+        "method-native",
+        "normalized",
+        "sensitivity-reviewed",
+        "reloaded"
+      ],
+      "required_metadata": [
+        "module-version",
+        "method-and-version",
+        "input-digests",
+        "sample-key",
+        "coordinate-unit",
+        "parameters",
+        "seed",
+        "quality-gates"
+      ],
+      "formats": [
+        {
+          "name": "h5ad",
+          "versions": [
+            "0.1.0"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "compression": [
+            "internal"
+          ],
+          "required_indexes": [
+            "observation-id"
+          ],
+          "coordinate_systems": [
+            "declared-spatial"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "inherited-from-input"
+          ],
+          "annotation_releases": [],
+          "orientations": [
+            "method-native-spatial-result"
+          ]
+        },
+        {
+          "name": "rds",
+          "versions": [
+            "declared-R"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "compression": [
+            "internal"
+          ],
+          "required_indexes": [],
+          "coordinate_systems": [
+            "declared-spatial"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "inherited-from-input"
+          ],
+          "annotation_releases": [],
+          "orientations": [
+            "method-native-R-result"
+          ]
+        },
+        {
+          "name": "tab-separated-values",
+          "versions": [
+            "1"
+          ],
+          "representations": [
+            "text"
+          ],
+          "compression": [
+            "none"
+          ],
+          "required_indexes": [],
+          "coordinate_systems": [
+            "declared-spatial"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": [
+            "location-by-cell-type",
+            "location-by-domain",
+            "sample-by-interaction",
+            "method-by-metric"
+          ]
+        },
+        {
+          "name": "inline-json",
+          "versions": [
+            "1"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "compression": [
+            "none"
+          ],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": [
+            "parameters-provenance-gates"
+          ]
+        }
+      ]
+    }
+  ],
+  "preconditions": [
+    "Spatial counts, physical coordinates/units and biological samples are valid; deconvolution has a count-preserved annotated reference; domain benchmark settings and communication database/distance scale are frozen before review."
+  ],
+  "assumptions": [
+    "Reference cell states are relevant to the tissue; spatial domains are exploratory; ligand-receptor expression plus proximity proposes communication but does not establish signaling or causality."
+  ],
+  "quality_gates": [
+    {
+      "id": "deconvolution-reference-contract",
+      "severity": "fatal",
+      "description": "Require shared gene namespace, raw counts, one spatial sample per fit, reference labels/batches, signatures, uncertainty or residual diagnostics, held-out-gene assessment and explicit proportion, abundance or mapping-probability semantics.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "projection-truth-and-resolution-contract",
+      "severity": "fatal",
+      "description": "Separate spot mixture deconvolution from cell-to-space mapping; call JSD accuracy only against independent or simulated truth and otherwise report concordance; never interpret super-resolution or mapped cells as directly observed cells.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "domain-label-blind-benchmark",
+      "severity": "fatal",
+      "description": "Fit BayesSpace, SpaGCN and STAGATE without reviewed biological labels; compare at least three seeds using stability, coherence, fragmentation, runtime and discordance; labels enter only post hoc.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "communication-distance-and-replicates",
+      "severity": "fatal",
+      "description": "Require a positive physical-distance threshold, sample-separated graphs, versioned LR database, heteromeric policy, global multiplicity control and biological-sample support.",
+      "blocks_interpretation": true
+    }
+  ],
+  "limitations": [
+    "No method is automatically declared best or averaged into a biological truth. RCTD, cell2location, Stereoscope, SPOTlight, CARD and SpatialDWLS estimate reference-defined mixtures with different spatial and noise assumptions. DestVI is intended when within-cell-type continuous state matters but assumes one state per declared type per spot and is GPU-favored. Tangram learns a cell- or cluster-to-location mapping probability rather than a compositional count model. Deep-learning and R backends require isolated compatible runtimes. Cross-condition inference remains at the biological-sample level."
+  ],
+  "evidence_effects": [
+    "adds-classic-spatial-deconvolution-cell-to-space-projection-domain-benchmark-and-distance-constrained-communication-evidence"
+  ],
+  "alternatives": [
+    "single-cell-spatial-analysis",
+    "single-cell-communication"
+  ],
+  "complements": [
+    "spatial-platform-image-foundation",
+    "spatial-multislice-integration",
+    "trajectory-spatial-figure-package",
+    "single-cell-complex-inference"
+  ],
+  "tool_requirements": [
+    {
+      "name": "cell2location",
+      "ecosystem": "python",
+      "identity": "cell2location",
+      "required": false,
+      "tested_versions": [
+        "0.1.4"
+      ],
+      "allowed_versions": [
+        ">=0.1,<0.2"
+      ],
+      "version_source": "https://cell2location.readthedocs.io/en/latest/",
+      "verified_at": "2026-07-30",
+      "version_probe": [
+        "python",
+        "-c",
+        "import cell2location; print(cell2location.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "spacexr",
+      "ecosystem": "r",
+      "identity": "spacexr",
+      "required": false,
+      "tested_versions": [
+        "2.2.1"
+      ],
+      "allowed_versions": [
+        ">=2.2,<2.3"
+      ],
+      "version_source": "https://github.com/dmcable/spacexr",
+      "verified_at": "2026-08-01",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('spacexr')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [
+        {
+          "id": "spacexr221-named-reference-and-sparse-weights",
+          "affected_versions": [
+            ">=2.2,<2.3"
+          ],
+          "category": "api",
+          "description": "spacexr 2.2.1 requires cell barcode names on the reference cell-type factor and returns RCTD weights as a sparse Matrix object.",
+          "compatibility_effect": "requires-parser",
+          "required_action": "Bind reference barcodes before constructing Reference, convert sparse weights explicitly, retain RCTD-filtered location identifiers and reload the native RCTD object.",
+          "source": "https://github.com/dmcable/spacexr"
+        }
+      ],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "tangram-sc",
+      "ecosystem": "python",
+      "identity": "tangram-sc",
+      "required": false,
+      "tested_versions": [
+        "1.0.4"
+      ],
+      "allowed_versions": [
+        ">=1,<2"
+      ],
+      "version_source": "https://github.com/broadinstitute/Tangram",
+      "verified_at": "2026-07-30",
+      "version_probe": [
+        "python",
+        "-c",
+        "import tangram; print(tangram.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "SPOTlight",
+      "ecosystem": "r",
+      "identity": "SPOTlight",
+      "required": false,
+      "tested_versions": [
+        "1.8.0"
+      ],
+      "allowed_versions": [
+        ">=1,<2"
+      ],
+      "version_source": "https://www.bioconductor.org/packages/devel/bioc/manuals/SPOTlight/man/SPOTlight.pdf",
+      "verified_at": "2026-07-30",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('SPOTlight')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "scvi-tools",
+      "ecosystem": "python",
+      "identity": "scvi-tools",
+      "required": false,
+      "tested_versions": [
+        "1.3.3"
+      ],
+      "allowed_versions": [
+        ">=1.3,<1.6"
+      ],
+      "version_source": "https://docs.scvi-tools.org/en/stable/api/reference/scvi.external.SpatialStereoscope.html",
+      "verified_at": "2026-07-31",
+      "version_probe": [
+        "python",
+        "-c",
+        "import scvi; print(scvi.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [
+        {
+          "id": "scvi-spatial-provider-transition",
+          "affected_versions": [
+            ">=1.3,<1.6"
+          ],
+          "category": "api",
+          "description": "DestVI documentation moved toward scVIVA-tools by scvi-tools 1.5 and the scvi-tools implementation is no longer the maintained home.",
+          "compatibility_effect": "requires-parameter",
+          "required_action": "Use a method-specific locked runtime and record the model provider and exact version.",
+          "source": "https://docs.scvi-tools.org/en/latest/user_guide/models/destvi.html"
+        }
+      ],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "CARD",
+      "ecosystem": "r",
+      "identity": "CARD",
+      "required": false,
+      "tested_versions": [
+        "1.1"
+      ],
+      "allowed_versions": [
+        ">=1,<2"
+      ],
+      "version_source": "https://yma-lab.github.io/CARD/",
+      "verified_at": "2026-07-31",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('CARD')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)*)",
+      "mismatch_policy": "block",
+      "version_differences": [],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "Giotto",
+      "ecosystem": "r",
+      "identity": "Giotto",
+      "required": false,
+      "tested_versions": [
+        "4.2.1"
+      ],
+      "allowed_versions": [
+        ">=4,<5"
+      ],
+      "version_source": "https://giottosuite.com/reference/runDWLSDeconv.html",
+      "verified_at": "2026-07-31",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('Giotto')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "BayesSpace",
+      "ecosystem": "r",
+      "identity": "BayesSpace",
+      "required": false,
+      "tested_versions": [
+        "1.12.0"
+      ],
+      "allowed_versions": [
+        ">=1,<3"
+      ],
+      "version_source": "https://bioconductor.org/packages/release/bioc/manuals/BayesSpace/man/BayesSpace.pdf",
+      "verified_at": "2026-07-30",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('BayesSpace')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "SpaGCN",
+      "ecosystem": "python",
+      "identity": "SpaGCN",
+      "required": false,
+      "tested_versions": [
+        "1.2.7"
+      ],
+      "allowed_versions": [
+        ">=1.2,<1.3"
+      ],
+      "version_source": "https://github.com/jianhuupenn/SpaGCN",
+      "verified_at": "2026-07-30",
+      "version_probe": [
+        "python",
+        "-c",
+        "import SpaGCN; print(SpaGCN.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "STAGATE_pyG",
+      "ecosystem": "python",
+      "identity": "STAGATE_pyG",
+      "required": false,
+      "tested_versions": [
+        "1.0.0"
+      ],
+      "allowed_versions": [
+        ">=1,<2"
+      ],
+      "version_source": "https://www.nature.com/articles/s41467-022-29439-6",
+      "verified_at": "2026-07-30",
+      "version_probe": [
+        "python",
+        "-c",
+        "import STAGATE_pyG"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "commot",
+      "ecosystem": "python",
+      "identity": "commot",
+      "required": false,
+      "tested_versions": [
+        "0.0.3"
+      ],
+      "allowed_versions": [
+        ">=0.0,<0.1"
+      ],
+      "version_source": "https://github.com/zcang/COMMOT",
+      "verified_at": "2026-07-30",
+      "version_probe": [
+        "python",
+        "-c",
+        "import commot; print(commot.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "mismatch_policy": "block",
+      "version_differences": [],
+      "platforms": [
+        "any"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "name": "python",
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "required": false,
+      "tested_versions": [
+        "3.10",
+        "3.12"
+      ],
+      "allowed_versions": [
+        ">=3.10,<3.13"
+      ],
+      "version_source": "https://www.python.org/",
+      "verified_at": "2026-07-30",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Run Python inference arms in method-specific isolated runtimes.",
+      "conflicts": [],
+      "platforms": [
+        "any"
+      ]
+    },
+    {
+      "name": "r",
+      "ecosystem": "runtime",
+      "identity": "r-runtime",
+      "required": false,
+      "tested_versions": [
+        "4.3"
+      ],
+      "allowed_versions": [
+        ">=4.3,<4.5"
+      ],
+      "version_source": "https://cran.r-project.org/",
+      "verified_at": "2026-07-30",
+      "version_probe": [
+        "Rscript",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Run RCTD, SPOTlight and BayesSpace in an isolated R library.",
+      "conflicts": [],
+      "platforms": [
+        "any"
+      ]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "method-isolated-runtime-contract-v2",
+      "module_version": "1.0.0",
+      "tool_versions": {
+        "cell2location": [
+          ">=0.1,<0.2"
+        ],
+        "spacexr": [
+          ">=2.2,<2.3"
+        ],
+        "tangram-sc": [
+          ">=1,<2"
+        ],
+        "SPOTlight": [
+          ">=1,<2"
+        ],
+        "scvi-tools": [
+          ">=1.3,<1.6"
+        ],
+        "CARD": [
+          ">=1,<2"
+        ],
+        "Giotto": [
+          ">=4,<5"
+        ],
+        "BayesSpace": [
+          ">=1,<3"
+        ],
+        "SpaGCN": [
+          ">=1.2,<1.3"
+        ],
+        "STAGATE_pyG": [
+          ">=1,<2"
+        ],
+        "commot": [
+          ">=0.0,<0.1"
+        ]
+      },
+      "dependency_versions": {
+        "python": [
+          ">=3.10,<3.13"
+        ],
+        "r": [
+          ">=4.3,<4.5"
+        ]
+      },
+      "input_formats": {
+        "spatial_expression": [
+          "h5ad@0.1.0"
+        ],
+        "single_cell_reference": [
+          "h5ad@0.1.0"
+        ]
+      },
+      "output_formats": {
+        "spatial_inference_evidence": [
+          "h5ad@0.1.0",
+          "rds@declared-R",
+          "tab-separated-values@1",
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "spatial-multimethod-inference-regression-v1"
+      ],
+      "end_to_end_evidence_ids": [
+        "spatial-multimethod-inference-adapter-v1",
+        "spacexr221-official-slideseq-rctd-public-e2e-v1"
+      ],
+      "verified_at": "2026-08-01"
+    }
+  ],
+  "access": "agent_generated",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "objective": {
+        "type": "string",
+        "minLength": 12
+      },
+      "analysis": {
+        "type": "string",
+        "enum": [
+          "deconvolution",
+          "domain-benchmark",
+          "spatial-communication"
+        ]
+      },
+      "methods": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "spatial_artifact_id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "reference_artifact_id": {
+        "type": "string"
+      },
+      "sample_key": {
+        "type": "string",
+        "minLength": 1
+      },
+      "coordinate_unit": {
+        "type": "string",
+        "minLength": 1
+      },
+      "distance_threshold": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      },
+      "seeds": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        }
+      },
+      "seed": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "objective",
+      "analysis",
+      "methods",
+      "spatial_artifact_id",
+      "sample_key",
+      "coordinate_unit",
+      "seed"
+    ]
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "handoff_type": {
+        "type": "string"
+      },
+      "module": {
+        "type": "object"
+      },
+      "request_digest": {
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "code_plan": {
+        "type": "array"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ]
+  },
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "provenance": {
+    "license": "Apache-2.0",
+    "concept_sources": [
+      "https://www.nature.com/articles/s41587-021-01139-4",
+      "https://www.nature.com/articles/s41587-021-00830-w",
+      "https://www.nature.com/articles/s41592-021-01264-7",
+      "https://docs.scvi-tools.org/en/stable/api/reference/scvi.external.SpatialStereoscope.html",
+      "https://docs.scvi-tools.org/en/latest/user_guide/models/destvi.html",
+      "https://academic.oup.com/nar/article/49/9/e50/6129676",
+      "https://www.nature.com/articles/s41587-022-01273-7",
+      "https://www.nature.com/articles/s41598-021-97953-0",
+      "https://www.nature.com/articles/s41587-021-00935-2",
+      "https://www.nature.com/articles/s41467-022-29439-6",
+      "https://www.nature.com/articles/s41592-024-02215-8",
+      "https://doi.org/10.1038/s41592-022-01728-4"
+    ]
+  },
+  "code_templates": [
+    {
+      "path": "templates/run_deconvolution.py",
+      "language": "python",
+      "purpose": "Run cell2location or Tangram while retaining native models and normalized abundance outputs.",
+      "quality_gate_ids": [
+        "deconvolution-reference-contract"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "path": "templates/run_rctd_spotlight.R",
+      "language": "r",
+      "purpose": "Run RCTD or project-marker-bound SPOTlight in native R objects.",
+      "quality_gate_ids": [
+        "deconvolution-reference-contract"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "path": "templates/run_scvi_spatial_deconvolution.py",
+      "language": "python",
+      "purpose": "Run Stereoscope for count-based proportions or DestVI for proportions plus within-cell-type continuous spatial states.",
+      "quality_gate_ids": [
+        "deconvolution-reference-contract",
+        "projection-truth-and-resolution-contract"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "path": "templates/run_card_spatialdwls.R",
+      "language": "r",
+      "purpose": "Run spatially regularized CARD or marker-screened SpatialDWLS and retain native objects plus normalized proportions.",
+      "quality_gate_ids": [
+        "deconvolution-reference-contract",
+        "projection-truth-and-resolution-contract"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "path": "templates/evaluate_deconvolution.py",
+      "language": "python",
+      "purpose": "Compare method outputs using JSD, top-type agreement and truth-qualified accuracy without converting consensus into truth.",
+      "quality_gate_ids": [
+        "deconvolution-reference-contract",
+        "projection-truth-and-resolution-contract"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "path": "templates/run_domain_benchmark.py",
+      "language": "python",
+      "purpose": "Orchestrate label-blind, multi-seed domain benchmark arms and shared metrics.",
+      "quality_gate_ids": [
+        "domain-label-blind-benchmark"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "path": "templates/run_python_domain_backend.py",
+      "language": "python",
+      "purpose": "Run native SpaGCN or STAGATE embeddings followed by exact-K label-blind clustering.",
+      "quality_gate_ids": [
+        "domain-label-blind-benchmark"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "path": "templates/run_bayesspace_backend.R",
+      "language": "r",
+      "purpose": "Run a native BayesSpace benchmark arm from SpatialExperiment.",
+      "quality_gate_ids": [
+        "domain-label-blind-benchmark"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "path": "templates/run_spatial_communication.py",
+      "language": "python",
+      "purpose": "Run sample-separated COMMOT with a mandatory physical-distance cutoff.",
+      "quality_gate_ids": [
+        "communication-distance-and-replicates"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "agent_protocol": {
+    "schema_version": 1,
+    "mode": "packaged_parameterized_workflow",
+    "languages": [
+      "python",
+      "r",
+      "notebook"
+    ],
+    "template_sections": [
+      {
+        "id": "reference-map",
+        "purpose": "Estimate cell-state abundance, proportions or mapping probabilities under explicit method and resolution semantics.",
+        "required_logic": [
+          "Validate raw counts, shared identifiers, reference cell types and batches and run one biological spatial sample per fit.",
+          "Use RCTD, cell2location, Stereoscope, SPOTlight, CARD or SpatialDWLS for spot mixtures; use DestVI when continuous within-type state is the objective; use Tangram for cell- or cluster-to-space mapping probabilities.",
+          "Run declared methods separately and preserve native models, normalized outputs, uncertainty, residual, reconstruction and held-out-gene diagnostics.",
+          "Use JSD as accuracy only with independent or simulated truth and otherwise label it concordance; never average methods into biological truth."
+        ],
+        "output_artifact_types": [
+          "spatial_inference_evidence"
+        ],
+        "template_files": [
+          "templates/run_deconvolution.py",
+          "templates/run_rctd_spotlight.R",
+          "templates/run_scvi_spatial_deconvolution.py",
+          "templates/run_card_spatialdwls.R",
+          "templates/evaluate_deconvolution.py"
+        ]
+      },
+      {
+        "id": "benchmark-domains",
+        "purpose": "Compare BayesSpace, SpaGCN and STAGATE without label leakage.",
+        "required_logic": [
+          "Freeze preprocessing, number of domains, seeds and method-native parameters.",
+          "Calculate seed/resolution stability, spatial coherence, fragmentation, runtime and pairwise discordance.",
+          "Use reviewed labels only as post-hoc evaluation and never as a fitting/tuning target."
+        ],
+        "output_artifact_types": [
+          "spatial_inference_evidence"
+        ],
+        "template_files": [
+          "templates/run_domain_benchmark.py",
+          "templates/run_python_domain_backend.py",
+          "templates/run_bayesspace_backend.R"
+        ]
+      },
+      {
+        "id": "distance-constrained-communication",
+        "purpose": "Restrict ligand-receptor hypotheses to physical neighborhoods.",
+        "required_logic": [
+          "Build no cross-sample edges and require a physical distance threshold in the declared unit.",
+          "Run COMMOT with declared database, heteromeric and pathway policies.",
+          "Aggregate effects, FDR and support at the biological-sample level; retain distance-threshold sensitivity."
+        ],
+        "output_artifact_types": [
+          "spatial_inference_evidence"
+        ],
+        "template_files": [
+          "templates/run_spatial_communication.py"
+        ]
+      }
+    ],
+    "parameter_rules": [
+      {
+        "id": "deconvolution-method",
+        "parameter": "rctd-cell2location-stereoscope-spotlight-card-spatialdwls-destvi-tangram",
+        "decision_inputs": [
+          "spot versus single-cell resolution",
+          "count depth",
+          "number of locations",
+          "reference match",
+          "cell-type granularity",
+          "continuous-state objective",
+          "spatial-prior need",
+          "uncertainty need",
+          "GPU availability"
+        ],
+        "selection_rule": "Choose from model assumptions before viewing anatomy: RCTD is a robust baseline with full or doublet modes; cell2location models abundance and technical effects; Stereoscope is a simpler negative-binomial baseline; SPOTlight is marker-seeded NMF; CARD and SpatialDWLS explicitly use spatial or marker screening; DestVI adds continuous within-type state; Tangram maps cells or clusters to locations.",
+        "validation_rule": "Review held-out/reconstructed genes, abundance or proportion conservation, uncertainty/residuals, reference and marker subsampling, truth-qualified JSD, method discordance and between-sample reproducibility."
+      },
+      {
+        "id": "projection-resolution",
+        "parameter": "mixture-proportion-abundance-or-mapping-probability",
+        "decision_inputs": [
+          "platform capture diameter",
+          "estimated cells per location",
+          "segmentation availability",
+          "desired output"
+        ],
+        "selection_rule": "Declare output semantics and resolution before fitting; do not call Tangram mapping probability, CARD imputation or other super-resolution output an observed cell.",
+        "validation_rule": "Require matched location identifiers, nonnegative finite outputs, compositional checks where applicable and independent truth or simulation for accuracy claims."
+      },
+      {
+        "id": "domain-benchmark",
+        "parameter": "method-native-domain-parameters",
+        "decision_inputs": [
+          "platform geometry",
+          "spot count",
+          "image availability",
+          "expected scale",
+          "runtime"
+        ],
+        "selection_rule": "Freeze BayesSpace, SpaGCN and STAGATE settings and compare the same observations across at least three seeds.",
+        "validation_rule": "Report label-blind stability, coherence, fragmentation, runtime and discordant regions; no automatic winner."
+      },
+      {
+        "id": "physical-communication",
+        "parameter": "database-distance-heteromeric",
+        "decision_inputs": [
+          "coordinate unit",
+          "cell or spot spacing",
+          "ligand range",
+          "platform resolution",
+          "database"
+        ],
+        "selection_rule": "Predeclare a biologically interpretable physical distance and build the graph separately within each sample.",
+        "validation_rule": "Prove zero cross-sample edges and report threshold sensitivity, sample support and multiplicity."
+      }
+    ],
+    "preflight_checks": [
+      "Inspect raw counts, physical coordinates/units, sample identity, reference annotation/batch, gene namespace, platform scale and desired output semantics.",
+      "Detect exact method-specific isolated runtimes; do not install or mix incompatible backends inside the analysis step."
+    ],
+    "postflight_checks": [
+      "Reload method-native objects and normalized TSV/JSON outputs; reconcile locations, genes, cell types/domains/interactions, parameters and digests.",
+      "Review reference sensitivity, marker sensitivity, truth-qualified JSD, label-blind domain stability, distance-threshold sensitivity and biological-sample support before interpretation."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "input-digests",
+      "method-and-version",
+      "sample-key",
+      "coordinate-system-and-unit",
+      "reference-and-label-source",
+      "marker-source",
+      "database-and-release",
+      "parameters",
+      "seeds",
+      "runtime-and-memory",
+      "output-digests",
+      "quality-gates"
+    ],
+    "forbidden_actions": [
+      "Use only project-approved isolated runtimes; do not mutate the host environment.",
+      "Do not impute cell types absent from the reference, call concordance accuracy, average methods into truth, call inferred or super-resolved cells observed, tune domains using reviewed labels, connect samples spatially, omit the distance threshold, treat locations/cells as biological replicates, or claim causality from proximity plus expression."
+    ],
+    "requires_observed_execution": true
+  }
+}

@@ -1,0 +1,253 @@
+{
+  "assay": "rip-seq",
+  "case_id": "ripseeker-prc2-official-chrx-v1",
+  "case_type": "official-package-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "bulk-rbp-rna-binding"
+    ],
+    "module_slice_digest": "e06d472857389f63cedbd8d4bb7a22d6dbcdb7ebe05b07e9e7c8d705346eb012",
+    "schema_version": 1
+  },
+  "execution": {
+    "assay": "rip-seq",
+    "external_workflow_executed": true,
+    "outputs": {
+      "models": [
+        {
+          "bytes": 515155,
+          "name": "seekOutput.RData",
+          "sha256": "063b4e722da96199c7810e806376e8e48b21ab70e3519c7f711b50f367abe043"
+        }
+      ],
+      "regions": [
+        {
+          "bytes": 15849,
+          "name": "RIPregions.gff3",
+          "sha256": "71c9e167d86df597bbb078df398d13f1406a07cc692382492cb3aa572678fb77"
+        }
+      ],
+      "reload_validation": {
+        "bytes": 462,
+        "name": "RIPSeeker_validation.json",
+        "sha256": "5e4e7321b8bc55f1e45e0c9f8d8341e3f4da5d1cf5844da2a3c8da97867dea94"
+      },
+      "result_rds": {
+        "bytes": 515930,
+        "name": "RIPSeeker_result.rds",
+        "sha256": "0c04caafb7a02c0ee861908e7080f135d2fde1393983879e15786e557c0cf45c"
+      }
+    },
+    "outputs_reloaded": true,
+    "parameters": {
+      "adjusted_pvalue_cutoff": 1.0,
+      "assign_multihits": true,
+      "bin_size": null,
+      "empirical_fdr_cutoff": 1.0,
+      "genome_build": "mm9",
+      "log_odd_cutoff": 0.0,
+      "max_bin_size": 10100,
+      "min_bin_size": 10000,
+      "multicore": false,
+      "padj_method": "BH",
+      "paired": false,
+      "pvalue_cutoff": 1.0,
+      "rerun_disambiguated_multihits": true,
+      "reverse_complement": true,
+      "seed": 20260802,
+      "strand_type": "-",
+      "unique_hit": true
+    },
+    "reproducibility": {
+      "independent_executions": 2,
+      "region_model_and_rds_outputs_byte_identical": true,
+      "seed": 20260802
+    },
+    "validation": {
+      "model_files": [
+        {
+          "file": "seekOutput.RData",
+          "object_count": 4,
+          "objects": [
+            "mainSeekOutputRIP",
+            "RIPGRList",
+            "mainSeekOutputCTL",
+            "annotatedRIPGR"
+          ]
+        }
+      ],
+      "region_files": [
+        {
+          "file": "RIPregions.gff3",
+          "row_count": 59
+        }
+      ],
+      "reload_passed": true,
+      "result_rds": {
+        "class": "list",
+        "file": "RIPSeeker_result.rds",
+        "length": 4
+      },
+      "ripseeker_version": "1.28.0",
+      "total_region_rows": 59
+    }
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "implementation": {
+    "path": "biomed_workbench/implementations/ripseeker.py",
+    "sha256": "3aa0971192431ad5258e72d2317603040f1c36baf8dcc690905e6c812da0ff92"
+  },
+  "module": {
+    "id": "bulk-rbp-rna-binding",
+    "version": "0.2.0"
+  },
+  "observed_at": "2026-08-02T05:51:34.492439+00:00",
+  "passed": true,
+  "quality_gates": {
+    "bioconductor_release_pinned": true,
+    "compatibility_patch_checksum_recorded": true,
+    "container_digest_recorded": true,
+    "current_implementation": true,
+    "enrichment_regions_nonempty": true,
+    "external_hmm_execution_exit_zero": true,
+    "fixed_seed_repeat_is_byte_identical": true,
+    "input_and_output_checksums_recorded": true,
+    "official_commit_and_version_pinned": true,
+    "official_prc2_inputs_checksum_bound": true,
+    "rdata_model_reloaded": true,
+    "rds_result_reloaded": true,
+    "two_rip_and_one_control_preserved": true
+  },
+  "runtime_asset_relocation": {
+    "asset_records_rewritten": 2,
+    "assets": [
+      {
+        "content_change": "Docker build-context path only",
+        "current_path": "biomed_workbench/runtime_compat/ripseeker/Dockerfile",
+        "current_sha256": "362dd0358fda33ce55ca57334263474b83b16d561c2b215d6f9660259829d3f4",
+        "prior_path": "biomed_workbench/modules/builtin/bulk-rbp-rna-binding/templates/Dockerfile.ripseeker",
+        "prior_sha256": "19f84accdbed146e975023849161fc37f8856b04d38a7af96e357fde00b2803c"
+      },
+      {
+        "content_change": "none",
+        "current_path": "biomed_workbench/runtime_compat/ripseeker/bioconductor-3.11-namespace.patch",
+        "current_sha256": "085b74e5eab2f18fda66eeff8b9d770738398f46eb8934bc6042a7601a30f5a4",
+        "prior_path": "biomed_workbench/modules/builtin/bulk-rbp-rna-binding/templates/ripseeker-bioconductor-3.11-namespace.patch",
+        "prior_sha256": "085b74e5eab2f18fda66eeff8b9d770738398f46eb8934bc6042a7601a30f5a4"
+      }
+    ],
+    "current_evidence_scope": {
+      "module_ids": [
+        "bulk-rbp-rna-binding"
+      ],
+      "module_slice_digest": "e06d472857389f63cedbd8d4bb7a22d6dbcdb7ebe05b07e9e7c8d705346eb012",
+      "schema_version": 1
+    },
+    "current_implementation_sha256": "3aa0971192431ad5258e72d2317603040f1c36baf8dcc690905e6c812da0ff92",
+    "migration_type": "checksum-bound-runtime-asset-relocation",
+    "prior_evidence_scope": {
+      "module_ids": [
+        "bulk-rbp-rna-binding"
+      ],
+      "module_slice_digest": "e06d472857389f63cedbd8d4bb7a22d6dbcdb7ebe05b07e9e7c8d705346eb012",
+      "schema_version": 1
+    },
+    "prior_implementation_sha256": "3f853380eec012cea90be7de0d2eea9fbc4c1316ab0d8dfada38d9e647554511",
+    "reason": "Runtime build assets were separated from scientific templates. The implementation change is restricted to locating those checksum-bound assets; previously observed inputs, parameters, container identities, output checksums and biological results are unchanged.",
+    "reviewed_on": "2026-08-02",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "scientific_parameters_changed": false
+  },
+  "schema_version": 1,
+  "scientific_scope": "RIPSeeker identifies protein-associated RNA enrichment regions. The result represents RIP-seq enrichment at regional resolution and is intended for replicate-aware follow-up and orthogonal binding validation.",
+  "source": {
+    "inputs": [
+      {
+        "accession": "SRR039210",
+        "bam": {
+          "bytes": 740463,
+          "name": "accepted_hits_noDup_sel_chrX.bam",
+          "sha256": "9b7115f4a0ba9c7e223f3176b5b595cb7686bd13aa57f6f702d3685ddacec3ce"
+        },
+        "group": "rip",
+        "index": {
+          "bytes": 243000,
+          "name": "accepted_hits_noDup_sel_chrX.bam.bai",
+          "sha256": "d1f1d06e8708987765911ad23f266e0c6e6f9bfc44a824765731b85ffcfa39e3"
+        }
+      },
+      {
+        "accession": "SRR039211",
+        "bam": {
+          "bytes": 184601,
+          "name": "accepted_hits_noDup_sel_chrX.bam",
+          "sha256": "f69eb78696d8087c1b86514efadb1dca54958d3e8ddf44d11f0071425dd52d9c"
+        },
+        "group": "rip",
+        "index": {
+          "bytes": 150392,
+          "name": "accepted_hits_noDup_sel_chrX.bam.bai",
+          "sha256": "949c3a476d00af4ade642c6437f954c6f816a2dec2b720e5fe124d4286387ff7"
+        }
+      },
+      {
+        "accession": "SRR039214",
+        "bam": {
+          "bytes": 385346,
+          "name": "accepted_hits_noDup_sel_chrX.bam",
+          "sha256": "b2a0923606f7d96facc4ddc2050ffe4573608502a82245c17ffc523d7274b7f6"
+        },
+        "group": "control",
+        "index": {
+          "bytes": 183008,
+          "name": "accepted_hits_noDup_sel_chrX.bam.bai",
+          "sha256": "27e84d4569a0c27f4b325774903367d099b6312b92325bd51a65768d1c884d9f"
+        }
+      }
+    ],
+    "package_commit": "e3eb1377fc9cd28851a7b301fc410848f7b1347f",
+    "package_example": "RIPSeeker inst/extdata/PRC2",
+    "package_source": "https://git.bioconductor.org/packages/RIPSeeker",
+    "sra_runs": [
+      {
+        "accession": "SRR039210",
+        "group": "rip",
+        "url": "https://www.ncbi.nlm.nih.gov/sra/SRR039210"
+      },
+      {
+        "accession": "SRR039211",
+        "group": "rip",
+        "url": "https://www.ncbi.nlm.nih.gov/sra/SRR039211"
+      },
+      {
+        "accession": "SRR039214",
+        "group": "control",
+        "url": "https://www.ncbi.nlm.nih.gov/sra/SRR039214"
+      }
+    ],
+    "workflow": {
+      "bioconductor_mirror": "https://mirrors.tuna.tsinghua.edu.cn/bioconductor",
+      "bioconductor_release": "3.11",
+      "commit": "e3eb1377fc9cd28851a7b301fc410848f7b1347f",
+      "container_build": {
+        "compatibility_patch": {
+          "path": "biomed_workbench/runtime_compat/ripseeker/bioconductor-3.11-namespace.patch",
+          "sha256": "085b74e5eab2f18fda66eeff8b9d770738398f46eb8934bc6042a7601a30f5a4"
+        },
+        "dockerfile": {
+          "path": "biomed_workbench/runtime_compat/ripseeker/Dockerfile",
+          "sha256": "362dd0358fda33ce55ca57334263474b83b16d561c2b215d6f9660259829d3f4"
+        }
+      },
+      "container_identity": "biomed-workbench/ripseeker@sha256:d68fd741be58b8db75fc32babefde9498339e60b04a6732f824aa59a1155b860",
+      "container_platform": "linux/amd64",
+      "cran_mirror": "https://mirrors.tuna.tsinghua.edu.cn/CRAN/",
+      "name": "RIPSeeker",
+      "package_status": "last-supported-release-before-removal-in-3.12",
+      "runtime": "container",
+      "source": "https://git.bioconductor.org/packages/RIPSeeker",
+      "version": "1.28.0"
+    }
+  }
+}

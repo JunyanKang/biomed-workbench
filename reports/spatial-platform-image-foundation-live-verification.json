@@ -1,0 +1,90 @@
+{
+  "compatibility_row_id": "spatialdata-io04-spatialdata05-squidpy166-python312",
+  "evidence_scope": {
+    "module_ids": [
+      "spatial-platform-image-foundation"
+    ],
+    "module_slice_digest": "6b844e3c24445f69387512f35e692609eacb0cf9b7154146271be3beb777ed1f",
+    "schema_version": 1
+  },
+  "execution": {
+    "all_outputs_reloaded": true,
+    "feature_types": {
+      "Gene Expression": 405,
+      "Genomic Control": 15,
+      "Negative Control Codeword": 41,
+      "Negative Control Probe": 20,
+      "Protein Expression": 4,
+      "Unassigned Codeword": 35
+    },
+    "features": 520,
+    "h5ad_written_and_reloaded": true,
+    "landmark_affine_registration_executed": true,
+    "observations": 358,
+    "official_vendor_output_imported": true,
+    "platform": "Xenium",
+    "registration_landmark_pairs": 4,
+    "registration_residual_rmse": 1.0048591735576161e-14,
+    "segmented_objects": 117,
+    "spatial_elements": {
+      "images": [
+        "morphology_focus"
+      ],
+      "labels": [
+        "cell_labels",
+        "nucleus_labels"
+      ],
+      "points": [
+        "transcripts"
+      ],
+      "shapes": [
+        "cell_boundaries",
+        "nucleus_boundaries"
+      ],
+      "tables": [
+        "table"
+      ]
+    },
+    "spatialdata_written_and_reloaded": true,
+    "squidpy_watershed_executed": true
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "implementation": {
+    "image_template_sha256": "009ef3253a683682a0bf37659e5188e57d62e7cf3c3abf0a4877e16538960642",
+    "import_report_sha256": "a14e9276541da484b823b6e02bc60fd97e503730f21416dea44687715d0ed792",
+    "import_template_sha256": "b41013746c1173ef0bab8290cdafa12c173c8b9925a396e51ad61db2ecfc6ef9",
+    "manifest_sha256": "821da494ae73e1e6432f9bb0fc0bbdacad92f2e66fb4db28f66071f62d8c2264",
+    "registration_report_sha256": "077245dde21936e6704d4fb005c9248893dd3587b9ab99d411f0176a8aaabd5e",
+    "segmentation_report_sha256": "a01ebb922cfd1a7c2e204f77d1fe999dcc1c69f57a79d0d663d5b776fe95b2e0"
+  },
+  "module_id": "spatial-platform-image-foundation",
+  "module_version": "1.0.0",
+  "observed_at": "2026-08-01T06:40:00Z",
+  "passed": true,
+  "quality_gates": {
+    "assay_feature_types_preserved": "pass",
+    "negative_controls_preserved": "pass",
+    "official_source_checksum_bound": "pass",
+    "registration_transform_reload": "pass",
+    "segmentation_foreground": "pass",
+    "spatialdata_reload": "pass",
+    "vendor_elements_preserved": "pass"
+  },
+  "registry_digest": "b406377b6f2e385328fc3069cc8b0ca3742885eb7b7cde70418cde4b58734826",
+  "runtime": {
+    "anndata": "0.12.19",
+    "python": "3.12.11",
+    "scanpy": "1.11.5",
+    "spatialdata": "0.5.0",
+    "spatialdata-io": "0.4.0",
+    "squidpy": "1.6.6"
+  },
+  "schema_version": 1,
+  "scientific_scope": "The production path accepts a cell-resolved Xenium vendor directory, preserves image, boundary, transcript, control-probe and protein feature semantics, performs image segmentation and writes a quantified landmark transform for downstream spatial analysis.",
+  "source": {
+    "bytes": 20628894,
+    "dataset": "Xenium V1 Protein Human Kidney tiny",
+    "sha256": "abd7e8f7fd047dcc6afdb1e9eece90d4533d3ead053c6f05c482be050bdf79d2",
+    "url": "https://cf.10xgenomics.com/samples/xenium/4.0.0/Xenium_V1_Protein_Human_Kidney_tiny/Xenium_V1_Protein_Human_Kidney_tiny_outs.zip"
+  }
+}

@@ -27,6 +27,7 @@ MODULE_ID = "single-cell-atac-regulatory"
 MODULE_ROOT = BUILTIN_ROOT / MODULE_ID
 MACS3_TEMPLATE = MODULE_ROOT / "templates" / "call_macs3_fragments.py"
 REGULATORY_TEMPLATE = MODULE_ROOT / "templates" / "run_atac_regulatory.R"
+RECALL_TEMPLATE = MODULE_ROOT / "templates" / "rebuild_recalled_peak_matrix.R"
 
 
 def sha256(path: Path) -> str:
@@ -147,13 +148,18 @@ def verify(python: Path, rscript: Path) -> dict[str, object]:
         if evaluation["motif_a_planted_matches"] < 14 or evaluation["motif_a_group_contrast"] < 2 or not evaluation["target_gene1_positive_link"]:
             raise RuntimeError(f"planted motif, chromVAR, or peak-gene signal was not recovered: {evaluation}")
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
+        manifest = registry.get(MODULE_ID)
+        if len(manifest.compatibility_matrix) != 1:
+            raise RuntimeError("ATAC regulatory live verification requires exactly one compatibility row")
+        compatibility_row = manifest.compatibility_matrix[0]
         versions = regulatory["versions"]
         return {
-            "schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": "1.1.0",
-            "compatibility_row_id": "agent-protocol-1-macs3-304-signac-116-chromvar-124-motifmatchr-124", "registry_digest": registry.digest,
+            "schema_version": 1, "passed": True, "module_id": MODULE_ID, "module_version": manifest.version,
+            "compatibility_row_id": compatibility_row.id, "registry_digest": registry.digest,
             "templates": {
                 "macs3": {"name": MACS3_TEMPLATE.name, "sha256": sha256(MACS3_TEMPLATE)},
                 "regulatory": {"name": REGULATORY_TEMPLATE.name, "sha256": sha256(REGULATORY_TEMPLATE)},
+                "recall": {"name": RECALL_TEMPLATE.name, "sha256": sha256(RECALL_TEMPLATE)},
             },
             "tool_versions": {"MACS3": macs3["tool_version"], "Signac": versions["Signac"], "chromVAR": versions["chromVAR"], "motifmatchr": versions["motifmatchr"]},
             "dependency_versions": {key: versions[key] for key in ("Seurat", "Matrix", "GenomicRanges", "Biostrings", "SummarizedExperiment", "TFBSTools", "jsonlite", "digest")} | {"python": subprocess.run([str(python), "-c", "import platform;print(platform.python_version())"], capture_output=True, text=True, check=True).stdout.strip(), "r": versions["R"]},

@@ -367,6 +367,25 @@ class DynamicModuleRoutingTests(unittest.TestCase):
 
         self.assertEqual(plan["matched_workflows"], ["omics", "imaging", "publication"])
 
+    def test_secondary_taxonomy_never_becomes_a_top_level_workflow(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            payload = valid_manifest_payload()
+            payload["id"] = "single-cell-integration"
+            payload["domains"] = ["omics", "single-cell", "statistics"]
+            payload["title"] = "Integrate single-cell datasets"
+            payload["intents"] = ["single-cell integration", "单细胞整合"]
+            write_manifest(root, payload)
+
+            plan = route(
+                "run single-cell integration",
+                registry=ModuleRegistry.discover(root),
+            )
+
+        self.assertEqual(plan["matched_workflows"], ["omics"])
+        self.assertNotIn("single-cell", plan["matched_workflows"])
+        self.assertNotIn("statistics", plan["matched_workflows"])
+
     def test_exact_manifest_intent_suppresses_incidental_fuzzy_workflows(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -410,7 +429,8 @@ class DynamicModuleRoutingTests(unittest.TestCase):
 
         routed = [item["id"] for step in plan["steps"] for item in step["candidates"]]
         self.assertEqual(routed.count("shared-visual"), 1)
-        self.assertIn("publication-check", routed)
+        self.assertNotIn("publication-check", routed)
+        self.assertEqual(plan["matched_workflows"], ["imaging"])
 
     def test_artifact_contract_turns_independent_selection_into_serial_plan(self):
         with tempfile.TemporaryDirectory() as temporary:

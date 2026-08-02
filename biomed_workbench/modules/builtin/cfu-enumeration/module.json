@@ -100,7 +100,7 @@
     {"id": "python-3.14.3-scipy-1.17-inline-json-1", "module_version": "1.0.0", "tool_versions": {"scipy": [">=1.17,<1.18"]}, "dependency_versions": {"python": [">=3.14,<3.15"]}, "input_formats": {"dilution_plate_observations": ["inline-json@1"]}, "output_formats": {"cfu_summary": ["inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["cfu-enumeration-regression-v1"], "end_to_end_evidence_ids": ["cfu-enumeration-e2e-v1"], "verified_at": "2026-07-24"}
   ],
   "code_templates": [
-    {"path": "templates/run_cfu_enumeration.py", "language": "python", "purpose": "Execute observed-plate CFU enumeration with a project-bound request and diagnostic-status validation.", "quality_gate_ids": ["cfu-observed-plate-contract", "cfu-countable-range-policy", "cfu-heterogeneity-and-claim-boundary"], "requires_adaptation": true}
+    {"path": "templates/run_cfu_enumeration.py", "language": "python", "purpose": "Execute observed-plate CFU enumeration with a project-bound request and diagnostic-status validation.", "quality_gate_ids": ["cfu-observed-plate-contract", "cfu-countable-range-policy", "cfu-heterogeneity-and-claim-boundary"], "requires_adaptation": false}
   ],
   "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned clean-room CFU enumeration implementation with observed-count, dilution-exposure, censored-plate, uncertainty, and heterogeneity contracts."]}
 }

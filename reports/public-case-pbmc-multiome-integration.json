@@ -1,6 +1,13 @@
 {
   "case_id": "pbmc-multiome-10k-integration-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-multimodal-integration"
+    ],
+    "module_slice_digest": "855c6ce5a399001c7500882f44cc5834b4d33a572884f1b9a68ecadfec2c0fa7",
+    "schema_version": 1
+  },
   "execution": {
     "mofaplus": {
       "factor_variance": {
@@ -34,11 +41,29 @@
       "wsnn_nonzero": 49990
     }
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "b663b59b28a4d35784dbac950e7489f94ed29e6d2fd576eef8eb5e73efa915b8",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "a3cf1e2aea36b3d89b59c309ba0d79219db9070848c63ec8c74847db7749a3dd",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "fit_mofaplus.py": "2277ee46a4d6c124375e2ee3156fc090ea98dede1670b266b0fae8f1318a06d5",
+      "prepare_10x_multiome.R": "ab62ac89a5f6a6ff60cc119661b920d9d2cab626e52c6ea71cf8437ead0ae345",
+      "run_wnn.R": "1b9986b9e5f19c8eb908d5c83441bbae37085ef2dc7109a7115dbac37cf6bba3"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-seurat-521-signac-116-mofapy2-074",
     "id": "single-cell-multimodal-integration",
-    "manifest_sha256": "a3cf1e2aea36b3d89b59c309ba0d79219db9070848c63ec8c74847db7749a3dd",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "b663b59b28a4d35784dbac950e7489f94ed29e6d2fd576eef8eb5e73efa915b8",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": {
       "fit_mofaplus.py": "2277ee46a4d6c124375e2ee3156fc090ea98dede1670b266b0fae8f1318a06d5",
       "prepare_10x_multiome.R": "ab62ac89a5f6a6ff60cc119661b920d9d2cab626e52c6ea71cf8437ead0ae345",

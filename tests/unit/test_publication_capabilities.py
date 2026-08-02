@@ -61,6 +61,19 @@ class PublicationCapabilityTests(unittest.TestCase):
         )
         self.assertFalse(result["ready"])
         self.assertEqual(result["panel_findings"][0]["label"], "b")
+        self.assertEqual(result["journal_profile"], "nature")
+        self.assertEqual(result["style_standard"]["canvas"]["single_column_mm"], 89)
+        self.assertEqual(result["style_standard"]["typography_pt"]["minimum"], 5.0)
+
+    def test_figure_specification_requires_target_guide_for_science_or_cell_export(self):
+        result = figure_specification(
+            title="Enrichment",
+            panels=[{"label": "a", "claim": "Ranked enrichment", "data_source": "complete ranking", "plot": "GSEA"}],
+            analysis_type="preranked-gsea",
+            journal_profile="cell",
+        )
+        self.assertFalse(result["style_standard"]["journal"]["ready_for_submission_export"])
+        self.assertIn("gsea_curve", result["required_plots"])
 
     def test_patent_disclosure_audit_separates_enablement_and_prior_art(self):
         result = patent_disclosure_audit(

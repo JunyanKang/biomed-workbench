@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import itertools
 import json
 import sys
 from pathlib import Path
@@ -35,6 +36,119 @@ def _current_template_hashes(module_id: str) -> dict[str, str]:
         path.name: _sha256(path)
         for path in sorted(template_root.iterdir())
         if path.is_file()
+    }
+
+
+def _prior_manifest(
+    module_id: str,
+    reported_manifest_sha: str,
+) -> tuple[dict[str, object], str]:
+    """Reconstruct only the immediately prior execution-contract representation.
+
+    The transformation is deliberately reversible and byte-preserving.  It
+    does not consult an arbitrary older Git revision, so unrelated scientific
+    manifest changes cannot be smuggled into a metadata re-attestation.
+    """
+    current = (BUILTIN_ROOT / module_id / "module.json").read_bytes()
+    base = current.replace(
+        b"packaged_parameterized_workflow",
+        b"codex_generated_project_code",
+    ).replace(
+        b"packaged_parameterized_project_analysis",
+        b"codex_generated_project_analysis",
+    )
+    marker = b'"requires_adaptation": false'
+    parts = base.split(marker)
+    occurrence_count = len(parts) - 1
+    if occurrence_count > 12:
+        raise RuntimeError(f"too many adaptation flags for bounded migration: {module_id}")
+    for reverse_flags in itertools.product((False, True), repeat=occurrence_count):
+        candidate = parts[0]
+        for reverse, suffix in zip(reverse_flags, parts[1:]):
+            candidate += (
+                b'"requires_adaptation": true' if reverse else marker
+            ) + suffix
+        candidate_sha = hashlib.sha256(candidate).hexdigest()
+        if candidate_sha == reported_manifest_sha:
+            return json.loads(candidate.decode("utf-8")), candidate_sha
+    raise RuntimeError(
+        f"public-case manifest is not the reversible prior execution contract: {module_id}"
+    )
+
+
+def _json_differences(
+    old: object,
+    new: object,
+    path: tuple[str, ...] = (),
+) -> list[tuple[tuple[str, ...], object, object]]:
+    if isinstance(old, dict) and isinstance(new, dict):
+        differences: list[tuple[tuple[str, ...], object, object]] = []
+        for key in sorted(set(old) | set(new)):
+            if key not in old or key not in new:
+                differences.append(((*path, str(key)), old.get(key), new.get(key)))
+            else:
+                differences.extend(_json_differences(old[key], new[key], (*path, str(key))))
+        return differences
+    if isinstance(old, list) and isinstance(new, list):
+        differences = []
+        for index in range(max(len(old), len(new))):
+            prior = old[index] if index < len(old) else None
+            current = new[index] if index < len(new) else None
+            differences.extend(_json_differences(prior, current, (*path, str(index))))
+        return differences
+    return [] if old == new else [(path, old, new)]
+
+
+def _allowed_execution_contract_change(
+    path: tuple[str, ...],
+    old: object,
+    new: object,
+) -> bool:
+    if path == ("agent_protocol", "mode"):
+        return old == "codex_generated_project_code" and new == "packaged_parameterized_workflow"
+    if len(path) >= 3 and path[-3:] == ("handoff_type", "enum", "0"):
+        return (
+            old == "codex_generated_project_analysis"
+            and new == "packaged_parameterized_project_analysis"
+        )
+    if len(path) >= 3 and path[0] == "code_templates" and path[-1] == "requires_adaptation":
+        return old is True and new is False
+    return False
+
+
+def _validate_metadata_only_manifest_migration(
+    module_id: str,
+    reported_manifest_sha: object,
+) -> dict[str, object] | None:
+    current_path = BUILTIN_ROOT / module_id / "module.json"
+    current_sha = _sha256(current_path)
+    if reported_manifest_sha == current_sha:
+        return None
+    if not isinstance(reported_manifest_sha, str):
+        raise RuntimeError(f"public-case manifest digest is invalid: {module_id}")
+    old_manifest, old_sha = _prior_manifest(module_id, reported_manifest_sha)
+    current_manifest = json.loads(current_path.read_text(encoding="utf-8"))
+    differences = _json_differences(old_manifest, current_manifest)
+    if not differences or any(
+        not _allowed_execution_contract_change(path, old, new)
+        for path, old, new in differences
+    ):
+        raise RuntimeError(
+            f"public-case manifest change is not an execution-contract-only migration: {module_id}"
+        )
+    return {
+        "schema_version": 1,
+        "migration_type": "execution-contract-metadata-only",
+        "prior_manifest_sha256": old_sha,
+        "current_manifest_sha256": current_sha,
+        "changed_fields": [".".join(path) for path, _old, _new in differences],
+        "templates_unchanged": True,
+        "template_sha256": _current_template_hashes(module_id),
+        "scientific_outputs_recomputed": False,
+        "reason": (
+            "The packaged template files and observed scientific outputs are unchanged; "
+            "only the release contract was corrected from manual adaptation to a packaged parameterized workflow."
+        ),
     }
 
 
@@ -77,9 +191,16 @@ def rebind_public_case(path: Path, registry: ModuleRegistry) -> bool:
         raise RuntimeError(f"public-case report compatibility row is stale: {module_id}")
 
     _validate_template_binding(module_id, module.get("template_sha256"))
+    migration = _validate_metadata_only_manifest_migration(
+        module_id,
+        module.get("manifest_sha256"),
+    )
     new_manifest_sha = _sha256(BUILTIN_ROOT / module_id / "module.json")
     changed = module.get("manifest_sha256") != new_manifest_sha
     module["manifest_sha256"] = new_manifest_sha
+    if migration is not None:
+        report["execution_contract_migration"] = migration
+        changed = True
     if "registry_digest" in module and module["registry_digest"] != registry.digest:
         module["registry_digest"] = registry.digest
         changed = True

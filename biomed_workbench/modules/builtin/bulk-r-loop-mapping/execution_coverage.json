@@ -1,0 +1,45 @@
+{
+  "assays": [
+    {
+      "assay": "drip-seq",
+      "contract_ready": true,
+      "executor_path": "templates/run_rlpipes.py"
+    },
+    {
+      "assay": "dripc-seq",
+      "contract_ready": true,
+      "executor_path": "templates/run_rlpipes.py"
+    },
+    {
+      "assay": "sdrip-seq",
+      "contract_ready": true,
+      "executor_path": "templates/run_rlpipes.py"
+    },
+    {
+      "assay": "qdrip-seq",
+      "contract_ready": true,
+      "executor_path": "templates/run_rlpipes.py"
+    },
+    {
+      "assay": "r-chip",
+      "contract_ready": true,
+      "executor_path": "templates/run_rlpipes.py"
+    },
+    {
+      "assay": "mapr",
+      "contract_ready": true,
+      "executor_path": "templates/run_rlpipes.py"
+    },
+    {
+      "assay": "cuttag",
+      "contract_ready": true,
+      "executor_module_id": "bulk-chromatin-peak-calling",
+      "executor_paths": [
+        "templates/call_macs3_chromatin.py",
+        "templates/normalize_cuttag_internal_reference.py"
+      ]
+    }
+  ],
+  "module_id": "bulk-r-loop-mapping",
+  "schema_version": 1
+}

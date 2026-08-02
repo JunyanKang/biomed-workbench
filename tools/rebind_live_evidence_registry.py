@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rebind still-valid live reports after an unrelated registry change."""
+"""Migrate still-valid live reports to dependency-scoped evidence identity."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
+from biomed_workbench.modules.evidence_scope import module_evidence_scope, report_module_ids  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry, ModuleRegistryError  # noqa: E402
 
 
@@ -80,9 +81,13 @@ def rebind(report_path: Path, registry: ModuleRegistry) -> bool:
         _validate_multi_module_report(report, registry)
     else:
         raise RuntimeError(f"live report has no module identity: {report_path.name}")
-    if report["registry_digest"] == registry.digest:
+    scope = module_evidence_scope(registry, report_module_ids(report)).to_dict()
+    if report.get("evidence_scope") == scope:
         return False
-    report["registry_digest"] = registry.digest
+    # Keep the historical registry digest as provenance of the installation
+    # that produced the result.  It is not rewritten and is not evidence
+    # validity: currentness is determined by the dependency slice above.
+    report["evidence_scope"] = scope
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return True
 

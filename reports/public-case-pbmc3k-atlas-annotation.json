@@ -1,6 +1,13 @@
 {
   "case_id": "pbmc3k-celltypist-atlas-annotation-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-atlas-annotation"
+    ],
+    "module_slice_digest": "32ef50571f6882c5b36ffc458d5a1b5a5bd5993f00f8219ec65e70f3739da78c",
+    "schema_version": 1
+  },
   "execution": {
     "broad_family_counts": {
       "B": 360,
@@ -163,11 +170,30 @@
     },
     "unknown_cells": 689
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "fc83dfdc43e3a1e92deb822eaa67cc887114426c2e4b943b5a02db2d186ffc58",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "f97d675d566171e91c1ab283e3ec370855f653c1ba85e9a56938254915ae7987",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "annotate_azimuth.R": "de9c3113eabd160c7fb89383692a951e2c763ad77174bfa4fecc17dac26da76e",
+      "annotate_celltypist.py": "f6345fca1d6fa3878c5ecb9a38c4a6a7642b7be3c8b158961df42c0a9aa45831",
+      "annotate_popv.py": "fc4012efb4147b7bff9bba63843ddc050ad2656e676eba5615fc233fb965f678",
+      "reconcile_annotation_consensus.py": "37e37b1274c455aa73840bfd98ae5006d15e59cd60583cf74c7fefeed292e6f1"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-celltypist-171-popv-061-azimuth-051-consensus",
     "id": "single-cell-atlas-annotation",
-    "manifest_sha256": "f97d675d566171e91c1ab283e3ec370855f653c1ba85e9a56938254915ae7987",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "fc83dfdc43e3a1e92deb822eaa67cc887114426c2e4b943b5a02db2d186ffc58",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": "f6345fca1d6fa3878c5ecb9a38c4a6a7642b7be3c8b158961df42c0a9aa45831",
     "version": "1.1.0"
   },

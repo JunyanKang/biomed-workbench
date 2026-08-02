@@ -1,6 +1,13 @@
 {
   "case_id": "seqfish-embryo-spatial-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-spatial-analysis"
+    ],
+    "module_slice_digest": "a435e7fe7f60cf0c4435043e22800c750f865d71e7fad8adc9c1cd36e5f53586",
+    "schema_version": 1
+  },
   "execution": {
     "admitted_spatial_genes": [
       "Dlk1",
@@ -53,11 +60,27 @@
       "Tjp2": 1
     }
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "db9689280434f170ae1995fa750948a6601a826bf8284d8bd59ac0987931c625",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "97abcad70a8687c1e17ccee5dc4533f02c10b0c762c90a1068567597bcd69a53",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "run_spatial_analysis.py": "21633bf67cac255d0b864e71904ce263ec0a03271500a755eb93456fa1797dbc"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-squidpy-166-spatialdata-050-scanpy-1115",
     "id": "single-cell-spatial-analysis",
-    "manifest_sha256": "97abcad70a8687c1e17ccee5dc4533f02c10b0c762c90a1068567597bcd69a53",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "db9689280434f170ae1995fa750948a6601a826bf8284d8bd59ac0987931c625",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": "21633bf67cac255d0b864e71904ce263ec0a03271500a755eb93456fa1797dbc",
     "version": "1.1.0"
   },

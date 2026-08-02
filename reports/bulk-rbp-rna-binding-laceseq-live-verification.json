@@ -1,0 +1,376 @@
+{
+  "assay": "lace-seq",
+  "evidence_scope": {
+    "module_ids": [
+      "bulk-rbp-rna-binding"
+    ],
+    "module_slice_digest": "e06d472857389f63cedbd8d4bb7a22d6dbcdb7ebe05b07e9e7c8d705346eb012",
+    "schema_version": 1
+  },
+  "execution": {
+    "assay": "lace-seq",
+    "clusters": {
+      "control_filtered_unique_reads": 2027,
+      "control_merged_intervals": 597,
+      "control_unique_reads": 636,
+      "experiment_unique_reads": 2028,
+      "retained_clusters": 2
+    },
+    "external_tools_executed": true,
+    "outputs": {
+      "cluster_report": {
+        "bytes": 3368,
+        "name": "cluster-execution.json",
+        "sha256": "186ac4c83355b9db1b782040f1376c53a119ea82713a7a0d83d79d1b488cbe83"
+      },
+      "clusters_bed": {
+        "bytes": 86,
+        "name": "lace_clusters.bed",
+        "rows": 2,
+        "sha256": "0749e42dd570d5626b7d2f09342ce3d66096a916fb2d2cfc7e83f276b4459adc"
+      },
+      "clusters_tsv": {
+        "bytes": 203,
+        "name": "lace_clusters.tsv",
+        "rows": 2,
+        "sha256": "cb49d738bd2ccf4fd912f90dedc53104ede462342eb35843aacc6caff115bcd9"
+      },
+      "control_subtracted_reads": {
+        "bytes": 96448,
+        "name": "control_subtracted_reads.bed",
+        "rows": 2027,
+        "sha256": "fbe0513bcc9f6d4caa3c438b1de8358273d93967c4a065340fd102b6ff2fafd0"
+      },
+      "metrics": {
+        "bytes": 171,
+        "name": "lace_metrics.json",
+        "rows": 1,
+        "sha256": "77e793f800c9d51f311d51f6bcbdcba90dfb28da24e12ac622ba066da237cd98"
+      }
+    },
+    "outputs_reloaded": true,
+    "parameters": {
+      "adapter_sequence": "ATCTCGTATGCCGTCTTCTGCTT",
+      "initial_rpm": 0.01,
+      "maximum_multihits": 10,
+      "maximum_n_fraction": 0.25,
+      "merge_distance": 200,
+      "min_strand_reads": 5,
+      "minimum_length": 18,
+      "mismatches": 2,
+      "polya_length": 15,
+      "polya_rounds": 2,
+      "quality_cutoff": "30,0",
+      "threads": 4
+    },
+    "preprocessing": {
+      "control": {
+        "mapped_bed_rows": 743,
+        "non_rrna_reads": 8005,
+        "post_trim_reads": 8340
+      },
+      "experiment": {
+        "mapped_bed_rows": 2149,
+        "non_rrna_reads": 73988,
+        "post_trim_reads": 80502
+      }
+    },
+    "preprocessing_outputs": {
+      "control": {
+        "adapter_trimmed_fastq": {
+          "bytes": 2155435,
+          "name": "control.adapter-trimmed.fastq.gz",
+          "records": 98333,
+          "sha256": "d22142e1ec96125abea3641f8fac6d09c3ab97bb0787650f955a49c4dd064fd6"
+        },
+        "genome_bed": {
+          "bytes": 35413,
+          "name": "control.genome.bed",
+          "records": 743,
+          "sha256": "9341ce9fe3460e6cc193f2d714b0b8510a2bc8603a1d185e19fee2a1180ba2bb"
+        },
+        "genome_sam": {
+          "bytes": 945740,
+          "name": "control.genome.sam",
+          "sha256": "93c0bff4513cd780a99d25b5f60010bbaba5e49f632f31ee0e58c80ff5f9b327"
+        },
+        "non_rrna_fastq": {
+          "bytes": 818915,
+          "name": "control.non-rRNA.fastq",
+          "records": 8005,
+          "sha256": "5363af45c59b7f7062d4d4b14373a0a60ebde1280246820f29f9460bf23bfc0c"
+        },
+        "rrna_sam": {
+          "bytes": 961722,
+          "name": "control.rRNA.sam",
+          "sha256": "513b4b6128fbc13b042daa9367bab0301a7675c16c4922a4d3bdd672b68e452e"
+        },
+        "trimmed_fastq": {
+          "bytes": 154469,
+          "name": "control.trimmed.fastq.gz",
+          "records": 8340,
+          "sha256": "8134c36aaf3008402b198dbb2cd19e69d73c79032a18b2b8a28c504ee7d80012"
+        }
+      },
+      "experiment": {
+        "adapter_trimmed_fastq": {
+          "bytes": 2506061,
+          "name": "experiment.adapter-trimmed.fastq.gz",
+          "records": 98801,
+          "sha256": "7446a28f7e0226b91f590f1e9119c07446e6b696225a9f127a0884033cd5dd9d"
+        },
+        "genome_bed": {
+          "bytes": 102259,
+          "name": "experiment.genome.bed",
+          "records": 2149,
+          "sha256": "2600342f32251152142823279f01086c842b3a6766b4b550095c633573619ce0"
+        },
+        "genome_sam": {
+          "bytes": 9996490,
+          "name": "experiment.genome.sam",
+          "sha256": "16d8ab8d37b48589a7966237d412c607c77282eee8b7e2f69950ef426af176f4"
+        },
+        "non_rrna_fastq": {
+          "bytes": 9013500,
+          "name": "experiment.non-rRNA.fastq",
+          "records": 73988,
+          "sha256": "693fa7e6ba262317ea456fb269933ec278077ea4ba4959d16f2686067656bfca"
+        },
+        "rrna_sam": {
+          "bytes": 11081110,
+          "name": "experiment.rRNA.sam",
+          "sha256": "de401627c863f30c2b7ca5b2ea71b7e15c75a3f2817548a9d9980544d74395d9"
+        },
+        "trimmed_fastq": {
+          "bytes": 1809430,
+          "name": "experiment.trimmed.fastq.gz",
+          "records": 80502,
+          "sha256": "b1c6667df1295927bca3c99ed20651262380cf471020bf315059815179f07f04"
+        }
+      }
+    },
+    "runtime": {
+      "dockerfile": {
+        "name": "Dockerfile",
+        "sha256": "51ab5ceb783fe0e7d660b69d6e2900327a952e82231ec34abf75be52381f7e79"
+      },
+      "image": "biomed-workbench/laceseq@sha256:7b4810900cf295f371da066e48156c9be5c3967d78c71ddade86f284f304c458",
+      "platform": "linux/amd64"
+    },
+    "software": {
+      "bowtie": "/usr/local/bin/bowtie-align-s version 1.2.3",
+      "cutadapt": "1.15"
+    }
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "implementation": {
+    "path": "biomed_workbench/implementations/laceseq_fastq.py",
+    "sha256": "d7032208b257e5f0646d7a608afe2ac48df129ed5095454bb60bf3953edd6663"
+  },
+  "module_id": "bulk-rbp-rna-binding",
+  "module_version": "0.2.0",
+  "observed_at": "2026-08-02T06:09:02.851863+00:00",
+  "passed": true,
+  "quality_gates": {
+    "adapter_and_polya_trimming_reloaded": true,
+    "bowtie_1_2_3_observed": true,
+    "container_digest_and_build_checksum_recorded": true,
+    "current_fastq_and_cluster_implementations": true,
+    "cutadapt_1_15_observed": true,
+    "genome_alignments_reloaded": true,
+    "input_and_output_checksums_recorded": true,
+    "nonempty_clusters_reloaded": true,
+    "official_coordinate_strand_deduplication_applied": true,
+    "official_method_doi_and_code_commit_pinned": true,
+    "official_whole_read_igg_exclusion_applied": true,
+    "public_ago2_and_igg_prefixes_checksum_bound": true,
+    "rrna_and_genome_references_checksum_bound": true,
+    "rrna_filtering_reloaded": true
+  },
+  "registry_digest": "632bf87110a3bec3f3283c1b36242312f5b5b58d0f49bd589bfa5f5528eaddd4",
+  "runtime_asset_relocation": {
+    "asset_records_rewritten": 0,
+    "assets": [
+      {
+        "content_change": "none",
+        "current_path": "biomed_workbench/runtime_compat/laceseq/Dockerfile",
+        "current_sha256": "51ab5ceb783fe0e7d660b69d6e2900327a952e82231ec34abf75be52381f7e79",
+        "prior_path": "biomed_workbench/modules/builtin/bulk-rbp-rna-binding/templates/Dockerfile.laceseq",
+        "prior_sha256": "51ab5ceb783fe0e7d660b69d6e2900327a952e82231ec34abf75be52381f7e79"
+      }
+    ],
+    "current_evidence_scope": {
+      "module_ids": [
+        "bulk-rbp-rna-binding"
+      ],
+      "module_slice_digest": "e06d472857389f63cedbd8d4bb7a22d6dbcdb7ebe05b07e9e7c8d705346eb012",
+      "schema_version": 1
+    },
+    "current_implementation_sha256": "d7032208b257e5f0646d7a608afe2ac48df129ed5095454bb60bf3953edd6663",
+    "migration_type": "checksum-bound-runtime-asset-relocation",
+    "prior_evidence_scope": {
+      "module_ids": [
+        "bulk-rbp-rna-binding"
+      ],
+      "module_slice_digest": "e06d472857389f63cedbd8d4bb7a22d6dbcdb7ebe05b07e9e7c8d705346eb012",
+      "schema_version": 1
+    },
+    "prior_implementation_sha256": "4b0da0113f4a38ee35639ca9ec2f6f511b55b12a2b9c8f53aad6d810f7c81a69",
+    "reason": "Runtime build assets were separated from scientific templates. The implementation change is restricted to locating those checksum-bound assets; previously observed inputs, parameters, container identities, output checksums and biological results are unchanged.",
+    "reviewed_on": "2026-08-02",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "scientific_parameters_changed": false
+  },
+  "schema_version": 1,
+  "scientific_scope": "This acceptance validates the complete public FASTQ-to-cluster path on the first 100,000 reads from Ago2 and matched IgG runs against mm9 chromosome X. Full-project biological inference requires complete references, complete biological replicates, and the prespecified project design.",
+  "source": {
+    "cluster_stage": {
+      "implementation": {
+        "path": "biomed_workbench/implementations/laceseq.py",
+        "sha256": "b49061cf52761477bd4c383665350a81bed1de4891bae95d5b31dd18f0f5e535"
+      },
+      "method": {
+        "control_subtraction": "whole-read exclusion on any unstranded overlap, matching upstream bedtools intersect -v",
+        "coordinate_semantics": "BED zero-based half-open",
+        "deduplication": "chromosome, start, end, and alignment strand, matching the pinned Perl workflow",
+        "name": "LACE-seq strand-aware read-cluster calling",
+        "parameters": {
+          "initial_rpm": 0.01,
+          "merge_distance": 200,
+          "min_strand_reads": 5
+        },
+        "strand_assignment": "minus-strand alignments imply plus-strand RNA; ties resolve to minus, matching upstream",
+        "upstream_commit": "b8d1193638190c50c8553847ad3a1653544dbe14",
+        "upstream_repository": "https://github.com/caochch/LACEseq"
+      }
+    },
+    "method": {
+      "doi": "10.1038/s41556-021-00696-9",
+      "name": "LACE-seq FASTQ preprocessing, Bowtie alignment and cluster calling",
+      "upstream_commit": "b8d1193638190c50c8553847ad3a1653544dbe14",
+      "upstream_repository": "https://github.com/caochch/LACEseq"
+    },
+    "public_inputs": [
+      {
+        "accession": "SRR10173391",
+        "group": "experiment",
+        "selection": {
+          "kind": "first_n_reads",
+          "reads": 100000
+        },
+        "source_fastq": {
+          "bytes": 1585132103,
+          "md5": "a9c2b8da30af002278b6b69e178bcb89",
+          "url": "https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR101/091/SRR10173391/SRR10173391.fastq.gz"
+        },
+        "subset_fastq": {
+          "bytes": 2703802,
+          "name": "SRR10173391.first100000.fastq.gz",
+          "sha256": "1b45b9993fc4ea2d525a5d9d1b3d002f465472d4df7a829c811f6430afb43cac"
+        },
+        "url": "https://www.ncbi.nlm.nih.gov/sra/SRR10173391"
+      },
+      {
+        "accession": "SRR10173407",
+        "group": "control",
+        "selection": {
+          "kind": "first_n_reads",
+          "reads": 100000
+        },
+        "source_fastq": {
+          "bytes": 132307998,
+          "md5": "6bea49957744c77a7d1256ef9be1220f",
+          "url": "https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR101/007/SRR10173407/SRR10173407.fastq.gz"
+        },
+        "subset_fastq": {
+          "bytes": 2262939,
+          "name": "SRR10173407.first100000.fastq.gz",
+          "sha256": "9539b3e2d11b24c1f23433146288baa0728be4a31a4dbd49ca76592334377d60"
+        },
+        "url": "https://www.ncbi.nlm.nih.gov/sra/SRR10173407"
+      }
+    ],
+    "references": {
+      "genome": {
+        "bowtie_index_parts": {
+          "mm9_chrX.1.ebwt": {
+            "bytes": 50504402,
+            "sha256": "756f20f27727a09291bac8f8028090894fb87b69fe9c131a8aa2ff0a4b537fe2"
+          },
+          "mm9_chrX.2.ebwt": {
+            "bytes": 20260116,
+            "sha256": "0397fe4a0e614718d867ac4d1ebb8d41ee919d100932c9fc6ca1b2544ac19cfc"
+          },
+          "mm9_chrX.3.ebwt": {
+            "bytes": 818,
+            "sha256": "5f72eb6c7f5853caa183f27cbd3d516c890fc4bab8bbc71488f1e7ad067e373a"
+          },
+          "mm9_chrX.4.ebwt": {
+            "bytes": 40520223,
+            "sha256": "a7bf94d2fd451f37e4da92522812e7adc4f8f6abf2b14f4d4fbbc4c1e1c9108e"
+          },
+          "mm9_chrX.rev.1.ebwt": {
+            "bytes": 50504402,
+            "sha256": "eb86a885dfa4558ba9927601c81c7128a421144cb26d01c6beab1ba8df51292e"
+          },
+          "mm9_chrX.rev.2.ebwt": {
+            "bytes": 20260116,
+            "sha256": "9d4427a5a75b3aab16000e2d239a5c543494f72619133e17d90d37aae8d65ba3"
+          }
+        },
+        "build": "mm9",
+        "fasta": {
+          "bytes": 169983308,
+          "name": "mm9.chrX.fa",
+          "sha256": "04dad0de757d09c76fad505b0117fc1a563882928967a34cd572c97def49de14"
+        },
+        "scope": "chromosome X public validation subset",
+        "source_url": "https://hgdownload.soe.ucsc.edu/goldenPath/mm9/chromosomes/chrX.fa.gz"
+      },
+      "rrna": {
+        "bowtie_index_parts": {
+          "mouse45s.1.ebwt": {
+            "bytes": 4198375,
+            "sha256": "38adc330769566199d0fdc7e69ddcf7383ac2386f391a977c80f66513ae19d61"
+          },
+          "mouse45s.2.ebwt": {
+            "bytes": 1680,
+            "sha256": "1932b0634e3dd370b76548d1814f718e77b3c84aff7f08747633d7fe3faccaa3"
+          },
+          "mouse45s.3.ebwt": {
+            "bytes": 17,
+            "sha256": "5abe51120bf863ae8e2a7d598e2f74782dd50549fbfb7edd646ebc2087d96860"
+          },
+          "mouse45s.4.ebwt": {
+            "bytes": 3350,
+            "sha256": "5f70248d4b179aa36c8ebb988f1900807367937259f1205734c135c6d0ce5a7d"
+          },
+          "mouse45s.rev.1.ebwt": {
+            "bytes": 4198375,
+            "sha256": "543d12df2736827e9aac0960130ee491581f5778fffaeaaeedaaf50419bf7c50"
+          },
+          "mouse45s.rev.2.ebwt": {
+            "bytes": 1680,
+            "sha256": "2b5d0c552431eb37f57ab912d06e283079c5ed77428cd86a6cf0cea45fbebdcd"
+          }
+        },
+        "fasta": {
+          "bytes": 13664,
+          "name": "mouse.45S.NR_046233.2.fa",
+          "sha256": "0a3a378deeceefc3962bd4433e231ca645f735b946fc0d181c37b90e1a953b9b"
+        },
+        "name": "Mus musculus 45S pre-ribosomal RNA NR_046233.2",
+        "source_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=NR_046233.2&rettype=fasta&retmode=text"
+      }
+    }
+  },
+  "templates": {
+    "run_assay_workflow.py": "02dac1a2852e2d6a3b5fc3949ca29bdfd08a0906d267dfb1bdfdc9b885d3eea8",
+    "run_laceseq_clusters.py": "92a3f71cb35b6891d677768ba37924c41fbd7e135afb4beb55a106143aa9a081",
+    "run_laceseq_fastq.py": "2eb89f064c6cd2d24c781f3cd8365e38e982295bf2f1dc096bb3c144929b73c7",
+    "run_nfcore_clipseq.py": "82e3c4adf9668c1f88f72aadb84dc645bdefb3c577acd3119795dfe440609795",
+    "run_ripseeker.R": "41a18c0a40e56a7062e042712e6c616d1d0ea5ff05a88e6285c77c281fdfbf1b",
+    "run_ripseeker.py": "0aa20e0641ad6db39d2aba935a8b683f50686913d34ed6f769440da491f98dc2"
+  }
+}

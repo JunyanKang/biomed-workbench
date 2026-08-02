@@ -1,4 +1,59 @@
 {
-  "schema_version": 1,
-  "cases": [{"name": "chip-seq-request-generates-contract-bound-handoff", "input": {"objective": "Identify reproducible H3K27ac enrichment intervals", "assay": "chip-seq", "treatment_artifact_id": "treatment-bam", "control_artifact_id": "input-bam", "input_format": "BAM", "genome_build": "GRCh38", "genome_size": "hs", "peak_mode": "narrow", "qvalue": 0.01, "duplicate_policy": "auto", "design_notes": "Two independently prepared biological replicates will be assessed downstream."}, "expected_subset": {"handoff_type": "codex_generated_project_analysis", "module": {"id": "bulk-chromatin-peak-calling"}}}]
+    "schema_version": 1,
+    "cases": [
+        {
+            "name": "chip-seq-request-generates-contract-bound-handoff",
+            "input": {
+                "objective": "Identify reproducible H3K27ac enrichment intervals",
+                "assay": "chip-seq",
+                "target_or_antibody": "H3K27ac",
+                "specificity_control": "matched-input",
+                "treatment_artifact_id": "treatment-bam",
+                "control_artifact_id": "input-bam",
+                "input_format": "BAM",
+                "genome_build": "GRCh38",
+                "genome_size": "hs",
+                "peak_mode": "narrow",
+                "qvalue": 0.01,
+                "duplicate_policy": "auto",
+                "design_notes": "Two independently prepared biological replicates will be assessed downstream."
+            },
+            "expected_subset": {
+                "handoff_type": "packaged_parameterized_project_analysis",
+                "module": {
+                    "id": "bulk-chromatin-peak-calling"
+                }
+            }
+        },
+        {
+            "name": "cuttag-s96-target-exposes-internal-reference-policy",
+            "input": {
+                "objective": "Call RNase H-sensitive S9.6 R-loop CUT&Tag enrichment with declared exogenous scaling",
+                "assay": "cuttag",
+                "target_or_antibody": "S9.6",
+                "specificity_control": "rnaseh",
+                "treatment_artifact_id": "s96-fragments",
+                "spikein_summary_artifact_id": "competitive-host-ecoli-counts",
+                "rnaseh_control_artifact_id": "matched-rnaseh-controls",
+                "spikein_reference": "E. coli K-12 MG1655",
+                "spikein_policy": "required",
+                "spikein_normalization_method": "matched-reference",
+                "minimum_spikein_fragments": 1000,
+                "minimum_spikein_fraction": 0.001,
+                "input_format": "BEDPE",
+                "genome_build": "GRCh38",
+                "genome_size": "hs",
+                "peak_mode": "narrow",
+                "qvalue": 0.05,
+                "duplicate_policy": "all",
+                "design_notes": "RNase H-treated libraries are paired to untreated references and are specificity controls rather than biological replicates."
+            },
+            "expected_subset": {
+                "handoff_type": "packaged_parameterized_project_analysis",
+                "module": {
+                    "id": "bulk-chromatin-peak-calling"
+                }
+            }
+        }
+    ]
 }

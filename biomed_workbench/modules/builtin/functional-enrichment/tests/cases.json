@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "go-ora-request-generates-evidence-bound-handoff",
+      "input": {
+        "objective": "Test biological-process over-representation against the complete measured gene universe",
+        "mode": "go-ora",
+        "gene_artifact_id": "selected-entrez-genes",
+        "universe_artifact_id": "tested-entrez-universe",
+        "organism": "hsa",
+        "orgdb": "org.Hs.eg.db",
+        "key_type": "ENTREZID",
+        "ontology": "BP",
+        "min_gene_set_size": 10,
+        "max_gene_set_size": 500,
+        "p_cutoff": 0.05,
+        "seed": 1
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "functional-enrichment"}
+      }
+    },
+    {
+      "name": "kegg-gsea-request-generates-evidence-bound-handoff",
+      "input": {
+        "objective": "Run a complete preranked KEGG analysis without significance prefiltering",
+        "mode": "kegg-gsea",
+        "gene_artifact_id": "complete-entrez-ranking",
+        "organism": "hsa",
+        "key_type": "ncbi-geneid",
+        "ranking_statistic": "signed moderated t statistic",
+        "tie_policy": "stable upstream feature identifier order",
+        "min_gene_set_size": 15,
+        "max_gene_set_size": 500,
+        "p_cutoff": 0.05,
+        "seed": 1
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "functional-enrichment"}
+      }
+    }
+  ]
+}

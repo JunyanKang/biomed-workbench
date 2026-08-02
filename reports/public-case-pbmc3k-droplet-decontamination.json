@@ -1,6 +1,13 @@
 {
   "case_id": "pbmc3k-emptydrops-soupx-public-data-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-droplet-decontamination"
+    ],
+    "module_slice_digest": "5330d0abae96684778c6c9a08f3896dbb8316c95c576f12e7dd93ac4971796b3",
+    "schema_version": 1
+  },
   "execution": {
     "cluster_counts": {
       "0": 375,
@@ -185,11 +192,28 @@
       }
     ]
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "369d717f746cf69efee019d4307fc22bc7e98f3cbba0e3b43f7ac3c45f9a4b4d",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "084d342d537af36d33979423d992367684ae06bedf8b39b9a4cd0a2f7b2f7a8d",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "run_cellbender.py": "8c78aed56e439c351d9226448d57b158c59d3b81e96045e1fbbe1a03005e1dcf",
+      "run_emptydrops_soupx.R": "0e49ec074883e0400a2caaaeaa7103850dcd0e2c457008f3a98688ac994e0648"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-emptydrops-1220-soupx-162-cellbender-032",
     "id": "single-cell-droplet-decontamination",
-    "manifest_sha256": "084d342d537af36d33979423d992367684ae06bedf8b39b9a4cd0a2f7b2f7a8d",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "369d717f746cf69efee019d4307fc22bc7e98f3cbba0e3b43f7ac3c45f9a4b4d",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": "0e49ec074883e0400a2caaaeaa7103850dcd0e2c457008f3a98688ac994e0648",
     "version": "1.1.0"
   },

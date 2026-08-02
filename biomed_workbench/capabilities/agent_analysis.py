@@ -1,4 +1,4 @@
-"""Deterministic handoffs for Codex-generated project analysis code."""
+"""Deterministic execution plans for packaged, parameterized analyses."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from ..modules.contract import ModuleManifest
 
 
 def prepare_agent_analysis(manifest: ModuleManifest, inputs: dict[str, Any]) -> dict[str, Any]:
-    """Serialize a module-owned code-generation and validation protocol."""
+    """Serialize a module-owned, no-code-edit execution and validation protocol."""
     protocol = manifest.agent_protocol
     if manifest.access != "agent_generated" or manifest.execution.kind != "workflow" or protocol is None:
         raise ValueError("module is not an agent-generated analysis protocol")
@@ -49,7 +49,7 @@ def prepare_agent_analysis(manifest: ModuleManifest, inputs: dict[str, Any]) -> 
         for item in manifest.dependencies
     ]
     return {
-        "handoff_type": "codex_generated_project_analysis",
+        "handoff_type": "packaged_parameterized_project_analysis",
         "module": {"id": manifest.id, "version": manifest.version},
         "request_digest": digest_value(inputs),
         "request_fields": sorted(inputs),
@@ -61,6 +61,7 @@ def prepare_agent_analysis(manifest: ModuleManifest, inputs: dict[str, Any]) -> 
                 "required_logic": list(section.required_logic),
                 "output_artifact_types": list(section.output_artifact_types),
                 "template_files": list(section.template_files),
+                "manual_code_editing_required": False,
             }
             for section in protocol.template_sections
         ],
@@ -82,7 +83,9 @@ def prepare_agent_analysis(manifest: ModuleManifest, inputs: dict[str, Any]) -> 
         "dependency_profiles": dependency_profiles,
         "quality_gate_ids": [gate.id for gate in manifest.quality_gates],
         "execution_policy": {
-            "generate_project_specific_code": True,
+            "generate_project_specific_code": False,
+            "use_packaged_parameterized_templates": True,
+            "manual_code_editing_required": False,
             "inspect_before_execution": True,
             "execute_in_user_scientific_environment": True,
             "manage_environment_or_compute_infrastructure": False,

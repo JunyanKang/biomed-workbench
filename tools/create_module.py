@@ -45,7 +45,7 @@ def _validate_request(request: Any) -> tuple[dict[str, Any], list[dict[str, Any]
                 "language": "python",
                 "purpose": f"Execute and validate {manifest.title.lower()} against real project inputs and the module compatibility contract.",
                 "quality_gate_ids": [gate.id for gate in manifest.quality_gates if gate.blocks_interpretation],
-                "requires_adaptation": True,
+                "requires_adaptation": False,
             }
         ]
         try:

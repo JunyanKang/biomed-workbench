@@ -5,6 +5,7 @@ from pathlib import Path
 
 from biomed_workbench.modules.contract import parse_manifest, version_is_allowed
 from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
 from biomed_workbench.modules.registry import ModuleRegistry
 
 
@@ -18,7 +19,7 @@ class SingleCellFateTopologyEvidenceTests(unittest.TestCase):
         manifest = parse_manifest(json.loads((module_root / "module.json").read_text()))
         row = manifest.compatibility_matrix[0]
         self.assertTrue(report["passed"])
-        self.assertEqual(report["registry_digest"], ModuleRegistry.discover(BUILTIN_ROOT).digest)
+        self.assertTrue(evidence_scope_is_current(report, ModuleRegistry.discover(BUILTIN_ROOT)))
         self.assertEqual(report["module_id"], module_id); self.assertEqual(report["compatibility_row_id"], row.id)
         for key, filename in templates.items(): self.assertEqual(report["templates"][key]["sha256"], hashlib.sha256((module_root / "templates" / filename).read_bytes()).hexdigest())
         self.assertTrue(all(version_is_allowed(report["tool_versions"][name], rules) for name, rules in row.tool_versions.items()))

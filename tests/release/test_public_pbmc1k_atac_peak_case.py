@@ -23,9 +23,14 @@ class PublicPBMC1kATACPeakCaseTests(unittest.TestCase):
 
     def test_case_is_bound_to_sources_module_and_template(self):
         report = self.report
+        manifest = json.loads((MODULE_ROOT / "module.json").read_text(encoding="utf-8"))
         self.assertTrue(report["passed"])
         self.assertEqual(report["case_type"], "public-data-end-to-end")
-        self.assertEqual(report["module"]["version"], "1.1.0")
+        self.assertEqual(report["module"]["version"], manifest["version"])
+        self.assertEqual(
+            report["module"]["compatibility_row_id"],
+            manifest["compatibility_matrix"][0]["id"],
+        )
         self.assertEqual(
             report["module"]["manifest_sha256"],
             hashlib.sha256((MODULE_ROOT / "module.json").read_bytes()).hexdigest(),

@@ -1,12 +1,21 @@
-# Omics And Single-Cell Analysis
+# Cross-Scale And Single-Cell Analysis
 
 ## Scientific Role
 
 This capability area coordinates sequencing data from input and design validation through statistical analysis, biological interpretation, hypothesis revision, and publication delivery. The workbench treats biological replication, immutable raw measurements, reference identity, and observed output checks as first-class requirements.
 
-## Unified Bulk Omics And Epigenomics Program
+## Research Scale And Method Classification
 
-For broad bulk sequencing, expression, variant, ATAC, motif, NMF, or multi-omics requests, the workbench stages the plan from data profiling and read-level QC to alignment, sorting, alignment qualification, variant or interval handling, chromatin or expression analysis, secondary synthesis, and publication-facing interpretation. Independent branches can run in parallel, but downstream modules receive explicit dependencies when they rely on QC, aligned records, filtered intervals, peak calls, expression matrices, or admitted statistical outputs.
+The workbench first assigns a primary research scale—bulk, single-cell, spatial,
+or universal—and then records measurement family, assay, biological target,
+controls and normalization as separate dimensions. These are not one flat
+taxonomy. Bulk assay coverage is maintained in the dedicated
+[bulk sequencing assay guide](bulk-sequencing-assays.md); this document focuses
+on universal foundations and the single-cell program.
+
+## Universal Sequencing And Statistical Program
+
+For broad sequencing, expression, variant, motif, NMF, or multi-measurement requests, the workbench stages reusable work from data profiling and read-level QC to alignment, sorting, alignment qualification, variant or interval handling, secondary synthesis, and publication-facing interpretation. Assay-specific inference remains in its assay module. Independent branches can run in parallel, but downstream modules receive explicit dependencies when they rely on QC, aligned records, filtered intervals, peak calls, expression matrices, or admitted statistical outputs.
 
 This keeps FASTQ, BAM/CRAM, VCF, BED, count matrices, peak sets, motif resources, NMF programs, and gene-set outputs under one interface without pretending that all formats or tools are interchangeable. Each selected module declares the accepted artifact formats, version boundaries, required metadata, templates, quality gates, and unresolved project inputs.
 
@@ -27,7 +36,7 @@ The staged plan is organized as a scientific program rather than a flat script l
 
 The v1.0 single-cell core is represented by the following modules in the unified route and plan: `single-cell-atac-regulatory`, `single-cell-atlas-annotation`, `single-cell-batch-integration`, `single-cell-communication`, `single-cell-complex-inference`, `single-cell-donor-inference`, `single-cell-doublet-detection`, `single-cell-droplet-decontamination`, `single-cell-fate-mapping`, `single-cell-marker-discovery`, `single-cell-multimodal-integration`, `single-cell-qc`, `single-cell-reference-annotation`, `single-cell-regulatory-network`, `single-cell-regulatory-velocity`, `single-cell-spatial-analysis`, `single-cell-trajectory-topology`, and `single-cell-trajectory-velocity`.
 
-Each module contributes a manifest contract, execution or agent-generated template sections, typed inputs and outputs, failure and limitation boundaries, compatibility evidence, quality gates, tests, and a documentation entry. A plan remains non-evidentiary until Codex inspects the user's real artifacts, adapts the relevant templates in the project workspace, records observed tool and dependency versions, reloads outputs, and admits only quality-controlled results.
+Each module contributes a manifest contract, an executable parameter surface, typed inputs and outputs, failure and limitation boundaries, compatibility evidence, quality gates, tests, and a documentation entry. A plan remains non-evidentiary until Codex inspects the user's real artifacts, binds the declared inputs and parameters without editing released source templates, records observed tool and dependency versions, reloads outputs, and admits only quality-controlled results.
 
 ## Sequencing And Genomic Foundations
 

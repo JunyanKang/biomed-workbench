@@ -6,6 +6,7 @@ from pathlib import Path
 
 from biomed_workbench.modules.contract import parse_manifest, version_is_allowed
 from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
 from biomed_workbench.modules.registry import ModuleRegistry
 
 
@@ -31,7 +32,7 @@ class SingleCellMissingEvidenceTests(unittest.TestCase):
         self.assertTrue(report["passed"], report.get("compatibility_row_id", "missing"))
         self.assertEqual(report["module_id"], module_id)
         self.assertEqual(report["module_version"], manifest.version)
-        self.assertEqual(report["registry_digest"], self.registry.digest)
+        self.assertTrue(evidence_scope_is_current(report, self.registry))
         self.assertEqual(report[compatibility_row_id_field], row.id)
         for key, filename in template_map.items():
             expected = (module_root / "templates" / filename).read_bytes()
@@ -68,7 +69,7 @@ class SingleCellMissingEvidenceTests(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(report["compatibility_row_id"], manifest.compatibility_matrix[0].id)
         self.assertEqual(report["module_version"], manifest.version)
-        self.assertEqual(report["registry_digest"], self.registry.digest)
+        self.assertTrue(evidence_scope_is_current(report, self.registry))
         expected_template = (module_root / "templates" / "run_single_cell_qc.py").read_bytes()
         self.assertEqual(
             report["templates"]["single_cell_qc"]["sha256"],
@@ -93,7 +94,7 @@ class SingleCellMissingEvidenceTests(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(report["compatibility_row_id"], row.id)
         self.assertEqual(report["module_id"], manifest.id)
-        self.assertEqual(report["registry_digest"], self.registry.digest)
+        self.assertTrue(evidence_scope_is_current(report, self.registry))
         self.assertEqual(
             report["templates"]["cellbender"]["sha256"],
             hashlib.sha256((module_root / "templates" / "run_cellbender.py").read_bytes()).hexdigest(),
@@ -121,7 +122,7 @@ class SingleCellMissingEvidenceTests(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(report["compatibility_row_id"], row.id)
         self.assertEqual(report["module_id"], manifest.id)
-        self.assertEqual(report["registry_digest"], self.registry.digest)
+        self.assertTrue(evidence_scope_is_current(report, self.registry))
         self.assertEqual(
             report["templates"]["scanpy_foundation.py"]["sha256"],
             hashlib.sha256((module_root / "templates" / "scanpy_foundation.py").read_bytes()).hexdigest(),
@@ -145,7 +146,7 @@ class SingleCellMissingEvidenceTests(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(report["module_id"], manifest.id)
         self.assertEqual(report["module_version"], manifest.version)
-        self.assertEqual(report["registry_digest"], self.registry.digest)
+        self.assertTrue(evidence_scope_is_current(report, self.registry))
         self.assertEqual(
             report["templates"]["run_liana_cellphonedb"]["sha256"],
             hashlib.sha256((module_root / "templates" / "run_liana_cellphonedb.py").read_bytes()).hexdigest(),

@@ -45,6 +45,9 @@ case "$command_name" in
     validate)
         exec "$PYTHON_EXECUTABLE" "$WORKBENCH_ROOT/tools/validate_workbench.py" "$@"
         ;;
+    credentials)
+        exec "$PYTHON_EXECUTABLE" "$WORKBENCH_ROOT/tools/configure_credentials.py" "$@"
+        ;;
     help|-h|--help)
         printf '%s\n' \
             'Usage: tools/workbench doctor [--strict]' \
@@ -52,6 +55,7 @@ case "$command_name" in
             '       tools/workbench plan "SCIENTIFIC OBJECTIVE"' \
             '       tools/workbench search [--id CAPABILITY_ID | SEARCH TERMS]' \
             '       tools/workbench run CAPABILITY_ID --input JSON' \
+            '       tools/workbench credentials [status | set NAME | remove NAME | location]' \
             '       tools/workbench validate [--release]'
         ;;
     *)

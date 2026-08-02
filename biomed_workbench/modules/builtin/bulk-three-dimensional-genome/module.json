@@ -1,0 +1,663 @@
+{
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not edit packaged templates, invent controls or replicates, infer assay identity from filenames, or substitute a related assay pipeline because it accepts the same file type.",
+      "Do not admit a run plan as evidence, fabricate missing outputs, hide method disagreement, or exceed the assay-specific claim boundary."
+    ],
+    "languages": [
+      "python",
+      "r",
+      "workflow"
+    ],
+    "mode": "packaged_parameterized_workflow",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "assay",
+          "restriction enzyme or fragmentation",
+          "valid-pair filters",
+          "reference",
+          "bin resolutions",
+          "matrix balance method",
+          "minimum contacts",
+          "replicate concordance",
+          "compartment method",
+          "domain and loop caller",
+          "assay-specific background",
+          "multiple-testing policy"
+        ],
+        "id": "assay-specific-method-selection",
+        "parameter": "assay-workflow-parameters",
+        "selection_rule": "Choose parameters from the exact assay protocol, official workflow documentation, blinded quality distributions, and the prespecified biological question before reviewing expected loci or effects.",
+        "validation_rule": "Reject a configuration borrowed from a related assay when control, strand, UMI, fragmentation, enrichment, conversion, resolution, or signal semantics differ."
+      }
+    ],
+    "postflight_checks": [
+      "Reload every result table, interval, matrix, track, model and figure; reconcile source/output digests, row counts, coordinates, sample identities, parameters and actual versions.",
+      "Apply technical, statistical, biological and robustness review; failed or discordant branches remain visible and cannot be replaced by a fallback result."
+    ],
+    "preflight_checks": [
+      "Inspect every source file and sample row; reconcile biological replicates, technical libraries, controls, read layout, reference, annotation and source digests.",
+      "Detect actual external workflow and tool versions and compare them with the reviewed official sources before execution.",
+      "Freeze the required figure inventory: pair-class QC; cis-trans and distance-decay; library complexity; replicate concordance; resolution curve; contact map; compartment eigenvector; domain insulation; loop enrichment; aggregate peak analysis; differential contact diagnostics"
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "assay",
+      "sample-manifest-digest",
+      "source-digests",
+      "reference-and-annotation",
+      "controls",
+      "parameters",
+      "actual-workflow-and-tool-versions",
+      "output-digests",
+      "quality-gates",
+      "figure-inventory"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "admit-and-freeze-assay-run",
+        "output_artifact_types": [
+          "bulk_three_dimensional_genome_evidence"
+        ],
+        "purpose": "Validate the assay and freeze project inputs, controls, parameters, versions, outputs and figure inventory.",
+        "required_logic": [
+          "Resolve the exact assay before choosing a workflow; assays in the same measurement family retain separate control and signal models.",
+          "Execute templates/run_assay_workflow.py without source editing to bind immutable inputs and parameters.",
+          "Run conventional Hi-C or restriction-free Micro-C through nf-core/hic 2.1.0; run bait-fragment Capture-C through capC-MAP 1.1.3; run HiChIP or PLAC-seq valid pairs through FitHiChIP 11.0; run linker-aware ChIA-PET through ChIA-PET2 0.9.3."
+        ],
+        "template_files": [
+          "templates/run_assay_workflow.py",
+          "templates/run_nfcore_hic.py",
+          "templates/run_capcmap.py",
+          "templates/run_fithichip.py",
+          "templates/run_chiapet2.py"
+        ]
+      }
+    ]
+  },
+  "alternatives": [],
+  "assumptions": [
+    "The declared sample manifest reflects independent biological units and does not promote technical libraries or reads to biological replicates."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_assay_workflow.py",
+      "purpose": "Validate immutable project inputs and freeze an assay-specific no-edit execution contract before running the selected official workflow.",
+      "quality_gate_ids": [
+        "bulk-three-dimensional-genome-assay-contract",
+        "bulk-three-dimensional-genome-execution-reload",
+        "bulk-three-dimensional-genome-claim-boundary"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/run_nfcore_hic.py",
+      "purpose": "Execute pinned nf-core/hic 2.1.0 and reload valid pairs, contact matrices, distance-decay, MultiQC, and pipeline-information outputs.",
+      "quality_gate_ids": [
+        "bulk-three-dimensional-genome-assay-contract",
+        "bulk-three-dimensional-genome-execution-reload",
+        "bulk-three-dimensional-genome-claim-boundary"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/run_capcmap.py",
+      "purpose": "Execute pinned capC-MAP 1.1.3 from paired FASTQ with an immutable target, restriction-fragment, Bowtie-index, binning, and normalization configuration, then reload target profiles and reports.",
+      "quality_gate_ids": [
+        "bulk-three-dimensional-genome-assay-contract",
+        "bulk-three-dimensional-genome-execution-reload",
+        "bulk-three-dimensional-genome-claim-boundary"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/run_fithichip.py",
+      "purpose": "Execute pinned FitHiChIP 11.0 for HiChIP or PLAC-seq from valid pairs, reference peaks, and chromosome sizes with all official loop-model parameters exposed and outputs reloaded.",
+      "quality_gate_ids": [
+        "bulk-three-dimensional-genome-assay-contract",
+        "bulk-three-dimensional-genome-execution-reload",
+        "bulk-three-dimensional-genome-claim-boundary"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/run_chiapet2.py",
+      "purpose": "Execute pinned ChIA-PET2 0.9.3 from paired FASTQ through linker trimming, alignment, duplicate removal, peak/loop calling, MICC significance, and QC output reload.",
+      "quality_gate_ids": [
+        "bulk-three-dimensional-genome-assay-contract",
+        "bulk-three-dimensional-genome-execution-reload",
+        "bulk-three-dimensional-genome-claim-boundary"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "bulk-three-dimensional-genome-contract-e2e-v1"
+      ],
+      "id": "python-3.14.3-bulk-three-dimensional-genome-contract-1",
+      "input_formats": {
+        "bulk_assay_inputs": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "0.2.0",
+      "output_formats": {
+        "bulk_assay_evidence": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "macos-arm64",
+        "linux-x86_64"
+      ],
+      "regression_evidence_ids": [
+        "bulk-three-dimensional-genome-regression-v1"
+      ],
+      "tool_versions": {
+        "ChIA-PET2": [
+          "==0.9.3"
+        ],
+        "FitHiChIP": [
+          "==11.0"
+        ],
+        "capC-MAP": [
+          "==1.1.3"
+        ],
+        "docker": [
+          ">=29.0,<30"
+        ],
+        "nextflow": [
+          ">=25.04.8,<25.05"
+        ]
+      },
+      "verified_at": "2026-07-31"
+    }
+  ],
+  "complements": [
+    "read-quality-fastqc",
+    "read-quality-fastp",
+    "quality-report-multiqc",
+    "functional-enrichment",
+    "figure-specification"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Validate and freeze the packaged assay run contract before external workflow execution.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-31",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Process Hi-C and capture or protein-anchored derivatives through pair validation, contact-matrix construction, normalization, replicate concordance, compartment, domain and loop analysis while retaining assay-specific enrichment and genomic-resolution limits.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "evidence_effects": [
+    "adds_bulk_three_dimensional_genome_evidence"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "bulk-three-dimensional-genome",
+  "input_artifacts": [
+    {
+      "artifact_type": "bulk_three_dimensional_genome_inputs",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "file-manifest-and-assay-parameters"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "bulk_assay_inputs",
+      "processing_levels": [
+        "raw-or-declared-upstream",
+        "sample-manifest-bound"
+      ],
+      "required_metadata": [
+        "sample-identity",
+        "biological-replicate",
+        "assay",
+        "reference",
+        "source-digests"
+      ],
+      "source_policy": "project_input"
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "annotation_release": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "assay": {
+        "enum": [
+          "hi-c",
+          "micro-c",
+          "capture-c",
+          "hichip",
+          "plac-seq",
+          "chia-pet"
+        ],
+        "type": "string"
+      },
+      "control_policy": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "design_notes": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "genome_build": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "input_manifest_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "parameters": {
+        "type": "object"
+      },
+      "replicate_key": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "requested_workflow": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "sample_key": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "assay",
+      "input_manifest_artifact_id",
+      "genome_build",
+      "annotation_release",
+      "sample_key",
+      "replicate_key",
+      "control_policy",
+      "requested_workflow",
+      "parameters",
+      "design_notes"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "hi-c",
+    "micro-c",
+    "capture-c",
+    "hichip",
+    "plac-seq",
+    "chia-pet",
+    "analyze bulk three dimensional genome",
+    "bulk-three-dimensional-genome workflow"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Contact frequency is population-averaged proximity under a resolution and normalization model; it is not direct physical binding, simultaneity in one cell, or causal regulation.",
+    "Each branch preserves its own observation model: whole-genome proximity, bait-fragment profiles, or protein-anchored enrichment. Contacts and statistically enriched loops do not establish simultaneous physical binding or regulatory causality."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "output_artifacts": [
+    {
+      "artifact_type": "bulk_three_dimensional_genome_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "assay-results-tables-figures-and-provenance"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "bulk_assay_evidence",
+      "processing_levels": [
+        "executed",
+        "reloaded",
+        "quality-gated"
+      ],
+      "required_metadata": [
+        "module-version",
+        "assay",
+        "actual-tool-versions",
+        "parameters",
+        "source-and-output-digests",
+        "quality-gates"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "packaged_parameterized_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The assay, biological samples and replicates, library design, controls, reference, annotation, input files, and intended inference are declared before parameter selection.",
+    "The selected workflow is compatible with the exact assay rather than merely accepting the same file extension."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://nf-co.re/hic/latest/",
+      "https://www.encodeproject.org/pipelines/",
+      "https://cooler.readthedocs.io/",
+      "https://github.com/aidenlab/juicer",
+      "https://capc-map.readthedocs.io/en/latest/usage.html",
+      "https://github.com/ay-lab/FitHiChIP/tree/0ea1ac21be870908c672316ffbb630189dc6fae2",
+      "https://github.com/GuipengLi/ChIA-PET2/tree/e120726d6440b24034f70bc3c51c17f351fef496"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block execution unless the assay-specific library, controls, reference, replicate, parameter, and output contracts are complete.",
+      "id": "bulk-three-dimensional-genome-assay-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Planned commands are not evidence; the workflow must run, every output must be reloaded, and actual versions, parameters, row counts, and digests must reconcile.",
+      "id": "bulk-three-dimensional-genome-execution-reload",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Contact frequency is population-averaged proximity under a resolution and normalization model; it is not direct physical binding, simultaneity in one cell, or causal regulation.",
+      "id": "bulk-three-dimensional-genome-claim-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Does the declared hi-c, micro-c, capture-c, hichip, plac-seq, chia-pet experiment support an assay-valid, reproducible bulk analysis?"
+  ],
+  "schema_version": 1,
+  "title": "Analyze bulk chromosome conformation with resolution and replicate gates",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=25.04.8,<25.05"
+      ],
+      "ecosystem": "system",
+      "identity": "nextflow",
+      "mismatch_policy": "block",
+      "name": "nextflow",
+      "platforms": [
+        "macos-arm64",
+        "linux-x86_64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "25.04.8"
+      ],
+      "verified_at": "2026-07-31",
+      "version_differences": [],
+      "version_pattern": "version\\s+([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "nextflow",
+        "-version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/nextflow-io/nextflow/releases/tag/v25.04.8"
+    },
+    {
+      "allowed_versions": [
+        ">=29.0,<30"
+      ],
+      "ecosystem": "system",
+      "identity": "docker",
+      "mismatch_policy": "block",
+      "name": "docker",
+      "platforms": [
+        "macos-arm64",
+        "linux-x86_64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "29.2.1"
+      ],
+      "verified_at": "2026-07-31",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "docker",
+        "version",
+        "--format",
+        "{{.Server.Version}}"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://docs.docker.com/engine/release-notes/29/"
+    },
+    {
+      "allowed_versions": [
+        "==0.9.3"
+      ],
+      "ecosystem": "system",
+      "identity": "ChIA-PET2",
+      "mismatch_policy": "block",
+      "name": "ChIA-PET2",
+      "platforms": [
+        "linux-x86_64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "0.9.3"
+      ],
+      "verified_at": "2026-07-31",
+      "version_differences": [],
+      "version_pattern": "ChIA-PET2\\s+([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "ChIA-PET2",
+        "-v"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/GuipengLi/ChIA-PET2/tree/e120726d6440b24034f70bc3c51c17f351fef496"
+    },
+    {
+      "allowed_versions": [
+        "==11.0"
+      ],
+      "ecosystem": "system",
+      "identity": "FitHiChIP",
+      "mismatch_policy": "block",
+      "name": "FitHiChIP",
+      "platforms": [
+        "linux-x86_64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "11.0"
+      ],
+      "verified_at": "2026-07-31",
+      "version_differences": [],
+      "version_pattern": "(0ea1ac21be870908c672316ffbb630189dc6fae2)",
+      "version_probe": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/ay-lab/FitHiChIP/tree/0ea1ac21be870908c672316ffbb630189dc6fae2"
+    },
+    {
+      "allowed_versions": [
+        "==1.1.3"
+      ],
+      "ecosystem": "system",
+      "identity": "capC-MAP",
+      "mismatch_policy": "block",
+      "name": "capC-MAP",
+      "platforms": [
+        "linux-x86_64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.1.3"
+      ],
+      "verified_at": "2026-07-31",
+      "version_differences": [],
+      "version_pattern": "(1\\.1\\.3)",
+      "version_probe": [
+        "capC-MAP",
+        "--help"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/cbrackley/capC-MAP/tree/fc2168f6da8a4fe331d5b22872789fa4caac0749"
+    }
+  ],
+  "version": "0.2.0"
+}

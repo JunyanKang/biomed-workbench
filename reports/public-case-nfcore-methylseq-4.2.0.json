@@ -1,0 +1,578 @@
+{
+  "assay": "wgbs",
+  "case_id": "nfcore-methylseq-4.2.0-checksum-bound-minimal-v1",
+  "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "bulk-dna-methylation"
+    ],
+    "module_slice_digest": "0b7ce22a5fc5d332666ec24181c174c0355ab33ac4063f81d2f3d445ba4a08d2",
+    "schema_version": 1
+  },
+  "evidence_scope_migration": {
+    "changed_fields": [
+      "maturity"
+    ],
+    "current_evidence_scope": {
+      "module_ids": [
+        "bulk-dna-methylation"
+      ],
+      "module_slice_digest": "0b7ce22a5fc5d332666ec24181c174c0355ab33ac4063f81d2f3d445ba4a08d2",
+      "schema_version": 1
+    },
+    "executed_implementation_current": {
+      "path": "biomed_workbench/implementations/nfcore.py",
+      "sha256": "188512d40ae53c2095322707c4acf1cc4513b3ba38c1ebf31c9e1d0c44c8164d"
+    },
+    "migration_type": "reviewed-metadata-only-scope-reissue",
+    "prior_evidence_scope": {
+      "module_ids": [
+        "bulk-dna-methylation"
+      ],
+      "module_slice_digest": "e70baeff057dfe694604650da0bb1953a0f0da61ecca6550d5f73cac9a48de20",
+      "schema_version": 1
+    },
+    "reason": "The module maturity label changed after representative observed execution passed; the executed implementation, parameters, source data, and scientific outputs in these reports are unchanged.",
+    "reissued_on": "2026-08-01",
+    "report_sha256_before_reissue": "aadd186c0a9e63ce31232f884ac2594a8bb3b73f9ca938783c5f07f2b685c6c7",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false
+  },
+  "execution": {
+    "assay": "wgbs",
+    "checksum_bound_public_case": true,
+    "external_workflow_executed": true,
+    "official_public_test_profile": false,
+    "output_groups": {
+      "alignment_qc": {
+        "file_count": 4,
+        "paths": [
+          "bismark/alignments/logs/Ecoli_10K_methylated_R1_bismark_bt2_PE_report.txt",
+          "bismark/alignments/logs/SRR389222_sub1_bismark_bt2_SE_report.txt",
+          "bismark/alignments/logs/SRR389222_sub2_bismark_bt2_SE_report.txt",
+          "bismark/alignments/logs/SRR389222_sub3_bismark_bt2_SE_report.txt"
+        ]
+      },
+      "mbias": {
+        "file_count": 4,
+        "paths": [
+          "bismark/methylation_calls/mbias/Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.M-bias.txt",
+          "bismark/methylation_calls/mbias/SRR389222_sub1_bismark_bt2.deduplicated.M-bias.txt",
+          "bismark/methylation_calls/mbias/SRR389222_sub2_bismark_bt2.deduplicated.M-bias.txt",
+          "bismark/methylation_calls/mbias/SRR389222_sub3_bismark_bt2.deduplicated.M-bias.txt"
+        ]
+      },
+      "methylation_calls": {
+        "file_count": 40,
+        "paths": [
+          "bismark/methylation_calls/bedGraph/Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.bedGraph.gz",
+          "bismark/methylation_calls/bedGraph/SRR389222_sub1_bismark_bt2.deduplicated.bedGraph.gz",
+          "bismark/methylation_calls/bedGraph/SRR389222_sub2_bismark_bt2.deduplicated.bedGraph.gz",
+          "bismark/methylation_calls/bedGraph/SRR389222_sub3_bismark_bt2.deduplicated.bedGraph.gz",
+          "bismark/methylation_calls/mbias/Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.M-bias.txt",
+          "bismark/methylation_calls/mbias/SRR389222_sub1_bismark_bt2.deduplicated.M-bias.txt",
+          "bismark/methylation_calls/mbias/SRR389222_sub2_bismark_bt2.deduplicated.M-bias.txt",
+          "bismark/methylation_calls/mbias/SRR389222_sub3_bismark_bt2.deduplicated.M-bias.txt",
+          "bismark/methylation_calls/methylation_calls/CHG_OB_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHG_OB_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHG_OB_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHG_OB_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHG_OT_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHG_OT_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHG_OT_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHG_OT_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHH_OB_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHH_OB_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHH_OB_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHH_OB_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHH_OT_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHH_OT_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHH_OT_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CHH_OT_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CpG_OB_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CpG_OB_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CpG_OB_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CpG_OB_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CpG_OT_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CpG_OT_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CpG_OT_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_calls/CpG_OT_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+          "bismark/methylation_calls/methylation_coverage/Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.bismark.cov.gz",
+          "bismark/methylation_calls/methylation_coverage/SRR389222_sub1_bismark_bt2.deduplicated.bismark.cov.gz",
+          "bismark/methylation_calls/methylation_coverage/SRR389222_sub2_bismark_bt2.deduplicated.bismark.cov.gz",
+          "bismark/methylation_calls/methylation_coverage/SRR389222_sub3_bismark_bt2.deduplicated.bismark.cov.gz",
+          "bismark/methylation_calls/splitting_report/Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated_splitting_report.txt",
+          "bismark/methylation_calls/splitting_report/SRR389222_sub1_bismark_bt2.deduplicated_splitting_report.txt",
+          "bismark/methylation_calls/splitting_report/SRR389222_sub2_bismark_bt2.deduplicated_splitting_report.txt",
+          "bismark/methylation_calls/splitting_report/SRR389222_sub3_bismark_bt2.deduplicated_splitting_report.txt"
+        ]
+      },
+      "multiqc": {
+        "file_count": 1,
+        "paths": [
+          "multiqc/bismark/multiqc_report.html"
+        ]
+      },
+      "pipeline_info": {
+        "file_count": 7,
+        "paths": [
+          "pipeline_info/execution_report_2026-08-01_10-52-45.html",
+          "pipeline_info/execution_timeline_2026-08-01_10-52-45.html",
+          "pipeline_info/execution_trace_2026-08-01_10-52-45.txt",
+          "pipeline_info/nf_core_methylseq_software_mqc_versions.yml",
+          "pipeline_info/nf_core_methylseq_topic_versions.yml",
+          "pipeline_info/params_2026-08-01_10-52-50.json",
+          "pipeline_info/pipeline_dag_2026-08-01_10-52-45.html"
+        ]
+      }
+    },
+    "outputs_reloaded": true,
+    "reloaded_files": [
+      {
+        "bytes": 1972,
+        "path": "bismark/alignments/logs/Ecoli_10K_methylated_R1_bismark_bt2_PE_report.txt",
+        "reload": "delimited-text",
+        "row_count": 33,
+        "sha256": "20fb326f6b53e8881d2942181b8e9c42f111eb722ba02a1b24785b809c0847a0"
+      },
+      {
+        "bytes": 1888,
+        "path": "bismark/alignments/logs/SRR389222_sub1_bismark_bt2_SE_report.txt",
+        "reload": "delimited-text",
+        "row_count": 33,
+        "sha256": "03661ddb41805dd24c9f5699adce94054352ebdb3c421ef3c4cb81d096396a90"
+      },
+      {
+        "bytes": 1888,
+        "path": "bismark/alignments/logs/SRR389222_sub2_bismark_bt2_SE_report.txt",
+        "reload": "delimited-text",
+        "row_count": 33,
+        "sha256": "94f0fcc6cbd5e67a8870be4255d2ba713126db865dfc27545bd08bcba4e4f602"
+      },
+      {
+        "bytes": 1883,
+        "path": "bismark/alignments/logs/SRR389222_sub3_bismark_bt2_SE_report.txt",
+        "reload": "delimited-text",
+        "row_count": 33,
+        "sha256": "5aebee723acb3ca93bee8ef52f12833084c3be0382efc7c1bd6bc0feae848958"
+      },
+      {
+        "bytes": 265,
+        "path": "bismark/methylation_calls/bedGraph/Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.bedGraph.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "2c16fcbebd3472938b79b30e8c7a11c1e233a4fb333db062e6b38aa90d6a1322"
+      },
+      {
+        "bytes": 288,
+        "path": "bismark/methylation_calls/bedGraph/SRR389222_sub1_bismark_bt2.deduplicated.bedGraph.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "e1149f14bc2205d5b63a3fce857579e3cc6230477778bbc0df66dc19cfd90c46"
+      },
+      {
+        "bytes": 291,
+        "path": "bismark/methylation_calls/bedGraph/SRR389222_sub2_bismark_bt2.deduplicated.bedGraph.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "71fda76500cea3d9f7e700a7e322ee0a269f7f4ebf08bfcf5c177b437b65fbe3"
+      },
+      {
+        "bytes": 278,
+        "path": "bismark/methylation_calls/bedGraph/SRR389222_sub3_bismark_bt2.deduplicated.bedGraph.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "b332370b100ee3c8ea26f182f6a8511afbbf97a952454a81e2d59f509e4e7455"
+      },
+      {
+        "bytes": 7215,
+        "path": "bismark/methylation_calls/mbias/Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.M-bias.txt",
+        "reload": "delimited-text",
+        "row_count": 606,
+        "sha256": "ba8c511c3aa24e83e4fdc00e331a2609176c278b91973d8380db00542d846bba"
+      },
+      {
+        "bytes": 1994,
+        "path": "bismark/methylation_calls/mbias/SRR389222_sub1_bismark_bt2.deduplicated.M-bias.txt",
+        "reload": "delimited-text",
+        "row_count": 117,
+        "sha256": "13111a9f4b9669c4337c51424373bb7ae817cdb10f0e20dda4c607f3b424a26b"
+      },
+      {
+        "bytes": 2017,
+        "path": "bismark/methylation_calls/mbias/SRR389222_sub2_bismark_bt2.deduplicated.M-bias.txt",
+        "reload": "delimited-text",
+        "row_count": 117,
+        "sha256": "ab284cb7eb72d270720b12a9297d494bba80a5d6bf980086e05eb8502bd9570e"
+      },
+      {
+        "bytes": 1991,
+        "path": "bismark/methylation_calls/mbias/SRR389222_sub3_bismark_bt2.deduplicated.M-bias.txt",
+        "reload": "delimited-text",
+        "row_count": 117,
+        "sha256": "1c16c141a2300c957ae2a982cbef046048815e2a77a8f750985c8150334163c5"
+      },
+      {
+        "bytes": 279,
+        "path": "bismark/methylation_calls/methylation_calls/CHG_OB_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "d9f481a6aab5f0c854f53dc82cf805cdcc2e32b40ce389af6cc4b998999ec351"
+      },
+      {
+        "bytes": 389,
+        "path": "bismark/methylation_calls/methylation_calls/CHG_OB_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "a2c544236ab40378cc646e4c23d9d18f84438a540cfce48d5859390df38f9011"
+      },
+      {
+        "bytes": 631,
+        "path": "bismark/methylation_calls/methylation_calls/CHG_OB_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "8b9e2b1d176e0ba1faacf6df4fec590b4d2635eb9008749a36025e5098f7be98"
+      },
+      {
+        "bytes": 393,
+        "path": "bismark/methylation_calls/methylation_calls/CHG_OB_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "4f89ba0a9730b9cc74ccad9c32838795d43491518e0e22b705ac77378cd4b7b0"
+      },
+      {
+        "bytes": 188,
+        "path": "bismark/methylation_calls/methylation_calls/CHG_OT_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "9dc6e27a924816ca2778ac858588a0b54873ae2dea72d790590f9120746038e6"
+      },
+      {
+        "bytes": 8270,
+        "path": "bismark/methylation_calls/methylation_calls/CHG_OT_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "66a6505fb2b70954c8862929ca7fbb6764abcef13cac990cdee08b1ae9efa334"
+      },
+      {
+        "bytes": 8185,
+        "path": "bismark/methylation_calls/methylation_calls/CHG_OT_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "b305d5105f74c41c6c42173361653012ab72dad529dbdb99d831a6fe0a58fefe"
+      },
+      {
+        "bytes": 8260,
+        "path": "bismark/methylation_calls/methylation_calls/CHG_OT_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "d249b43b70e0d16c58594075fd5b13a61e7f532f2f05a8240cb7eb13eb64ab59"
+      },
+      {
+        "bytes": 427,
+        "path": "bismark/methylation_calls/methylation_calls/CHH_OB_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "f05ff4110abc39e2ce882584fb3138fa160c2a46a76b85071829a8a68111eee5"
+      },
+      {
+        "bytes": 477,
+        "path": "bismark/methylation_calls/methylation_calls/CHH_OB_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "060890b4789be409c41ce98cf1cc9c48183c1bfa43885ad4e9ef82fd44930056"
+      },
+      {
+        "bytes": 822,
+        "path": "bismark/methylation_calls/methylation_calls/CHH_OB_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "1e60405b900582bfee4ebcdc9e25791caa6482c5103419e950e3b08139288dcf"
+      },
+      {
+        "bytes": 456,
+        "path": "bismark/methylation_calls/methylation_calls/CHH_OB_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "3782f9c5adcc528263e59c19c88d70575c033a55d5a1ce112ec727270c3b2fe4"
+      },
+      {
+        "bytes": 272,
+        "path": "bismark/methylation_calls/methylation_calls/CHH_OT_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "5b7185e43d0393fd73c87739cae072b92ab7f224f36fb96351769971f147ccf9"
+      },
+      {
+        "bytes": 7534,
+        "path": "bismark/methylation_calls/methylation_calls/CHH_OT_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "5ebb7e2ac8b46e43f4472eb190d7eaafa894edffc5783c36870f0809a908a895"
+      },
+      {
+        "bytes": 7528,
+        "path": "bismark/methylation_calls/methylation_calls/CHH_OT_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "b558b2f6f497e4c0fc54225000f308b84105765bad2d2b4fcb57d86316175872"
+      },
+      {
+        "bytes": 7494,
+        "path": "bismark/methylation_calls/methylation_calls/CHH_OT_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "983959f8451cc73bc34c67a9aa94241926703250b8e5b2ecf1511f4414fe8e1a"
+      },
+      {
+        "bytes": 257,
+        "path": "bismark/methylation_calls/methylation_calls/CpG_OB_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "1162f728ff062ca73ae1373b9d5248e68709fc63e3fcb31c10f0f970efee75ed"
+      },
+      {
+        "bytes": 430,
+        "path": "bismark/methylation_calls/methylation_calls/CpG_OB_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "10bd7dfbd6d35f3737b8ba6d47cba963af8b8951aef1f15f8bdcf8f03be44363"
+      },
+      {
+        "bytes": 728,
+        "path": "bismark/methylation_calls/methylation_calls/CpG_OB_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "c60508d6d0141e9e843417787dbbc7371b2b3dd9840170ccd1d7ae1735b66e48"
+      },
+      {
+        "bytes": 436,
+        "path": "bismark/methylation_calls/methylation_calls/CpG_OB_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "5e67b532eb886bd5b85e508d7070d79abfe0b945ad7f729108aca8f7246fce5a"
+      },
+      {
+        "bytes": 212,
+        "path": "bismark/methylation_calls/methylation_calls/CpG_OT_Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "599063a4fdd5aa7f8a210da3f0484e08fcdc6fa8a8b791f7464abe9809ef41fa"
+      },
+      {
+        "bytes": 7685,
+        "path": "bismark/methylation_calls/methylation_calls/CpG_OT_SRR389222_sub1_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "a072353d6c79dbd9ecba6132e202aaa6cb25b0b92b9ade2094a544d8726e1962"
+      },
+      {
+        "bytes": 7601,
+        "path": "bismark/methylation_calls/methylation_calls/CpG_OT_SRR389222_sub2_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "b8bcd0c85158ff005c52def8547f5065863f4492a6375214956c9d4f98a82c7e"
+      },
+      {
+        "bytes": 7590,
+        "path": "bismark/methylation_calls/methylation_calls/CpG_OT_SRR389222_sub3_bismark_bt2.deduplicated.txt.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "082819e6ca8433672e072151651c3f1aadadf44e9c118612c1058f6d4305d242"
+      },
+      {
+        "bytes": 215,
+        "path": "bismark/methylation_calls/methylation_coverage/Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated.bismark.cov.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "715276c4ebf50a0df65fb1e436591fa6680f2e994f8c42aac6a5afe75b5bd16d"
+      },
+      {
+        "bytes": 263,
+        "path": "bismark/methylation_calls/methylation_coverage/SRR389222_sub1_bismark_bt2.deduplicated.bismark.cov.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "cb87b24ae0a10941cf6e3a8d997c4243402dd971ed0329ddd1ab1743e83ae688"
+      },
+      {
+        "bytes": 269,
+        "path": "bismark/methylation_calls/methylation_coverage/SRR389222_sub2_bismark_bt2.deduplicated.bismark.cov.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "ccbc626d91aaf30235d09e8379309e9993d57fe04e8cb9f858a77b9910aa911a"
+      },
+      {
+        "bytes": 245,
+        "path": "bismark/methylation_calls/methylation_coverage/SRR389222_sub3_bismark_bt2.deduplicated.bismark.cov.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "1106c514e4d56d5bd43dbb523efd5e51955a403eeca4279ce6eb6331dc89e1c1"
+      },
+      {
+        "bytes": 882,
+        "path": "bismark/methylation_calls/splitting_report/Ecoli_10K_methylated_R1_bismark_bt2_pe.deduplicated_splitting_report.txt",
+        "reload": "delimited-text",
+        "row_count": 22,
+        "sha256": "91909fd8ba6f6270beac224f808751b64938527456dce1dcd5166a24f36be4c4"
+      },
+      {
+        "bytes": 774,
+        "path": "bismark/methylation_calls/splitting_report/SRR389222_sub1_bismark_bt2.deduplicated_splitting_report.txt",
+        "reload": "delimited-text",
+        "row_count": 19,
+        "sha256": "d1aa960c2c0fa475d05509b3a04c931369416cf7265b785c8f93197cd9324f4e"
+      },
+      {
+        "bytes": 774,
+        "path": "bismark/methylation_calls/splitting_report/SRR389222_sub2_bismark_bt2.deduplicated_splitting_report.txt",
+        "reload": "delimited-text",
+        "row_count": 19,
+        "sha256": "045a99795be93f6f6bae84bf9a700d2e32dc6d0f3044943cbba3e4e4051dcd61"
+      },
+      {
+        "bytes": 774,
+        "path": "bismark/methylation_calls/splitting_report/SRR389222_sub3_bismark_bt2.deduplicated_splitting_report.txt",
+        "reload": "delimited-text",
+        "row_count": 19,
+        "sha256": "89c062a61c803e4f74c264cad5c857d0aa67c97edce59d459786c0b2aec21f58"
+      },
+      {
+        "bytes": 2485497,
+        "path": "multiqc/bismark/multiqc_report.html",
+        "reload": "html",
+        "sha256": "558652bef71a1bac7be0a0145d42bf3813a79c02b02e0b02bc4458b6b5ae25aa"
+      },
+      {
+        "bytes": 3027645,
+        "path": "pipeline_info/execution_report_2026-08-01_10-52-45.html",
+        "reload": "html",
+        "sha256": "50874ac29fa154c4317f4fb95de1056e3b5f00cf4b0706eea760323d315ea7f0"
+      },
+      {
+        "bytes": 262319,
+        "path": "pipeline_info/execution_timeline_2026-08-01_10-52-45.html",
+        "reload": "html",
+        "sha256": "5c8038a30bc05bedb532131e18b626a3bb06841862f60fc523d7c357fb168b44"
+      },
+      {
+        "bytes": 6000,
+        "path": "pipeline_info/execution_trace_2026-08-01_10-52-45.txt",
+        "reload": "delimited-text",
+        "row_count": 33,
+        "sha256": "7d5a89643c47ed233157c89a1d75f1cbd247aefe55fc80d23184983151ab4ee8"
+      },
+      {
+        "bytes": 454,
+        "path": "pipeline_info/nf_core_methylseq_software_mqc_versions.yml",
+        "reload": "yaml-structure",
+        "sha256": "2a974c64810158b346a1540ef127e45389b1f182dab691a68d2f2a8fa97bcae5"
+      },
+      {
+        "bytes": 117,
+        "path": "pipeline_info/nf_core_methylseq_topic_versions.yml",
+        "reload": "yaml-structure",
+        "sha256": "f793c42fe7697acf0a7876c8e9b103d7b0e96a51af7871d7b3307ae6afe6aab6"
+      },
+      {
+        "bytes": 2925,
+        "path": "pipeline_info/params_2026-08-01_10-52-50.json",
+        "reload": "json",
+        "sha256": "407cd077ff58427ab6a10407ed53b9a9a15e644711a0e2323f7c7b4958e8db16"
+      },
+      {
+        "bytes": 4713,
+        "path": "pipeline_info/pipeline_dag_2026-08-01_10-52-45.html",
+        "reload": "html",
+        "sha256": "c41f33c0d2baf72e688708d7cb964b63f83c83e8ed1cdf0039be362117143dd6"
+      }
+    ],
+    "runtime_compatibility": [
+      {
+        "id": "nfcore-workstation-resource-limits",
+        "limits": {
+          "cpus": 4,
+          "memory": "30.GB",
+          "time": "6.h"
+        },
+        "nextflow_config_sha256": "1a534ecaab31309ac8542ea2c62253a0ef2ae1a82ef5fe78a04ced7a63725c93",
+        "reason": "Cap scheduler reservations to the declared workstation capacity using the official nf-core resourceLimits mechanism.",
+        "scientific_parameters_changed": false,
+        "scope": "all processes in nf-core/methylseq 4.2.0"
+      }
+    ],
+    "scientific_file_count": 52,
+    "workflow": {
+      "name": "nf-core/methylseq",
+      "official_schema_sha256": "d36c0badea1d18fe483a5736d5f36add86e34b03bc8fd7bd958769a89581239f",
+      "revision": "4.2.0",
+      "revision_commit": "5aa56467a85a5e2d6795ea72dfa5a5f0c9babc23"
+    }
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "implementation": {
+    "path": "biomed_workbench/implementations/nfcore.py",
+    "sha256": "188512d40ae53c2095322707c4acf1cc4513b3ba38c1ebf31c9e1d0c44c8164d"
+  },
+  "module": {
+    "id": "bulk-dna-methylation",
+    "version": "0.2.0"
+  },
+  "observed_at": "2026-08-01T03:00:19.131708+00:00",
+  "passed": true,
+  "quality_gates": {
+    "all_inputs_checksum_bound": true,
+    "assay_specific_outputs_reloaded": true,
+    "external_workflow_exit_zero": true,
+    "multiqc_reloaded": true,
+    "pinned_official_schema": true,
+    "pinned_public_source_commits": true,
+    "pinned_workflow_identity": true,
+    "scientific_output_checksums_recorded": true
+  },
+  "runtime": {
+    "engine_profile": "docker",
+    "nextflow_version": "25.4.8",
+    "profile_runtime_version": "29.2.1"
+  },
+  "schema_version": 1,
+  "scientific_boundary": "This is an executable integration and output-reload acceptance on the pinned official minimal public fixture. It is not a biological project conclusion.",
+  "source": {
+    "derived_tools": [],
+    "official_samplesheet_row_count": null,
+    "pipeline_commit": "5aa56467a85a5e2d6795ea72dfa5a5f0c9babc23",
+    "pipeline_revision": "4.2.0",
+    "selected_pair_ids": [],
+    "selected_samplesheet_row_count": null,
+    "selection_policy": null,
+    "source_file_count": 8,
+    "source_files": [
+      {
+        "bytes": 791,
+        "name": "samplesheet.csv",
+        "rewritten_to_local_immutable_paths": true,
+        "sha256": "0dfecee300fd69582a29060ae41fb4cd8e7ae4f17e5a291b3519e5e15921512f",
+        "source_url": "https://raw.githubusercontent.com/nf-core/methylseq/5aa56467a85a5e2d6795ea72dfa5a5f0c9babc23/assets/samplesheet.csv"
+      },
+      {
+        "bytes": 18,
+        "name": "genome.fa.fai",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "ec9624611b5d75a85dd2e4c3987bc80c953ecd4a1c8cdd3b6065f46da2adae46",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/e7e1fb8940fc14e2336101147a31ce8e0eda6264/reference/genome.fa.fai"
+      },
+      {
+        "bytes": 15223,
+        "name": "genome.fa.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "28529ce29002b688a9fc4ce16955b83b4524465cacad1dd8bc6b496907e239c3",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/e7e1fb8940fc14e2336101147a31ce8e0eda6264/reference/genome.fa.gz"
+      },
+      {
+        "bytes": 467487,
+        "name": "Ecoli_10K_methylated_R1.fastq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "3d84b54e065f0760e830357d37bbc1ce511570b0443b6d0a7da1cf26261fe79b",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/e7e1fb8940fc14e2336101147a31ce8e0eda6264/testdata/Ecoli_10K_methylated_R1.fastq.gz"
+      },
+      {
+        "bytes": 467335,
+        "name": "Ecoli_10K_methylated_R2.fastq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "2f3e6de0edf9bbc6dae46a5a43a2152d6d9d724b8b8ecd46281d47dd0606a646",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/e7e1fb8940fc14e2336101147a31ce8e0eda6264/testdata/Ecoli_10K_methylated_R2.fastq.gz"
+      },
+      {
+        "bytes": 3302006,
+        "name": "SRR389222_sub1.fastq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "cf64dcfa6399e1f872a2c8cad0568db96d9fcc4c210ef00c9f5db06e689e1238",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/e7e1fb8940fc14e2336101147a31ce8e0eda6264/testdata/SRR389222_sub1.fastq.gz"
+      },
+      {
+        "bytes": 3947922,
+        "name": "SRR389222_sub2.fastq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "287d636a1676bd1f2e1905cf2796d542d39e6e80ce0ae24144cb13088ed7d435",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/e7e1fb8940fc14e2336101147a31ce8e0eda6264/testdata/SRR389222_sub2.fastq.gz"
+      },
+      {
+        "bytes": 2646597,
+        "name": "SRR389222_sub3.fastq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "13abeb23edef24ea58f7d4683ba321cfc0321274864299e1c81e3dc6d25843f7",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/e7e1fb8940fc14e2336101147a31ce8e0eda6264/testdata/SRR389222_sub3.fastq.gz"
+      }
+    ],
+    "test_data_commits": {
+      "methylseq": "e7e1fb8940fc14e2336101147a31ce8e0eda6264"
+    }
+  }
+}

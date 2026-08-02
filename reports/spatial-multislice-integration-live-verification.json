@@ -1,0 +1,92 @@
+{
+  "compatibility_row_id": "paste-paste2-lme4-contract-v1",
+  "evidence_scope": {
+    "module_ids": [
+      "spatial-multislice-integration"
+    ],
+    "module_slice_digest": "e0eaa5c000dcf084d88e59a659a9106fafdaa3fed61b88d3196bd1f105973cad",
+    "schema_version": 1
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "executions": {
+    "alignment_and_reconstruction": {
+      "aligned_h5ad_reloaded": true,
+      "alpha": 0.1,
+      "backend": "PASTE",
+      "backend_version": "1.4.0",
+      "common_genes": 7224,
+      "coordinates_reloaded": true,
+      "coupling_nonzero_entries": 504,
+      "coupling_reloaded": true,
+      "coupling_weight_sum": 0.999999999999982,
+      "execution_report_sha256": "f770adc74b14715b8280567c5c2243f4715c97e98b6a3c69c0d8d20e53ecbc89",
+      "native_alignment_executed": true,
+      "pot_version": "0.9.0",
+      "section_observations": [
+        254,
+        251
+      ],
+      "sections": 2,
+      "three_dimensional_coordinates": 505
+    },
+    "cross_sample_model": {
+      "backend": "lme4",
+      "backend_version": "1.1.38",
+      "biological_samples": 12,
+      "finite_effect_estimates": true,
+      "observations": 1728,
+      "output_reload": true,
+      "sample_is_experimental_unit": true,
+      "section_nested_within_sample": true,
+      "sections_per_sample": 3,
+      "singular": false
+    }
+  },
+  "implementation": {
+    "alignment_template_sha256": "40b4d337022d921b10376ea1d5444f664f20971a514d9e1225e0551d87a683bd",
+    "hierarchical_model_template_sha256": "3255fa84122b2ed7621317cb76884072d5f05a39316337a6b0bd66286f1973de",
+    "manifest_sha256": "8ec4b5f29142b28ef82b97355520f63ebfafbe99c8c5111b450713cfae263734"
+  },
+  "module_id": "spatial-multislice-integration",
+  "module_version": "1.0.0",
+  "observed_at": "2026-08-01T04:40:14Z",
+  "outputs": {
+    "aligned_slice1_sha256": "9e7f2dc4ac3ef8481e6568d9bcbf9b139be8a99fdc0a538cebcc290e279ae4bb",
+    "aligned_slice2_sha256": "307d27423f6a628d7e8849b55e03bf2be3a4975a7064c21d7b29d41480fc4a2c",
+    "coordinates_sha256": "3af6b74f09186ca4bdd72bebd4ad0e7e038c5e1fe2809d16970908aa7af48141",
+    "couplings_sha256": "1bcc0157908c855bab513e6c8456b7004db748592ec0f79d129ab64e2cf10319"
+  },
+  "passed": true,
+  "quality_gates": {
+    "aligned_outputs_reload": "pass",
+    "common_gene_contract": "pass",
+    "coupling_mass": "pass",
+    "official_source_checksum": "pass",
+    "sample_level_hierarchical_model": "pass",
+    "section_order_and_spacing": "pass"
+  },
+  "registry_digest": "fce637f7f0cc029f54b2da9ee616ab4fd89c98c5533e7f16f2f210219a4fd45f",
+  "schema_version": 1,
+  "scientific_scope": "The module now executes both ordered-section PASTE alignment/3D coordinate reconstruction and biological-sample-aware hierarchical inference. PASTE2 remains the selectable backend for declared partial overlap.",
+  "source": {
+    "files": [
+      {
+        "name": "slice1.csv",
+        "sha256": "f7e8e1b37be579b66b63f1541055c1df5380e87e993d8cbc4e6fda457dc16002"
+      },
+      {
+        "name": "slice1_coor.csv",
+        "sha256": "77647774caeb6b03bc481a76d97e1b6117d722a8ddfcf192625cc30a8144ed88"
+      },
+      {
+        "name": "slice2.csv",
+        "sha256": "c6c44953348db76aba7120d189834a6c55cb5fa4351c83b6a6b88d6b4b4ccadc"
+      },
+      {
+        "name": "slice2_coor.csv",
+        "sha256": "5eb5f4ca0ccd274a1b30caec877ae02b10cee2f1a21ed0c218d254a42dfa53d4"
+      }
+    ],
+    "repository": "https://github.com/raphael-group/paste/tree/v1.4.0/sample_data"
+  }
+}

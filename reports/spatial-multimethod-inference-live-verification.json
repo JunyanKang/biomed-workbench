@@ -1,0 +1,91 @@
+{
+  "compatibility_row_id": "method-isolated-runtime-contract-v2",
+  "evidence_scope": {
+    "module_ids": [
+      "spatial-multimethod-inference"
+    ],
+    "module_slice_digest": "ef3f3205bbd1c83c2d113c58e4a09bb9fc2d40192c283cbc6a095089bd269350",
+    "schema_version": 1
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "executions": [
+    {
+      "abundance_sha256": "0e81d95b64122b0d9ed0dc3a43df4d9ae1544b778fcedd0c5c3c40e8bc41bba7",
+      "abundance_shape": [
+        9852,
+        18
+      ],
+      "backend": "Tangram",
+      "backend_version": "1.0.4",
+      "density_prior": "rna_count_based_explicit_array",
+      "epochs": 80,
+      "execution_report_sha256": "c604d882c643ef840743cb934ce68e0d08a031455c3609a05966be3b8b092758",
+      "finite_normalized_abundance": true,
+      "mapping_mode": "clusters",
+      "mapping_shape": [
+        18,
+        9852
+      ],
+      "native_model_reloaded": true,
+      "native_model_sha256": "898a7731aed570ff5c3aad96c8304d418b9f2ab49eff53ca2a4bfdff2ff6e556",
+      "official_source_commit": "4c68995a418f41dc8caef567598c4d9b47781a13",
+      "reference_cell_types": 18,
+      "reference_cells": 26431,
+      "seed": 20260802,
+      "shared_genes": 249,
+      "spatial_locations": 9852
+    },
+    {
+      "abundance_sha256": "2fc649e0ef25f2fd34d6d03cc2b6b5bac37aa59a607ef3deaf998c30fb74171e",
+      "abundance_shape": [
+        71,
+        19
+      ],
+      "backend": "RCTD",
+      "backend_version": "2.2.1",
+      "execution_report_sha256": "e4193521e5013af6094bc41ccfd13bc4b618d3132c67948e11243c15da181731",
+      "finite_normalized_abundance": true,
+      "native_model_reloaded": true,
+      "native_model_sha256": "4c4d83cd0c4d6796c6656993ae6238ddc649c6ec38391ff778644c08c9c5514e",
+      "official_spacexr_example": "Slide-seq Vignette",
+      "reference_cell_types": 19,
+      "reference_cells": 475,
+      "shared_genes": 378,
+      "spatial_locations_input": 100,
+      "spatial_locations_retained": 71
+    }
+  ],
+  "implementation": {
+    "backend_templates": {
+      "RCTD": {
+        "path": "biomed_workbench/modules/builtin/spatial-multimethod-inference/templates/run_rctd_spotlight.R",
+        "sha256": "46f46fa4c2f91fd61f59e03e986f105f2675a9b635345d4ec09d87e1d6ddb1b2"
+      },
+      "Tangram": {
+        "path": "biomed_workbench/modules/builtin/spatial-multimethod-inference/templates/run_deconvolution.py",
+        "sha256": "752283a8b245dd4bf5d0a58fc4c1c09bf4f95893452bcbd0247d26e1b977326a"
+      }
+    },
+    "manifest_sha256": "1ae040c13e2d25d775df721539a380f2f1ef0ef5254ca3ccd9a94e4145c1d422",
+    "publisher_sha256": "39698453431027b9d184dd74c802dff2a35ebde225c532c0f1eece20dc60d2df",
+    "template_path": "biomed_workbench/modules/builtin/spatial-multimethod-inference/templates/run_deconvolution.py",
+    "template_sha256": "752283a8b245dd4bf5d0a58fc4c1c09bf4f95893452bcbd0247d26e1b977326a"
+  },
+  "module_id": "spatial-multimethod-inference",
+  "module_version": "1.0.0",
+  "observed_at": "2026-08-02T06:59:30.004627+00:00",
+  "passed": true,
+  "quality_gates": {
+    "current_tangram_template_executed": "pass",
+    "finite_nonnegative_abundance": "pass",
+    "location_identity_retained": "pass",
+    "native_backends_executed": "pass",
+    "native_models_reloaded": "pass",
+    "official_tangram_inputs_checksum_bound": "pass",
+    "reference_and_spatial_counts_reconciled": "pass",
+    "row_normalization": "pass"
+  },
+  "registry_digest": "632bf87110a3bec3f3283c1b36242312f5b5b58d0f49bd589bfa5f5528eaddd4",
+  "schema_version": 1,
+  "scientific_scope": "The released reference-mapping paths include Tangram probability mapping and RCTD count-based mixture estimation. Method identity, reference composition, retained locations and normalized abundance outputs remain explicit."
+}

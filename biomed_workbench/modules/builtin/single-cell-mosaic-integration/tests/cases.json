@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {"name": "totalvi-citeseq-handoff", "input": {"objective": "Integrate paired RNA and protein counts while retaining panel background and donor structure", "method": "totalvi", "multimodal_artifact_id": "citeseq-counts", "batch_key": "library_id", "sample_key": "donor_id", "seed": 17}, "expected_subset": {"handoff_type": "packaged_parameterized_project_analysis", "module": {"id": "single-cell-mosaic-integration"}}},
+    {"name": "multivi-mosaic-handoff", "input": {"objective": "Integrate paired and single modality RNA ATAC cells using paired anchors and a shared peak universe", "method": "multivi", "multimodal_artifact_id": "mosaic-h5mu", "batch_key": "library_id", "sample_key": "donor_id", "seed": 17}, "expected_subset": {"handoff_type": "packaged_parameterized_project_analysis", "module": {"id": "single-cell-mosaic-integration"}}},
+    {"name": "scglue-unpaired-handoff", "input": {"objective": "Integrate unpaired RNA and ATAC cells with a reviewed regulatory guidance graph", "method": "scglue", "multimodal_artifact_id": "unpaired-rna-atac", "guidance_graph_artifact_id": "promoter-guidance-v1", "batch_key": "library_id", "sample_key": "donor_id", "seed": 17}, "expected_subset": {"handoff_type": "packaged_parameterized_project_analysis", "module": {"id": "single-cell-mosaic-integration"}}}
+  ]
+}

@@ -23,7 +23,6 @@ from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 
 MODULE_ID = "single-cell-atac-regulatory"
-ROW_ID = "agent-protocol-1-macs3-304-signac-116-chromvar-124-motifmatchr-124"
 MODULE_ROOT = BUILTIN_ROOT / MODULE_ID
 MANIFEST = MODULE_ROOT / "module.json"
 TEMPLATE = MODULE_ROOT / "templates" / "call_macs3_fragments.py"
@@ -201,6 +200,9 @@ def verify(
             else "fail",
         }
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
+        manifest = registry.get(MODULE_ID)
+        if len(manifest.compatibility_matrix) != 1:
+            raise RuntimeError("public PBMC1k ATAC verification requires exactly one compatibility row")
         report = {
             "schema_version": 1,
             "case_id": "pbmc1k-atac-macs3-v1",
@@ -208,8 +210,8 @@ def verify(
             "passed": set(quality_gates.values()) == {"pass"},
             "module": {
                 "id": MODULE_ID,
-                "version": registry.get(MODULE_ID).version,
-                "compatibility_row_id": ROW_ID,
+                "version": manifest.version,
+                "compatibility_row_id": manifest.compatibility_matrix[0].id,
                 "manifest_sha256": sha256(MANIFEST),
                 "template_sha256": sha256(TEMPLATE),
                 "registry_digest": registry.digest,

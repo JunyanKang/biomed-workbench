@@ -1,0 +1,92 @@
+{
+  "backend": {
+    "anndata": "0.12.7",
+    "mudata": "0.3.8",
+    "name": "MultiVI",
+    "scvi_tools": "1.5.0"
+  },
+  "case_id": "pbmc-multiome-multivi-150-public-e2e-v1",
+  "case_type": "public-data-end-to-end",
+  "compatibility_binding_migration": {
+    "case_id": "pbmc-multiome-multivi-150-public-e2e-v1",
+    "compatibility_row_id": "scvi15-scglue041-mosaic-v1",
+    "migration_type": "registry-cited-public-evidence-binding",
+    "module_id": "single-cell-mosaic-integration",
+    "module_version": "1.0.0",
+    "reason": "The current module compatibility row uniquely cites this already passing public case. The binding adds release metadata only; source data, execution, parameters and results are unchanged.",
+    "report_sha256_before_binding": "d787c6c07d482e8be9a1e2c3f022e546dd8e3d470da2c69a3d958319283f84eb",
+    "reviewed_on": "2026-08-02",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false
+  },
+  "design": {
+    "atac_features": 800,
+    "atac_only": 100,
+    "paired": 400,
+    "rna_features": 600,
+    "rna_only": 100,
+    "selection_uses_labels": false
+  },
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-mosaic-integration"
+    ],
+    "module_slice_digest": "133fc9c762efa23ccf00f039805abcefb45a835f37a9808d979842af4f43db18",
+    "schema_version": 1
+  },
+  "evidence_scope_migration": {
+    "changed_fields": [
+      "maturity"
+    ],
+    "current_evidence_scope": {
+      "module_ids": [
+        "single-cell-mosaic-integration"
+      ],
+      "module_slice_digest": "133fc9c762efa23ccf00f039805abcefb45a835f37a9808d979842af4f43db18",
+      "schema_version": 1
+    },
+    "executed_implementation_current": null,
+    "migration_type": "reviewed-metadata-only-scope-reissue",
+    "prior_evidence_scope": {
+      "module_ids": [
+        "single-cell-mosaic-integration"
+      ],
+      "module_slice_digest": "1844ba68dcf8e89daf050d36ae00315a67f198d299b7ecf4c6932e54bf41bf54",
+      "schema_version": 1
+    },
+    "reason": "The module maturity label changed after representative observed execution passed; the executed implementation, parameters, source data, and scientific outputs in these reports are unchanged.",
+    "reissued_on": "2026-08-01",
+    "report_sha256_before_reissue": "f484976cedc3752a7210f45fcf58166273c7bcdbd4ff8c9685db191d034f3aa1",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false
+  },
+  "execution": {
+    "epochs": 20,
+    "integrated_h5mu_reload": true,
+    "latent_dimensions": 10,
+    "latent_tsv_reload": true,
+    "native_training": true,
+    "saved_model_reload": true
+  },
+  "module": {
+    "compatibility_row_id": "scvi15-scglue041-mosaic-v1",
+    "id": "single-cell-mosaic-integration",
+    "version": "1.0.0"
+  },
+  "passed": true,
+  "quality_gates": {
+    "cell_reconciliation": "pass",
+    "count_contract": "pass",
+    "finite_latent": "pass",
+    "mosaic_design": "pass",
+    "native_reload": "pass",
+    "source_identity": "pass"
+  },
+  "schema_version": 1,
+  "source": {
+    "dataset": "10x PBMC 10k Multiome",
+    "selected_cells": 600,
+    "sha256": "03f946fc11984e6d4e8bf9a5d5904654c3d8b6b5776e08b7962796a9cb81c48d",
+    "source_cells": 11909
+  }
+}

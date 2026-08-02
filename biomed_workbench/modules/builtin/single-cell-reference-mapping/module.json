@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "id": "single-cell-reference-mapping",
+  "version": "1.0.0",
+  "title": "Single-cell reference mapping",
+  "description": "Map count-backed query cells to frozen scArches SCVI or SCANVI references or portable Symphony references; decompose spatial locations with RCTD full or doublet modes; evaluate probability or abundance projections with Jensen-Shannon divergence; preserve reference geometry, query identities and unknown states.",
+  "module_type": "analysis",
+  "domains": ["omics", "classification"],
+  "intents": ["reference-map", "atlas-project", "label-transfer", "query-to-reference mapping"],
+  "questions": ["How does a query map onto a frozen reference atlas?", "Which query states are unsupported by the reference?", "Which cell-type mixtures explain spatial locations?", "Does JSD measure accuracy against truth or only concordance between projections?"],
+  "entrypoint": "agent-generated-analysis",
+  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "reference_and_query",
+      "artifact_type": "single_cell_reference_and_query",
+      "processing_levels": ["reference-reviewed", "query-quality-controlled", "raw-count-preserved"],
+      "required_metadata": ["reference-version", "reference-labels", "query-sample-key", "feature-namespace", "raw-count-location", "source-digests"],
+      "source_policy": "project_or_upstream",
+      "formats": [
+        {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["internal"], "required_indexes": ["observation-id", "feature-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-reference-release"], "orientations": ["reference-or-query-cell-by-gene"]},
+        {"name": "seurat-rds", "versions": ["5"], "representations": ["binary", "container"], "compression": ["internal"], "required_indexes": ["cell-id", "feature-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-reference-release"], "orientations": ["reference-or-query-cell-by-gene"]}
+      ]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "reference_mapping_evidence",
+      "artifact_type": "single_cell_reference_mapping_evidence",
+      "processing_levels": ["mapped", "confidence-reviewed", "unknown-retained", "reloaded"],
+      "required_metadata": ["method", "version", "reference-digest", "query-digest", "feature-overlap", "parameters", "mapping-confidence", "unknown-reasons"],
+      "source_policy": "upstream_required",
+      "formats": [
+        {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["internal"], "required_indexes": ["observation-id", "feature-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-from-reference"], "orientations": ["query-cell-by-gene-with-reference-embedding"]},
+        {"name": "seurat-rds", "versions": ["5"], "representations": ["binary", "container"], "compression": ["internal"], "required_indexes": ["cell-id", "feature-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-from-reference"], "orientations": ["query-cell-by-feature-with-symphony-reduction"]},
+        {"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["mapping-provenance-and-gates"]}
+      ]
+    }
+  ],
+  "preconditions": ["Reference model and annotation release are frozen and versioned; query raw counts, cells and feature namespace are explicit; reference-query feature overlap is measured before mapping."],
+  "assumptions": ["The reference covers at least part of the query biology and compatible assay features; nearest reference states are hypotheses rather than ground truth."],
+  "quality_gates": [
+    {"id": "frozen-reference-and-feature-overlap", "severity": "fatal", "description": "Block unversioned references, ambiguous feature namespaces, inadequate feature overlap or accidental reference retraining.", "blocks_interpretation": true},
+    {"id": "query-identity-and-unknown-retention", "severity": "fatal", "description": "Every query cell must be retained exactly once and low-confidence, unsupported or absent-reference populations must remain unknown.", "blocks_interpretation": true},
+    {"id": "mapping-holdout-and-reload", "severity": "fatal", "description": "Require label holdout or independent query evaluation, saved native reference/query objects, output reload and unchanged source counts.", "blocks_interpretation": true},
+    {"id": "spatial-mixture-and-jsd-semantics", "severity": "fatal", "description": "Use RCTD full mode for multicellular spots and doublet mode only for near-single-cell locations; interpret JSD as accuracy only against independent or simulated truth and otherwise as concordance.", "blocks_interpretation": true}
+  ],
+  "limitations": ["Reference mapping cannot discover a missing reference population by forced nearest-neighbor assignment. scArches inherits the base model and reference limitations. Symphony maps to a linear Harmony-style reference and does not create count-level evidence. RCTD estimates reference-defined cell-type mixtures and cannot recover states absent from the reference. JSD is a bounded distribution distance, not an integration or labeling algorithm."],
+  "evidence_effects": ["adds-scarches-symphony-rctd-and-jsd-reference-projection-evidence"],
+  "alternatives": ["single-cell-atlas-annotation", "single-cell-reference-annotation"],
+  "complements": ["single-cell-integration-benchmark", "single-cell-generative-modeling"],
+  "tool_requirements": [
+    {"name": "scvi-tools", "ecosystem": "python", "identity": "scvi-tools", "required": false, "tested_versions": ["1.3.3"], "allowed_versions": [">=1.3,<1.4"], "version_source": "https://docs.scvi-tools.org/en/stable/tutorials/notebooks/scrna/scarches_scvi_tools.html", "verified_at": "2026-07-31", "version_probe": ["python", "-c", "import scvi; print(scvi.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [], "platforms": ["any"]},
+    {"name": "symphony", "ecosystem": "r", "identity": "symphony", "required": false, "tested_versions": ["0.1.1"], "allowed_versions": [">=0.1,<0.2"], "version_source": "https://github.com/immunogenomics/symphony", "verified_at": "2026-07-31", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('symphony')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [], "platforms": ["any"]},
+    {"name": "spacexr", "ecosystem": "r", "identity": "spacexr", "required": false, "tested_versions": ["2.2.1"], "allowed_versions": [">=2.2,<2.3"], "version_source": "https://www.bioconductor.org/packages/release/bioc/html/spacexr.html", "verified_at": "2026-07-31", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('spacexr')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [], "platforms": ["any"]}
+  ],
+  "dependencies": [
+    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": false, "tested_versions": ["3.11"], "allowed_versions": [">=3.10,<3.13"], "version_source": "https://www.python.org/", "verified_at": "2026-07-31", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run scArches query mapping in an isolated runtime.", "conflicts": [], "platforms": ["any"]},
+    {"name": "r", "ecosystem": "runtime", "identity": "r-runtime", "required": false, "tested_versions": ["4.3"], "allowed_versions": [">=4.3,<4.5"], "version_source": "https://cran.r-project.org/", "verified_at": "2026-07-31", "version_probe": ["Rscript", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Build and map Symphony references.", "conflicts": [], "platforms": ["any"]}
+  ],
+  "compatibility_matrix": [
+    {"id": "scarches133-symphony011-spacexr221-v1", "module_version": "1.0.0", "tool_versions": {"scvi-tools": [">=1.3,<1.4"], "symphony": [">=0.1,<0.2"], "spacexr": [">=2.2,<2.3"]}, "dependency_versions": {"python": [">=3.10,<3.13"], "r": [">=4.3,<4.5"]}, "input_formats": {"reference_and_query": ["h5ad@0.1.0", "seurat-rds@5"]}, "output_formats": {"reference_mapping_evidence": ["h5ad@0.1.0", "seurat-rds@5", "inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["reference-mapping-contract-regression-v1"], "end_to_end_evidence_ids": ["reference-mapping-adapter-execution-v1"], "verified_at": "2026-07-31"}
+  ],
+  "access": "agent_generated",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "objective": {"type": "string", "minLength": 12},
+      "method": {"type": "string", "enum": ["scarches-scvi", "scarches-scanvi", "symphony", "rctd-full", "rctd-doublet", "jsd-evaluation"]},
+      "reference_artifact_id": {"type": "string", "minLength": 1},
+      "query_artifact_id": {"type": "string", "minLength": 1},
+      "batch_key": {"type": "string", "minLength": 1},
+      "label_key": {"type": "string", "minLength": 1},
+      "unknown_label": {"type": "string", "minLength": 1},
+      "seed": {"type": "integer"}
+    },
+    "required": ["objective", "method", "reference_artifact_id", "query_artifact_id", "batch_key", "label_key", "unknown_label", "seed"]
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {"handoff_type": {"type": "string"}, "module": {"type": "object"}, "request_digest": {"type": "string"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}},
+    "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["https://www.nature.com/articles/s41587-021-01001-7", "https://docs.scvi-tools.org/en/stable/tutorials/notebooks/scrna/scarches_scvi_tools.html", "https://www.nature.com/articles/s41467-021-25957-x", "https://github.com/immunogenomics/symphony", "https://www.nature.com/articles/s41587-021-00830-w", "https://www.bioconductor.org/packages/release/bioc/html/spacexr.html", "https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.distance.jensenshannon.html"]},
+  "code_templates": [
+    {"path": "templates/map_scarches.py", "language": "python", "purpose": "Map query cells to frozen SCVI or SCANVI references with weight-decay protection and optional label suggestions.", "quality_gate_ids": ["frozen-reference-and-feature-overlap", "query-identity-and-unknown-retention", "mapping-holdout-and-reload"], "requires_adaptation": false},
+    {"path": "templates/map_symphony.R", "language": "r", "purpose": "Build a portable Symphony reference and map query cells with retained reference and query objects.", "quality_gate_ids": ["frozen-reference-and-feature-overlap", "query-identity-and-unknown-retention", "mapping-holdout-and-reload"], "requires_adaptation": false},
+    {"path": "templates/map_rctd.R", "language": "r", "purpose": "Decompose multicellular or near-single-cell spatial locations using mode-appropriate RCTD and a reviewed count-backed reference.", "quality_gate_ids": ["frozen-reference-and-feature-overlap", "query-identity-and-unknown-retention", "spatial-mixture-and-jsd-semantics"], "requires_adaptation": false},
+    {"path": "templates/score_projection_jsd.py", "language": "python", "purpose": "Evaluate matched probability or abundance projections with spot- and cell-type-level Jensen-Shannon divergence.", "quality_gate_ids": ["mapping-holdout-and-reload", "spatial-mixture-and-jsd-semantics"], "requires_adaptation": false}
+  ],
+  "agent_protocol": {
+    "schema_version": 1,
+    "mode": "packaged_parameterized_workflow",
+    "languages": ["python", "r"],
+    "template_sections": [
+      {"id": "reference-preflight", "purpose": "Freeze the reference and prove query compatibility.", "required_logic": ["Record reference model, annotation release, feature namespace and source digest.", "Measure feature overlap and preserve query raw counts and identities.", "Predeclare unknown and low-confidence behavior."], "output_artifact_types": ["single_cell_reference_mapping_evidence"], "template_files": ["templates/map_scarches.py", "templates/map_symphony.R"]},
+      {"id": "map-and-review", "purpose": "Map without rebuilding the atlas and retain uncertainty.", "required_logic": ["Run the declared native method with frozen parameters.", "Keep embeddings, scores, suggested labels and reason-coded unknown cells.", "Evaluate held-out or independent query labels only after mapping."], "output_artifact_types": ["single_cell_reference_mapping_evidence"], "template_files": ["templates/map_scarches.py", "templates/map_symphony.R"]},
+      {"id": "spatial-projection", "purpose": "Project a single-cell reference into spatial mixtures with mode-appropriate RCTD and distributional evaluation.", "required_logic": ["Use full mode for multicellular spots and doublet mode only for near-single-cell locations.", "Run each biological sample separately and retain normalized weights plus the native RCTD object.", "Use JSD as accuracy only against independent truth and otherwise label it method or reference concordance."], "output_artifact_types": ["single_cell_reference_mapping_evidence"], "template_files": ["templates/map_rctd.R", "templates/score_projection_jsd.py"]}
+    ],
+    "parameter_rules": [
+      {"id": "reference-method", "parameter": "scarches-symphony-or-rctd", "decision_inputs": ["query is cells or spatial locations", "reference backend", "spot resolution", "available model", "feature overlap", "label confidence"], "selection_rule": "Use scArches or Symphony for cell-to-atlas mapping and RCTD for reference-defined spatial mixtures; do not use JSD as a mapper.", "validation_rule": "Require reference invariance, query preservation, feature overlap, holdout performance, unknown retention and mode-appropriate spatial diagnostics."},
+      {"id": "jsd-semantics", "parameter": "truth-or-concordance", "decision_inputs": ["independent truth availability", "simulation design", "matched probability support", "comparison objective"], "selection_rule": "Declare whether the second distribution is truth, simulation truth, another method or a reference distribution before computing JSD.", "validation_rule": "Report spot- and cell-type-level JSD and never call concordance accuracy without independent truth."}
+    ],
+    "preflight_checks": ["Inspect reference version, model files, labels, feature namespace, query counts, overlap, sample structure and runtime."],
+    "postflight_checks": ["Reload reference and query artifacts; reconcile cells, features, embeddings, predictions, parameters, versions, scores and digests."],
+    "provenance_fields": ["module-id", "module-version", "reference-id-and-version", "reference-digest", "query-digest", "feature-overlap", "method-version", "parameters", "seed", "output-digests", "quality-gates"],
+    "forbidden_actions": ["Do not overwrite the reference, force every cell to a known label, hide missing features, use query truth to tune mapping, or interpret nearest-reference labels as ground truth."],
+    "requires_observed_execution": true
+  }
+}

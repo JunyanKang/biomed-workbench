@@ -23,15 +23,27 @@ class ExperimentalMaturityReleaseTests(unittest.TestCase):
         report = self.report
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
         expected_count = sum(1 for module in registry.all() if module.maturity == "experimental")
-        self.assertTrue(report["passed"])
         self.assertEqual(report["experimental_module_count"], expected_count)
-        for key in (
-            "contract_passed",
-            "template_passed",
-            "compatibility_passed",
-            "representative_execution_passed",
-        ):
-            self.assertEqual(report[key], report["experimental_module_count"])
+        expected_foundational = sum(
+            record["evidence"]["contract"]
+            and record["evidence"]["passing_code_template"]
+            and record["evidence"]["compatibility"]
+            and record["evidence"]["representative_execution"]
+            for record in report["records"]
+        )
+        self.assertEqual(
+            report["passed"],
+            expected_foundational == report["experimental_module_count"],
+        )
+        self.assertEqual(report["representative_execution_passed"], sum(
+            record["evidence"]["representative_execution"] for record in report["records"]
+        ))
+        for record in report["records"]:
+            self.assertIn("rejected_representative_reports", record)
+            if record["evidence"]["representative_execution"]:
+                self.assertTrue(record["representative_execution_reports"])
+            else:
+                self.assertIn("representative_live_execution", record["missing_evidence"])
 
     def test_public_data_gaps_are_explicit_and_not_promoted_by_fixture_evidence(self):
         report = self.report

@@ -14,6 +14,8 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+from biomed_workbench.visualization import scientific_figure_standard, validate_panel_style
+
 
 def manuscript_audit(
     sections: dict[str, str],
@@ -108,7 +110,12 @@ def response_matrix(comments: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def figure_specification(title: str, panels: list[dict[str, Any]]) -> dict[str, Any]:
+def figure_specification(
+    title: str,
+    panels: list[dict[str, Any]],
+    analysis_type: str | None = None,
+    journal_profile: str = "nature",
+) -> dict[str, Any]:
     if not title.strip() or not panels:
         raise ValueError("figure title and at least one panel are required")
     labels = [str(panel.get("label", "")).strip() for panel in panels]
@@ -121,10 +128,20 @@ def figure_specification(title: str, panels: list[dict[str, Any]]) -> dict[str, 
         missing = [key for key in ("claim", "data_source", "plot") if not row[key]]
         if missing:
             findings.append({"label": row["label"], "missing": missing})
+        for finding in validate_panel_style(panel):
+            if finding["code"] not in {"PANEL_FIELD_MISSING"}:
+                findings.append({"label": row["label"], **finding})
         normalized.append(row)
+    standard = scientific_figure_standard(analysis_type, journal_profile)
     return {
         "title": title.strip(), "panels": normalized, "panel_findings": findings, "ready": not findings,
-        "quality_gates": ["Panel claim is supported by the stated data source.", "Axes, units, n, statistical test, and uncertainty are explicit.", "Colors remain distinguishable and consistent across figures.", "Raster elements meet final-size resolution requirements."],
+        "analysis_type": analysis_type or "general",
+        "journal_profile": journal_profile,
+        "required_plots": standard["required_plots"],
+        "optional_plots": standard["optional_plots"],
+        "style_standard": standard["style"],
+        "plot_contracts": standard["plot_contracts"],
+        "quality_gates": ["Panel claim is supported by the stated data source.", "Axes, units, n, statistical test, and uncertainty are explicit.", "Colors remain distinguishable and consistent across figures.", "Raster elements meet final-size resolution requirements.", "The selected target-journal profile is linked to a current official author guide before submission export."],
     }
 
 

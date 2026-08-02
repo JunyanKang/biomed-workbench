@@ -1,6 +1,13 @@
 {
   "case_id": "gse96583-paired-complex-inference-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-complex-inference"
+    ],
+    "module_slice_digest": "275bf3d5fca4b31179fdb56d89e8d3ef809e26e606ecca9c9d6cbdbb6c19c2ef",
+    "schema_version": 1
+  },
   "execution": {
     "alr_result_rows": 15,
     "composition_reference_stability": [
@@ -105,11 +112,29 @@
     "source_artifacts_immutable": true,
     "variance_result_rows": 12770
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "0f8b3ee2757b7a0a081dd1ceb44df30a8e6e060b95ab6a7bf31000dd3f0db188",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "6a8bac0699da0ea36f968e03b540ef9c6fde95887ee3e7d52e85a5ce4a7ad779",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "fit_composition_models.R": "687e2c2e2025c53e20596db658c1186be9217b52290f9ac89b4728e4e6004ae2",
+      "fit_dream_longitudinal.R": "c8406fbaaa6652e3c632f8600d00289f2f882fba7a14cc8617c870f68e179afb",
+      "prepare_inference_inputs.py": "3f09baf724e46b2d3c2ce325221277ac05be0627772523d283b5f2797e09517c"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-dream-1325-speckle-120",
     "id": "single-cell-complex-inference",
-    "manifest_sha256": "6a8bac0699da0ea36f968e03b540ef9c6fde95887ee3e7d52e85a5ce4a7ad779",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "0f8b3ee2757b7a0a081dd1ceb44df30a8e6e060b95ab6a7bf31000dd3f0db188",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": {
       "fit_composition_models.R": "687e2c2e2025c53e20596db658c1186be9217b52290f9ac89b4728e4e6004ae2",
       "fit_dream_longitudinal.R": "c8406fbaaa6652e3c632f8600d00289f2f882fba7a14cc8617c870f68e179afb",

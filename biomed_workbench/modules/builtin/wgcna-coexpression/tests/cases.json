@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "wgcna-request-generates-evidence-bound-handoff",
+      "input": {
+        "objective": "Identify stable signed coexpression modules and their association with declared sample traits",
+        "expression_artifact_id": "normalized-feature-matrix",
+        "traits_artifact_id": "sample-trait-manifest",
+        "normalization": "variance-stabilized sample-level abundance",
+        "feature_filter": "predeclared expression and variance eligibility filter",
+        "network_type": "signed",
+        "cor_type": "bicor",
+        "candidate_powers": [1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20],
+        "deep_split": 2,
+        "min_module_size": 30,
+        "merge_cut_height": 0.15,
+        "max_block_size": 5000,
+        "seed": 54321,
+        "threads": 1,
+        "stability_policy": "bootstrap consensus before consequential hub claims"
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "wgcna-coexpression"}
+      }
+    }
+  ]
+}

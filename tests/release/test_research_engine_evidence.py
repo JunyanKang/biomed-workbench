@@ -4,7 +4,7 @@ from pathlib import Path
 
 from biomed_workbench.modules.index import BUILTIN_ROOT
 from biomed_workbench.modules.registry import ModuleRegistry
-from tools.build_research_engine_report import build
+from tools.build_research_engine_report import EXECUTION_CONTRACTS, KERNEL_CONTRACTS, build
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -23,10 +23,8 @@ class ResearchEngineEvidenceTests(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(report["module_count"], len(ModuleRegistry.discover(BUILTIN_ROOT).all()))
         self.assertGreaterEqual(report["test_count"], 363)
-        self.assertEqual(
-            set(report["execution_contracts"]),
-            {"scientific_command", "command_companion_sidecar_input", "command_digest_bound_project_implementation", "command_input_binding", "command_derived_sidecar_output", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"},
-        )
+        self.assertEqual(report["kernel_contracts"], KERNEL_CONTRACTS)
+        self.assertEqual(report["execution_contracts"], EXECUTION_CONTRACTS)
         self.assertEqual(report["scenario_count"], 4)
         self.assertEqual({item["plan_type"] for item in scenarios}, {"single", "serial", "parallel", "mixed"})
         self.assertEqual(report["strict_compatibility_blocks"], 4)

@@ -12,15 +12,15 @@
         ]
       },
       "end_to_end_evidence_ids": [
-        "figure-specification-e2e-v1"
+        "figure-specification-e2e-v2"
       ],
-      "id": "python-3.14.3-inline-json-1",
+      "id": "python-3.14.3-inline-json-2",
       "input_formats": {
         "panel_requests": [
           "inline-json@1"
         ]
       },
-      "module_version": "1.0.0",
+      "module_version": "1.2.0",
       "output_formats": {
         "figure": [
           "inline-json@1"
@@ -30,10 +30,10 @@
         "any"
       ],
       "regression_evidence_ids": [
-        "figure-specification-regression-v1"
+        "figure-specification-regression-v2"
       ],
       "tool_versions": {},
-      "verified_at": "2026-07-12"
+      "verified_at": "2026-07-30"
     }
   ],
   "complements": [],
@@ -65,7 +65,7 @@
       "version_source": "https://www.python.org/downloads/release/python-3143/"
     }
   ],
-  "description": "Require a claim, data source, and plot form for every uniquely labeled figure panel.",
+  "description": "Require a claim, data source, plot form, final-size typography, strokes, colors, legends, statistical annotations, export settings, and analysis-specific plot inventory for every uniquely labeled scientific figure panel.",
   "domains": [
     "publication"
   ],
@@ -114,6 +114,27 @@
   "input_schema": {
     "additionalProperties": false,
     "properties": {
+      "analysis_type": {
+        "enum": [
+          "bulk-cuttag",
+          "bulk-r-loop-mapping",
+          "single-cell-atac-peak-recall",
+          "proteomics-deqms",
+          "go-kegg-overrepresentation",
+          "preranked-gsea",
+          "wgcna"
+        ],
+        "type": "string"
+      },
+      "journal_profile": {
+        "enum": [
+          "nature",
+          "science",
+          "cell",
+          "screen"
+        ],
+        "type": "string"
+      },
       "panels": {
         "items": {
           "type": "object"
@@ -191,8 +212,20 @@
       "panel_findings": {
         "type": "array"
       },
+      "analysis_type": {
+        "type": "string"
+      },
+      "journal_profile": {
+        "type": "string"
+      },
+      "optional_plots": {
+        "type": "array"
+      },
       "panels": {
         "type": "array"
+      },
+      "plot_contracts": {
+        "type": "object"
       },
       "quality_gates": {
         "type": "array"
@@ -200,15 +233,27 @@
       "ready": {
         "type": "boolean"
       },
+      "required_plots": {
+        "type": "array"
+      },
+      "style_standard": {
+        "type": "object"
+      },
       "title": {
         "type": "string"
       }
     },
     "required": [
+      "analysis_type",
+      "journal_profile",
       "panel_findings",
+      "optional_plots",
       "panels",
+      "plot_contracts",
       "quality_gates",
       "ready",
+      "required_plots",
+      "style_standard",
       "title"
     ],
     "type": "object"
@@ -218,7 +263,9 @@
   ],
   "provenance": {
     "concept_sources": [
-      "Project-owned implementation with module-level validation evidence."
+      "https://research-figure-guide.nature.com/figures/building-and-exporting-figure-panels/",
+      "https://www.nature.com/nature/for-authors/formatting-guide",
+      "docs/capabilities/advanced-omics-evidence-standard.md"
     ],
     "license": "Apache-2.0"
   },
@@ -231,10 +278,10 @@
     }
   ],
   "questions": [
-    "Does every figure panel state a unique claim, data source, and plot form?"
+    "Does every figure panel state a unique claim, data source, and plot form, and does the complete analysis satisfy the versioned final-size style and required-plot contract?"
   ],
   "schema_version": 1,
   "title": "Specify a scientific figure",
   "tool_requirements": [],
-  "version": "1.0.0"
+  "version": "1.2.0"
 }

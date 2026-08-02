@@ -1,0 +1,613 @@
+{
+  "assay": "gro-seq",
+  "case_id": "nfcore-nascent-2.3.0-official-minimal-v1",
+  "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "bulk-nascent-transcription"
+    ],
+    "module_slice_digest": "92a6bf0958e55c01b1a6f62327c3c65e8697198b11c4d99ae7686578184da325",
+    "schema_version": 1
+  },
+  "evidence_scope_migration": {
+    "changed_fields": [
+      "additive-unexecuted-adapter",
+      "maturity"
+    ],
+    "current_evidence_scope": {
+      "module_ids": [
+        "bulk-nascent-transcription"
+      ],
+      "module_slice_digest": "92a6bf0958e55c01b1a6f62327c3c65e8697198b11c4d99ae7686578184da325",
+      "schema_version": 1
+    },
+    "executed_implementation_current": {
+      "path": "biomed_workbench/implementations/nfcore.py",
+      "sha256": "188512d40ae53c2095322707c4acf1cc4513b3ba38c1ebf31c9e1d0c44c8164d"
+    },
+    "migration_type": "reviewed-metadata-only-scope-reissue",
+    "prior_evidence_scope": {
+      "module_ids": [
+        "bulk-nascent-transcription"
+      ],
+      "module_slice_digest": "eeb9e399a0c8c90eafac877b76c7218945b43658ba78c775070b1117350b7d75",
+      "schema_version": 1
+    },
+    "reason": "The module added separately packaged TT-seq, NET-seq, RIPSeeker, and LACE-seq adapters without changing the nf-core implementation executed by these reports; each added adapter receives its own observed public-data case.",
+    "reissued_on": "2026-08-01",
+    "report_sha256_before_reissue": "edad8bf0fcb26b85b4756ebf3405f1e4eb9630a1c2d23b2ef71e51e5b33d307a",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false
+  },
+  "execution": {
+    "assay": "gro-seq",
+    "checksum_bound_public_case": false,
+    "external_workflow_executed": true,
+    "official_public_test_profile": true,
+    "output_groups": {
+      "coverage": {
+        "file_count": 12,
+        "paths": [
+          "coverage_graphs/cd4_REP1.minus.bigWig",
+          "coverage_graphs/cd4_REP1.plus.bigWig",
+          "coverage_graphs/cd4_REP2.minus.bigWig",
+          "coverage_graphs/cd4_REP2.plus.bigWig",
+          "coverage_graphs/cd4_REP3.minus.bigWig",
+          "coverage_graphs/cd4_REP3.plus.bigWig",
+          "coverage_graphs/cd4_REP4.minus.bigWig",
+          "coverage_graphs/cd4_REP4.plus.bigWig",
+          "coverage_graphs/jurkat_REP1.minus.bigWig",
+          "coverage_graphs/jurkat_REP1.plus.bigWig",
+          "coverage_graphs/jurkat_REP2.minus.bigWig",
+          "coverage_graphs/jurkat_REP2.plus.bigWig"
+        ]
+      },
+      "multiqc": {
+        "file_count": 1,
+        "paths": [
+          "multiqc/multiqc_report.html"
+        ]
+      },
+      "pipeline_info": {
+        "file_count": 6,
+        "paths": [
+          "pipeline_info/execution_report_2026-08-01_11-43-34.html",
+          "pipeline_info/execution_timeline_2026-08-01_11-43-34.html",
+          "pipeline_info/execution_trace_2026-08-01_11-43-34.txt",
+          "pipeline_info/nf_core_nascent_software_mqc_versions.yml",
+          "pipeline_info/params_2026-08-01_11-43-42.json",
+          "pipeline_info/pipeline_dag_2026-08-01_11-43-34.html"
+        ]
+      },
+      "quantification": {
+        "file_count": 4,
+        "paths": [
+          "quantification/gene/cd4.featureCounts.txt",
+          "quantification/gene/jurkat.featureCounts.txt",
+          "quantification/nascent/cd4-group_cd4_intersect-transcripts.featureCounts.txt",
+          "quantification/nascent/jurkat-group_cd4_intersect-transcripts.featureCounts.txt"
+        ]
+      },
+      "transcription_units": {
+        "file_count": 27,
+        "paths": [
+          "transcript_identification/homer/cd4.bed",
+          "transcript_identification/homer/cd4.bedGraph.gz",
+          "transcript_identification/homer/cd4.peaks.txt",
+          "transcript_identification/homer/cd4_tagdir/chr21.tags.tsv",
+          "transcript_identification/homer/cd4_tagdir/genomeGCcontent.txt",
+          "transcript_identification/homer/cd4_tagdir/tagAutocorrelation.txt",
+          "transcript_identification/homer/cd4_tagdir/tagCountDistribution.txt",
+          "transcript_identification/homer/cd4_tagdir/tagFreq.txt",
+          "transcript_identification/homer/cd4_tagdir/tagFreqUniq.txt",
+          "transcript_identification/homer/cd4_tagdir/tagGCcontent.txt",
+          "transcript_identification/homer/cd4_tagdir/tagInfo.txt",
+          "transcript_identification/homer/cd4_tagdir/tagLengthDistribution.txt",
+          "transcript_identification/homer/jurkat.bed",
+          "transcript_identification/homer/jurkat.bedGraph.gz",
+          "transcript_identification/homer/jurkat.peaks.txt",
+          "transcript_identification/homer/jurkat_tagdir/chr21.tags.tsv",
+          "transcript_identification/homer/jurkat_tagdir/genomeGCcontent.txt",
+          "transcript_identification/homer/jurkat_tagdir/tagAutocorrelation.txt",
+          "transcript_identification/homer/jurkat_tagdir/tagCountDistribution.txt",
+          "transcript_identification/homer/jurkat_tagdir/tagFreq.txt",
+          "transcript_identification/homer/jurkat_tagdir/tagFreqUniq.txt",
+          "transcript_identification/homer/jurkat_tagdir/tagGCcontent.txt",
+          "transcript_identification/homer/jurkat_tagdir/tagInfo.txt",
+          "transcript_identification/homer/jurkat_tagdir/tagLengthDistribution.txt",
+          "transcript_identification/homer/versions.yml",
+          "transcript_identification/pints/cd4_chr21_1_unidirectional_peaks.bed",
+          "transcript_identification/pints/jurkat_chr21_1_unidirectional_peaks.bed"
+        ]
+      }
+    },
+    "outputs_reloaded": true,
+    "reloaded_files": [
+      {
+        "bytes": 131473,
+        "path": "coverage_graphs/cd4_REP1.minus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "113d5be9b2594cdc13c6726ef5da2566a3746691bcfba37029abd9628b096f9d"
+      },
+      {
+        "bytes": 140868,
+        "path": "coverage_graphs/cd4_REP1.plus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "ee840bade319f56784ec02b985c721482cb9db4ef211dd28b5fc740320d8a405"
+      },
+      {
+        "bytes": 123260,
+        "path": "coverage_graphs/cd4_REP2.minus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "5dc1c2b32bceaa7de8b2bd56b486500592f63b4378b46b87baf8739ca42578b4"
+      },
+      {
+        "bytes": 132983,
+        "path": "coverage_graphs/cd4_REP2.plus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "6bd2819921c6cec2df011b68454019832a5fd2683b40bd72cdf52a5c2b9d0e7b"
+      },
+      {
+        "bytes": 123492,
+        "path": "coverage_graphs/cd4_REP3.minus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "22113867e111283c9852eb520ab2fcb01ec1caaae6be54fc0d31d98b5d950ac2"
+      },
+      {
+        "bytes": 131711,
+        "path": "coverage_graphs/cd4_REP3.plus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "da2b68c05c669068114255922b6e9d78f90256981de8cc97d53bd4109b541fd4"
+      },
+      {
+        "bytes": 113550,
+        "path": "coverage_graphs/cd4_REP4.minus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "e8f31ddda36d0e4fb7a30eb4b9801a75e771f3a9bd6d8c15d92771761327d779"
+      },
+      {
+        "bytes": 120020,
+        "path": "coverage_graphs/cd4_REP4.plus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "48d36c682abd89e1626aef380ccae254c50d077f6cb30012c5c1deca3c80bdfa"
+      },
+      {
+        "bytes": 86060,
+        "path": "coverage_graphs/jurkat_REP1.minus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "fbfe31e67a8ff399bd7fa0d658ec7789b4463bca8f6ce05fa45a5ef0ae4430f7"
+      },
+      {
+        "bytes": 89705,
+        "path": "coverage_graphs/jurkat_REP1.plus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "8cb634c13352bbb8d0a1af2b0bcb6c1850446a9f545d64d5810e6688a9595b9a"
+      },
+      {
+        "bytes": 83936,
+        "path": "coverage_graphs/jurkat_REP2.minus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "7af1f08c38652d7d830df1157c596fd19455d7cacc32a9aca9c188222defb4a1"
+      },
+      {
+        "bytes": 87719,
+        "path": "coverage_graphs/jurkat_REP2.plus.bigWig",
+        "reload": "bigwig-signature",
+        "sha256": "ae817e98002244b3dfea8ca3f29ef29e7219f07ac1dc241b8bf1066cd254b53f"
+      },
+      {
+        "bytes": 5297800,
+        "path": "multiqc/multiqc_report.html",
+        "reload": "html",
+        "sha256": "7c87be9f4147e2853a321c9d0978f7b28ac5b0920d1ccdf4eb879f3109ef8124"
+      },
+      {
+        "bytes": 3353684,
+        "path": "pipeline_info/execution_report_2026-08-01_11-43-34.html",
+        "reload": "html",
+        "sha256": "6a4d96dddf2c7dc111f1615fede39a3ba07fd15a768b1700479949d472756db4"
+      },
+      {
+        "bytes": 302683,
+        "path": "pipeline_info/execution_timeline_2026-08-01_11-43-34.html",
+        "reload": "html",
+        "sha256": "ae14cb349350fe5c3064544728697b8375b23149c74fd55ce38a0582cd94c062"
+      },
+      {
+        "bytes": 26592,
+        "path": "pipeline_info/execution_trace_2026-08-01_11-43-34.txt",
+        "reload": "delimited-text",
+        "row_count": 150,
+        "sha256": "873b41930a29a0ca3c0011b3daf7b60f39c73be6166227ce7db3259ac221804d"
+      },
+      {
+        "bytes": 1102,
+        "path": "pipeline_info/nf_core_nascent_software_mqc_versions.yml",
+        "reload": "yaml-structure",
+        "sha256": "dbf1649aa71a8f8e87478370d3677fc185f269f862e85317a6a9394616798858"
+      },
+      {
+        "bytes": 2593,
+        "path": "pipeline_info/params_2026-08-01_11-43-42.json",
+        "reload": "json",
+        "sha256": "684dde81be9cf726ab20d1f836db82598c9b1548b24655c2edefd49a9775aa37"
+      },
+      {
+        "bytes": 9013,
+        "path": "pipeline_info/pipeline_dag_2026-08-01_11-43-34.html",
+        "reload": "html",
+        "sha256": "f0338b04cf280a2ea9f4a18540e5586ad3ca845989116012eb268abfcbe9b923"
+      },
+      {
+        "bytes": 162834,
+        "path": "quantification/gene/cd4.featureCounts.txt",
+        "reload": "delimited-text",
+        "row_count": 352,
+        "sha256": "d33f53b3ea3258a8f2c5db5bb84964c6c7b19aab1d35de4ccea157f01c173368"
+      },
+      {
+        "bytes": 161235,
+        "path": "quantification/gene/jurkat.featureCounts.txt",
+        "reload": "delimited-text",
+        "row_count": 352,
+        "sha256": "9427207b54ef2be546d30154c362f70b7b93f7a8502c5c3e42afa0eb4f696885"
+      },
+      {
+        "bytes": 500,
+        "path": "quantification/nascent/cd4-group_cd4_intersect-transcripts.featureCounts.txt",
+        "reload": "delimited-text",
+        "row_count": 3,
+        "sha256": "7da7a921bb035cbe5819108ff52c8e85ca56850be12509f1336f275798e520cd"
+      },
+      {
+        "bytes": 420,
+        "path": "quantification/nascent/jurkat-group_cd4_intersect-transcripts.featureCounts.txt",
+        "reload": "delimited-text",
+        "row_count": 3,
+        "sha256": "1901cb5a478114dd9626b1ab15f72174c9e7d3b2fc9bd4ad45be10deb2d607d8"
+      },
+      {
+        "bytes": 2063,
+        "path": "transcript_identification/homer/cd4.bed",
+        "reload": "delimited-text",
+        "row_count": 33,
+        "sha256": "36a6bd9219a2ea855fa8deba5ea3ff07f278b725a311bb4cf4cb72dc4c0528ae"
+      },
+      {
+        "bytes": 316802,
+        "path": "transcript_identification/homer/cd4.bedGraph.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "608ebcac699fb9c46de72c6f461a51e6e8a3d24f132aa9248fe1f5df3da62584"
+      },
+      {
+        "bytes": 2472,
+        "path": "transcript_identification/homer/cd4.peaks.txt",
+        "reload": "delimited-text",
+        "row_count": 33,
+        "sha256": "df85a7d7c332fe186411b27959c10cd142f6638517d70f2b73ccf7dcbd52a1b6"
+      },
+      {
+        "bytes": 801430,
+        "path": "transcript_identification/homer/cd4_tagdir/chr21.tags.tsv",
+        "reload": "delimited-text",
+        "row_count": 32092,
+        "sha256": "ef322e26a4be3251e54ab078941e6e4234150e9fd3cd4bd0094fc099c415d4b0"
+      },
+      {
+        "bytes": 10198,
+        "path": "transcript_identification/homer/cd4_tagdir/genomeGCcontent.txt",
+        "reload": "delimited-text",
+        "row_count": 461,
+        "sha256": "fa6457ea119164801814c00b68edcc548000cb8a10d5935192b0baf34ecf72c6"
+      },
+      {
+        "bytes": 59681,
+        "path": "transcript_identification/homer/cd4_tagdir/tagAutocorrelation.txt",
+        "reload": "delimited-text",
+        "row_count": 4001,
+        "sha256": "ebf69bfcb37daa3fdc2380731b67e4ba168c2cd1c04a936ac25bd3a520ca9876"
+      },
+      {
+        "bytes": 1180,
+        "path": "transcript_identification/homer/cd4_tagdir/tagCountDistribution.txt",
+        "reload": "delimited-text",
+        "row_count": 93,
+        "sha256": "cf450d13aa3696dc2b0b065e155aa909902e2556261d7ecb445c9da8ec5a77ca"
+      },
+      {
+        "bytes": 131653,
+        "path": "transcript_identification/homer/cd4_tagdir/tagFreq.txt",
+        "reload": "delimited-text",
+        "row_count": 559,
+        "sha256": "2463535d65606c862c0d637e5b1bd2b067eed7f569cb70ad0d64e95bf74c3f6f"
+      },
+      {
+        "bytes": 131653,
+        "path": "transcript_identification/homer/cd4_tagdir/tagFreqUniq.txt",
+        "reload": "delimited-text",
+        "row_count": 559,
+        "sha256": "24ce179fce4c0576d6059beabd99f959bc318be1c180bf422bd30cfb572fc9fd"
+      },
+      {
+        "bytes": 9128,
+        "path": "transcript_identification/homer/cd4_tagdir/tagGCcontent.txt",
+        "reload": "delimited-text",
+        "row_count": 461,
+        "sha256": "8e4e816c917e321dca5ec2f49be76089292691189bf15f3c93d62ab9d5432cc6"
+      },
+      {
+        "bytes": 451,
+        "path": "transcript_identification/homer/cd4_tagdir/tagInfo.txt",
+        "reload": "delimited-text",
+        "row_count": 12,
+        "sha256": "60f8133fa6af639a444ef6a61ccdbb8678f85cd3a3482bf294abbe98997d1a0f"
+      },
+      {
+        "bytes": 675,
+        "path": "transcript_identification/homer/cd4_tagdir/tagLengthDistribution.txt",
+        "reload": "delimited-text",
+        "row_count": 53,
+        "sha256": "58b9871b6a15dcb57ec4623a395d133bfa8ed0a6e4866283f50179c6593ee2b4"
+      },
+      {
+        "bytes": 945,
+        "path": "transcript_identification/homer/jurkat.bed",
+        "reload": "delimited-text",
+        "row_count": 4,
+        "sha256": "d13aaa8adbb9af4f3b968c60ac956ff7589833e52e1e62ece993566a39350242"
+      },
+      {
+        "bytes": 115153,
+        "path": "transcript_identification/homer/jurkat.bedGraph.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "a5f2da7bd2fef1944b0cbbbb58efa6a010e21bf56202215f6549beaf2d6e7ed2"
+      },
+      {
+        "bytes": 992,
+        "path": "transcript_identification/homer/jurkat.peaks.txt",
+        "reload": "delimited-text",
+        "row_count": 4,
+        "sha256": "58e5dbe1ba606c58283267f906b57c0bb7413538975a5368b4aa95e86b77f659"
+      },
+      {
+        "bytes": 261041,
+        "path": "transcript_identification/homer/jurkat_tagdir/chr21.tags.tsv",
+        "reload": "delimited-text",
+        "row_count": 10462,
+        "sha256": "351074a84df969a9c783598cca4f2d225c555d39e9a458ffd8d1c5c996243c4d"
+      },
+      {
+        "bytes": 1828,
+        "path": "transcript_identification/homer/jurkat_tagdir/genomeGCcontent.txt",
+        "reload": "delimited-text",
+        "row_count": 78,
+        "sha256": "e86cb2768dfe57e371ce6daa396b49d1c460e79db61511a2d4ac9eeabf948824"
+      },
+      {
+        "bytes": 52954,
+        "path": "transcript_identification/homer/jurkat_tagdir/tagAutocorrelation.txt",
+        "reload": "delimited-text",
+        "row_count": 4001,
+        "sha256": "a67bacdc8fc10a67fbb64dfbeb4e89fc4810b12d5f85081931fe8993541dca69"
+      },
+      {
+        "bytes": 3356,
+        "path": "transcript_identification/homer/jurkat_tagdir/tagCountDistribution.txt",
+        "reload": "delimited-text",
+        "row_count": 261,
+        "sha256": "22144bd52fd9aae9beb68f57b934cefeaeaab5c61a78168ed2cd0cd8fab74ec0"
+      },
+      {
+        "bytes": 41265,
+        "path": "transcript_identification/homer/jurkat_tagdir/tagFreq.txt",
+        "reload": "delimited-text",
+        "row_count": 176,
+        "sha256": "1a4a711668ae2ce69c17827801d29bff52bd1453bd24f2bc7693c5e2b8cb3598"
+      },
+      {
+        "bytes": 41265,
+        "path": "transcript_identification/homer/jurkat_tagdir/tagFreqUniq.txt",
+        "reload": "delimited-text",
+        "row_count": 176,
+        "sha256": "397806c35627635491ce9a56e0688f236fe52671249441dca61cd28e0ae55c74"
+      },
+      {
+        "bytes": 1571,
+        "path": "transcript_identification/homer/jurkat_tagdir/tagGCcontent.txt",
+        "reload": "delimited-text",
+        "row_count": 78,
+        "sha256": "f45ef7c753252933173a915081e42a705b6f1213ab16616a38c9d7acbc872da6"
+      },
+      {
+        "bytes": 418,
+        "path": "transcript_identification/homer/jurkat_tagdir/tagInfo.txt",
+        "reload": "delimited-text",
+        "row_count": 12,
+        "sha256": "12a0513a040b3c258e0ddba5842203f286cc19c5fd2f6a8f61af073919d3b50c"
+      },
+      {
+        "bytes": 675,
+        "path": "transcript_identification/homer/jurkat_tagdir/tagLengthDistribution.txt",
+        "reload": "delimited-text",
+        "row_count": 53,
+        "sha256": "d055f57cfb3f704e248fa16157917351a741c5ded3c1bae68d371c71d8dcc515"
+      },
+      {
+        "bytes": 96,
+        "path": "transcript_identification/homer/versions.yml",
+        "reload": "yaml-structure",
+        "sha256": "6f186c676a7db6488309061034dbdefff3cd020ee4084d15ba00b875034dff04"
+      },
+      {
+        "bytes": 3872,
+        "path": "transcript_identification/pints/cd4_chr21_1_unidirectional_peaks.bed",
+        "reload": "delimited-text",
+        "row_count": 55,
+        "sha256": "56a1416d052284b2f78164b2249c49fed083a33725ff2dd3868d08c85638e06d"
+      },
+      {
+        "bytes": 427,
+        "path": "transcript_identification/pints/jurkat_chr21_1_unidirectional_peaks.bed",
+        "reload": "delimited-text",
+        "row_count": 6,
+        "sha256": "0c071a1abed88a297af1441c2d33807209e43488cd5001d413c3914003652020"
+      }
+    ],
+    "runtime_compatibility": [
+      {
+        "id": "nfcore-workstation-resource-limits",
+        "limits": {
+          "cpus": 4,
+          "memory": "30.GB",
+          "time": "6.h"
+        },
+        "nextflow_config_sha256": "8228cb3b52544ab2d00cd04ae4676704d5c542c1499df442288a620c430000d6",
+        "reason": "Cap scheduler reservations to the declared workstation capacity using the official nf-core resourceLimits mechanism.",
+        "scientific_parameters_changed": false,
+        "scope": "all processes in nf-core/nascent 2.3.0"
+      },
+      {
+        "container": "community.wave.seqera.io/library/fastqc@sha256:c7cdf1bd0bd7557ba7d0a986f1e907bed45cd54a484f3a81dc5a472abdf318ba",
+        "id": "nfcore-nascent-fastqc-arm64-container",
+        "nextflow_config_sha256": "8228cb3b52544ab2d00cd04ae4676704d5c542c1499df442288a620c430000d6",
+        "reason": "FastQC 0.12.1 can remain CPU-bound indefinitely under amd64 emulation for a valid official fixture FASTQ; the same pinned FastQC version in the nf-core-generated ARM64 image completes the file successfully.",
+        "scientific_parameters_changed": false,
+        "scope": "nf-core/nascent 2.3.0 FASTQC processes on ARM64 Docker only"
+      }
+    ],
+    "scientific_file_count": 50,
+    "workflow": {
+      "name": "nf-core/nascent",
+      "official_schema_sha256": "4ba0638668088b749c93a6036ec6373f42aeb4e9775ae91b7318b8e4f2cc9958",
+      "revision": "2.3.0",
+      "revision_commit": "7d4fe61975015f652c271886e661764b05cfd3bf"
+    }
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "implementation": {
+    "path": "biomed_workbench/implementations/nfcore.py",
+    "sha256": "188512d40ae53c2095322707c4acf1cc4513b3ba38c1ebf31c9e1d0c44c8164d"
+  },
+  "module": {
+    "id": "bulk-nascent-transcription",
+    "version": "0.2.0"
+  },
+  "observed_at": "2026-08-01T03:56:10.677126+00:00",
+  "passed": true,
+  "quality_gates": {
+    "all_inputs_checksum_bound": true,
+    "assay_specific_outputs_reloaded": true,
+    "external_workflow_exit_zero": true,
+    "multiqc_reloaded": true,
+    "pinned_official_schema": true,
+    "pinned_public_source_commits": true,
+    "pinned_workflow_identity": true,
+    "scientific_output_checksums_recorded": true
+  },
+  "runtime": {
+    "engine_profile": "docker",
+    "nextflow_version": "25.4.8",
+    "profile_runtime_version": "29.2.1"
+  },
+  "schema_version": 1,
+  "scientific_boundary": "This is an executable integration and output-reload acceptance on the pinned official minimal public fixture. It is not a biological project conclusion.",
+  "source": {
+    "derived_tools": [],
+    "official_samplesheet_row_count": null,
+    "pipeline_commit": "7d4fe61975015f652c271886e661764b05cfd3bf",
+    "pipeline_revision": "2.3.0",
+    "selected_pair_ids": [],
+    "selected_samplesheet_row_count": null,
+    "selection_policy": null,
+    "source_file_count": 12,
+    "source_files": [
+      {
+        "bytes": 1014,
+        "name": "samplesheet.csv",
+        "rewritten_to_local_immutable_paths": true,
+        "sha256": "95b8f503a094b7a876cb74d76ad51cbcb88226cfed4f4b747b8a3a0ea5a4e21d",
+        "source_url": "https://raw.githubusercontent.com/nf-core/nascent/7d4fe61975015f652c271886e661764b05cfd3bf/assets/samplesheet.csv"
+      },
+      {
+        "bytes": 72,
+        "name": "unwanted_region.bed",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "4c63b4f2d8fa2f5f6fc1e84568b37642813e5f79cf2e879a1f1b1142292911a3",
+        "source_url": "https://raw.githubusercontent.com/nf-core/nascent/7d4fe61975015f652c271886e661764b05cfd3bf/tests/config/unwanted_region.bed"
+      },
+      {
+        "bytes": 48,
+        "name": "wanted_region.bed",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "666b0f04525011660cebea40c5f82681677b793f514556fdb2b4cc0636e6b9b0",
+        "source_url": "https://raw.githubusercontent.com/nf-core/nascent/7d4fe61975015f652c271886e661764b05cfd3bf/tests/config/wanted_region.bed"
+      },
+      {
+        "bytes": 47377349,
+        "name": "GRCh38_chr21.fa",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "89084e0423c4578c497f0ae8cbbaf36267cda38773de394af947e46b5d045ef6",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/a9010a0c5ff942987cb06f77d09c2b1dbebddb0c/reference/GRCh38_chr21.fa"
+      },
+      {
+        "bytes": 59369654,
+        "name": "GRCh38_chr21_hisat2.tar.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "9a6c62e1bd9cc46e219af9f3903c7256615bed8f4c656b21e786f5b5d4718db2",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/a9010a0c5ff942987cb06f77d09c2b1dbebddb0c/reference/GRCh38_chr21_hisat2.tar.gz"
+      },
+      {
+        "bytes": 1620759,
+        "name": "genes_chr21.gtf",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "5d5520f0e10ddfb7125f87c53f0db5610d47fbb6d5e5485e08e416a4aad61e1a",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/a9010a0c5ff942987cb06f77d09c2b1dbebddb0c/reference/genes_chr21.gtf"
+      },
+      {
+        "bytes": 2367148,
+        "name": "SRX882903_T1.fastq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "37f9d8ebedc33dfea12d0bb716afedc9d5a83ef0d0b5436a62a497e67a90259b",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/a9010a0c5ff942987cb06f77d09c2b1dbebddb0c/testdata/SRX882903_T1.fastq.gz"
+      },
+      {
+        "bytes": 2318712,
+        "name": "SRX882903_T2.fastq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "fcd648187c2fad0519019ece347f85f8c331c5a33bbe4884b85ede07b6552cb8",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/a9010a0c5ff942987cb06f77d09c2b1dbebddb0c/testdata/SRX882903_T2.fastq.gz"
+      },
+      {
+        "bytes": 2124312,
+        "name": "SRX882903_T3.fastq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "72a8bc59e08362c7cd23d3ebaefc470885de262d47a980f8fde327dd4910f45b",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/a9010a0c5ff942987cb06f77d09c2b1dbebddb0c/testdata/SRX882903_T3.fastq.gz"
+      },
+      {
+        "bytes": 2182404,
+        "name": "SRX882903_T4.fastq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "98d0920db01e8ef31df6d65f4873d78de9f9c6698053764d0347f257ad33e888",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/a9010a0c5ff942987cb06f77d09c2b1dbebddb0c/testdata/SRX882903_T4.fastq.gz"
+      },
+      {
+        "bytes": 2189129,
+        "name": "SRX882904_T1.fastq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "969e21a6a23b1b3f41df2cacb58070453ea93429a8e8bf3d525901569e951c41",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/a9010a0c5ff942987cb06f77d09c2b1dbebddb0c/testdata/SRX882904_T1.fastq.gz"
+      },
+      {
+        "bytes": 2306387,
+        "name": "SRX882904_T2.fastq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "a3a6423e6f00da871704117ed58627ec7586bc56787ad4179cbb1875df34b7c3",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/a9010a0c5ff942987cb06f77d09c2b1dbebddb0c/testdata/SRX882904_T2.fastq.gz"
+      }
+    ],
+    "test_data_commits": {
+      "nascent": "a9010a0c5ff942987cb06f77d09c2b1dbebddb0c"
+    }
+  }
+}

@@ -728,7 +728,7 @@ def _agent_parameter(value: Any, location: str) -> AgentParameterRule:
 def _agent_protocol(value: Any) -> AgentProtocol:
     payload = _object(value, "manifest.agent_protocol")
     _exact_fields(payload, _AGENT_PROTOCOL_FIELDS, "manifest.agent_protocol")
-    if payload["schema_version"] != 1 or payload["mode"] != "codex_generated_project_code":
+    if payload["schema_version"] != 1 or payload["mode"] != "packaged_parameterized_workflow":
         raise ValueError("manifest.agent_protocol version or mode is unsupported")
     sections = payload["template_sections"]
     parameters = payload["parameter_rules"]
@@ -740,7 +740,7 @@ def _agent_protocol(value: Any) -> AgentProtocol:
         raise ValueError("manifest.agent_protocol contains duplicate section or parameter rule ids")
     return AgentProtocol(
         schema_version=1,
-        mode="codex_generated_project_code",
+        mode="packaged_parameterized_workflow",
         languages=_strings(payload["languages"], "manifest.agent_protocol.languages"),
         template_sections=parsed_sections,
         parameter_rules=parsed_parameters,

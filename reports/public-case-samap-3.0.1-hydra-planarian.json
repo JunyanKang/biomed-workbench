@@ -1,0 +1,92 @@
+{
+  "backend": {
+    "distribution": "sc-samap",
+    "name": "SAMap",
+    "python": "3.12.11",
+    "version": "3.0.1"
+  },
+  "case_id": "samap-3.0.1-official-hydra-planarian-v1",
+  "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-cross-species-integration"
+    ],
+    "module_slice_digest": "b9030247c9f53399cef05536bcd0516de70778125ac9e2bbc9300d4aa75440a7",
+    "schema_version": 1
+  },
+  "evidence_scope_migration": {
+    "changed_fields": [
+      "maturity"
+    ],
+    "current_evidence_scope": {
+      "module_ids": [
+        "single-cell-cross-species-integration"
+      ],
+      "module_slice_digest": "b9030247c9f53399cef05536bcd0516de70778125ac9e2bbc9300d4aa75440a7",
+      "schema_version": 1
+    },
+    "executed_implementation_current": null,
+    "migration_type": "reviewed-metadata-only-scope-reissue",
+    "prior_evidence_scope": {
+      "module_ids": [
+        "single-cell-cross-species-integration"
+      ],
+      "module_slice_digest": "30c2fde54cdd140bd6d5fe18d28904e1d80509919eb8544e29cc2e4045f759c6",
+      "schema_version": 1
+    },
+    "reason": "The module maturity label changed after representative observed execution passed; the executed implementation, parameters, source data, and scientific outputs in these reports are unchanged.",
+    "reissued_on": "2026-08-01",
+    "report_sha256_before_reissue": "34e45e4ca6d144ef6bfe011642ee86630899fa12380f047d7a3d1d4abdfab202",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false
+  },
+  "execution": {
+    "cells": 2053,
+    "joint_umap": true,
+    "matched_gene_symbols": {
+      "hy": 11731,
+      "pl": 12330
+    },
+    "native_backend_executed": true,
+    "outputs_reloaded": true
+  },
+  "module": {
+    "id": "single-cell-cross-species-integration",
+    "version": "1.0.0"
+  },
+  "output": {
+    "cells": 2053,
+    "format": "h5ad",
+    "genes": 59313,
+    "sha256": "6e4e4281935310c94bbeaef1ce3c4694d066dad4c6f8c177ae13daeb74205d49"
+  },
+  "passed": true,
+  "quality_gates": {
+    "cell_reconciliation": "pass",
+    "finite_embedding": "pass",
+    "native_execution": "pass",
+    "reload": "pass",
+    "source_identity": "pass"
+  },
+  "schema_version": 1,
+  "source": {
+    "datasets": [
+      {
+        "cells": 1004,
+        "genes": 33376,
+        "name": "Hydra",
+        "sha256": "a940b4d4ce655ff21a933f50d38174bb993c9cf6deb332c584aa164c936c6f9b",
+        "species_id": "hy"
+      },
+      {
+        "cells": 1049,
+        "genes": 25937,
+        "name": "planarian",
+        "sha256": "27f081f3c77ed1a4155e9c439290463fb3d038fea67e77c9dbc556b58fb05f1e",
+        "species_id": "pl"
+      }
+    ],
+    "homology_map_sha256": "fb4beff23275c2d834cf24e3ce7c243ce0bed54808c72984861b83eedb567488",
+    "repository": "https://github.com/atarashansky/SAMap/tree/v3.0.1/example_data"
+  }
+}

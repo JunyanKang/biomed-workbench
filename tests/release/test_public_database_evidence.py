@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
 from biomed_workbench.modules.registry import ModuleRegistry
 from biomed_workbench.services.public_databases import (
     ALPHAFOLD_CONTRACT_VERSION,
@@ -50,7 +51,7 @@ class PublicDatabaseEvidenceTests(unittest.TestCase):
         }
 
         self.assertTrue(self.report["passed"])
-        self.assertEqual(self.report["registry_digest"], self.registry.digest)
+        self.assertTrue(evidence_scope_is_current(self.report, self.registry))
         self.assertEqual(set(self.report["module_ids"]), MODULE_IDS)
         self.assertEqual(self.report["contracts"], expected_contracts)
 

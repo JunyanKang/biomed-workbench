@@ -1,0 +1,83 @@
+{
+  "compatibility_row_id": "samap301-saturn1-came027-v1",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-cross-species-integration"
+    ],
+    "module_slice_digest": "b9030247c9f53399cef05536bcd0516de70778125ac9e2bbc9300d4aa75440a7",
+    "schema_version": 1
+  },
+  "execution": {
+    "backend": "SAMap",
+    "backend_version": "3.0.1",
+    "cells": 2053,
+    "expression_neighborhood_alignment_executed": true,
+    "genes_in_integrated_container": 59313,
+    "joint_umap_executed": true,
+    "matched_gene_symbols": {
+      "hydra": 11731,
+      "planarian": 12330
+    },
+    "official_public_example_executed": true,
+    "outputs_reloaded": true,
+    "result": {
+      "bytes": 43642659,
+      "embedding": "X_umap",
+      "path": "samap-integrated.h5ad",
+      "reload": "anndata.read_h5ad",
+      "sha256": "6e4e4281935310c94bbeaef1ce3c4694d066dad4c6f8c177ae13daeb74205d49"
+    },
+    "sequence_homology_maps_loaded": true,
+    "species": 2
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "implementation": {
+    "manifest_sha256": "8f3fe316c6a59db556700034a096c9ab414a3b0ad2f980359475195f51553299",
+    "raw_execution_report_sha256": "75f4aebb129cfeb5495d453639333335b341ef78b70bbfb7902b6458dd3c1855",
+    "template": "run_samap.py",
+    "template_sha256": "7e215b2fbb54a87e9ab608a3a623fa0b84d4d0bb4cef45c6d20f8859e4f05507"
+  },
+  "module_id": "single-cell-cross-species-integration",
+  "module_version": "1.0.0",
+  "observed_at": "2026-08-01T04:18:27Z",
+  "passed": true,
+  "quality_gates": {
+    "cell_count_reconciled": "pass",
+    "finite_joint_embedding": "pass",
+    "homology_maps_checksum_bound": "pass",
+    "integrated_h5ad_reloaded": "pass",
+    "official_inputs_checksum_bound": "pass"
+  },
+  "registry_digest": "b7b9b0a7ec9ad7c70b771b10f472ad40e1492c069be087c9fd9b3ae4cc2e45e8",
+  "schema_version": 1,
+  "scientific_scope": "This acceptance establishes executable SAMap 3.0.1 cross-species mapping on the official Hydra-planarian example. Project-level label transfer still uses the module's leave-one-species-out evaluator and retains species-specific states.",
+  "source": {
+    "files": [
+      {
+        "bytes": 69950240,
+        "name": "hydra.h5ad",
+        "sha256": "a940b4d4ce655ff21a933f50d38174bb993c9cf6deb332c584aa164c936c6f9b",
+        "url": "https://raw.githubusercontent.com/atarashansky/SAMap/v3.0.1/example_data/hydra.h5ad"
+      },
+      {
+        "bytes": 69595285,
+        "name": "planarian.h5ad",
+        "sha256": "27f081f3c77ed1a4155e9c439290463fb3d038fea67e77c9dbc556b58fb05f1e",
+        "url": "https://raw.githubusercontent.com/atarashansky/SAMap/v3.0.1/example_data/planarian.h5ad"
+      },
+      {
+        "bytes": 11665395,
+        "name": "hy_to_pl.txt",
+        "sha256": "98eb2072c9fa2d255f1a9617ab461b7c3ff75c3bfd5290c8eca7fc893577843e",
+        "url": "https://raw.githubusercontent.com/atarashansky/SAMap/v3.0.1/example_data/maps/hypl/hy_to_pl.txt"
+      },
+      {
+        "bytes": 11531268,
+        "name": "pl_to_hy.txt",
+        "sha256": "a2a7b1db196542148d897b13aff2bb13237b8fe61105a92870273e8355e27bda",
+        "url": "https://raw.githubusercontent.com/atarashansky/SAMap/v3.0.1/example_data/maps/hypl/pl_to_hy.txt"
+      }
+    ],
+    "release": "https://github.com/atarashansky/SAMap/releases/tag/v3.0.1"
+  }
+}

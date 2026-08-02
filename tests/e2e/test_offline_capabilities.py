@@ -116,7 +116,7 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
             "raw_count_location": "layers.counts", "requested_backend": "auto", "expected_modalities": ["rna"],
             "declared_thresholds": {}, "design_notes": "Four donors per condition; library is nested within donor."
         })
-        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertEqual(output["handoff_type"], "packaged_parameterized_project_analysis")
         self.assertTrue(output["execution_policy"]["observed_execution_required"])
         self.assertTrue(output["execution_policy"]["planned_output_is_not_evidence"])
         self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"scanpy", "seurat"})
@@ -131,7 +131,7 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
             "declared_thresholds": {"min_cells_per_pseudobulk": 20, "min_library_size": 10000, "min_replicates_per_group": 3},
             "design_notes": "Eight independent donors, four per condition; sex is not confounded with treatment."
         })
-        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertEqual(output["handoff_type"], "packaged_parameterized_project_analysis")
         self.assertTrue(output["execution_policy"]["observed_execution_required"])
         self.assertTrue(output["execution_policy"]["planned_output_is_not_evidence"])
         self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"scanpy", "edgeR", "DESeq2", "limma"})
@@ -149,7 +149,7 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
             "declared_thresholds": {"maximum_label_purity_loss": 0.15, "minimum_batch_entropy_gain": 0.05, "minimum_label_connectivity": 0.8},
             "design_notes": "Four independent samples cross two batches; labels are withheld from integration fitting."
         })
-        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertEqual(output["handoff_type"], "packaged_parameterized_project_analysis")
         self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"scanpy", "harmonypy", "scanorama", "bbknn"})
         self.assertIn("integration-no-label-leakage", output["quality_gate_ids"])
         self.assertTrue(output["execution_policy"]["observed_execution_required"])
@@ -164,7 +164,7 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
             "declared_thresholds": {"minimum_heldout_macro_f1": 0.8, "maximum_label_purity_loss": 0.15, "minimum_label_connectivity": 0.8},
             "design_notes": "Independent samples span two batches; every reviewed class occurs in both; unknown cells remain unpromoted."
         })
-        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertEqual(output["handoff_type"], "packaged_parameterized_project_analysis")
         self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"scvi-tools", "scanpy"})
         self.assertIn("scanvi-heldout-generalization", output["quality_gate_ids"])
         self.assertTrue(output["execution_policy"]["observed_execution_required"])
@@ -181,7 +181,7 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
             "declared_thresholds": {"minimum_delta_next": 0.05, "minimum_group_consensus": 0.8, "minimum_positive_marker_support": 0.75, "maximum_negative_marker_conflict": 0.25},
             "design_notes": "Reference labels are independently reviewed; query clusters were generated without reference-label leakage."
         })
-        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertEqual(output["handoff_type"], "packaged_parameterized_project_analysis")
         self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"SingleR", "scanpy"})
         self.assertIn("annotation-ontology-consistency", output["quality_gate_ids"])
         self.assertTrue(output["execution_policy"]["observed_execution_required"])
@@ -196,7 +196,7 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
             "declared_thresholds": {"minimum_modeled_genes": 20, "minimum_latent_time_correlation": 0.65, "minimum_velocity_pseudotime_correlation": 0.25, "minimum_root_terminal_separation": 0.05, "minimum_median_velocity_confidence": 0.7},
             "design_notes": "Four independent samples span the process; experimental time is withheld from fitting."
         })
-        self.assertEqual(output["handoff_type"], "codex_generated_project_analysis")
+        self.assertEqual(output["handoff_type"], "packaged_parameterized_project_analysis")
         self.assertEqual({item["name"] for item in output["tool_profiles"]}, {"scvelo", "scanpy"})
         self.assertIn("velocity-independent-direction", output["quality_gate_ids"])
         self.assertTrue(output["execution_policy"]["observed_execution_required"])

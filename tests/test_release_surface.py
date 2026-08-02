@@ -47,10 +47,11 @@ class ReleaseSurfaceTests(unittest.TestCase):
         english_readme = (ROOT / "README.en.md").read_text()
         development = (ROOT / "docs" / "development.md").read_text()
 
-        self.assertIn("codex plugin marketplace add JunyanKang/biomed-workbench --ref main", readme)
-        self.assertIn("codex plugin add biomed-workbench@biomed-workbench", readme)
-        self.assertIn("开启一个新的 Codex 任务", readme)
-        self.assertIn("new Codex task", english_readme)
+        self.assertIn("把这个 GitHub 项目链接交给 Codex", readme)
+        self.assertNotIn("codex plugin marketplace add", readme)
+        self.assertNotIn("codex plugin add", readme)
+        self.assertIn("开启一个新的研究任务", readme)
+        self.assertIn("open a new task", english_readme)
         self.assertNotIn("python3 ", readme)
         self.assertIn("python3 -m unittest discover -s tests -v", development)
 

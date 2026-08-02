@@ -1,0 +1,35 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "execution_policy": {
+          "manual_code_editing_required": false,
+          "observed_execution_required": true,
+          "planned_output_is_not_evidence": true
+        },
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {
+          "id": "bulk-rbp-rna-binding",
+          "version": "0.2.0"
+        }
+      },
+      "input": {
+        "annotation_release": "GENCODE-v48",
+        "assay": "rip-seq",
+        "control_policy": "assay-specific matched controls declared in the sample manifest",
+        "design_notes": "Independent biological replicates and assay-specific controls are retained through inference.",
+        "genome_build": "GRCh38",
+        "input_manifest_artifact_id": "bulk-rbp-rna-binding-manifest",
+        "objective": "Execute and quality review a representative rip-seq bulk sequencing analysis",
+        "parameters": {
+          "parameter_contract": "reviewed-and-frozen-before-execution"
+        },
+        "replicate_key": "biological_replicate",
+        "requested_workflow": "RIPSeeker or count-level IP versus input enrichment with biological replicates",
+        "sample_key": "sample_id"
+      },
+      "name": "prepare-rip-seq-workflow"
+    }
+  ],
+  "schema_version": 1
+}

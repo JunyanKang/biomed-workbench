@@ -33,11 +33,25 @@ def build() -> dict[str, object]:
         compatibility_records.setdefault(str(item["module_id"]), []).append(item)
 
     live_reports: dict[str, list[str]] = {}
+    rejected_live_reports: dict[str, list[dict[str, object]]] = {}
     for path in sorted((ROOT / "reports").glob("*-live-verification.json")):
         payload = load_json(path)
         module_id = payload.get("module_id")
-        if module_id and payload.get("passed") is True:
+        execution = payload.get("execution")
+        observed = (
+            payload.get("passed") is True
+            and payload.get("execution_evidence_level") == "observed_scientific_workflow"
+            and isinstance(execution, dict)
+            and execution.get("external_workflow_executed") is True
+            and execution.get("outputs_reloaded") is True
+        )
+        if module_id and observed:
             live_reports.setdefault(str(module_id), []).append(path.name)
+        elif module_id and payload.get("passed") is True:
+            rejected_live_reports.setdefault(str(module_id), []).append({
+                "report": path.name,
+                "reason": "missing_observed_scientific_workflow_and_output_reload_evidence",
+            })
 
     public_cases: dict[str, list[str]] = {}
     for path in sorted((ROOT / "reports").glob("public-case-*.json")):
@@ -91,10 +105,11 @@ def build() -> dict[str, object]:
                 "template_files": template.get("template_files", []),
                 "compatibility_row_ids": sorted(str(row["row_id"]) for row in compatibility),
                 "representative_execution_reports": live,
+                "rejected_representative_reports": rejected_live_reports.get(module.id, []),
                 "public_case_ids": public,
                 "missing_evidence": missing,
                 "claim_boundary": (
-                    "Public-data acceptance is source-, design-, parameter-, runtime-, and gate-specific."
+                    "Observed execution requires a successful external scientific workflow plus output reload; public-data acceptance is source-, design-, parameter-, runtime-, and gate-specific."
                     if public_data_acceptance
                     else "Deterministic or representative fixtures do not establish performance on biological public data."
                 ),

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from biomed_workbench.modules.contract import parse_manifest, version_is_allowed
 from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
 from biomed_workbench.modules.registry import ModuleRegistry
 
 
@@ -26,7 +27,7 @@ class SingleCellSpatialAnalysisEvidenceTests(unittest.TestCase):
         self.assertEqual(self.report["module_id"], self.manifest.id)
         self.assertEqual(self.report["module_version"], self.manifest.version)
         self.assertEqual(self.report["compatibility_row_id"], row.id)
-        self.assertEqual(self.report["registry_digest"], ModuleRegistry.discover(BUILTIN_ROOT).digest)
+        self.assertTrue(evidence_scope_is_current(self.report, ModuleRegistry.discover(BUILTIN_ROOT)))
         self.assertEqual(self.report["templates"]["spatial"]["sha256"], hashlib.sha256((MODULE_ROOT / "templates" / "run_spatial_analysis.py").read_bytes()).hexdigest())
         self.assertEqual(set(self.report["tool_versions"]), set(row.tool_versions))
         self.assertTrue(all(version_is_allowed(self.report["tool_versions"][name], rules) for name, rules in row.tool_versions.items()))

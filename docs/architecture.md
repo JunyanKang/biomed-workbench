@@ -97,7 +97,7 @@ python3 -m unittest discover -s tests -p 'test*.py'
 - Adding a tested baseline or widening a compatibility range requires an authoritative version source, a bounded version probe, compatibility-row coverage, input/output regression fixtures, known-change review, and representative end-to-end validation.
 - Changing required input fields, units, coordinate conventions, output meaning, defaults, or quality interpretation requires a module version update.
 - Removing an ID or breaking the v0.2 compatibility projection requires a documented plugin-level migration.
-- Optional credentials must remain in the project allowlist. `NCBI_API_KEY` is currently the only allowed credential.
+- Optional credentials must remain in the project allowlist and be assigned to exact endpoint contracts. `NCBI_API_KEY` is currently the only stored credential and is optional for the implemented NCBI E-utilities and Datasets endpoints; private or paid services require separate future contracts rather than reuse by database name.
 - Generated indexes must exactly match recursive manifest discovery and are checked by digest during release validation.
 
 ## Release Flow

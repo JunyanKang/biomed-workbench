@@ -3,6 +3,6 @@
   "cases": [{
     "name": "prepare-chain-bound-bed-liftover",
     "input": {"objective": "Convert declared hg19 BED intervals to hg38 while retaining every mapped and unmapped source record.", "interval_artifact_id": "peak-bed-hg19", "source_assembly": "hg19", "target_assembly": "hg38", "chain_artifact_id": "ucsc-hg19-to-hg38-chain", "chain_source_url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/hg19ToHg38.over.chain.gz", "coordinate_convention": "zero-based-half-open", "split_mapping_policy": "retain-and-flag", "unmapped_policy": "retain-and-report", "declared_thresholds": {"maximum_unmapped_fraction": 0.1}, "design_notes": "The hg19 source assembly, target hg38 assembly and exact UCSC chain digest are predeclared; unmapped and split records will be reviewed before downstream interval analysis."},
-    "expected_subset": {"handoff_type": "codex_generated_project_analysis", "module": {"id": "genome-coordinate-liftover", "version": "0.1.0"}, "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}}
+    "expected_subset": {"handoff_type": "packaged_parameterized_project_analysis", "module": {"id": "genome-coordinate-liftover", "version": "0.1.0"}, "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}}
   }]
 }

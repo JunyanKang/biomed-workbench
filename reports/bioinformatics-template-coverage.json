@@ -1,14 +1,17 @@
 {
-  "bioinformatics_module_count": 78,
-  "covered_module_count": 78,
+  "bioinformatics_module_count": 96,
+  "covered_module_count": 96,
+  "manual_adaptation_template_count": 0,
   "passed": true,
-  "passing_module_count": 78,
+  "passing_module_count": 96,
   "records": [
     {
       "domains": [
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "aligned-protein-conservation",
       "module_type": "analysis",
       "passed": true,
@@ -22,6 +25,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "alignment-quality-samtools",
       "module_type": "validation",
       "passed": true,
@@ -35,6 +40,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "alignment-sort-index-samtools",
       "module_type": "transform",
       "passed": true,
@@ -48,6 +55,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "assembly-reference-alignment",
       "module_type": "analysis",
       "passed": true,
@@ -58,16 +67,157 @@
     },
     {
       "domains": [
-        "omics",
-        "epigenomics"
+        "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "bulk-chromatin-accessibility",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 2,
+      "template_files": [
+        "templates/run_assay_workflow.py",
+        "templates/run_encode_accessibility.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "bulk-chromatin-peak-calling",
       "module_type": "analysis",
       "passed": true,
-      "template_count": 1,
+      "template_count": 2,
       "template_files": [
-        "templates/call_macs3_chromatin.py"
+        "templates/call_macs3_chromatin.py",
+        "templates/normalize_cuttag_internal_reference.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "bulk-dna-methylation",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 2,
+      "template_files": [
+        "templates/run_assay_workflow.py",
+        "templates/run_nfcore_methylseq.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "bulk-nascent-transcription",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 4,
+      "template_files": [
+        "templates/run_assay_workflow.py",
+        "templates/run_netseq_wdl.py",
+        "templates/run_nfcore_nascent.py",
+        "templates/run_ttseq_kinetics.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "bulk-r-loop-mapping",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 2,
+      "template_files": [
+        "templates/run_assay_workflow.py",
+        "templates/run_rlpipes.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "bulk-rbp-rna-binding",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 6,
+      "template_files": [
+        "templates/run_assay_workflow.py",
+        "templates/run_laceseq_clusters.py",
+        "templates/run_laceseq_fastq.py",
+        "templates/run_nfcore_clipseq.py",
+        "templates/run_ripseeker.R",
+        "templates/run_ripseeker.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "bulk-ribosome-profiling",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 3,
+      "template_files": [
+        "templates/ribotish_python314_sitecustomize.py",
+        "templates/run_assay_workflow.py",
+        "templates/run_nfcore_riboseq.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "bulk-rna-modification-enrichment",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 3,
+      "template_files": [
+        "templates/run_assay_workflow.py",
+        "templates/run_exomepeak2.R",
+        "templates/run_exomepeak2.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "bulk-three-dimensional-genome",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 5,
+      "template_files": [
+        "templates/run_assay_workflow.py",
+        "templates/run_capcmap.py",
+        "templates/run_chiapet2.py",
+        "templates/run_fithichip.py",
+        "templates/run_nfcore_hic.py"
       ]
     },
     {
@@ -75,6 +225,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "cd-thermal-transition-summary",
       "module_type": "analysis",
       "passed": true,
@@ -88,6 +240,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "chemical-substructure-filter",
       "module_type": "analysis",
       "passed": true,
@@ -102,6 +256,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "comparative-sequence-phylogeny",
       "module_type": "analysis",
       "passed": true,
@@ -116,6 +272,8 @@
         "epigenomics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "cool-contact-evidence",
       "module_type": "analysis",
       "passed": true,
@@ -130,6 +288,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "copy-number-event-summary",
       "module_type": "analysis",
       "passed": true,
@@ -143,6 +303,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "crispr-design",
       "module_type": "design",
       "passed": true,
@@ -156,6 +318,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "data-profile",
       "module_type": "validation",
       "passed": true,
@@ -170,6 +334,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "ddr-coexpression-hypothesis-network",
       "module_type": "analysis",
       "passed": true,
@@ -183,6 +349,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "differential-expression",
       "module_type": "analysis",
       "passed": true,
@@ -196,6 +364,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "dna-align-bwa-mem-single",
       "module_type": "transform",
       "passed": true,
@@ -209,6 +379,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "docking-pose-review",
       "module_type": "analysis",
       "passed": true,
@@ -223,6 +395,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "enrichment-analysis",
       "module_type": "analysis",
       "passed": true,
@@ -236,6 +410,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "enzyme-kinetics",
       "module_type": "analysis",
       "passed": true,
@@ -249,6 +425,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "expression-qc",
       "module_type": "validation",
       "passed": true,
@@ -259,10 +437,28 @@
     },
     {
       "domains": [
+        "omics",
+        "functional-genomics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "functional-enrichment",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_clusterprofiler_fgsea.R"
+      ]
+    },
+    {
+      "domains": [
         "molecular_design",
         "evidence"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "genbank-coding-sequence-extraction",
       "module_type": "transform",
       "passed": true,
@@ -276,6 +472,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "genome-coordinate-liftover",
       "module_type": "transform",
       "passed": true,
@@ -289,6 +487,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "glycosylation-scan",
       "module_type": "analysis",
       "passed": true,
@@ -302,6 +502,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "golden-gate-plan",
       "module_type": "design",
       "passed": true,
@@ -316,6 +518,8 @@
         "genetics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "gwas-susie-fine-mapping",
       "module_type": "analysis",
       "passed": true,
@@ -329,6 +533,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "interval-overlap-bedtools",
       "module_type": "analysis",
       "passed": true,
@@ -342,6 +548,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "itc-single-site-binding",
       "module_type": "analysis",
       "passed": true,
@@ -356,6 +564,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "metagene-factorization-nmf",
       "module_type": "analysis",
       "passed": true,
@@ -371,6 +581,8 @@
         "population-genetics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "msprime-demographic-simulation",
       "module_type": "analysis",
       "passed": true,
@@ -384,6 +596,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "multi-sample-variant-concordance",
       "module_type": "analysis",
       "passed": true,
@@ -397,6 +611,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "network-analysis",
       "module_type": "analysis",
       "passed": true,
@@ -410,6 +626,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "open-reading-frame-annotation",
       "module_type": "analysis",
       "passed": true,
@@ -423,6 +641,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "pcr-amplicon-simulation",
       "module_type": "analysis",
       "passed": true,
@@ -436,6 +656,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "pcr-primer-pair-selection",
       "module_type": "design",
       "passed": true,
@@ -449,6 +671,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "primer-design",
       "module_type": "design",
       "passed": true,
@@ -462,6 +686,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "primer-pair-specificity-screen",
       "module_type": "analysis",
       "passed": true,
@@ -475,6 +701,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "protein-secondary-structure",
       "module_type": "analysis",
       "passed": true,
@@ -486,9 +714,27 @@
     },
     {
       "domains": [
+        "omics",
+        "proteomics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "proteomics-deqms",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_deqms.R"
+      ]
+    },
+    {
+      "domains": [
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "quality-report-multiqc",
       "module_type": "validation",
       "passed": true,
@@ -502,6 +748,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "read-contamination-screen",
       "module_type": "validation",
       "passed": true,
@@ -515,6 +763,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "read-quality-fastp",
       "module_type": "validation",
       "passed": true,
@@ -528,6 +778,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "read-quality-fastqc",
       "module_type": "validation",
       "passed": true,
@@ -541,6 +793,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "restriction-plan",
       "module_type": "design",
       "passed": true,
@@ -554,6 +808,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "rna-secondary-structure-summary",
       "module_type": "analysis",
       "passed": true,
@@ -568,6 +824,8 @@
         "genetics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "rrblup-genomic-prediction",
       "module_type": "analysis",
       "passed": true,
@@ -581,6 +839,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "sanger-verification-coverage",
       "module_type": "design",
       "passed": true,
@@ -594,6 +854,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "sequence-back-translate",
       "module_type": "analysis",
       "passed": true,
@@ -607,6 +869,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "sequence-inspect",
       "module_type": "analysis",
       "passed": true,
@@ -621,6 +885,8 @@
         "epigenomics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "sequence-motif-enrichment",
       "module_type": "analysis",
       "passed": true,
@@ -634,6 +900,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "sequence-pairwise-alignment",
       "module_type": "analysis",
       "passed": true,
@@ -647,6 +915,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "sequence-variant-localization",
       "module_type": "analysis",
       "passed": true,
@@ -661,12 +931,15 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-atac-regulatory",
       "module_type": "analysis",
       "passed": true,
-      "template_count": 2,
+      "template_count": 3,
       "template_files": [
         "templates/call_macs3_fragments.py",
+        "templates/rebuild_recalled_peak_matrix.R",
         "templates/run_atac_regulatory.R"
       ]
     },
@@ -676,6 +949,8 @@
         "classification"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-atlas-annotation",
       "module_type": "analysis",
       "passed": true,
@@ -693,6 +968,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-batch-integration",
       "module_type": "analysis",
       "passed": true,
@@ -707,6 +984,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-communication",
       "module_type": "analysis",
       "passed": true,
@@ -722,6 +1001,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-complex-inference",
       "module_type": "analysis",
       "passed": true,
@@ -738,6 +1019,29 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "single-cell-cross-species-integration",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 6,
+      "template_files": [
+        "templates/build_orthology_ledger.py",
+        "templates/evaluate_cross_species.py",
+        "templates/prepare_shared_ortholog_baseline.py",
+        "templates/run_came.py",
+        "templates/run_samap.py",
+        "templates/run_saturn.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
+        "statistics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-donor-inference",
       "module_type": "analysis",
       "passed": true,
@@ -753,6 +1057,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-doublet-detection",
       "module_type": "analysis",
       "passed": true,
@@ -768,6 +1074,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-droplet-decontamination",
       "module_type": "analysis",
       "passed": true,
@@ -783,6 +1091,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-fate-mapping",
       "module_type": "analysis",
       "passed": true,
@@ -796,6 +1106,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-foundation-workflow",
       "module_type": "analysis",
       "passed": true,
@@ -811,6 +1123,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-generative-modeling",
       "module_type": "analysis",
       "passed": true,
@@ -825,6 +1139,26 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "single-cell-integration-benchmark",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 3,
+      "template_files": [
+        "templates/run_seurat_v5_integration.R",
+        "templates/run_sysvi.py",
+        "templates/score_scib.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
+        "statistics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-marker-discovery",
       "module_type": "analysis",
       "passed": true,
@@ -839,6 +1173,26 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "single-cell-mosaic-integration",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 3,
+      "template_files": [
+        "templates/evaluate_mosaic.py",
+        "templates/run_scglue.py",
+        "templates/run_scvi_mosaic.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
+        "statistics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-multimodal-integration",
       "module_type": "analysis",
       "passed": true,
@@ -854,6 +1208,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-qc",
       "module_type": "validation",
       "passed": true,
@@ -868,6 +1224,8 @@
         "evidence"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-reference-annotation",
       "module_type": "analysis",
       "passed": true,
@@ -880,9 +1238,30 @@
     {
       "domains": [
         "omics",
+        "classification"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "single-cell-reference-mapping",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 4,
+      "template_files": [
+        "templates/map_rctd.R",
+        "templates/map_scarches.py",
+        "templates/map_symphony.R",
+        "templates/score_projection_jsd.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-regulatory-network",
       "module_type": "analysis",
       "passed": true,
@@ -899,6 +1278,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-regulatory-velocity",
       "module_type": "analysis",
       "passed": true,
@@ -914,6 +1295,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-spatial-analysis",
       "module_type": "analysis",
       "passed": true,
@@ -928,6 +1311,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-trajectory-topology",
       "module_type": "analysis",
       "passed": true,
@@ -942,6 +1327,8 @@
         "statistics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "single-cell-trajectory-velocity",
       "module_type": "analysis",
       "passed": true,
@@ -952,9 +1339,72 @@
     },
     {
       "domains": [
+        "omics",
+        "spatial-omics",
+        "systems-biology"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "spatial-multimethod-inference",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 9,
+      "template_files": [
+        "templates/evaluate_deconvolution.py",
+        "templates/run_bayesspace_backend.R",
+        "templates/run_card_spatialdwls.R",
+        "templates/run_deconvolution.py",
+        "templates/run_domain_benchmark.py",
+        "templates/run_python_domain_backend.py",
+        "templates/run_rctd_spotlight.R",
+        "templates/run_scvi_spatial_deconvolution.py",
+        "templates/run_spatial_communication.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
+        "spatial-omics",
+        "three-dimensional-biology"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "spatial-multislice-integration",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 2,
+      "template_files": [
+        "templates/run_hierarchical_spatial_model.R",
+        "templates/run_multislice_alignment.py"
+      ]
+    },
+    {
+      "domains": [
+        "omics",
+        "imaging",
+        "spatial-omics"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "spatial-platform-image-foundation",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 2,
+      "template_files": [
+        "templates/import_platform_qc.py",
+        "templates/segment_register.py"
+      ]
+    },
+    {
+      "domains": [
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "structure-chain-comparison",
       "module_type": "analysis",
       "passed": true,
@@ -968,6 +1418,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "structure-interactive-visualization",
       "module_type": "analysis",
       "passed": true,
@@ -981,6 +1433,8 @@
         "molecular_design"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "structure-quality-assessment",
       "module_type": "analysis",
       "passed": true,
@@ -994,6 +1448,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "tumor-mutation-burden",
       "module_type": "analysis",
       "passed": true,
@@ -1008,6 +1464,8 @@
         "clinical"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "tumor-mutation-burden-vcf",
       "module_type": "analysis",
       "passed": true,
@@ -1021,6 +1479,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "variant-decompress-bgzip",
       "module_type": "transform",
       "passed": true,
@@ -1034,6 +1494,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "variant-filter-vcf",
       "module_type": "analysis",
       "passed": true,
@@ -1047,6 +1509,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "variant-region-query-tabix",
       "module_type": "analysis",
       "passed": true,
@@ -1060,6 +1524,8 @@
         "omics"
       ],
       "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
       "module_id": "variant-summary",
       "module_type": "analysis",
       "passed": true,
@@ -1067,8 +1533,24 @@
       "template_files": [
         "templates/run_variant_summary.py"
       ]
+    },
+    {
+      "domains": [
+        "omics",
+        "systems-biology"
+      ],
+      "errors": [],
+      "manual_adaptation_template_count": 0,
+      "manual_adaptation_templates": [],
+      "module_id": "wgcna-coexpression",
+      "module_type": "analysis",
+      "passed": true,
+      "template_count": 1,
+      "template_files": [
+        "templates/run_wgcna.R"
+      ]
     }
   ],
-  "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+  "registry_digest": "632bf87110a3bec3f3283c1b36242312f5b5b58d0f49bd589bfa5f5528eaddd4",
   "schema_version": 1
 }

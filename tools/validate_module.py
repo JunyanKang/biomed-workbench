@@ -322,7 +322,7 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
     if module_path.is_symlink():
         errors.append("module path must not be a symbolic link")
     expected_files = {"module.json", "tests/cases.json"} if require_tests else {"module.json"}
-    allowed_files = {"module.json", "tests/cases.json"}
+    allowed_files = {"module.json", "tests/cases.json", "execution_coverage.json"}
     if not module_path.is_dir():
         errors.append("module path must be a directory")
     files = _relative_files(module_path) if module_path.is_dir() else set()

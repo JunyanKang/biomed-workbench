@@ -1,0 +1,94 @@
+{
+  "case_id": "tangram-1.0.4-official-repository-test-data-v1",
+  "case_type": "official-public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "spatial-multimethod-inference"
+    ],
+    "module_slice_digest": "ef3f3205bbd1c83c2d113c58e4a09bb9fc2d40192c283cbc6a095089bd269350",
+    "schema_version": 1
+  },
+  "execution": {
+    "abundance_sha256": "0e81d95b64122b0d9ed0dc3a43df4d9ae1544b778fcedd0c5c3c40e8bc41bba7",
+    "abundance_shape": [
+      9852,
+      18
+    ],
+    "backend": "Tangram",
+    "backend_version": "1.0.4",
+    "density_prior": "rna_count_based_explicit_array",
+    "epochs": 80,
+    "execution_report_sha256": "c604d882c643ef840743cb934ce68e0d08a031455c3609a05966be3b8b092758",
+    "finite_normalized_abundance": true,
+    "mapping_mode": "clusters",
+    "mapping_shape": [
+      18,
+      9852
+    ],
+    "native_model_reloaded": true,
+    "native_model_sha256": "898a7731aed570ff5c3aad96c8304d418b9f2ab49eff53ca2a4bfdff2ff6e556",
+    "official_source_commit": "4c68995a418f41dc8caef567598c4d9b47781a13",
+    "reference_cell_types": 18,
+    "reference_cells": 26431,
+    "seed": 20260802,
+    "shared_genes": 249,
+    "spatial_locations": 9852
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "implementation": {
+    "backend_templates": {
+      "RCTD": {
+        "path": "biomed_workbench/modules/builtin/spatial-multimethod-inference/templates/run_rctd_spotlight.R",
+        "sha256": "46f46fa4c2f91fd61f59e03e986f105f2675a9b635345d4ec09d87e1d6ddb1b2"
+      },
+      "Tangram": {
+        "path": "biomed_workbench/modules/builtin/spatial-multimethod-inference/templates/run_deconvolution.py",
+        "sha256": "752283a8b245dd4bf5d0a58fc4c1c09bf4f95893452bcbd0247d26e1b977326a"
+      }
+    },
+    "manifest_sha256": "1ae040c13e2d25d775df721539a380f2f1ef0ef5254ca3ccd9a94e4145c1d422",
+    "publisher_sha256": "39698453431027b9d184dd74c802dff2a35ebde225c532c0f1eece20dc60d2df",
+    "template_path": "biomed_workbench/modules/builtin/spatial-multimethod-inference/templates/run_deconvolution.py",
+    "template_sha256": "752283a8b245dd4bf5d0a58fc4c1c09bf4f95893452bcbd0247d26e1b977326a"
+  },
+  "module_id": "spatial-multimethod-inference",
+  "module_version": "1.0.0",
+  "observed_at": "2026-08-02T06:59:30.004627+00:00",
+  "passed": true,
+  "quality_gates": {
+    "abundance_rows_sum_to_one": true,
+    "all_spatial_locations_retained": true,
+    "current_template_executed": true,
+    "finite_nonnegative_abundance": true,
+    "native_mapping_model_reloaded": true,
+    "official_inputs_checksum_bound": true,
+    "output_checksums_reverified_at_publication": true
+  },
+  "runtime": {
+    "anndata": "0.10.9",
+    "numpy": "1.26.4",
+    "pandas": "2.2.3",
+    "tangram": "1.0.4",
+    "torch": "2.13.0"
+  },
+  "schema_version": 1,
+  "scientific_scope": "Tangram cluster-mode mapping probabilities were generated from the upstream repository's complete test AnnData pair using an RNA-count-based spatial density prior. Mapping probabilities are not observed cell counts or a count-model deconvolution estimate.",
+  "source": {
+    "commit": "4c68995a418f41dc8caef567598c4d9b47781a13",
+    "files": [
+      {
+        "bytes": 27999723,
+        "name": "test_ad_sc.h5ad",
+        "sha256": "fa49de9d37a2cfcc57e28e4c4b341aa040b000568f91a931099e5e5364ece3e4",
+        "source_url": "https://raw.githubusercontent.com/broadinstitute/Tangram/4c68995a418f41dc8caef567598c4d9b47781a13/data/test_ad_sc.h5ad"
+      },
+      {
+        "bytes": 10763824,
+        "name": "test_ad_sp.h5ad",
+        "sha256": "4a66814ab1d714cf6105a860188ee1155e6aec0b2f65c6ee957bec4c7778914d",
+        "source_url": "https://raw.githubusercontent.com/broadinstitute/Tangram/4c68995a418f41dc8caef567598c4d9b47781a13/data/test_ad_sp.h5ad"
+      }
+    ],
+    "repository": "https://github.com/broadinstitute/Tangram"
+  }
+}

@@ -199,6 +199,17 @@ def _is_publication_query(normalized_query: str) -> bool:
     )
 
 
+def _is_journal_targeting_query(normalized_query: str) -> bool:
+    """Return whether a publication request actually asks for journal fit or rules."""
+    return bool(
+        re.search(
+            r"\b(journal|target journal|journal fit|author guidelines?|format requirements?|submission requirements?|word limit)\b",
+            normalized_query,
+        )
+        or any(term in normalized_query for term in ("期刊", "投稿规范", "作者指南", "格式要求", "字数限制", "选刊"))
+    )
+
+
 def _is_clinical_query(normalized_query: str) -> bool:
     return bool(
         re.search(r"\b(clinical|patient|cohort|survival|biomarker|adverse|trial|tumou?r|cancer|de[- ]?identif)\b", normalized_query)
@@ -240,6 +251,8 @@ def _module_allowed_for_query(module: ModuleManifest, query: str) -> bool:
     if module.domains[0] == "imaging" and not _is_imaging_query(normalized_query):
         return False
     if module.domains[0] == "publication" and not _is_publication_query(normalized_query):
+        return False
+    if module.id == "journal-targeting-and-compliance" and not _is_journal_targeting_query(normalized_query):
         return False
     if module.domains[0] == "wetlab" and omics_query and not _is_wetlab_query(normalized_query):
         return False
@@ -401,6 +414,20 @@ def _select_ranked_modules(
     exact = [item for item in ranked if any(reason.startswith("exact intent:") or reason == "title matches the request" for reason in item[2])]
     selected: list[tuple[float, ModuleManifest, list[str]]] = exact[:] if exact else [ranked[0]]
     forced_single_cell_ids = _forced_single_cell_module_ids(normalized)
+    # Alternatives are mutually substitutable implementations, not parallel
+    # workflow steps. For a dense single-cell program, however, the explicitly
+    # forced modules are complementary stages and must all remain available.
+    if not forced_single_cell_ids:
+        nonredundant: list[tuple[float, ModuleManifest, list[str]]] = []
+        for item in sorted(selected, key=lambda value: (-value[0], value[1].id)):
+            module = item[1]
+            if any(
+                module.id in kept[1].alternatives or kept[1].id in module.alternatives
+                for kept in nonredundant
+            ):
+                continue
+            nonredundant.append(item)
+        selected = nonredundant
     if forced_single_cell_ids:
         selected_ids = {item[1].id for item in selected}
         for forced_id in forced_single_cell_ids:
@@ -644,6 +671,7 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
     normalized_query = _normalize(query)
     single_cell_query = _is_single_cell_query(normalized_query)
     imaging_query = _is_imaging_query(normalized_query)
+    wetlab_query = _is_wetlab_query(normalized_query)
     dominant_exact_domains = set()
     exact_domains = set()
     direct_source_exact_domains = set()
@@ -657,13 +685,6 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
             exact_domains.add(module.domains[0])
             if module.module_type == "data_source":
                 direct_source_exact_domains.add(module.domains[0])
-            if len(module.domains) > 1:
-                for extra_domain in module.domains[1:]:
-                    label = re.escape(_normalize(extra_domain.replace("_", " "))).replace(r"\\ ", r"[\\s_-]+")
-                    if re.search(rf"(?<![a-z0-9]){label}(?![a-z0-9])", normalized_query):
-                        exact_domains.add(extra_domain)
-                        if module.module_type == "data_source":
-                            direct_source_exact_domains.add(extra_domain)
         if any(len(_normalize(phrase)) / len(normalized_query) >= 0.75 for phrase in exact_phrases):
             dominant_exact_domains.add(module.domains[0])
     if dominant_exact_domains:
@@ -682,6 +703,11 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
     # second workflow merely because a broad module happens to share them.
     if exact_domains and not multi_intent:
         return _domain_order(exact_domains)
+    # A named wet-lab measurement such as Western blot remains a wet-lab
+    # quantification request even when it also mentions normalization. Generic
+    # normalization language must not redirect it to a sequencing assay.
+    if wetlab_query and not _is_omics_assay_query(normalized_query) and not multi_intent:
+        return ["wetlab"]
     domain_scores: dict[str, float] = defaultdict(float)
     for module in active.all():
         score, reasons = _score_module(module, query)

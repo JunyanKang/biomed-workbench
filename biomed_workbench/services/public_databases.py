@@ -20,6 +20,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import Request, urlopen
 
+from .credentials import optional_credential
 
 CROSSREF_CONTRACT_VERSION = "rest-v1-observed-2026-07-13"
 EUROPE_PMC_CONTRACT_VERSION = "rest-observed-2026-07-13"
@@ -227,8 +228,11 @@ def ncbi_gene_orthologs(
         raise ValueError("gene_id must be a positive NCBI Gene identifier")
     if not 1 <= target_taxon_id <= 9_999_999 or not 1 <= max_records <= 100:
         raise ValueError("target_taxon_id or max_records is outside the bounded contract")
+    ncbi_api_key = optional_credential("NCBI_API_KEY")
     payload, transport = (client or PublicJSONClient()).get_with_metadata(
-        "https://api.ncbi.nlm.nih.gov", f"/datasets/v2/gene/id/{normalized_gene}/orthologs"
+        "https://api.ncbi.nlm.nih.gov",
+        f"/datasets/v2/gene/id/{normalized_gene}/orthologs",
+        api_key=ncbi_api_key,
     )
     reports = payload.get("reports")
     if not isinstance(reports, list):
@@ -251,7 +255,7 @@ def ncbi_gene_orthologs(
     if source is None:
         raise PublicDatabaseError("NCBI Datasets response did not preserve the requested source Gene ID")
     orthologs.sort(key=lambda record: (record["gene_id"], record["symbol"] or ""))
-    return {"source": {"gene_id": source["gene_id"], "symbol": _clean_text(source.get("symbol")), "tax_id": str(source.get("tax_id", "")), "taxname": _clean_text(source.get("taxname")), "ensembl_gene_ids": sorted(str(value) for value in source.get("ensembl_gene_ids", []) if isinstance(value, str))}, "target_taxon_id": str(target_taxon_id), "orthologs": orthologs[:max_records], "total_target_orthologs": len(orthologs), "truncated": len(orthologs) > max_records, "provenance": {"service": "NCBI Datasets Gene API", "transport": transport}}
+    return {"source": {"gene_id": source["gene_id"], "symbol": _clean_text(source.get("symbol")), "tax_id": str(source.get("tax_id", "")), "taxname": _clean_text(source.get("taxname")), "ensembl_gene_ids": sorted(str(value) for value in source.get("ensembl_gene_ids", []) if isinstance(value, str))}, "target_taxon_id": str(target_taxon_id), "orthologs": orthologs[:max_records], "total_target_orthologs": len(orthologs), "truncated": len(orthologs) > max_records, "provenance": {"service": "NCBI Datasets Gene API", "transport": transport, "api_key_used": bool(ncbi_api_key)}}
 
 
 def ensembl_gene_lookup(
@@ -881,6 +885,7 @@ class PublicJSONClient:
         params: Mapping[str, Any] | None = None,
         *,
         not_found_as_empty_object: bool = False,
+        api_key: str | None = None,
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         if not path.startswith("/") or ".." in path:
             raise ValueError("database path must be absolute and traversal-free")
@@ -893,6 +898,10 @@ class PublicJSONClient:
             "Accept": "application/json",
             "User-Agent": "biomed-workbench/0.2 (+https://github.com/JunyanKang/biomed-workbench)",
         }
+        if api_key is not None:
+            if not isinstance(api_key, str) or not api_key.strip():
+                raise ValueError("api_key must be nonempty when supplied")
+            headers["api-key"] = api_key.strip()
         response: HTTPResponse | None = None
         attempts = 0
         for attempt in range(self._retries + 1):

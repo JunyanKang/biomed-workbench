@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "samap-and-baselines-handoff",
+      "input": {
+        "objective": "Compare conservative one-to-one baselines with sequence-informed SAMap across two species",
+        "methods": ["orthology-ledger", "classical-baselines", "samap"],
+        "species_artifact_ids": ["mouse-counts", "human-counts"],
+        "orthology_artifact_id": "ensembl-compara-ledger",
+        "species_key": "species",
+        "sample_key": "donor_id",
+        "label_key": "reviewed_cell_type",
+        "seed": 19
+      },
+      "expected_subset": {"handoff_type": "packaged_parameterized_project_analysis", "module": {"id": "single-cell-cross-species-integration"}}
+    },
+    {
+      "name": "saturn-multispecies-handoff",
+      "input": {
+        "objective": "Integrate several evolutionarily distant species with protein embeddings and validate held-out species",
+        "methods": ["orthology-ledger", "classical-baselines", "saturn"],
+        "species_artifact_ids": ["species-a", "species-b", "species-c"],
+        "orthology_artifact_id": "orthology-ledger-v1",
+        "species_key": "species",
+        "sample_key": "sample_id",
+        "label_key": "reviewed_cell_type",
+        "seed": 19
+      },
+      "expected_subset": {"handoff_type": "packaged_parameterized_project_analysis", "module": {"id": "single-cell-cross-species-integration"}}
+    },
+    {
+      "name": "came-many-to-many-handoff",
+      "input": {
+        "objective": "Transfer labels pairwise with CAME while preserving one-to-many and many-to-many orthology",
+        "methods": ["orthology-ledger", "classical-baselines", "came"],
+        "species_artifact_ids": ["reference-species", "query-species"],
+        "orthology_artifact_id": "many-to-many-ledger",
+        "species_key": "species",
+        "sample_key": "sample_id",
+        "label_key": "reviewed_cell_type",
+        "seed": 19
+      },
+      "expected_subset": {"handoff_type": "packaged_parameterized_project_analysis", "module": {"id": "single-cell-cross-species-integration"}}
+    }
+  ]
+}

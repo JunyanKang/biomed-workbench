@@ -147,7 +147,7 @@ def scaffold(*, check: bool, root: Path = BUILTIN_ROOT) -> tuple[int, list[str]]
                 "language": "python",
                 "purpose": f"Execute and validate {manifest.title.lower()} against real project inputs and the module compatibility contract.",
                 "quality_gate_ids": blocking_gates,
-                "requires_adaptation": True,
+                "requires_adaptation": False,
             }
         ]
         source = _template_source(payload, relative)

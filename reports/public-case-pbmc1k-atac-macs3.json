@@ -1,6 +1,13 @@
 {
   "case_id": "pbmc1k-atac-macs3-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-atac-regulatory"
+    ],
+    "module_slice_digest": "de54e2c42b64765bae95ff6fc80f624bfe3da618ce3c4e7f5529c11312a38ea7",
+    "schema_version": 1
+  },
   "execution": {
     "accounting": {
       "allowlist_barcodes": 300,
@@ -45,7 +52,7 @@
         "rows": 94726,
         "sha256": "9374fb0b14b8f6d69e7e98a143fdb180be4fef1c22f1cffee2b917dc182cc8b1"
       },
-      "peaks_xls_sha256": "6bb715cf00a7c43a75edceffe3fbc71c5fb92b0e899bac51be255d6feaf8a796",
+      "peaks_xls_sha256": "0968c4f58c48f3d1a40207ec75ef18991a2e24bcd14b6efbf0f3537dc97b4ef8",
       "summits": {
         "chromosomes": {
           "chr1": 9091,
@@ -80,13 +87,31 @@
     "outputs_reloaded": true,
     "source_artifacts_immutable": true
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "efb353337a27c78c60d11e07f9ab0679cc68d43a915a0a9b5129642ceab3c4c2",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "2525899da16ad93e67583344833efd2654060bc744bcca6af2d147f182ed35ad",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "call_macs3_fragments.py": "a135a1404f21075d5353e0f28480119a1af36f27e8786e55736f0e54befb33da",
+      "rebuild_recalled_peak_matrix.R": "88cba9fd454cf8b06fa28ed9b03bb178343b2368e67132a4cadc268cfafb2873",
+      "run_atac_regulatory.R": "9b164eed5af95707275861daadf6a02aee3cdef524881c332f38cb26a346de26"
+    },
+    "templates_unchanged": true
+  },
   "module": {
-    "compatibility_row_id": "agent-protocol-1-macs3-304-signac-116-chromvar-124-motifmatchr-124",
+    "compatibility_row_id": "agent-protocol-2-macs3-304-signac-116-chromvar-124-motifmatchr-124",
     "id": "single-cell-atac-regulatory",
-    "manifest_sha256": "9d9ce3b52b326a7997d499ddda6537f735673f2658261c794d5c3f51d2864484",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "efb353337a27c78c60d11e07f9ab0679cc68d43a915a0a9b5129642ceab3c4c2",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": "a135a1404f21075d5353e0f28480119a1af36f27e8786e55736f0e54befb33da",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "parameters": {
     "call_summits": true,

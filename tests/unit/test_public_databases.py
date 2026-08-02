@@ -1,5 +1,6 @@
 import json
 import unittest
+from unittest.mock import patch
 
 from biomed_workbench.services.public_databases import (
     HTTPResponse,
@@ -638,6 +639,38 @@ class PublicDatabaseTests(unittest.TestCase):
         self.assertIn("api.ncbi.nlm.nih.gov/datasets/v2/gene/id/7157/orthologs", client._transport.urls[0])
         with self.assertRaises(ValueError):
             ncbi_gene_orthologs("TP53", 10090, client=client)
+
+    def test_ncbi_datasets_optional_key_is_header_only_and_never_in_provenance(self):
+        observed = {}
+
+        def transport(url, headers, _timeout):
+            observed["url"] = url
+            observed["headers"] = dict(headers)
+            payload = {
+                "reports": [
+                    {
+                        "gene": {
+                            "gene_id": "7157",
+                            "symbol": "TP53",
+                            "tax_id": "9606",
+                            "taxname": "Homo sapiens",
+                        }
+                    }
+                ]
+            }
+            return HTTPResponse(200, {"Content-Type": "application/json"}, json.dumps(payload).encode())
+
+        client = PublicJSONClient(transport=transport, retries=0, sleeper=lambda _: None)
+        with patch(
+            "biomed_workbench.services.public_databases.optional_credential",
+            return_value="test-secret-that-must-not-leak",
+        ):
+            result = ncbi_gene_orthologs("7157", 10090, client=client)
+
+        self.assertEqual(observed["headers"]["api-key"], "test-secret-that-must-not-leak")
+        self.assertNotIn("test-secret-that-must-not-leak", observed["url"])
+        self.assertTrue(result["provenance"]["api_key_used"])
+        self.assertNotIn("test-secret-that-must-not-leak", json.dumps(result))
 
 
 if __name__ == "__main__":

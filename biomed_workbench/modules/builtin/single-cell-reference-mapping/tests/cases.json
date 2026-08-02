@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "scarches-scanvi-query-map",
+      "input": {
+        "objective": "Map a query cohort onto a frozen reference while retaining novel and uncertain states",
+        "method": "scarches-scanvi",
+        "reference_artifact_id": "frozen-scanvi-reference",
+        "query_artifact_id": "query-counts",
+        "batch_key": "study",
+        "label_key": "cell_type",
+        "unknown_label": "Unknown",
+        "seed": 19
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "single-cell-reference-mapping"}
+      }
+    },
+    {
+      "name": "symphony-query-map",
+      "input": {
+        "objective": "Build a portable Symphony reference and map a new query without rebuilding the atlas",
+        "method": "symphony",
+        "reference_artifact_id": "reviewed-reference-rds",
+        "query_artifact_id": "query-rds",
+        "batch_key": "donor",
+        "label_key": "cell_type",
+        "unknown_label": "Unknown",
+        "seed": 19
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "single-cell-reference-mapping"}
+      }
+    },
+    {
+      "name": "rctd-spatial-full-mode",
+      "input": {
+        "objective": "Decompose multicellular spatial spots using a reviewed single-cell reference",
+        "method": "rctd-full",
+        "reference_artifact_id": "single-cell-reference-counts",
+        "query_artifact_id": "visium-spatial-counts",
+        "batch_key": "sample_id",
+        "label_key": "cell_type",
+        "unknown_label": "Unknown",
+        "seed": 19
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "single-cell-reference-mapping"}
+      }
+    },
+    {
+      "name": "jsd-heldout-projection-evaluation",
+      "input": {
+        "objective": "Compare projected and held-out cell-type distributions with Jensen Shannon divergence",
+        "method": "jsd-evaluation",
+        "reference_artifact_id": "heldout-mixture-truth",
+        "query_artifact_id": "projected-proportions",
+        "batch_key": "sample_id",
+        "label_key": "cell_type",
+        "unknown_label": "Unknown",
+        "seed": 19
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "single-cell-reference-mapping"}
+      }
+    }
+  ]
+}

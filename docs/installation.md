@@ -4,36 +4,21 @@ Languages: [English](installation.md) · [中文](installation.zh-CN.md)
 
 ## Install From GitHub
 
-Add the repository as a Codex marketplace and install the plugin:
+Tell Codex or another compatible agent:
 
-```bash
-codex plugin marketplace add JunyanKang/biomed-workbench --ref main
-codex plugin add biomed-workbench@biomed-workbench
-codex plugin list
-```
+> Install Biomed Workbench from the `JunyanKang/biomed-workbench` GitHub repository. Use the current main release, verify the installed plugin identity and scientific-module registry, and report the exact installed revision and validation result.
 
-The marketplace name is `biomed-workbench`, so the installed package is `biomed-workbench@biomed-workbench`.
+The agent should add the repository as the Biomed Workbench marketplace, install the plugin, and verify that the installed package is `biomed-workbench@biomed-workbench`.
 
 After installation, open a new Codex task. Skills and MCP tools are discovered when a task starts, so an already-open task may not show the newly installed version.
 
 ## Install From A Full Git URL
 
-```bash
-codex plugin marketplace add https://github.com/JunyanKang/biomed-workbench --ref main
-codex plugin add biomed-workbench@biomed-workbench
-```
+If repository shorthand is unavailable, ask the agent to use the full GitHub address `https://github.com/JunyanKang/biomed-workbench`, stay on the requested branch or release, and perform the same identity and registry checks.
 
 ## Local Development Install
 
-For local development, clone the repository into a stable directory and add that directory as a marketplace:
-
-```bash
-mkdir -p ~/plugins
-git clone https://github.com/JunyanKang/biomed-workbench ~/plugins/biomed-workbench
-codex plugin marketplace add ~/plugins/biomed-workbench
-codex plugin add biomed-workbench@biomed-workbench
-codex plugin list
-```
+For local development, give the agent a stable development directory and ask it to clone or use the repository there, register that exact directory as a local marketplace, install the plugin, and report both the source revision and the loaded plugin revision. The agent must preserve unrelated working-tree changes and must not silently replace a local development checkout with the remote branch.
 
 ## Update
 
@@ -41,13 +26,7 @@ Pull the desired repository revision, then reinstall or refresh the marketplace 
 
 ## Verify The Installation
 
-`codex plugin list` should show the marketplace and installed plugin. In a new task, ask Codex to use Biomed Workbench for a small scientific request, such as inspecting a DNA sequence or planning a literature search. The agent runs the packaged health check before first use and reports whether the plugin manifest, unified skill, module registry, routing, and optional credential policy are ready.
-
-Maintainers can run the same health check directly:
-
-```bash
-tools/workbench doctor --strict
-```
+Ask the agent to show that the marketplace and installed plugin are present, then open a new task and use Biomed Workbench for a small scientific request such as inspecting a DNA sequence or planning a literature search. The agent runs the packaged strict health check before first use and reports whether the plugin manifest, unified skill, module registry, routing, credential policy and generated evidence reports agree.
 
 The plugin core requires Python 3.10 or newer. The launcher discovers a compatible interpreter instead of assuming that the operating system's `python3` is suitable. Scientific package and command versions remain module-level compatibility and provenance records: the health check does not claim that every optional analysis backend is already installed.
 
@@ -55,7 +34,9 @@ For maintainers who need repository, release, and isolated-install checks, see [
 
 ## Credentials
 
-Most public evidence clients require no credential. When a scientific service supports an optional API key, configure it in the user's environment or approved Codex secret surface. Never place credentials in the repository, module manifests, examples, logs, or research artifacts.
+Credential needs are endpoint-specific. The current public modules do not require a key; `NCBI_API_KEY` is optional for the implemented NCBI E-utilities and Datasets requests and increases service capacity without changing scientific interpretation.
+
+Ask the agent to inspect credential status, configure the NCBI key through hidden input, show only the repository-external storage location, rotate the key, or remove it. Values remain outside command arguments, module inputs, logs, reports, research artifacts, and scientific evidence maps. Cluster and institutional secret-manager options are described in [Data Access and Credentials](data-access-and-credentials.md).
 
 ## Troubleshooting
 

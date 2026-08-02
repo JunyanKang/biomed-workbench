@@ -6,6 +6,7 @@ from pathlib import Path
 
 from biomed_workbench.modules.contract import version_is_allowed
 from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
 from biomed_workbench.modules.registry import ModuleRegistry
 
 
@@ -43,7 +44,7 @@ class StructureAnalysisEvidenceTests(unittest.TestCase):
             self.assertTrue(report["passed"], module_id)
             self.assertEqual(report["module_version"], manifest.version)
             self.assertEqual(report["compatibility_row_id"], row.id)
-            self.assertEqual(report["registry_digest"], self.registry.digest)
+            self.assertTrue(evidence_scope_is_current(report, self.registry))
             self.assertEqual(observed_templates, expected_templates)
             self.assertTrue(package["valid"])
             self.assertEqual(package["executed_test_cases"], 1)

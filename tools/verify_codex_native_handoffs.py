@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
+from biomed_workbench.modules.evidence_scope import module_evidence_scope  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 from biomed_workbench.router import route  # noqa: E402
 from biomed_workbench.runner import run  # noqa: E402
@@ -87,6 +88,8 @@ def verify() -> dict[str, object]:
             "regression_evidence_id": record["regression"]["id"],
             "end_to_end_evidence_id": record["end_to_end"]["id"],
         },
+        "registry_digest": registry.digest,
+        "evidence_scope": module_evidence_scope(registry, [MODULE_ID]).to_dict(),
         "skill": {
             "sha256": _sha256(skill_path),
             "single_entry": True,

@@ -25,9 +25,12 @@ inside an allowed range.
 - `experimental`: the module contract and templates are usable, but the
   scientific surface still needs broader backend, public-data, or project
   acceptance before routine use.
-- `agent_generated`: Codex must inspect the project, adapt the packaged template,
-  review generated code, execute it, inspect every output, and record observed
-  versions and gates. The protocol handoff is not evidence.
+- `agent_generated`: Codex binds project artifacts and reviewed parameters to
+  packaged command-line adapters, executes them without editing source code,
+  inspects every output, and records observed versions and gates. A prepared
+  execution plan is not evidence; only an observed, reloaded run can contribute
+  evidence. Any module whose adapter still requires source editing is
+  `scaffolded` and is blocked from the released capability surface.
 - `offline`, `public_api`, and `codex_native`: these describe access and
   execution boundaries, not scientific maturity.
 

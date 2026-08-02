@@ -6,9 +6,25 @@ This capability area turns the research record into a coherent, reviewable, and 
 
 ## Unified Publication Program
 
-For broad manuscript, response, patent, or presentation requests, the workbench compiles a staged publication program. Figure specification and manuscript structure are established first; citation, assertion, temporal, claim-evidence, manuscript, and reviewer audits then challenge the package; response matrices and revision lineage organize required changes; patent and presentation modules only use the admitted evidence and unresolved-issue state.
+For broad manuscript, response, patent, or presentation requests, the workbench compiles a staged publication program. Journal fit and article-type feasibility are assessed against a versioned standards catalog before the manuscript structure is frozen. Figure specification and manuscript structure are then established; citation, assertion, temporal, claim-evidence, manuscript, and reviewer audits challenge the package; response matrices and revision lineage organize required changes; patent and presentation modules only use the admitted evidence and unresolved-issue state.
 
 This staged plan prevents a polished deliverable from bypassing evidence checks. It also keeps manuscript revision, reviewer response, patent readiness, and presentation delivery as separate outputs with different quality gates rather than treating them as one generic writing task.
+
+## Versioned Journal Standards
+
+The `journal-targeting-and-compliance` capability reads the released catalog under `biomed_workbench/knowledge/journal_standards/`. The current release, `2026.07.31`, contains 54 biomedical journals and records for every profile:
+
+- audience and scientific remit;
+- preferred article families and project-fit terms;
+- expected manuscript sections and language style;
+- officially stated length, abstract, reference, display-item and related numeric constraints when the journal publishes an exact value;
+- figure, reporting and policy requirements;
+- official author-instruction sources;
+- profile version, review date and catalog fingerprint.
+
+Project-to-journal ranking uses scientific scope, audience, article type and evidentiary fit. It does not use journal impact factor or fabricate an acceptance probability. Compliance review checks field-level manuscript facts against the selected version. When an official page leaves a numeric requirement unspecified or delegates it to an article type, the result is a manual check that blocks a “submission-ready” conclusion rather than an invented number.
+
+The catalog is append-only by release. Updating one journal creates a new profile version and new catalog fingerprint, while prior versions remain available to explain which rules governed an earlier manuscript decision. New journals use the same schema and validation gates. See [English](../journal-standards.md) or [中文](../journal-standards.zh-CN.md).
 
 ## Scientific Figures And Manuscripts
 
@@ -18,6 +34,8 @@ This staged plan prevents a polished deliverable from bypassing evidence checks.
 - Keep untouched manuscript blocks unchanged and verify claimed analysis, experiment, figure, citation, and response locations.
 
 Representative modules include `figure-specification`, `manuscript-audit`, `citation-audit`, `assertion-citation-coverage-audit`, `claim-evidence-integrity-audit`, `manuscript-revision-base`, `manuscript-revision-lineage`, and `presentation-delivery-plan`.
+
+`journal-targeting-and-compliance` runs before these modules when a target journal is unknown or its requirements have not been version-bound.
 
 ## Peer Review And Revision
 

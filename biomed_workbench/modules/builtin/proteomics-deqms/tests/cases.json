@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "deqms-request-generates-evidence-bound-handoff",
+      "input": {
+        "objective": "Test a treated versus control protein abundance contrast with peptide-count-aware variance moderation",
+        "abundance_artifact_id": "normalized-protein-abundance",
+        "support_count_artifact_id": "minimum-peptide-support",
+        "design_artifact_id": "proteomics-sample-design",
+        "formula": "~ 0 + condition + batch",
+        "contrast": "conditiontreated-conditioncontrol",
+        "factor_columns": ["condition", "batch"],
+        "support_count_semantics": "minimum quantified peptide count across contrast samples",
+        "normalization": "upstream median-normalized log2 abundance",
+        "missingness_policy": "no imputation; model eligible observed values"
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "proteomics-deqms"}
+      }
+    }
+  ]
+}

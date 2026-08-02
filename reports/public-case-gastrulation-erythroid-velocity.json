@@ -1,6 +1,13 @@
 {
   "case_id": "gastrulation-erythroid-scvelo-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-trajectory-velocity"
+    ],
+    "module_slice_digest": "103eaf8cbb1f98740423129f79a02ce653acd2d7dda5b74e6155d1565afa0a8c",
+    "schema_version": 1
+  },
   "execution": {
     "all_outputs_reloaded": true,
     "confidence": {
@@ -50,11 +57,27 @@
     },
     "source_artifact_immutable": true
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "dd8c7c45635316ae987939c69f48778a1f089d393bdbcb6d89e67c4eaa189913",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "558aace3a5d365b37d6febfc1577d06030a57bd216addf138eaa1de9de063e16",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "run_velocity.py": "0ce11ce5a22c765ef00117342a7999f94c1bb34ff28e2ade9ca7ed055afd42f8"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-scvelo-034-scanpy-1115",
     "id": "single-cell-trajectory-velocity",
-    "manifest_sha256": "558aace3a5d365b37d6febfc1577d06030a57bd216addf138eaa1de9de063e16",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "dd8c7c45635316ae987939c69f48778a1f089d393bdbcb6d89e67c4eaa189913",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": "0ce11ce5a22c765ef00117342a7999f94c1bb34ff28e2ade9ca7ed055afd42f8",
     "version": "1.1.0"
   },

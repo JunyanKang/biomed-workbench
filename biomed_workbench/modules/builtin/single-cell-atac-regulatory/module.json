@@ -4,6 +4,7 @@
     "forbidden_actions": [
       "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
       "Do not silently intersect or reorder cells, guess genome builds or coordinate systems, synthesize missing sequences, overwrite source counts/fragments, tune parameters toward expected loci, or report unexecuted outputs.",
+      "Do not group peak calling by post hoc labels selected from the target result, replace the original ATAC assay, or reuse an old LSI/WNN embedding after rebuilding the peak matrix.",
       "Do not call motif presence, chromVAR deviation, or peak-gene correlation direct transcription-factor binding or causal regulation."
     ],
     "languages": [
@@ -11,7 +12,7 @@
       "r",
       "notebook"
     ],
-    "mode": "codex_generated_project_code",
+    "mode": "packaged_parameterized_workflow",
     "parameter_rules": [
       {
         "decision_inputs": [
@@ -24,6 +25,20 @@
         "parameter": "barcode-policy",
         "selection_rule": "Call peaks on declared cells and biological aggregation units; preserve barcode accounting and avoid mixing contrasts before donor-aware review.",
         "validation_rule": "Require nonempty coordinate-valid peaks and source/selected/excluded fragment reconciliation."
+      },
+      {
+        "decision_inputs": [
+          "biological sample identity",
+          "predeclared coarse group",
+          "replicate structure",
+          "fragment depth",
+          "blacklist and standard chromosomes",
+          "peak width and support"
+        ],
+        "id": "recalled-peak-matrix",
+        "parameter": "grouping-reproducibility-filter-and-requantification",
+        "selection_rule": "Call sample or predeclared-group pseudobulk peaks, construct a frozen reproducible or union peak set with explicit blacklist/width/support filters, and quantify that set with Signac FeatureMatrix.",
+        "validation_rule": "Preserve the original assay, require exact cell order and sparse integer counts, create a distinct recalled assay, and rerun TF-IDF, LSI and RNA–ATAC WNN before downstream comparison."
       },
       {
         "decision_inputs": [
@@ -52,11 +67,11 @@
       }
     ],
     "postflight_checks": [
-      "Reconcile fragment records/counts/barcodes and reload narrowPeak, summits, motif matches, chromVAR backgrounds/deviations, peak-gene links, RDS, tables, reports, versions, and digests.",
+      "Reconcile fragment records/counts/barcodes and reload narrowPeak, summits, frozen recalled peaks, rebuilt sparse peak-by-cell matrix, motif matches, chromVAR backgrounds/deviations, peak-gene links, RDS, tables, reports, versions, and digests.",
       "Evaluate planted or independent truth only after parameter freeze; require biological replication before condition-level accessibility, motif, or link claims."
     ],
     "preflight_checks": [
-      "Inspect actual 10x fragments, optional barcode allow-list, count matrices, metadata, peak and gene coordinates, peak sequences, motif objects, genome build, source digests, versions, and output paths.",
+      "Inspect actual indexed 10x fragments, optional barcode allow-list, biological samples, predeclared peak-call groups, count matrices, metadata, blacklist, peak and gene coordinates, peak sequences, motif objects, genome build, source digests, versions, and output paths.",
       "Confirm exact paired cell order, count semantics, coordinate conversions, sufficient trans-chromosomal background peaks for LinkPeaks, and compatible existing MACS3 and R package profiles."
     ],
     "provenance_fields": [
@@ -70,6 +85,9 @@
       "motif-resource-digest",
       "peak-sequence-provenance",
       "MACS3-parameters",
+      "peak-recall-grouping-consensus-and-filters",
+      "recalled-peak-and-matrix-digests",
+      "original-and-recalled-assay-identities",
       "chromVAR-background-parameters",
       "LinkPeaks-parameters",
       "actual-tool-versions",
@@ -91,7 +109,24 @@
         ],
         "template_files": [
           "templates/call_macs3_fragments.py",
+          "templates/rebuild_recalled_peak_matrix.R",
           "templates/run_atac_regulatory.R"
+        ]
+      },
+      {
+        "id": "freeze-and-rebuild-recalled-peak-assay",
+        "output_artifact_types": [
+          "single_cell_atac_regulatory_evidence"
+        ],
+        "purpose": "Turn sample or predeclared-group peak calls into a frozen, filtered common peak space and rebuild the peak-by-cell assay.",
+        "required_logic": [
+          "Declare grouping, MACS3 or ArchR parameters, reproducibility or union rule, standard chromosomes, blacklist, width and support filters before inspecting final embeddings or target differential results.",
+          "Use Signac FeatureMatrix on the indexed fragments and frozen peak set, preserve exact cell order and sparse integer counts, create a new ATAC_recalled assay, and retain the original assay.",
+          "Rerun TF-IDF, LSI and RNA–ATAC WNN from the rebuilt assay and report FRiP, sparsity, LSI-depth correlation and biological-structure sensitivity before selecting a primary representation."
+        ],
+        "template_files": [
+          "templates/call_macs3_fragments.py",
+          "templates/rebuild_recalled_peak_matrix.R"
         ]
       },
       {
@@ -148,6 +183,7 @@
         ],
         "template_files": [
           "templates/call_macs3_fragments.py",
+          "templates/rebuild_recalled_peak_matrix.R",
           "templates/run_atac_regulatory.R"
         ]
       }
@@ -192,10 +228,10 @@
         ]
       },
       "end_to_end_evidence_ids": [
-        "single-cell-atac-regulatory-e2e-v1",
+        "single-cell-atac-regulatory-e2e-v2",
         "pbmc1k-atac-macs3-v1"
       ],
-      "id": "agent-protocol-1-macs3-304-signac-116-chromvar-124-motifmatchr-124",
+      "id": "agent-protocol-2-macs3-304-signac-116-chromvar-124-motifmatchr-124",
       "input_formats": {
         "paired_atac_rna_regulatory_inputs": [
           "rds@1",
@@ -206,7 +242,7 @@
           "tenx-fragments@1"
         ]
       },
-      "module_version": "1.1.0",
+      "module_version": "1.2.0",
       "output_formats": {
         "atac_regulatory_evidence": [
           "narrowpeak@10-column",
@@ -219,7 +255,7 @@
         "any"
       ],
       "regression_evidence_ids": [
-        "single-cell-atac-regulatory-regression-v1"
+        "single-cell-atac-regulatory-regression-v2"
       ],
       "tool_versions": {
         "MACS3": [
@@ -513,7 +549,7 @@
       "version_source": "https://cran.r-project.org/package=digest"
     }
   ],
-  "description": "Direct Codex to validate 10x fragments and paired RNA/ATAC count evidence, call peaks with MACS3 FRAG semantics, scan declared motifs against supplied peak sequences, construct reproducible GC/accessibility-matched chromVAR backgrounds, calculate motif deviations, execute Signac peak-to-gene linking, and retain reload-validated method-specific evidence without causal overinterpretation.",
+  "description": "Direct Codex to validate indexed 10x fragments and paired RNA/ATAC evidence, call sample or predeclared-group peaks, freeze a filtered reproducible common peak set, rebuild a sparse peak-by-cell assay with Signac FeatureMatrix, rerun LSI/WNN, scan declared motifs, compute chromVAR deviations, execute Signac peak-to-gene linking, and retain reload-validated method-specific evidence.",
   "domains": [
     "omics",
     "statistics"
@@ -521,6 +557,7 @@
   "entrypoint": "agent-generated-analysis",
   "evidence_effects": [
     "adds_macs3_scATAC_peaks",
+    "adds_recalled_peak_matrix_and_rerun_contract",
     "adds_sequence_bound_motif_matches",
     "adds_chromvar_motif_deviations",
     "adds_signac_peak_gene_links"
@@ -695,6 +732,50 @@
         "minLength": 1,
         "type": "string"
       },
+      "peak_call_grouping": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "peak_call_method": {
+        "enum": [
+          "macs3",
+          "archr"
+        ],
+        "type": "string"
+      },
+      "peak_combine_policy": {
+        "enum": [
+          "reproducible-consensus",
+          "union-reduce"
+        ],
+        "type": "string"
+      },
+      "peak_reproducibility_rule": {
+        "minLength": 3,
+        "type": "string"
+      },
+      "peak_shift": {
+        "type": "integer"
+      },
+      "peak_extsize": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "peak_min_width": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "peak_max_width": {
+        "minimum": 2,
+        "type": "integer"
+      },
+      "blacklist_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "retain_original_assay": {
+        "type": "boolean"
+      },
       "objective": {
         "minLength": 12,
         "type": "string"
@@ -707,6 +788,7 @@
         "items": {
           "enum": [
             "macs3-peaks",
+            "recalled-peak-matrix",
             "motifmatchr",
             "chromvar",
             "linkpeaks"
@@ -791,7 +873,9 @@
           ],
           "name": "rds",
           "orientations": [
-            "motifs-by-cells-and-peak-gene-links"
+            "motifs-by-cells-and-peak-gene-links",
+            "recalled-peaks-by-cells",
+            "seurat-object-with-preserved-and-recalled-atac-assays"
           ],
           "representations": [
             "container",
@@ -859,6 +943,7 @@
       "name": "atac_regulatory_evidence",
       "processing_levels": [
         "peak-called",
+        "peak-recalled-and-requantified",
         "motif-resolved",
         "deviation-modeled",
         "RNA-linked",
@@ -867,6 +952,7 @@
       "required_metadata": [
         "genome-build",
         "MACS3-parameters",
+        "peak-recall-grouping-consensus-filter-and-matrix-digests",
         "barcode-accounting",
         "motif-resource",
         "background-policy",
@@ -895,7 +981,7 @@
       },
       "handoff_type": {
         "enum": [
-          "codex_generated_project_analysis"
+          "packaged_parameterized_project_analysis"
         ],
         "type": "string"
       },
@@ -954,8 +1040,12 @@
   ],
   "provenance": {
     "concept_sources": [
-      "Project-owned ATAC regulatory workflow retaining method-specific peak, motif, deviation, and link evidence.",
+      "Project-owned ATAC regulatory workflow retaining method-specific peak, rebuilt matrix, motif, deviation, and link evidence.",
       "https://macs3-project.github.io/MACS/docs/callpeak.html",
+      "https://stuartlab.org/signac/reference/callpeaks",
+      "https://stuartlab.org/signac/reference/featurematrix",
+      "https://www.archrproject.com/reference/addReproduciblePeakSet.html",
+      "https://www.nature.com/articles/s41588-021-00790-6",
       "https://stuartlab.org/signac/reference/linkpeaks",
       "https://bioconductor.org/packages/3.18/bioc/html/chromVAR.html",
       "https://bioconductor.org/packages/3.18/bioc/html/motifmatchr.html"
@@ -973,6 +1063,12 @@
       "blocks_interpretation": true,
       "description": "MACS3 narrowPeak and summit outputs must be nonempty, coordinate-valid, reloaded, and bound to source and parameter digests.",
       "id": "atac-peak-coordinate-reload",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Recalled peaks must use declared sample or predeclared-group pseudobulks, reproducibility or union and blacklist/width filters, a frozen common peak set, exact FeatureMatrix cell order, a distinct preserved assay, and rerun LSI/WNN diagnostics.",
+      "id": "atac-recalled-peak-matrix",
       "severity": "fatal"
     },
     {
@@ -1004,7 +1100,7 @@
     "Which accessible regions, motif deviations, and RNA-linked peaks are supported by validated single-cell ATAC and paired RNA evidence?"
   ],
   "schema_version": 1,
-  "title": "Call scATAC peaks and infer motif, chromVAR, and peak-to-gene evidence",
+  "title": "Recall scATAC peaks, rebuild the assay, and infer regulatory evidence",
   "tool_requirements": [
     {
       "allowed_versions": [
@@ -1162,5 +1258,5 @@
       "version_source": "https://bioconductor.org/packages/3.18/bioc/html/motifmatchr.html"
     }
   ],
-  "version": "1.1.0"
+  "version": "1.2.0"
 }

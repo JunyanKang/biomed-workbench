@@ -1,6 +1,13 @@
 {
   "case_id": "pbmc3k-foundation-public-data-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-foundation-workflow"
+    ],
+    "module_slice_digest": "fc53f1520e79add585ab71f16fd22ca368c54d36e22d3cef42deafc736cd43df",
+    "schema_version": 1
+  },
   "execution": {
     "adjacent_resolution_ari": [
       {
@@ -37,6 +44,23 @@
     "retained_cells": 2638,
     "retained_features": 13656
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "70da484c584818854d7a35df60ebc1d0466d01a041d758480bcea2fc66b1eb75",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "d4cc242a1e52ae5376a3b530687d39975d1f015106ee234f174e8eb4db395f78",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "scanpy_foundation.py": "600e48b401276b1cdf6e0de2de781ea09dac443ff864044fe7312860899cb7b1",
+      "seurat_foundation.R": "6fc81fa32af558fe7ebce39a10985bd9855c00a3d3f4ca3f339346eccc4d0cef"
+    },
+    "templates_unchanged": true
+  },
   "methods_not_run": {
     "ambient_rna": "not-run",
     "doublet": "not-run",
@@ -45,7 +69,7 @@
   "module": {
     "compatibility_row_id": "agent-protocol-1-scanpy-110-or-seurat-52",
     "id": "single-cell-foundation-workflow",
-    "manifest_sha256": "d4cc242a1e52ae5376a3b530687d39975d1f015106ee234f174e8eb4db395f78",
+    "manifest_sha256": "70da484c584818854d7a35df60ebc1d0466d01a041d758480bcea2fc66b1eb75",
     "template_sha256": "600e48b401276b1cdf6e0de2de781ea09dac443ff864044fe7312860899cb7b1",
     "version": "1.0.0"
   },

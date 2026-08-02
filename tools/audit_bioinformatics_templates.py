@@ -29,6 +29,9 @@ def build() -> dict[str, object]:
             continue
         module_path = BUILTIN_ROOT / manifest.id
         errors = validate_module_templates(module_path, manifest)
+        manual_templates = [
+            item.path for item in manifest.code_templates if item.requires_adaptation
+        ]
         records.append(
             {
                 "module_id": manifest.id,
@@ -36,6 +39,8 @@ def build() -> dict[str, object]:
                 "domains": list(manifest.domains),
                 "template_files": list(referenced_template_paths(manifest)),
                 "template_count": len(referenced_template_paths(manifest)),
+                "manual_adaptation_template_count": len(manual_templates),
+                "manual_adaptation_templates": manual_templates,
                 "passed": not errors,
                 "errors": errors,
             }
@@ -46,6 +51,9 @@ def build() -> dict[str, object]:
         "bioinformatics_module_count": len(records),
         "covered_module_count": sum(bool(item["template_count"]) for item in records),
         "passing_module_count": sum(bool(item["passed"]) for item in records),
+        "manual_adaptation_template_count": sum(
+            int(item["manual_adaptation_template_count"]) for item in records
+        ),
         "passed": bool(records) and all(bool(item["passed"]) for item in records),
         "records": records,
     }

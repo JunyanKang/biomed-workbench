@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "id": "journal-targeting-and-compliance",
+  "version": "1.0.0",
+  "title": "Recommend journals and audit manuscripts against versioned official standards",
+  "description": "Rank project-to-journal fit without impact-factor or acceptance-probability claims, bind drafting to one immutable official-source standard version, and block submission readiness when a verified limit, section, reporting requirement, or live source check remains unresolved.",
+  "module_type": "validation",
+  "domains": ["publication"],
+  "intents": [
+    "recommend a journal for this project",
+    "compare journal fit",
+    "audit manuscript against journal requirements",
+    "bind manuscript to journal author guidelines",
+    "期刊推荐",
+    "按目标期刊规范审查论文",
+    "生命医学顶级期刊格式要求"
+  ],
+  "questions": [
+    "Which journals match the project's audience, study type, and scientific contribution, and does the manuscript satisfy the exact version of the selected official author standard?"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.journal_standards:journal_targeting_and_compliance",
+  "execution": {"kind": "python", "timeout_seconds": 30, "max_output_bytes": 10000000},
+  "maturity": "validated",
+  "input_artifacts": [
+    {
+      "name": "journal_targeting_request",
+      "artifact_type": "publication_targeting_request",
+      "source_policy": "project_input",
+      "processing_levels": ["project-scoped", "article-type-aware"],
+      "required_metadata": ["project-summary", "study-type", "intended-audience"],
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["project-and-manuscript-metrics"]
+        }
+      ]
+    }
+  ],
+  "output_artifacts": [
+    {
+      "name": "journal_targeting_report",
+      "artifact_type": "versioned_journal_targeting_and_compliance_report",
+      "processing_levels": ["official-source-bound", "fit-ranked", "compliance-gated"],
+      "required_metadata": ["catalog-version", "catalog-sha256", "reviewed-on", "target-journal-id", "official-source-urls"],
+      "formats": [
+        {
+          "name": "inline-json",
+          "versions": ["1"],
+          "representations": ["structured"],
+          "compression": ["none"],
+          "required_indexes": [],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "annotation_releases": [],
+          "orientations": ["ranked-journal-fit-and-field-level-compliance"]
+        }
+      ]
+    }
+  ],
+  "preconditions": [
+    "The project summary, study type, intended scientific audience, principal methods, and maturity of the evidence are declared before journal ranking.",
+    "Compliance review uses measured manuscript fields and the exact intended article type rather than a generic publisher label."
+  ],
+  "assumptions": [
+    "Official journal and publisher author pages are the authority for submission rules; the catalog records the date and version last reviewed.",
+    "Scope fit is a scientific editorial judgment and cannot be reduced to citation metrics, impact factor, or a predicted acceptance probability."
+  ],
+  "quality_gates": [
+    {
+      "id": "journal-standard-version-bound",
+      "severity": "fatal",
+      "description": "Recommendation and compliance output must carry the immutable catalog version, catalog digest, journal review date, and official source URLs.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "journal-unknown-rule-blocks-readiness",
+      "severity": "fatal",
+      "description": "A numerical limit or reporting rule that the official public guide does not state remains a live manual check and blocks submission-ready status.",
+      "blocks_interpretation": true
+    },
+    {
+      "id": "journal-fit-claim-boundary",
+      "severity": "major",
+      "description": "Journal ranking may describe audience, scope, article-type, and evidence fit but must not claim acceptance probability or use impact factor as the deciding score.",
+      "blocks_interpretation": true
+    }
+  ],
+  "limitations": [
+    "The catalog cannot replace editorial presubmission judgment, a live check of the selected article type, specialist statistical review, ethics review, or publisher correspondence.",
+    "Publisher instructions can change without notice; submission export therefore requires a live source recheck even when the stored version passed."
+  ],
+  "evidence_effects": [
+    "adds_version_bound_journal_fit_evidence",
+    "adds_field_level_manuscript_compliance_findings"
+  ],
+  "alternatives": [],
+  "complements": [
+    "manuscript-audit",
+    "figure-specification",
+    "citation-audit",
+    "reviewer-assessment",
+    "source-freshness-audit"
+  ],
+  "tool_requirements": [],
+  "dependencies": [
+    {
+      "name": "python",
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "required": true,
+      "tested_versions": ["3.14.3"],
+      "allowed_versions": [">=3.14,<3.15"],
+      "version_source": "https://www.python.org/downloads/release/python-3143/",
+      "verified_at": "2026-07-31",
+      "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "purpose": "Load the immutable journal catalog, rank fit, and execute deterministic field-level compliance checks.",
+      "conflicts": [],
+      "platforms": ["any"]
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "id": "python-3.14.3-journal-catalog-2026-07-31",
+      "module_version": "1.0.0",
+      "tool_versions": {},
+      "dependency_versions": {"python": [">=3.14,<3.15"]},
+      "input_formats": {"journal_targeting_request": ["inline-json@1"]},
+      "output_formats": {"journal_targeting_report": ["inline-json@1"]},
+      "platforms": ["any"],
+      "regression_evidence_ids": ["journal-targeting-and-compliance-regression-v1"],
+      "end_to_end_evidence_ids": ["journal-targeting-and-compliance-e2e-v1"],
+      "verified_at": "2026-07-31"
+    }
+  ],
+  "access": "offline",
+  "mutability": "read_only",
+  "credentials": [],
+  "input_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "project": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "summary": {"type": "string", "minLength": 20},
+          "study_type": {"type": "string", "minLength": 2},
+          "topics": {"type": "array", "items": {"type": "string"}, "maxItems": 30},
+          "methods": {"type": "array", "items": {"type": "string"}, "maxItems": 30},
+          "intended_audience": {"type": "string", "minLength": 2},
+          "translational_stage": {"type": "string"}
+        },
+        "required": ["summary", "study_type", "topics", "methods", "intended_audience"]
+      },
+      "target_journal_id": {"type": "string", "minLength": 2},
+      "candidate_journal_ids": {"type": "array", "items": {"type": "string"}, "minItems": 1, "maxItems": 54, "uniqueItems": true},
+      "manuscript": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "main_text_words": {"type": "integer", "minimum": 0},
+          "main_text_characters_with_spaces": {"type": "integer", "minimum": 0},
+          "abstract_words": {"type": "integer", "minimum": 0},
+          "display_items": {"type": "integer", "minimum": 0},
+          "references": {"type": "integer", "minimum": 0},
+          "sections": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+          "declarations": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+        },
+        "required": ["main_text_words", "abstract_words", "display_items", "references", "sections", "declarations"]
+      },
+      "top_k": {"type": "integer", "minimum": 1, "maximum": 20},
+      "standard_version": {"type": "string", "pattern": "^[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}$"}
+    },
+    "required": ["project"]
+  },
+  "output_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "catalog_version": {"type": "string"},
+      "catalog_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+      "reviewed_on": {"type": "string"},
+      "journal_count": {"type": "integer"},
+      "recommendations": {"type": "array"},
+      "target_standard": {"type": "object", "nullable": true},
+      "compliance": {"type": "object", "nullable": true},
+      "policy": {"type": "object"}
+    },
+    "required": ["catalog_version", "catalog_sha256", "reviewed_on", "journal_count", "recommendations", "target_standard", "compliance", "policy"]
+  },
+  "kernel_compatibility": [">=0.2.0,<0.3.0"],
+  "provenance": {
+    "license": "Apache-2.0",
+    "concept_sources": [
+      "Versioned project-owned catalog built from current official journal scope, content-type, author-instruction, figure, and reporting pages.",
+      "https://www.nature.com/nature/for-authors/formatting-guide",
+      "https://www.science.org/content/page/instructions-preparing-initial-manuscript",
+      "https://crosstalk.cell.com/blog/taking-the-references-out-of-the-equation",
+      "https://www.icmje.org/recommendations/",
+      "https://www.equator-network.org/"
+    ]
+  }
+}

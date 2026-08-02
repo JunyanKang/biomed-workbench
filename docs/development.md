@@ -56,6 +56,8 @@ The generated registry is source-neutral and dynamically discovers valid modules
 ## Release Discipline
 
 - Regenerate deterministic registry and report artifacts before release.
+- Version scientific implementations, runtime compatibility, module-scoped evidence, and documentation separately. A global registry or documentation change never invalidates scientific outputs by itself; a module metadata change requires reviewed scope reissue; a runtime-policy change requires targeted compatibility retesting; only a scientific implementation, parameter-semantic, input-processing, or output-recognition change requires recomputation.
+- Run `tools/assess_report_revalidation.py` before reissuing or rerunning observed evidence. Never rebind a changed scientific implementation to old outputs, and never spend compute merely because an unrelated global digest changed.
 - Keep plugin, catalog, and release versions consistent.
 - Run compatibility regression and representative execution checks when changing a baseline or widening a policy.
 - Run the full test suite, release validator, isolated plugin install verification, and complete-history secret scan.

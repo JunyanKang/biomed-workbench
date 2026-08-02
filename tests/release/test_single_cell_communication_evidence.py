@@ -6,6 +6,7 @@ from pathlib import Path
 
 from biomed_workbench.modules.contract import parse_manifest, version_is_allowed
 from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
 from biomed_workbench.modules.registry import ModuleRegistry
 
 
@@ -21,7 +22,7 @@ class TestSingleCellCommunicationEvidence(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(report["module_id"], module.id)
         self.assertEqual(report["module_version"], module.version)
-        self.assertEqual(report["registry_digest"], ModuleRegistry.discover(BUILTIN_ROOT).digest)
+        self.assertTrue(evidence_scope_is_current(report, ModuleRegistry.discover(BUILTIN_ROOT)))
         self.assertEqual(
             report["templates"]["run_liana_cellphonedb"]["sha256"],
             hashlib.sha256((MODULE_ROOT / "templates" / "run_liana_cellphonedb.py").read_bytes()).hexdigest(),

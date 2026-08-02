@@ -1,0 +1,133 @@
+{
+  "assay": "net-seq",
+  "case_id": "netseq-rdshear-srr12840066-saccer3-first10000-v1",
+  "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "bulk-nascent-transcription"
+    ],
+    "module_slice_digest": "92a6bf0958e55c01b1a6f62327c3c65e8697198b11c4d99ae7686578184da325",
+    "schema_version": 1
+  },
+  "execution": {
+    "assay": "net-seq",
+    "external_workflow_executed": true,
+    "outputs": {
+      "alignment_log": {
+        "bytes": 1974,
+        "name": "SRR12840066_first10000.Log.final.out",
+        "sha256": "b66ceeb19e95477ab19507d09907497d935221c2ccebe845e2fd2de3d1478f81"
+      },
+      "bedgraph_neg": {
+        "bytes": 7650,
+        "name": "SRR12840066_first10000.neg.bedgraph.gz",
+        "sha256": "3a937105d1668a8bff3542408c0dcfa78bd2d7846d4658e53304368223f7e06a"
+      },
+      "bedgraph_pos": {
+        "bytes": 8732,
+        "name": "SRR12840066_first10000.pos.bedgraph.gz",
+        "sha256": "f1af21f32eea91d79b9b4657af61103a39d845abaccf73d9cfd32dcb24bb558c"
+      },
+      "fastp_report_html": {
+        "bytes": 218621,
+        "name": "SRR12840066_first10000.fastp.html",
+        "sha256": "22fb80cc2b3bd363f0294306d14c7d2f6f483a21cb20492f77004ef27ee36ac2"
+      },
+      "fastp_report_json": {
+        "bytes": 46055,
+        "name": "SRR12840066_first10000.fastp.json",
+        "sha256": "040f5620f45b42c19d6478a74aa4b11bcbb5806640ef362b9ddcaf1b976cca91"
+      },
+      "mask_neg": {
+        "bytes": 28,
+        "name": "SRR12840066_first10000.mask_neg.bedgraph.gz",
+        "sha256": "d079906378251d29409f7f0f691113fd3b0049b5927b713e2704ca44ac743d48"
+      },
+      "mask_pos": {
+        "bytes": 28,
+        "name": "SRR12840066_first10000.mask_pos.bedgraph.gz",
+        "sha256": "d079906378251d29409f7f0f691113fd3b0049b5927b713e2704ca44ac743d48"
+      },
+      "output_bam": {
+        "bytes": 171899,
+        "name": "SRR12840066_first10000.bam",
+        "sha256": "e1011a0a793c9e26906db4f3e09ddc87790e9ce75a3fa55479d1ef012c43d6f1"
+      }
+    },
+    "outputs_reloaded": true,
+    "parameters": {
+      "adapter_sequence": "ATCTCGTATGCCGTCTTCTGCTTG",
+      "dup_calc_accuracy": 3,
+      "genome_name": "sacCer3",
+      "max_read_count": 10000,
+      "memory": "8G",
+      "minimum_read_length": 24,
+      "out_filter_multimap_nmax": 1,
+      "out_sam_mult_nmax": 1,
+      "sample_name": "SRR12840066_first10000",
+      "threads": 4,
+      "umi_width": 6
+    },
+    "reload_validation": {
+      "bam_reloaded": true,
+      "bedgraph_rows": {
+        "bedgraph_neg": 1410,
+        "bedgraph_pos": 1596,
+        "mask_neg": 0,
+        "mask_pos": 0
+      },
+      "fastp_html_reloaded": true,
+      "fastp_json_reloaded": true,
+      "fastp_reads_before_filtering": 10000,
+      "star_input_reads": 9850,
+      "star_uniquely_mapped_reads": 3240
+    }
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "implementation": {
+    "path": "biomed_workbench/implementations/netseq.py",
+    "sha256": "effd8379ea3390cf3daec5f156c6a9957917a79fa60e8697f9fcd17b97544735"
+  },
+  "module": {
+    "id": "bulk-nascent-transcription",
+    "version": "0.2.0"
+  },
+  "observed_at": "2026-08-02T04:20:30.148315+00:00",
+  "passed": true,
+  "quality_gates": {
+    "bam_reloaded": true,
+    "current_implementation": true,
+    "digest_pinned_container": true,
+    "external_workflow_exit_zero": true,
+    "fastp_reports_reloaded": true,
+    "input_and_output_checksums_recorded": true,
+    "official_sra_case_processed": true,
+    "pinned_upstream_commit_and_wdl": true,
+    "star_log_reloaded": true,
+    "strand_bedgraphs_reloaded": true
+  },
+  "schema_version": 1,
+  "scientific_scope": "This acceptance confirms the complete public-read execution path and reloadable NET-seq deliverables; full project inference uses complete biological replicates and study-specific design.",
+  "source": {
+    "accession": "SRR12840066",
+    "reference": {
+      "assembly": "sacCer3",
+      "bytes": 3820548,
+      "sha256": "e3a70396853eff5a012077efbd06cb97d858e12349745d102e316bb8f620f266",
+      "url": "https://hgdownload.soe.ucsc.edu/goldenPath/sacCer3/bigZips/sacCer3.fa.gz"
+    },
+    "selection": "first 10,000 reads through the workflow's official maxReadCount parameter",
+    "url": "https://www.ncbi.nlm.nih.gov/sra/SRR12840066",
+    "workflow": {
+      "commit": "ebcc7790c19041cb3da73f7a84965d8b4bf29a40",
+      "container_image": "rdshear/netseq@sha256:90fb2e5737b5a22d50182d60bb35ddc47ba2e0d8c08f1eb3fcf5808bdbd93948",
+      "derived_sha256": "d4b5c78760dca9ea2c021810bb5fe8450a9c01987cd8042827e9352da27cdda9",
+      "repository": "https://github.com/rdshear/netseq",
+      "reviewed_changes": "workflow and task refFasta String declarations to localized File; wget stream to cat localized file",
+      "runtime": "Cromwell",
+      "runtime_version": "cromwell 88",
+      "upstream_sha256": "197ccd91ba5e73b83f142bae488b6458da0333cb3b7621004991cc9068b5b59c",
+      "upstream_wdl_url": "https://raw.githubusercontent.com/rdshear/netseq/ebcc7790c19041cb3da73f7a84965d8b4bf29a40/netseq.wdl"
+    }
+  }
+}

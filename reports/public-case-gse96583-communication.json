@@ -1,6 +1,13 @@
 {
   "case_id": "gse96583-sample-aware-communication-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-communication"
+    ],
+    "module_slice_digest": "eb577bbeb22d2a56c23ec296ccb9731267be7bfffb3fd8f6c9cfc63857edc099",
+    "schema_version": 1
+  },
   "execution": {
     "method": "liana-cellphonedb",
     "minimum_significant_sample_support": 6,
@@ -24,11 +31,28 @@
     "sample_interaction_rows": 3870,
     "source_artifacts_immutable": true
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "dea07bf14785a2b2e801a818ab14bb77360a2735e66d4a9c57a1d52b27dbc079",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "a72feed0cec29cf88da564dc7eeb75ecef44aca6dbebe2134f0d7f883e5e55ba",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "run_cellchat_nichenet.R": "1baf05b6ec3adb8efff1fa6f64dc21d9bac9984711f46994ae9ec591d07bce30",
+      "run_liana_cellphonedb.py": "f49ae16291adbcb5a7259238e3dc6fa5077628626a6247af2fd7f4b525e0b1c8"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-python-communication",
     "id": "single-cell-communication",
-    "manifest_sha256": "a72feed0cec29cf88da564dc7eeb75ecef44aca6dbebe2134f0d7f883e5e55ba",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "dea07bf14785a2b2e801a818ab14bb77360a2735e66d4a9c57a1d52b27dbc079",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": "f49ae16291adbcb5a7259238e3dc6fa5077628626a6247af2fd7f4b525e0b1c8",
     "version": "1.1.0"
   },

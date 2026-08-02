@@ -14,7 +14,7 @@ class PublicCapabilityDocumentationTests(unittest.TestCase):
     def test_capability_map_module_count_matches_dynamic_registry(self):
         text = CAPABILITY_MAP.read_text(encoding="utf-8")
         match = re.search(
-            r"The registry currently contains (\d+) independently discoverable modules\.",
+            r"The registry currently contains \*\*(\d+)\*\* independently discoverable modules\.",
             text,
         )
 

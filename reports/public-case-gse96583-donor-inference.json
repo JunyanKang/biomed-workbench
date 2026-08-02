@@ -1,6 +1,13 @@
 {
   "case_id": "gse96583-donor-pseudobulk-public-data-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-donor-inference"
+    ],
+    "module_slice_digest": "7941e02e22e8d6b2d5650f0605262d3d77d600cd2b3f7c89d1646681aef25b1f",
+    "schema_version": 1
+  },
   "execution": {
     "all_cells_accounted": true,
     "complete_pairs_by_cell_type": {
@@ -41,10 +48,27 @@
     "result_reload_validated": true,
     "result_rows": 21874
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "a2c80c8d91055369f357048c856a8a7708b7235c67f0c2301a5a8771156c385a",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "c5196626d53595f374f6ba4825247daf2afaa28518f8257d0f9658569b76972d",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "donor_differential.R": "1ffda21e0b16da3e5f688dc7dbce8ad39d11303549a5c191df97cb08fb17d117",
+      "pseudobulk_aggregate.py": "9644d8d7c8f04365cdba5842f692c2da87b0a4e956704845c5260a3fd6ead3d6"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-scanpy-110-edger-40-deseq2-142-limma-358",
     "id": "single-cell-donor-inference",
-    "manifest_sha256": "c5196626d53595f374f6ba4825247daf2afaa28518f8257d0f9658569b76972d",
+    "manifest_sha256": "a2c80c8d91055369f357048c856a8a7708b7235c67f0c2301a5a8771156c385a",
     "template_sha256": {
       "donor_differential.R": "1ffda21e0b16da3e5f688dc7dbce8ad39d11303549a5c191df97cb08fb17d117",
       "pseudobulk_aggregate.py": "9644d8d7c8f04365cdba5842f692c2da87b0a4e956704845c5260a3fd6ead3d6"

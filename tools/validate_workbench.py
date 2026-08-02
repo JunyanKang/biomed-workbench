@@ -19,6 +19,7 @@ if str(ROOT) not in sys.path:
 from biomed_workbench.catalog import all_capabilities, capability_to_dict, resolve_entrypoint  # noqa: E402
 from biomed_workbench.formats import FormatRegistry  # noqa: E402
 from biomed_workbench.modules.index import BUILTIN_ROOT, MODULE_INDEX, build_index  # noqa: E402
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry, ModuleRegistryError  # noqa: E402
 from biomed_workbench.orchestration.graph import build_capability_graph  # noqa: E402
 from biomed_workbench.services.public_databases import (  # noqa: E402
@@ -36,6 +37,8 @@ from biomed_workbench.version import VERSION  # noqa: E402
 from tools.validate_module import validate_module  # noqa: E402
 from tools.build_format_contract_report import build as build_format_contract_report  # noqa: E402
 from tools.audit_bioinformatics_templates import build as build_bioinformatics_template_report  # noqa: E402
+from tools.audit_execution_readiness import build as build_execution_readiness_report  # noqa: E402
+from tools.build_research_engine_report import EXECUTION_CONTRACTS, KERNEL_CONTRACTS  # noqa: E402
 from tools.build_experimental_maturity_report import build as build_experimental_maturity_report  # noqa: E402
 
 CATALOG_FIELDS = {"id", "workflow", "kind", "title", "description", "entrypoint", "input_schema", "requirements", "access", "mutability"}
@@ -250,8 +253,8 @@ def main() -> int:
                 or research_report.get("module_count") != len(modules)
                 or research_report.get("test_count", 0) < 383
                 or research_report.get("registry_digest") != registry.digest
-                or set(research_report.get("execution_contracts", ()))
-                != {"scientific_command", "command_companion_sidecar_input", "command_digest_bound_project_implementation", "command_input_binding", "command_derived_sidecar_output", "command_output_binding", "command_scalar_parameter_template", "command_stream_output_capture", "command_zip_directory_input", "command_workdir_relative_paths", "tested_baseline_compatibility_policy", "bounded_process_result"}
+                or research_report.get("kernel_contracts") != KERNEL_CONTRACTS
+                or research_report.get("execution_contracts") != EXECUTION_CONTRACTS
                 or graph_report != {"node_count": len(graph.nodes), "edge_count": len(graph.edges), "digest": graph.digest}
             ):
                 errors.append("research engine report differs from the discovered registry or capability graph")
@@ -315,6 +318,24 @@ def main() -> int:
                 or any(item.get("template_count", 0) < 1 for item in template_report.get("records", ()))
             ):
                 errors.append("every bioinformatics module must retain at least one passing code template")
+        execution_readiness_path = ROOT / "reports" / "execution-readiness.json"
+        try:
+            execution_readiness = json.loads(execution_readiness_path.read_text(encoding="utf-8"))
+            expected_execution_readiness = build_execution_readiness_report()
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
+            errors.append(f"execution readiness report is missing or invalid: {exc}")
+        else:
+            if (
+                execution_readiness != expected_execution_readiness
+                or execution_readiness.get("passed") is not True
+                or execution_readiness.get("registry_digest") != registry.digest
+                or execution_readiness.get("module_count") != len(modules)
+                or execution_readiness.get("blocked_module_ids")
+                or execution_readiness.get("counts", {}).get("manual-adaptation", 0) != 0
+            ):
+                errors.append(
+                    "execution readiness differs from the registry or still contains a manual-adaptation module"
+                )
         experimental_maturity_path = ROOT / "reports" / "experimental-module-maturity.json"
         try:
             experimental_maturity = json.loads(experimental_maturity_path.read_text(encoding="utf-8"))
@@ -347,7 +368,7 @@ def main() -> int:
                 communication_report.get("passed") is not True
                 or communication_report.get("module_id") != communication_manifest.id
                 or communication_report.get("module_version") != communication_manifest.version
-                or communication_report.get("registry_digest") != registry.digest
+                or not evidence_scope_is_current(communication_report, registry)
                 or communication_report.get("compatibility_rows") != expected_rows
                 or communication_report.get("fixture", {}).get("cells") != 160
                 or communication_report.get("fixture", {}).get("biological_samples") != 4
@@ -1176,7 +1197,7 @@ def main() -> int:
             scientific_summary = public_database_report.get("scientific_summary", {})
             if (
                 public_database_report.get("passed") is not True
-                or public_database_report.get("registry_digest") != registry.digest
+                or not evidence_scope_is_current(public_database_report, registry)
                 or set(public_database_report.get("module_ids", ())) != public_database_module_ids
                 or public_database_report.get("contracts") != expected_public_database_contracts
                 or check_names != expected_check_names

@@ -45,7 +45,9 @@
     "gene-identifier-resolution",
     "comparative-sequence-phylogeny"
   ],
-  "credentials": [],
+  "credentials": [
+    "NCBI_API_KEY"
+  ],
   "dependencies": [
     {
       "allowed_versions": [
@@ -73,7 +75,7 @@
       "version_source": "https://www.python.org/downloads/release/python-3143/"
     }
   ],
-  "description": "Retrieve bounded NCBI Datasets ortholog records from one stable source Gene ID to one declared target taxon, preserving source identity, returned target records, missing results, and retrieval provenance without claiming functional equivalence.",
+  "description": "Retrieve bounded NCBI Datasets ortholog records from one stable source Gene ID to one declared target taxon, optionally using the same NCBI API key as E-utilities for higher request capacity, while preserving source identity, returned target records, missing results, and retrieval provenance without claiming functional equivalence.",
   "domains": [
     "evidence"
   ],
@@ -297,7 +299,7 @@
         "ortholog-source-and-target-identity",
         "ortholog-claim-boundary"
       ],
-      "requires_adaptation": true
+      "requires_adaptation": false
     }
   ]
 }

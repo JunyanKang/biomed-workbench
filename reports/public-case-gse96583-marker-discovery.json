@@ -1,6 +1,13 @@
 {
   "case_id": "gse96583-held-out-donor-marker-discovery-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-marker-discovery"
+    ],
+    "module_slice_digest": "973ce9c9741670a5d8bbf70b012c102d93a022f9296dd30df985cb35dc23b7d4",
+    "schema_version": 1
+  },
   "execution": {
     "cell_types": 6,
     "cells_by_cell_type_and_donor": {
@@ -179,10 +186,26 @@
       "1488"
     ]
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "353700fe11e762159812996d8db82cbbebe8ff603595707833d9021b550e3307",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "be8d7b35ef0e922d5f7f76b883d74805b01f740a312b0843b90bfb34f63b4f57",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "discover_markers.py": "eca3837e4acd39523b68fd8931072c60d98edf87fc6569f796a531c68453bdad"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-scanpy-1104-marker-stability",
     "id": "single-cell-marker-discovery",
-    "manifest_sha256": "be8d7b35ef0e922d5f7f76b883d74805b01f740a312b0843b90bfb34f63b4f57",
+    "manifest_sha256": "353700fe11e762159812996d8db82cbbebe8ff603595707833d9021b550e3307",
     "template_sha256": "eca3837e4acd39523b68fd8931072c60d98edf87fc6569f796a531c68453bdad",
     "version": "1.1.0"
   },

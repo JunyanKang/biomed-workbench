@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
 from biomed_workbench.modules.registry import ModuleRegistry
 from tools.rebind_live_evidence_registry import rebind
 
@@ -26,12 +27,13 @@ class RebindLiveEvidenceRegistryTests(unittest.TestCase):
         path.write_text(json.dumps(report), encoding="utf-8")
         return path
 
-    def test_rebinds_only_the_registry_digest_for_current_module_evidence(self):
+    def test_migrates_to_dependency_scope_without_rewriting_historical_registry(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = self._write(Path(temporary), scientific_summary={"passed": True})
             self.assertTrue(rebind(path, self.registry))
             report = json.loads(path.read_text(encoding="utf-8"))
-            self.assertEqual(report["registry_digest"], self.registry.digest)
+            self.assertEqual(report["registry_digest"], "0" * 64)
+            self.assertTrue(evidence_scope_is_current(report, self.registry))
             self.assertEqual(report["scientific_summary"], {"passed": True})
             self.assertFalse(rebind(path, self.registry))
 

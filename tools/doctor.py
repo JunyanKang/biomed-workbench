@@ -194,13 +194,20 @@ def _check_routing() -> Check:
 
 
 def _check_optional_credentials() -> Check:
-    configured = bool(os.environ.get("NCBI_API_KEY", "").strip())
+    from biomed_workbench.services.credentials import credential_sources
+
+    sources = credential_sources()
     return Check(
         id="optional-credentials",
         status="pass",
         summary="Optional credential policy is valid.",
         details={
-            "NCBI_API_KEY": "configured" if configured else "not configured",
+            "NCBI_API_KEY": (
+                "configured"
+                if sources["NCBI_API_KEY"] != "not-configured"
+                else "not configured"
+            ),
+            "NCBI_API_KEY_source": sources["NCBI_API_KEY"],
             "required_for_core_use": False,
         },
     )

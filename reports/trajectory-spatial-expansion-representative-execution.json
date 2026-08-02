@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "verified_at": "2026-07-30",
+  "style_version": "1.2.0",
+  "modules": {
+    "spatial-platform-image-foundation": {
+      "contract_validation": "passed",
+      "representative_execution": "passed",
+      "execution_id": "spatial-platform-generic-h5ad-qc-e2e-v1",
+      "input": {
+        "format": "h5ad@0.1.0",
+        "platform": "generic",
+        "observations": 80,
+        "features": 120,
+        "biological_samples": 2,
+        "coordinate_unit": "micrometre",
+        "raw_count_semantics": true
+      },
+      "output": {
+        "interpretation_ready": true,
+        "quality_gate_failures": [],
+        "h5ad_reload": "passed",
+        "observation_qc_reload": "passed",
+        "sample_qc_reload": "passed"
+      },
+      "native_vendor_reader_execution": "not-run"
+    },
+    "spatial-multimethod-inference": {
+      "contract_validation": "passed",
+      "representative_execution": "controller-and-template-validation-only",
+      "native_backend_execution": "not-run",
+      "reason": "The selected machine runtime did not contain cell2location, spacexr, Tangram, SPOTlight, BayesSpace, SpaGCN, STAGATE or COMMOT."
+    },
+    "spatial-multislice-integration": {
+      "contract_validation": "passed",
+      "hierarchical_model_execution": "passed",
+      "execution_id": "spatial-hierarchical-model-synthetic-e2e-v1",
+      "observations": 1728,
+      "biological_samples": 12,
+      "lme4_version": "1.1.38",
+      "singular": false,
+      "convergence_messages": null,
+      "native_alignment_backend_execution": "not-run",
+      "reason": "PASTE and PASTE2 were not installed in the selected machine runtime."
+    },
+    "trajectory-spatial-figure-package": {
+      "contract_validation": "passed",
+      "representative_execution": "passed",
+      "execution_id": "trajectory-spatial-figure-package-synthetic-e2e-v1",
+      "analysis_type": "spatial-core-analysis",
+      "required_panels": 7,
+      "complete_profile": true,
+      "backend": "R/ggplot2/patchwork/svglite/ragg",
+      "aggregate_outputs": {
+        "pdf": {
+          "bytes": 44962,
+          "sha256": "b0a553fe54490ce38a0694326bd24dcd95fbdf52c61e36f2d3e8ece0840bb008"
+        },
+        "svg": {
+          "bytes": 121659,
+          "sha256": "90731ecc8c07886c8bc3729464892c76f28a11af5dc7819e7c2b954fe3df4691"
+        },
+        "tiff_600_dpi_lzw": {
+          "bytes": 773358,
+          "sha256": "c2b76b81672bcf66b3a8064e5ef069513cfadcfbf9ad91ee08a62c6c4e9ce99b"
+        }
+      },
+      "negative_gate": {
+        "missing_panel": "domain_stability_and_sample_composition",
+        "expected_failure": true,
+        "exit_code": 1
+      }
+    }
+  },
+  "evidence_policy": {
+    "registered_template_is_not_native_backend_validation": true,
+    "compatibility_promotion_requires_representative_execution": true,
+    "cells_spots_and_sections_are_not_condition_replicates": true,
+    "formal_plot_backend": "R-only"
+  }
+}

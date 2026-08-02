@@ -1,0 +1,75 @@
+{
+  "backend": {
+    "RLPipes": "0.9.3",
+    "runtime": "Linux/amd64 isolated container",
+    "workflow_commit": "b1f864e52c48e164c059b40afc450a5726c147e7"
+  },
+  "case_id": "rlpipes093-official-dripc-mm10-public-e2e-v1",
+  "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "bulk-r-loop-mapping"
+    ],
+    "module_slice_digest": "c05479aac378cac8ea84e25ba4fe88a2f5b8900856180b659a3b6db0c664a662",
+    "schema_version": 1
+  },
+  "evidence_scope_migration": {
+    "changed_fields": [
+      "maturity"
+    ],
+    "current_evidence_scope": {
+      "module_ids": [
+        "bulk-r-loop-mapping"
+      ],
+      "module_slice_digest": "c05479aac378cac8ea84e25ba4fe88a2f5b8900856180b659a3b6db0c664a662",
+      "schema_version": 1
+    },
+    "executed_implementation_current": null,
+    "migration_type": "reviewed-metadata-only-scope-reissue",
+    "prior_evidence_scope": {
+      "module_ids": [
+        "bulk-r-loop-mapping"
+      ],
+      "module_slice_digest": "8cb9690bd760eefd51955c1840dbfcd32e9336c26e632bef1a7da10044580928",
+      "schema_version": 1
+    },
+    "reason": "The module maturity label changed after representative observed execution passed; the executed implementation, parameters, source data, and scientific outputs in these reports are unchanged.",
+    "reissued_on": "2026-08-01",
+    "report_sha256_before_reissue": "283b6681c9490bd34cac60491c0948f04049f6a33c16ff8b3d2df66d504c51ca",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false
+  },
+  "execution": {
+    "all_required_outputs_nonempty": true,
+    "all_required_outputs_reloaded": true,
+    "assay": "DRIPc-seq",
+    "coverage_tracks": 1,
+    "genome": "mm10",
+    "peaks": 23,
+    "rlpipes_mode": "DRIPc",
+    "samples": 1,
+    "threads": 2,
+    "wrangled_bam_files": 1
+  },
+  "module": {
+    "id": "bulk-r-loop-mapping",
+    "version": "0.2.0"
+  },
+  "passed": true,
+  "quality_gates": {
+    "bam_reload": "pass",
+    "coverage_magic_and_reload": "pass",
+    "native_workflow_completion": "pass",
+    "peak_interval_validation": "pass",
+    "sample_manifest_validation": "pass",
+    "source_checksum": "pass",
+    "workflow_version_probe": "pass"
+  },
+  "schema_version": 1,
+  "source": {
+    "bam_bytes": 12861474,
+    "bam_sha256": "7374e101cb9ec43e2d600b35b67a69a34cdabcce945dac16e21282746fbf9101",
+    "official_test_data_url": "https://s3.amazonaws.com/rlseq-test-data/bam-files/SRX1674681_mm10.bam",
+    "repository": "https://github.com/Bishop-Laboratory/RLPipes"
+  }
+}

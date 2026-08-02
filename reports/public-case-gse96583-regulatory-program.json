@@ -1,6 +1,13 @@
 {
   "case_id": "gse96583-regulatory-program-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-regulatory-network"
+    ],
+    "module_slice_digest": "7e62b60aff98433b3ada034fa97b4790deaf9c3ea10e2dc8fef95bd20c4812e2",
+    "schema_version": 1
+  },
   "execution": {
     "adjacencies": 23816,
     "auc_shape": [
@@ -539,11 +546,29 @@
     "scored_programs": 31,
     "source_artifacts_immutable": true
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "f4c9115719e6ce5701f85bc9f522860076ecb74e66817d662a55feab3e28035e",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "afeea4f8b2eb7e8192ed20165d6627bab79a76bcc0924dba3ae72253337f448b",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "run_grnboost2_programs.py": "c45f50e124c3756816e9f4484425c6066985f67e88255a5f311164ad44adee4d",
+      "run_pyscenic.py": "ec4c6abaf5289209315e9e1ef15788cc74ba1390c371f67eeb90ea9c9f2113dc",
+      "score_scenicplus_eregulons.py": "e61e0d203c2601c45b7133200d59f45306155d8885fd03ae914ebe7a32de83ef"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-pyscenic-0121-scenicplus-10a2",
     "id": "single-cell-regulatory-network",
-    "manifest_sha256": "afeea4f8b2eb7e8192ed20165d6627bab79a76bcc0924dba3ae72253337f448b",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "f4c9115719e6ce5701f85bc9f522860076ecb74e66817d662a55feab3e28035e",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": "c45f50e124c3756816e9f4484425c6066985f67e88255a5f311164ad44adee4d",
     "version": "1.1.0"
   },

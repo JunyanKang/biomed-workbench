@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "rank-developmental-single-cell-journals",
+      "input": {
+        "project": {
+          "summary": "A developmental single-cell multi-omics study resolves a conserved cell-fate mechanism with independent perturbation evidence.",
+          "study_type": "Article",
+          "topics": ["development", "cell fate", "single-cell", "mechanism"],
+          "methods": ["single-cell RNA-seq", "single-cell ATAC-seq", "perturbation"],
+          "intended_audience": "developmental and cell biologists"
+        },
+        "candidate_journal_ids": ["developmental-cell", "nature-cell-biology", "genome-biology"],
+        "top_k": 3
+      },
+      "expected_subset": {
+        "catalog_version": "2026.07.31",
+        "journal_count": 54,
+        "policy": {
+          "impact_factor_used": false,
+          "acceptance_probability_claimed": false,
+          "official_unknowns_are_not_inferred": true
+        }
+      }
+    },
+    {
+      "name": "audit-nature-medicine-manuscript",
+      "input": {
+        "project": {
+          "summary": "A biomarker study links a mechanistically validated molecular signature to treatment response in an independent patient cohort.",
+          "study_type": "Article",
+          "topics": ["biomarker", "clinical", "disease mechanism"],
+          "methods": ["cohort", "omics", "validation"],
+          "intended_audience": "biomedical scientists and clinicians"
+        },
+        "target_journal_id": "nature-medicine",
+        "manuscript": {
+          "main_text_words": 3900,
+          "abstract_words": 145,
+          "display_items": 6,
+          "references": 55,
+          "sections": ["Abstract", "Introduction", "Results", "Discussion", "Methods", "Data availability"],
+          "declarations": ["data availability statement", "code availability statement when custom code is central"]
+        }
+      },
+      "expected_subset": {
+        "target_standard": {
+          "id": "nature-medicine",
+          "standard_version": "2026.07.31"
+        },
+        "compliance": {
+          "failed_count": 0,
+          "submission_ready": false
+        }
+      }
+    }
+  ]
+}

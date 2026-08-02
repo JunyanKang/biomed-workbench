@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-30",
+  "passed": true,
+  "evidence_scope": "Deterministic representative synthetic executions proving runnable method, output, plotting, and reload paths; this is not biological validation on a user dataset.",
+  "executions": {
+    "s96_rloop_cuttag_spikein": {
+      "passed": true,
+      "template_sha256": "5c15e8dc67c5de3bd05907b050da34d1703277697a0e216af97161c32e075508",
+      "report_sha256": "0b4aefa70215eade68984a01aeb8cf40aeb0b76e9dec8fde0730b73a5a79a5fc",
+      "samples": 4,
+      "rnaseh_pairs": 2,
+      "normalization_method": "matched-reference",
+      "figures": ["host_spikein_alignment_fraction", "spikein_scale_factor"],
+      "outputs_reloaded": true
+    },
+    "single_cell_atac_peak_recall": {
+      "passed": true,
+      "template_sha256": "88cba9fd454cf8b06fa28ed9b03bb178343b2368e67132a4cadc268cfafb2873",
+      "report_sha256": "ad3b4911adfe76d7cd86866d8ca5f17823d4c22abea7e3dd1004a903f8776436",
+      "cells": 60,
+      "peaks": 300,
+      "nonzero_entries": 12528,
+      "peak_call_groups": 3,
+      "original_assays_preserved": true,
+      "tfidf_lsi_rerun": true,
+      "wnn_rerun": true,
+      "outputs_reloaded": true
+    },
+    "proteomics_deqms": {
+      "passed": true,
+      "template_sha256": "b64b3603ee3bd1dfb1a3b8935f14c7418dfc3369bfa613d9bf4aca4c304a976a",
+      "report_sha256": "b253e6ade71c1a7cdfe951672e2f9c09ac539ff1e49c194584fa91f0425188d4",
+      "proteins": 120,
+      "samples": 8,
+      "contrast": "conditiontreated-conditioncontrol",
+      "figures": ["missingness_and_intensity_qc", "sample_correlation_heatmap", "pca", "psm_count_distribution", "variance_count_trend", "variance_count_boxplot", "residual_diagnostic", "ma", "volcano", "significant_protein_heatmap"],
+      "outputs_reloaded": true
+    },
+    "go_preranked_gsea": {
+      "passed": true,
+      "template_sha256": "1fc3daa2c2c70a41519429d8c7d3ad8fb2be4a70ca28a9c3f646b34b1d5924df",
+      "report_sha256": "ba135ac6cdcd5b9bd4df8d13ba2281de638666470e416068ba400d91a57e1f6d",
+      "mode": "go-gsea",
+      "significant_terms": 17,
+      "figures": ["nes_dotplot", "gsea_top_pathway", "leading_edge_heatmap"],
+      "empty_result_execution_also_passed": true,
+      "outputs_reloaded": true
+    },
+    "go_overrepresentation": {
+      "passed": true,
+      "template_sha256": "1fc3daa2c2c70a41519429d8c7d3ad8fb2be4a70ca28a9c3f646b34b1d5924df",
+      "report_sha256": "47588b59ec72e7f62577dac7a2bf65a282e6414e755c2f921f4897e57e8cdecd",
+      "mode": "go-ora",
+      "result_terms": 80,
+      "explicit_universe_used": true,
+      "figures": ["enrichment_dotplot", "enrichment_barplot"],
+      "outputs_reloaded": true
+    },
+    "wgcna": {
+      "passed": true,
+      "template_sha256": "1da9df73c41613a1b13764e68e48fd351bee976817f37f7c28d2385d0b6a84fe",
+      "report_sha256": "817333ee5bc26695c33ee4ea5bf941a62a7ec753b37a5a2a1a8d9997ed4b9dbf",
+      "samples": 24,
+      "features": 300,
+      "modules_excluding_grey": 3,
+      "threads": 1,
+      "figures": ["sample_dendrogram_and_traits", "soft_threshold_diagnostics", "gene_dendrogram_module_colors", "module_size_distribution", "module_trait_heatmap", "eigengene_network", "module_membership_gene_significance"],
+      "outputs_reloaded": true
+    }
+  },
+  "versions": {
+    "DEqMS": "1.20.0",
+    "limma": "3.58.1",
+    "clusterProfiler": "4.10.1",
+    "fgsea": "1.28.0",
+    "enrichplot": "1.22.0",
+    "WGCNA": "1.73",
+    "Signac": "1.16.0",
+    "Seurat": "5.2.1",
+    "Matrix": "1.6.5",
+    "GenomicRanges": "1.54.1",
+    "jsonlite": "2.0.0",
+    "digest": "0.6.39"
+  },
+  "source_policy": "docs/capabilities/advanced-omics-evidence-standard.md"
+}

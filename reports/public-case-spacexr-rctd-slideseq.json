@@ -1,0 +1,102 @@
+{
+  "backend": {
+    "R": "4.3.2",
+    "SpatialExperiment": "1.12.0",
+    "spacexr": "2.2.1"
+  },
+  "case_id": "spacexr221-official-slideseq-rctd-public-e2e-v1",
+  "case_type": "public-data-end-to-end",
+  "compatibility_binding_migration": {
+    "case_id": "spacexr221-official-slideseq-rctd-public-e2e-v1",
+    "compatibility_row_id": "method-isolated-runtime-contract-v2",
+    "migration_type": "registry-cited-public-evidence-binding",
+    "module_id": "spatial-multimethod-inference",
+    "module_version": "1.0.0",
+    "reason": "The current module compatibility row uniquely cites this already passing public case. The binding adds release metadata only; source data, execution, parameters and results are unchanged.",
+    "report_sha256_before_binding": "9212b16e535f7ff1c4a7c0e26a6428c58f7ef7a0d9fb240004dfe9b7858b73ca",
+    "reviewed_on": "2026-08-02",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false
+  },
+  "evidence_scope": {
+    "module_ids": [
+      "spatial-multimethod-inference"
+    ],
+    "module_slice_digest": "ef3f3205bbd1c83c2d113c58e4a09bb9fc2d40192c283cbc6a095089bd269350",
+    "schema_version": 1
+  },
+  "evidence_scope_migration": {
+    "changed_fields": [
+      "independent-backend-change"
+    ],
+    "current_evidence_scope": {
+      "module_ids": [
+        "spatial-multimethod-inference"
+      ],
+      "module_slice_digest": "ef3f3205bbd1c83c2d113c58e4a09bb9fc2d40192c283cbc6a095089bd269350",
+      "schema_version": 1
+    },
+    "executed_implementation_current": {
+      "path": "biomed_workbench/modules/builtin/spatial-multimethod-inference/templates/run_rctd_spotlight.R",
+      "sha256": "46f46fa4c2f91fd61f59e03e986f105f2675a9b635345d4ec09d87e1d6ddb1b2"
+    },
+    "migration_type": "reviewed-metadata-only-scope-reissue",
+    "prior_evidence_scope": {
+      "module_ids": [
+        "spatial-multimethod-inference"
+      ],
+      "module_slice_digest": "97c48196bb151208e80eec5bfd410b4b90ccb5051f9a1da6b50085e3896fef9a",
+      "schema_version": 1
+    },
+    "reason": "The independent Tangram backend template was corrected and validated on its own official data; the current RCTD template hash, spacexr inputs, parameters, and recorded RCTD outputs remain unchanged.",
+    "reissued_on": "2026-08-02",
+    "report_sha256_before_reissue": "be4b397eed8de51562563c4767707f507d193a86f9c5634d91f12dd4eb92b735",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false
+  },
+  "execution": {
+    "abundance_columns": 19,
+    "abundance_rows_sum_to_one": true,
+    "cell_types": 19,
+    "doublet_mode": "full",
+    "native_model_reloaded": true,
+    "reference_cells": 475,
+    "reference_genes": 384,
+    "shared_genes": 378,
+    "spatial_genes": 378,
+    "spatial_locations_input": 100,
+    "spatial_locations_retained": 71
+  },
+  "implementation": {
+    "path": "biomed_workbench/modules/builtin/spatial-multimethod-inference/templates/run_rctd_spotlight.R",
+    "sha256": "46f46fa4c2f91fd61f59e03e986f105f2675a9b635345d4ec09d87e1d6ddb1b2"
+  },
+  "module": {
+    "compatibility_row_id": "method-isolated-runtime-contract-v2",
+    "id": "spatial-multimethod-inference",
+    "version": "1.0.0"
+  },
+  "outputs": {
+    "abundance_tsv_sha256": "2fc649e0ef25f2fd34d6d03cc2b6b5bac37aa59a607ef3deaf998c30fb74171e",
+    "native_model_rds_sha256": "4c4d83cd0c4d6796c6656993ae6238ddc649c6ec38391ff778644c08c9c5514e",
+    "reference_rds_sha256": "c4bcf44c5c8fa45acdbe3fbcdeabe7c578927396f482bfc6109e434e99203295",
+    "spatial_rds_sha256": "d376916edce2a57facc367ef0de352c08d494fffd78da1fa6ad9033d3676e4f5"
+  },
+  "passed": true,
+  "quality_gates": {
+    "abundance_reload": "pass",
+    "native_model_reload": "pass",
+    "native_rctd_execution": "pass",
+    "official_source_identity": "pass",
+    "raw_integer_counts": "pass",
+    "reference_barcode_identity": "pass",
+    "spatial_coordinate_identity": "pass"
+  },
+  "schema_version": 1,
+  "source": {
+    "commit": "9f5dc33c8060f946c6072a138b70e189636e1435",
+    "official_example": "inst/extdata SpatialRNA/Vignette and Reference/Vignette",
+    "repository": "https://github.com/dmcable/spacexr",
+    "source_archive_sha256": "b12620248da1d604f5e215b4530ab3c4e06e2311f2cd5469a13658a1aa7b6fc6"
+  }
+}

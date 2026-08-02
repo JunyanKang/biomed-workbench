@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "seurat-v5-three-method-benchmark",
+      "input": {
+        "objective": "Compare conservative and strong batch integration while preserving biological states",
+        "analysis": "seurat-v5",
+        "methods": ["cca", "rpca", "fastmnn"],
+        "input_artifact_id": "qc-seurat",
+        "batch_key": "library_batch",
+        "sample_key": "donor_id",
+        "label_key": "reviewed_cell_type",
+        "seed": 17
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "single-cell-integration-benchmark"}
+      }
+    },
+    {
+      "name": "complete-scib-adjudication",
+      "input": {
+        "objective": "Score every candidate with complete scIB metric families and explicit unavailable reasons",
+        "analysis": "scib",
+        "methods": ["scib"],
+        "input_artifact_id": "candidate-embeddings",
+        "batch_key": "library_batch",
+        "sample_key": "donor_id",
+        "label_key": "reviewed_cell_type",
+        "seed": 17
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "single-cell-integration-benchmark"}
+      }
+    },
+    {
+      "name": "strong-system-sysvi-candidate",
+      "input": {
+        "objective": "Evaluate sysVI as a candidate for strong cross-system technical variation",
+        "analysis": "sysvi",
+        "methods": ["sysvi"],
+        "input_artifact_id": "normalized-shared-hvg-h5ad",
+        "batch_key": "system",
+        "sample_key": "sample_id",
+        "label_key": "reviewed_cell_type",
+        "seed": 17
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "single-cell-integration-benchmark"}
+      }
+    }
+  ]
+}

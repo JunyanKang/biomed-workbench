@@ -1,0 +1,72 @@
+{
+  "backend": {
+    "Bioconductor": "3.18",
+    "R": "4.3.2",
+    "exomePeak2": "1.14.3"
+  },
+  "case_id": "exomepeak2-1143-official-merip-public-e2e-v1",
+  "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "bulk-rna-modification-enrichment"
+    ],
+    "module_slice_digest": "a3098b5fec8269be08d528e250c7123a97d661811c4fd833e944f83005529889",
+    "schema_version": 1
+  },
+  "evidence_scope_migration": {
+    "changed_fields": [
+      "maturity"
+    ],
+    "current_evidence_scope": {
+      "module_ids": [
+        "bulk-rna-modification-enrichment"
+      ],
+      "module_slice_digest": "a3098b5fec8269be08d528e250c7123a97d661811c4fd833e944f83005529889",
+      "schema_version": 1
+    },
+    "executed_implementation_current": null,
+    "migration_type": "reviewed-metadata-only-scope-reissue",
+    "prior_evidence_scope": {
+      "module_ids": [
+        "bulk-rna-modification-enrichment"
+      ],
+      "module_slice_digest": "0ae2687b34600b9e98113a45a6c58297727afd64df6c27e978811dd01109964c",
+      "schema_version": 1
+    },
+    "reason": "The module maturity label changed after representative observed execution passed; the executed implementation, parameters, source data, and scientific outputs in these reports are unchanged.",
+    "reissued_on": "2026-08-01",
+    "report_sha256_before_reissue": "ced28e874c0c0d656f2152086177142d0d96c4a96d397adf0c13c3dc06d9cb07",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false
+  },
+  "execution": {
+    "all_required_outputs_nonempty": true,
+    "annotation": "official example.gtf",
+    "assay": "MeRIP-seq",
+    "input_libraries": 3,
+    "ip_libraries": 3,
+    "mode": "exon",
+    "peaks": 74,
+    "result_rds_reloaded": true,
+    "test_method": "Poisson"
+  },
+  "module": {
+    "id": "bulk-rna-modification-enrichment",
+    "version": "0.2.0"
+  },
+  "passed": true,
+  "quality_gates": {
+    "bam_and_index_identity": "pass",
+    "matched_design": "pass",
+    "native_object_round_trip": "pass",
+    "peak_intervals": "pass",
+    "source_checksum": "pass",
+    "tabular_statistics": "pass"
+  },
+  "schema_version": 1,
+  "source": {
+    "commit": "8d265ea9c590c6e8e5bb10bee891467c40604d6f",
+    "package_archive_sha256": "ffead690e6f15a2752802f9e8edf381c68eb4bf1079e1772c2b03935d3a36f12",
+    "repository": "https://git.bioconductor.org/packages/exomePeak2"
+  }
+}

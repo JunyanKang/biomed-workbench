@@ -1,0 +1,334 @@
+{
+  "assay": "iclip",
+  "case_id": "nfcore-clipseq-1.0.0-checksum-bound-minimal-v1",
+  "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "bulk-rbp-rna-binding"
+    ],
+    "module_slice_digest": "e06d472857389f63cedbd8d4bb7a22d6dbcdb7ebe05b07e9e7c8d705346eb012",
+    "schema_version": 1
+  },
+  "evidence_scope_migration": {
+    "changed_fields": [
+      "additive-independently-validated-assay-arm"
+    ],
+    "current_evidence_scope": {
+      "module_ids": [
+        "bulk-rbp-rna-binding"
+      ],
+      "module_slice_digest": "e06d472857389f63cedbd8d4bb7a22d6dbcdb7ebe05b07e9e7c8d705346eb012",
+      "schema_version": 1
+    },
+    "executed_implementation_current": {
+      "path": "biomed_workbench/implementations/nfcore.py",
+      "sha256": "188512d40ae53c2095322707c4acf1cc4513b3ba38c1ebf31c9e1d0c44c8164d"
+    },
+    "migration_type": "reviewed-metadata-only-scope-reissue",
+    "prior_evidence_scope": {
+      "module_ids": [
+        "bulk-rbp-rna-binding"
+      ],
+      "module_slice_digest": "56b807974329c727215a667dfba5ba96367c9094ef7abd2ef4f0c02ad9227885",
+      "schema_version": 1
+    },
+    "reason": "RIP-seq and LACE-seq were added as separately implemented and independently observed assay arms; the pinned nf-core/clipseq executor, inputs, parameters, and recorded CLIP outputs are unchanged.",
+    "reissued_on": "2026-08-02",
+    "report_sha256_before_reissue": "ab95048f6b93a7a46ffadc73d47573b10fda46eca989a9d51543993a67ca0758",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false
+  },
+  "execution": {
+    "assay": "iclip",
+    "checksum_bound_public_case": true,
+    "external_workflow_executed": true,
+    "official_public_test_profile": false,
+    "output_groups": {
+      "clip_qc": {
+        "file_count": 9,
+        "paths": [
+          "clipqc/dedup_mean_umis.tsv",
+          "clipqc/dedup_metrics.tsv",
+          "clipqc/dedup_ratio.tsv",
+          "clipqc/dedup_reads.tsv",
+          "clipqc/mapping.tsv",
+          "clipqc/mapping_metrics.tsv",
+          "clipqc/xlinks_counts.tsv",
+          "clipqc/xlinks_metrics.tsv",
+          "clipqc/xlinks_ratio.tsv"
+        ]
+      },
+      "crosslinks": {
+        "file_count": 4,
+        "paths": [
+          "xlinks/exp1.xl.bed.gz",
+          "xlinks/exp1.xl.bedgraph.gz",
+          "xlinks/exp2.xl.bed.gz",
+          "xlinks/exp2.xl.bedgraph.gz"
+        ]
+      },
+      "multiqc": {
+        "file_count": 1,
+        "paths": [
+          "multiqc/multiqc_report.html"
+        ]
+      },
+      "peaks": {
+        "file_count": 0,
+        "paths": []
+      },
+      "pipeline_info": {
+        "file_count": 8,
+        "paths": [
+          "pipeline_info/execution_report.html",
+          "pipeline_info/execution_timeline.html",
+          "pipeline_info/execution_trace.txt",
+          "pipeline_info/pipeline_dag.svg",
+          "pipeline_info/pipeline_report.html",
+          "pipeline_info/pipeline_report.txt",
+          "pipeline_info/results_description.html",
+          "pipeline_info/software_versions.csv"
+        ]
+      }
+    },
+    "outputs_reloaded": true,
+    "reloaded_files": [
+      {
+        "bytes": 34,
+        "path": "clipqc/dedup_mean_umis.tsv",
+        "reload": "delimited-text",
+        "row_count": 3,
+        "sha256": "fed632228dfb8257795527f5ae07e96487ef06d51d17cd8ce7e73f5e015d9a88"
+      },
+      {
+        "bytes": 99,
+        "path": "clipqc/dedup_metrics.tsv",
+        "reload": "delimited-text",
+        "row_count": 3,
+        "sha256": "2455829e31180dc9b3d025e3ea4fe0bcbe0af672a057048d9565c51718d74573"
+      },
+      {
+        "bytes": 31,
+        "path": "clipqc/dedup_ratio.tsv",
+        "reload": "delimited-text",
+        "row_count": 3,
+        "sha256": "7bd488b6bf073716ca727c0d850b38d847bcf1b1f747f6a387182ba0d4391d76"
+      },
+      {
+        "bytes": 62,
+        "path": "clipqc/dedup_reads.tsv",
+        "reload": "delimited-text",
+        "row_count": 3,
+        "sha256": "5e9ab0e89c6189f237edb318cbfa46fcea80344878d62b935c187e19896b3836"
+      },
+      {
+        "bytes": 84,
+        "path": "clipqc/mapping.tsv",
+        "reload": "delimited-text",
+        "row_count": 3,
+        "sha256": "dac2ccce9e85ed1c750c42344cefbce24ff29eb18f030dcb2193f4e7b30d00cd"
+      },
+      {
+        "bytes": 108,
+        "path": "clipqc/mapping_metrics.tsv",
+        "reload": "delimited-text",
+        "row_count": 3,
+        "sha256": "f564a411e6f1b2dcc729f82fd8ba6f861941bd52548c7eb6ba5524a2f1d31223"
+      },
+      {
+        "bytes": 69,
+        "path": "clipqc/xlinks_counts.tsv",
+        "reload": "delimited-text",
+        "row_count": 3,
+        "sha256": "39f621fa93cbf5b960ca4d7b5069a1301bee2397d89109b49d25712ef6684b28"
+      },
+      {
+        "bytes": 85,
+        "path": "clipqc/xlinks_metrics.tsv",
+        "reload": "delimited-text",
+        "row_count": 3,
+        "sha256": "bdbf56ff01ba946ee9de32c3dc32a17005a08319b028fedb06e0658f914f04a9"
+      },
+      {
+        "bytes": 30,
+        "path": "clipqc/xlinks_ratio.tsv",
+        "reload": "delimited-text",
+        "row_count": 3,
+        "sha256": "3b28e0dd6f11956deb8ce5feeb020eed8e7dc34f07e3d879f27b2bc0430d2a4e"
+      },
+      {
+        "bytes": 1166751,
+        "path": "multiqc/multiqc_report.html",
+        "reload": "html",
+        "sha256": "df7d6526abfe5b7c9bafcf02fd8bb5e48847395137e141ede306b9ceaa80be75"
+      },
+      {
+        "bytes": 2992315,
+        "path": "pipeline_info/execution_report.html",
+        "reload": "html",
+        "sha256": "4b982dd95e7f45a7341e799756e89243cda905ee39bdc78c0fc3d6f598fd39ea"
+      },
+      {
+        "bytes": 258221,
+        "path": "pipeline_info/execution_timeline.html",
+        "reload": "html",
+        "sha256": "4d5ce47ba81b0c32aae4a9338b343a5ef4868427bcf5af4823a75adcf46318c9"
+      },
+      {
+        "bytes": 2786,
+        "path": "pipeline_info/execution_trace.txt",
+        "reload": "delimited-text",
+        "row_count": 23,
+        "sha256": "d42c7dac53068d1845c5599061a8a57744d6c2ed49356b75a784180f161e51b6"
+      },
+      {
+        "bytes": 59753,
+        "path": "pipeline_info/pipeline_dag.svg",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "882b2ca6ce7cfb9dd1a16c2014d678433dde4b5f38e969d86ebd3fe0ee62da18"
+      },
+      {
+        "bytes": 12274,
+        "path": "pipeline_info/pipeline_report.html",
+        "reload": "html",
+        "sha256": "e017c6040519779f6159bf311155e9981dff2ee09ffea0dcde990551c8d78d95"
+      },
+      {
+        "bytes": 3115,
+        "path": "pipeline_info/pipeline_report.txt",
+        "reload": "delimited-text",
+        "row_count": 44,
+        "sha256": "0db154186ccd9693b4b3073bdf8f6ab0591b2de1e37da9ff0b4e1a4796e52d06"
+      },
+      {
+        "bytes": 16999,
+        "path": "pipeline_info/results_description.html",
+        "reload": "html",
+        "sha256": "64b3b83785df7d0a5e95a88b8835173a08b8f3fa4f4dc12a15a8d2aeaccaf11a"
+      },
+      {
+        "bytes": 311,
+        "path": "pipeline_info/software_versions.csv",
+        "reload": "delimited-text",
+        "row_count": 21,
+        "sha256": "ce709b4e7dff0c8d8c8cd330e999dc9da2a1e95a6da596d60f719dc8fd48c278"
+      },
+      {
+        "bytes": 51187,
+        "path": "xlinks/exp1.xl.bed.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "53abcff80341a55083a561740156621a7966251562a1ceab883c4c6926f9c870"
+      },
+      {
+        "bytes": 48051,
+        "path": "xlinks/exp1.xl.bedgraph.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "b4276520b006427fcd7a28a395e4a099c678e870156de91894cc2d0a9b06e2df"
+      },
+      {
+        "bytes": 21079,
+        "path": "xlinks/exp2.xl.bed.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "dc605349c1bac50daf722c5b7b3f0c4218cfac1d2f70b10481b6d0d46230c7b0"
+      },
+      {
+        "bytes": 20433,
+        "path": "xlinks/exp2.xl.bedgraph.gz",
+        "reload": "nonempty-binary-or-text",
+        "sha256": "0ccda6c0a4128541cb4c206fcebae4a84bcf45dafd3ebf7b74f279a266b8be67"
+      }
+    ],
+    "runtime_compatibility": [
+      {
+        "id": "nfcore-workstation-resource-limits",
+        "limits": {
+          "cpus": 4,
+          "memory": "30.GB",
+          "time": "6.h"
+        },
+        "nextflow_config_sha256": "1a534ecaab31309ac8542ea2c62253a0ef2ae1a82ef5fe78a04ced7a63725c93",
+        "reason": "Cap scheduler reservations to the declared workstation capacity using the official nf-core resourceLimits mechanism.",
+        "scientific_parameters_changed": false,
+        "scope": "all processes in nf-core/clipseq 1.0.0"
+      }
+    ],
+    "scientific_file_count": 22,
+    "workflow": {
+      "name": "nf-core/clipseq",
+      "official_schema_sha256": "1b499a1b3c7aad66212839f278b3fea2b163526589f719110d94dde31a1d2a4d",
+      "revision": "1.0.0",
+      "revision_commit": "45ae3c0b9b16206b687f4a645e1643c85b3f1ab4"
+    }
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "implementation": {
+    "path": "biomed_workbench/implementations/nfcore.py",
+    "sha256": "188512d40ae53c2095322707c4acf1cc4513b3ba38c1ebf31c9e1d0c44c8164d"
+  },
+  "module": {
+    "id": "bulk-rbp-rna-binding",
+    "version": "0.2.0"
+  },
+  "observed_at": "2026-08-01T03:18:18.814992+00:00",
+  "passed": true,
+  "quality_gates": {
+    "all_inputs_checksum_bound": true,
+    "assay_specific_outputs_reloaded": true,
+    "external_workflow_exit_zero": true,
+    "multiqc_reloaded": true,
+    "pinned_official_schema": true,
+    "pinned_public_source_commits": true,
+    "pinned_workflow_identity": true,
+    "scientific_output_checksums_recorded": true
+  },
+  "runtime": {
+    "engine_profile": "docker",
+    "nextflow_version": "22.10.8",
+    "profile_runtime_version": "29.2.1"
+  },
+  "schema_version": 1,
+  "scientific_boundary": "This is an executable integration and output-reload acceptance on the pinned official minimal public fixture. It is not a biological project conclusion.",
+  "source": {
+    "derived_tools": [],
+    "official_samplesheet_row_count": null,
+    "pipeline_commit": "45ae3c0b9b16206b687f4a645e1643c85b3f1ab4",
+    "pipeline_revision": "1.0.0",
+    "selected_pair_ids": [],
+    "selected_samplesheet_row_count": null,
+    "selection_policy": null,
+    "source_file_count": 4,
+    "source_files": [
+      {
+        "bytes": 382,
+        "name": "metadata.csv",
+        "rewritten_to_local_immutable_paths": true,
+        "sha256": "207beef7d298bff759650f41ff6f7cbf67793a83065afe59185cbcb523162dfd",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/f87bd7f5de9c8ab85fc0be7ba64f346163a49312/metadata.csv"
+      },
+      {
+        "bytes": 1040256,
+        "name": "prpf8-hela-eif4a3-sirna-20190611-ju-2_trimmed_chr20_0_64444167.fq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "64fdebd3df5a1560d1a162636918c337a5200418ee8a8a615901d6bb6e8b68f0",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/f87bd7f5de9c8ab85fc0be7ba64f346163a49312/reads/prpf8-hela-eif4a3-sirna-20190611-ju-2_trimmed_chr20_0_64444167.fq.gz"
+      },
+      {
+        "bytes": 756356,
+        "name": "prpf8-hela-eif4a3-sirna-20190611-ju_trimmed_chr20_0_64444167.fq.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "1deaefaa23e5a2794835fa0585a54a96d3080baebcb6d59d11985be732fc5eca",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/f87bd7f5de9c8ab85fc0be7ba64f346163a49312/reads/prpf8-hela-eif4a3-sirna-20190611-ju_trimmed_chr20_0_64444167.fq.gz"
+      },
+      {
+        "bytes": 20351790,
+        "name": "chr20.fa.gz",
+        "rewritten_to_local_immutable_paths": false,
+        "sha256": "8cd9b07ab471557fcd11be6d85e13b9df555cb6ed18164b488c29c178744a0c2",
+        "source_url": "https://raw.githubusercontent.com/nf-core/test-datasets/f87bd7f5de9c8ab85fc0be7ba64f346163a49312/reference/chr20.fa.gz"
+      }
+    ],
+    "test_data_commits": {
+      "clipseq": "f87bd7f5de9c8ab85fc0be7ba64f346163a49312"
+    }
+  }
+}

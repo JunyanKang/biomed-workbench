@@ -1,0 +1,62 @@
+{
+  "assay": "tt-seq",
+  "case_id": "ttseq-gse75792-transcript-counts-public-e2e-v1",
+  "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "bulk-nascent-transcription"
+    ],
+    "module_slice_digest": "92a6bf0958e55c01b1a6f62327c3c65e8697198b11c4d99ae7686578184da325",
+    "schema_version": 1
+  },
+  "execution": {
+    "analysis_mode": "relative-profile",
+    "external_workflow_executed": true,
+    "feature_rows": 43748,
+    "features": 21874,
+    "normalization": "median-ratio",
+    "outputs_reloaded": true,
+    "replicates": 2
+  },
+  "implementation": {
+    "path": "biomed_workbench/implementations/ttseq.py",
+    "sha256": "e79ebffabbc57bcb0b2e59b1696b06f39bdcc1de7ea21cc945474131f988cc56"
+  },
+  "module": {
+    "id": "bulk-nascent-transcription",
+    "version": "0.2.0"
+  },
+  "outputs": {
+    "feature_estimates": {
+      "rows": 43748,
+      "sha256": "36617ec6fe3e9570ec24b286e4cd7059b12506459797255633e7c80069e7262c"
+    },
+    "scale_factors": {
+      "rows": 4,
+      "sha256": "4e719bc80f5948f1468f33fa0d52e7958e0dd02de3c4e85aeb0159e0365ac123"
+    }
+  },
+  "passed": true,
+  "quality_gates": {
+    "current_implementation": "pass",
+    "feature_reconciliation": "pass",
+    "finite_scale_factors": "pass",
+    "output_reload": "pass",
+    "source_identity": "pass"
+  },
+  "schema_version": 1,
+  "scientific_scope": "This GSE75792 count-table case validates relative new-versus-total RNA profiling. It intentionally does not emit kinetic rates because the deposited table does not provide the complete matched spike-in calibration required for rate estimation.",
+  "source": {
+    "derived_count_table_sha256": "945be15e11c4781c87ab8a8218538649995b5497eb062ebfc4581d484a24a99d",
+    "doi": "10.1126/science.aad9841",
+    "geo_accession": "GSE75792",
+    "metadata_sha256": "f6a778678b964de83b526c64a9ce783f54c73a53fadffffc9bd6a7ffc6727e7d",
+    "official_archive_sha256": "99578f71a00f53bb1b382504e30e221b32c3973f2170344ee16125a792bd1be9",
+    "url": "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE75792"
+  },
+  "status_counts": {
+    "low_total_support": 17378,
+    "no_new_rna_signal": 114,
+    "relative_profile": 26256
+  }
+}

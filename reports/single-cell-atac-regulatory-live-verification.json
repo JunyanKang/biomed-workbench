@@ -17,7 +17,7 @@
         "barcode_allowlist_sha256": "c6fd32fe99c93b411da626420483372e3abc63c1eb67915491d45bd31e73e3cf",
         "compression": "gzip",
         "format": "10x-fragments-frag-five-column",
-        "sha256": "8961cb33f836436bf5e7c2e60ca7b6699726e0e8306f08e48380c04a5f6ceffa"
+        "sha256": "62e6fa8199f9ef3aec0420618d93b54555f58341f4c4620636e497e0f59edcc0"
       },
       "no_environment_or_compute_infrastructure_managed": true,
       "outputs": {
@@ -28,7 +28,7 @@
           "rows": 2,
           "sha256": "61dc1739175e29c82560088a76675d00c2896b5bfe8ded12a4cac24f69958ea2"
         },
-        "peaks_xls_sha256": "292dfe6e05e3a61e5c056aed8b7ed5d3b7b98d4cf4ea69aa1c9a664225f529bf",
+        "peaks_xls_sha256": "d44d7d9cf68c62aedc258d0203f0f9fa1ced32ce9d0dde4d9a9c31481167e520",
         "summits": {
           "chromosomes": {
             "chr1": 2
@@ -91,7 +91,7 @@
       }
     }
   },
-  "compatibility_row_id": "agent-protocol-1-macs3-304-signac-116-chromvar-124-motifmatchr-124",
+  "compatibility_row_id": "agent-protocol-2-macs3-304-signac-116-chromvar-124-motifmatchr-124",
   "dependency_versions": {
     "Biostrings": "2.70.3",
     "GenomicRanges": "1.54.1",
@@ -103,6 +103,13 @@
     "jsonlite": "2.0.0",
     "python": "3.12.11",
     "r": "4.3.2"
+  },
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-atac-regulatory"
+    ],
+    "module_slice_digest": "de54e2c42b64765bae95ff6fc80f624bfe3da618ce3c4e7f5529c11312a38ea7",
+    "schema_version": 1
   },
   "execution": {
     "chromvar_completed": true,
@@ -131,9 +138,9 @@
     "target_gene1_positive_link": true
   },
   "module_id": "single-cell-atac-regulatory",
-  "module_version": "1.1.0",
+  "module_version": "1.2.0",
   "passed": true,
-  "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+  "registry_digest": "82f19cefb8d5202eef026de4c7fed8b27cdbc44f33f1e28f53e0303ba41ae2f0",
   "schema_version": 1,
   "scientific_summary": {
     "barcode_filtering_and_fragment_accounting_reconciled": true,
@@ -152,6 +159,10 @@
     "macs3": {
       "name": "call_macs3_fragments.py",
       "sha256": "a135a1404f21075d5353e0f28480119a1af36f27e8786e55736f0e54befb33da"
+    },
+    "recall": {
+      "name": "rebuild_recalled_peak_matrix.R",
+      "sha256": "88cba9fd454cf8b06fa28ed9b03bb178343b2368e67132a4cadc268cfafb2873"
     },
     "regulatory": {
       "name": "run_atac_regulatory.R",

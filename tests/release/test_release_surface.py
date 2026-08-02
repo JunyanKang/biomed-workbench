@@ -27,7 +27,7 @@ class IndependentModuleReleaseSurfaceTests(unittest.TestCase):
         for path in directories:
             children = {item.name for item in path.iterdir()}
             self.assertIn("module.json", children)
-            self.assertLessEqual(children, {"module.json", "tests", "templates", "validators"})
+            self.assertLessEqual(children, {"module.json", "tests", "templates", "validators", "execution_coverage.json"})
             if "tests" in children:
                 self.assertEqual({item.name for item in (path / "tests").iterdir()}, {"cases.json"})
             if "templates" in children or "validators" in children:

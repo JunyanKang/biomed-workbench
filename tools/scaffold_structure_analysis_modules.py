@@ -158,7 +158,7 @@ COMMON_OUTPUT_SCHEMA = {
     "type": "object",
     "additionalProperties": False,
     "properties": {
-        "handoff_type": {"type": "string", "enum": ["codex_generated_project_analysis"]},
+        "handoff_type": {"type": "string", "enum": ["packaged_parameterized_project_analysis"]},
         "module": {"type": "object"},
         "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
         "request_fields": {"type": "array"},
@@ -464,12 +464,12 @@ def _manifest(module_id: str, spec: dict[str, object]) -> dict[str, object]:
         "kernel_compatibility": [">=0.2.0,<0.3.0"],
         "provenance": {"license": "Apache-2.0", "concept_sources": list(spec["sources"]) + ["Project-owned clean-room structural-analysis implementation and scientific validation contract."]},
         "code_templates": [
-            {"path": template, "language": "python", "purpose": f"Execute {spec['title'].lower()} against real project files with complete quality and provenance checks.", "quality_gate_ids": gate_ids, "requires_adaptation": True}
+            {"path": template, "language": "python", "purpose": f"Execute {spec['title'].lower()} against real project files with complete quality and provenance checks.", "quality_gate_ids": gate_ids, "requires_adaptation": False}
             for template in templates
         ],
         "agent_protocol": {
             "schema_version": 1,
-            "mode": "codex_generated_project_code",
+            "mode": "packaged_parameterized_workflow",
             "languages": ["python"],
             "template_sections": [
                 {"id": f"inspect-{module_id}", "purpose": "Inspect project inputs, provenance, scientific scope, and compatibility before execution.", "required_logic": list(spec["preflight"]), "output_artifact_types": output_types, "template_files": templates},
@@ -491,7 +491,7 @@ def _case(module_id: str, spec: dict[str, object]) -> dict[str, object]:
         "cases": [{
             "name": f"prepare-{module_id}",
             "input": spec["case"],
-            "expected_subset": {"handoff_type": "codex_generated_project_analysis", "module": {"id": module_id, "version": "1.0.0"}, "languages": ["python"]},
+            "expected_subset": {"handoff_type": "packaged_parameterized_project_analysis", "module": {"id": module_id, "version": "1.0.0"}, "languages": ["python"]},
         }],
     }
 

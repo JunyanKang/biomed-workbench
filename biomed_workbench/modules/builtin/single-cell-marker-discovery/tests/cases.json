@@ -3,6 +3,6 @@
   "cases": [{
     "name": "prepare-sample-stable-marker-discovery",
     "input": {"objective": "Discover cluster markers and require directional support in predeclared held-out biological samples before annotation use.", "input_artifact_id": "artifact-clustered-scrna", "input_format": "h5ad", "raw_count_location": "layers.counts", "cluster_key": "leiden_reviewed", "biological_sample_key": "donor_sample", "validation_sample_ids": ["donor-07", "donor-08"], "requested_method": "wilcoxon", "declared_thresholds": {"min_in_fraction": 0.25, "max_out_fraction": 0.5, "min_logfc": 0.25, "max_adjusted_p": 0.05, "min_sample_support": 4, "min_validation_sample_support": 2}, "design_notes": "Validation donors are frozen before ranking and are not used to choose ranks or thresholds; markers remain evidence for reference and ontology review rather than direct labels."},
-    "expected_subset": {"handoff_type": "codex_generated_project_analysis", "module": {"id": "single-cell-marker-discovery", "version": "1.1.0"}, "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}}
+    "expected_subset": {"handoff_type": "packaged_parameterized_project_analysis", "module": {"id": "single-cell-marker-discovery", "version": "1.1.0"}, "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}}
   }]
 }

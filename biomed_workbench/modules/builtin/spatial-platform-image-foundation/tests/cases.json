@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "xenium-platform-qc-handoff",
+      "input": {"objective": "Import Xenium cells, transcripts, boundaries and negative controls with coordinate-aware QC", "platform": "xenium", "input_artifact_id": "xenium-output-bundle", "sample_key": "sample_id", "coordinate_unit": "micrometre", "image_mode": "none", "seed": 17},
+      "expected_subset": {"handoff_type": "packaged_parameterized_project_analysis", "module": {"id": "spatial-platform-image-foundation"}}
+    },
+    {
+      "name": "visium-image-registration-handoff",
+      "input": {"objective": "Import Visium spots and register the declared histology image using landmarks", "platform": "visium", "input_artifact_id": "spaceranger-output", "sample_key": "section_id", "coordinate_unit": "micrometre", "image_mode": "register-landmarks", "seed": 17},
+      "expected_subset": {"handoff_type": "packaged_parameterized_project_analysis", "module": {"id": "spatial-platform-image-foundation"}}
+    }
+  ]
+}

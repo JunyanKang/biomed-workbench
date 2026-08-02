@@ -1,6 +1,13 @@
 {
   "case_id": "gastrulation-erythroid-topology-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-trajectory-topology"
+    ],
+    "module_slice_digest": "5ac312ee3766fa87624ab4cc1d2e0c661d184d715c9e5a8d17ee6fc2759e8328",
+    "schema_version": 1
+  },
   "execution": {
     "outputs_reloaded": true,
     "results": {
@@ -23,11 +30,27 @@
     },
     "source_artifact_immutable": true
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "a63c90b2702dc3dae780b028a4b36d92118027cecb76bd0384b6681a03c7a826",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "02d2524ea6d4fa35d812bc2f02d346da5b767f1e5e2341c2d42583683a80c81f",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "run_slingshot_monocle_tradeseq.R": "797bb1b211e80af6161a17c123a0ba25b8be71d13815bead3abad216a8d52eac"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-slingshot-210-monocle3-1426-tradeseq-116",
     "id": "single-cell-trajectory-topology",
-    "manifest_sha256": "02d2524ea6d4fa35d812bc2f02d346da5b767f1e5e2341c2d42583683a80c81f",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "a63c90b2702dc3dae780b028a4b36d92118027cecb76bd0384b6681a03c7a826",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": "797bb1b211e80af6161a17c123a0ba25b8be71d13815bead3abad216a8d52eac",
     "version": "1.1.0"
   },

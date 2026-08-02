@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from biomed_workbench.kernel.identity import digest_value  # noqa: E402
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current  # noqa: E402
 from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 from biomed_workbench.modules.contract import version_is_allowed  # noqa: E402
@@ -378,7 +379,7 @@ def capture() -> dict[str, object]:
                 live_report.get("passed") is not True
                 or live_report.get("module_id") != manifest.id
                 or live_report.get("module_version") != manifest.version
-                or live_report.get("registry_digest") != registry.digest
+                or not evidence_scope_is_current(live_report, registry)
                 or live_report.get("compatibility_rows") != expected_rows
                 or observed_templates != template_hashes
                 or any(live_report.get("execution", {}).get(flag) is not True for flag in evidence_config["execution_flags"])

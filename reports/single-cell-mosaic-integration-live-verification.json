@@ -1,0 +1,71 @@
+{
+  "compatibility_row_id": "scvi15-scglue041-mosaic-v1",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-mosaic-integration"
+    ],
+    "module_slice_digest": "133fc9c762efa23ccf00f039805abcefb45a835f37a9808d979842af4f43db18",
+    "schema_version": 1
+  },
+  "execution": {
+    "atac_features": 800,
+    "atac_only_cells": 100,
+    "backend": "MultiVI",
+    "cells": 600,
+    "epochs": 20,
+    "integrated_mudata_reloaded": true,
+    "latent_dimensions": 10,
+    "latent_table_reloaded": true,
+    "native_model_reloaded": true,
+    "native_model_trained": true,
+    "paired_cells": 400,
+    "rna_features": 600,
+    "rna_only_cells": 100,
+    "scvi_tools_version": "1.5.0",
+    "seed": 17
+  },
+  "execution_evidence_level": "observed_scientific_workflow",
+  "implementation": {
+    "manifest_sha256": "cfcfe13d4de4416cbfaf87025aa60972876a2433395999237a0b17f09e32e213",
+    "public_case_preparer_sha256": "9c5db0138b9fa28487bf8cb4329a36af2df028b376d51fbcc208887131b89a55",
+    "template_sha256": "919f47c862334dd0f8e714972da117c929b37d0d90d62d32295036bc359e07aa"
+  },
+  "module_id": "single-cell-mosaic-integration",
+  "module_version": "1.0.0",
+  "observed_at": "2026-08-01T04:33:15Z",
+  "outputs": {
+    "execution_report_sha256": "23d54fc53aba2e88e07e22b6c6bf0693d34541ab03fc5312d484720bf0a0a282",
+    "integrated_h5mu_sha256": "809e91c6a0d727c83840e3a79001773a602718e137d3c6e90fe6902b01d645b7",
+    "latent_tsv_sha256": "d6ea4634c8559f0ad498618a25fee75bc12ec81782b70128035c244f178b1f7b",
+    "native_model_sha256": "164435d1a9d32b1320bad64035dfea199386424c2256398c6c3d9d33c58c80a9",
+    "prepared_h5mu_sha256": "adbf43e466965b8b98d1d4fc4528bab44d559cb9a6ec3f018baceabf4840611c"
+  },
+  "passed": true,
+  "quality_gates": {
+    "cell_order_reconciled": "pass",
+    "finite_latent_representation": "pass",
+    "integer_counts": "pass",
+    "missing_modalities_retained": "pass",
+    "model_and_outputs_reloaded": "pass",
+    "official_source_checksum": "pass",
+    "paired_anchors_retained": "pass"
+  },
+  "registry_digest": "be9119f43d0df21125305b341d3dee1d5c84572eb5338eee8a53486b479fb418",
+  "runtime": {
+    "accelerator": "cpu",
+    "anndata": "0.12.7",
+    "mudata": "0.3.8",
+    "python": "3.12.11"
+  },
+  "schema_version": 1,
+  "scientific_scope": "This acceptance establishes native MultiVI execution for paired and missing-modality RNA-ATAC integration. Batch correction requires real project sample or library identities; confirmatory differential analysis returns to raw counts and biological replicates.",
+  "source": {
+    "bytes": 162282142,
+    "dataset": "10x PBMC 10k Multiome ATAC + Gene Expression",
+    "selection": "stable barcode hash and label-blind feature detection/total-count ranking",
+    "sha256": "03f946fc11984e6d4e8bf9a5d5904654c3d8b6b5776e08b7962796a9cb81c48d",
+    "source_cells": 11909,
+    "source_features": 144978,
+    "url": "https://cf.10xgenomics.com/samples/cell-arc/1.0.0/pbmc_granulocyte_sorted_10k/pbmc_granulocyte_sorted_10k_filtered_feature_bc_matrix.h5"
+  }
+}

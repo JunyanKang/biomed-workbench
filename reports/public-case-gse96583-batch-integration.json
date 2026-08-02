@@ -1,6 +1,13 @@
 {
   "case_id": "gse96583-crossed-batch-integration-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-batch-integration"
+    ],
+    "module_slice_digest": "bb78b762ed19120069a723fd46947be5aff8bd31484a37d1aa2e8f76100e88d2",
+    "schema_version": 1
+  },
   "execution": {
     "all_cells_accounted": true,
     "blocked_methods": {
@@ -228,11 +235,27 @@
     "selection_rule": "maximum batch entropy gain among methods passing all frozen mixing, conservation, source, and reload gates",
     "source_artifacts_immutable": true
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "1b4e9131442e1f36cd1ed6b56e099a210f0b2ebd5943246d969daebc1b0f2289",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "f512b1e386bf561777544ad8ac681c9f426d486d859b4d92e73bbc2845c40d29",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "benchmark_integration.py": "569dbf5db22bf4f311ac1dfb4c58052bbeb3d2885776189d8ead478039123377"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-scanpy-1104-harmony-020-scanorama-174-bbknn-160",
     "id": "single-cell-batch-integration",
-    "manifest_sha256": "f512b1e386bf561777544ad8ac681c9f426d486d859b4d92e73bbc2845c40d29",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "1b4e9131442e1f36cd1ed6b56e099a210f0b2ebd5943246d969daebc1b0f2289",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": "569dbf5db22bf4f311ac1dfb4c58052bbeb3d2885776189d8ead478039123377",
     "version": "1.1.0"
   },

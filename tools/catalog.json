@@ -707,7 +707,83 @@
     },
     {
       "access": "agent_generated",
-      "description": "Direct Codex to validate and execute MACS3 peak calling for bulk ChIP-seq, CUT&RUN, or CUT&Tag data with explicit assay, control, peak-shape, provenance, and output-reload contracts.",
+      "description": "Execute bulk ATAC-seq or DNase-seq quality control, alignment, fragment filtering, accessibility peak calling, replicate consensus, differential accessibility, motif and optional footprint analysis while keeping Tn5 and nuclease-specific biases explicit.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "bulk-chromatin-accessibility",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "annotation_release": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "assay": {
+            "enum": [
+              "atac-seq",
+              "dnase-seq"
+            ],
+            "type": "string"
+          },
+          "control_policy": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genome_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_manifest_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "replicate_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_workflow": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "assay",
+          "input_manifest_artifact_id",
+          "genome_build",
+          "annotation_release",
+          "sample_key",
+          "replicate_key",
+          "control_policy",
+          "requested_workflow",
+          "parameters",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Analyze bulk chromatin accessibility with assay-specific footprint boundaries",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Validate and execute peak calling for bulk ChIP-seq, CUT&RUN, or CUT&Tag, with the measured target or antibody, control design, peak geometry, optional internal-reference normalization, and target-specific validation represented as separate parameters rather than separate assay types.",
       "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
       "id": "bulk-chromatin-peak-calling",
       "input_schema": {
@@ -752,6 +828,15 @@
             ],
             "type": "string"
           },
+          "minimum_spikein_fraction": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "type": "number"
+          },
+          "minimum_spikein_fragments": {
+            "minimum": 1,
+            "type": "integer"
+          },
           "nomodel_extsize": {
             "maximum": 2000,
             "minimum": 1,
@@ -773,6 +858,51 @@
             "maximum": 1,
             "type": "number"
           },
+          "rnaseh_control_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "specificity_control": {
+            "enum": [
+              "none",
+              "matched-input",
+              "igg",
+              "rnaseh",
+              "other-declared"
+            ],
+            "type": "string"
+          },
+          "spikein_normalization_method": {
+            "enum": [
+              "none",
+              "exogenous-target",
+              "matched-reference"
+            ],
+            "type": "string"
+          },
+          "spikein_policy": {
+            "enum": [
+              "required",
+              "not-applicable"
+            ],
+            "type": "string"
+          },
+          "spikein_reference": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "spikein_summary_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "spikein_target_fragments": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "target_or_antibody": {
+            "minLength": 1,
+            "type": "string"
+          },
           "treatment_artifact_id": {
             "minLength": 1,
             "type": "string"
@@ -781,6 +911,8 @@
         "required": [
           "objective",
           "assay",
+          "target_or_antibody",
+          "specificity_control",
           "treatment_artifact_id",
           "input_format",
           "genome_build",
@@ -795,7 +927,554 @@
       "kind": "workflow",
       "mutability": "read_only",
       "requirements": [],
-      "title": "Call bulk chromatin enrichment peaks",
+      "title": "Call peaks and audit normalization for bulk chromatin profiling",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Process WGBS, RRBS, or enzymatic methyl-seq with conversion-aware alignment, context-specific methylation extraction, coverage and conversion quality control, biological-replicate aggregation, and region-level differential methylation without conflating 5mC with unresolved 5hmC.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "bulk-dna-methylation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "annotation_release": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "assay": {
+            "enum": [
+              "wgbs",
+              "rrbs",
+              "em-seq"
+            ],
+            "type": "string"
+          },
+          "control_policy": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genome_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_manifest_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "replicate_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_workflow": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "assay",
+          "input_manifest_artifact_id",
+          "genome_build",
+          "annotation_release",
+          "sample_key",
+          "replicate_key",
+          "control_policy",
+          "requested_workflow",
+          "parameters",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Analyze bulk cytosine methylation with conversion-aware quality control",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Process GRO-seq and PRO-seq with strand-preserving alignment, run-on-specific quality control, nascent transcript and regulatory-element calling, pausing and directionality analysis, and replicate-aware differential transcription; TT-seq and NET-seq enter only through their separately declared pulse-label or polymerase-associated measurement models.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "bulk-nascent-transcription",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "annotation_release": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "assay": {
+            "enum": [
+              "gro-seq",
+              "pro-seq",
+              "tt-seq",
+              "net-seq"
+            ],
+            "type": "string"
+          },
+          "control_policy": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genome_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_manifest_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "replicate_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_workflow": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "assay",
+          "input_manifest_artifact_id",
+          "genome_build",
+          "annotation_release",
+          "sample_key",
+          "replicate_key",
+          "control_policy",
+          "requested_workflow",
+          "parameters",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Analyze bulk nascent transcription with strand-aware assay policies",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Compare genome-wide R-loop mapping assays without treating the biological target as an assay: DRIP-seq, DRIPc-seq, sDRIP/ssDRIP-seq and qDRIP-seq use S9.6-dependent capture with distinct fragmentation, strandedness and quantification models; R-ChIP and MapR use catalytically inactive RNase H1 sensors; CUT&Tag remains CUT&Tag with its exact hybrid sensor declared.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "bulk-r-loop-mapping",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "annotation_release": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "assay": {
+            "enum": [
+              "drip-seq",
+              "dripc-seq",
+              "sdrip-seq",
+              "qdrip-seq",
+              "r-chip",
+              "mapr",
+              "cuttag"
+            ],
+            "type": "string"
+          },
+          "control_policy": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genome_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_manifest_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "replicate_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_workflow": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "assay",
+          "input_manifest_artifact_id",
+          "genome_build",
+          "annotation_release",
+          "sample_key",
+          "replicate_key",
+          "control_policy",
+          "requested_workflow",
+          "parameters",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Map bulk R-loops with assay- and sensor-specific evidence",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Route RIP-seq, eCLIP, iCLIP, HITS-CLIP, PAR-CLIP, or LACE-seq through distinct control, UMI, crosslink, reverse-transcription-stop, enrichment, replicate, site-calling, and claim-boundary policies rather than treating all RNA immunoprecipitation assays as interchangeable.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "bulk-rbp-rna-binding",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "annotation_release": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "assay": {
+            "enum": [
+              "rip-seq",
+              "eclip",
+              "iclip",
+              "hits-clip",
+              "par-clip",
+              "lace-seq"
+            ],
+            "type": "string"
+          },
+          "control_policy": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genome_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_manifest_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "replicate_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_workflow": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "assay",
+          "input_manifest_artifact_id",
+          "genome_build",
+          "annotation_release",
+          "sample_key",
+          "replicate_key",
+          "control_policy",
+          "requested_workflow",
+          "parameters",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Map bulk RNA-binding-protein targets with assay-specific controls",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Execute Ribo-seq preprocessing, contaminant depletion, alignment, P-site calibration, triplet-periodicity and metagene quality control, translated-ORF calling, gene and ORF quantification, and paired RNA-seq translational-efficiency analysis while preserving disagreement between ORF callers.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "bulk-ribosome-profiling",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "annotation_release": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "assay": {
+            "enum": [
+              "ribo-seq"
+            ],
+            "type": "string"
+          },
+          "control_policy": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genome_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_manifest_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "replicate_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_workflow": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "assay",
+          "input_manifest_artifact_id",
+          "genome_build",
+          "annotation_release",
+          "sample_key",
+          "replicate_key",
+          "control_policy",
+          "requested_workflow",
+          "parameters",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Analyze ribosome profiling and benchmark translated ORFs",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Process MeRIP-seq or m6A-seq IP and input libraries through RNA-aware alignment, expression-aware enrichment calling, replicate consensus, differential peak analysis, motif and transcript-position summaries while preserving the resolution and antibody-specificity limits of enrichment assays.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "bulk-rna-modification-enrichment",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "annotation_release": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "assay": {
+            "enum": [
+              "merip-seq",
+              "m6a-seq"
+            ],
+            "type": "string"
+          },
+          "control_policy": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genome_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_manifest_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "replicate_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_workflow": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "assay",
+          "input_manifest_artifact_id",
+          "genome_build",
+          "annotation_release",
+          "sample_key",
+          "replicate_key",
+          "control_policy",
+          "requested_workflow",
+          "parameters",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Analyze bulk RNA-modification enrichment without claiming base resolution",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Process Hi-C and capture or protein-anchored derivatives through pair validation, contact-matrix construction, normalization, replicate concordance, compartment, domain and loop analysis while retaining assay-specific enrichment and genomic-resolution limits.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "bulk-three-dimensional-genome",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "annotation_release": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "assay": {
+            "enum": [
+              "hi-c",
+              "micro-c",
+              "capture-c",
+              "hichip",
+              "plac-seq",
+              "chia-pet"
+            ],
+            "type": "string"
+          },
+          "control_policy": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "design_notes": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "genome_build": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_manifest_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "replicate_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "requested_workflow": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "assay",
+          "input_manifest_artifact_id",
+          "genome_build",
+          "annotation_release",
+          "sample_key",
+          "replicate_key",
+          "control_policy",
+          "requested_workflow",
+          "parameters",
+          "design_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Analyze bulk chromosome conformation with resolution and replicate gates",
       "workflow": "omics"
     },
     {
@@ -3368,12 +4047,33 @@
     },
     {
       "access": "offline",
-      "description": "Require a claim, data source, and plot form for every uniquely labeled figure panel.",
+      "description": "Require a claim, data source, plot form, final-size typography, strokes, colors, legends, statistical annotations, export settings, and analysis-specific plot inventory for every uniquely labeled scientific figure panel.",
       "entrypoint": "biomed_workbench.capabilities.publication:figure_specification",
       "id": "figure-specification",
       "input_schema": {
         "additionalProperties": false,
         "properties": {
+          "analysis_type": {
+            "enum": [
+              "bulk-cuttag",
+              "bulk-r-loop-mapping",
+              "single-cell-atac-peak-recall",
+              "proteomics-deqms",
+              "go-kegg-overrepresentation",
+              "preranked-gsea",
+              "wgcna"
+            ],
+            "type": "string"
+          },
+          "journal_profile": {
+            "enum": [
+              "nature",
+              "science",
+              "cell",
+              "screen"
+            ],
+            "type": "string"
+          },
           "panels": {
             "items": {
               "type": "object"
@@ -3584,6 +4284,100 @@
       "workflow": "wetlab"
     },
     {
+      "access": "agent_generated",
+      "description": "Execute explicitly separated GO/KEGG over-representation analysis or preranked GSEA with clusterProfiler and fgsea semantics, declared organism and identifier namespace, explicit ORA universe or complete ranking, versioned resources, standardized figures, empty-result preservation, and output reload.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "functional-enrichment",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "gene_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "key_type": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "max_gene_set_size": {
+            "minimum": 2,
+            "type": "integer"
+          },
+          "min_gene_set_size": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "mode": {
+            "enum": [
+              "go-ora",
+              "kegg-ora",
+              "go-gsea",
+              "kegg-gsea"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "ontology": {
+            "enum": [
+              "BP",
+              "MF",
+              "CC",
+              "ALL"
+            ],
+            "type": "string"
+          },
+          "organism": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "orgdb": {
+            "minLength": 3,
+            "type": "string"
+          },
+          "p_cutoff": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "type": "number"
+          },
+          "ranking_statistic": {
+            "minLength": 3,
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "tie_policy": {
+            "minLength": 3,
+            "type": "string"
+          },
+          "universe_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "mode",
+          "gene_artifact_id",
+          "organism",
+          "key_type",
+          "min_gene_set_size",
+          "max_gene_set_size",
+          "p_cutoff",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Run GO/KEGG ORA or preranked GSEA",
+      "workflow": "omics"
+    },
+    {
       "access": "offline",
       "description": "Extract exact CDS records for one declared identifier from one supplied GenBank record, retaining location, strand, translation-table, and translation-agreement evidence.",
       "entrypoint": "biomed_workbench.capabilities.molecular:extract_genbank_coding_sequences",
@@ -3675,7 +4469,7 @@
     },
     {
       "access": "public_api",
-      "description": "Retrieve bounded NCBI Datasets ortholog records from one stable source Gene ID to one declared target taxon, preserving source identity, returned target records, missing results, and retrieval provenance without claiming functional equivalence.",
+      "description": "Retrieve bounded NCBI Datasets ortholog records from one stable source Gene ID to one declared target taxon, optionally using the same NCBI API key as E-utilities for higher request capacity, while preserving source identity, returned target records, missing results, and retrieval provenance without claiming functional equivalence.",
       "entrypoint": "biomed_workbench.capabilities.evidence:gene_ortholog_evidence",
       "id": "gene-ortholog-evidence",
       "input_schema": {
@@ -4467,6 +5261,138 @@
       "requirements": [],
       "title": "Fit one-site ITC binding",
       "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Rank project-to-journal fit without impact-factor or acceptance-probability claims, bind drafting to one immutable official-source standard version, and block submission readiness when a verified limit, section, reporting requirement, or live source check remains unresolved.",
+      "entrypoint": "biomed_workbench.capabilities.journal_standards:journal_targeting_and_compliance",
+      "id": "journal-targeting-and-compliance",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_journal_ids": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 54,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "manuscript": {
+            "additionalProperties": false,
+            "properties": {
+              "abstract_words": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "declarations": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "uniqueItems": true
+              },
+              "display_items": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "main_text_characters_with_spaces": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "main_text_words": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "references": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "sections": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "uniqueItems": true
+              }
+            },
+            "required": [
+              "main_text_words",
+              "abstract_words",
+              "display_items",
+              "references",
+              "sections",
+              "declarations"
+            ],
+            "type": "object"
+          },
+          "project": {
+            "additionalProperties": false,
+            "properties": {
+              "intended_audience": {
+                "minLength": 2,
+                "type": "string"
+              },
+              "methods": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 30,
+                "type": "array"
+              },
+              "study_type": {
+                "minLength": 2,
+                "type": "string"
+              },
+              "summary": {
+                "minLength": 20,
+                "type": "string"
+              },
+              "topics": {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 30,
+                "type": "array"
+              },
+              "translational_stage": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "summary",
+              "study_type",
+              "topics",
+              "methods",
+              "intended_audience"
+            ],
+            "type": "object"
+          },
+          "standard_version": {
+            "pattern": "^[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}$",
+            "type": "string"
+          },
+          "target_journal_id": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "top_k": {
+            "maximum": 20,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "project"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Recommend journals and audit manuscripts against versioned official standards",
+      "workflow": "publication"
     },
     {
       "access": "public_api",
@@ -5923,6 +6849,77 @@
       "workflow": "molecular_design"
     },
     {
+      "access": "agent_generated",
+      "description": "Generate and execute a coefficient-bound limma plus DEqMS workflow with explicit protein-support counts, full-rank design validation, official variance/count diagnostics, standardized figures, output reload, and provenance.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "proteomics-deqms",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "abundance_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "contrast": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "design_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "factor_columns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "formula": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "missingness_policy": {
+            "minLength": 3,
+            "type": "string"
+          },
+          "normalization": {
+            "minLength": 3,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "support_count_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "support_count_semantics": {
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "abundance_artifact_id",
+          "support_count_artifact_id",
+          "design_artifact_id",
+          "formula",
+          "contrast",
+          "factor_columns",
+          "support_count_semantics",
+          "normalization",
+          "missingness_policy"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Run peptide-count-aware DEqMS proteomics inference",
+      "workflow": "omics"
+    },
+    {
       "access": "offline",
       "description": "Aggregate technical replicates, normalize across multiple reference assays, apply assay efficiencies, and report sample-level QC.",
       "entrypoint": "biomed_workbench.capabilities.quantitative_assays:quantify_relative_expression",
@@ -7066,12 +8063,16 @@
     },
     {
       "access": "agent_generated",
-      "description": "Direct Codex to validate 10x fragments and paired RNA/ATAC count evidence, call peaks with MACS3 FRAG semantics, scan declared motifs against supplied peak sequences, construct reproducible GC/accessibility-matched chromVAR backgrounds, calculate motif deviations, execute Signac peak-to-gene linking, and retain reload-validated method-specific evidence without causal overinterpretation.",
+      "description": "Direct Codex to validate indexed 10x fragments and paired RNA/ATAC evidence, call sample or predeclared-group peaks, freeze a filtered reproducible common peak set, rebuild a sparse peak-by-cell assay with Signac FeatureMatrix, rerun LSI/WNN, scan declared motifs, compute chromVAR deviations, execute Signac peak-to-gene linking, and retain reload-validated method-specific evidence.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-atac-regulatory",
       "input_schema": {
         "additionalProperties": false,
         "properties": {
+          "blacklist_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
           "declared_thresholds": {
             "type": "object"
           },
@@ -7098,10 +8099,48 @@
             "minLength": 1,
             "type": "string"
           },
+          "peak_call_grouping": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "peak_call_method": {
+            "enum": [
+              "macs3",
+              "archr"
+            ],
+            "type": "string"
+          },
+          "peak_combine_policy": {
+            "enum": [
+              "reproducible-consensus",
+              "union-reduce"
+            ],
+            "type": "string"
+          },
+          "peak_extsize": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "peak_max_width": {
+            "minimum": 2,
+            "type": "integer"
+          },
+          "peak_min_width": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "peak_reproducibility_rule": {
+            "minLength": 3,
+            "type": "string"
+          },
+          "peak_shift": {
+            "type": "integer"
+          },
           "requested_analyses": {
             "items": {
               "enum": [
                 "macs3-peaks",
+                "recalled-peak-matrix",
                 "motifmatchr",
                 "chromvar",
                 "linkpeaks"
@@ -7111,6 +8150,9 @@
             "minItems": 1,
             "type": "array",
             "uniqueItems": true
+          },
+          "retain_original_assay": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -7128,7 +8170,7 @@
       "kind": "workflow",
       "mutability": "read_only",
       "requirements": [],
-      "title": "Call scATAC peaks and infer motif, chromVAR, and peak-to-gene evidence",
+      "title": "Recall scATAC peaks, rebuild the assay, and infer regulatory evidence",
       "workflow": "omics"
     },
     {
@@ -7550,6 +8592,78 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Fit longitudinal mixed models and compositional single-cell inference",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Build a versioned one-to-one, one-to-many and many-to-many orthology ledger; compare conservative scVI, scANVI, Harmony and Seurat CCA/RPCA baselines with SAMap, SATURN and CAME; and require leave-one-species-out validation, species-specific-state retention and raw-count inference.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "single-cell-cross-species-integration",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "label_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "methods": {
+            "items": {
+              "enum": [
+                "orthology-ledger",
+                "classical-baselines",
+                "samap",
+                "saturn",
+                "came"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "orthology_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "species_artifact_ids": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "minItems": 2,
+            "type": "array"
+          },
+          "species_key": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "methods",
+          "species_artifact_ids",
+          "orthology_artifact_id",
+          "species_key",
+          "sample_key",
+          "label_key",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Cross-species single-cell integration and label transfer",
       "workflow": "omics"
     },
     {
@@ -8149,6 +9263,77 @@
     },
     {
       "access": "agent_generated",
+      "description": "Execute Seurat v5 CCA, RPCA and FastMNN from one count-preserving foundation, evaluate strong-system sysVI only as a candidate, compute the complete official scIB metric families with explicit not-applicable reasons, and admit no integration that improves mixing by erasing reviewed biology.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-integration-benchmark",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis": {
+            "enum": [
+              "seurat-v5",
+              "scib",
+              "sysvi"
+            ],
+            "type": "string"
+          },
+          "batch_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "label_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "methods": {
+            "items": {
+              "enum": [
+                "cca",
+                "rpca",
+                "fastmnn",
+                "scib",
+                "sysvi"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "objective",
+          "analysis",
+          "methods",
+          "input_artifact_id",
+          "batch_key",
+          "sample_key",
+          "label_key",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Single-cell integration benchmark",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
       "description": "Direct Codex to validate count-backed clustered single-cell data, freeze discovery and held-out biological samples before ranking, calculate raw-count detection evidence in each partition, and emit independently validated marker candidates without turning cell-level significance into donor-level inference or automatic cell-type labels.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-marker-discovery",
@@ -8231,6 +9416,61 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Discover and independently validate single-cell cluster markers",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Integrate count-backed RNA+protein with totalVI, paired or mosaic RNA+ATAC with MultiVI, and graph-linked paired or unpaired RNA+ATAC with GLUE; retain missing-modality semantics, native models, joint embeddings and method-specific validation.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "single-cell-mosaic-integration",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "batch_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "guidance_graph_artifact_id": {
+            "type": "string"
+          },
+          "method": {
+            "enum": [
+              "totalvi",
+              "multivi",
+              "scglue"
+            ],
+            "type": "string"
+          },
+          "multimodal_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "objective",
+          "method",
+          "multimodal_artifact_id",
+          "batch_key",
+          "sample_key",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Single-cell paired, unpaired and mosaic multi-omics integration",
       "workflow": "omics"
     },
     {
@@ -8478,6 +9718,71 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Annotate single cells with SingleR, markers, ontology constraints, and unknown retention",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Map count-backed query cells to frozen scArches SCVI or SCANVI references or portable Symphony references; decompose spatial locations with RCTD full or doublet modes; evaluate probability or abundance projections with Jensen-Shannon divergence; preserve reference geometry, query identities and unknown states.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "single-cell-reference-mapping",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "batch_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "label_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "method": {
+            "enum": [
+              "scarches-scvi",
+              "scarches-scanvi",
+              "symphony",
+              "rctd-full",
+              "rctd-doublet",
+              "jsd-evaluation"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "query_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "reference_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "unknown_label": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "method",
+          "reference_artifact_id",
+          "query_artifact_id",
+          "batch_key",
+          "label_key",
+          "unknown_label",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Single-cell reference mapping",
       "workflow": "omics"
     },
     {
@@ -8974,6 +10279,221 @@
       "requirements": [],
       "title": "Audit citation freshness windows without overstating currentness",
       "workflow": "evidence"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Run cell2location, RCTD, Stereoscope, SPOTlight, CARD, SpatialDWLS, DestVI or Tangram under method-specific assumptions; compare projections with truth-qualified JSD and held-out diagnostics; benchmark BayesSpace, SpaGCN and STAGATE domains without label leakage; and test COMMOT distance-constrained ligand-receptor communication separately within biological samples.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "spatial-multimethod-inference",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis": {
+            "enum": [
+              "deconvolution",
+              "domain-benchmark",
+              "spatial-communication"
+            ],
+            "type": "string"
+          },
+          "coordinate_unit": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "distance_threshold": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "methods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "reference_artifact_id": {
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "seeds": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "spatial_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "analysis",
+          "methods",
+          "spatial_artifact_id",
+          "sample_key",
+          "coordinate_unit",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Benchmark spatial deconvolution, projection, domains and distance-constrained communication",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Align ordered spatial sections with PASTE or partial-overlap PASTE2, retain pairwise couplings and transform provenance, reconstruct calibrated 3D coordinates, and fit biological-sample-aware hierarchical spatial models across conditions, domains and nested sections.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "spatial-multislice-integration",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "backend": {
+            "enum": [
+              "paste",
+              "paste2",
+              "stalign",
+              "valis"
+            ],
+            "type": "string"
+          },
+          "condition_key": {
+            "type": "string"
+          },
+          "coordinate_unit": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "section_artifact_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "type": "array"
+          },
+          "section_order": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2,
+            "type": "array"
+          },
+          "section_spacing": {
+            "items": {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "seed": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "objective",
+          "backend",
+          "section_artifact_ids",
+          "section_order",
+          "section_spacing",
+          "coordinate_unit",
+          "sample_key",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Align spatial sections, reconstruct 3D tissue and fit cross-sample models",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Import Visium, Visium HD, Stereo-seq, Slide-seq, Xenium, CosMx and MERFISH/MERSCOPE data with platform-aware QC, standardized coordinates, image and boundary provenance, plus Squidpy segmentation and SpatialData landmark registration.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "spatial-platform-image-foundation",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "coordinate_unit": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "image_mode": {
+            "enum": [
+              "none",
+              "segment-watershed",
+              "segment-cellpose",
+              "register-landmarks"
+            ],
+            "type": "string"
+          },
+          "input_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "platform": {
+            "enum": [
+              "visium",
+              "visium-hd",
+              "stereoseq",
+              "slide-seq",
+              "xenium",
+              "cosmx",
+              "merfish",
+              "generic"
+            ],
+            "type": "string"
+          },
+          "sample_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "objective",
+          "platform",
+          "input_artifact_id",
+          "sample_key",
+          "coordinate_unit",
+          "image_mode",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Import and quality-control spatial platforms and tissue images",
+      "workflow": "omics"
     },
     {
       "access": "agent_generated",
@@ -10058,6 +11578,77 @@
       "workflow": "publication"
     },
     {
+      "access": "agent_generated",
+      "description": "Validate analysis-specific required plot inventories and render final-size editable PDF/SVG plus 600-dpi TIFF figure packages for trajectory topology, velocity, fate mapping, RegVelo, spatial platform QC, spatial statistics, deconvolution, domains, communication, image analysis and multislice 3D reconstruction using a single versioned R graphic contract.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "trajectory-spatial-figure-package",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_type": {
+            "enum": [
+              "trajectory-topology",
+              "trajectory-velocity",
+              "fate-mapping",
+              "regulatory-velocity",
+              "spatial-platform-qc",
+              "spatial-core-analysis",
+              "spatial-deconvolution",
+              "spatial-domain-benchmark",
+              "spatial-communication",
+              "spatial-image-analysis",
+              "spatial-multislice"
+            ],
+            "type": "string"
+          },
+          "dpi": {
+            "minimum": 300,
+            "type": "integer"
+          },
+          "figure_manifest_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "height_mm": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          },
+          "journal_profile": {
+            "enum": [
+              "nature",
+              "science",
+              "cell",
+              "screen"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "width_mm": {
+            "exclusiveMinimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "objective",
+          "analysis_type",
+          "figure_manifest_artifact_id",
+          "journal_profile",
+          "width_mm",
+          "height_mm",
+          "dpi"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Render complete trajectory and spatial figure packages",
+      "workflow": "publication"
+    },
+    {
       "access": "offline",
       "description": "Apply declared somatic, filter, effect, and allele-fraction rules before dividing eligible mutations by explicit callable megabases.",
       "entrypoint": "biomed_workbench.capabilities.research_quality:calculate_tumor_mutation_burden",
@@ -10403,6 +11994,116 @@
       "workflow": "wetlab"
     },
     {
+      "access": "agent_generated",
+      "description": "Execute WGCNA on an inspected sample-level quantitative matrix with explicit correlation and network semantics, soft-threshold diagnostics, deterministic module detection, module-trait multiplicity, standardized figures, provenance, and stability claim boundaries.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "wgcna-coexpression",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_powers": {
+            "items": {
+              "minimum": 1,
+              "type": "integer"
+            },
+            "minItems": 2,
+            "type": "array"
+          },
+          "cor_type": {
+            "enum": [
+              "pearson",
+              "bicor"
+            ],
+            "type": "string"
+          },
+          "deep_split": {
+            "maximum": 4,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "expression_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "feature_filter": {
+            "minLength": 3,
+            "type": "string"
+          },
+          "max_block_size": {
+            "minimum": 100,
+            "type": "integer"
+          },
+          "merge_cut_height": {
+            "exclusiveMinimum": 0,
+            "maximum": 1,
+            "type": "number"
+          },
+          "min_module_size": {
+            "minimum": 10,
+            "type": "integer"
+          },
+          "network_type": {
+            "enum": [
+              "unsigned",
+              "signed",
+              "signed hybrid"
+            ],
+            "type": "string"
+          },
+          "normalization": {
+            "minLength": 3,
+            "type": "string"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "seed": {
+            "type": "integer"
+          },
+          "selected_power": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "stability_policy": {
+            "minLength": 3,
+            "type": "string"
+          },
+          "threads": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "traits_artifact_id": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "expression_artifact_id",
+          "traits_artifact_id",
+          "normalization",
+          "feature_filter",
+          "network_type",
+          "cor_type",
+          "candidate_powers",
+          "deep_split",
+          "min_module_size",
+          "merge_cut_height",
+          "max_block_size",
+          "seed",
+          "threads",
+          "stability_policy"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Build a sample-aware WGCNA coexpression network",
+      "workflow": "omics"
+    },
+    {
       "access": "offline",
       "description": "Retain animal-level longitudinal tumor volumes, declared endpoint changes, and descriptive tumor-growth inhibition against a control group.",
       "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_xenograft_tumor_growth",
@@ -10439,7 +12140,7 @@
       "workflow": "wetlab"
     }
   ],
-  "entry_count": 174,
+  "entry_count": 194,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

@@ -1,6 +1,13 @@
 {
   "case_id": "gse96583-doublet-detection-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-doublet-detection"
+    ],
+    "module_slice_digest": "cadc637505d7cc0230fc603f1d83d90fd896720d5df29a69e163b7d2c92c6ea2",
+    "schema_version": 1
+  },
   "execution": {
     "all_cells_accounted": true,
     "ambiguous_cells_excluded_from_metrics": 1217,
@@ -109,11 +116,28 @@
     "outputs_reloaded": true,
     "source_immutable": true
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "76025f5894b9b05c25364ab7169c8c6c5b5559e1e51370e52cdff4e6c282d00e",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "422efe00961eacb903b5266532ab2390dfe5aa4a95bc6725120d16dcf8a05df6",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "run_scdblfinder.R": "6c8ef824ca8b4ce77d2bbe35776cf8f0ba79ac6a3b4ebf6f9563b4f1551776ea",
+      "run_scrublet.py": "4168c311b1c052e04125bf2efc4696c868030d6b7f3f2c29039a2df9127d504b"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-scrublet-023-scdblfinder-1160",
     "id": "single-cell-doublet-detection",
-    "manifest_sha256": "422efe00961eacb903b5266532ab2390dfe5aa4a95bc6725120d16dcf8a05df6",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "76025f5894b9b05c25364ab7169c8c6c5b5559e1e51370e52cdff4e6c282d00e",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": {
       "run_scdblfinder.R": "6c8ef824ca8b4ce77d2bbe35776cf8f0ba79ac6a3b4ebf6f9563b4f1551776ea",
       "run_scrublet.py": "4168c311b1c052e04125bf2efc4696c868030d6b7f3f2c29039a2df9127d504b"

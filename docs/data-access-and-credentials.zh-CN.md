@@ -1,0 +1,67 @@
+# 公共数据库访问与凭据
+
+版本：`2026.07.31`
+适用范围：当前 Biomed Workbench 实际实现并列入允许访问清单的公共服务端点。
+
+“一个数据库是否需要 API key”必须具体到服务与端点。数据库网站可能同时包含公开检索、登录后的个人功能、付费接口或私有部署；工作台只声明自身当前调用的端点，不用一个结论代替整个数据库生态。
+
+## 当前结论
+
+- **必须提供 API key 才能运行的当前模块：无。**
+- **可选 API key：`NCBI_API_KEY`。** 同一密钥可用于 NCBI E-utilities 和 NCBI Datasets，提高请求容量；没有密钥时仍可访问公开端点。
+- **当前未启用的付费或私有凭据：** Crossref Metadata Plus token、私有 cBioPortal 的 OAuth/token 等。它们不能被误写成当前公开客户端的必要条件。
+- 其他当前客户端使用官方公开端点，不接收凭据；访问仍受服务条款、合理请求频率、版本变化和数据许可约束。
+
+## 服务级访问清单
+
+| 服务 | 工作台当前用途 | 当前端点凭据状态 | 需要注意 |
+| --- | --- | --- | --- |
+| NCBI E-utilities | PubMed、Gene、dbSNP、ClinVar 等检索和摘要 | `NCBI_API_KEY` 可选 | 官方限制通常为无 key 每秒 3 次、有 key 每秒 10 次；Agent 仍需退避和限速 |
+| NCBI Datasets v2 | Gene ortholog 记录 | `NCBI_API_KEY` 可选 | 官方默认每秒 5 次，有 key 每秒 10 次；工作台已支持同一 NCBI key |
+| Crossref REST | DOI 元数据 | 当前公开访问无需 token | 推荐提供联系邮箱进入 polite pool；邮箱不是密钥。Metadata Plus token 属于付费服务，当前客户端不使用 |
+| Europe PMC REST | 文献元数据与开放内容状态 | 当前公开端点无需 key | 全文访问仍取决于开放获取状态 |
+| bioRxiv API | 预印本元数据 | 当前公开端点无需 key | 预印本必须保留未同行评议标记 |
+| ClinicalTrials.gov API v2 | 试验记录 | 当前公开端点无需 key | 数据结构和版本会更新，应记录 API 数据时间戳 |
+| UniProt REST / ID Mapping | 蛋白记录与标识符映射 | 当前公开端点无需 key | 批量任务使用异步作业和合理轮询 |
+| Ensembl REST | 基因身份、坐标与注释信息 | 当前公开端点无需 key | 记录 assembly 与 annotation release |
+| Reactome Content/Analysis | 通路记录与富集上下文 | 当前公开端点无需 key | 记录数据库 release；旧 REST 已由 Content Service 取代 |
+| Open Targets GraphQL | target–disease 证据 | 当前公开端点无需 key | 大规模查询应转向官方数据下载或 BigQuery |
+| gnomAD GraphQL | 基因约束等公开汇总 | 当前公开端点无需 key | 记录数据版本、参考基因组和人群范围 |
+| cBioPortal 公共门户 | 研究、突变、拷贝数和覆盖记录 | `www.cbioportal.org` 公共 API 无需认证 | 私有 cBioPortal 可以配置 OAuth/token；当前客户端不会把公共凭据自动用于私有实例 |
+| PubChem PUG REST | 化合物与结构信息 | 不提供 API key 或白名单 | 官方要求合理限速，典型动态上限为每秒 5 次 |
+| RCSB PDB Data/Search | 结构记录与检索 | 当前公开端点无需 key | 结构记录并不自动证明生理构象或功能 |
+| AlphaFold DB API | 公开预测结构记录 | 当前公开端点无需 key | 保留模型版本和置信度；预测不是实验结构 |
+| QuickGO | GO 术语记录 | 当前公开端点无需 key | 记录 ontology release 与证据代码 |
+| Enrichr | 基因集目录与成员 | 当前公开端点无需 key | 记录库名称和检索时间；库更新会改变结果 |
+| ARCHS4 | 公开表达上下文 | 当前公开端点无需 key | 汇总表达只能作为背景证据，不能替代项目统计设计 |
+| HPO API | 表型术语 | 当前公开端点无需 key | 记录术语版本与映射状态 |
+| IUPred2A | 蛋白无序倾向 | 当前公开端点无需 key | 记录算法模式与版本；结果是计算预测 |
+
+官方入口包括：[NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25497/)、[NCBI Datasets API keys](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/)、[Crossref access and authentication](https://crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/)、[Europe PMC REST](https://europepmc.org/RestfulWebService)、[ClinicalTrials.gov API](https://clinicaltrials.gov/data-api/api)、[UniProt programmatic access](https://www.uniprot.org/help/programmatic_access)、[Reactome Content Service](https://reactome.org/dev/content-service)、[Open Targets GraphQL](https://platform-docs.opentargets.org/data-access/graphql-api)、[cBioPortal public API](https://www.cbioportal.org/api/swagger-ui/index.html)、[cBioPortal private token authentication](https://docs.cbioportal.org/deployment/authorization-and-authentication/authenticating-users-via-tokens/) 和 [PubChem PUG REST](https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest)。
+
+## 面向 Agent 的配置方式
+
+推荐直接对 Codex 或其他受信任的 Agent 说：
+
+> 检查这个项目要访问的公共数据库及当前凭据状态。如果 NCBI 任务需要更高请求容量，请在隐藏输入中引导我配置 NCBI API key；不要让我把密钥贴进聊天、项目文件或报告，并在配置后只告诉我凭据来源和是否生效。
+
+Agent 应先说明是否真的需要凭据，再打开隐藏输入。用户不需要编写命令。
+
+### 可选择的保存方式
+
+1. **本次任务临时使用**：适合集群、自动化和短期任务，由安全的环境变量或作业密钥注入；任务结束后失效。
+2. **本机用户级保存**：适合个人工作站。Agent 通过隐藏输入把密钥保存到项目目录之外的用户配置文件，并限制文件权限。
+3. **机构密钥管理器**：适合服务器或团队环境。Agent 读取机构已批准的 secret 注入，不复制密钥到项目。
+
+本机用户级文件位于操作系统的用户配置目录，优先级低于本次任务的安全环境变量。状态检查只显示“已配置／未配置”和来源，不显示值。
+
+## 轮换、删除与审计
+
+可以直接告诉 Agent：
+
+- “检查 NCBI key 是否生效，但不要显示它。”
+- “把 NCBI key 换成新的，确认旧值不再被读取。”
+- “删除本机保存的 NCBI key，保留项目数据。”
+- “审计仓库、报告和证据地图，确认没有凭据残留。”
+
+密钥不得进入聊天文本、Git、项目 JSON、样本表、运行日志、图表、报告或科学证据地图。公共服务新增认证要求时，必须先更新凭据允许清单、双语文档、模块清单和泄露防护测试，再允许 Agent 使用新凭据。

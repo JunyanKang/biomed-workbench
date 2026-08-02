@@ -182,7 +182,7 @@ def agent_manifest_payload():
     payload["execution"] = {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 1000000}
     payload["agent_protocol"] = {
         "schema_version": 1,
-        "mode": "codex_generated_project_code",
+        "mode": "packaged_parameterized_workflow",
         "languages": ["python", "r"],
         "template_sections": [{
             "id": "validate-input",

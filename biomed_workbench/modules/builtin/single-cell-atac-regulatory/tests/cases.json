@@ -14,9 +14,37 @@
         "design_notes": "Cells, count locations, coordinate conversions, sequences, motifs, barcodes, and parameters are frozen before execution."
       },
       "expected_subset": {
-        "handoff_type": "codex_generated_project_analysis",
-        "module": {"id": "single-cell-atac-regulatory", "version": "1.1.0"},
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "single-cell-atac-regulatory", "version": "1.2.0"},
         "execution_policy": {"observed_execution_required": true, "manage_environment_or_compute_infrastructure": false, "planned_output_is_not_evidence": true}
+      }
+    },
+    {
+      "name": "prepare-recalled-peak-matrix-and-rerun-analysis",
+      "input": {
+        "objective": "Recall peaks by biological sample, rebuild a common peak matrix, and rerun LSI and RNA–ATAC WNN.",
+        "fragments_artifact_id": "artifact-indexed-tenx-fragments",
+        "paired_counts_artifact_id": "artifact-paired-rna-atac",
+        "genome_build": "GRCh38",
+        "motif_resource": "named-PFMatrixList-with-digest",
+        "peak_call_grouping": "biological_sample",
+        "peak_call_method": "macs3",
+        "peak_combine_policy": "reproducible-consensus",
+        "peak_reproducibility_rule": "supported in independent biological replicates",
+        "peak_shift": -75,
+        "peak_extsize": 150,
+        "peak_min_width": 20,
+        "peak_max_width": 10000,
+        "blacklist_artifact_id": "encode-grch38-blacklist",
+        "retain_original_assay": true,
+        "requested_analyses": ["macs3-peaks", "recalled-peak-matrix"],
+        "declared_thresholds": {"macs3_qvalue": 0.05, "minimum_pseudobulk_cells": 100},
+        "design_notes": "Grouping and filters were fixed from sample metadata before target embeddings and differential results."
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "single-cell-atac-regulatory", "version": "1.2.0"},
+        "execution_policy": {"observed_execution_required": true}
       }
     }
   ]

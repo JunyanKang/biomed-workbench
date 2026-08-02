@@ -25,12 +25,14 @@ The unified skill selects a single, serial, parallel, or mixed workflow. It shou
 2. state the working hypotheses and decision criteria;
 3. identify the scientific modules and artifact dependencies;
 4. check tool compatibility and available evidence before execution;
-5. run or adapt module templates in the project environment;
+5. bind real project data through the declared parameter interface and execute the packaged workflow;
 6. inspect outputs against module-specific quality gates;
 7. revise the plan when results contradict the hypothesis or fail quality checks;
 8. assemble interpretable artifacts and a claim-evidence trail;
 9. review the result from statistical, biological, and publication perspectives;
 10. deliver the requested research package with unresolved limitations visible.
+
+After execution, register every data, table, model, Figure, and panel in the scientific evidence map together with its prerequisite conclusion, producing script, renderer, final file, caption, narrative source, DOI, path, and checksum. Chinese and English interpretation reports are rendered from the same validated map version.
 
 ## Project Checkpoints
 

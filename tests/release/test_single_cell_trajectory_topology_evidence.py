@@ -5,6 +5,7 @@ from pathlib import Path
 
 from biomed_workbench.modules.contract import parse_manifest, version_is_allowed
 from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
 from biomed_workbench.modules.registry import ModuleRegistry
 
 
@@ -22,7 +23,7 @@ class TestSingleCellTrajectoryTopologyEvidence(unittest.TestCase):
         self.assertEqual(report["module_id"], module.id)
         self.assertEqual(report["module_version"], module.version)
         self.assertEqual(report["compatibility_row_id"], row.id)
-        self.assertEqual(report["registry_digest"], ModuleRegistry.discover(BUILTIN_ROOT).digest)
+        self.assertTrue(evidence_scope_is_current(report, ModuleRegistry.discover(BUILTIN_ROOT)))
         self.assertEqual(
             report["templates"]["trajectory"]["sha256"],
             hashlib.sha256((MODULE_ROOT / "templates" / "run_slingshot_monocle_tradeseq.R").read_bytes()).hexdigest(),

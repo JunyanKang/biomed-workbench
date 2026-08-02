@@ -23,7 +23,7 @@ When a scientific backend is absent or incompatible, guidance and routing remain
 Reproducibility is represented by several linked layers:
 
 1. **Module contract:** scientific purpose, inputs, outputs, compatibility rules, and quality gates.
-2. **Code template:** substantive reference implementation that an agent adapts to the project.
+2. **Packaged implementation:** immutable released code with a declared input, configuration, or command surface; routine project execution binds parameters without editing source.
 3. **Execution provenance:** actual tools, versions, parameters, inputs, output digests, and observed checks.
 4. **Scientific evidence:** interpreted results that passed the relevant technical and scientific gates.
 5. **Decision record:** why a hypothesis, workflow, or claim was accepted, revised, rejected, or left unresolved.
@@ -37,6 +37,11 @@ Shared profiles cover foundational sequencing, alignment, variant, interval, exp
 ## Published Verification
 
 The [`reports/`](../reports/) directory contains release-safe summaries for compatibility execution, bioinformatics template coverage, public database checks, structural and single-cell verification, deterministic evidence, plugin installation, and public-data acceptance cases. Reports preserve concrete verification results without exposing private source paths or credentials.
+
+Project analysis uses the [scientific evidence map](scientific-evidence-map.md)
+to pre-admit analyses, review every result and figure panel, retain or exclude
+artifacts without deleting history, and render separate Chinese and English
+interpretation reports from one validated evidence graph.
 
 The detailed baseline table is generated from the module registry and compatibility reports rather than duplicated in this guide. This keeps user documentation readable while preserving machine-verifiable evidence at the source of truth.
 

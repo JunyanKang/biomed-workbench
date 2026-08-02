@@ -1,6 +1,13 @@
 {
   "case_id": "gse96583-held-out-donor-reference-annotation-v1",
   "case_type": "public-data-end-to-end",
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-reference-annotation"
+    ],
+    "module_slice_digest": "f823773eecab00bcea503abbe6d13ca4e1f9aa62a1f452ee081f0c55a7af5825",
+    "schema_version": 1
+  },
   "execution": {
     "accepted_cells": 3373,
     "all_query_cells_accounted": true,
@@ -782,11 +789,28 @@
     "source_artifacts_immutable": true,
     "unknown_cells": 766
   },
+  "execution_contract_migration": {
+    "changed_fields": [
+      "agent_protocol.mode",
+      "output_schema.properties.handoff_type.enum.0"
+    ],
+    "current_manifest_sha256": "682929b9ea7ac0bd7e3730454f22afc7d7f2f3889033602b6f9e62fbab786b94",
+    "migration_type": "execution-contract-metadata-only",
+    "prior_manifest_sha256": "ca1783308c5f230b80dc1c8ef34656e733bea8f0130b7ecfc9c4c0f450379d72",
+    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false,
+    "template_sha256": {
+      "annotate_reference.py": "af55986dd9e4214801a0b3fb81bf3ce4d9078edb82cffb485a6a4570ab0b2618",
+      "run_singler.R": "cb6e088a544396a8a17ad8895ab192b48b22f51cc1c3edf7794861c7c7a9c183"
+    },
+    "templates_unchanged": true
+  },
   "module": {
     "compatibility_row_id": "agent-protocol-1-singler-241-scanpy-1115-r-432",
     "id": "single-cell-reference-annotation",
-    "manifest_sha256": "ca1783308c5f230b80dc1c8ef34656e733bea8f0130b7ecfc9c4c0f450379d72",
-    "registry_digest": "9206216d7a52df0cb09d66100eb7aa1a58d285847b63a76000f060c63cae73c1",
+    "manifest_sha256": "682929b9ea7ac0bd7e3730454f22afc7d7f2f3889033602b6f9e62fbab786b94",
+    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
     "template_sha256": {
       "annotate_reference.py": "af55986dd9e4214801a0b3fb81bf3ce4d9078edb82cffb485a6a4570ab0b2618",
       "run_singler.R": "cb6e088a544396a8a17ad8895ab192b48b22f51cc1c3edf7794861c7c7a9c183"

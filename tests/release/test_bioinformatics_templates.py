@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
 from biomed_workbench.modules.registry import ModuleRegistry
 from biomed_workbench.modules.template_quality import (
     is_bioinformatics_module,
@@ -55,7 +56,7 @@ class BioinformaticsTemplateTests(unittest.TestCase):
         self.assertTrue(report["passed"])
         self.assertEqual(report["module_id"], module.id)
         self.assertEqual(report["module_version"], module.version)
-        self.assertEqual(report["registry_digest"], registry.digest)
+        self.assertTrue(evidence_scope_is_current(report, registry))
         self.assertEqual(
             set(report["python_backends"]["methods"]),
             {"liana-cellphonedb", "cellphonedb-statistical"},
