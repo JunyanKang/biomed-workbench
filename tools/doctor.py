@@ -195,8 +195,10 @@ def _check_routing() -> Check:
 
 def _check_optional_credentials() -> Check:
     from biomed_workbench.services.credentials import credential_sources
+    from biomed_workbench.services.interactive_access import interactive_access_status
 
     sources = credential_sources()
+    alphafold_server = interactive_access_status()
     return Check(
         id="optional-credentials",
         status="pass",
@@ -209,6 +211,12 @@ def _check_optional_credentials() -> Check:
             ),
             "NCBI_API_KEY_source": sources["NCBI_API_KEY"],
             "required_for_core_use": False,
+            "ALPHAFOLD_SERVER": {
+                "state": alphafold_server["state"],
+                "authentication_mode": alphafold_server["authentication_mode"],
+                "password_stored": False,
+                "next_action": alphafold_server["next_action"],
+            },
         },
     )
 

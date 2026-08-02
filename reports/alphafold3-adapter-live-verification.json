@@ -1,50 +1,58 @@
 {
-  "compatibility_row_id": "alphafold3-3-0-2-input-output-adapter",
+  "compatibility_row_id": "alphafold3-3-0-3-server-and-local-adapter",
   "dependency_versions": {
-    "python": "3.12.10"
+    "python": "3.14.3"
   },
   "evidence_scope": {
     "module_ids": [
       "alphafold3-complex-prediction"
     ],
-    "module_slice_digest": "52174dfa589985c9715b9056b099bae46fc50d1e0df17e9557b3e6dbd0d3dd50",
+    "module_slice_digest": "0e44518830348bdcb4a395e2a8cbd2f3d5746b55554a7fe4e10074d45124f648",
     "schema_version": 1
   },
   "execution": {
     "confidence_figures_completed": true,
+    "local_inference_performed": false,
+    "local_resource_gate_completed": true,
     "official_input_generated": true,
-    "official_output_fixture_reloaded": true
+    "official_output_fixture_reloaded": true,
+    "official_server_package_generated": true,
+    "server_origin_docking_gate_completed": true
   },
   "fixture": {
+    "account_used": false,
     "inference_performed": false,
     "scope": "synthetic official-schema input-output adapter fixture"
   },
   "module_id": "alphafold3-complex-prediction",
-  "module_version": "1.0.0",
+  "module_version": "1.1.0",
   "passed": true,
   "results": {
+    "docking_handoff_allowed": false,
     "figure_count": 3,
-    "input_sha256": "974d1dfafa343982ad11ead84be71f5b5b8450301b39a44839981bfa6544279d",
     "model_count": 1,
-    "ranking_rows": 2,
-    "ranking_table_sha256": "ca973766cf1f11b1611df3861c34cf78436bfb1c12eb8ac64005a38964bc7e58"
+    "ranking_rows": 1,
+    "server_submission_sha256": "f32025c1b0c6bf7a3f4a9dfd6b008ea85232dccfe91db3e4c48e84c3ec1f2ba8"
   },
-  "schema_version": 1,
+  "schema_version": 2,
   "scientific_summary": {
     "confidence_not_binding_evidence": true,
     "full_local_inference_not_claimed": true,
+    "manual_server_submission_required": true,
     "official_schema_preserved": true,
     "outputs_reloaded": true,
+    "sensitive_auth_material_absent": true,
+    "server_output_terms_gate_preserved": true,
     "weights_not_bundled": true
   },
   "templates": {
     "runner": {
       "name": "run_alphafold3_complex_prediction.py",
-      "sha256": "b1707fc772db11f5b92483aef49051793e090c7aab0ce839237dcf91aa88a799"
+      "sha256": "b4a8f0830f79c772d23394d82d1b0e5a06a1101146d25fced3c452d88c9691c0"
     }
   },
   "tool_versions": {
-    "alphafold3": "3.0.2",
-    "matplotlib": "3.10.3"
+    "alphafold3": "3.0.3",
+    "matplotlib": "3.10.8"
   }
 }

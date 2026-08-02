@@ -34,6 +34,8 @@ Biomed Workbench 只暴露一个面向用户的 Codex 入口；所有科学能�
 
 新增模块不应修改中央路由表。它通过完整清单进入注册表，重新生成目录和报告，并依次通过模块测试、集成测试和发布验证。
 
+可保存的凭据必须进入项目允许清单，并绑定到具体访问端点。当前只有可选的 `NCBI_API_KEY` 可以进入仓库外的私有凭据存储，用于 NCBI E-utilities 和 Datasets。需要网页登录的服务使用另一份不含秘密的访问状态记录：AlphaFold Server 只记录状态、检查时间和条款确认，不记录密码、令牌、cookie 或浏览器会话。私有或付费服务必须建立独立契约，不能仅凭数据库名称复用凭据。
+
 ## 分类原则
 
 科学分类使用相互独立的维度：数据尺度、测量家族、具体实验和方法角色。bulk、single-cell、spatial 是尺度；CUT&Tag、Ribo-seq、LACE-seq 是实验；S9.6 是靶标/抗体；spike-in 是内部参照策略。完整模块分类由 `reports/module-scientific-taxonomy.json` 生成并与注册表校验值绑定。

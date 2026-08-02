@@ -216,7 +216,7 @@
     },
     {
       "access": "agent_generated",
-      "description": "Build versioned official AlphaFold 3 inputs for proteins, nucleic acids and ligands, connect an approved local inference runtime without bundling model weights, audit ranked mmCIF and confidence outputs, and export confidence figures and replot tables.",
+      "description": "Prepare official AlphaFold Server packages for manual Google-authenticated submission, read complete Server or local AlphaFold 3 results, enforce origin-specific reuse terms, audit ranked structures and confidence outputs, and export publication figures with replot tables. An optional local official runtime is gated by current host headroom and explicit user permission.",
       "entrypoint": "agent-generated-analysis",
       "id": "alphafold3-complex-prediction",
       "input_schema": {
@@ -224,8 +224,9 @@
         "properties": {
           "execution_mode": {
             "enum": [
-              "prepare",
-              "parse-existing",
+              "server-package",
+              "server-result-import",
+              "prepare-local",
               "local-inference"
             ],
             "type": "string"

@@ -1,14 +1,15 @@
 # 公共数据库访问与凭据
 
-版本：`2026.07.31`
+版本：`2026.08.02`
 适用范围：当前 Biomed Workbench 实际实现并列入允许访问清单的公共服务端点。
 
 “一个数据库是否需要 API key”必须具体到服务与端点。数据库网站可能同时包含公开检索、登录后的个人功能、付费接口或私有部署；工作台只声明自身当前调用的端点，不用一个结论代替整个数据库生态。
 
 ## 当前结论
 
-- **必须提供 API key 才能运行的当前模块：无。**
+- **必须提供 API key 才能运行的当前数据库模块：无。**
 - **可选 API key：`NCBI_API_KEY`。** 同一密钥可用于 NCBI E-utilities 和 NCBI Datasets，提高请求容量；没有密钥时仍可访问公开端点。
+- **需要网页账号的分析服务：AlphaFold Server。** 它使用 Google 账号在官方网页交互登录，不提供工作台可调用的公开提交 API。工作台生成官方 JSON 提交包，用户核对后手动上传和提交；只记录访问状态，不保存账号密码、OAuth 令牌、cookie 或浏览器会话。
 - **当前未启用的付费或私有凭据：** Crossref Metadata Plus token、私有 cBioPortal 的 OAuth/token 等。它们不能被误写成当前公开客户端的必要条件。
 - 其他当前客户端使用官方公开端点，不接收凭据；访问仍受服务条款、合理请求频率、版本变化和数据许可约束。
 
@@ -31,13 +32,14 @@
 | PubChem PUG REST | 化合物与结构信息 | 不提供 API key 或白名单 | 官方要求合理限速，典型动态上限为每秒 5 次 |
 | RCSB PDB Data/Search | 结构记录与检索 | 当前公开端点无需 key | 结构记录并不自动证明生理构象或功能 |
 | AlphaFold DB API | 公开预测结构记录 | 当前公开端点无需 key | 保留模型版本和置信度；预测不是实验结构 |
+| AlphaFold Server | 蛋白、核酸、配体复合物结构预测 | 需要 Google 账号网页登录；不是 API key | 用户手动提交；非商业用途；序列和结果可能被长期保留；Server 输出不得用于自动化配体/肽对接或互作预测 |
 | QuickGO | GO 术语记录 | 当前公开端点无需 key | 记录 ontology release 与证据代码 |
 | Enrichr | 基因集目录与成员 | 当前公开端点无需 key | 记录库名称和检索时间；库更新会改变结果 |
 | ARCHS4 | 公开表达上下文 | 当前公开端点无需 key | 汇总表达只能作为背景证据，不能替代项目统计设计 |
 | HPO API | 表型术语 | 当前公开端点无需 key | 记录术语版本与映射状态 |
 | IUPred2A | 蛋白无序倾向 | 当前公开端点无需 key | 记录算法模式与版本；结果是计算预测 |
 
-官方入口包括：[NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25497/)、[NCBI Datasets API keys](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/)、[Crossref access and authentication](https://crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/)、[Europe PMC REST](https://europepmc.org/RestfulWebService)、[ClinicalTrials.gov API](https://clinicaltrials.gov/data-api/api)、[UniProt programmatic access](https://www.uniprot.org/help/programmatic_access)、[Reactome Content Service](https://reactome.org/dev/content-service)、[Open Targets GraphQL](https://platform-docs.opentargets.org/data-access/graphql-api)、[cBioPortal public API](https://www.cbioportal.org/api/swagger-ui/index.html)、[cBioPortal private token authentication](https://docs.cbioportal.org/deployment/authorization-and-authentication/authenticating-users-via-tokens/) 和 [PubChem PUG REST](https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest)。
+官方入口包括：[NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25497/)、[NCBI Datasets API keys](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/)、[Crossref access and authentication](https://crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/)、[Europe PMC REST](https://europepmc.org/RestfulWebService)、[ClinicalTrials.gov API](https://clinicaltrials.gov/data-api/api)、[UniProt programmatic access](https://www.uniprot.org/help/programmatic_access)、[Reactome Content Service](https://reactome.org/dev/content-service)、[Open Targets GraphQL](https://platform-docs.opentargets.org/data-access/graphql-api)、[cBioPortal public API](https://www.cbioportal.org/api/swagger-ui/index.html)、[cBioPortal private token authentication](https://docs.cbioportal.org/deployment/authorization-and-authentication/authenticating-users-via-tokens/)、[PubChem PUG REST](https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest)、[AlphaFold Server](https://alphafoldserver.com/)、[输出使用条款](https://alphafoldserver.com/output-terms) 和 [隐私说明](https://alphafoldserver.com/privacy)。
 
 ## 面向 Agent 的配置方式
 
@@ -45,7 +47,9 @@
 
 > 检查这个项目要访问的公共数据库及当前凭据状态。如果 NCBI 任务需要更高请求容量，请在隐藏输入中引导我配置 NCBI API key；不要让我把密钥贴进聊天、项目文件或报告，并在配置后只告诉我凭据来源和是否生效。
 
-Agent 应先说明是否真的需要凭据，再打开隐藏输入。用户不需要编写命令。
+> 检查 AlphaFold Server 访问状态。若未登录、登录错误、会话过期、无权限、额度用尽或尚未确认条款，请告诉我具体状态并打开官方登录页面；不要保存或复述我的 Google 密码。先生成提交包，待我逐项核对后再手动提交。
+
+Agent 应先说明是否真的需要凭据，再打开隐藏输入。AlphaFold Server 的 Google 登录必须在官方网页完成；Agent 只记录可用、登录错误、会话过期、无权限、额度用尽或条款未确认等状态和检查时间。用户不需要编写命令。
 
 ### 可选择的保存方式
 
@@ -64,4 +68,4 @@ Agent 应先说明是否真的需要凭据，再打开隐藏输入。用户不�
 - “删除本机保存的 NCBI key，保留项目数据。”
 - “审计仓库、报告和证据地图，确认没有凭据残留。”
 
-密钥不得进入聊天文本、Git、项目 JSON、样本表、运行日志、图表、报告或科学证据地图。公共服务新增认证要求时，必须先更新凭据允许清单、双语文档、模块清单和泄露防护测试，再允许 Agent 使用新凭据。
+密钥不得进入聊天文本、Git、项目 JSON、样本表、运行日志、图表、报告或科学证据地图。账号密码、OAuth 令牌、浏览器 cookie 与恢复信息也不得进入工作台的访问状态记录。公共服务新增认证要求时，必须先更新允许清单、双语文档、模块清单和泄露防护测试，再允许 Agent 使用。

@@ -33,7 +33,7 @@ Codex 在首次使用前运行严格健康检查，并报告插件身份、统�
 
 ## 凭据
 
-凭据需求按实际访问端点判断。当前实现的公共端点大多匿名开放；`NCBI_API_KEY` 对 NCBI E-utilities 和 Datasets 是可选加速凭据。用户可以要求 Codex 通过隐藏输入检查、配置、轮换或删除凭据，值不得进入聊天正文、命令参数、模块输入、日志、报告、研究产物或科学证据地图。完整服务清单见[数据访问与凭据](data-access-and-credentials.zh-CN.md)。
+凭据需求按实际访问端点判断。当前实现的公共数据库端点大多匿名开放；`NCBI_API_KEY` 对 NCBI E-utilities 和 Datasets 是可选加速凭据。AlphaFold Server 则使用官方网页中的 Google 账号交互登录：Codex 只检查访问状态并生成提交包，用户在网页核对后手动提交，工作台不保存密码、令牌或浏览器会话。用户可以要求 Codex 通过隐藏输入检查、配置、轮换或删除 API 凭据；敏感值不得进入命令参数、模块输入、日志、报告、研究产物或科学证据地图。完整服务清单见[数据访问与凭据](data-access-and-credentials.zh-CN.md)。
 
 ## 常见问题
 

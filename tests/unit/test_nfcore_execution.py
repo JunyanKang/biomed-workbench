@@ -100,6 +100,11 @@ class NfCoreExecutionTests(unittest.TestCase):
             nextflow = root / "nextflow"
             nextflow.write_text(FAKE_NEXTFLOW, encoding="utf-8")
             nextflow.chmod(0o755)
+            docker = root / "docker"
+            docker.write_text("#!/bin/sh\necho '26.1.4'\n", encoding="utf-8")
+            docker.chmod(0o755)
+            old_path = os.environ.get("PATH", "")
+            os.environ["PATH"] = f"{root}:{old_path}"
             input_fastq = root / "reads.fastq.gz"
             with gzip.open(input_fastq, "wt", encoding="utf-8") as handle:
                 handle.write("@r\nACGT\n+\nIIII\n")
@@ -128,6 +133,7 @@ class NfCoreExecutionTests(unittest.TestCase):
                     )
             finally:
                 os.chdir(old)
+                os.environ["PATH"] = old_path
             self.assertTrue(report["passed"])
             self.assertTrue((root / "relative-run/results").is_dir())
             self.assertTrue((root / "relative-report.json").is_file())
@@ -249,6 +255,9 @@ class NfCoreExecutionTests(unittest.TestCase):
             fake = root / "nextflow"
             fake.write_text(FAKE_NEXTFLOW, encoding="utf-8")
             fake.chmod(0o755)
+            fake_mamba = root / "mamba"
+            fake_mamba.write_text("#!/bin/sh\necho 'mamba 2.0.5'\n", encoding="utf-8")
+            fake_mamba.chmod(0o755)
             old_path = os.environ.get("PATH", "")
             os.environ["PATH"] = f"{root}:{old_path}"
             try:
@@ -269,6 +278,11 @@ class NfCoreExecutionTests(unittest.TestCase):
             fake = root / "nextflow"
             fake.write_text(FAKE_NEXTFLOW, encoding="utf-8")
             fake.chmod(0o755)
+            fake_mamba = root / "mamba"
+            fake_mamba.write_text("#!/bin/sh\necho 'mamba 2.0.5'\n", encoding="utf-8")
+            fake_mamba.chmod(0o755)
+            old_path = os.environ.get("PATH", "")
+            os.environ["PATH"] = f"{root}:{old_path}"
             fastq_1 = root / "sample_1.fastq.gz"
             fastq_2 = root / "sample_2.fastq.gz"
             self._fastq(fastq_1)
@@ -299,30 +313,33 @@ class NfCoreExecutionTests(unittest.TestCase):
                     "contact_matrices",
                 ),
             ]
-            for index, (spec, assay, sample_text, params, official_schema, expected_group) in enumerate(cases):
-                samples = root / f"samples-{index}.csv"
-                samples.write_text(sample_text, encoding="utf-8")
-                params["input"] = str(samples)
-                request = {
-                    "schema_version": 1,
-                    "module_id": spec.module_id,
-                    "assay": assay,
-                    "engine_profile": "mamba",
-                    "official_test_profile": False,
-                    "resume": False,
-                    "pipeline_params": params,
-                }
-                report = execute_nfcore(
-                    request,
-                    spec=spec,
-                    output_dir=root / f"run-{index}",
-                    report_path=root / f"report-{index}.json",
-                    nextflow=str(fake),
-                    schema=official_schema,
-                    timeout_seconds=30,
-                )
-                self.assertTrue(report["execution"]["outputs_reloaded"])
-                self.assertGreater(report["outputs"]["groups"][expected_group]["file_count"], 0)
+            try:
+                for index, (spec, assay, sample_text, params, official_schema, expected_group) in enumerate(cases):
+                    samples = root / f"samples-{index}.csv"
+                    samples.write_text(sample_text, encoding="utf-8")
+                    params["input"] = str(samples)
+                    request = {
+                        "schema_version": 1,
+                        "module_id": spec.module_id,
+                        "assay": assay,
+                        "engine_profile": "mamba",
+                        "official_test_profile": False,
+                        "resume": False,
+                        "pipeline_params": params,
+                    }
+                    report = execute_nfcore(
+                        request,
+                        spec=spec,
+                        output_dir=root / f"run-{index}",
+                        report_path=root / f"report-{index}.json",
+                        nextflow=str(fake),
+                        schema=official_schema,
+                        timeout_seconds=30,
+                    )
+                    self.assertTrue(report["execution"]["outputs_reloaded"])
+                    self.assertGreater(report["outputs"]["groups"][expected_group]["file_count"], 0)
+            finally:
+                os.environ["PATH"] = old_path
 
     @staticmethod
     def _fastq(path: Path) -> None:

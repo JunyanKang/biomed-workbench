@@ -82,7 +82,7 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 | [单细胞、轨迹与跨系统整合](docs/capabilities/single-cell-integration-reference-cross-species.md) | Scanpy/Seurat、scVI/scANVI、Harmony、CCA/RPCA、FastMNN、scIB、WNN、MOFA+；公共 PBMC 多组学数据验收的 MultiVI；Hydra–涡虫跨物种数据验收的 SAMap |
 | [空间组学](docs/capabilities/trajectory-spatial-complete-analysis.md) | Visium 与 Xenium 数据结构；Xenium–SpatialData–Squidpy 图像/分割流程；Slide-seq 上验收的 RCTD、公共数据验收的 Tangram；PASTE 多切片对齐与三维坐标重建 |
 | [跨尺度通用分析](docs/capabilities/omics-and-single-cell.md) | 文件与读段质控、差异表达和差异可及性、DEqMS、GO/KEGG、GSEA、WGCNA、NMF、motif、网络分析、JSD、统一统计审查与作图规范 |
-| [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | STRING 功能/物理互作网络；HADDOCK3 复合物对接、DockQ 参考评价与 PRODIGY 亲和力估计；AlphaFold 3 官方输入/输出适配；MSBio2/Metascape 与 Cytoscape 网络交付；序列、ORF、PCR、CRISPR、克隆、结构质量、结构比较与实验验证设计 |
+| [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | STRING 功能/物理互作网络；HADDOCK3 复合物对接、DockQ 参考评价与 PRODIGY 亲和力估计；AlphaFold Server 提交包、结果导入、置信度审查与发表图件；经许可的本地 AlphaFold 3 运行入口；MSBio2/Metascape 与 Cytoscape 网络交付；序列、ORF、PCR、CRISPR、克隆、结构质量、结构比较与实验验证设计 |
 | [临床与实验研究](docs/capabilities/clinical-and-experimental.md) | 队列与生存、biomarker、流式、qPCR、剂量反应、Western blot、biodistribution、xenograft、稳定性与实验定量 |
 | [成像与科学可视化](docs/capabilities/imaging-and-visualization.md) | 图像 profiling、分割、共定位、追踪、组织图像配准、统一绘图规格、图组编排与视觉质量审查 |
 | [论文与转化交付](docs/capabilities/publication-and-translation.md) | 54 本生命医学高水平期刊的版本化规范、期刊推荐、逐项稿件审查、图表规格、引用审计、审稿模拟、回复矩阵、修订谱系、专利准备与展示材料 |
@@ -129,9 +129,9 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 
 ## 公共数据库访问
 
-当前实现的公开端点都可以匿名访问；`NCBI_API_KEY` 可选用于提高 NCBI E-utilities 与 NCBI Datasets 的请求容量。Crossref 的联系邮箱、付费 Metadata Plus token、私有 cBioPortal 的 OAuth/token 和 PubChem 不提供 key 的规则均分别记录，不能用一条结论概括整个数据库。
+当前实现的数据库 API 均可匿名访问；`NCBI_API_KEY` 可选用于提高 NCBI E-utilities 与 NCBI Datasets 的请求容量。AlphaFold Server 不属于匿名数据库 API：它使用 Google 账号在官方网页交互登录，提交由用户检查后手动完成。工作台只记录访问状态，不保存账号密码、令牌或浏览器会话，并按结果来源限制后续用途。
 
-用户可以直接要求 Agent 检查项目需要哪些数据库，并在确有必要时通过隐藏输入配置凭据。密钥不会进入聊天、项目文件、Git、报告或证据地图。完整服务清单与多种配置方式：[中文](docs/data-access-and-credentials.zh-CN.md) · [English](docs/data-access-and-credentials.md)。
+用户可以直接要求 Codex 检查项目需要哪些数据库、配置可选 NCBI 密钥，或检查 AlphaFold Server 登录状态。敏感值不会进入项目文件、Git、日志、报告或证据地图；Google 登录必须在官方页面完成。完整服务清单与配置方式：[中文](docs/data-access-and-credentials.zh-CN.md) · [English](docs/data-access-and-credentials.md)。
 
 ## 文档索引
 

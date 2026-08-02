@@ -69,8 +69,8 @@ COMMAND_EVIDENCE = {
 AGENT_EVIDENCE = {
     "alphafold3-complex-prediction": {
         "path": "reports/alphafold3-adapter-live-verification.json",
-        "execution_flags": ("official_input_generated", "official_output_fixture_reloaded", "confidence_figures_completed"),
-        "summary_flags": ("official_schema_preserved", "full_local_inference_not_claimed", "weights_not_bundled", "confidence_not_binding_evidence", "outputs_reloaded"),
+        "execution_flags": ("official_input_generated", "official_server_package_generated", "official_output_fixture_reloaded", "confidence_figures_completed", "server_origin_docking_gate_completed", "local_resource_gate_completed"),
+        "summary_flags": ("official_schema_preserved", "manual_server_submission_required", "sensitive_auth_material_absent", "server_output_terms_gate_preserved", "full_local_inference_not_claimed", "weights_not_bundled", "confidence_not_binding_evidence", "outputs_reloaded"),
         "live_dependency_keys": ("python",),
     },
     "chemical-substructure-filter": {

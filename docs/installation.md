@@ -33,7 +33,7 @@ Maintainer-level repository, release and isolated-install checks are documented 
 
 ## Credentials
 
-Credential need is determined by the implemented endpoint. Most current public endpoints are anonymous; `NCBI_API_KEY` is an optional capacity credential for NCBI E-utilities and Datasets. A user may ask Codex to inspect, configure, rotate or remove a credential through hidden input. Values must remain outside chat text, command arguments, module inputs, logs, reports, research artifacts and scientific evidence maps. See [Data Access And Credentials](data-access-and-credentials.md) for the full service inventory.
+Credential need is determined by the implemented endpoint. Most current public-database endpoints are anonymous; `NCBI_API_KEY` is an optional capacity credential for NCBI E-utilities and Datasets. AlphaFold Server instead uses interactive Google sign-in on the official website: Codex checks an access state and prepares a package, while the user reviews and submits it manually; the workbench stores no password, token, or browser session. A user may ask Codex to inspect, configure, rotate or remove an API credential through hidden input. Sensitive values must remain outside command arguments, module inputs, logs, reports, research artifacts and scientific evidence maps. See [Data Access And Credentials](data-access-and-credentials.md) for the full service inventory.
 
 ## Troubleshooting
 

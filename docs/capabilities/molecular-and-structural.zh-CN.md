@@ -21,7 +21,7 @@
 ## 复合物预测与分子对接
 
 - `protein-complex-docking` 使用 HADDOCK3 执行闭合的约束驱动复合物对接流程，严格区分小型集成测试和研究级采样。完整保留模型、簇、HADDOCK score、需要参考结构的 DockQ 指标和 PRODIGY 亲和力估计，并输出界面接触、残基坐标、标准化模型评分、PyMOL 可编辑场景与发表级图件。
-- `alphafold3-complex-prediction` 为蛋白、RNA、DNA 和配体建立官方 AlphaFold 3 输入；在用户具备合规权重、版本化数据库和 Linux GPU 环境时连接本地推理，或审查已有官方输出。结果包含排序与置信度表、模型文件及 PDF/SVG/600-dpi PNG。项目不打包权重，也不通过未公开接口自动操作公共服务器。
+- `alphafold3-complex-prediction` 默认生成 AlphaFold Server 官方导入格式的提交包、链映射与人工提交说明。Codex 检查交互登录状态，用户在官方网页完成 Google 登录、逐项核对并手动提交；下载后的完整结果包可被重新读取，输出排序、PAE、pLDDT、pTM、ipTM、链与链对置信度表，以及 PDF/SVG/600-dpi PNG。工作台不保存密码、令牌或浏览器会话，也不调用未公开接口。Server 结果会标记来源并禁止进入自动化配体/肽对接或互作预测。可选的本地官方 AlphaFold 3 入口仅在 Linux/NVIDIA、CPU、可用内存、磁盘和空闲显存均满足官方需求且至少保留当前可用资源的一半，并得到用户明确许可后启用。
 
 AlphaFold 3 更适合提出共同折叠的复合物构象并评价模型置信度；HADDOCK3 更适合在明确的物理或实验约束下采样结合模式。二者一致可提高验证优先级，但仍需生化、生物物理或细胞实验确认互作、亲和力和功能。
 
