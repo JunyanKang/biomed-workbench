@@ -2,6 +2,7 @@ import importlib.util
 import json
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -130,6 +131,86 @@ class AlphaFold3WorkflowTests(unittest.TestCase):
             payload = json.loads(target.read_text())
             self.assertFalse(payload["automated_docking_allowed"])
             self.assertNotIn("protein-complex-docking", payload["eligible_next_modules"])
+
+    def test_server_job_round_trip_recovers_local_request(self):
+        prepared, _ = workflow.prepare(request())
+        jobs, _ = workflow.prepare_server_submission(prepared)
+        recovered = workflow.prepare_from_server_job(jobs, job_name=prepared["name"])
+        reparsed, _ = workflow.prepare(recovered)
+        self.assertEqual(reparsed["sequences"], prepared["sequences"])
+        self.assertEqual(reparsed["modelSeeds"], prepared["modelSeeds"])
+
+    def test_observed_server_archive_layout_is_parsed_without_msa_extraction(self):
+        prepared, _ = workflow.prepare(request())
+        jobs, _ = workflow.prepare_server_submission(prepared)
+        job_name = "server_fixture"
+        jobs[0]["name"] = job_name
+        prefix = f"{job_name}/fold_{job_name}"
+        full = {
+            "atom_chain_ids": ["A", "A", "B", "B"],
+            "atom_plddts": [80.0, 82.0, 70.0, 72.0],
+            "contact_probs": [[0.0, 0.1, 0.8, 0.3], [0.1, 0.0, 0.2, 0.7], [0.8, 0.2, 0.0, 0.1], [0.3, 0.7, 0.1, 0.0]],
+            "pae": [[1.0, 2.0, 5.0, 8.0], [2.0, 1.0, 9.0, 6.0], [5.0, 9.0, 1.0, 2.0], [8.0, 6.0, 2.0, 1.0]],
+            "token_chain_ids": ["A", "A", "B", "B"],
+            "token_res_ids": [1, 2, 1, 2],
+        }
+        cif = """data_test
+loop_
+_atom_site.group_PDB
+_atom_site.id
+_atom_site.type_symbol
+_atom_site.label_atom_id
+_atom_site.label_alt_id
+_atom_site.label_comp_id
+_atom_site.label_asym_id
+_atom_site.label_entity_id
+_atom_site.label_seq_id
+_atom_site.pdbx_PDB_ins_code
+_atom_site.Cartn_x
+_atom_site.Cartn_y
+_atom_site.Cartn_z
+_atom_site.occupancy
+_atom_site.B_iso_or_equiv
+_atom_site.auth_seq_id
+_atom_site.auth_asym_id
+_atom_site.pdbx_PDB_model_num
+ATOM 1 C CA . ALA A 1 1 ? 0 0 0 1 80 1 A 1
+ATOM 2 C CA . GLY A 1 2 ? 1 0 0 1 82 2 A 1
+ATOM 3 C CA . ALA B 2 1 ? 0 2 0 1 70 1 B 1
+ATOM 4 C CA . GLY B 2 2 ? 1 2 0 1 72 2 B 1
+#
+"""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            archive_path = root / "fold.zip"
+            with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+                archive.writestr("terms_of_use.md", "fixture terms")
+                archive.writestr(f"{prefix}_job_request.json", json.dumps(jobs))
+                for index, score in enumerate((0.2, 0.4)):
+                    summary = {
+                        "ranking_score": score,
+                        "ptm": 0.5,
+                        "iptm": 0.4,
+                        "fraction_disordered": 0.1,
+                        "has_clash": 0.0,
+                        "chain_ids": ["A", "A", "B", "B"],
+                        "chain_ptm": [0.5, 0.5],
+                        "chain_iptm": [0.4, 0.4],
+                        "chain_pair_iptm": [[0.5, 0.4], [0.4, 0.5]],
+                        "chain_pair_pae_min": [[1.0, 5.0], [5.0, 1.0]],
+                    }
+                    archive.writestr(f"{prefix}_summary_confidences_{index}.json", json.dumps(summary))
+                    archive.writestr(f"{prefix}_full_data_{index}.json", json.dumps(full))
+                    archive.writestr(f"{prefix}_model_{index}.cif", cif)
+                archive.writestr(f"{job_name}/msas/large_unused.a3m", ">unused\nAAAA\n")
+            output = root / "report"
+            parsed = workflow.parse_alphafold_server_archive(archive_path, output, job_name=job_name)
+            self.assertEqual(parsed["model_count"], 2)
+            self.assertEqual(parsed["top_model_index"], 1)
+            self.assertEqual(parsed["chain_ids"], ["A", "B"])
+            self.assertTrue((output / "pae_binned.tsv").is_file())
+            self.assertTrue((output / "top_cross_chain_contacts.tsv").is_file())
+            self.assertFalse((output / "msas").exists())
 
 
 if __name__ == "__main__":

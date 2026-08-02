@@ -3,6 +3,7 @@ import unittest
 from pathlib import Path
 
 from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
 from biomed_workbench.modules.registry import ModuleRegistry
 
 
@@ -29,7 +30,8 @@ class BulkAssayContractEvidenceTests(unittest.TestCase):
             self.assertTrue(report["passed"])
             self.assertEqual(report["module_id"], module_id)
             self.assertEqual(report["module_version"], registry.get(module_id).version)
-            self.assertEqual(report["registry_digest"], registry.digest)
+            self.assertTrue(evidence_scope_is_current(report, registry))
+            self.assertRegex(report["registry_digest"], r"^[0-9a-f]{64}$")
             self.assertTrue(report["execution"]["packaged_contract_executed"])
             self.assertTrue(report["execution"]["contract_reloaded"])
             self.assertTrue(report["execution"]["input_immutability_verified"])

@@ -869,12 +869,12 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
-            "alphafold3-official-schema-output-fixture-v2"
+            "alphafold3-server-live-import-v3"
           ],
           "id": "alphafold3-3-0-3-server-and-local-adapter",
-          "module_version": "1.1.0",
+          "module_version": "1.2.0",
           "regression_evidence_ids": [
-            "alphafold3-adapter-regression-v2"
+            "alphafold3-server-archive-regression-v3"
           ],
           "verified_at": "2026-08-02"
         }
@@ -891,7 +891,7 @@
           "platforms": [
             "any"
           ],
-          "purpose": "Prepare Server/local requests, enforce access and resource gates, and audit outputs without embedding model assets or authentication secrets.",
+          "purpose": "Prepare Server/local requests, enforce access and resource gates, stream Server archives and audit outputs without embedding model assets or authentication secrets.",
           "required": true,
           "tested_versions": [
             "3.14.3"
@@ -904,6 +904,32 @@
           "version_probe_kind": "python_callable",
           "version_probe_timeout_seconds": 5,
           "version_source": "https://www.python.org/downloads/"
+        },
+        {
+          "allowed_versions": [
+            ">=4.3,<4.4"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "r-runtime",
+          "name": "r",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Render the verified publication figure set from replot tables.",
+          "required": true,
+          "tested_versions": [
+            "4.3.2"
+          ],
+          "verified_at": "2026-08-02",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://cran.r-project.org/"
         }
       ],
       "external_tool_required": true,
@@ -940,7 +966,7 @@
           "required_metadata": []
         }
       ],
-      "module_version": "1.1.0",
+      "module_version": "1.2.0",
       "output_formats": [
         {
           "artifact_type": "structure_prediction_bundle",
@@ -1077,7 +1103,7 @@
               ],
               "category": "behavior",
               "compatibility_effect": "requires-format",
-              "description": "Matplotlib exports confidence summaries in vector and high-resolution raster formats.",
+              "description": "Matplotlib remains the verified fallback renderer when the R renderer is unavailable.",
               "id": "af3-confidence-figure-export",
               "required_action": "Reload every figure and retain its source table and style version.",
               "source": "https://matplotlib.org/stable/api/index.html"
@@ -1092,6 +1118,141 @@
           "version_probe_kind": "command",
           "version_probe_timeout_seconds": 30,
           "version_source": "https://matplotlib.org/stable/api/index.html"
+        },
+        {
+          "allowed_versions": [
+            ">=3.5,<3.6"
+          ],
+          "ecosystem": "r",
+          "identity": "ggplot2",
+          "mismatch_policy": "block",
+          "name": "ggplot2",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.5.2"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('ggplot2')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://ggplot2.tidyverse.org/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.3,<1.4"
+          ],
+          "ecosystem": "r",
+          "identity": "patchwork",
+          "mismatch_policy": "block",
+          "name": "patchwork",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.3.2"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('patchwork')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://patchwork.data-imaginist.com/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.4,<1.5"
+          ],
+          "ecosystem": "r",
+          "identity": "scales",
+          "mismatch_policy": "block",
+          "name": "scales",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.4.0"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('scales')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://scales.r-lib.org/"
+        },
+        {
+          "allowed_versions": [
+            ">=2.2,<2.3"
+          ],
+          "ecosystem": "r",
+          "identity": "svglite",
+          "mismatch_policy": "block",
+          "name": "svglite",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "2.2.1"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('svglite')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://svglite.r-lib.org/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.5,<1.6"
+          ],
+          "ecosystem": "r",
+          "identity": "ragg",
+          "mismatch_policy": "block",
+          "name": "ragg",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "1.5.0"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "Rscript",
+            "-e",
+            "cat(as.character(packageVersion('ragg')))"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://ragg.r-lib.org/"
         }
       ],
       "validation_status": "complete"
@@ -41497,6 +41658,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "c4fb853a41fc51531c728ba1c52513d5bac1e0b60bffa8d0e3636623864e1e08",
+  "registry_digest": "cb1061927bbb0c29b51d102fb5c3019265650c4f6e8485854f335d4d1a6adc65",
   "schema_version": 1
 }

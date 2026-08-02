@@ -25,11 +25,13 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from biomed_workbench.implementations.alphafold3_local import execute_alphafold3_local
+from biomed_workbench.implementations.alphafold3_server import parse_alphafold_server_archive
 
 
 AF3_RELEASE = "3.0.3"
 AF3_INPUT_VERSION = 4
-FIGURE_STYLE_VERSION = "biomed-workbench-structure-v1"
+FIGURE_STYLE_VERSION = "biomed-workbench-structure-v2"
+R_FIGURE_TEMPLATE = Path(__file__).with_name("render_alphafold3_publication_figures.R")
 OFFICIAL_DB_RELEASE = "alphafold-databases-v3.0"
 OFFICIAL_DB_FILES = (
     "mgy_clusters_2022_05.fa",
@@ -330,6 +332,47 @@ def prepare_server_submission(prepared: dict) -> tuple[list[dict], list[dict]]:
         "version": 1,
     }
     return [job], mapping
+
+
+def prepare_from_server_job(payload: object, *, job_name: str) -> dict:
+    """Recover the closed local request from an official Server v1 job record."""
+
+    jobs = payload if isinstance(payload, list) else [payload]
+    matches = [job for job in jobs if isinstance(job, dict) and str(job.get("name", "")).lower() == job_name.lower()]
+    if len(matches) != 1:
+        raise ValueError(f"expected one AlphaFold Server job named {job_name}; found {len(matches)}")
+    job = matches[0]
+    if job.get("dialect") != "alphafoldserver" or job.get("version") != 1:
+        raise ValueError("server-result import requires the official AlphaFold Server v1 dialect")
+    next_chain = ord("A")
+    entities = []
+    for item in job.get("sequences", []):
+        if not isinstance(item, dict) or len(item) != 1:
+            raise ValueError("AlphaFold Server sequence entry is invalid")
+        kind, value = next(iter(item.items()))
+        if not isinstance(value, dict):
+            raise ValueError("AlphaFold Server sequence value is invalid")
+        count = int(value.get("count", 1))
+        ids = [chr(next_chain + index) for index in range(count)]
+        next_chain += count
+        entity_id: str | list[str] = ids[0] if count == 1 else ids
+        if kind == "proteinChain":
+            clean = {"id": entity_id, "sequence": value.get("sequence", "")}
+            if value.get("modifications"):
+                clean["modifications"] = value["modifications"]
+            entities.append({"protein": clean})
+        elif kind in {"rnaSequence", "dnaSequence"}:
+            clean = {"id": entity_id, "sequence": value.get("sequence", "")}
+            if value.get("modifications"):
+                clean["modifications"] = value["modifications"]
+            entities.append({"rna" if kind == "rnaSequence" else "dna": clean})
+        elif kind == "ligand":
+            code = str(value.get("ligand", "")).removeprefix("CCD_")
+            entities.append({"ligand": {"id": entity_id, "ccdCodes": [code]}})
+        else:
+            raise ValueError(f"unsupported AlphaFold Server entity type: {kind}")
+    seeds = [int(seed) for seed in job.get("modelSeeds", [1])]
+    return {"name": job["name"], "model_seeds": seeds, "entities": entities}
 
 
 def write_server_package(
@@ -865,13 +908,42 @@ def _downstream_handoff(report: dict, report_dir: Path, *, result_origin: str) -
     return target
 
 
+def render_confidence_with_r(report_dir: Path, *, job_label: str, chain_a_label: str, chain_b_label: str) -> list[Path]:
+    rscript = shutil.which("Rscript")
+    if not rscript:
+        raise RuntimeError("Rscript is required for the selected AlphaFold 3 figure backend")
+    completed = subprocess.run(
+        [rscript, str(R_FIGURE_TEMPLATE), str(report_dir), job_label, chain_a_label, chain_b_label],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=300,
+    )
+    if completed.returncode:
+        raise RuntimeError(f"AlphaFold 3 R figure renderer failed: {completed.stderr.strip()}")
+    expected = [
+        report_dir / f"{stem}.{suffix}"
+        for stem in ("alphafold3_confidence_overview", "alphafold3_structure_overview")
+        for suffix in ("pdf", "svg", "png")
+    ]
+    missing = [path.name for path in expected if not path.is_file() or path.stat().st_size == 0]
+    if missing:
+        raise RuntimeError(f"AlphaFold 3 R figure renderer omitted outputs: {missing}")
+    return expected
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("request", type=Path)
     parser.add_argument("output", type=Path)
-    parser.add_argument("--backend", choices=("server-package", "prepare", "parse-existing", "local-native", "local-container", "local-portable-container"), default="server-package")
+    parser.add_argument("--backend", choices=("server-package", "prepare", "parse-existing", "parse-server-archive", "local-native", "local-container", "local-portable-container"), default="server-package")
     parser.add_argument("--parse-output", type=Path)
+    parser.add_argument("--server-job-name")
     parser.add_argument("--result-origin", choices=("alphafold-server", "local-official", "external-official"))
+    parser.add_argument("--render-backend", choices=("python", "r"), default="python")
+    parser.add_argument("--job-label")
+    parser.add_argument("--chain-a-label", default="Chain A")
+    parser.add_argument("--chain-b-label", default="Chain B")
     parser.add_argument("--server-access-state", choices=("not-configured", "ready", "authentication-error", "session-expired", "access-denied", "quota-exhausted", "terms-not-accepted"), default="not-configured")
     parser.add_argument("--server-terms-reviewed", action="store_true")
     parser.add_argument("--preflight-only", action="store_true")
@@ -912,7 +984,12 @@ def main() -> int:
     input_dir.mkdir(parents=True, exist_ok=True)
     prediction_dir.mkdir(parents=True, exist_ok=True)
     request_path = args.request.resolve()
-    request, assets = prepare(json.loads(request_path.read_text(encoding="utf-8")), request_dir=request_path.parent, asset_dir=input_dir / "assets")
+    raw_request = json.loads(request_path.read_text(encoding="utf-8"))
+    if args.backend == "parse-server-archive":
+        if not args.server_job_name:
+            raise ValueError("parse-server-archive requires --server-job-name")
+        raw_request = prepare_from_server_job(raw_request, job_name=args.server_job_name)
+    request, assets = prepare(raw_request, request_dir=request_path.parent, asset_dir=input_dir / "assets")
     input_path = input_dir / "alphafold3_input.json"
     write_json(input_path, request)
     host = probe_host(
@@ -924,7 +1001,7 @@ def main() -> int:
     )
     manifest: dict[str, object] = {
         "schema_version": 2,
-        "module": {"id": "alphafold3-complex-prediction", "version": "1.1.0"},
+        "module": {"id": "alphafold3-complex-prediction", "version": "1.2.0"},
         "alphafold3_release": AF3_RELEASE,
         "official_sources": OFFICIAL_SOURCES,
         "input": {"path": input_path.relative_to(output).as_posix(), "sha256": digest(input_path), "assets": assets},
@@ -990,20 +1067,39 @@ def main() -> int:
             manifest["execution"].update(local_report)
     parse_root = args.parse_output.resolve() if args.parse_output else prediction_dir
     should_parse = args.parse_output is not None or args.backend == "parse-existing" or (manifest["execution"]["state"] == "completed")
-    if args.backend == "parse-existing" and args.parse_output is None:
-        raise ValueError("parse-existing requires --parse-output")
+    if args.backend in {"parse-existing", "parse-server-archive"} and args.parse_output is None:
+        raise ValueError(f"{args.backend} requires --parse-output")
+    if args.backend == "parse-server-archive" and not args.server_job_name:
+        raise ValueError("parse-server-archive requires --server-job-name")
     if should_parse:
-        parsed = parse_outputs(parse_root, output)
-        result_origin = args.result_origin or ("alphafold-server" if args.backend == "server-package" else "external-official" if args.backend == "parse-existing" else "local-official")
+        parsed = (
+            parse_alphafold_server_archive(parse_root, output, job_name=args.server_job_name)
+            if args.backend == "parse-server-archive"
+            else parse_outputs(parse_root, output)
+        )
+        result_origin = args.result_origin or ("alphafold-server" if args.backend in {"server-package", "parse-server-archive"} else "external-official" if args.backend == "parse-existing" else "local-official")
         manifest.update({key: value for key, value in parsed.items() if key != "plot_data"})
-        confidence_figures = render_confidence(parsed, output)
-        structure_figures, coordinate_table = render_structure(parsed, output)
+        if args.backend == "parse-server-archive":
+            if args.render_backend != "r":
+                raise ValueError("observed AlphaFold Server archives require --render-backend r in the current publication workflow")
+            confidence_figures = render_confidence_with_r(
+                output,
+                job_label=args.job_label or args.server_job_name,
+                chain_a_label=args.chain_a_label,
+                chain_b_label=args.chain_b_label,
+            )
+            structure_figures = []
+            coordinate_table = output / "structure_coordinates.tsv"
+        else:
+            confidence_figures = render_confidence(parsed, output)
+            structure_figures, coordinate_table = render_structure(parsed, output)
         handoff = _downstream_handoff(parsed, output, result_origin=result_origin)
         all_figures = [*confidence_figures, *structure_figures]
         manifest["figures"] = [{"path": path.name, "sha256": digest(path)} for path in all_figures]
-        manifest["replot_artifacts"] = [*parsed["tables"], {"path": coordinate_table.name, "sha256": digest(coordinate_table)}]
+        manifest["replot_artifacts"] = parsed.get("replot_artifacts", [*parsed["tables"], {"path": coordinate_table.name, "sha256": digest(coordinate_table)}])
         manifest["downstream_handoff"] = {"path": handoff.name, "sha256": digest(handoff)}
         manifest["result_origin"] = result_origin
+        manifest["execution"]["state"] = "server-results-imported" if result_origin == "alphafold-server" else "results-imported"
         manifest["execution"]["outputs_reloaded"] = True
         manifest["execution"]["inference_performed"] = bool(execution_backend and args.run_inference and manifest["execution"]["state"] == "completed")
         manifest["execution"]["data_pipeline_performed"] = bool(execution_backend and args.run_data_pipeline and manifest["execution"]["state"] == "completed")
