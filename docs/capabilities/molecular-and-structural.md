@@ -8,7 +8,7 @@ This capability area connects sequence, chemical, and structural observations to
 
 For broad molecular-design requests, the workbench stages the plan from sequence and record inspection to design, verification, structural assessment, docking review, and chemical filtering. PCR workflows keep primer candidate selection upstream of finite-panel specificity screening and amplicon simulation. Structure workflows keep deposited or predicted coordinate evidence separate from quality assessment, chain comparison, visualization, docking interpretation, and chemical identity filtering.
 
-The staged plan is a design and review program, not experimental confirmation. It exposes the selected module contracts, template sections, compatibility evidence, and quality gates so Codex can adapt the correct project-owned code and keep unsupported molecular claims out of downstream manuscripts or patent materials.
+The staged plan is a design and review program, not experimental confirmation. It exposes the selected module contracts, template sections, compatibility evidence, and quality gates so Codex can execute the correct packaged workflow and keep unsupported molecular claims out of downstream manuscripts or patent materials.
 
 ## Sequence And Construct Design
 
@@ -51,13 +51,32 @@ Representative modules include `chemical-evidence`, `structure-search`, `structu
 
 These capabilities are implemented by `structure-quality-assessment`, `structure-chain-comparison`, `protein-secondary-structure`, and `structure-interactive-visualization`.
 
-## Docking And Chemical Review
+## Protein Interaction Networks
+
+`protein-interaction-network-evidence` resolves identifiers through STRING 12.0, keeps functional-association and physical-subnetwork semantics separate, records identifier losses and evidence-channel scores, and tests whether the submitted protein set is more connected than expected. The output includes node and edge tables, a Cytoscape style, PDF/SVG/600-dpi PNG figures and a digest-bound replot manifest. STRING evidence prioritizes candidates and network context; it does not establish direct binding.
+
+## Complex Prediction And Docking
+
+- `protein-complex-docking` executes a closed HADDOCK3 workflow with declared restraints and distinct integration-test and production sampling profiles. It preserves all ranked models and clusters, keeps HADDOCK score, reference-backed DockQ metrics and PRODIGY affinity estimates semantically separate, and exports interface contacts, residue coordinates, normalized model scores, editable PyMOL instructions and publication figures.
+- `alphafold3-complex-prediction` builds the official AlphaFold 3 JSON input for protein, RNA, DNA and ligand entities, connects an approved local runtime when weights, databases, terms and Linux GPU resources are available, or audits existing official outputs. It exports ranked confidence tables and vector/raster confidence figures. The repository does not bundle model weights or automate the public server through an undocumented interface.
+
+AlphaFold 3 and docking answer different questions. AlphaFold 3 proposes a co-folded biomolecular arrangement with model confidence; HADDOCK3 samples complexes under explicit physical or experimental restraints. Agreement may strengthen prioritization, but neither method demonstrates interaction, affinity or function without independent evidence.
+
+## Metascape, MSBio2 And Cytoscape
+
+`metascape-msbio-network-analysis` executes a licensed local MSBio2 wrapper when available or audits an existing complete Metascape result bundle. It reconciles enrichment workbooks, GO and PPI XGMML networks, MCODE components, reports and figures. The paired Cytoscape renderer imports the admitted XGMML through CyREST, applies recorded publication styling and layout, and exports an editable session plus PDF/SVG/PNG. Local licenses, private paths and result data remain outside the public package. When the task launches Cytoscape, it must save the session, request a normal exit after validating every export, and verify that the task-owned process has terminated; a Cytoscape session already owned by the user is left running.
+
+## Pose And Chemical Review
 
 - Validate receptor, ligand, configuration, and complete pose inventories before interpretation.
 - Review pose identity, geometry, clashes, diversity, and malformed records while retaining failures.
 - Filter SMILES, CSV, or SDF records through validated inclusion and exclusion SMARTS with complete accepted and rejected ledgers.
 
-These capabilities are implemented by `docking-pose-review` and `chemical-substructure-filter`.
+These focused downstream capabilities are implemented by `docking-pose-review` and `chemical-substructure-filter`; they complement rather than replace the full complex-docking workflow.
+
+## Publication-Grade Structural Figures
+
+Structure and docking modules follow the shared final-size figure contract: color-blind-safe chain colors, 5–7 pt text, strokes of at least 0.5 pt, explicit coordinate and confidence units, legends outside molecular views, editable vector text, PDF/SVG primary exports and 600-dpi PNG. A standard complex bundle includes a chain-colored overview, interface residue-contact map, complete model-quality summary when comparable metrics exist, and confidence or PAE panels when available. Every figure is paired with the exact replot tables, source digests, style version and an editable molecular-view scene or session. Users may re-render from those tables; the workbench also produces the standard figure set directly.
 
 ## Quality Gates
 
@@ -65,4 +84,4 @@ The workbench does not equate docking confidence with affinity, pLDDT with exper
 
 ## Typical Deliverables
 
-Sequence and construct plans, target dossiers, structure inventories, quality reports, chain-comparison tables, secondary-structure tracks, docking-review ledgers, chemical-filter results, molecular figures, mechanistic hypotheses, and prioritized experimental validation plans.
+Sequence and construct plans, target dossiers, STRING node/edge evidence, structure inventories, quality reports, chain-comparison tables, secondary-structure tracks, AlphaFold 3 confidence audits, HADDOCK3 model and interface ledgers, Metascape enrichment and Cytoscape sessions, chemical-filter results, publication-ready molecular figures with replot tables, mechanistic hypotheses, and prioritized experimental validation plans.

@@ -1,8 +1,8 @@
 {
-  "compatibility_complete": 194,
-  "compatibility_row_count": 195,
-  "end_to_end_passed": 195,
-  "module_count": 194,
+  "compatibility_complete": 198,
+  "compatibility_row_count": 199,
+  "end_to_end_passed": 199,
+  "module_count": 198,
   "modules": [
     {
       "compatibility_rows": [
@@ -863,6 +863,236 @@
           "version_probe_kind": "service_contract",
           "version_probe_timeout_seconds": 10,
           "version_source": "https://alphafold.ebi.ac.uk/api-docs"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "alphafold3-official-schema-output-fixture-v1"
+          ],
+          "id": "alphafold3-3-0-2-input-output-adapter",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "alphafold3-adapter-regression-v1"
+          ],
+          "verified_at": "2026-08-02"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.12,<3.13"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Prepare requests and audit outputs without embedding model assets.",
+          "required": true,
+          "tested_versions": [
+            "3.12.10"
+          ],
+          "verified_at": "2026-08-02",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "alphafold3-complex-prediction",
+      "input_formats": [
+        {
+          "artifact_type": "structure_prediction_request",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "alphafold3_request",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "structure_prediction_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "alphafold3-output",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.0.2"
+              ]
+            }
+          ],
+          "name": "alphafold3_prediction_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "model-version",
+            "weights-terms-version",
+            "input-digest",
+            "output-digests"
+          ]
+        },
+        {
+          "artifact_type": "structure_figure_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "publication-figure-set",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "alphafold3_figure_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "style-version",
+            "source-digests",
+            "replot-table"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=3.0.2,<3.1"
+          ],
+          "ecosystem": "python",
+          "identity": "run_alphafold.py",
+          "mismatch_policy": "block",
+          "name": "alphafold3",
+          "platforms": [
+            "linux-x86_64"
+          ],
+          "required": false,
+          "tested_versions": [
+            "3.0.2"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.0.2,<3.1"
+              ],
+              "category": "input-format",
+              "compatibility_effect": "requires-format",
+              "description": "The adapter emits the documented AlphaFold 3 JSON dialect and reads documented ranking, summary confidence and mmCIF outputs.",
+              "id": "af3-input-output-contract",
+              "required_action": "Revalidate entity fields, dialect version, output names and confidence semantics after every AlphaFold 3 release.",
+              "source": "https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "run_alphafold.py",
+            "--help"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/google-deepmind/alphafold3"
+        },
+        {
+          "allowed_versions": [
+            ">=3.10,<3.11"
+          ],
+          "ecosystem": "python",
+          "identity": "matplotlib",
+          "mismatch_policy": "block",
+          "name": "matplotlib",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.10.8"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.10,<3.11"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-format",
+              "description": "Matplotlib exports confidence summaries in vector and high-resolution raster formats.",
+              "id": "af3-confidence-figure-export",
+              "required_action": "Reload every figure and retain its source table and style version.",
+              "source": "https://matplotlib.org/stable/api/index.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import matplotlib; print(matplotlib.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://matplotlib.org/stable/api/index.html"
         }
       ],
       "validation_status": "complete"
@@ -1999,7 +2229,7 @@
       "tools": [
         {
           "allowed_versions": [
-            "==2.3.1"
+            ">=2.3.1,<2.4"
           ],
           "ecosystem": "python",
           "identity": "caper",
@@ -2915,7 +3145,7 @@
         },
         {
           "allowed_versions": [
-            "==88"
+            ">=88,<89"
           ],
           "ecosystem": "system",
           "identity": "cromwell",
@@ -3070,7 +3300,7 @@
       "tools": [
         {
           "allowed_versions": [
-            "==0.9.3"
+            ">=0.9.3,<0.10"
           ],
           "ecosystem": "system",
           "identity": "rlpipes",
@@ -3620,7 +3850,7 @@
         },
         {
           "allowed_versions": [
-            "==1.14.3"
+            ">=1.14.3,<1.15"
           ],
           "ecosystem": "r",
           "identity": "exomePeak2",
@@ -3832,7 +4062,7 @@
         },
         {
           "allowed_versions": [
-            "==0.9.3"
+            ">=0.9.3,<0.10"
           ],
           "ecosystem": "system",
           "identity": "ChIA-PET2",
@@ -3858,7 +4088,7 @@
         },
         {
           "allowed_versions": [
-            "==11.0"
+            ">=11,<12"
           ],
           "ecosystem": "system",
           "identity": "FitHiChIP",
@@ -3885,7 +4115,7 @@
         },
         {
           "allowed_versions": [
-            "==1.1.3"
+            ">=1.1.3,<1.2"
           ],
           "ecosystem": "system",
           "identity": "capC-MAP",
@@ -15418,6 +15648,235 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "metascape-existing-result-cytoscape-v1"
+          ],
+          "id": "msbio2-metascape-cytoscape-3-10-4",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "metascape-msbio-postflight-regression-v1"
+          ],
+          "verified_at": "2026-08-02"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.12,<3.13"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute result validation, provenance capture and Cytoscape automation without copying licensed software or data.",
+          "required": true,
+          "tested_versions": [
+            "3.12.10"
+          ],
+          "verified_at": "2026-08-02",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "metascape-msbio-network-analysis",
+      "input_formats": [
+        {
+          "artifact_type": "gene_set_analysis_request",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "metascape_request",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "enrichment_network_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "metascape-result",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "metascape_analysis_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "backend-version",
+            "input-digest",
+            "parameter-digest",
+            "result-digests"
+          ]
+        },
+        {
+          "artifact_type": "network_figure_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "publication-figure-set",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "cytoscape_figure_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "cytoscape-version",
+            "layout",
+            "style",
+            "source-digest"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            "==local-package-observed-2026-08-02"
+          ],
+          "ecosystem": "system",
+          "identity": "ms.sh",
+          "mismatch_policy": "block",
+          "name": "msbio2",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "required": false,
+          "tested_versions": [
+            "local-package-observed-2026-08-02"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==local-package-observed-2026-08-02"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parameter",
+              "description": "The observed wrapper accepts a gene-list input, source and target taxonomy identifiers and an output directory, and generates Metascape reports and network assets.",
+              "id": "msbio2-licensed-wrapper-contract",
+              "required_action": "Revalidate wrapper help, license eligibility, option schema and output inventory after every package update.",
+              "source": "https://metascape.org/msbio/"
+            }
+          ],
+          "version_pattern": "(.+)",
+          "version_probe": [
+            "ms.sh",
+            "-h"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://metascape.org/msbio/"
+        },
+        {
+          "allowed_versions": [
+            ">=3.10.4,<3.11"
+          ],
+          "ecosystem": "java",
+          "identity": "Cytoscape",
+          "mismatch_policy": "block",
+          "name": "cytoscape",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.10.4"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.10.4,<3.11"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "CyREST imports XGMML, applies a declared layout and exports editable sessions and publication graphics.",
+              "id": "cyrest-network-rendering",
+              "required_action": "Verify network counts, style mappings, layout, session persistence and nonempty exports after import.",
+              "source": "https://manual.cytoscape.org/en/latest/Programmatic_Access_to_Cytoscape_Features_Scripting.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "cytoscape",
+            "-v"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://cytoscape.org/cytoscape-automation/"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "msprime-demographic-simulation-e2e-v1"
           ],
           "id": "agent-protocol-1-msprime-142-python-3143",
@@ -18977,6 +19436,325 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "haddock3-official-protein-protein-test-v1"
+          ],
+          "id": "haddock3-2026-7-official-protein-protein-example",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "protein-complex-docking-regression-v1"
+          ],
+          "verified_at": "2026-08-02"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.12,<3.13"
+          ],
+          "conflicts": [
+            {
+              "dependency": "numpy",
+              "reason": "The validated HADDOCK3/PRODIGY environment resolved NumPy 2.5.1 while DockQ 2.1.3 requires NumPy below 2.",
+              "required_action": "Run DockQ in a separate environment and pass only coordinate and text artifacts between stages.",
+              "source": "https://github.com/wallnerlab/DockQ",
+              "versions": [
+                ">=2",
+                "<2"
+              ]
+            }
+          ],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the packaged runner and renderer in isolated, provenance-recorded environments.",
+          "required": true,
+          "tested_versions": [
+            "3.12.10"
+          ],
+          "verified_at": "2026-08-02",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "protein-complex-docking",
+      "input_formats": [
+        {
+          "artifact_type": "structure_analysis_request",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "complex_docking_request",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "complex_docking_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "artifact-directory",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "complex_docking_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ]
+        },
+        {
+          "artifact_type": "structure_figure_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "publication-figure-set",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure_figure_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "style-version",
+            "source-digest",
+            "replot-table"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=2026.7,<2026.8"
+          ],
+          "ecosystem": "python",
+          "identity": "haddock3",
+          "mismatch_policy": "block",
+          "name": "haddock3",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "2026.7.0"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2026.7,<2026.8"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parameter",
+              "description": "The validated workflow uses topoaa, rigidbody, CAPRI evaluation, selection, flexible refinement, energy minimization, FCC clustering and analysis.",
+              "id": "haddock3-official-workflow",
+              "required_action": "Revalidate module sequence, configuration grammar, output tables and compressed final-model handling after a version change.",
+              "source": "https://www.bonvinlab.org/haddock3-user-manual/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "haddock3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/haddocking/haddock3"
+        },
+        {
+          "allowed_versions": [
+            ">=2.3,<2.4"
+          ],
+          "ecosystem": "python",
+          "identity": "prodigy",
+          "mismatch_policy": "block",
+          "name": "prodigy-prot",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "2.3.0"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2.3,<2.4"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "PRODIGY estimates affinity from a supplied complex and refuses unsupported non-standard residues.",
+              "id": "prodigy-complex-affinity",
+              "required_action": "Preserve parser failures and never report an estimate after silent residue deletion.",
+              "source": "https://github.com/haddocking/prodigy"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "prodigy",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/haddocking/prodigy"
+        },
+        {
+          "allowed_versions": [
+            ">=2.1,<2.2"
+          ],
+          "ecosystem": "python",
+          "identity": "DockQ",
+          "mismatch_policy": "block",
+          "name": "dockq",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "2.1.3"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2.1,<2.2"
+              ],
+              "category": "parameter",
+              "compatibility_effect": "requires-parameter",
+              "description": "DockQ reports interface and ligand RMSD, native and non-native contact fractions, F1, clashes and chain mapping against a declared reference.",
+              "id": "dockq-reference-mapping",
+              "required_action": "Require the reference and justify any allowed sequence mismatches explicitly.",
+              "source": "https://github.com/wallnerlab/DockQ"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "DockQ",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/wallnerlab/DockQ"
+        },
+        {
+          "allowed_versions": [
+            ">=3.10,<3.11"
+          ],
+          "ecosystem": "python",
+          "identity": "matplotlib",
+          "mismatch_policy": "block",
+          "name": "matplotlib",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.10.8"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.10,<3.11"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-format",
+              "description": "Matplotlib renders deterministic vector and high-resolution raster structure-summary panels.",
+              "id": "structure-figure-export",
+              "required_action": "Reload every export and retain the exact replot tables and style version.",
+              "source": "https://matplotlib.org/stable/api/index.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import matplotlib; print(matplotlib.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://matplotlib.org/stable/api/index.html"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "protein-disorder-evidence-e2e-v1"
           ],
           "id": "iupred2a-rest-2026-07-24-python-3143",
@@ -19130,6 +19908,237 @@
           "version_probe_kind": "service_contract",
           "version_probe_timeout_seconds": 10,
           "version_source": "https://iupred2a.elte.hu/help_new"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "string-v12-live-network-v1"
+          ],
+          "id": "string-12-0-network-api",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "string-network-regression-v1"
+          ],
+          "verified_at": "2026-08-02"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the bounded public-database client and optional renderer.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "protein-interaction-network-evidence",
+      "input_formats": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "protein_network_query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [
+                "STRING-12.0"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "protein_network_result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "service-contract",
+            "database-release",
+            "retrieval-time"
+          ]
+        },
+        {
+          "artifact_type": "network_figure_bundle",
+          "formats": [
+            {
+              "annotation_releases": [
+                "STRING-12.0"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "publication-figure-set",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "protein_network_figures",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "style-version",
+            "source-digest",
+            "replot-tables"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=12,<13"
+          ],
+          "ecosystem": "service",
+          "identity": "STRING-12.0-REST",
+          "mismatch_policy": "block",
+          "name": "string-api",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "12.0"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=12,<13"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Version-specific identifier mapping, network and PPI enrichment endpoints return documented mapping, edge-channel and summary fields.",
+              "id": "string-v12-api",
+              "required_action": "Revalidate mapping, edge fields, network types, score scale and enrichment schema before changing the version-specific host.",
+              "source": "https://string-db.org/help/api/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_string_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://string-db.org/help/api/"
+        },
+        {
+          "allowed_versions": [
+            ">=3.10,<3.11"
+          ],
+          "ecosystem": "python",
+          "identity": "matplotlib",
+          "mismatch_policy": "block",
+          "name": "matplotlib",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "3.10.8"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.10,<3.11"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-format",
+              "description": "Matplotlib creates deterministic vector and high-resolution raster network figures from normalized STRING tables.",
+              "id": "ppi-figure-export",
+              "required_action": "Reload each export and preserve node and edge replot tables.",
+              "source": "https://matplotlib.org/stable/api/index.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import matplotlib; print(matplotlib.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://matplotlib.org/stable/api/index.html"
         }
       ],
       "validation_status": "complete"
@@ -36101,7 +37110,7 @@
         },
         {
           "allowed_versions": [
-            "==0.9.0"
+            ">=0.9.0,<0.9.1"
           ],
           "ecosystem": "python",
           "identity": "POT",
@@ -40676,11 +41685,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "f538e3fdf671a459b296082a11535b58f01cdad0bbb1bed8f993a86e07aeb555",
+        "digest": "cebd60d728c83925bcedfbbc05626e68d67935af0f1fe52149054fb4a32140b1",
         "id": "alphafold-structure-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "alphafold-structure-evidence-query": [
           "inline-json@1"
@@ -40694,7 +41703,7 @@
         ]
       },
       "regression": {
-        "digest": "e0e5974d28be37eb5896a10f2e21bfd2bdde4514741b4c0117d5a4bc7d935903",
+        "digest": "ea59d7e32f15a9b9d1ebe67b68fc2a9cf3dfb0373e6127f3d0a80d7e6699131a",
         "id": "alphafold-structure-evidence-regression-v1",
         "passed": true
       },
@@ -40706,6 +41715,50 @@
         ]
       },
       "verified_at": "2026-07-14"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.12,<3.13"
+        ]
+      },
+      "end_to_end": {
+        "digest": "55b299043b61797173cf54b560a53e3d3c2a3053d2b48f3137231a24f8adf0df",
+        "id": "alphafold3-official-schema-output-fixture-v1",
+        "passed": true
+      },
+      "implementation_sha256": "20feb40851a46e755ab1aab44612db11921400bd344036cdb6619329ea73a152",
+      "input_formats": {
+        "alphafold3_request": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "alphafold3-complex-prediction",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "alphafold3_figure_bundle": [
+          "publication-figure-set@1"
+        ],
+        "alphafold3_prediction_bundle": [
+          "alphafold3-output@3.0.2"
+        ]
+      },
+      "regression": {
+        "digest": "3669d5d1194cf60c7d1dac18830f63bb0cba3ca46ce070f6a5638ed230230e23",
+        "id": "alphafold3-adapter-regression-v1",
+        "passed": true
+      },
+      "row_id": "alphafold3-3-0-2-input-output-adapter",
+      "supplemental_end_to_end": [],
+      "tool_versions": {
+        "alphafold3": [
+          ">=3.0.2,<3.1"
+        ],
+        "matplotlib": [
+          ">=3.10,<3.11"
+        ]
+      },
+      "verified_at": "2026-08-02"
     },
     {
       "dependency_versions": {
@@ -40748,11 +41801,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "bf1274b8a63299acf8187cb1cba848118856785ca911b1f2b965d1a4d956c480",
+        "digest": "3e156334646f12bab8b2f57c677d6f2e12ac2c9a8abc93c5163874c919638d57",
         "id": "archs4-expression-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "archs4_expression_query": [
           "inline-json@1"
@@ -40766,7 +41819,7 @@
         ]
       },
       "regression": {
-        "digest": "d0d59ab9e16cd4953b7609a5bb08a18f93ca87118d4cdd80867249b69be5de7f",
+        "digest": "3fe0e6d6662601f3d109694ca975f7adc8f0a2b226ee0a88ea1197304f68db98",
         "id": "archs4-expression-evidence-regression-v1",
         "passed": true
       },
@@ -40964,7 +42017,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "5a9820469eb136c224fcf3f55a4560a366c29a93912577bd5af919b0221e292b",
+        "digest": "e96b9be064b1b9f18aaca20d2b854e58e087e98fea22f692f2c3d59c0f377b85",
         "id": "bulk-chromatin-accessibility-contract-e2e-v1",
         "passed": true
       },
@@ -40982,7 +42035,7 @@
         ]
       },
       "regression": {
-        "digest": "ce61e7e85eb8ff62d6d3bcc384132598d23c8fd8d7d017850d65a4d0f76106af",
+        "digest": "13a7717362ee9df4e90a1fa626ce1f3362d1de8e31941ea2029f2ac17638648c",
         "id": "bulk-chromatin-accessibility-regression-v1",
         "passed": true
       },
@@ -40990,7 +42043,7 @@
       "supplemental_end_to_end": [],
       "tool_versions": {
         "Caper": [
-          "==2.3.1"
+          ">=2.3.1,<2.4"
         ],
         "Docker": [
           ">=29.0,<30"
@@ -41102,7 +42155,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "eaf4ba70ea80222f34647619693d570ba8df010d06cd3846c2744d089939f759",
+        "digest": "22007a395e04e78571c1153746f3d9972c8f47c1459bd33bf22a66e4587e1bc2",
         "id": "bulk-nascent-transcription-contract-e2e-v1",
         "passed": true
       },
@@ -41120,7 +42173,7 @@
         ]
       },
       "regression": {
-        "digest": "c15f955132172d37c3f9a85678ad7e5c873a39815a63c4301a602a96c78f30b6",
+        "digest": "afd2965144e870bee4b0c3268e48b399ce604c3e704f8e0aaf338da546a0e6cc",
         "id": "bulk-nascent-transcription-regression-v1",
         "passed": true
       },
@@ -41128,7 +42181,7 @@
       "supplemental_end_to_end": [],
       "tool_versions": {
         "cromwell": [
-          "==88"
+          ">=88,<89"
         ],
         "docker": [
           ">=29.0,<30"
@@ -41146,7 +42199,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "cd7d533b1ea39073134442dc2a510a2768562b1b6ac3f0feb52a798c1fd740ad",
+        "digest": "d63b617b51e4e3a078b45876c127894b1c966ee3740085ebd2e863230c1f6c47",
         "id": "bulk-r-loop-mapping-contract-e2e-v1",
         "passed": true
       },
@@ -41164,7 +42217,7 @@
         ]
       },
       "regression": {
-        "digest": "8ef12a437ca69dd70095dbc3fdca21dcd7bb2ff8c000e28c7807aadfe63fa4ec",
+        "digest": "793e84b10d44a228c899f705ea00fb344a16f8258c0a4f799f10c9259c1ee7a7",
         "id": "bulk-r-loop-mapping-regression-v1",
         "passed": true
       },
@@ -41172,7 +42225,7 @@
       "supplemental_end_to_end": [],
       "tool_versions": {
         "RLPipes": [
-          "==0.9.3"
+          ">=0.9.3,<0.10"
         ]
       },
       "verified_at": "2026-07-31"
@@ -41266,7 +42319,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "2d795711ac0554ef27d9483adf05592bf6f20dc34559bafec0c7379b7b5ba446",
+        "digest": "b774004b02bd9ff2233ad73125d8fc6941819ae911961a9698b28fd40dda9138",
         "id": "bulk-rna-modification-enrichment-contract-e2e-v1",
         "passed": true
       },
@@ -41284,7 +42337,7 @@
         ]
       },
       "regression": {
-        "digest": "6e90ef367c9993379f4b1abe9a1d0f1d13f51b02ab9658976c7a56711c0d053a",
+        "digest": "29d8028a134dd0712d9106fa7e48ac32cec787da1655dcddbae0baf9a0dde097",
         "id": "bulk-rna-modification-enrichment-regression-v1",
         "passed": true
       },
@@ -41295,7 +42348,7 @@
           ">=4.3,<4.4"
         ],
         "exomePeak2": [
-          "==1.14.3"
+          ">=1.14.3,<1.15"
         ]
       },
       "verified_at": "2026-07-31"
@@ -41307,7 +42360,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "c1b7c49fb97f48e262b67f9aec1d90da0e114d6f8262c4d5e7c587032d4f6e59",
+        "digest": "36f85de5a7feb9e94cb995777e6fff41d374a9284d2758101fa64f0b7912fb82",
         "id": "bulk-three-dimensional-genome-contract-e2e-v1",
         "passed": true
       },
@@ -41325,7 +42378,7 @@
         ]
       },
       "regression": {
-        "digest": "afce8cc538161198651de4cb2af46bb7d400afd8c0f1aa9dac5fd601bbfea3dc",
+        "digest": "26be26a300dea8d1f014ecc5631b92e442072db30a72c202bd47799f075a83f2",
         "id": "bulk-three-dimensional-genome-regression-v1",
         "passed": true
       },
@@ -41333,13 +42386,13 @@
       "supplemental_end_to_end": [],
       "tool_versions": {
         "ChIA-PET2": [
-          "==0.9.3"
+          ">=0.9.3,<0.10"
         ],
         "FitHiChIP": [
-          "==11.0"
+          ">=11,<12"
         ],
         "capC-MAP": [
-          "==1.1.3"
+          ">=1.1.3,<1.2"
         ],
         "docker": [
           ">=29.0,<30"
@@ -41527,7 +42580,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "e25dec7702a6f322f1f731f4feba983b31d5d92217a707b79a2d76703ebefc24",
+        "digest": "120f44c54a89c00a9781593be62384bb49633c950538e09fb26eb5b27a3f128b",
         "id": "cfu-enumeration-e2e-v1",
         "passed": true
       },
@@ -41565,11 +42618,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "2294e17b200bb65a7bd9b55f9c31c508aa282a9188e8fdf1d7b200ab46281350",
+        "digest": "8fadd21e5293b00d1c7f58d34e7af35feff4802fd16b4d3b4f8562670ca2dc71",
         "id": "chemical-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "chemical-evidence-query": [
           "inline-json@1"
@@ -41583,7 +42636,7 @@
         ]
       },
       "regression": {
-        "digest": "bac354976a3b51b73b42d4316ddb8a48301c67ac5e6dcb3b9e57a3b66a8366b1",
+        "digest": "846db67c19b542fed6148bb9d7143dbb6b78a79595b505ff8742d73fb3480fee",
         "id": "chemical-evidence-regression-v1",
         "passed": true
       },
@@ -41678,11 +42731,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "956708e14969fd62920a63ee73e0afe030fae3ff24f164d1881a845e19bcc79d",
+        "digest": "9b208c0d09b2830ebc22e35859c0b28d49afb10da4bee368d68babcace2ee9dd",
         "id": "citation-record-resolution-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "citation-record-resolution-query": [
           "inline-json@1"
@@ -41696,7 +42749,7 @@
         ]
       },
       "regression": {
-        "digest": "541c4206cdb325ff86b683bf2dc3d4d68c24f5997fd6e277e869e92c305e1ead",
+        "digest": "47482e0366537d3bce6e9f3bba92a93677762e7bf9bddf77006d3f4c871f0084",
         "id": "citation-record-resolution-regression-v1",
         "passed": true
       },
@@ -41923,11 +42976,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "b89602e8a952c2ff5b5725505b128d0069b17277fe00c913c609ed5cbab7e1fd",
+        "digest": "8484a7a3e29799701ca0a06453773babce50d4cb832075eb4eaf293384d62827",
         "id": "clinical-trial-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "clinical-trial-evidence-query": [
           "inline-json@1"
@@ -41941,7 +42994,7 @@
         ]
       },
       "regression": {
-        "digest": "62ccbef47c47fa797e1609826953297951c8cdc43f8229470a0585b14dad19e1",
+        "digest": "707976678c21ab4c840cd5af76ad9fe2f4bd3a42845091f586eb7673a3b56dd1",
         "id": "clinical-trial-evidence-regression-v1",
         "passed": true
       },
@@ -42189,11 +43242,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "d13b06d87949be0320a2bb56ef7a15b6e23ee898585eeb09b21af1e212f2dbbf",
+        "digest": "faf76b1fb23cf6cc56b028f9eea28c2e582ede91022827aebcf0e0eb6e27d88e",
         "id": "dbsnp-rsid-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "dbsnp_rsid_query": [
           "inline-json@1"
@@ -42207,7 +43260,7 @@
         ]
       },
       "regression": {
-        "digest": "8e0d3a3cd798b4641d6a49d7a63a1ac5a3098343a60d1ae25e7c6a849a26e496",
+        "digest": "aea5e8b1ae42ca4ad5b7d93b06ea25a7699a09b38de1a1c6a9ba6e163e60e2c7",
         "id": "dbsnp-rsid-evidence-regression-v1",
         "passed": true
       },
@@ -42370,7 +43423,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "b64329853027f44580a8582763bcef603f1f500d63b6727c55f22a5843301f81",
+        "digest": "d1daef6e0889bea1fb16cdcaddc4f5348a317fdefddaf08d12f1e4e834191e17",
         "id": "dna-content-phase-fit-e2e-v1",
         "passed": true
       },
@@ -42604,11 +43657,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "57494f7f9d7a9aeb6e5092491db6819b5844c15591ab716b69fe86a42864b944",
+        "digest": "718b40bc20a02855780a53ceaf55918cac3e064a56753fabb5fceeb0732a8c91",
         "id": "ensembl-gene-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "ensembl-gene-evidence-query": [
           "inline-json@1"
@@ -42622,7 +43675,7 @@
         ]
       },
       "regression": {
-        "digest": "4d75382455526fb9349a35767fe7f94e9bf6765a0cfc1aa09188dc177f7a1083",
+        "digest": "f0ab82fa07961422089928e38b0b6118988812e319b2077dbeb5ad6503f62329",
         "id": "ensembl-gene-evidence-regression-v1",
         "passed": true
       },
@@ -42710,7 +43763,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "d5d215d202c7d0f0af7c0e9440e24cd579962bd9af9d7f19317ae8a558253b2f",
+        "digest": "1b44a07940ed4c64a6ab70ff9169be07420fba6cff59808a6694516dc9071a45",
         "id": "fcs-event-import-e2e-v1",
         "passed": true
       },
@@ -42787,7 +43840,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "01c8d81f215766ef946ccfa0b6f7131bece0975b3c1b0dff505f733a38254563",
+        "digest": "3f2feb13bca922fb040f272e4fc43764a5902a63e0092ec91c55f0b827f0dd78",
         "id": "fixed-period-cosinor-e2e-v1",
         "passed": true
       },
@@ -42958,7 +44011,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "f908047ac1d6ffa6c5c90cae03a6d2ff5a5aaf349b6b6b612023a26727ab37a4",
+        "digest": "2d53934733e199e45d086e82bf6dcf1c95d90d38ae0edbf61c40a0483036df54",
         "id": "genbank-coding-sequence-extraction-e2e-v1",
         "passed": true
       },
@@ -42996,11 +44049,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "44043fa31c2c386f11d8ae0f8dae7fac78d50695105148844b8782f987a1adc0",
+        "digest": "92f922835180a5c5cb4434066961b75be97e3b63e50756751d00c22089313d8f",
         "id": "gene-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "gene_query": [
           "inline-json@1"
@@ -43014,7 +44067,7 @@
         ]
       },
       "regression": {
-        "digest": "7cfb366b55300b84eaad44ba9d34100c7802b6d79f0350629513c83b439c0e31",
+        "digest": "539024ada7f97507c83687cf5d4d30f1d6a883e97e490e7326a19a945c3d0c31",
         "id": "gene-evidence-regression-v1",
         "passed": true
       },
@@ -43034,11 +44087,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "43a43437ea1b5c4b42ff59cd5f8cd2824bf007d611af0538e721ed0b1f85f00a",
+        "digest": "296e5950cab593b6f7bc8c480405db2ada5aa57dd8b02e51a4afcf6cefd02f67",
         "id": "gene-identifier-resolution-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "gene_symbol_query": [
           "inline-json@1"
@@ -43052,7 +44105,7 @@
         ]
       },
       "regression": {
-        "digest": "ff24e8bc10ca2d3fadfa0a5c42dc779f1545aa26caddad3a25f21b16a55a89b3",
+        "digest": "91e5f7e0e02aa2c91d09c0e7d68c046fa0e962a241c005f74fd852ef268a98b0",
         "id": "gene-identifier-resolution-regression-v1",
         "passed": true
       },
@@ -43072,11 +44125,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "21f58a44d5e6db0a439d7ef6ca727bc138c80ca6c615f269c57cfa8c2f703647",
+        "digest": "f2c5cfb9c3608c988667bf1efd8504c3e47bd86f7c1e0d0a7467fbb4ad20208c",
         "id": "gene-ortholog-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "resolved_source_gene_identifier": [
           "normalized-json@1"
@@ -43090,7 +44143,7 @@
         ]
       },
       "regression": {
-        "digest": "9ee951ea86316ce0377f50c2c75decaab90f3fe6c5d76dc48b617416bff67d03",
+        "digest": "1bc0802922bcb19e07b3ba80a46fa299dbca7c5d7321df99ed39d17335a41aa6",
         "id": "gene-ortholog-evidence-regression-v1",
         "passed": true
       },
@@ -43110,11 +44163,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "3629ac613a98a1ef5e0af26b0925a929f85d54d790a377bbf6c015dda019e602",
+        "digest": "8bde0df9c24a3f3657c92da44d99eeabadc29159b8ad960c33852a127bf56e73",
         "id": "gene-set-library-catalog-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "gene_set_resource_query": [
           "inline-json@1"
@@ -43128,7 +44181,7 @@
         ]
       },
       "regression": {
-        "digest": "51f765b64518de7e4c741e4972916eec7f62f2c7a7fbbe61adf0bcb82765c2e3",
+        "digest": "4bb699b6fd9fa9326aec9db60a3ed00497171e2df763552983257c10a91f18eb",
         "id": "gene-set-library-catalog-regression-v1",
         "passed": true
       },
@@ -43148,11 +44201,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "869108aa9f72bedfc22b07d37ea8722ef7c9d7aa422b4526d2b06e2b6ddd8d4c",
+        "digest": "1924a579312e2fb466731032a41221b992d7cbe5c5ef06ea7cee936098c2addc",
         "id": "gene-set-library-membership-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "gene_set_library_request": [
           "inline-json@1"
@@ -43166,7 +44219,7 @@
         ]
       },
       "regression": {
-        "digest": "b502932f41efb8b65987c6d1cdf6ec062e38a405f498aeba07d33e5e6cbbe373",
+        "digest": "21c8d3914dac078577a5cf8d4488da7a62bb0afaec00959c7ac53c6fcdf24f75",
         "id": "gene-set-library-membership-regression-v1",
         "passed": true
       },
@@ -43264,11 +44317,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "7d775f6a11ed29b1d0d44d0c29c0bb9afa185e5019179f471cfb9794bf3fb1c5",
+        "digest": "9154dca10df54245649e5f88b1ed8b308b1205334ddb0e4094a5b1a5d6640296",
         "id": "gnomad-gene-constraint-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "gnomad_gene_query": [
           "inline-json@1"
@@ -43282,7 +44335,7 @@
         ]
       },
       "regression": {
-        "digest": "a2fc802d8cf1d726570fc87e842b89edb5f455a941ce810ac81875ac25ade1d0",
+        "digest": "ef1e5d8dbc30d990712a82802f424c20aadb8fd41acd24c925523c850011eaae",
         "id": "gnomad-gene-constraint-regression-v1",
         "passed": true
       },
@@ -43332,7 +44385,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "8642abb297912d7ef49fb249d3be17c817bef415c0f43cfaf998a98562da1ea3",
+        "digest": "8cfe893b124e999cf47f9a696478bdad74fc8fe3eb0279b24688854916819750",
         "id": "growth-curve-e2e-v2",
         "passed": true
       },
@@ -43417,11 +44470,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "feb9d1c9eeecc78fd61bb6f3662ad428d68b98349e02cbc456e8692ee926fa26",
+        "digest": "b593720051dd361bfb4192a268e0b703c1e8300a1486cef7227b363a9d7b0a5b",
         "id": "hpo-term-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "hpo_term_query": [
           "inline-json@1"
@@ -43435,7 +44488,7 @@
         ]
       },
       "regression": {
-        "digest": "8893d8ade6f268be235cba7dd5b772cafb6bf4adf5995623471f060e6c7c0c55",
+        "digest": "e372c1071c18eff537adb39d233b5207ec8bd56f934c0d0bdb3ea944d92bd832",
         "id": "hpo-term-evidence-regression-v1",
         "passed": true
       },
@@ -43717,7 +44770,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "e8499b2b2324f88e10050ecdce130683d250001d266293b5f532bc66c14adcc0",
+        "digest": "0470b64678fcfbf141e84b2fc2cb074f4ec701b53fee08481ca0f01aa9a59fdd",
         "id": "itc-single-site-binding-e2e-v1",
         "passed": true
       },
@@ -43789,11 +44842,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "c598fe3e5333a416a51c681c4af1dc72362f877f27430babd6b74f62092c9ea6",
+        "digest": "cab4f5459e4b3a481fef1e3d6b445a86a6ae48014622c321d000353c5f689580",
         "id": "literature-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "literature_query": [
           "inline-json@1"
@@ -43807,7 +44860,7 @@
         ]
       },
       "regression": {
-        "digest": "0812c113a4496eb7345c7e13c8158793550fe144c7f6cfab9a32136303134398",
+        "digest": "d95d2473dfac57445f9a5599d5f0c64d41b06851d66699b12734c47d075e4534",
         "id": "literature-evidence-regression-v1",
         "passed": true
       },
@@ -44049,6 +45102,50 @@
     },
     {
       "dependency_versions": {
+        "python": [
+          ">=3.12,<3.13"
+        ]
+      },
+      "end_to_end": {
+        "digest": "34a303ef19cb009f574c14e8c2a5efbd5f7a82a2c6623b2dc44337e850f8a11b",
+        "id": "metascape-existing-result-cytoscape-v1",
+        "passed": true
+      },
+      "implementation_sha256": "20feb40851a46e755ab1aab44612db11921400bd344036cdb6619329ea73a152",
+      "input_formats": {
+        "metascape_request": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "metascape-msbio-network-analysis",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "cytoscape_figure_bundle": [
+          "publication-figure-set@1"
+        ],
+        "metascape_analysis_bundle": [
+          "metascape-result@1"
+        ]
+      },
+      "regression": {
+        "digest": "cf067695f149ac275dc1996727f6e7dfc64132a8c1f58949b270d5b0d64fc2cf",
+        "id": "metascape-msbio-postflight-regression-v1",
+        "passed": true
+      },
+      "row_id": "msbio2-metascape-cytoscape-3-10-4",
+      "supplemental_end_to_end": [],
+      "tool_versions": {
+        "cytoscape": [
+          ">=3.10.4,<3.11"
+        ],
+        "msbio2": [
+          "==local-package-observed-2026-08-02"
+        ]
+      },
+      "verified_at": "2026-08-02"
+    },
+    {
+      "dependency_versions": {
         "Python": [
           ">=3.10,<3.15"
         ]
@@ -44128,7 +45225,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "796692b8de8fdfbfa62f3d7c4928c5eb450b4920eee1873f142a698ff7634f8b",
+        "digest": "ab6cb5bf5ece7e2c032d5dc1aa61c7d17983b1f11a88c113d4b5be4b3e13d4a5",
         "id": "ncbi-fetch-e2e-v1",
         "passed": true
       },
@@ -44166,7 +45263,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "06f61d49386d6c8a15ad3161dc7d4d6d83f88661ce29477b4ee58d4b200d6d48",
+        "digest": "71ab420c1c15c64fc56b7ab3df1578951725c3154c43bb457be2b28ba806820f",
         "id": "ncbi-info-e2e-v1",
         "passed": true
       },
@@ -44204,7 +45301,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "9f22f62886f1be52edffd043b61c41af54fd3af86e43181e980c7a6bf97a70e4",
+        "digest": "53db7bfe6828c720901cae102c44dce651f057627918f5839b19e2423a186186",
         "id": "ncbi-link-e2e-v1",
         "passed": true
       },
@@ -44242,7 +45339,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "197450b8cd9f2b2b79deb4f5b00dfe938b87fdd2f4fe5e8e249ec7711444a1ca",
+        "digest": "65b2fa780c1f538b8e244e279228daf1214725c84d2eccd4fa75246ede575a12",
         "id": "ncbi-search-e2e-v1",
         "passed": true
       },
@@ -44280,7 +45377,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "3a31c916e521302d2e0bc75c27a79789d71ffd13866ce37a78b60bba8f9b83bf",
+        "digest": "24c40775f5ea1bb802621c4f21151439247ffcb458dd48e217df6e1eae6e4e4a",
         "id": "ncbi-search-summary-e2e-v1",
         "passed": true
       },
@@ -44318,7 +45415,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "02a2eb4656433f524a62895e018f90e5ca1e7c34cf35996bd2720afe40237cce",
+        "digest": "a282c35447e80c0bed076c30095d69cbef70db72b8fcad32cfe97e7a77d3c7f2",
         "id": "ncbi-summary-e2e-v1",
         "passed": true
       },
@@ -44427,11 +45524,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "99f22a129c218536c84627568bf0fbafa27f04caa43dfed88c6b8e1cb2866061",
+        "digest": "fbd11ee9e4a9a13eaa60efda96553bb872cf5138099ced0683f298d24ea2572c",
         "id": "opentargets-target-disease-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "opentargets-target-disease-evidence-query": [
           "inline-json@1"
@@ -44445,7 +45542,7 @@
         ]
       },
       "regression": {
-        "digest": "57668da1b89813217a74347c557cae28ac87ae76a960b4c6ff64a71990461010",
+        "digest": "23c2facb26384b5dc5f9006a2f68ee20d2c3e8b02dd163ec01ffcac0a6c6e009",
         "id": "opentargets-target-disease-evidence-regression-v1",
         "passed": true
       },
@@ -44740,7 +45837,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "0681b11cecd4889806be141dd80da8653863ea2e436474e75dc29440ee55ad4e",
+        "digest": "fcda8ca09b811404dc827c33ec1d31713a5982d79d9db10d447927c65dc28b72",
         "id": "pdf-evidence-extraction-e2e-v1",
         "passed": true
       },
@@ -44816,11 +45913,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "d869065d9a821736709f78b0a6bd55f88da9625d8fb70c08981b9c1777a3bc4c",
+        "digest": "ee2c107b263bf6b8d58d3d1246d23c873312436f04df6d59f82a5594cf04c374",
         "id": "preprint-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "preprint-evidence-query": [
           "inline-json@1"
@@ -44834,7 +45931,7 @@
         ]
       },
       "regression": {
-        "digest": "d43525304c1f6cc93b01baeac99ee8b585d87e35aafebffe1bda1ed678b11915",
+        "digest": "18ee5c53c1d037498af8adc5d330ba577395ac2f4a9dcfbdccde6836309daf7e",
         "id": "preprint-evidence-regression-v1",
         "passed": true
       },
@@ -44961,15 +46058,65 @@
     {
       "dependency_versions": {
         "python": [
+          ">=3.12,<3.13"
+        ]
+      },
+      "end_to_end": {
+        "digest": "a4e0d7952f7ff8d5338202acccae2fe28ab520c6c6b776490d3f33534710ef41",
+        "id": "haddock3-official-protein-protein-test-v1",
+        "passed": true
+      },
+      "implementation_sha256": "20feb40851a46e755ab1aab44612db11921400bd344036cdb6619329ea73a152",
+      "input_formats": {
+        "complex_docking_request": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "protein-complex-docking",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "complex_docking_bundle": [
+          "artifact-directory@1"
+        ],
+        "structure_figure_bundle": [
+          "publication-figure-set@1"
+        ]
+      },
+      "regression": {
+        "digest": "8015af4562333a6dfc39e4c6beb66cec8e4a1990ec25f59deaf81e09ec667524",
+        "id": "protein-complex-docking-regression-v1",
+        "passed": true
+      },
+      "row_id": "haddock3-2026-7-official-protein-protein-example",
+      "supplemental_end_to_end": [],
+      "tool_versions": {
+        "dockq": [
+          ">=2.1,<2.2"
+        ],
+        "haddock3": [
+          ">=2026.7,<2026.8"
+        ],
+        "matplotlib": [
+          ">=3.10,<3.11"
+        ],
+        "prodigy-prot": [
+          ">=2.3,<2.4"
+        ]
+      },
+      "verified_at": "2026-08-02"
+    },
+    {
+      "dependency_versions": {
+        "python": [
           ">=3.14,<3.15"
         ]
       },
       "end_to_end": {
-        "digest": "9ffe064160bcd4880fba74ef6db4e558a9bf7c5e36589a7822c67ebea81ad551",
+        "digest": "f0a19cfb951f6ccaeb2e50c074607a26b7473349a68cceb6c4ff48716adfb27d",
         "id": "protein-disorder-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "protein_disorder_query": [
           "inline-json@1"
@@ -44983,7 +46130,7 @@
         ]
       },
       "regression": {
-        "digest": "ea84f1f81d84ce0dadba76516b1f499785c24b95be99bc6d80c6ae510c8fecbe",
+        "digest": "2c3e4351a891f49b7e39083628ff02a1541b32ba684a550c6d8fe03aa82a8917",
         "id": "protein-disorder-evidence-regression-v1",
         "passed": true
       },
@@ -44995,6 +46142,50 @@
         ]
       },
       "verified_at": "2026-07-24"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "de9f8b2ab1f9f3f2690d73eb751b07339fac000f6ee93fea8ed1456fe62cb032",
+        "id": "string-v12-live-network-v1",
+        "passed": true
+      },
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
+      "input_formats": {
+        "protein_network_query": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "protein-interaction-network-evidence",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "protein_network_figures": [
+          "publication-figure-set@1"
+        ],
+        "protein_network_result": [
+          "normalized-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "91bacbed1057998b925d55ffdd55d5f3a232c626c8706386a4654e23cbc838c9",
+        "id": "string-network-regression-v1",
+        "passed": true
+      },
+      "row_id": "string-12-0-network-api",
+      "supplemental_end_to_end": [],
+      "tool_versions": {
+        "matplotlib": [
+          ">=3.10,<3.11"
+        ],
+        "string-api": [
+          ">=12,<13"
+        ]
+      },
+      "verified_at": "2026-08-02"
     },
     {
       "dependency_versions": {
@@ -45204,11 +46395,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "0df3a27934faa91e64b5d786c921e8bc9af42302e5fa487b0dfda4b9ee72d577",
+        "digest": "a93ae9ec141571f588d69548ddf6743e686a106fd0234e0b8aca5811d1481799",
         "id": "quickgo-term-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "go_term_query": [
           "inline-json@1"
@@ -45222,7 +46413,7 @@
         ]
       },
       "regression": {
-        "digest": "82263c5cca6eb0f33e4813c3025206b399593478a7e5630a98fcdcc5ca22a79c",
+        "digest": "f14dbb2072555899e0a2e6ea570a3d85a8df1bca3639ba493145c445c4e39705",
         "id": "quickgo-term-evidence-regression-v1",
         "passed": true
       },
@@ -45276,11 +46467,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "2b47dccc6c1f9242204d60c08dec0a066b1438fa411ab7f999139fc55c232070",
+        "digest": "d91ee57e4fd48e0d7da378e9085b13c231fbfe63ad9ab7634616780bba75fab6",
         "id": "reactome-overrepresentation-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "reactome-overrepresentation-evidence-query": [
           "inline-json@1"
@@ -45294,7 +46485,7 @@
         ]
       },
       "regression": {
-        "digest": "e7a8edf850ca0abe719af56bc38e2fdc9fc125f6af909d9b886a953746249fae",
+        "digest": "3e888a12d56b974b8952fe2e5393b871885cdd535bb035da91fc001ef4417cbe",
         "id": "reactome-overrepresentation-evidence-regression-v1",
         "passed": true
       },
@@ -45314,11 +46505,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "979ca011f7f795694bfefa760334c65931b522beb5acb633dd9182002f47cae5",
+        "digest": "7252df044a41623b384eaf3a0381e6337826b1bbf4ad15be52615559039356a3",
         "id": "reactome-pathway-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "reactome-pathway-evidence-query": [
           "inline-json@1"
@@ -45332,7 +46523,7 @@
         ]
       },
       "regression": {
-        "digest": "9819b8c7cd8e8d03bb71fe08f27940a0d484dc1d84a040fe85a2596bee7c4488",
+        "digest": "6bbc4e9a138e7e9ecfd8c40811cfb9ab39c7f7922d3b9fe8caf7324b0c106d7f",
         "id": "reactome-pathway-evidence-regression-v1",
         "passed": true
       },
@@ -47745,7 +48936,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "78fc29e5090df2ba69c21162401281d0971f0c7fcf0781bf59850c435b8392e6",
+        "digest": "2c8a7adb12eaac4d4a6a2ca3136939f4fab016b104c6837e4d5ca06042ced95d",
         "id": "spatial-hierarchical-model-synthetic-e2e-v1",
         "passed": true
       },
@@ -47765,14 +48956,14 @@
         ]
       },
       "regression": {
-        "digest": "e9d1b1068a776fd9235da997557b76c8b06245a8341728c200eb92b1a11c2459",
+        "digest": "9c29184337b301bdd01586d7e16615ae3a93c1d0ea7f540345a780ccf6b7f605",
         "id": "spatial-multislice-integration-regression-v1",
         "passed": true
       },
       "row_id": "paste-paste2-lme4-contract-v1",
       "supplemental_end_to_end": [
         {
-          "digest": "69a2945cfcc0de94b2e8be200ea38873be4c366d4f1618898c40a8085322acfa",
+          "digest": "0f2af3484e810b6d6ad83f00ea7415ee002814d3b8ab4b0b0a3192c938d259b1",
           "id": "paste140-official-slices-public-e2e-v1",
           "passed": true,
           "report": "public-case-paste-official-slices.json"
@@ -47780,7 +48971,7 @@
       ],
       "tool_versions": {
         "POT": [
-          "==0.9.0"
+          ">=0.9.0,<0.9.1"
         ],
         "lme4": [
           ">=1.1,<1.2"
@@ -47903,11 +49094,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "f3c37107a8b0c8a575d71307ddd30e1a1d197e5bafa2d4bc67c0ecac0d9fe1b0",
+        "digest": "a1f5beb7639203d2823ca9f92b60762fca2d80c6c2b231e54e55b8ffc80bcc37",
         "id": "structure-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "structure-evidence-query": [
           "inline-json@1"
@@ -47921,7 +49112,7 @@
         ]
       },
       "regression": {
-        "digest": "e0787b1aa0a3ce862b2a38b90d5297535bed19998cdaad8bbda8d1dd0da2c16d",
+        "digest": "1792fb5b41bcb0a9cdf972e882be1065c20d37d040b2da05003492d4bdcc2edf",
         "id": "structure-evidence-regression-v1",
         "passed": true
       },
@@ -47986,11 +49177,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "0afd923d870757a78a95933a273aab7c1467edf5188d83dcc9ad984e4ce92109",
+        "digest": "a427113a87acd414b2c20be80b8c46659bc0df6bc635a59efbc93bb5944519d0",
         "id": "structure-ligands-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "structure-ligands-query": [
           "inline-json@1"
@@ -48004,7 +49195,7 @@
         ]
       },
       "regression": {
-        "digest": "14ea8eb84851d9afcb457c9dee9b652b21e02ea186986758d4ec75fb7a716099",
+        "digest": "dd7999c3667b6f186df12cc540cfb124a4abbbeda517e0dabdab6277457c4b14",
         "id": "structure-ligands-regression-v1",
         "passed": true
       },
@@ -48024,11 +49215,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "cac1617411bb70f1afbc67c797b75ba61b7af73ef2d2cdf53d8eed7290c65bd2",
+        "digest": "7359b3a8d8d32289b179e1a532de7815b911892fda9c537a1714bd0d2f0cbad7",
         "id": "structure-polymer-entities-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "structure-polymer-entities-query": [
           "inline-json@1"
@@ -48042,7 +49233,7 @@
         ]
       },
       "regression": {
-        "digest": "29b5d703a6029f9b1de3397002b6bd48034d53ed4a3391f89a1cd3c680b332d0",
+        "digest": "0246962f3aa39ccf69754c0287cc4b1836edc8d0ddf0d14233870ca354c7193e",
         "id": "structure-polymer-entities-regression-v1",
         "passed": true
       },
@@ -48102,11 +49293,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "e2558c8fd39810d5fdc5d8585750e6cf4d31125ff7df14c785c5aa152cbf7115",
+        "digest": "b7ba593352b374474061712563fa3f3c3a8320f91ddf9a22ab745b3d39ee6493",
         "id": "structure-search-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "structure-search-query": [
           "inline-json@1"
@@ -48120,7 +49311,7 @@
         ]
       },
       "regression": {
-        "digest": "0f23624a27076599e29869c5cbb28e8e3825a5b920181d7ea59ca2e4255a4569",
+        "digest": "1d6c778eeeb3e58647202ba5084760492a6d328cf444793e3e29ab4b8198160b",
         "id": "structure-search-regression-v1",
         "passed": true
       },
@@ -48324,11 +49515,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "8a02b3daa86e33fbf7227ad85144f3c06f4d43772b1e43211c01dae6cc2b6f6b",
+        "digest": "3da2754787cde5741acc58196f4e542fda82b19e0b81f4a318395e870feb24f4",
         "id": "uniprot-protein-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "uniprot_accession_query": [
           "inline-json@1"
@@ -48342,7 +49533,7 @@
         ]
       },
       "regression": {
-        "digest": "a8e804e48bbe8c67e5f1c01c5a58f9cac6f382cddb9de0d87797ccb51bc2d1dd",
+        "digest": "280009d365701fdaca7ad09e1176889802a3abcd0342c7cb59a9b51f4ba6e01a",
         "id": "uniprot-protein-evidence-regression-v1",
         "passed": true
       },
@@ -48362,11 +49553,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "babe16258ae33782571ec7ceb03fc80de48c473d9d92e24a894d02bf1e1eb3f2",
+        "digest": "be7d0308014b3bf5ab10524918107c5634b59ec990735fad5e17157a5a17e77d",
         "id": "uniprot-to-ensembl-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "uniprot-to-ensembl-evidence-query": [
           "inline-json@1"
@@ -48380,7 +49571,7 @@
         ]
       },
       "regression": {
-        "digest": "4cb418210456f5db2fb511e051ecf73dc41a3245311774b5fffd4da633cde66b",
+        "digest": "6cb5a8ae2faf4304b0c665c6fd334fc1ad02cf66b0df25a87eafeb1b0f4ebaa9",
         "id": "uniprot-to-ensembl-evidence-regression-v1",
         "passed": true
       },
@@ -48438,11 +49629,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "9c84de1ff6d3ca73ce4c9894912fea71b889dbfb1f2a48b5b3d1cc6a1e98b435",
+        "digest": "1558c64373dd744f9f5341ced00f0a749a91576dc9d0e42d60733b6cd446561e",
         "id": "variant-evidence-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "bdab0ee904221f798885e7117758585dc19fa6a3704228838b10a21232f5823f",
+      "implementation_sha256": "0f63eac977bbe9a0e65c8aac28902c1886c3b4156e10e43c32ce044f83775c6b",
       "input_formats": {
         "variant_query": [
           "inline-json@1"
@@ -48456,7 +49647,7 @@
         ]
       },
       "regression": {
-        "digest": "efe4a0d6a5bbf5cbbd4d320832701d7dba04e6a8fcc0bae16303bb7ac3a17317",
+        "digest": "98a5dadbdcffea433c4627cf289f6b99b1e6172cde3bb30b218d2717515b5a81",
         "id": "variant-evidence-regression-v1",
         "passed": true
       },
@@ -48701,8 +49892,8 @@
       "verified_at": "2026-07-24"
     }
   ],
-  "registry_digest": "632bf87110a3bec3f3283c1b36242312f5b5b58d0f49bd589bfa5f5528eaddd4",
-  "regression_passed": 195,
+  "registry_digest": "55487b07c73a75145a82bad293abc63c1d7e9a54130fd86be24116e8b87bc4b9",
+  "regression_passed": 199,
   "schema_version": 1,
   "supplemental_end_to_end_passed": 14
 }

@@ -9,6 +9,12 @@ def ids_for(plan, workflow):
 
 
 class RoutingTests(unittest.TestCase):
+    def test_structure_and_interaction_modules_route_by_explicit_method(self):
+        self.assertEqual(route("用 STRING 12.0 做 PPI 网络分析")["selected_module_ids"][0], "protein-interaction-network-evidence")
+        self.assertEqual(route("用 HADDOCK3 做蛋白复合物对接")["selected_module_ids"][0], "protein-complex-docking")
+        self.assertEqual(route("准备 AlphaFold 3 蛋白复合物预测")["selected_module_ids"][0], "alphafold3-complex-prediction")
+        self.assertEqual(route("用 MSBio2 和 Metascape 做 MCODE 网络分析")["selected_module_ids"][0], "metascape-msbio-network-analysis")
+
     def test_evidence_crispr_publication_request_is_serial_and_specific(self):
         plan = route("分析TP53基因证据并设计CRISPR验证，最后审计Nature论文", per_workflow=3)
         self.assertEqual(plan["matched_workflows"], ["evidence", "molecular_design", "publication"])

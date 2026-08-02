@@ -1,5 +1,5 @@
 {
-  "module_count": 194,
+  "module_count": 198,
   "modules": [
     {
       "access": "offline",
@@ -1870,6 +1870,529 @@
           "version_probe_kind": "service_contract",
           "version_probe_timeout_seconds": 10,
           "version_source": "https://alphafold.ebi.ac.uk/api-docs"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "agent_generated",
+      "agent_protocol": {
+        "forbidden_actions": [
+          "Do not bundle or redistribute AlphaFold 3 weights or imply rights beyond the current terms.",
+          "Do not treat pTM, ipTM, ranking score or a rendered complex as binding or functional proof.",
+          "Do not automate the public AlphaFold Server through an undocumented interface."
+        ],
+        "languages": [
+          "python"
+        ],
+        "mode": "packaged_parameterized_workflow",
+        "parameter_rules": [
+          {
+            "decision_inputs": [
+              "license-eligibility",
+              "runtime-availability",
+              "molecular-system",
+              "existing-output"
+            ],
+            "id": "select-af3-execution-mode",
+            "parameter": "prepare-parse-or-infer",
+            "selection_rule": "Use prepare mode for portable input, parse-existing for supplied outputs, and local inference only with approved weights, databases and GPU runtime.",
+            "validation_rule": "Block inference or interpretation when terms, molecular identity, runtime provenance, confidence files or chain-pair scope are unresolved."
+          }
+        ],
+        "postflight_checks": [
+          "Reconcile all seeds and samples, reload ranking and confidence files, verify mmCIF and figure exports, and bind every digest."
+        ],
+        "preflight_checks": [
+          "Verify current terms, non-commercial eligibility, entity identity, chain IDs, seeds, modifications, ligand representation, databases, weights and GPU runtime."
+        ],
+        "provenance_fields": [
+          "module-version",
+          "alphafold-version",
+          "weights-terms-version",
+          "database-versions",
+          "entity-identities",
+          "input-output-digests",
+          "confidence-semantics",
+          "figure-style-version"
+        ],
+        "requires_observed_execution": true,
+        "schema_version": 1,
+        "template_sections": [
+          {
+            "id": "prepare-run-review-alphafold3",
+            "output_artifact_types": [
+              "structure_prediction_bundle",
+              "structure_figure_bundle"
+            ],
+            "purpose": "Prepare, optionally execute, and review an AlphaFold 3 biomolecular complex job.",
+            "required_logic": [
+              "Validate molecular identity and terms, generate official JSON, execute only in an approved runtime, reconcile confidence outputs, and render publication figures."
+            ],
+            "template_files": [
+              "templates/run_alphafold3_complex_prediction.py"
+            ]
+          }
+        ]
+      },
+      "alternatives": [
+        "protein-complex-docking",
+        "alphafold-structure-evidence"
+      ],
+      "assumptions": [
+        "Every sequence, chain ID, modification, CCD ligand, SMILES ligand, covalent context and model seed describes the intended molecular system."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_alphafold3_complex_prediction.py",
+          "purpose": "Prepare the official input dialect, connect an approved runtime, parse outputs and render confidence figures.",
+          "quality_gate_ids": [
+            "af3-input-identity",
+            "af3-license-runtime",
+            "af3-output-confidence",
+            "af3-publication-figures"
+          ],
+          "requires_adaptation": false
+        }
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.12,<3.13"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "alphafold3-official-schema-output-fixture-v1"
+          ],
+          "id": "alphafold3-3-0-2-input-output-adapter",
+          "input_formats": {
+            "alphafold3_request": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "alphafold3_figure_bundle": [
+              "publication-figure-set@1"
+            ],
+            "alphafold3_prediction_bundle": [
+              "alphafold3-output@3.0.2"
+            ]
+          },
+          "platforms": [
+            "linux-x86_64",
+            "macos-arm64"
+          ],
+          "regression_evidence_ids": [
+            "alphafold3-adapter-regression-v1"
+          ],
+          "tool_versions": {
+            "alphafold3": [
+              ">=3.0.2,<3.1"
+            ],
+            "matplotlib": [
+              ">=3.10,<3.11"
+            ]
+          },
+          "verified_at": "2026-08-02"
+        }
+      ],
+      "complements": [
+        "structure-quality-assessment",
+        "structure-chain-comparison",
+        "structure-interactive-visualization",
+        "protein-interaction-network-evidence"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.12,<3.13"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Prepare requests and audit outputs without embedding model assets.",
+          "required": true,
+          "tested_versions": [
+            "3.12.10"
+          ],
+          "verified_at": "2026-08-02",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "description": "Build versioned official AlphaFold 3 inputs for proteins, nucleic acids and ligands, connect an approved local inference runtime without bundling model weights, audit ranked mmCIF and confidence outputs, and export confidence figures and replot tables.",
+      "domains": [
+        "molecular_design"
+      ],
+      "entrypoint": "agent-generated-analysis",
+      "evidence_effects": [
+        "produces-biomolecular-complex-structure-hypotheses",
+        "produces-confidence-aware-structure-figures",
+        "blocks-prediction-as-experimental-proof"
+      ],
+      "execution": {
+        "kind": "workflow",
+        "max_output_bytes": 3000000,
+        "timeout_seconds": 30
+      },
+      "id": "alphafold3-complex-prediction",
+      "input_artifacts": [
+        {
+          "artifact_type": "structure_prediction_request",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "alphafold3_request",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "execution_mode": {
+            "enum": [
+              "prepare",
+              "parse-existing",
+              "local-inference"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "output_directory": {
+            "type": "string"
+          },
+          "request_path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "request_path",
+          "output_directory",
+          "execution_mode"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "AlphaFold 3 complex prediction",
+        "protein ligand structure prediction",
+        "AlphaFold3\u86cb\u767d\u590d\u5408\u7269\u7ed3\u6784\u9884\u6d4b"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The repository does not bundle AlphaFold 3 model weights or reference databases and cannot grant rights beyond their current terms.",
+        "AlphaFold 3 outputs are theoretical predictions and do not establish binding, affinity, kinetics, function, mechanism or clinical validity.",
+        "This release validates input generation and output auditing; full local inference additionally requires an approved compatible GPU runtime, weights and databases."
+      ],
+      "maturity": "reference",
+      "module_type": "analysis",
+      "mutability": "writes_output",
+      "output_artifacts": [
+        {
+          "artifact_type": "structure_prediction_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "alphafold3-output",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "3.0.2"
+              ]
+            }
+          ],
+          "name": "alphafold3_prediction_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "model-version",
+            "weights-terms-version",
+            "input-digest",
+            "output-digests"
+          ],
+          "source_policy": "project_input"
+        },
+        {
+          "artifact_type": "structure_figure_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "publication-figure-set",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "alphafold3_figure_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "style-version",
+            "source-digests",
+            "replot-table"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "code_plan": {
+            "type": "array"
+          },
+          "dependency_profiles": {
+            "type": "array"
+          },
+          "execution_policy": {
+            "type": "object"
+          },
+          "forbidden_actions": {
+            "type": "array"
+          },
+          "handoff_type": {
+            "enum": [
+              "packaged_parameterized_project_analysis"
+            ],
+            "type": "string"
+          },
+          "languages": {
+            "type": "array"
+          },
+          "module": {
+            "type": "object"
+          },
+          "parameter_rules": {
+            "type": "array"
+          },
+          "postflight_checks": {
+            "type": "array"
+          },
+          "preflight_checks": {
+            "type": "array"
+          },
+          "provenance_fields": {
+            "type": "array"
+          },
+          "quality_gate_ids": {
+            "type": "array"
+          },
+          "request_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "request_fields": {
+            "type": "array"
+          },
+          "tool_profiles": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "handoff_type",
+          "module",
+          "request_digest",
+          "request_fields",
+          "languages",
+          "code_plan",
+          "parameter_rules",
+          "preflight_checks",
+          "postflight_checks",
+          "provenance_fields",
+          "forbidden_actions",
+          "tool_profiles",
+          "dependency_profiles",
+          "quality_gate_ids",
+          "execution_policy"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Codex can establish non-commercial eligibility, current AlphaFold 3 terms, approved model weights, versioned databases, sufficient Linux GPU resources, and immutable entity identities before local inference."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://github.com/google-deepmind/alphafold3",
+          "https://www.nature.com/articles/s41586-024-07487-w",
+          "Project-owned input builder, output auditor and confidence renderer."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Require unique chain IDs, bounded valid sequences, explicit ligand identity and a closed official AlphaFold 3 input dialect.",
+          "id": "af3-input-identity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Record the current code, model-weight and output terms plus runtime, database and weight provenance before inference.",
+          "id": "af3-license-runtime",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Reconcile all seeds and samples, ranking scores, pTM, ipTM, chain and chain-pair confidence, clashes, mmCIF models and documented confidence files.",
+          "id": "af3-output-confidence",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Export confidence and structural figure panels as PDF, SVG and 600-dpi PNG with source tables, labels, legends and model-confidence semantics.",
+          "id": "af3-publication-figures",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Which AlphaFold 3 complex samples and chain-pair hypotheses remain interpretable after identity, license, confidence, clash and output-integrity review?"
+      ],
+      "schema_version": 1,
+      "title": "Prepare, run and review AlphaFold 3 biomolecular-complex predictions",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            ">=3.0.2,<3.1"
+          ],
+          "ecosystem": "python",
+          "identity": "run_alphafold.py",
+          "mismatch_policy": "block",
+          "name": "alphafold3",
+          "platforms": [
+            "linux-x86_64"
+          ],
+          "required": false,
+          "tested_versions": [
+            "3.0.2"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.0.2,<3.1"
+              ],
+              "category": "input-format",
+              "compatibility_effect": "requires-format",
+              "description": "The adapter emits the documented AlphaFold 3 JSON dialect and reads documented ranking, summary confidence and mmCIF outputs.",
+              "id": "af3-input-output-contract",
+              "required_action": "Revalidate entity fields, dialect version, output names and confidence semantics after every AlphaFold 3 release.",
+              "source": "https://github.com/google-deepmind/alphafold3/blob/main/docs/input.md"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "run_alphafold.py",
+            "--help"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/google-deepmind/alphafold3"
+        },
+        {
+          "allowed_versions": [
+            ">=3.10,<3.11"
+          ],
+          "ecosystem": "python",
+          "identity": "matplotlib",
+          "mismatch_policy": "block",
+          "name": "matplotlib",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.10.8"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.10,<3.11"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-format",
+              "description": "Matplotlib exports confidence summaries in vector and high-resolution raster formats.",
+              "id": "af3-confidence-figure-export",
+              "required_action": "Reload every figure and retain its source table and style version.",
+              "source": "https://matplotlib.org/stable/api/index.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import matplotlib; print(matplotlib.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://matplotlib.org/stable/api/index.html"
         }
       ],
       "version": "1.0.0"
@@ -4717,7 +5240,7 @@
           ],
           "tool_versions": {
             "Caper": [
-              "==2.3.1"
+              ">=2.3.1,<2.4"
             ],
             "Docker": [
               ">=29.0,<30"
@@ -5051,7 +5574,7 @@
       "tool_requirements": [
         {
           "allowed_versions": [
-            "==2.3.1"
+            ">=2.3.1,<2.4"
           ],
           "ecosystem": "python",
           "identity": "caper",
@@ -6787,7 +7310,7 @@
           ],
           "tool_versions": {
             "cromwell": [
-              "==88"
+              ">=88,<89"
             ],
             "docker": [
               ">=29.0,<30"
@@ -7185,7 +7708,7 @@
         },
         {
           "allowed_versions": [
-            "==88"
+            ">=88,<89"
           ],
           "ecosystem": "system",
           "identity": "cromwell",
@@ -7349,7 +7872,7 @@
           ],
           "tool_versions": {
             "RLPipes": [
-              "==0.9.3"
+              ">=0.9.3,<0.10"
             ]
           },
           "verified_at": "2026-07-31"
@@ -7692,7 +8215,7 @@
       "tool_requirements": [
         {
           "allowed_versions": [
-            "==0.9.3"
+            ">=0.9.3,<0.10"
           ],
           "ecosystem": "system",
           "identity": "rlpipes",
@@ -8997,7 +9520,7 @@
               ">=4.3,<4.4"
             ],
             "exomePeak2": [
-              "==1.14.3"
+              ">=1.14.3,<1.15"
             ]
           },
           "verified_at": "2026-07-31"
@@ -9355,7 +9878,7 @@
         },
         {
           "allowed_versions": [
-            "==1.14.3"
+            ">=1.14.3,<1.15"
           ],
           "ecosystem": "r",
           "identity": "exomePeak2",
@@ -9558,13 +10081,13 @@
           ],
           "tool_versions": {
             "ChIA-PET2": [
-              "==0.9.3"
+              ">=0.9.3,<0.10"
             ],
             "FitHiChIP": [
-              "==11.0"
+              ">=11,<12"
             ],
             "capC-MAP": [
-              "==1.1.3"
+              ">=1.1.3,<1.2"
             ],
             "docker": [
               ">=29.0,<30"
@@ -9968,7 +10491,7 @@
         },
         {
           "allowed_versions": [
-            "==0.9.3"
+            ">=0.9.3,<0.10"
           ],
           "ecosystem": "system",
           "identity": "ChIA-PET2",
@@ -9994,7 +10517,7 @@
         },
         {
           "allowed_versions": [
-            "==11.0"
+            ">=11,<12"
           ],
           "ecosystem": "system",
           "identity": "FitHiChIP",
@@ -10021,7 +10544,7 @@
         },
         {
           "allowed_versions": [
-            "==1.1.3"
+            ">=1.1.3,<1.2"
           ],
           "ecosystem": "system",
           "identity": "capC-MAP",
@@ -36337,6 +36860,561 @@
       "access": "agent_generated",
       "agent_protocol": {
         "forbidden_actions": [
+          "Do not copy MSBio2 software, license contents or private project outputs into the public repository.",
+          "Do not use the full genome as an implicit background when the assay tested a narrower universe.",
+          "Do not label MCODE topology or visual proximity as a validated pathway, complex or mechanism.",
+          "Do not leave a task-launched Cytoscape process running after exports are validated, and do not terminate a pre-existing user-owned Cytoscape process."
+        ],
+        "languages": [
+          "python"
+        ],
+        "mode": "packaged_parameterized_workflow",
+        "parameter_rules": [
+          {
+            "decision_inputs": [
+              "assay-universe",
+              "organism",
+              "list-count",
+              "hypothesis",
+              "network-size"
+            ],
+            "id": "select-metascape-design",
+            "parameter": "universe-thresholds-and-ppi-source",
+            "selection_rule": "Choose identifier mapping, background, category, multiplicity, similarity and PPI settings from the assay design and declared hypothesis before viewing results.",
+            "validation_rule": "Block interpretation if the universe, organism, identifier losses, thresholds, database release, network-size eligibility or MCODE settings are unknown."
+          }
+        ],
+        "postflight_checks": [
+          "Reload the report and workbook, reconcile GO/PPI/MCODE tables with XGMML and CYS assets, and verify every PDF, SVG, PNG and digest.",
+          "If this task launched Cytoscape, save the editable session, request a normal exit, and verify that the task-owned process terminated; never close a Cytoscape session that was already owned by the user."
+        ],
+        "preflight_checks": [
+          "Confirm lawful MSBio2 access, gene-list provenance, organism, background, identifiers, option schema, output path and Cytoscape availability."
+        ],
+        "provenance_fields": [
+          "module-version",
+          "msbio2-version",
+          "metascape-database-date",
+          "cytoscape-version",
+          "input-background-parameter-digests",
+          "identifier-losses",
+          "output-digests",
+          "layout-and-style"
+        ],
+        "requires_observed_execution": true,
+        "schema_version": 1,
+        "template_sections": [
+          {
+            "id": "run-or-validate-metascape",
+            "output_artifact_types": [
+              "enrichment_network_bundle"
+            ],
+            "purpose": "Run an approved licensed MSBio2 installation or validate an existing Metascape result package.",
+            "required_logic": [
+              "Validate identifiers and universe, freeze parameters, execute or ingest, and reconcile the full report and network inventory."
+            ],
+            "template_files": [
+              "templates/run_msbio2_metascape_analysis.py"
+            ]
+          },
+          {
+            "id": "render-cytoscape-networks",
+            "output_artifact_types": [
+              "network_figure_bundle"
+            ],
+            "purpose": "Render Metascape networks consistently through Cytoscape automation.",
+            "required_logic": [
+              "Import XGMML, reconcile nodes and edges, apply declared layout and style, export CYS, PDF, SVG and PNG, and verify every artifact."
+            ],
+            "template_files": [
+              "templates/render_metascape_cytoscape.py"
+            ]
+          }
+        ]
+      },
+      "alternatives": [
+        "functional-enrichment",
+        "protein-interaction-network-evidence",
+        "network-analysis"
+      ],
+      "assumptions": [
+        "Gene identifiers, organism, list construction, background universe, category selection, enrichment thresholds and PPI source settings are explicit and appropriate."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_msbio2_metascape_analysis.py",
+          "purpose": "Execute the observed wrapper or validate a complete existing package without redistributing licensed assets.",
+          "quality_gate_ids": [
+            "metascape-input-design",
+            "metascape-parameter-provenance",
+            "metascape-output-integrity"
+          ],
+          "requires_adaptation": false
+        },
+        {
+          "language": "python",
+          "path": "templates/render_metascape_cytoscape.py",
+          "purpose": "Import XGMML into Cytoscape and export editable and publication-ready network assets.",
+          "quality_gate_ids": [
+            "metascape-output-integrity",
+            "cytoscape-publication-render"
+          ],
+          "requires_adaptation": false
+        }
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.12,<3.13"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "metascape-existing-result-cytoscape-v1"
+          ],
+          "id": "msbio2-metascape-cytoscape-3-10-4",
+          "input_formats": {
+            "metascape_request": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "cytoscape_figure_bundle": [
+              "publication-figure-set@1"
+            ],
+            "metascape_analysis_bundle": [
+              "metascape-result@1"
+            ]
+          },
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "regression_evidence_ids": [
+            "metascape-msbio-postflight-regression-v1"
+          ],
+          "tool_versions": {
+            "cytoscape": [
+              ">=3.10.4,<3.11"
+            ],
+            "msbio2": [
+              "==local-package-observed-2026-08-02"
+            ]
+          },
+          "verified_at": "2026-08-02"
+        }
+      ],
+      "complements": [
+        "enrichment-analysis",
+        "functional-enrichment",
+        "network-analysis",
+        "wgcna-coexpression"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.12,<3.13"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute result validation, provenance capture and Cytoscape automation without copying licensed software or data.",
+          "required": true,
+          "tested_versions": [
+            "3.12.10"
+          ],
+          "verified_at": "2026-08-02",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "description": "Execute an approved licensed MSBio2 wrapper or ingest an existing Metascape package, validate enrichment, PPI, MCODE and Cytoscape deliverables, preserve parameter and database provenance, and export editable Cytoscape sessions plus publication-ready vector and raster figures.",
+      "domains": [
+        "omics",
+        "molecular_design"
+      ],
+      "entrypoint": "agent-generated-analysis",
+      "evidence_effects": [
+        "produces-enrichment-cluster-evidence",
+        "produces-ppi-mcode-hypotheses",
+        "produces-editable-network-figures"
+      ],
+      "execution": {
+        "kind": "workflow",
+        "max_output_bytes": 3000000,
+        "timeout_seconds": 30
+      },
+      "id": "metascape-msbio-network-analysis",
+      "input_artifacts": [
+        {
+          "artifact_type": "gene_set_analysis_request",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "metascape_request",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "execution_mode": {
+            "enum": [
+              "licensed-runtime",
+              "validate-existing"
+            ],
+            "type": "string"
+          },
+          "existing_results_path": {
+            "type": "string"
+          },
+          "gene_lists_path": {
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "output_directory": {
+            "type": "string"
+          },
+          "species_taxon_id": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "objective",
+          "gene_lists_path",
+          "species_taxon_id",
+          "output_directory",
+          "execution_mode"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "Metascape analysis",
+        "MSBio2 enrichment PPI MCODE",
+        "Metascape\u4e0eCytoscape\u7f51\u7edc\u5206\u6790"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Biomed Workbench does not redistribute MSBio2 software, images, license material or private Metascape project data.",
+        "Enrichment and interaction networks are hypothesis-generating and depend on identifier mapping, gene-list construction, background, database release and thresholds.",
+        "MCODE modules are topological dense regions, not automatically pathways, complexes or mechanisms; Cytoscape layout proximity is not biological distance."
+      ],
+      "maturity": "experimental",
+      "module_type": "analysis",
+      "mutability": "writes_output",
+      "output_artifacts": [
+        {
+          "artifact_type": "enrichment_network_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "metascape-result",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "metascape_analysis_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "backend-version",
+            "input-digest",
+            "parameter-digest",
+            "result-digests"
+          ],
+          "source_policy": "project_input"
+        },
+        {
+          "artifact_type": "network_figure_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "publication-figure-set",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "cytoscape_figure_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "cytoscape-version",
+            "layout",
+            "style",
+            "source-digest"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "code_plan": {
+            "type": "array"
+          },
+          "dependency_profiles": {
+            "type": "array"
+          },
+          "execution_policy": {
+            "type": "object"
+          },
+          "forbidden_actions": {
+            "type": "array"
+          },
+          "handoff_type": {
+            "enum": [
+              "packaged_parameterized_project_analysis"
+            ],
+            "type": "string"
+          },
+          "languages": {
+            "type": "array"
+          },
+          "module": {
+            "type": "object"
+          },
+          "parameter_rules": {
+            "type": "array"
+          },
+          "postflight_checks": {
+            "type": "array"
+          },
+          "preflight_checks": {
+            "type": "array"
+          },
+          "provenance_fields": {
+            "type": "array"
+          },
+          "quality_gate_ids": {
+            "type": "array"
+          },
+          "request_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "request_fields": {
+            "type": "array"
+          },
+          "tool_profiles": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "handoff_type",
+          "module",
+          "request_digest",
+          "request_fields",
+          "languages",
+          "code_plan",
+          "parameter_rules",
+          "preflight_checks",
+          "postflight_checks",
+          "provenance_fields",
+          "forbidden_actions",
+          "tool_profiles",
+          "dependency_profiles",
+          "quality_gate_ids",
+          "execution_policy"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The user has lawful access to an MSBio2 installation and license or provides a complete existing Metascape result package; a compatible Cytoscape session is available for editable network rendering."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://www.nature.com/articles/s41467-019-09234-6",
+          "https://metascape.org/msbio/",
+          "https://cytoscape.org/cytoscape-automation/",
+          "Project-owned licensed-runtime adapter, postflight validator and Cytoscape renderer."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Require explicit organism, stable identifiers, nonempty lists, list provenance, duplicate policy and a defensible measured or tested background universe.",
+          "id": "metascape-input-design",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Record overlap, enrichment, p-value, correction, similarity-clustering, category, PPI-source, network-size and MCODE settings before interpretation.",
+          "id": "metascape-parameter-provenance",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Require and hash the report, workbook, enrichment tables, GO and PPI XGMML networks, MCODE tables, Cytoscape sessions, PDF and PNG outputs.",
+          "id": "metascape-output-integrity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Preserve a deterministic layout, visible node and edge semantics, editable session, PDF, SVG, 600-dpi PNG and the tables needed for independent replotting.",
+          "id": "cytoscape-publication-render",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Which enrichment clusters and dense PPI subnetworks remain interpretable after identifier, universe, database, multiplicity, MCODE and Cytoscape-output review?"
+      ],
+      "schema_version": 1,
+      "title": "Run and audit Metascape MSBio2 enrichment and interaction networks",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==local-package-observed-2026-08-02"
+          ],
+          "ecosystem": "system",
+          "identity": "ms.sh",
+          "mismatch_policy": "block",
+          "name": "msbio2",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "required": false,
+          "tested_versions": [
+            "local-package-observed-2026-08-02"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==local-package-observed-2026-08-02"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parameter",
+              "description": "The observed wrapper accepts a gene-list input, source and target taxonomy identifiers and an output directory, and generates Metascape reports and network assets.",
+              "id": "msbio2-licensed-wrapper-contract",
+              "required_action": "Revalidate wrapper help, license eligibility, option schema and output inventory after every package update.",
+              "source": "https://metascape.org/msbio/"
+            }
+          ],
+          "version_pattern": "(.+)",
+          "version_probe": [
+            "ms.sh",
+            "-h"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://metascape.org/msbio/"
+        },
+        {
+          "allowed_versions": [
+            ">=3.10.4,<3.11"
+          ],
+          "ecosystem": "java",
+          "identity": "Cytoscape",
+          "mismatch_policy": "block",
+          "name": "cytoscape",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.10.4"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.10.4,<3.11"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "CyREST imports XGMML, applies a declared layout and exports editable sessions and publication graphics.",
+              "id": "cyrest-network-rendering",
+              "required_action": "Verify network counts, style mappings, layout, session persistence and nonempty exports after import.",
+              "source": "https://manual.cytoscape.org/en/latest/Programmatic_Access_to_Cytoscape_Features_Scripting.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "cytoscape",
+            "-v"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://cytoscape.org/cytoscape-automation/"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "agent_generated",
+      "agent_protocol": {
+        "forbidden_actions": [
           "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
           "Do not infer demographic history, estimate parameters from empirical data, select scenarios after viewing simulated output, or claim real biological history from simulations.",
           "Do not overwrite outputs or discard failed simulations without preserving the reason."
@@ -43948,6 +45026,645 @@
       "version": "1.0.0"
     },
     {
+      "access": "agent_generated",
+      "agent_protocol": {
+        "forbidden_actions": [
+          "Do not treat a docking score, model rank, predicted affinity or attractive figure as experimental interaction evidence.",
+          "Do not silently remove non-standard residues, change chain mappings or increase allowed sequence mismatches.",
+          "Do not run the official-test sampling profile as a research-grade production analysis."
+        ],
+        "languages": [
+          "python"
+        ],
+        "mode": "packaged_parameterized_workflow",
+        "parameter_rules": [
+          {
+            "decision_inputs": [
+              "scientific-purpose",
+              "restraint-evidence",
+              "complex-size",
+              "reference-availability"
+            ],
+            "id": "select-complex-docking-profile",
+            "parameter": "sampling-and-restraints",
+            "selection_rule": "Use the small official-test profile only for integration checks and the declared production profile for research sampling.",
+            "validation_rule": "Block production interpretation when sampling, restraints, identity, preparation, clustering or reference mapping is unresolved."
+          }
+        ],
+        "postflight_checks": [
+          "Reload CAPRI, DockQ and PRODIGY outputs; reconcile every model; reload PDF, SVG and PNG exports; verify all digests."
+        ],
+        "preflight_checks": [
+          "Resolve molecule identity, chain mapping, coordinate quality, non-standard residues, restraints, sampling profile and isolated tool environments."
+        ],
+        "provenance_fields": [
+          "module-version",
+          "compatibility-row-id",
+          "tool-and-environment-versions",
+          "input-and-output-digests",
+          "parameters",
+          "quality-gate-results",
+          "figure-style-version"
+        ],
+        "requires_observed_execution": true,
+        "schema_version": 1,
+        "template_sections": [
+          {
+            "id": "execute-complex-docking",
+            "output_artifact_types": [
+              "complex_docking_bundle"
+            ],
+            "purpose": "Run the packaged docking workflow in isolated validated environments.",
+            "required_logic": [
+              "Validate identities and preparation, freeze the sampling profile, execute HADDOCK3, and reconcile every ranked model."
+            ],
+            "template_files": [
+              "templates/run_haddock3_complex_docking.py"
+            ]
+          },
+          {
+            "id": "render-complex-figures",
+            "output_artifact_types": [
+              "structure_figure_bundle"
+            ],
+            "purpose": "Render publication-ready structure and quality panels from admitted outputs.",
+            "required_logic": [
+              "Export vector and raster figures, editable scene instructions, interface tables, score tables and a digest-bound manifest."
+            ],
+            "template_files": [
+              "templates/render_complex_publication_figures.py"
+            ]
+          }
+        ]
+      },
+      "alternatives": [
+        "alphafold3-complex-prediction",
+        "docking-pose-review"
+      ],
+      "assumptions": [
+        "Molecular identity, protonation and residue naming, chain mapping, restraint provenance, and coordinate units are declared and reviewed."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_haddock3_complex_docking.py",
+          "purpose": "Generate and execute a closed HADDOCK3 workflow and reconcile all ranked outputs.",
+          "quality_gate_ids": [
+            "complex-input-identity",
+            "docking-sampling-profile",
+            "complex-result-accounting",
+            "complex-score-semantics"
+          ],
+          "requires_adaptation": false
+        },
+        {
+          "language": "python",
+          "path": "templates/render_complex_publication_figures.py",
+          "purpose": "Render structure and interface figures with PDF, SVG, PNG, editable scene instructions and replot tables.",
+          "quality_gate_ids": [
+            "complex-result-accounting",
+            "structure-publication-figures"
+          ],
+          "requires_adaptation": false
+        }
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.12,<3.13"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "haddock3-official-protein-protein-test-v1"
+          ],
+          "id": "haddock3-2026-7-official-protein-protein-example",
+          "input_formats": {
+            "complex_docking_request": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "complex_docking_bundle": [
+              "artifact-directory@1"
+            ],
+            "structure_figure_bundle": [
+              "publication-figure-set@1"
+            ]
+          },
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "regression_evidence_ids": [
+            "protein-complex-docking-regression-v1"
+          ],
+          "tool_versions": {
+            "dockq": [
+              ">=2.1,<2.2"
+            ],
+            "haddock3": [
+              ">=2026.7,<2026.8"
+            ],
+            "matplotlib": [
+              ">=3.10,<3.11"
+            ],
+            "prodigy-prot": [
+              ">=2.3,<2.4"
+            ]
+          },
+          "verified_at": "2026-08-02"
+        }
+      ],
+      "complements": [
+        "protein-interaction-network-evidence",
+        "structure-quality-assessment",
+        "structure-interactive-visualization"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.12,<3.13"
+          ],
+          "conflicts": [
+            {
+              "dependency": "numpy",
+              "reason": "The validated HADDOCK3/PRODIGY environment resolved NumPy 2.5.1 while DockQ 2.1.3 requires NumPy below 2.",
+              "required_action": "Run DockQ in a separate environment and pass only coordinate and text artifacts between stages.",
+              "source": "https://github.com/wallnerlab/DockQ",
+              "versions": [
+                ">=2",
+                "<2"
+              ]
+            }
+          ],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the packaged runner and renderer in isolated, provenance-recorded environments.",
+          "required": true,
+          "tested_versions": [
+            "3.12.10"
+          ],
+          "verified_at": "2026-08-02",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/"
+        }
+      ],
+      "description": "Execute restraint-aware HADDOCK3 protein-complex docking with explicit test and production sampling profiles, optional PRODIGY and reference-backed DockQ evaluation, complete model accounting, and publication-ready structural figures plus replot tables.",
+      "domains": [
+        "molecular_design"
+      ],
+      "entrypoint": "agent-generated-analysis",
+      "evidence_effects": [
+        "produces-complex-docking-hypotheses",
+        "produces-publication-ready-structure-figures",
+        "blocks-docking-as-binding-proof"
+      ],
+      "execution": {
+        "kind": "workflow",
+        "max_output_bytes": 3000000,
+        "timeout_seconds": 30
+      },
+      "id": "protein-complex-docking",
+      "input_artifacts": [
+        {
+          "artifact_type": "structure_analysis_request",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "complex_docking_request",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "figure_title": {
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "output_directory": {
+            "type": "string"
+          },
+          "request_path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "request_path",
+          "output_directory"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "protein protein docking",
+        "HADDOCK3 complex docking",
+        "\u86cb\u767d\u590d\u5408\u7269\u5bf9\u63a5\u4e0e\u7ed3\u6784\u8bc4\u4ef7"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Docking generates structural hypotheses and does not establish interaction, affinity, kinetics, stoichiometry, cellular context, or mechanism.",
+        "PRODIGY rejects unsupported non-standard residues unless the user applies a scientifically reviewed preparation step.",
+        "HADDOCK3/PRODIGY and DockQ require isolated environments because their validated NumPy requirements conflict."
+      ],
+      "maturity": "experimental",
+      "module_type": "analysis",
+      "mutability": "writes_output",
+      "output_artifacts": [
+        {
+          "artifact_type": "complex_docking_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "artifact-directory",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "complex_docking_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module-version",
+            "compatibility-row-id",
+            "artifact-digest"
+          ],
+          "source_policy": "project_input"
+        },
+        {
+          "artifact_type": "structure_figure_bundle",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [
+                "cartesian-angstrom"
+              ],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "publication-figure-set",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "structure_figure_bundle",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "style-version",
+            "source-digest",
+            "replot-table"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "code_plan": {
+            "type": "array"
+          },
+          "dependency_profiles": {
+            "type": "array"
+          },
+          "execution_policy": {
+            "type": "object"
+          },
+          "forbidden_actions": {
+            "type": "array"
+          },
+          "handoff_type": {
+            "enum": [
+              "packaged_parameterized_project_analysis"
+            ],
+            "type": "string"
+          },
+          "languages": {
+            "type": "array"
+          },
+          "module": {
+            "type": "object"
+          },
+          "parameter_rules": {
+            "type": "array"
+          },
+          "postflight_checks": {
+            "type": "array"
+          },
+          "preflight_checks": {
+            "type": "array"
+          },
+          "provenance_fields": {
+            "type": "array"
+          },
+          "quality_gate_ids": {
+            "type": "array"
+          },
+          "request_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "request_fields": {
+            "type": "array"
+          },
+          "tool_profiles": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "handoff_type",
+          "module",
+          "request_digest",
+          "request_fields",
+          "languages",
+          "code_plan",
+          "parameter_rules",
+          "preflight_checks",
+          "postflight_checks",
+          "provenance_fields",
+          "forbidden_actions",
+          "tool_profiles",
+          "dependency_profiles",
+          "quality_gate_ids",
+          "execution_policy"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Codex can inspect immutable coordinate inputs, restraints, reference availability, and separate compatible HADDOCK3 and DockQ runtimes before execution."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://github.com/haddocking/haddock3",
+          "https://github.com/wallnerlab/DockQ",
+          "https://github.com/haddocking/prodigy",
+          "Project-owned parameterized runner, output auditor and publication renderer."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Require two or more parseable PDB inputs with explicit molecular identity, chain scope, coordinate units, and immutable digests.",
+          "id": "complex-input-identity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Separate the official small integration test from the production profile and record every sampling, selection, restraint, seed, and clustering parameter.",
+          "id": "docking-sampling-profile",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Reconcile every generated model, CAPRI table row, cluster, selected model, evaluation return code, and output digest.",
+          "id": "complex-result-accounting",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Keep HADDOCK score, DockQ reference agreement, and PRODIGY affinity estimation distinct from experimental interaction and binding evidence.",
+          "id": "complex-score-semantics",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Export PDF, SVG and 600-dpi PNG figures, editable scene instructions, interface contacts, score tables, legends, units, and a style-bound figure manifest.",
+          "id": "structure-publication-figures",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Which complex models remain supported after sampling, clustering, interface evaluation, reference comparison when available, and structural-figure review?"
+      ],
+      "schema_version": 1,
+      "title": "Dock and evaluate biomolecular complexes with HADDOCK3",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            ">=2026.7,<2026.8"
+          ],
+          "ecosystem": "python",
+          "identity": "haddock3",
+          "mismatch_policy": "block",
+          "name": "haddock3",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "2026.7.0"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2026.7,<2026.8"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parameter",
+              "description": "The validated workflow uses topoaa, rigidbody, CAPRI evaluation, selection, flexible refinement, energy minimization, FCC clustering and analysis.",
+              "id": "haddock3-official-workflow",
+              "required_action": "Revalidate module sequence, configuration grammar, output tables and compressed final-model handling after a version change.",
+              "source": "https://www.bonvinlab.org/haddock3-user-manual/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "haddock3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/haddocking/haddock3"
+        },
+        {
+          "allowed_versions": [
+            ">=2.3,<2.4"
+          ],
+          "ecosystem": "python",
+          "identity": "prodigy",
+          "mismatch_policy": "block",
+          "name": "prodigy-prot",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "2.3.0"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2.3,<2.4"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "PRODIGY estimates affinity from a supplied complex and refuses unsupported non-standard residues.",
+              "id": "prodigy-complex-affinity",
+              "required_action": "Preserve parser failures and never report an estimate after silent residue deletion.",
+              "source": "https://github.com/haddocking/prodigy"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "prodigy",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/haddocking/prodigy"
+        },
+        {
+          "allowed_versions": [
+            ">=2.1,<2.2"
+          ],
+          "ecosystem": "python",
+          "identity": "DockQ",
+          "mismatch_policy": "block",
+          "name": "dockq",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "2.1.3"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=2.1,<2.2"
+              ],
+              "category": "parameter",
+              "compatibility_effect": "requires-parameter",
+              "description": "DockQ reports interface and ligand RMSD, native and non-native contact fractions, F1, clashes and chain mapping against a declared reference.",
+              "id": "dockq-reference-mapping",
+              "required_action": "Require the reference and justify any allowed sequence mismatches explicitly.",
+              "source": "https://github.com/wallnerlab/DockQ"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "DockQ",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://github.com/wallnerlab/DockQ"
+        },
+        {
+          "allowed_versions": [
+            ">=3.10,<3.11"
+          ],
+          "ecosystem": "python",
+          "identity": "matplotlib",
+          "mismatch_policy": "block",
+          "name": "matplotlib",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.10.8"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.10,<3.11"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-format",
+              "description": "Matplotlib renders deterministic vector and high-resolution raster structure-summary panels.",
+              "id": "structure-figure-export",
+              "required_action": "Reload every export and retain the exact replot tables and style version.",
+              "source": "https://matplotlib.org/stable/api/index.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import matplotlib; print(matplotlib.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://matplotlib.org/stable/api/index.html"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
       "access": "public_api",
       "alternatives": [],
       "assumptions": [
@@ -44273,6 +45990,457 @@
           "version_probe_kind": "service_contract",
           "version_probe_timeout_seconds": 10,
           "version_source": "https://iupred2a.elte.hu/help_new"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "public_api",
+      "alternatives": [
+        "network-analysis",
+        "metascape-msbio-network-analysis"
+      ],
+      "assumptions": [
+        "Input identifiers refer to the intended species and mapping ambiguities or losses are scientifically reviewed before network interpretation."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/render_string_ppi_network.py",
+          "purpose": "Render normalized STRING edges as vector and raster figures with Cytoscape-ready node and edge tables.",
+          "quality_gate_ids": [
+            "string-identifier-mapping",
+            "string-network-semantics",
+            "string-enrichment-semantics",
+            "ppi-publication-render"
+          ],
+          "requires_adaptation": false
+        }
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "string-v12-live-network-v1"
+          ],
+          "id": "string-12-0-network-api",
+          "input_formats": {
+            "protein_network_query": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "protein_network_figures": [
+              "publication-figure-set@1"
+            ],
+            "protein_network_result": [
+              "normalized-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "string-network-regression-v1"
+          ],
+          "tool_versions": {
+            "matplotlib": [
+              ">=3.10,<3.11"
+            ],
+            "string-api": [
+              ">=12,<13"
+            ]
+          },
+          "verified_at": "2026-08-02"
+        }
+      ],
+      "complements": [
+        "structure-evidence",
+        "alphafold3-complex-prediction",
+        "protein-complex-docking",
+        "functional-enrichment"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the bounded public-database client and optional renderer.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-07-12",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Map two to 100 declared protein identifiers to STRING 12.0, retrieve functional-association or physical-evidence networks with explicit score thresholds and optional added nodes, preserve every evidence-channel score and PPI enrichment statistic, and export Cytoscape-ready tables and publication figures.",
+      "domains": [
+        "evidence",
+        "molecular_design"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.evidence:protein_interaction_network_evidence",
+      "evidence_effects": [
+        "grounds-protein-network-associations",
+        "preserves-physical-versus-functional-semantics",
+        "produces-replot-ready-ppi-figures"
+      ],
+      "execution": {
+        "kind": "service",
+        "max_output_bytes": 20000000,
+        "timeout_seconds": 90
+      },
+      "id": "protein-interaction-network-evidence",
+      "input_artifacts": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "protein_network_query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "add_nodes": {
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "identifiers": {
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 2,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "network_type": {
+            "enum": [
+              "functional",
+              "physical"
+            ],
+            "type": "string"
+          },
+          "required_score": {
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "species": {
+            "maximum": 9999999,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "identifiers",
+          "species"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "STRING PPI analysis",
+        "protein interaction network",
+        "\u86cb\u767d\u4e92\u4f5c\u7f51\u7edc\u4e0ePPI\u5bcc\u96c6"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "A functional STRING edge is an association and need not represent physical interaction.",
+        "A physical STRING edge is database evidence compatible with interaction, not proof in the user's tissue, condition or assay.",
+        "PPI enrichment and network topology do not establish pathway activation, direction, affinity, causality or mechanism."
+      ],
+      "maturity": "validated",
+      "module_type": "data_source",
+      "mutability": "read_only",
+      "output_artifacts": [
+        {
+          "artifact_type": "evidence_bundle",
+          "formats": [
+            {
+              "annotation_releases": [
+                "STRING-12.0"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "protein_network_result",
+          "processing_levels": [
+            "source-preserved",
+            "derived"
+          ],
+          "required_metadata": [
+            "service-contract",
+            "database-release",
+            "retrieval-time"
+          ],
+          "source_policy": "project_input"
+        },
+        {
+          "artifact_type": "network_figure_bundle",
+          "formats": [
+            {
+              "annotation_releases": [
+                "STRING-12.0"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "publication-figure-set",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "protein_network_figures",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "style-version",
+            "source-digest",
+            "replot-tables"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "edge_count": {
+            "type": "integer"
+          },
+          "edges": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "mapped_count": {
+            "type": "integer"
+          },
+          "mappings": {
+            "type": "array"
+          },
+          "ppi_enrichment": {
+            "type": "object"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "query": {
+            "type": "object"
+          },
+          "unmapped_identifiers": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "query",
+          "mappings",
+          "mapped_count",
+          "unmapped_identifiers",
+          "edges",
+          "edge_count",
+          "ppi_enrichment",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "A bounded unique protein list and exact NCBI taxonomy identifier are available and public HTTPS access is permitted."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://string-db.org/help/api/",
+          "https://academic.oup.com/nar/article/51/D1/D638/6825349",
+          "Project-owned bounded client, semantic validation and figure renderer."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Preserve query index, submitted identifier, STRING ID, preferred name, organism and every unmapped identifier without silent substitution.",
+          "id": "string-identifier-mapping",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Record release, network type, required score, added-node policy and all combined and channel-specific edge scores.",
+          "id": "string-network-semantics",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Preserve node and edge counts, expected edges, average degree, clustering and PPI enrichment p-value without converting enrichment into mechanism.",
+          "id": "string-enrichment-semantics",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Export node and edge TSVs, Cytoscape style, PDF, SVG and 600-dpi PNG with fixed layout and explicit edge semantics.",
+          "id": "ppi-publication-render",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Which versioned STRING associations or physical-evidence edges connect the declared proteins, through which evidence channels, and with what enrichment relative to expectation?"
+      ],
+      "schema_version": 1,
+      "title": "Retrieve and render version-pinned STRING protein networks",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            ">=12,<13"
+          ],
+          "ecosystem": "service",
+          "identity": "STRING-12.0-REST",
+          "mismatch_policy": "block",
+          "name": "string-api",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "12.0"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=12,<13"
+              ],
+              "category": "api",
+              "compatibility_effect": "requires-parser",
+              "description": "Version-specific identifier mapping, network and PPI enrichment endpoints return documented mapping, edge-channel and summary fields.",
+              "id": "string-v12-api",
+              "required_action": "Revalidate mapping, edge fields, network types, score scale and enrichment schema before changing the version-specific host.",
+              "source": "https://string-db.org/help/api/"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.services.public_databases:probe_string_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://string-db.org/help/api/"
+        },
+        {
+          "allowed_versions": [
+            ">=3.10,<3.11"
+          ],
+          "ecosystem": "python",
+          "identity": "matplotlib",
+          "mismatch_policy": "block",
+          "name": "matplotlib",
+          "platforms": [
+            "any"
+          ],
+          "required": false,
+          "tested_versions": [
+            "3.10.8"
+          ],
+          "verified_at": "2026-08-02",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.10,<3.11"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-format",
+              "description": "Matplotlib creates deterministic vector and high-resolution raster network figures from normalized STRING tables.",
+              "id": "ppi-figure-export",
+              "required_action": "Reload each export and preserve node and edge replot tables.",
+              "source": "https://matplotlib.org/stable/api/index.html"
+            }
+          ],
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import matplotlib; print(matplotlib.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 30,
+          "version_source": "https://matplotlib.org/stable/api/index.html"
         }
       ],
       "version": "1.0.0"
@@ -78051,7 +80219,7 @@
           ],
           "tool_versions": {
             "POT": [
-              "==0.9.0"
+              ">=0.9.0,<0.9.1"
             ],
             "lme4": [
               ">=1.1,<1.2"
@@ -78518,7 +80686,7 @@
         },
         {
           "allowed_versions": [
-            "==0.9.0"
+            ">=0.9.0,<0.9.1"
           ],
           "ecosystem": "python",
           "identity": "POT",
@@ -88688,6 +90856,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "632bf87110a3bec3f3283c1b36242312f5b5b58d0f49bd589bfa5f5528eaddd4",
+  "registry_digest": "55487b07c73a75145a82bad293abc63c1d7e9a54130fd86be24116e8b87bc4b9",
   "schema_version": 1
 }

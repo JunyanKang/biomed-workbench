@@ -1,4 +1,4 @@
-"""Composable NCBI evidence workflows driven by structured Codex inputs."""
+"""Composable public-database workflows driven by structured Codex inputs."""
 
 from __future__ import annotations
 
@@ -30,6 +30,7 @@ from biomed_workbench.services.public_databases import (
     gnomad_gene_constraint_evidence as fetch_gnomad_gene_constraint_evidence,
     uniprot_protein_record,
     uniprot_to_ensembl_gene_mapping,
+    string_protein_interaction_evidence as fetch_string_protein_interaction_evidence,
 )
 
 
@@ -165,6 +166,19 @@ def alphafold_structure_evidence(
 ) -> dict[str, Any]:
     """Retrieve versioned AlphaFold DB model and confidence metadata."""
     return alphafold_structure_records(uniprot_accessions, include_sequence)
+
+
+def protein_interaction_network_evidence(
+    identifiers: list[str],
+    species: int,
+    network_type: str = "functional",
+    required_score: int = 700,
+    add_nodes: int = 0,
+) -> dict[str, Any]:
+    """Retrieve a version-pinned STRING association or physical-evidence network."""
+    return fetch_string_protein_interaction_evidence(
+        identifiers, species, network_type, required_score, add_nodes
+    )
 
 
 def protein_disorder_evidence(

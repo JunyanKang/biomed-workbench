@@ -19,7 +19,7 @@ if str(ROOT) not in sys.path:
 from biomed_workbench.catalog import all_capabilities, capability_to_dict, resolve_entrypoint  # noqa: E402
 from biomed_workbench.formats import FormatRegistry  # noqa: E402
 from biomed_workbench.modules.index import BUILTIN_ROOT, MODULE_INDEX, build_index  # noqa: E402
-from biomed_workbench.modules.evidence_scope import evidence_scope_is_current  # noqa: E402
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current, report_module_ids  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry, ModuleRegistryError  # noqa: E402
 from biomed_workbench.orchestration.graph import build_capability_graph  # noqa: E402
 from biomed_workbench.services.public_databases import (  # noqa: E402
@@ -31,15 +31,19 @@ from biomed_workbench.services.public_databases import (  # noqa: E402
     PUBCHEM_CONTRACT_VERSION,
     RCSB_CONTRACT_VERSION,
     RCSB_SEARCH_CONTRACT_VERSION,
+    STRING_CONTRACT_VERSION,
 )
 from biomed_workbench.services.credentials import ALLOWED_CREDENTIALS  # noqa: E402
 from biomed_workbench.version import VERSION  # noqa: E402
 from tools.validate_module import validate_module  # noqa: E402
 from tools.build_format_contract_report import build as build_format_contract_report  # noqa: E402
+from tools.build_tool_compatibility_matrix import build_compatibility_report  # noqa: E402
 from tools.audit_bioinformatics_templates import build as build_bioinformatics_template_report  # noqa: E402
 from tools.audit_execution_readiness import build as build_execution_readiness_report  # noqa: E402
 from tools.build_research_engine_report import EXECUTION_CONTRACTS, KERNEL_CONTRACTS  # noqa: E402
 from tools.build_experimental_maturity_report import build as build_experimental_maturity_report  # noqa: E402
+from tools.audit_adapter_boundaries import build as build_adapter_boundary_report  # noqa: E402
+from tools.verify_mcp_adapter import validate_report as validate_mcp_adapter_report  # noqa: E402
 
 CATALOG_FIELDS = {"id", "workflow", "kind", "title", "description", "entrypoint", "input_schema", "requirements", "access", "mutability"}
 SECRET_PATTERNS = [
@@ -171,6 +175,22 @@ def main() -> int:
     for policy_file in (ROOT / "PRIVACY.md", ROOT / "TERMS.md"):
         if not policy_file.is_file():
             errors.append(f"missing public policy document: {policy_file.name}")
+    interoperability_path = ROOT / "reports" / "adapter-boundary-audit.json"
+    try:
+        interoperability_report = json.loads(interoperability_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        errors.append("agent interoperability audit is missing or invalid")
+    else:
+        if interoperability_report != build_adapter_boundary_report() or interoperability_report.get("passed") is not True:
+            errors.append("Codex and optional-adapter boundary audit differs from the current source")
+    mcp_report_path = ROOT / "reports" / "mcp-adapter-live-verification.json"
+    try:
+        mcp_report = json.loads(mcp_report_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        errors.append("optional MCP adapter execution report is missing or invalid")
+    else:
+        if not validate_mcp_adapter_report(mcp_report):
+            errors.append("optional MCP adapter execution report differs from the current adapter or registry")
 
     catalog_path = ROOT / "tools" / "catalog.json"
     catalog = json.loads(catalog_path.read_text()) if catalog_path.is_file() else {}
@@ -236,6 +256,25 @@ def main() -> int:
                 and report["compatibility_evidence_complete"]
             ):
                 errors.append(f"module scientific compatibility evidence is incomplete: {report['module_id']}")
+        for report_path in sorted((ROOT / "reports").glob("*.json")):
+            try:
+                scoped_report = json.loads(report_path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if (
+                isinstance(scoped_report, dict)
+                and report_module_ids(scoped_report)
+                and not evidence_scope_is_current(scoped_report, registry)
+            ):
+                errors.append(f"module-specific report has a missing or stale evidence scope: {report_path.name}")
+        compatibility_matrix_path = ROOT / "reports" / "tool-compatibility-matrix.json"
+        try:
+            compatibility_matrix = json.loads(compatibility_matrix_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            errors.append("tool compatibility matrix is missing or invalid")
+        else:
+            if compatibility_matrix != build_compatibility_report(registry):
+                errors.append("tool compatibility matrix differs from the discovered registry")
         research_report_path = ROOT / "reports" / "research-engine-verification.json"
         compatibility_evidence_path = ROOT / "reports" / "compatibility-execution-evidence.json"
         fixture_root = ROOT / "tests" / "fixtures" / "research-cycles"
@@ -1164,6 +1203,7 @@ def main() -> int:
             "structure-polymer-entities",
             "structure-ligands",
             "alphafold-structure-evidence",
+            "protein-interaction-network-evidence",
         }
         expected_public_database_contracts = {
             "alphafold-db-api": ALPHAFOLD_CONTRACT_VERSION,
@@ -1174,6 +1214,7 @@ def main() -> int:
             "pubchem-pug-rest": PUBCHEM_CONTRACT_VERSION,
             "rcsb-pdb-data-api": RCSB_CONTRACT_VERSION,
             "rcsb-pdb-search-api": RCSB_SEARCH_CONTRACT_VERSION,
+            "string-api": STRING_CONTRACT_VERSION,
         }
         try:
             public_database_report = json.loads(public_database_report_path.read_text(encoding="utf-8"))
@@ -1193,6 +1234,7 @@ def main() -> int:
                 "structure_polymer_entities",
                 "structure_bound_ligands",
                 "structure_prediction_metadata",
+                "protein_interaction_network",
             }
             scientific_summary = public_database_report.get("scientific_summary", {})
             if (

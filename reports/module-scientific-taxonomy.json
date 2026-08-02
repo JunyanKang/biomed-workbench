@@ -10,10 +10,10 @@
     "assay-specific": 35,
     "cross-scale": 10,
     "cross-scale delivery": 2,
-    "multi-assay": 37,
-    "research-infrastructure-or-other-domain": 110
+    "multi-assay": 38,
+    "research-infrastructure-or-other-domain": 113
   },
-  "module_count": 194,
+  "module_count": 198,
   "modules": [
     {
       "domains": [
@@ -114,6 +114,23 @@
       "method_role": "research-infrastructure-or-other-domain",
       "module_id": "alphafold-structure-evidence",
       "module_type": "data_source",
+      "module_version": "1.0.0",
+      "primary_scale": "universal"
+    },
+    {
+      "domains": [
+        "molecular_design"
+      ],
+      "invariants": {
+        "assay_is_not_target_or_antibody": true,
+        "normalization_is_not_assay": true,
+        "scale_is_not_measurement_family": true,
+        "specificity_control_is_not_biological_replicate": true
+      },
+      "measurement_family": "not assay-scoped",
+      "method_role": "research-infrastructure-or-other-domain",
+      "module_id": "alphafold3-complex-prediction",
+      "module_type": "analysis",
       "module_version": "1.0.0",
       "primary_scale": "universal"
     },
@@ -1651,6 +1668,24 @@
     {
       "domains": [
         "omics",
+        "molecular_design"
+      ],
+      "invariants": {
+        "assay_is_not_target_or_antibody": true,
+        "normalization_is_not_assay": true,
+        "scale_is_not_measurement_family": true,
+        "specificity_control_is_not_biological_replicate": true
+      },
+      "measurement_family": "sequence or molecular data infrastructure",
+      "method_role": "multi-assay",
+      "module_id": "metascape-msbio-network-analysis",
+      "module_type": "analysis",
+      "module_version": "1.0.0",
+      "primary_scale": "universal"
+    },
+    {
+      "domains": [
+        "omics",
         "genetics",
         "population-genetics"
       ],
@@ -2078,6 +2113,23 @@
     },
     {
       "domains": [
+        "molecular_design"
+      ],
+      "invariants": {
+        "assay_is_not_target_or_antibody": true,
+        "normalization_is_not_assay": true,
+        "scale_is_not_measurement_family": true,
+        "specificity_control_is_not_biological_replicate": true
+      },
+      "measurement_family": "not assay-scoped",
+      "method_role": "research-infrastructure-or-other-domain",
+      "module_id": "protein-complex-docking",
+      "module_type": "analysis",
+      "module_version": "1.0.0",
+      "primary_scale": "universal"
+    },
+    {
+      "domains": [
         "evidence",
         "molecular_design"
       ],
@@ -2090,6 +2142,24 @@
       "measurement_family": "not assay-scoped",
       "method_role": "research-infrastructure-or-other-domain",
       "module_id": "protein-disorder-evidence",
+      "module_type": "data_source",
+      "module_version": "1.0.0",
+      "primary_scale": "universal"
+    },
+    {
+      "domains": [
+        "evidence",
+        "molecular_design"
+      ],
+      "invariants": {
+        "assay_is_not_target_or_antibody": true,
+        "normalization_is_not_assay": true,
+        "scale_is_not_measurement_family": true,
+        "specificity_control_is_not_biological_replicate": true
+      },
+      "measurement_family": "not assay-scoped",
+      "method_role": "research-infrastructure-or-other-domain",
+      "module_id": "protein-interaction-network-evidence",
       "module_type": "data_source",
       "module_version": "1.0.0",
       "primary_scale": "universal"
@@ -3398,13 +3468,13 @@
       "primary_scale": "universal"
     }
   ],
-  "registry_digest": "632bf87110a3bec3f3283c1b36242312f5b5b58d0f49bd589bfa5f5528eaddd4",
-  "report_sha256_without_self_field": "470acfcf0df20b1bc94c7675e17a6393b610f59eb6154234b48f2a7d1d7bb40d",
+  "registry_digest": "55487b07c73a75145a82bad293abc63c1d7e9a54130fd86be24116e8b87bc4b9",
+  "report_sha256_without_self_field": "6d79ced63fcf39ecf134837f74e86cd72d7c9e890938f8f732662b83d75e8147",
   "scale_counts": {
     "bulk": 9,
     "single-cell": 23,
     "spatial": 5,
-    "universal": 157
+    "universal": 161
   },
   "schema_version": 1
 }

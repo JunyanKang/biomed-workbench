@@ -58,7 +58,9 @@ jobs:
           set -euo pipefail
           python tools/build_module_index.py
           python tools/build_format_contract_report.py --output reports/format-contract-registry.json
+          python tools/build_tool_compatibility_matrix.py biomed_workbench/modules/builtin --output reports/tool-compatibility-matrix.json
           python tools/capture_compatibility_evidence.py --output reports/compatibility-execution-evidence.json
+          python tools/audit_adapter_boundaries.py --output reports/adapter-boundary-audit.json
           python tools/verify_registry_snapshot.py --output reports/module-registry-verification.json
           python tools/verify_codex_native_handoffs.py --output reports/codex-native-handoff-verification.json
           python tools/verify_ci_quality.py --output reports/ci-quality-verification.json

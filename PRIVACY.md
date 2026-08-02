@@ -1,9 +1,9 @@
 # Privacy
 
-Biomed Workbench processes supplied scientific data locally unless a registered public-database capability is selected. The current networked capabilities access NCBI E-utilities.
+Biomed Workbench processes project data in the user-controlled workspace unless the user selects an external database, literature, model-service, or other networked capability. Implemented public clients include NCBI, Europe PMC, Crossref, UniProt, Ensembl, Reactome, Open Targets, public cBioPortal, PubChem, STRING and other services listed in the versioned [data-access inventory](docs/data-access-and-credentials.md).
 
-The plugin does not operate an independent data-collection service. It does not intentionally transmit project files, prompts, clinical records, or credentials to the plugin author. Requests sent to an external scientific database are governed by that database's privacy policy and terms.
+Each external request is limited to the declared identifiers or query payload required by that capability and is governed by the destination service's terms and privacy policy. Project files, prompts, clinical records and credentials are not sent to the plugin author. Local MSBio2, Cytoscape, HADDOCK3 and approved AlphaFold 3 runtimes operate on user-selected local artifacts; their licenses and any separately chosen external services remain under the user's control.
 
-`NCBI_API_KEY` is optional. It is read from the process environment, excluded from structured results and reports, and must not be stored in the repository or capability input payloads.
+Credential requirements are endpoint-specific. `NCBI_API_KEY` is optional for the implemented NCBI E-utilities and Datasets endpoints. Credential values are read through the credential service or task-scoped environment, excluded from structured inputs and outputs, and must not be stored in the repository, reports, logs or scientific evidence maps.
 
-Users must de-identify sensitive human data and confirm that any external-database use is permitted by their institution, consent framework, and applicable law.
+Sensitive human data must be de-identified or processed in an appropriately governed environment. Before external access, users and Codex—or an explicitly configured interoperability adapter—must confirm that the requested identifiers and metadata can be transmitted under the applicable consent, institutional policy and law.

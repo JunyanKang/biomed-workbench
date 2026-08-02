@@ -41,6 +41,7 @@ SERVICE_COVERAGE = {
     "ncbi-search-summary": (("search", "pubmed"), ("summary", "pubmed")),
     "ncbi-summary": (("summary", "pubmed"),),
     "preprint-evidence": (("preprint_version_history", "biorxiv"),),
+    "protein-interaction-network-evidence": (("protein_interaction_network", "string-v12"),),
     "structure-evidence": (("structure_entry_context", "rcsb-pdb"),),
     "structure-search": (("structure_attribute_search", "rcsb-pdb-search"),),
     "structure-polymer-entities": (("structure_polymer_entities", "rcsb-pdb"),),
@@ -66,6 +67,12 @@ COMMAND_EVIDENCE = {
 }
 
 AGENT_EVIDENCE = {
+    "alphafold3-complex-prediction": {
+        "path": "reports/alphafold3-adapter-live-verification.json",
+        "execution_flags": ("official_input_generated", "official_output_fixture_reloaded", "confidence_figures_completed"),
+        "summary_flags": ("official_schema_preserved", "full_local_inference_not_claimed", "weights_not_bundled", "confidence_not_binding_evidence", "outputs_reloaded"),
+        "live_dependency_keys": ("python",),
+    },
     "chemical-substructure-filter": {
         "path": "reports/chemical-substructure-filter-live-verification.json",
         "execution_flags": ("template_completed", "outputs_reloaded"),
@@ -76,6 +83,18 @@ AGENT_EVIDENCE = {
         "path": "reports/docking-pose-review-live-verification.json",
         "execution_flags": ("template_completed", "outputs_reloaded"),
         "summary_flags": ("all_pose_files_accounted", "invalid_sdf_retained", "confidence_not_affinity", "receptor_clashes_computed"),
+        "live_dependency_keys": ("python",),
+    },
+    "metascape-msbio-network-analysis": {
+        "path": "reports/metascape-msbio-cytoscape-live-verification.json",
+        "execution_flags": ("existing_result_bundle_reloaded", "cytoscape_completed", "figures_reloaded"),
+        "summary_flags": ("required_artifact_families_reconciled", "mcode_records_reloaded", "node_edge_counts_reconciled", "editable_session_saved", "layout_not_biological_distance"),
+        "live_dependency_keys": ("python",),
+    },
+    "protein-complex-docking": {
+        "path": "reports/protein-complex-docking-live-verification.json",
+        "execution_flags": ("haddock3_completed", "outputs_reloaded", "publication_figures_completed", "dockq_completed", "prodigy_standard_reference_completed", "prodigy_nonstandard_residue_rejection_preserved"),
+        "summary_flags": ("official_workflow_completed", "all_ranked_models_accounted", "reference_metrics_separated", "affinity_estimate_separated", "replot_tables_exported", "outputs_reloaded"),
         "live_dependency_keys": ("python",),
     },
     "protein-secondary-structure": {

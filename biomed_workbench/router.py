@@ -175,7 +175,7 @@ def _is_imaging_query(normalized_query: str) -> bool:
 def _is_molecular_design_query(normalized_query: str) -> bool:
     return bool(
         re.search(
-            r"\b(primer|pcr|amplicon|crispr|guide|restriction|digest|golden[ -]?gate|cloning|plasmid|orf|open reading frame|sanger|docking|ligand|smiles|protein structure|structure quality)\b",
+            r"\b(primer|pcr|amplicon|crispr|guide|restriction|digest|golden[ -]?gate|cloning|plasmid|orf|open reading frame|sanger|docking|haddock3|ligand|smiles|protein structure|structure quality|alphafold ?3|protein interaction|ppi|metascape|msbio2)\b",
             normalized_query,
         )
         or any(term in normalized_query for term in ("引物", "酶切", "克隆", "质粒", "结构质量", "分子对接"))
@@ -226,7 +226,7 @@ def _is_wetlab_query(normalized_query: str) -> bool:
 
 def _is_evidence_query(normalized_query: str) -> bool:
     return bool(
-        re.search(r"\b(evidence|retrieve|search|database|ncbi|entrez|uniprot|ensembl|dbsnp|gnomad|hpo|go|reactome|cbioportal|opentargets|crossref|europe pmc|biorxiv|pubchem|rcsb|alphafold)\b", normalized_query)
+        re.search(r"\b(evidence|retrieve|search|database|ncbi|entrez|uniprot|ensembl|dbsnp|gnomad|hpo|go|reactome|cbioportal|opentargets|crossref|europe pmc|biorxiv|pubchem|rcsb|alphafold|string|ppi)\b", normalized_query)
         or any(term in normalized_query for term in ("证据", "数据库", "检索", "查询", "文献"))
     )
 
@@ -241,6 +241,13 @@ def _has_exact_route_signal(module: ModuleManifest, query: str) -> bool:
 
 def _module_allowed_for_query(module: ModuleManifest, query: str) -> bool:
     normalized_query = _normalize(query)
+    if module.id == "alphafold3-complex-prediction" and not re.search(
+        r"\balphafold[\s_-]*3\b|\baf3\b|protein[\s_-]+ligand[\s_-]+structure[\s_-]+prediction|蛋白复合物结构预测",
+        normalized_query,
+    ):
+        # AlphaFold DB confidence/disorder lookups are evidence retrieval, not
+        # requests to prepare or execute an AlphaFold 3 complex prediction.
+        return False
     if _has_exact_route_signal(module, query):
         return True
     single_cell_query = _is_single_cell_query(normalized_query)
@@ -267,7 +274,13 @@ def _module_allowed_for_query(module: ModuleManifest, query: str) -> bool:
         normalized_query,
     ):
         return False
-    if module.domains[0] == "omics" and molecular_query and not omics_query and module.id != "sequence-inspect":
+    if (
+        module.domains[0] == "omics"
+        and molecular_query
+        and not omics_query
+        and module.id != "sequence-inspect"
+        and module.id not in _forced_named_method_module_ids(normalized_query)
+    ):
         return False
     return True
 
@@ -315,6 +328,20 @@ def _forced_single_cell_module_ids(normalized_query: str) -> list[str]:
         add("single-cell-fate-mapping")
     if re.search(r"\b(donor-aware|pseudobulk|mixed model|edger|deseq2|dream)\b", normalized_query):
         add("single-cell-donor-inference")
+    return forced
+
+
+def _forced_named_method_module_ids(normalized_query: str) -> list[str]:
+    """Resolve unambiguous method names before broad biological keywords."""
+    forced = []
+    if re.search(r"\bstring\b", normalized_query) and re.search(r"\bppi\b|protein interaction|蛋白互作", normalized_query):
+        forced.append("protein-interaction-network-evidence")
+    if re.search(r"\bhaddock\s*3?\b", normalized_query):
+        forced.append("protein-complex-docking")
+    if re.search(r"\balphafold\s*3\b|\baf3\b", normalized_query):
+        forced.append("alphafold3-complex-prediction")
+    if re.search(r"\bmsbio\s*2\b|\bmetascape\b", normalized_query):
+        forced.append("metascape-msbio-network-analysis")
     return forced
 
 
@@ -402,6 +429,11 @@ def _select_ranked_modules(
     normalized = _normalize(query)
     has_regvelo = _has_regvelo_intent(normalized)
     has_scvi = _has_scvi_intent(normalized)
+    forced_named_ids = _forced_named_method_module_ids(normalized)
+    if forced_named_ids:
+        forced_items = [item for module_id in forced_named_ids for item in ranked if item[1].id == module_id]
+        if forced_items:
+            return [item[1].id for item in forced_items]
 
     if has_regvelo and not has_scvi:
         ranked = [item for item in ranked if item[1].id != "single-cell-generative-modeling"]
@@ -672,6 +704,8 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
     single_cell_query = _is_single_cell_query(normalized_query)
     imaging_query = _is_imaging_query(normalized_query)
     wetlab_query = _is_wetlab_query(normalized_query)
+    forced_named_ids = _forced_named_method_module_ids(normalized_query)
+    forced_named_domains = {active.get(module_id).domains[0] for module_id in forced_named_ids}
     dominant_exact_domains = set()
     exact_domains = set()
     direct_source_exact_domains = set()
@@ -693,6 +727,8 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
         token in normalized_query
         for token in (" and ", " then ", "同时", "并行", "以及", "并且", "然后", "最后", "和")
     )
+    if forced_named_domains and not multi_intent:
+        return _domain_order(forced_named_domains)
     # An explicit, standalone source lookup is already a bounded operation.
     # Broad assay words in its description must not add unrelated analysis
     # workflows unless the request explicitly joins another operation.
@@ -777,7 +813,7 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
         domain
         for domain, score in domain_scores.items()
         if score >= max(5.0, strongest * 0.35)
-    } | exact_domains | explicit_primary_domains | specific_feature_domains | domain_concentrated_feature_domains
+    } | exact_domains | explicit_primary_domains | specific_feature_domains | domain_concentrated_feature_domains | forced_named_domains
     if single_cell_query and not imaging_query:
         matched.discard("imaging")
     if _is_omics_assay_query(normalized_query) and not _is_wetlab_query(normalized_query):
@@ -791,6 +827,11 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
             matched.discard("publication")
         if not _is_clinical_query(normalized_query):
             matched.discard("clinical")
+    elif re.search(r"\balphafold\b", normalized_query) and _is_evidence_query(normalized_query):
+        # A plain AlphaFold DB/confidence request belongs to evidence retrieval.
+        # Molecular design is added only by an explicit AF3, docking, ligand,
+        # structure-design, or other molecular-design signal.
+        matched.discard("molecular_design")
     if single_cell_query and not matched:
         matched_single_cell = {
             module.domains[0]

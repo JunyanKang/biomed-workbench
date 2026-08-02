@@ -16,6 +16,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
+from biomed_workbench.modules.evidence_scope import module_evidence_scope  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 from biomed_workbench.services.public_databases import (  # noqa: E402
     alphafold_structure_records,
@@ -35,6 +36,8 @@ from biomed_workbench.services.public_databases import (  # noqa: E402
     rcsb_structure_search,
     rcsb_structure_records,
     resolve_citation_record,
+    string_protein_interaction_evidence,
+    probe_string_contract,
 )
 from tools.validate_module import validate_module  # noqa: E402
 
@@ -56,6 +59,7 @@ def verify() -> dict[str, object]:
         "structure-polymer-entities",
         "structure-ligands",
         "alphafold-structure-evidence",
+        "protein-interaction-network-evidence",
     ]
     citation = resolve_citation_record("10.1038/s41586-020-2649-2")
     preprint = preprint_record("10.1101/339747", "biorxiv")
@@ -66,6 +70,13 @@ def verify() -> dict[str, object]:
     polymer_entities = rcsb_polymer_entity_records("4HHB", ["1"], include_sequences=True)
     ligands = rcsb_ligand_records("4HHB", max_ligands=1)
     alphafold = alphafold_structure_records(["P04637"], include_sequence=False)
+    string_network = string_protein_interaction_evidence(
+        identifiers=["TP53", "MDM2", "ATM", "CHEK2"],
+        species=9606,
+        network_type="functional",
+        required_score=700,
+        add_nodes=0,
+    )
 
     citation_passed = (
         citation["query"]["doi"] == "10.1038/s41586-020-2649-2"
@@ -114,6 +125,15 @@ def verify() -> dict[str, object]:
         and alphafold["records"][0]["requested_uniprot_accession"] == "P04637"
         and alphafold["records"][0]["model_count"] >= 1
         and all(0 <= model["global_plddt"] <= 100 for model in alphafold["records"][0]["models"] if model["global_plddt"] is not None)
+    )
+    string_passed = (
+        string_network["query"]["network_type"] == "functional"
+        and string_network["query"]["required_score"] == 700
+        and string_network["mapped_count"] == 4
+        and string_network["unmapped_identifiers"] == []
+        and len(string_network["edges"]) >= 1
+        and string_network["ppi_enrichment"]["number_of_nodes"] == 4
+        and string_network["provenance"]["release"] == "12.0"
     )
     checks = [
         {
@@ -164,6 +184,7 @@ def verify() -> dict[str, object]:
         {"name": "structure_polymer_entities", "database": "rcsb-pdb", "passed": polymer_entities_passed, "requested_id": "4HHB", "returned_count": polymer_entities["returned_count"], "output_sha256": _digest(polymer_entities)},
         {"name": "structure_bound_ligands", "database": "rcsb-pdb", "passed": ligands_passed, "requested_id": "4HHB", "returned_count": ligands["returned_count"], "output_sha256": _digest(ligands)},
         {"name": "structure_prediction_metadata", "database": "alphafold-db", "passed": alphafold_passed, "requested_id": "P04637", "model_count": alphafold["records"][0]["model_count"], "output_sha256": _digest(alphafold)},
+        {"name": "protein_interaction_network", "database": "string-v12", "passed": string_passed, "requested_id": "TP53,MDM2,ATM,CHEK2", "mapped_count": string_network["mapped_count"], "edge_count": len(string_network["edges"]), "network_type": string_network["query"]["network_type"], "required_score": string_network["query"]["required_score"], "output_sha256": _digest(string_network)},
     ]
     contracts = {
         "crossref-rest": probe_crossref_contract(),
@@ -174,6 +195,7 @@ def verify() -> dict[str, object]:
         "rcsb-pdb-data-api": probe_rcsb_contract(),
         "rcsb-pdb-search-api": probe_rcsb_search_contract(),
         "alphafold-db-api": probe_alphafold_contract(),
+        "string-api": probe_string_contract(),
     }
     module_validation = {
         module_id: validate_module(BUILTIN_ROOT / module_id, require_tests=True, execute_tests=True)
@@ -185,6 +207,7 @@ def verify() -> dict[str, object]:
         "verified_at": datetime.now(timezone.utc).isoformat(),
         "registry_digest": registry.digest,
         "module_ids": module_ids,
+        "evidence_scope": module_evidence_scope(registry, module_ids).to_dict(),
         "contracts": contracts,
         "checks": checks,
         "module_package_validation": module_validation,
@@ -203,6 +226,7 @@ def verify() -> dict[str, object]:
             "polymer_entity_identity_and_sequence_context_retained": polymer_entities_passed,
             "bound_ligand_component_identity_retained": ligands_passed,
             "alphafold_model_version_and_confidence_context_retained": alphafold_passed,
+            "string_mapping_network_type_score_and_release_retained": string_passed,
             "no_new_credentials_required": True,
         },
     }

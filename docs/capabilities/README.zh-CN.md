@@ -13,7 +13,7 @@ Biomed Workbench 按科研决策组织能力，而不是按脚本目录展示能
 | 单细胞测量 | 在保留细胞层级结构的同时处理样本设计、整合、注释、轨迹、多组学与跨物种投射 | [通用与单细胞分析](omics-and-single-cell.md)；[整合、参考映射与跨物种规范](single-cell-integration-reference-cross-species.md) |
 | 空间测量 | 连接分子状态、物理坐标、组织图像、参考映射、空间区域、通讯、多切片对齐与三维结构 | [轨迹与空间完整分析规范](trajectory-spatial-complete-analysis.md)；[空间解卷积与投射方法](spatial-deconvolution-projection-methods.md) |
 | 通用分析与项目方法 | 为适用的研究尺度提供格式核查、实验设计、统计、富集、网络、作图规范与科学评审 | [查看](omics-and-single-cell.md) |
-| 分子与结构生物学 | 连接序列、化学和结构证据，形成可实验检验的分子假设 | [查看](molecular-and-structural.md) |
+| 分子与结构生物学 | 连接序列、互作网络、化学、对接和结构证据，形成可实验检验的分子假设 | [中文指南](molecular-and-structural.zh-CN.md) · [English](molecular-and-structural.md)；STRING PPI；HADDOCK3/DockQ/PRODIGY；AlphaFold 3；MSBio2/Metascape/Cytoscape |
 | 成像与可视化 | 对图像进行定量分析，并产出忠实、可审查的科学视觉材料 | [查看](imaging-and-visualization.md) |
 | 临床与实验研究 | 将队列、实验测量和统计解释连接为可判断的研究证据 | [查看](clinical-and-experimental.md) |
 | 论文与转化交付 | 根据项目证据推荐期刊，并将证据链转化为符合目标期刊规范的稿件、回复、专利、图表和展示材料 | [查看](publication-and-translation.md)；[版本化期刊规范](../journal-standards.zh-CN.md) |
@@ -26,7 +26,7 @@ Biomed Workbench 按科研决策组织能力，而不是按脚本目录展示能
 
 ## 当前范围
 
-注册表目前包含 **194 个可独立发现的模块**：其中 31 个具有按依赖范围登记的公共数据验收，另 163 个已具备可执行并重新读取产物的适配器，但尚无当前公共数据验收案例。Bulk 层现已覆盖 RNA-seq；ChIP-seq、CUT&RUN 与 CUT&Tag；DRIP-seq、DRIPc-seq、sDRIP/ssDRIP-seq、qDRIP-seq、R-ChIP、MapR 和传感器明确的 CUT&Tag 等 R-loop 测量；RIP-seq、eCLIP、iCLIP、HITS-CLIP、PAR-CLIP 与 LACE-seq；带多种 ORF 识别工具比较的 Ribo-seq；GRO-seq、PRO-seq、TT-seq 与 NET-seq；ATAC-seq 与 DNase-seq；WGBS、RRBS 与 EM-seq；Hi-C、Micro-C、Capture-C、HiChIP、PLAC-seq 与 ChIA-PET；以及 MeRIP-seq/m6A-seq。具体可据此主张的后端、版本、数据设计与产物范围，以对应公共数据案例为准。
+注册表目前包含 **198 个可独立发现的模块**。精确的执行与公共数据验收状态由对应版本的发布证据登记，不从“模块已注册”这一事实推断。Bulk 层现已覆盖 RNA-seq；ChIP-seq、CUT&RUN 与 CUT&Tag；DRIP-seq、DRIPc-seq、sDRIP/ssDRIP-seq、qDRIP-seq、R-ChIP、MapR 和传感器明确的 CUT&Tag 等 R-loop 测量；RIP-seq、eCLIP、iCLIP、HITS-CLIP、PAR-CLIP 与 LACE-seq；带多种 ORF 识别工具比较的 Ribo-seq；GRO-seq、PRO-seq、TT-seq 与 NET-seq；ATAC-seq 与 DNase-seq；WGBS、RRBS 与 EM-seq；Hi-C、Micro-C、Capture-C、HiChIP、PLAC-seq 与 ChIA-PET；以及 MeRIP-seq/m6A-seq。具体可据此主张的后端、版本、数据设计与产物范围，以对应公共数据案例为准。
 
 CUT&Tag 是实验方法；S9.6 是靶标或抗体身份；外源内参是可选归一化方案；RNase H 处理提供特异性证据。这四者分别登记，任何一项都不会被错误提升为与 CUT&Tag 并列的实验类型。
 

@@ -4,7 +4,7 @@
       "database": "crossref-europe-pmc",
       "europe_pmc_exact_matches": 1,
       "name": "citation_record_resolution",
-      "output_sha256": "70c96bbea3f357a3e12ebadfe70cb01f38b0644dc5e3364f1ef974fa6d3cb692",
+      "output_sha256": "c2c2f75d627f001480d0f3b2c4eb8a2a112d5617abaacf094652b4ad5c23b8c0",
       "passed": true,
       "requested_id": "10.1038/s41586-020-2649-2"
     },
@@ -31,7 +31,7 @@
       "database": "clinicaltrials-gov",
       "has_results": false,
       "name": "trial_design_record",
-      "output_sha256": "4abb169145008b9f141dd29a773d48ea069c1b5ffbd1c231d445dce280c83fd0",
+      "output_sha256": "5b318b1efb0622a3eab9b7ae410d4e31b50dd2419322405a120fcb425810569a",
       "passed": true,
       "quality_assertions": {
         "api_total_reconciled": true,
@@ -105,6 +105,17 @@
       "output_sha256": "32f2bf91cda7330fbc43aed545b70177c389963a39356ced60f61dcecf4bed38",
       "passed": true,
       "requested_id": "P04637"
+    },
+    {
+      "database": "string-v12",
+      "edge_count": 6,
+      "mapped_count": 4,
+      "name": "protein_interaction_network",
+      "network_type": "functional",
+      "output_sha256": "0e8b259ce75c441d552134d2c63e9f058c0355d2a5ab768ff4638d4ab9b0e02e",
+      "passed": true,
+      "requested_id": "TP53,MDM2,ATM,CHEK2",
+      "required_score": 700
     }
   ],
   "contracts": {
@@ -115,7 +126,8 @@
     "europe-pmc-rest": "rest-observed-2026-07-13",
     "pubchem-pug-rest": "pug-rest-observed-2026-07-13",
     "rcsb-pdb-data-api": "data-rest-v1-observed-2026-07-13",
-    "rcsb-pdb-search-api": "search-v2-observed-2026-07-13"
+    "rcsb-pdb-search-api": "search-v2-observed-2026-07-13",
+    "string-api": "api-v12.0-observed-2026-08-02"
   },
   "evidence_scope": {
     "module_ids": [
@@ -124,13 +136,58 @@
       "citation-record-resolution",
       "clinical-trial-evidence",
       "preprint-evidence",
+      "protein-interaction-network-evidence",
       "structure-evidence",
       "structure-ligands",
       "structure-polymer-entities",
       "structure-search"
     ],
-    "module_slice_digest": "f8a5e1dc0229682e661e0b15a14c0375f1c2c339c30fc25ede991f241663dade",
+    "module_slice_digest": "b68d89eb0ac69240ae6efe6b053e16098a574148a7b36dc00f4d5e9821b45edb",
     "schema_version": 1
+  },
+  "evidence_scope_migration": {
+    "changed_fields": [
+      "compatibility-policy"
+    ],
+    "current_evidence_scope": {
+      "module_ids": [
+        "alphafold-structure-evidence",
+        "chemical-evidence",
+        "citation-record-resolution",
+        "clinical-trial-evidence",
+        "preprint-evidence",
+        "protein-interaction-network-evidence",
+        "structure-evidence",
+        "structure-ligands",
+        "structure-polymer-entities",
+        "structure-search"
+      ],
+      "module_slice_digest": "b68d89eb0ac69240ae6efe6b053e16098a574148a7b36dc00f4d5e9821b45edb",
+      "schema_version": 1
+    },
+    "executed_implementation_current": null,
+    "migration_type": "reviewed-metadata-only-scope-reissue",
+    "prior_evidence_scope": {
+      "module_ids": [
+        "alphafold-structure-evidence",
+        "chemical-evidence",
+        "citation-record-resolution",
+        "clinical-trial-evidence",
+        "preprint-evidence",
+        "protein-interaction-network-evidence",
+        "structure-evidence",
+        "structure-ligands",
+        "structure-polymer-entities",
+        "structure-search"
+      ],
+      "module_slice_digest": "42051ed15ba95eaeb43e19a026bf23f13821ca1580594c4fbcc3e82fee75d742",
+      "schema_version": 1
+    },
+    "reason": "Reviewed compatibility ranges were separated from exact observed baselines; scientific outputs, parsers, fixtures, and conclusions are unchanged.",
+    "reissued_on": "2026-08-02",
+    "report_sha256_before_reissue": "4f1204115866f2d98170ca05516e8a9a85ebbc240ea037df1f25e66620892030",
+    "schema_version": 1,
+    "scientific_outputs_recomputed": false
   },
   "module_ids": [
     "citation-record-resolution",
@@ -141,7 +198,8 @@
     "structure-search",
     "structure-polymer-entities",
     "structure-ligands",
-    "alphafold-structure-evidence"
+    "alphafold-structure-evidence",
+    "protein-interaction-network-evidence"
   ],
   "module_package_validation": {
     "alphafold-structure-evidence": {
@@ -219,6 +277,21 @@
       "tool_evidence_complete": true,
       "valid": true
     },
+    "protein-interaction-network-evidence": {
+      "compatibility_evidence_complete": true,
+      "compatibility_rows": 1,
+      "dependency_evidence_complete": true,
+      "entrypoint_resolved": true,
+      "errors": [],
+      "executed_test_cases": 1,
+      "format_evidence_complete": true,
+      "kernel_version": "0.2.0-dev",
+      "module_id": "protein-interaction-network-evidence",
+      "module_version": "1.0.0",
+      "schema_version": 1,
+      "tool_evidence_complete": true,
+      "valid": true
+    },
     "structure-evidence": {
       "compatibility_evidence_complete": true,
       "compatibility_rows": 1,
@@ -281,7 +354,7 @@
     }
   },
   "passed": true,
-  "registry_digest": "82f19cefb8d5202eef026de4c7fed8b27cdbc44f33f1e28f53e0303ba41ae2f0",
+  "registry_digest": "d498e4a1712069491b1732004d1ae8b6d881a4cf7da557c248614fad4e706e58",
   "schema_version": 1,
   "scientific_summary": {
     "alphafold_model_version_and_confidence_context_retained": true,
@@ -293,9 +366,10 @@
     "polymer_entity_identity_and_sequence_context_retained": true,
     "preprint_versions_not_collapsed": true,
     "source_specific_schemas_retained": true,
+    "string_mapping_network_type_score_and_release_retained": true,
     "structure_method_and_resolution_context_retained": true,
     "structure_search_counts_and_truncation_reconciled": true,
     "trial_protocol_and_results_context_retained": true
   },
-  "verified_at": "2026-07-31T03:36:37.796440+00:00"
+  "verified_at": "2026-08-02T10:29:01.674454+00:00"
 }

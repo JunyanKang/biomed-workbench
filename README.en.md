@@ -18,8 +18,8 @@
 <p align="center">
   <a href="https://github.com/JunyanKang/biomed-workbench/actions"><img alt="Quality" src="https://img.shields.io/github/actions/workflow/status/JunyanKang/biomed-workbench/quality.yml?branch=main&amp;label=quality"></a>
   <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-4388C7"></a>
-  <img alt="194 scientific modules" src="https://img.shields.io/badge/scientific%20modules-194-36A58B">
-  <img alt="One Codex entry" src="https://img.shields.io/badge/Codex%20entry-1-E05A47">
+  <img alt="198 scientific modules" src="https://img.shields.io/badge/scientific%20modules-198-36A58B">
+  <img alt="Codex native" src="https://img.shields.io/badge/Codex-native-E05A47">
   <img alt="Versioned evidence maps" src="https://img.shields.io/badge/evidence%20maps-versioned-C7953E">
 </p>
 
@@ -71,7 +71,7 @@ Read the complete design in [Scientific Evidence Map](docs/scientific-evidence-m
 
 ## From molecules to tissue, from data to argument
 
-The current registry contains **194 scientific modules** spanning the major layers of research from knowledge building to scientific delivery. Evidence, databases, and literature establish what is known, contested, or missing; data analysis connects bulk, single-cell, spatial, and cross-scale studies; molecular and structural biology, clinical and experimental research, and imaging and visualization support mechanistic reasoning, experimental measurement, and morphological or spatial evidence; publication and translation turn reviewed results into narratives suited to particular audiences, journals, and applications.
+The current registry contains **198 scientific modules** spanning the major layers of research from knowledge building to scientific delivery. Evidence, databases, and literature establish what is known, contested, or missing; data analysis connects bulk, single-cell, spatial, and cross-scale studies; molecular and structural biology, clinical and experimental research, and imaging and visualization support mechanistic reasoning, experimental measurement, and morphological or spatial evidence; publication and translation turn reviewed results into narratives suited to particular audiences, journals, and applications.
 
 Within the data-analysis layer, capabilities are further organized by data scale, measurement family, and tool role. Targets, antibodies, internal references, specificity treatments, and normalization strategies remain properties of an experimental or analytical design rather than being promoted to separate omics categories. Module registration establishes the scientific contract; the capability that can actually be claimed is defined by the backend, version, study design, and reloaded artifacts recorded in each public-data case.
 
@@ -82,7 +82,7 @@ Within the data-analysis layer, capabilities are further organized by data scale
 | [Single-cell measurements, trajectories, and integration](docs/capabilities/single-cell-integration-reference-cross-species.md) | Scanpy/Seurat, scVI/scANVI, Harmony, CCA/RPCA, FastMNN, scIB, WNN and MOFA+; MultiVI accepted on public PBMC multiome data; SAMap accepted on the public Hydra–planarian case |
 | [Spatial measurements](docs/capabilities/trajectory-spatial-complete-analysis.md) | Visium and Xenium data structures; Xenium–SpatialData–Squidpy image/segmentation analysis; RCTD accepted on Slide-seq and Tangram on public data; PASTE slice alignment and three-dimensional coordinates |
 | [Universal analysis and project methods](docs/capabilities/omics-and-single-cell.md) | format validation, sample design, differential testing, DEqMS, GO/KEGG, GSEA, WGCNA, motifs, networks, evidence review and visualization specifications that can serve several measurement scales |
-| [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | Sequence and ORF analysis, PCR, CRISPR, cloning design, structure quality, comparison, docking review, chemical filtering, validation design |
+| [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | STRING functional and physical interaction networks; HADDOCK3 complex docking with DockQ reference evaluation and PRODIGY affinity estimates; official AlphaFold 3 input/output adaptation; MSBio2/Metascape and Cytoscape network delivery; sequence, ORF, PCR, CRISPR, cloning, structure quality, comparison and validation design |
 | [Clinical and experimental research](docs/capabilities/clinical-and-experimental.md) | Cohort and survival analysis, biomarkers, flow cytometry, qPCR, dose response, western blot, biodistribution, xenograft, stability and quantitative assays |
 | [Imaging and scientific visualization](docs/capabilities/imaging-and-visualization.md) | Image profiling, segmentation, colocalization, tracking, tissue-image registration, unified figure specifications, multi-part figure composition and visual QA |
 | [Publication and translation](docs/capabilities/publication-and-translation.md) | Versioned standards for 54 journals, project-to-journal fit, article-structure and limit review, figure specifications, manuscript review, citation audit, reviewer simulation, response matrices, revision lineage, patent preparation and presentations |
@@ -121,7 +121,7 @@ The workbench inspects real project files and experimental design before compili
 
 ## Installation
 
-Ask Codex or another compatible agent to install the Biomed Workbench plugin from the `JunyanKang/biomed-workbench` GitHub repository, verify the installed version and module registry, and open a new task so the current entry point is loaded. The agent should report the exact version, validation result, and any unmet runtime dependency in plain language. Details: [中文](docs/installation.zh-CN.md) · [English](docs/installation.md).
+Give the `JunyanKang/biomed-workbench` repository to Codex and ask it to install the current release, verify the unified entry and module registry, preserve local changes, and report the exact revision and unmet dependencies. After installation, open a new task and describe the scientific objective directly. Other agents may use the isolated Agent Skills or read-only MCP adapters; those adapters reuse the same registry without changing Codex-native behavior or scientific evidence. Details: [中文](docs/installation.zh-CN.md) · [English](docs/installation.md); optional adapters: [中文](docs/agent-integration.zh-CN.md) · [English](docs/agent-integration.md).
 
 ## Data access and credentials
 
@@ -136,6 +136,7 @@ A researcher may simply ask an agent to “configure my NCBI API key.” The age
 - Capability map: [中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)
 - Usage: [中文](docs/using-biomed-workbench.zh-CN.md) · [English](docs/using-biomed-workbench.md)
 - Installation: [中文](docs/installation.zh-CN.md) · [English](docs/installation.md)
+- Optional interoperability adapters: [中文](docs/agent-integration.zh-CN.md) · [English](docs/agent-integration.md)
 - Data access and credentials: [中文](docs/data-access-and-credentials.zh-CN.md) · [English](docs/data-access-and-credentials.md)
 - Journal standards and manuscript review: [中文](docs/journal-standards.zh-CN.md) · [English](docs/journal-standards.md)
 - Reproducibility: [中文](docs/reproducibility.zh-CN.md) · [English](docs/reproducibility.md)

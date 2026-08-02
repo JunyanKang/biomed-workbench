@@ -18,8 +18,8 @@
 <p align="center">
   <a href="https://github.com/JunyanKang/biomed-workbench/actions"><img alt="Quality" src="https://img.shields.io/github/actions/workflow/status/JunyanKang/biomed-workbench/quality.yml?branch=main&amp;label=quality"></a>
   <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-4388C7"></a>
-  <img alt="194 scientific modules" src="https://img.shields.io/badge/scientific%20modules-194-36A58B">
-  <img alt="One Codex entry" src="https://img.shields.io/badge/Codex%20entry-1-E05A47">
+  <img alt="198 scientific modules" src="https://img.shields.io/badge/scientific%20modules-198-36A58B">
+  <img alt="Codex native" src="https://img.shields.io/badge/Codex-native-E05A47">
   <img alt="Versioned evidence maps" src="https://img.shields.io/badge/evidence%20maps-versioned-C7953E">
 </p>
 
@@ -71,7 +71,7 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 
 ## 从分子到组织，从数据到论证
 
-当前注册表包含 **194 个科学模块**，覆盖研究从知识建构到成果交付的主要层级：证据、数据库与文献用于界定已知、争议和知识缺口；数据分析连接 bulk、single-cell、spatial 与跨尺度研究；分子与结构、临床与实验、成像与可视化分别承载机制推演、实验测量和形态空间证据；论文与转化交付则把经过审查的结果组织成面向特定读者、期刊与应用场景的研究叙事。
+当前注册表包含 **198 个科学模块**，覆盖研究从知识建构到成果交付的主要层级：证据、数据库与文献用于界定已知、争议和知识缺口；数据分析连接 bulk、single-cell、spatial 与跨尺度研究；分子与结构、临床与实验、成像与可视化分别承载机制推演、实验测量和形态空间证据；论文与转化交付则把经过审查的结果组织成面向特定读者、期刊与应用场景的研究叙事。
 
 其中，数据分析层再按数据尺度、测量家族和工具角色细分。靶标、抗体、内部参照、特异性处理和归一化属于具体实验或分析设计，不会被误列为独立的组学门类。模块注册表示相应科学契约已经建立；能够据此主张的实际能力，仍由公共数据案例中登记的后端、版本、研究设计以及重新读取的产物共同界定。
 
@@ -82,7 +82,7 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 | [单细胞、轨迹与跨系统整合](docs/capabilities/single-cell-integration-reference-cross-species.md) | Scanpy/Seurat、scVI/scANVI、Harmony、CCA/RPCA、FastMNN、scIB、WNN、MOFA+；公共 PBMC 多组学数据验收的 MultiVI；Hydra–涡虫跨物种数据验收的 SAMap |
 | [空间组学](docs/capabilities/trajectory-spatial-complete-analysis.md) | Visium 与 Xenium 数据结构；Xenium–SpatialData–Squidpy 图像/分割流程；Slide-seq 上验收的 RCTD、公共数据验收的 Tangram；PASTE 多切片对齐与三维坐标重建 |
 | [跨尺度通用分析](docs/capabilities/omics-and-single-cell.md) | 文件与读段质控、差异表达和差异可及性、DEqMS、GO/KEGG、GSEA、WGCNA、NMF、motif、网络分析、JSD、统一统计审查与作图规范 |
-| [分子与结构生物学](docs/capabilities/molecular-and-structural.md) | 序列、ORF、PCR、CRISPR、克隆设计、结构质量、结构比较、docking 审查、化学过滤与实验验证设计 |
+| [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | STRING 功能/物理互作网络；HADDOCK3 复合物对接、DockQ 参考评价与 PRODIGY 亲和力估计；AlphaFold 3 官方输入/输出适配；MSBio2/Metascape 与 Cytoscape 网络交付；序列、ORF、PCR、CRISPR、克隆、结构质量、结构比较与实验验证设计 |
 | [临床与实验研究](docs/capabilities/clinical-and-experimental.md) | 队列与生存、biomarker、流式、qPCR、剂量反应、Western blot、biodistribution、xenograft、稳定性与实验定量 |
 | [成像与科学可视化](docs/capabilities/imaging-and-visualization.md) | 图像 profiling、分割、共定位、追踪、组织图像配准、统一绘图规格、图组编排与视觉质量审查 |
 | [论文与转化交付](docs/capabilities/publication-and-translation.md) | 54 本生命医学高水平期刊的版本化规范、期刊推荐、逐项稿件审查、图表规格、引用审计、审稿模拟、回复矩阵、修订谱系、专利准备与展示材料 |
@@ -121,11 +121,11 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 
 工作台会先检查真实项目文件和研究设计，再编译计划、执行适用模块、审查产物并形成下一步决策。使用指南：[中文](docs/using-biomed-workbench.zh-CN.md) · [English](docs/using-biomed-workbench.md)。
 
-## 在 Codex 或其他 Agent 中安装
+## 安装
 
-把这个 GitHub 项目链接交给 Codex 或支持插件安装的 Agent，请它安装最新版 Biomed Workbench、核对统一研究入口和模块注册表，并在完成后开启一个新的研究任务加载最新能力。更新时可以用同样的自然语言要求 Agent 拉取新版本、完成发布完整性检查并重新加载。
+把这个 GitHub 项目链接交给 Codex，请它安装最新版 Biomed Workbench、核对统一研究入口和模块注册表，并报告实际版本与依赖状态。安装完成后，开启一个新的研究任务并直接描述科学目标。更新时，用同样的自然语言要求 Codex 拉取新版本、保护本地修改、完成发布完整性检查并重新加载。其他智能体如需接入，可使用隔离的 Agent Skills 或只读 MCP 适配层；这些适配器复用同一注册表，不改变 Codex 原生工作流和科学证据。
 
-面向不同 Agent 的支持环境、更新与验证说明：[中文](docs/installation.zh-CN.md) · [English](docs/installation.md)。
+面向不同智能体的支持环境、更新与验证说明：[中文](docs/installation.zh-CN.md) · [English](docs/installation.md)；接口说明：[中文](docs/agent-integration.zh-CN.md) · [English](docs/agent-integration.md)。
 
 ## 公共数据库访问
 
@@ -143,6 +143,7 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 - 公共数据库访问与凭据：[中文](docs/data-access-and-credentials.zh-CN.md) · [English](docs/data-access-and-credentials.md)
 - 使用指南：[中文](docs/using-biomed-workbench.zh-CN.md) · [English](docs/using-biomed-workbench.md)
 - 安装与更新：[中文](docs/installation.zh-CN.md) · [English](docs/installation.md)
+- 可选互操作适配器：[中文](docs/agent-integration.zh-CN.md) · [English](docs/agent-integration.md)
 - 可重复性：[中文](docs/reproducibility.zh-CN.md) · [English](docs/reproducibility.md)
 - 公共数据验证案例：[中文](docs/cases/README.zh-CN.md) · [English](docs/cases/README.md)
 - 成熟度与证据等级：[中文](docs/maturity.zh-CN.md) · [English](docs/maturity.md)

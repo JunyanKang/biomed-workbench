@@ -215,6 +215,46 @@
       "workflow": "evidence"
     },
     {
+      "access": "agent_generated",
+      "description": "Build versioned official AlphaFold 3 inputs for proteins, nucleic acids and ligands, connect an approved local inference runtime without bundling model weights, audit ranked mmCIF and confidence outputs, and export confidence figures and replot tables.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "alphafold3-complex-prediction",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "execution_mode": {
+            "enum": [
+              "prepare",
+              "parse-existing",
+              "local-inference"
+            ],
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "output_directory": {
+            "type": "string"
+          },
+          "request_path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "request_path",
+          "output_directory",
+          "execution_mode"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "writes_output",
+      "requirements": [],
+      "title": "Prepare, run and review AlphaFold 3 biomolecular-complex predictions",
+      "workflow": "molecular_design"
+    },
+    {
       "access": "offline",
       "description": "Calculate viable, early-apoptotic, late-apoptotic, necrotic, and total-apoptotic fractions from a declared compensated and reviewed quadrant table.",
       "entrypoint": "biomed_workbench.capabilities.quantitative_assays:summarize_annexin_viability_quadrants",
@@ -5647,6 +5687,52 @@
     },
     {
       "access": "agent_generated",
+      "description": "Execute an approved licensed MSBio2 wrapper or ingest an existing Metascape package, validate enrichment, PPI, MCODE and Cytoscape deliverables, preserve parameter and database provenance, and export editable Cytoscape sessions plus publication-ready vector and raster figures.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "metascape-msbio-network-analysis",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "execution_mode": {
+            "enum": [
+              "licensed-runtime",
+              "validate-existing"
+            ],
+            "type": "string"
+          },
+          "existing_results_path": {
+            "type": "string"
+          },
+          "gene_lists_path": {
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "output_directory": {
+            "type": "string"
+          },
+          "species_taxon_id": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "objective",
+          "gene_lists_path",
+          "species_taxon_id",
+          "output_directory",
+          "execution_mode"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "writes_output",
+      "requirements": [],
+      "title": "Run and audit Metascape MSBio2 enrichment and interaction networks",
+      "workflow": "omics"
+    },
+    {
+      "access": "agent_generated",
       "description": "Direct Codex to turn a predeclared single-population demographic scenario into reloadable tree-sequence and VCF simulation evidence for method calibration or study design, without presenting it as empirical demographic inference.",
       "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
       "id": "msprime-demographic-simulation",
@@ -6718,6 +6804,40 @@
       "workflow": "molecular_design"
     },
     {
+      "access": "agent_generated",
+      "description": "Execute restraint-aware HADDOCK3 protein-complex docking with explicit test and production sampling profiles, optional PRODIGY and reference-backed DockQ evaluation, complete model accounting, and publication-ready structural figures plus replot tables.",
+      "entrypoint": "agent-generated-analysis",
+      "id": "protein-complex-docking",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "figure_title": {
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "output_directory": {
+            "type": "string"
+          },
+          "request_path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "request_path",
+          "output_directory"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "writes_output",
+      "requirements": [],
+      "title": "Dock and evaluate biomolecular complexes with HADDOCK3",
+      "workflow": "molecular_design"
+    },
+    {
       "access": "public_api",
       "description": "Retrieve accession-bound IUPred2A residue-level disorder tendencies and transparent score-threshold spans through a bounded public REST contract.",
       "entrypoint": "biomed_workbench.capabilities.evidence:protein_disorder_evidence",
@@ -6764,6 +6884,60 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Retrieve protein disorder tendency evidence",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Map two to 100 declared protein identifiers to STRING 12.0, retrieve functional-association or physical-evidence networks with explicit score thresholds and optional added nodes, preserve every evidence-channel score and PPI enrichment statistic, and export Cytoscape-ready tables and publication figures.",
+      "entrypoint": "biomed_workbench.capabilities.evidence:protein_interaction_network_evidence",
+      "id": "protein-interaction-network-evidence",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "add_nodes": {
+            "maximum": 50,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "identifiers": {
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 2,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "network_type": {
+            "enum": [
+              "functional",
+              "physical"
+            ],
+            "type": "string"
+          },
+          "required_score": {
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "species": {
+            "maximum": 9999999,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "identifiers",
+          "species"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Retrieve and render version-pinned STRING protein networks",
       "workflow": "evidence"
     },
     {
@@ -12140,7 +12314,7 @@
       "workflow": "wetlab"
     }
   ],
-  "entry_count": 194,
+  "entry_count": 198,
   "schema_version": 2,
   "version": "0.2.0-dev"
 }

@@ -1,0 +1,552 @@
+{
+    "schema_version": 1,
+    "id": "metascape-msbio-network-analysis",
+    "version": "1.0.0",
+    "title": "Run and audit Metascape MSBio2 enrichment and interaction networks",
+    "description": "Execute an approved licensed MSBio2 wrapper or ingest an existing Metascape package, validate enrichment, PPI, MCODE and Cytoscape deliverables, preserve parameter and database provenance, and export editable Cytoscape sessions plus publication-ready vector and raster figures.",
+    "module_type": "analysis",
+    "domains": [
+        "omics",
+        "molecular_design"
+    ],
+    "intents": [
+        "Metascape analysis",
+        "MSBio2 enrichment PPI MCODE",
+        "Metascape\u4e0eCytoscape\u7f51\u7edc\u5206\u6790"
+    ],
+    "questions": [
+        "Which enrichment clusters and dense PPI subnetworks remain interpretable after identifier, universe, database, multiplicity, MCODE and Cytoscape-output review?"
+    ],
+    "entrypoint": "agent-generated-analysis",
+    "execution": {
+        "kind": "workflow",
+        "timeout_seconds": 30,
+        "max_output_bytes": 3000000
+    },
+    "maturity": "experimental",
+    "input_artifacts": [
+        {
+            "name": "metascape_request",
+            "artifact_type": "gene_set_analysis_request",
+            "formats": [
+                {
+                    "name": "inline-json",
+                    "versions": [
+                        "1"
+                    ],
+                    "representations": [
+                        "structured"
+                    ],
+                    "compression": [
+                        "none"
+                    ],
+                    "required_indexes": [],
+                    "coordinate_systems": [],
+                    "genome_build_policy": "not_applicable",
+                    "genome_builds": [],
+                    "annotation_releases": [],
+                    "orientations": [
+                        "request-object"
+                    ]
+                }
+            ],
+            "processing_levels": [
+                "declared"
+            ],
+            "required_metadata": []
+        }
+    ],
+    "output_artifacts": [
+        {
+            "name": "metascape_analysis_bundle",
+            "artifact_type": "enrichment_network_bundle",
+            "formats": [
+                {
+                    "name": "metascape-result",
+                    "versions": [
+                        "1"
+                    ],
+                    "representations": [
+                        "container"
+                    ],
+                    "compression": [
+                        "none"
+                    ],
+                    "required_indexes": [],
+                    "coordinate_systems": [],
+                    "genome_build_policy": "not_applicable",
+                    "genome_builds": [],
+                    "annotation_releases": [],
+                    "orientations": [
+                        "module-output"
+                    ]
+                }
+            ],
+            "processing_levels": [
+                "derived"
+            ],
+            "required_metadata": [
+                "backend-version",
+                "input-digest",
+                "parameter-digest",
+                "result-digests"
+            ]
+        },
+        {
+            "name": "cytoscape_figure_bundle",
+            "artifact_type": "network_figure_bundle",
+            "formats": [
+                {
+                    "name": "publication-figure-set",
+                    "versions": [
+                        "1"
+                    ],
+                    "representations": [
+                        "container"
+                    ],
+                    "compression": [
+                        "none"
+                    ],
+                    "required_indexes": [],
+                    "coordinate_systems": [],
+                    "genome_build_policy": "not_applicable",
+                    "genome_builds": [],
+                    "annotation_releases": [],
+                    "orientations": [
+                        "module-output"
+                    ]
+                }
+            ],
+            "processing_levels": [
+                "derived"
+            ],
+            "required_metadata": [
+                "cytoscape-version",
+                "layout",
+                "style",
+                "source-digest"
+            ]
+        }
+    ],
+    "preconditions": [
+        "The user has lawful access to an MSBio2 installation and license or provides a complete existing Metascape result package; a compatible Cytoscape session is available for editable network rendering."
+    ],
+    "assumptions": [
+        "Gene identifiers, organism, list construction, background universe, category selection, enrichment thresholds and PPI source settings are explicit and appropriate."
+    ],
+    "quality_gates": [
+        {
+            "id": "metascape-input-design",
+            "severity": "fatal",
+            "description": "Require explicit organism, stable identifiers, nonempty lists, list provenance, duplicate policy and a defensible measured or tested background universe.",
+            "blocks_interpretation": true
+        },
+        {
+            "id": "metascape-parameter-provenance",
+            "severity": "fatal",
+            "description": "Record overlap, enrichment, p-value, correction, similarity-clustering, category, PPI-source, network-size and MCODE settings before interpretation.",
+            "blocks_interpretation": true
+        },
+        {
+            "id": "metascape-output-integrity",
+            "severity": "fatal",
+            "description": "Require and hash the report, workbook, enrichment tables, GO and PPI XGMML networks, MCODE tables, Cytoscape sessions, PDF and PNG outputs.",
+            "blocks_interpretation": true
+        },
+        {
+            "id": "cytoscape-publication-render",
+            "severity": "major",
+            "description": "Preserve a deterministic layout, visible node and edge semantics, editable session, PDF, SVG, 600-dpi PNG and the tables needed for independent replotting.",
+            "blocks_interpretation": true
+        }
+    ],
+    "limitations": [
+        "Biomed Workbench does not redistribute MSBio2 software, images, license material or private Metascape project data.",
+        "Enrichment and interaction networks are hypothesis-generating and depend on identifier mapping, gene-list construction, background, database release and thresholds.",
+        "MCODE modules are topological dense regions, not automatically pathways, complexes or mechanisms; Cytoscape layout proximity is not biological distance."
+    ],
+    "evidence_effects": [
+        "produces-enrichment-cluster-evidence",
+        "produces-ppi-mcode-hypotheses",
+        "produces-editable-network-figures"
+    ],
+    "alternatives": [
+        "functional-enrichment",
+        "protein-interaction-network-evidence",
+        "network-analysis"
+    ],
+    "complements": [
+        "enrichment-analysis",
+        "functional-enrichment",
+        "network-analysis",
+        "wgcna-coexpression"
+    ],
+    "tool_requirements": [
+        {
+            "name": "msbio2",
+            "ecosystem": "system",
+            "identity": "ms.sh",
+            "required": false,
+            "tested_versions": [
+                "local-package-observed-2026-08-02"
+            ],
+            "allowed_versions": [
+                "==local-package-observed-2026-08-02"
+            ],
+            "version_source": "https://metascape.org/msbio/",
+            "verified_at": "2026-08-02",
+            "version_probe": [
+                "ms.sh",
+                "-h"
+            ],
+            "version_probe_kind": "command",
+            "version_probe_timeout_seconds": 30,
+            "version_pattern": "(.+)",
+            "mismatch_policy": "block",
+            "version_differences": [
+                {
+                    "id": "msbio2-licensed-wrapper-contract",
+                    "affected_versions": [
+                        "==local-package-observed-2026-08-02"
+                    ],
+                    "category": "behavior",
+                    "description": "The observed wrapper accepts a gene-list input, source and target taxonomy identifiers and an output directory, and generates Metascape reports and network assets.",
+                    "compatibility_effect": "requires-parameter",
+                    "required_action": "Revalidate wrapper help, license eligibility, option schema and output inventory after every package update.",
+                    "source": "https://metascape.org/msbio/"
+                }
+            ],
+            "platforms": [
+                "macos-arm64",
+                "linux-x86_64"
+            ]
+        },
+        {
+            "name": "cytoscape",
+            "ecosystem": "java",
+            "identity": "Cytoscape",
+            "required": true,
+            "tested_versions": [
+                "3.10.4"
+            ],
+            "allowed_versions": [
+                ">=3.10.4,<3.11"
+            ],
+            "version_source": "https://cytoscape.org/cytoscape-automation/",
+            "verified_at": "2026-08-02",
+            "version_probe": [
+                "cytoscape",
+                "-v"
+            ],
+            "version_probe_kind": "command",
+            "version_probe_timeout_seconds": 30,
+            "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+            "mismatch_policy": "block",
+            "version_differences": [
+                {
+                    "id": "cyrest-network-rendering",
+                    "affected_versions": [
+                        ">=3.10.4,<3.11"
+                    ],
+                    "category": "api",
+                    "description": "CyREST imports XGMML, applies a declared layout and exports editable sessions and publication graphics.",
+                    "compatibility_effect": "requires-parser",
+                    "required_action": "Verify network counts, style mappings, layout, session persistence and nonempty exports after import.",
+                    "source": "https://manual.cytoscape.org/en/latest/Programmatic_Access_to_Cytoscape_Features_Scripting.html"
+                }
+            ],
+            "platforms": [
+                "any"
+            ]
+        }
+    ],
+    "dependencies": [
+        {
+            "name": "python",
+            "ecosystem": "runtime",
+            "identity": "python-runtime",
+            "required": true,
+            "tested_versions": [
+                "3.12.10"
+            ],
+            "allowed_versions": [
+                ">=3.12,<3.13"
+            ],
+            "version_source": "https://www.python.org/downloads/",
+            "verified_at": "2026-08-02",
+            "version_probe": [
+                "biomed_workbench.modules.compatibility:probe_python_runtime"
+            ],
+            "version_probe_kind": "python_callable",
+            "version_probe_timeout_seconds": 5,
+            "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+            "purpose": "Execute result validation, provenance capture and Cytoscape automation without copying licensed software or data.",
+            "conflicts": [],
+            "platforms": [
+                "any"
+            ]
+        }
+    ],
+    "compatibility_matrix": [
+        {
+            "id": "msbio2-metascape-cytoscape-3-10-4",
+            "module_version": "1.0.0",
+            "tool_versions": {
+                "msbio2": [
+                    "==local-package-observed-2026-08-02"
+                ],
+                "cytoscape": [
+                    ">=3.10.4,<3.11"
+                ]
+            },
+            "dependency_versions": {
+                "python": [
+                    ">=3.12,<3.13"
+                ]
+            },
+            "input_formats": {
+                "metascape_request": [
+                    "inline-json@1"
+                ]
+            },
+            "output_formats": {
+                "metascape_analysis_bundle": [
+                    "metascape-result@1"
+                ],
+                "cytoscape_figure_bundle": [
+                    "publication-figure-set@1"
+                ]
+            },
+            "platforms": [
+                "macos-arm64",
+                "linux-x86_64"
+            ],
+            "regression_evidence_ids": [
+                "metascape-msbio-postflight-regression-v1"
+            ],
+            "end_to_end_evidence_ids": [
+                "metascape-existing-result-cytoscape-v1"
+            ],
+            "verified_at": "2026-08-02"
+        }
+    ],
+    "access": "agent_generated",
+    "mutability": "writes_output",
+    "credentials": [],
+    "input_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "objective": {
+                "type": "string"
+            },
+            "gene_lists_path": {
+                "type": "string"
+            },
+            "species_taxon_id": {
+                "type": "integer"
+            },
+            "output_directory": {
+                "type": "string"
+            },
+            "execution_mode": {
+                "type": "string",
+                "enum": [
+                    "licensed-runtime",
+                    "validate-existing"
+                ]
+            },
+            "existing_results_path": {
+                "type": "string"
+            }
+        },
+        "required": [
+            "objective",
+            "gene_lists_path",
+            "species_taxon_id",
+            "output_directory",
+            "execution_mode"
+        ]
+    },
+    "output_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+            "handoff_type": {
+                "type": "string",
+                "enum": [
+                    "packaged_parameterized_project_analysis"
+                ]
+            },
+            "module": {
+                "type": "object"
+            },
+            "request_digest": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+            },
+            "request_fields": {
+                "type": "array"
+            },
+            "languages": {
+                "type": "array"
+            },
+            "code_plan": {
+                "type": "array"
+            },
+            "parameter_rules": {
+                "type": "array"
+            },
+            "preflight_checks": {
+                "type": "array"
+            },
+            "postflight_checks": {
+                "type": "array"
+            },
+            "provenance_fields": {
+                "type": "array"
+            },
+            "forbidden_actions": {
+                "type": "array"
+            },
+            "tool_profiles": {
+                "type": "array"
+            },
+            "dependency_profiles": {
+                "type": "array"
+            },
+            "quality_gate_ids": {
+                "type": "array"
+            },
+            "execution_policy": {
+                "type": "object"
+            }
+        },
+        "required": [
+            "handoff_type",
+            "module",
+            "request_digest",
+            "request_fields",
+            "languages",
+            "code_plan",
+            "parameter_rules",
+            "preflight_checks",
+            "postflight_checks",
+            "provenance_fields",
+            "forbidden_actions",
+            "tool_profiles",
+            "dependency_profiles",
+            "quality_gate_ids",
+            "execution_policy"
+        ]
+    },
+    "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+    ],
+    "provenance": {
+        "license": "Apache-2.0",
+        "concept_sources": [
+            "https://www.nature.com/articles/s41467-019-09234-6",
+            "https://metascape.org/msbio/",
+            "https://cytoscape.org/cytoscape-automation/",
+            "Project-owned licensed-runtime adapter, postflight validator and Cytoscape renderer."
+        ]
+    },
+    "code_templates": [
+        {
+            "path": "templates/run_msbio2_metascape_analysis.py",
+            "language": "python",
+            "purpose": "Execute the observed wrapper or validate a complete existing package without redistributing licensed assets.",
+            "quality_gate_ids": [
+                "metascape-input-design",
+                "metascape-parameter-provenance",
+                "metascape-output-integrity"
+            ],
+            "requires_adaptation": false
+        },
+        {
+            "path": "templates/render_metascape_cytoscape.py",
+            "language": "python",
+            "purpose": "Import XGMML into Cytoscape and export editable and publication-ready network assets.",
+            "quality_gate_ids": [
+                "metascape-output-integrity",
+                "cytoscape-publication-render"
+            ],
+            "requires_adaptation": false
+        }
+    ],
+    "agent_protocol": {
+        "schema_version": 1,
+        "mode": "packaged_parameterized_workflow",
+        "languages": [
+            "python"
+        ],
+        "template_sections": [
+            {
+                "id": "run-or-validate-metascape",
+                "purpose": "Run an approved licensed MSBio2 installation or validate an existing Metascape result package.",
+                "required_logic": [
+                    "Validate identifiers and universe, freeze parameters, execute or ingest, and reconcile the full report and network inventory."
+                ],
+                "output_artifact_types": [
+                    "enrichment_network_bundle"
+                ],
+                "template_files": [
+                    "templates/run_msbio2_metascape_analysis.py"
+                ]
+            },
+            {
+                "id": "render-cytoscape-networks",
+                "purpose": "Render Metascape networks consistently through Cytoscape automation.",
+                "required_logic": [
+                    "Import XGMML, reconcile nodes and edges, apply declared layout and style, export CYS, PDF, SVG and PNG, and verify every artifact."
+                ],
+                "output_artifact_types": [
+                    "network_figure_bundle"
+                ],
+                "template_files": [
+                    "templates/render_metascape_cytoscape.py"
+                ]
+            }
+        ],
+        "parameter_rules": [
+            {
+                "id": "select-metascape-design",
+                "parameter": "universe-thresholds-and-ppi-source",
+                "decision_inputs": [
+                    "assay-universe",
+                    "organism",
+                    "list-count",
+                    "hypothesis",
+                    "network-size"
+                ],
+                "selection_rule": "Choose identifier mapping, background, category, multiplicity, similarity and PPI settings from the assay design and declared hypothesis before viewing results.",
+                "validation_rule": "Block interpretation if the universe, organism, identifier losses, thresholds, database release, network-size eligibility or MCODE settings are unknown."
+            }
+        ],
+        "preflight_checks": [
+            "Confirm lawful MSBio2 access, gene-list provenance, organism, background, identifiers, option schema, output path and Cytoscape availability."
+        ],
+        "postflight_checks": [
+            "Reload the report and workbook, reconcile GO/PPI/MCODE tables with XGMML and CYS assets, and verify every PDF, SVG, PNG and digest.",
+            "If this task launched Cytoscape, save the editable session, request a normal exit, and verify that the task-owned process terminated; never close a Cytoscape session that was already owned by the user."
+        ],
+        "provenance_fields": [
+            "module-version",
+            "msbio2-version",
+            "metascape-database-date",
+            "cytoscape-version",
+            "input-background-parameter-digests",
+            "identifier-losses",
+            "output-digests",
+            "layout-and-style"
+        ],
+        "forbidden_actions": [
+            "Do not copy MSBio2 software, license contents or private project outputs into the public repository.",
+            "Do not use the full genome as an implicit background when the assay tested a narrower universe.",
+            "Do not label MCODE topology or visual proximity as a validated pathway, complex or mechanism.",
+            "Do not leave a task-launched Cytoscape process running after exports are validated, and do not terminate a pre-existing user-owned Cytoscape process."
+        ],
+        "requires_observed_execution": true
+    }
+}

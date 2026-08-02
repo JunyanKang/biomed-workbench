@@ -31,6 +31,8 @@ ALLOWED_METADATA_FIELDS = frozenset({
     "additive-unexecuted-adapter",
     "additive-independently-validated-assay-arm",
     "independent-backend-change",
+    "compatibility-policy",
+    "application-lifecycle",
 })
 
 
@@ -75,8 +77,16 @@ def reissue(
     current = module_evidence_scope(registry, module_ids).to_dict()
     if prior == current:
         return False
-    implementation = current_implementation(report)
-    if implementation is None and set(changed_fields) - {"maturity", "description", "limitations", "module-registration"}:
+    compatibility_policy_only = set(changed_fields) == {"compatibility-policy"}
+    implementation = None if compatibility_policy_only else current_implementation(report)
+    if implementation is None and set(changed_fields) - {
+        "maturity",
+        "description",
+        "limitations",
+        "module-registration",
+        "compatibility-policy",
+        "application-lifecycle",
+    }:
         raise RuntimeError("a report without implementation identity can only receive presentation metadata changes")
     before = sha256(path)
     report["evidence_scope"] = current

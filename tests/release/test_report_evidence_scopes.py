@@ -37,6 +37,8 @@ class ReportEvidenceScopeTests(unittest.TestCase):
             "additive-unexecuted-adapter",
             "additive-independently-validated-assay-arm",
             "independent-backend-change",
+            "compatibility-policy",
+            "application-lifecycle",
         }
         checked = 0
         for path in sorted((ROOT / "reports").glob("*.json")):

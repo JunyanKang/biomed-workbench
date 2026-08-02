@@ -14,6 +14,7 @@ from biomed_workbench.services.public_databases import (
     PUBCHEM_CONTRACT_VERSION,
     RCSB_CONTRACT_VERSION,
     RCSB_SEARCH_CONTRACT_VERSION,
+    STRING_CONTRACT_VERSION,
 )
 
 
@@ -29,6 +30,7 @@ MODULE_IDS = {
     "structure-polymer-entities",
     "structure-ligands",
     "alphafold-structure-evidence",
+    "protein-interaction-network-evidence",
 }
 
 
@@ -48,6 +50,7 @@ class PublicDatabaseEvidenceTests(unittest.TestCase):
             "pubchem-pug-rest": PUBCHEM_CONTRACT_VERSION,
             "rcsb-pdb-data-api": RCSB_CONTRACT_VERSION,
             "rcsb-pdb-search-api": RCSB_SEARCH_CONTRACT_VERSION,
+            "string-api": STRING_CONTRACT_VERSION,
         }
 
         self.assertTrue(self.report["passed"])
@@ -66,6 +69,7 @@ class PublicDatabaseEvidenceTests(unittest.TestCase):
             "structure_polymer_entities",
             "structure_bound_ligands",
             "structure_prediction_metadata",
+            "protein_interaction_network",
         }
         packages = self.report["module_package_validation"]
 
@@ -85,6 +89,7 @@ class PublicDatabaseEvidenceTests(unittest.TestCase):
         self.assertTrue(summary["cross_source_disagreement_not_silently_merged"])
         self.assertTrue(summary["preprint_versions_not_collapsed"])
         self.assertTrue(summary["alphafold_model_version_and_confidence_context_retained"])
+        self.assertTrue(summary["string_mapping_network_type_score_and_release_retained"])
         self.assertTrue(summary["no_new_credentials_required"])
 
     def test_public_evidence_contains_no_local_path_or_credential(self):

@@ -2,46 +2,43 @@
 
 Languages: [English](installation.md) · [中文](installation.zh-CN.md)
 
-## Install From GitHub
+## Brief installation
 
-Tell Codex or another compatible agent:
+Give `https://github.com/JunyanKang/biomed-workbench` to Codex and ask:
 
-> Install Biomed Workbench from the `JunyanKang/biomed-workbench` GitHub repository. Use the current main release, verify the installed plugin identity and scientific-module registry, and report the exact installed revision and validation result.
+> Install the current release from this repository. Verify the Codex plugin identity, unified research entry, scientific-module registry and exact revision; preserve existing local changes; then report the validation result and any scientific backend still missing for my project in plain language.
 
-The agent should add the repository as the Biomed Workbench marketplace, install the plugin, and verify that the installed package is `biomed-workbench@biomed-workbench`.
+After installation or update, ask Codex to reload the plugin and open a new task so the current skill and tool entries are discovered.
 
-After installation, open a new Codex task. Skills and MCP tools are discovered when a task starts, so an already-open task may not show the newly installed version.
+## Codex-native entry
 
-## Install From A Full Git URL
+Codex reads the installation metadata in `.codex-plugin` and `.agents/plugins`, uses `skills/biomed-workbench/SKILL.md` as the unified research entry, and maps native features such as image generation to explicit scientific contracts. This is the primary, release-validated product path.
 
-If repository shorthand is unavailable, ask the agent to use the full GitHub address `https://github.com/JunyanKang/biomed-workbench`, stay on the requested branch or release, and perform the same identity and registry checks.
+## Optional interoperability adapters
 
-## Local Development Install
+- **Agent Skills:** another agent that supports a skills-directory convention may read the same skill guidance, but it must provide its own file access, permission checks, runtime execution, artifact reload and evidence registration.
+- **Read-only MCP:** an agent with local stdio MCP support may register `tools/mcp_server.py` for capability discovery, natural-language routing, contract inspection and read-only execution. Output-writing research workflows, Codex-native tools and project-level scientific decisions are not automatically proxied through MCP.
 
-For local development, give the agent a stable development directory and ask it to clone or use the repository there, register that exact directory as a local marketplace, install the plugin, and report both the source revision and the loaded plugin revision. The agent must preserve unrelated working-tree changes and must not silently replace a local development checkout with the remote branch.
+These adapters sit outside the scientific modules and read the same registry. They do not duplicate modules, rewrite templates or rebind prior execution evidence. See [Optional Interoperability Adapters](agent-integration.md).
 
-## Update
+## Local development and updates
 
-Pull the desired repository revision, then reinstall or refresh the marketplace package using the Codex plugin commands available in the installed Codex release. Start a new task after the update and confirm that the skill list contains `biomed-workbench`.
+For development, give Codex a stable repository directory and require it to preserve unrelated changes, report both source and loaded revisions, and run the release-integrity checks after edits. For updates, name the branch or release, reload the plugin and verify the registry digest. A remote revision must not silently overwrite uncommitted local work.
 
-## Verify The Installation
+## Installation verification
 
-Ask the agent to show that the marketplace and installed plugin are present, then open a new task and use Biomed Workbench for a small scientific request such as inspecting a DNA sequence or planning a literature search. The agent runs the packaged strict health check before first use and reports whether the plugin manifest, unified skill, module registry, routing, credential policy and generated evidence reports agree.
+Before first use, Codex runs the strict health check and reports whether the plugin identity, unified entry, module count, registry, router, credential policy and generated evidence agree. The core requires Python 3.10 or newer and the launcher discovers a compatible interpreter. Scientific packages, databases and command versions remain module-level compatibility and provenance records; the core health check does not imply that every optional backend is installed.
 
-The plugin core requires Python 3.10 or newer. The launcher discovers a compatible interpreter instead of assuming that the operating system's `python3` is suitable. Scientific package and command versions remain module-level compatibility and provenance records: the health check does not claim that every optional analysis backend is already installed.
-
-For maintainers who need repository, release, and isolated-install checks, see [development and release](development.md).
+Maintainer-level repository, release and isolated-install checks are documented in [Development And Release](development.md).
 
 ## Credentials
 
-Credential needs are endpoint-specific. The current public modules do not require a key; `NCBI_API_KEY` is optional for the implemented NCBI E-utilities and Datasets requests and increases service capacity without changing scientific interpretation.
-
-Ask the agent to inspect credential status, configure the NCBI key through hidden input, show only the repository-external storage location, rotate the key, or remove it. Values remain outside command arguments, module inputs, logs, reports, research artifacts, and scientific evidence maps. Cluster and institutional secret-manager options are described in [Data Access and Credentials](data-access-and-credentials.md).
+Credential need is determined by the implemented endpoint. Most current public endpoints are anonymous; `NCBI_API_KEY` is an optional capacity credential for NCBI E-utilities and Datasets. A user may ask Codex to inspect, configure, rotate or remove a credential through hidden input. Values must remain outside chat text, command arguments, module inputs, logs, reports, research artifacts and scientific evidence maps. See [Data Access And Credentials](data-access-and-credentials.md) for the full service inventory.
 
 ## Troubleshooting
 
-- **Skill is missing:** start a new Codex task after installation or update.
-- **Marketplace cannot be resolved:** confirm the repository URL, branch, and marketplace name.
-- **Core runtime is blocked:** install Python 3.10 or newer. The workbench launcher will select it automatically; no global environment activation is required.
-- **A scientific backend is unavailable:** the skill can still provide guidance and routing, but execution must wait for a compatible project environment or use a validated alternative.
-- **A result is blocked:** inspect the named input, compatibility, or scientific quality gate; blocked evidence is not silently promoted into a conclusion.
+- **New capabilities are missing:** reload the plugin and open a new task.
+- **The repository cannot be resolved:** use the full GitHub URL and verify the requested branch or release.
+- **The core runtime is unavailable:** provide Python 3.10 or newer; no global environment activation is required.
+- **A scientific backend is unavailable:** ask Codex to discover a compatible existing environment or create an isolated one. Register an analysis result only after observed execution and output review.
+- **A result is not admitted:** inspect the named input, compatibility or scientific-quality condition, then decide whether to add data, tune declared parameters or change method.

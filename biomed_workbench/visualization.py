@@ -223,6 +223,31 @@ PLOT_CONTRACTS: dict[str, dict[str, Any]] = {
         "layout": "pair the 3D view with orthogonal or section-wise views; do not hide missing sections",
         "legend": "right; shared across projections",
     },
+    "structure_complex": {
+        "required_elements": ["molecular identities", "chain identities", "model or experimental provenance", "coordinate units", "interface definition", "confidence or quality semantics", "orientation statement"],
+        "layout": "pair an uncluttered complex overview with a zoomed interface or residue-contact panel; use the same chain colors across all views",
+        "legend": "outside the molecular view; identify every chain, ligand, confidence color and interface encoding",
+    },
+    "docking_quality": {
+        "required_elements": ["complete model inventory", "docking score", "cluster identity", "reference-dependent metrics only when a reference exists", "sampling profile", "rejected-model accounting"],
+        "layout": "show score distributions and cluster summaries before highlighting selected models; mark the official integration-test profile as non-production",
+        "legend": "outside; separate producer scores, reference-agreement metrics and predicted affinity",
+    },
+    "structure_confidence": {
+        "required_elements": ["model version", "seed and sample", "ranking score", "pTM", "ipTM", "chain or chain-pair confidence", "clash status", "PAE when available"],
+        "layout": "pair the complex with confidence summaries and PAE; use chain-pair metrics for interaction-specific questions",
+        "legend": "outside; confidence measures must never be labelled as binding probability or affinity",
+    },
+    "ppi_network": {
+        "required_elements": ["database and release", "organism", "identifier mapping losses", "functional or physical edge semantics", "score threshold", "added-node policy", "edge evidence channels"],
+        "layout": "fixed seed or recorded Cytoscape layout; retain node and edge tables; proximity has no biological meaning unless explicitly encoded",
+        "legend": "outside; separate node size, node color, edge width and edge evidence semantics",
+    },
+    "enrichment_similarity_network": {
+        "required_elements": ["database categories and release", "background universe", "term-similarity threshold", "multiplicity method", "representative-term rule", "cluster identity"],
+        "layout": "label only representative terms in dense networks; preserve full term table and editable Cytoscape session",
+        "legend": "outside; show term significance, size, cluster and edge-similarity encodings separately",
+    },
 }
 
 
@@ -318,6 +343,22 @@ ANALYSIS_FIGURE_PROFILES: dict[str, dict[str, list[str]]] = {
             "module_membership_gene_significance",
         ],
         "optional": ["tom_heatmap", "hub_gene_network", "module_expression_heatmap"],
+    },
+    "protein-interaction-network": {
+        "required": ["identifier_mapping_summary", "ppi_network", "edge_evidence_channel_summary", "ppi_enrichment_summary"],
+        "optional": ["physical_functional_network_comparison", "threshold_sensitivity", "cytoscape_editable_session"],
+    },
+    "protein-complex-docking": {
+        "required": ["structure_complex", "interface_residue_contact_map", "docking_score_distribution", "cluster_summary", "model_accounting", "structure_figure_manifest"],
+        "optional": ["docking_quality", "prodigy_affinity_summary", "restraint_satisfaction", "sampling_sensitivity"],
+    },
+    "alphafold3-complex": {
+        "required": ["structure_complex", "structure_confidence", "ranking_score_summary", "chain_pair_confidence", "clash_summary", "model_sample_inventory"],
+        "optional": ["pae_heatmap", "seed_sensitivity", "comparison_with_experimental_structure", "comparison_with_docking"],
+    },
+    "metascape-msbio": {
+        "required": ["enrichment_dotplot", "enrichment_similarity_network", "ppi_network", "mcode_component_summary", "identifier_mapping_summary"],
+        "optional": ["enrichment_heatmap", "multi-list_overlap", "cytoscape_editable_session", "parameter_sensitivity"],
     },
     "trajectory-topology": {
         "required": [

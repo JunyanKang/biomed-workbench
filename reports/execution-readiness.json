@@ -1,10 +1,10 @@
 {
   "blocked_module_ids": [],
   "counts": {
-    "executable": 163,
+    "executable": 167,
     "validated": 31
   },
-  "module_count": 194,
+  "module_count": 198,
   "passed": true,
   "records": [
     {
@@ -92,6 +92,19 @@
       ],
       "released": true,
       "template_paths": []
+    },
+    {
+      "assay_readiness": [],
+      "contract_ready": true,
+      "executor_ready": true,
+      "level": "executable",
+      "module_id": "alphafold3-complex-prediction",
+      "public_data_validated": false,
+      "reasons": [],
+      "released": true,
+      "template_paths": [
+        "templates/run_alphafold3_complex_prediction.py"
+      ]
     },
     {
       "assay_readiness": [],
@@ -1648,6 +1661,20 @@
       "contract_ready": true,
       "executor_ready": true,
       "level": "executable",
+      "module_id": "metascape-msbio-network-analysis",
+      "public_data_validated": false,
+      "reasons": [],
+      "released": true,
+      "template_paths": [
+        "templates/render_metascape_cytoscape.py",
+        "templates/run_msbio2_metascape_analysis.py"
+      ]
+    },
+    {
+      "assay_readiness": [],
+      "contract_ready": true,
+      "executor_ready": true,
+      "level": "executable",
       "module_id": "msprime-demographic-simulation",
       "public_data_validated": false,
       "reasons": [],
@@ -1987,6 +2014,20 @@
       "contract_ready": true,
       "executor_ready": true,
       "level": "executable",
+      "module_id": "protein-complex-docking",
+      "public_data_validated": false,
+      "reasons": [],
+      "released": true,
+      "template_paths": [
+        "templates/render_complex_publication_figures.py",
+        "templates/run_haddock3_complex_docking.py"
+      ]
+    },
+    {
+      "assay_readiness": [],
+      "contract_ready": true,
+      "executor_ready": true,
+      "level": "executable",
       "module_id": "protein-disorder-evidence",
       "public_data_validated": false,
       "reasons": [
@@ -1994,6 +2035,21 @@
       ],
       "released": true,
       "template_paths": []
+    },
+    {
+      "assay_readiness": [],
+      "contract_ready": true,
+      "executor_ready": true,
+      "level": "executable",
+      "module_id": "protein-interaction-network-evidence",
+      "public_data_validated": false,
+      "reasons": [
+        "The registered Python, service, or scientific-command entrypoint is the execution surface; templates are reproducible examples only."
+      ],
+      "released": true,
+      "template_paths": [
+        "templates/render_string_ppi_network.py"
+      ]
     },
     {
       "assay_readiness": [],
@@ -3045,7 +3101,7 @@
       ]
     }
   ],
-  "registry_digest": "632bf87110a3bec3f3283c1b36242312f5b5b58d0f49bd589bfa5f5528eaddd4",
+  "registry_digest": "55487b07c73a75145a82bad293abc63c1d7e9a54130fd86be24116e8b87bc4b9",
   "schema_version": 2,
   "status_model": {
     "executable": "A parameterized adapter executes a controlled workflow and reloads declared outputs.",
