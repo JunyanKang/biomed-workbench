@@ -9,6 +9,7 @@ from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, Mapping
 
 from .identity import digest_value, validate_identifier
+from .execution_chain import delivery_slice_digest
 from .scientific_dependency import (
     AnalysisAdmission,
     ArtifactReview,
@@ -55,6 +56,7 @@ class EvidenceMapVersion:
     change_type: str
     change_summary_zh: str
     change_summary_en: str
+    map_kind: str = "project-snapshot"
 
     def __post_init__(self) -> None:
         if not _SEMVER.fullmatch(self.version):
@@ -63,6 +65,8 @@ class EvidenceMapVersion:
             raise ValueError("evidence map revision must be positive")
         if self.change_type not in CHANGE_TYPES:
             raise ValueError("evidence map change_type is unsupported")
+        if self.map_kind not in {"project-snapshot", "validated-delivery"}:
+            raise ValueError("evidence map kind is unsupported")
         if self.parent_map_digest is not None and not _SHA256.fullmatch(self.parent_map_digest):
             raise ValueError("evidence map parent digest must be SHA-256")
         if self.revision == 1:
@@ -83,6 +87,7 @@ class EvidenceMapVersion:
             "change_type": self.change_type,
             "change_summary_zh": self.change_summary_zh,
             "change_summary_en": self.change_summary_en,
+            "map_kind": self.map_kind,
         }
 
     @classmethod
@@ -100,14 +105,23 @@ class EvidenceMapPublication:
     edge_table_digest: str
     source_state_digest: str
     dependency_bundle_digest: str
+    map_kind: str
+    delivery_slice_digest: str
+    active_artifact_ids: tuple[str, ...]
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "evidence_map_publication.id"))
         if not isinstance(self.version, EvidenceMapVersion):
             raise ValueError("evidence map publication requires a version contract")
-        for field in ("map_digest", "edge_table_digest", "source_state_digest", "dependency_bundle_digest"):
+        for field in ("map_digest", "edge_table_digest", "source_state_digest", "dependency_bundle_digest", "delivery_slice_digest"):
             if not _SHA256.fullmatch(getattr(self, field)):
                 raise ValueError(f"evidence map publication {field} must be SHA-256")
+        if self.map_kind != self.version.map_kind:
+            raise ValueError("evidence map publication kind differs from its version contract")
+        active = tuple(validate_identifier(value, "evidence_map_publication.active_artifact_id") for value in self.active_artifact_ids)
+        if len(set(active)) != len(active):
+            raise ValueError("evidence map publication active artifact IDs must be unique")
+        object.__setattr__(self, "active_artifact_ids", active)
 
     @classmethod
     def from_map(cls, evidence_map: "ScientificEvidenceMap") -> "EvidenceMapPublication":
@@ -119,12 +133,18 @@ class EvidenceMapPublication:
             edge_table_digest=evidence_map.edge_table_digest,
             source_state_digest=evidence_map.state_digest,
             dependency_bundle_digest=evidence_map.dependency_bundle_digest,
+            map_kind=evidence_map.version.map_kind,
+            delivery_slice_digest=evidence_map.delivery_slice_digest,
+            active_artifact_ids=evidence_map.active_evidence_artifact_ids,
         )
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "EvidenceMapPublication":
         values = dict(payload)
         values["version"] = EvidenceMapVersion.from_dict(values["version"])
+        values.setdefault("map_kind", values["version"].map_kind)
+        values.setdefault("delivery_slice_digest", values["source_state_digest"])
+        values["active_artifact_ids"] = tuple(values.get("active_artifact_ids", ()))
         return cls(**values)
 
     def to_dict(self) -> dict[str, object]:
@@ -135,6 +155,9 @@ class EvidenceMapPublication:
             "edge_table_digest": self.edge_table_digest,
             "source_state_digest": self.source_state_digest,
             "dependency_bundle_digest": self.dependency_bundle_digest,
+            "map_kind": self.map_kind,
+            "delivery_slice_digest": self.delivery_slice_digest,
+            "active_artifact_ids": list(self.active_artifact_ids),
         }
 
 
@@ -293,6 +316,7 @@ class EvidenceMapUnit:
     admissions: tuple[AnalysisAdmission, ...]
     review: ArtifactReview
     decision: ScientificDecision
+    evidence_origin: str
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -310,6 +334,7 @@ class EvidenceMapUnit:
             "analysis_admissions": [item.to_dict() for item in self.admissions],
             "review": self.review.to_dict(),
             "decision": self.decision.to_dict(),
+            "evidence_origin": self.evidence_origin,
         }
 
 
@@ -339,6 +364,8 @@ class ScientificEvidenceMap:
     version: EvidenceMapVersion
     state_digest: str
     dependency_bundle_digest: str
+    delivery_slice_digest: str
+    active_evidence_artifact_ids: tuple[str, ...]
     hypotheses: tuple[Hypothesis, ...]
     units: tuple[EvidenceMapUnit, ...]
     edges: tuple[EvidenceMapEdge, ...]
@@ -353,6 +380,8 @@ class ScientificEvidenceMap:
             "version": self.version.to_dict(),
             "state_digest": self.state_digest,
             "dependency_bundle_digest": self.dependency_bundle_digest,
+            "delivery_slice_digest": self.delivery_slice_digest,
+            "active_evidence_artifact_ids": list(self.active_evidence_artifact_ids),
             "hypotheses": [hypothesis.to_dict() for hypothesis in self.hypotheses],
             "units": [unit.to_dict() for unit in self.units],
             "edges": [edge.to_dict() for edge in self.edges],
@@ -434,6 +463,8 @@ def build_scientific_evidence_map(
     workspace_root: Path,
     version: EvidenceMapVersion,
 ) -> ScientificEvidenceMap:
+    if bundle.map_kind != version.map_kind:
+        raise ValueError("evidence map version and dependency bundle kinds differ")
     bundle._validate(state)
     specs = tuple(unit_specs)
     if len({item.id for item in specs}) != len(specs):
@@ -482,6 +513,7 @@ def build_scientific_evidence_map(
                 unit_admissions,
                 review,
                 decisions[spec.artifact_id],
+                "input-qualification" if artifact.producing_module_id is None else "observed-analysis",
             )
         )
     for artifact_id, review in reviews.items():
@@ -533,6 +565,8 @@ def build_scientific_evidence_map(
         version,
         state.state_digest,
         bundle.digest,
+        delivery_slice_digest(state),
+        tuple(sorted(item.artifact_id for item in bundle.decisions if item.active_evidence)),
         tuple(sorted(state.hypotheses, key=lambda item: item.id)),
         ordered_units,
         ordered_edges,

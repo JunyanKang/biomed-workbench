@@ -18,7 +18,7 @@ class RoutingTests(unittest.TestCase):
     def test_evidence_crispr_publication_request_is_serial_and_specific(self):
         plan = route("分析TP53基因证据并设计CRISPR验证，最后审计Nature论文", per_workflow=3)
         self.assertEqual(plan["matched_workflows"], ["evidence", "molecular_design", "publication"])
-        self.assertEqual(plan["plan_type"], "serial")
+        self.assertEqual(plan["plan_type"], "mixed")
         self.assertEqual(ids_for(plan, "evidence")[0], "gene-evidence")
         self.assertEqual(ids_for(plan, "molecular_design")[0], "crispr-design")
         self.assertEqual(ids_for(plan, "publication")[0], "manuscript-audit")

@@ -63,7 +63,7 @@ def _entry_surfaces(manifest: ModuleManifest, *, executor_ready: bool) -> dict[s
             "stateful_controller": {"reachable": True, "mode": "execution-handoff", "scientific_completion": False},
             "mcp": {"reachable": False, "mode": "explicitly-unsupported", "scientific_completion": False},
             "codex_handoff": {"reachable": True, "mode": "packaged-protocol", "scientific_completion": False},
-            "packaged_adapter": {"reachable": executor_ready, "mode": "project-scoped-external-execution", "scientific_completion": executor_ready},
+            "packaged_adapter": {"reachable": executor_ready, "mode": "project-scoped-external-execution", "scientific_completion": False},
         }
     if manifest.access == "codex_native":
         return {
@@ -75,19 +75,19 @@ def _entry_surfaces(manifest: ModuleManifest, *, executor_ready: bool) -> dict[s
         }
     if manifest.execution.kind == "command":
         return {
-            "cli": {"reachable": True, "mode": "strict-project-artifact-execution", "scientific_completion": True},
-            "stateful_controller": {"reachable": True, "mode": "strict-project-artifact-execution", "scientific_completion": True},
+            "cli": {"reachable": True, "mode": "strict-project-artifact-execution", "scientific_completion": False},
+            "stateful_controller": {"reachable": True, "mode": "strict-project-artifact-execution", "scientific_completion": False},
             "mcp": {"reachable": False, "mode": "explicitly-unsupported", "scientific_completion": False},
             "codex_handoff": {"reachable": False, "mode": "not-applicable", "scientific_completion": False},
-            "packaged_adapter": {"reachable": True, "mode": "scientific-command", "scientific_completion": True},
+            "packaged_adapter": {"reachable": True, "mode": "scientific-command", "scientific_completion": False},
         }
     mcp_reachable = manifest.mutability == "read_only" and manifest.execution.kind in {"python", "service"}
     return {
-        "cli": {"reachable": True, "mode": "strict-project-artifact-execution", "scientific_completion": True},
-        "stateful_controller": {"reachable": True, "mode": "strict-compatible-entry", "scientific_completion": True},
-        "mcp": {"reachable": mcp_reachable, "mode": "validated-direct-entry" if mcp_reachable else "explicitly-unsupported", "scientific_completion": mcp_reachable},
+        "cli": {"reachable": True, "mode": "strict-project-artifact-execution", "scientific_completion": False},
+        "stateful_controller": {"reachable": True, "mode": "strict-compatible-entry", "scientific_completion": False},
+        "mcp": {"reachable": mcp_reachable, "mode": "validated-direct-entry" if mcp_reachable else "explicitly-unsupported", "scientific_completion": False},
         "codex_handoff": {"reachable": False, "mode": "not-applicable", "scientific_completion": False},
-        "packaged_adapter": {"reachable": True, "mode": manifest.execution.kind, "scientific_completion": True},
+        "packaged_adapter": {"reachable": True, "mode": manifest.execution.kind, "scientific_completion": False},
     }
 
 
@@ -145,12 +145,16 @@ def assess_execution_readiness(
     public_data_validated_assays: frozenset[str] = frozenset(),
 ) -> ExecutionReadiness:
     paths = referenced_template_paths(manifest)
+    fixture_path = module_path / "tests" / "cases.json"
+    controlled_fixture_executed = public_data_validated or (
+        manifest.access != "agent_generated" and fixture_path.is_file()
+    )
     if manifest.access != "agent_generated":
         executor_ready = True
         surfaces = _entry_surfaces(manifest, executor_ready=executor_ready)
         return ExecutionReadiness(
             manifest.id,
-            "validated" if public_data_validated else "executable",
+            "validated" if public_data_validated else "executable" if controlled_fixture_executed else "scaffolded",
             True,
             True,
             True,
@@ -160,9 +164,10 @@ def assess_execution_readiness(
             surfaces,
             {
                 "contract_valid": True,
-                "executor_reachable": executor_ready,
+                "adapter_static_reachable": executor_ready,
+                "controlled_fixture_executed_and_reloaded": controlled_fixture_executed,
                 "representative_or_public_case_validated": public_data_validated,
-                "current_project_validated": False,
+                "current_project_reviewed": False,
             },
             ("The registered Python, service, or scientific-command entrypoint is the execution surface; templates are reproducible examples only.",),
         )
@@ -283,8 +288,11 @@ def assess_execution_readiness(
         )
     elif public_data_validated:
         level = "validated"
-    else:
+    elif controlled_fixture_executed:
         level = "executable"
+    else:
+        level = "scaffolded"
+        reasons.append("The adapter is statically reachable, but this readiness record does not bind a controlled reloaded execution fixture.")
     surfaces = _entry_surfaces(manifest, executor_ready=executor_ready)
     return ExecutionReadiness(
         manifest.id,
@@ -298,9 +306,10 @@ def assess_execution_readiness(
         surfaces,
         {
             "contract_valid": contract_ready,
-            "executor_reachable": executor_ready,
+            "adapter_static_reachable": executor_ready,
+            "controlled_fixture_executed_and_reloaded": controlled_fixture_executed,
             "representative_or_public_case_validated": public_data_validated and executor_ready,
-            "current_project_validated": False,
+            "current_project_reviewed": False,
         },
         tuple(reasons),
     )

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from .modules.contract import ModuleManifest
@@ -52,30 +53,33 @@ def _dependencies(objective: str, selected: tuple[ModuleManifest, ...], bindings
         module.id: set(bindings[module.id].values())
         for module in selected
     }
-    for module in selected:
-        dependencies[module.id].update(
-            upstream.id
-            for upstream in selected
-            if upstream.id != module.id
-            and upstream.domains[0] == module.domains[0]
-            and upstream.orchestration.scientific_stage < module.orchestration.scientific_stage
-        )
     non_publication = {module.id for module in selected if module.domains[0] != "publication"}
     if non_publication:
         for module in selected:
             if module.domains[0] == "publication":
                 dependencies[module.id].update(non_publication)
     normalized = objective.lower()
-    parallel_requested = any(term in normalized for term in (" parallel ", "concurrently", "并行", "同时"))
-    if not parallel_requested and any(term in normalized for term in (" then ", " finally ", " subsequently ", "然后", "最后", "随后")):
-        domain_order = list(dict.fromkeys(module.domains[0] for module in selected))
-        for module in selected:
-            domain_index = domain_order.index(module.domains[0])
-            dependencies[module.id].update(
-                upstream.id
-                for upstream in selected
-                if domain_order.index(upstream.domains[0]) < domain_index
-            )
+    parallel_requested = bool(re.search(r"\b(?:parallel|concurrently|independently|separately)\b|并行|独立|分别", normalized))
+    sequential_requested = bool(re.search(r"\b(?:then|finally|subsequently|followed by)\b|然后|最后|随后|再进行|后用|之后", normalized))
+    if sequential_requested and not parallel_requested:
+        def mention_position(module: ModuleManifest) -> tuple[int, int]:
+            positions = [normalized.find(alias.lower()) for alias in module.routing.method_aliases]
+            observed = [value for value in positions if value >= 0]
+            return (min(observed) if observed else len(normalized), selected.index(module))
+
+        ordered = sorted(selected, key=mention_position)
+        for index, module in enumerate(ordered[1:], start=1):
+            upstream_id = ordered[index - 1].id
+            stack = [upstream_id]
+            seen = set()
+            while stack:
+                current = stack.pop()
+                if current in seen:
+                    continue
+                seen.add(current)
+                stack.extend(dependencies.get(current, ()))
+            if module.id not in seen:
+                dependencies[module.id].add(upstream_id)
     return {module_id: tuple(sorted(values)) for module_id, values in dependencies.items()}
 
 

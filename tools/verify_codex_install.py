@@ -195,7 +195,14 @@ def build_report(codex_cli: Path, source: Path) -> dict[str, Any]:
             .get("content", {})
             .get("row_count")
         )
-        if execution.get("status") != "completed" or execution.get("module_id") != "data-profile" or execution.get("stop_reason") != "awaiting_artifact_review" or output_rows != 2:
+        if (
+            execution.get("execution_status") != "completed"
+            or execution.get("scientific_status") != "awaiting_review"
+            or execution.get("module_id") != "data-profile"
+            or execution.get("stop_reason") != "awaiting_artifact_review"
+            or output_rows != 2
+            or not (project_root / str(execution.get("project_state_path", ""))).is_file()
+        ):
             raise RuntimeError("installed data-profile execution did not complete with two accounted rows")
         source_registry = json.loads((source / "biomed_workbench" / "modules" / "index.json").read_text(encoding="utf-8"))
         checks = [
@@ -205,7 +212,7 @@ def build_report(codex_cli: Path, source: Path) -> dict[str, Any]:
             ("manifest_version_resolution", installation.get("version") == plugin_manifest["version"]),
             ("installed_cache_module_index", registry["module_count"] == source_registry["module_count"] and registry["registry_digest"] == source_registry["registry_digest"]),
             ("installed_cache_routing", "data-profile" in route["selected_module_ids"]),
-            ("installed_cache_execution", execution["status"] == "completed" and execution["stop_reason"] == "awaiting_artifact_review" and output_rows == 2),
+            ("installed_cache_execution", execution["execution_status"] == "completed" and execution["scientific_status"] == "awaiting_review" and execution["stop_reason"] == "awaiting_artifact_review" and output_rows == 2),
             ("installed_skill_metadata", len(skill_paths) == 1),
             ("cache_snapshot_isolation", installed_resolved.is_relative_to(isolated_home) and installed_resolved != source.resolve()),
             ("new_task_reload_required", True),

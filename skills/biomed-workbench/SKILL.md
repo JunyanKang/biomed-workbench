@@ -41,7 +41,7 @@ Use one approved `AnalysisAdmission` for every planned analysis. It must bind a 
 
 Review every produced artifact through one bilingual `ArtifactReview`, including intermediate, negative, excluded, table, model and figure artifacts. Figure reviews must match the declared panel set exactly. Follow each review with an explicit `ScientificDecision`: retain, retain with caveat, exclude, rerun, switch method, acquire data, revise the hypothesis or scope, or stop the branch.
 
-Generate Chinese and English interpretation reports only from a validated `ScientificEvidenceMap`. Recheck every path, SHA-256 and machine-readable edge table before rendering. Publish accepted map states through the append-only semantic-version mechanism; preserve the parent digest and classify interpretation changes as patch, minor or major.
+Generate Chinese and English interpretation reports only from a validated `ScientificEvidenceMap`. A `project-snapshot` may describe qualified inputs, pending branches, failures and exclusions, but it never releases a publication-delivery node. Only a current `validated-delivery` map whose retained results carry the complete execution, reload, bilingual review and decision chain satisfies that gate. Recheck every path, SHA-256 and machine-readable edge table before rendering. Publish accepted map states through the append-only semantic-version mechanism; preserve the parent digest and classify interpretation changes as patch, minor or major.
 
 Treat tool versions as reproducibility metadata and compatibility guidance, not as the scientific capability itself. Distinguish exact tested baselines from allowed compatibility ranges, record the actual detected tool and dependency versions, and keep usage guidance available when execution is blocked. Never present a range-compatible version as if it were directly regression-tested.
 
@@ -71,11 +71,22 @@ Inspect an exact capability contract or refine a broad route:
 "$WORKBENCH_ROOT/tools/workbench" search --workflow WORKFLOW "SEARCH TERMS"
 ```
 
-Execute a bounded capability with a JSON object. Prefer `--input-file` when payloads are large or contain multiline scientific data.
+Execute a bounded capability only after binding its project context, typed input artifacts, approved admission and exact compatibility row. The command persists a new, non-overwriting project state inside the project root; its `execution_status` is distinct from the later `scientific_status`. Prefer `--input-file` when parameters are large or multiline.
 
 ```bash
-"$WORKBENCH_ROOT/tools/workbench" run CAPABILITY_ID --input '{"field":"value"}'
-"$WORKBENCH_ROOT/tools/workbench" run CAPABILITY_ID --input-file INPUT.json
+"$WORKBENCH_ROOT/tools/workbench" run CAPABILITY_ID --input-file PARAMETERS.json --project-root PROJECT_DIR --artifact-bindings PROJECT_BINDINGS.json --compatibility-row EXACT_ROW
+```
+
+For a continuing project, use the persisted state rather than reconstructing it from chat. `init` registers an initial state; `admit`, `review`, and `decide` append the required scientific judgements; `resume` advances only released nodes. When a packaged external workflow returns from its recorded handoff, `ingest-execution` verifies the exact module, version, compatibility row, runtime versions, exit status, output identities and content-addressed payloads before making the outputs reviewable. `map` publishes either an explicit project snapshot or a validated delivery map according to the version contract.
+
+```bash
+"$WORKBENCH_ROOT/tools/workbench" project init --context CONTEXT.json --hypotheses HYPOTHESES.json --artifacts ARTIFACTS.json --plan PLAN.json --state PROJECT_STATE.json
+"$WORKBENCH_ROOT/tools/workbench" project ingest-execution --state PROJECT_STATE.json --input OBSERVED_EXECUTION.json --project-root PROJECT_DIR
+"$WORKBENCH_ROOT/tools/workbench" project review --state PROJECT_STATE.json --input ARTIFACT_REVIEW.json
+"$WORKBENCH_ROOT/tools/workbench" project decide --state PROJECT_STATE.json --input SCIENTIFIC_DECISION.json
+"$WORKBENCH_ROOT/tools/workbench" project resume --state PROJECT_STATE.json --project-root PROJECT_DIR
+"$WORKBENCH_ROOT/tools/workbench" project map --state PROJECT_STATE.json --workspace PROJECT_DIR --specs EVIDENCE_UNITS.json --version MAP_VERSION.json --publish-root EVIDENCE_MAP_DIR
+"$WORKBENCH_ROOT/tools/workbench" project map-recovery --state PROJECT_STATE.json --publish-root EVIDENCE_MAP_DIR
 ```
 
 Inspect optional scientific-service credentials without exposing their values. Determine credential need from the exact implemented endpoint, not from the database name. Current public Crossref, Europe PMC, ClinicalTrials.gov, UniProt, Ensembl, Reactome, Open Targets, public cBioPortal and PubChem endpoints do not require a user API key. `NCBI_API_KEY` is optional for the implemented E-utilities and Datasets requests and increases service capacity. Private cBioPortal deployments, paid Crossref services, institutional proxies and future restricted endpoints require their own separately declared authentication contracts. When the user wants higher NCBI request capacity, offer the guided hidden-input flow and obtain permission before saving a credential:

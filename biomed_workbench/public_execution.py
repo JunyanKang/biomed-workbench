@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
+import os
 from pathlib import Path
+import tempfile
 from typing import Any, Callable, Mapping
 
 from .kernel.artifact_store import ProjectArtifactStore
@@ -33,22 +36,42 @@ class PublicExecutionError(ValueError):
 class PublicExecutionResult:
     module_id: str
     execution_status: str
+    scientific_status: str
     stop_reason: str
     project_id: str
     project_state_digest: str
     execution: Mapping[str, Any]
     output_artifacts: tuple[Mapping[str, Any], ...]
+    project_state_path: str
+    project_state: ProjectState
 
     def to_dict(self) -> dict[str, object]:
         return {
             "module_id": self.module_id,
-            "status": self.execution_status,
+            "execution_status": self.execution_status,
+            "scientific_status": self.scientific_status,
             "stop_reason": self.stop_reason,
             "project_id": self.project_id,
             "project_state_digest": self.project_state_digest,
             "execution": dict(self.execution),
             "output_artifacts": [dict(value) for value in self.output_artifacts],
+            "project_state_path": self.project_state_path,
         }
+
+
+def _persist_state(path: Path, state: ProjectState) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            json.dump(state.to_dict(), handle, indent=2, sort_keys=True, ensure_ascii=False)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def _project_root(path: str | Path) -> Path:
@@ -246,6 +269,11 @@ def _bound_artifacts(
         raise PublicExecutionError("INPUT_ARTIFACT_REQUIRED", f"artifact bindings differ from module ports: {detail}")
     artifacts = []
     for index, port in enumerate(manifest.input_artifacts):
+        if port.source_policy == "upstream_required":
+            raise PublicExecutionError(
+                "UPSTREAM_REVIEW_REQUIRED",
+                f"input port {port.name} must be bound through a persisted project plan to a reviewed and retained upstream result",
+            )
         binding = raw[port.name]
         if not isinstance(binding, Mapping):
             raise PublicExecutionError("ARTIFACT_BINDING_INVALID", f"artifact binding for port {port.name} must be an object")
@@ -281,6 +309,7 @@ def execute_public_module(
     allow_mutation: bool = False,
     environment_provider: Callable[[ModuleManifest], EnvironmentSnapshot] = detect_environment,
     command_executable_resolver: Callable[[str], str | None] | None = None,
+    state_path: str | Path | None = None,
 ) -> PublicExecutionResult:
     """Execute one exact module through the stateful strict controller."""
     if not isinstance(parameters, Mapping):
@@ -296,10 +325,40 @@ def execute_public_module(
     root = _project_root(project_root)
     store = ProjectArtifactStore(root / ".biomed-workbench" / "artifacts")
     context = _context(artifact_bindings)
+    resolved_state_path = Path(state_path).expanduser() if state_path is not None else (
+        root / ".biomed-workbench" / "projects" / context.project_id / "project-state.json"
+    )
+    if not resolved_state_path.is_absolute():
+        resolved_state_path = root / resolved_state_path
+    resolved_state_path = resolved_state_path.resolve(strict=False)
+    if root not in resolved_state_path.parents:
+        raise PublicExecutionError("PROJECT_STATE_PATH_INVALID", "project state must be stored inside --project-root")
     hypotheses = _hypotheses(artifact_bindings)
     artifacts = _bound_artifacts(manifest, artifact_bindings, parameters, context, store)
-    state = ProjectState.create(context)
+    if resolved_state_path.exists():
+        try:
+            state = ProjectState.from_dict(json.loads(resolved_state_path.read_text(encoding="utf-8")))
+        except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError) as exc:
+            raise PublicExecutionError("PROJECT_STATE_INVALID", "the existing project state cannot be replayed") from exc
+        if state.context != context:
+            raise PublicExecutionError("PROJECT_CONTEXT_MISMATCH", "the existing project state belongs to a different exact context")
+        active = next((item for item in state.plans if item.id == state.active_plan_id), None)
+        if active is not None and any(node.status != "completed" for node in active.nodes):
+            raise PublicExecutionError(
+                "PROJECT_STATE_REQUIRES_CONTINUATION",
+                "the active plan is unfinished; continue its review, decision, ingest, or resume path before admitting another run",
+            )
+    else:
+        state = ProjectState.create(context)
+    known_hypotheses = {item.id: item for item in state.hypotheses}
     for hypothesis in hypotheses:
+        if hypothesis.id in known_hypotheses:
+            dynamic = {"status", "supporting_evidence_ids", "conflicting_evidence_ids", "missing_evidence_types"}
+            existing_basis = {key: value for key, value in known_hypotheses[hypothesis.id].to_dict().items() if key not in dynamic}
+            supplied_basis = {key: value for key, value in hypothesis.to_dict().items() if key not in dynamic}
+            if existing_basis != supplied_basis:
+                raise PublicExecutionError("HYPOTHESIS_CONFLICT", "a supplied hypothesis ID differs from the persisted project hypothesis")
+            continue
         state = apply_event(
             state,
             "hypothesis_added",
@@ -307,7 +366,14 @@ def execute_public_module(
             rationale="Register one falsifiable project hypothesis before admitting public execution.",
             affected_hypothesis_ids=(hypothesis.id,),
         )
+    known_artifacts = {item.id: item for item in state.artifacts}
+    materialized_artifacts = []
     for artifact in artifacts:
+        if artifact.id in known_artifacts:
+            if known_artifacts[artifact.id].content_digest != artifact.content_digest:
+                raise PublicExecutionError("ARTIFACT_CONFLICT", "a supplied artifact ID differs from the persisted project artifact")
+            materialized_artifacts.append(known_artifacts[artifact.id])
+            continue
         state = apply_event(
             state,
             "artifact_registered",
@@ -315,13 +381,16 @@ def execute_public_module(
             rationale="Register one public-entry input artifact after content-addressed import and contract validation.",
             affected_artifact_ids=(artifact.id,),
         )
+        materialized_artifacts.append(artifact)
+    artifacts = tuple(materialized_artifacts)
     bindings = {port.name: artifact.id for port, artifact in zip(manifest.input_artifacts, artifacts, strict=True)}
+    run_identity = {"module": module_id, "inputs": bindings, "parameters": dict(parameters), "prior_state": state.state_digest}
     output_ids = {
-        port.name: f"artifact-output-{port.name}-{digest_value({'module': module_id, 'inputs': bindings, 'parameters': dict(parameters)})[:12]}"
+        port.name: f"artifact-output-{port.name}-{digest_value(run_identity)[:12]}"
         for port in manifest.output_artifacts
     }
     node = PlanNode(
-        id=f"node-{manifest.id}-{digest_value({'inputs': bindings, 'row': compatibility_row_id})[:12]}",
+        id=f"node-{manifest.id}-{digest_value({'inputs': bindings, 'row': compatibility_row_id, 'prior_state': state.state_digest})[:12]}",
         module_id=manifest.id,
         input_bindings=bindings,
         dependencies=(),
@@ -335,7 +404,7 @@ def execute_public_module(
         attempt=0,
     )
     plan = ResearchDAG.create(
-        id=f"plan-{manifest.id}-{digest_value({'node': node.to_dict(), 'context': context.to_dict()})[:12]}",
+        id=f"plan-{manifest.id}-{digest_value({'node': node.to_dict(), 'context': context.to_dict(), 'prior_state': state.state_digest})[:12]}",
         objective=context.objective,
         nodes=(node,),
         required_output_artifact_types=tuple(dict.fromkeys(port.artifact_type for port in manifest.output_artifacts)),
@@ -380,12 +449,17 @@ def execute_public_module(
         for artifact in cycle.state.artifacts
         if artifact.id in set(execution.output_artifact_ids)
     )
+    active_node = next(item for item in cycle.active_plan.nodes if item.id == node.id)
+    _persist_state(resolved_state_path, cycle.state)
     return PublicExecutionResult(
         module_id=manifest.id,
         execution_status=execution.status,
+        scientific_status=active_node.status,
         stop_reason=cycle.stop_reason,
         project_id=context.project_id,
         project_state_digest=cycle.state.state_digest,
         execution=execution.to_dict(),
         output_artifacts=outputs,
+        project_state_path=str(resolved_state_path.relative_to(root)),
+        project_state=cycle.state,
     )

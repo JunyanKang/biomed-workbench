@@ -19,7 +19,7 @@ These levels are cumulative for a specific compatibility row. Evidence from one
 row must not be transferred to another row merely because its version appears
 inside an allowed range.
 
-Four independent axes are reported for every released capability: scientific-contract completeness, entry-surface reachability, observed execution evidence, and project evidence state. They answer different questions and are never collapsed into one maturity count. A module can have a complete contract while its command surface is unavailable, or have a reachable adapter while no project result has been observed and reviewed.
+Five independent axes are reported for every released capability: contract validity, static adapter reachability, controlled fixture execution and reload, representative or public-case acceptance, and current-project review. They are never collapsed into one maturity count. Reachable code is not proof of execution; a representative case is not proof that the current project produced and reviewed a result. Generic entry surfaces therefore never declare scientific completion before the project review and decision events exist.
 
 ## Operational Labels
 

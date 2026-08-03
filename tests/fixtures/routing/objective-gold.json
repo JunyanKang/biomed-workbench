@@ -15,7 +15,7 @@
       "per_workflow": 5,
       "required_module_ids": ["single-cell-batch-integration", "single-cell-qc"],
       "forbidden_module_ids": ["single-cell-communication", "spatial-multimethod-inference"],
-      "expected_plan_type": "serial"
+      "expected_plan_type": "parallel"
     },
     {
       "id": "zh-independent-publication-audits",
@@ -40,6 +40,31 @@
       "required_module_ids": ["journal-targeting-and-compliance"],
       "forbidden_module_ids": ["patent-draft-readiness-audit", "reviewer-assessment"],
       "expected_plan_type": "mixed"
-    }
+    },
+    {"id":"zh-fastqc-multiqc-order","query":"用 FastQC 检查 FASTQ 质量后用 MultiQC 汇总","per_workflow":5,"required_module_ids":["read-quality-fastqc","quality-report-multiqc"],"forbidden_module_ids":["read-quality-fastp","expression-qc"],"expected_plan_type":"serial"},
+    {"id":"en-independent-de-wgcna","query":"Perform differential expression and WGCNA independently on the same normalized expression matrix","per_workflow":5,"required_module_ids":["differential-expression","wgcna-coexpression"],"forbidden_module_ids":["expression-qc"],"expected_plan_type":"parallel"},
+    {"id":"zh-pdf-claim-citation-not-patent","query":"读取 PDF 并核对主张与引用是否一致","per_workflow":5,"required_module_ids":["pdf-evidence-extraction","claim-evidence-integrity-audit"],"forbidden_module_ids":["patent-claim-support-audit","patent-claim-structure-audit"],"expected_plan_type":"mixed"},
+    {"id":"zh-patent-claim-structure","query":"检查专利权利要求结构","per_workflow":5,"required_module_ids":["patent-claim-structure-audit"],"forbidden_module_ids":["manuscript-audit"],"expected_plan_type":"single"},
+    {"id":"en-patent-claim-support","query":"Audit support for patent claims","per_workflow":5,"required_module_ids":["patent-claim-support-audit"],"forbidden_module_ids":["citation-audit"],"expected_plan_type":"single"},
+    {"id":"en-manuscript-claims-citations","query":"Audit manuscript claims and citations","per_workflow":5,"required_module_ids":["manuscript-audit","citation-audit"],"forbidden_module_ids":["patent-claim-support-audit","patent-claim-structure-audit"],"expected_plan_type":"parallel"},
+    {"id":"zh-fastp-named","query":"使用 fastp 检查 FASTQ 质量","per_workflow":5,"required_module_ids":["read-quality-fastp"],"forbidden_module_ids":["read-quality-fastqc","quality-report-multiqc"],"expected_plan_type":"single"},
+    {"id":"en-multiqc-named","query":"MultiQC","per_workflow":5,"required_module_ids":["quality-report-multiqc"],"forbidden_module_ids":["read-quality-fastqc","read-quality-fastp"],"expected_plan_type":"single"},
+    {"id":"en-cellrank-named","query":"CellRank","per_workflow":5,"required_module_ids":["single-cell-fate-mapping"],"forbidden_module_ids":["single-cell-trajectory-velocity"],"expected_plan_type":"single"},
+    {"id":"en-haddock3-named","query":"HADDOCK3","per_workflow":5,"required_module_ids":["protein-complex-docking"],"forbidden_module_ids":["alphafold3-complex-prediction"],"expected_plan_type":"single"},
+    {"id":"en-rctd-named","query":"RCTD","per_workflow":5,"required_module_ids":["spatial-multimethod-inference"],"forbidden_module_ids":["single-cell-reference-mapping"],"expected_plan_type":"single"},
+    {"id":"en-samap-named","query":"SAMap","per_workflow":5,"required_module_ids":["single-cell-cross-species-integration"],"forbidden_module_ids":["single-cell-batch-integration"],"expected_plan_type":"single"},
+    {"id":"en-deqms-named","query":"DEqMS","per_workflow":5,"required_module_ids":["proteomics-deqms"],"forbidden_module_ids":["differential-expression"],"expected_plan_type":"single"},
+    {"id":"en-wgcna-named","query":"WGCNA","per_workflow":5,"required_module_ids":["wgcna-coexpression"],"forbidden_module_ids":["network-analysis"],"expected_plan_type":"single"},
+    {"id":"en-macs3-cuttag","query":"MACS3 CUT&Tag","per_workflow":5,"required_module_ids":["bulk-chromatin-peak-calling"],"forbidden_module_ids":["single-cell-atac-regulatory"],"expected_plan_type":"single"},
+    {"id":"en-functional-enrichment","query":"functional enrichment","per_workflow":5,"required_module_ids":["enrichment-analysis"],"forbidden_module_ids":["wgcna-coexpression"],"expected_plan_type":"single"},
+    {"id":"en-reactome-pathway","query":"Reactome pathway evidence","per_workflow":5,"required_module_ids":["reactome-pathway-evidence"],"forbidden_module_ids":["reactome-overrepresentation-evidence"],"expected_plan_type":"single"},
+    {"id":"en-ncbi-gene","query":"NCBI Gene evidence","per_workflow":5,"required_module_ids":["gene-evidence"],"forbidden_module_ids":["gene-ortholog-evidence"],"expected_plan_type":"single"},
+    {"id":"en-string-ppi-short","query":"STRING PPI","per_workflow":5,"required_module_ids":["protein-interaction-network-evidence"],"forbidden_module_ids":["protein-complex-docking"],"expected_plan_type":"single"},
+    {"id":"en-alphafold3-complex","query":"Run AlphaFold 3 complex prediction","per_workflow":5,"required_module_ids":["alphafold3-complex-prediction"],"forbidden_module_ids":["alphafold-structure-evidence"],"expected_plan_type":"single"},
+    {"id":"en-tangram-spatial","query":"Use Tangram to map single-cell data into spatial transcriptomics","per_workflow":5,"required_module_ids":["spatial-multimethod-inference"],"forbidden_module_ids":["single-cell-cross-species-integration"],"expected_plan_type":"parallel"},
+    {"id":"en-seurat-wnn","query":"Run Seurat WNN integration","per_workflow":5,"required_module_ids":["single-cell-multimodal-integration"],"forbidden_module_ids":["single-cell-cross-species-integration"],"expected_plan_type":"parallel"},
+    {"id":"en-scrna-harmony","query":"Use Harmony for single-cell batch integration","per_workflow":5,"required_module_ids":["single-cell-batch-integration"],"forbidden_module_ids":["single-cell-communication"],"expected_plan_type":"parallel"},
+    {"id":"en-go-kegg-separate","query":"Perform GO and KEGG enrichment separately","per_workflow":5,"required_module_ids":["functional-enrichment","enrichment-analysis"],"forbidden_module_ids":["wgcna-coexpression"],"expected_plan_type":"parallel"},
+    {"id":"en-de-followed-enrichment","query":"Run differential expression followed by functional enrichment","per_workflow":5,"required_module_ids":["differential-expression","enrichment-analysis"],"forbidden_module_ids":["wgcna-coexpression"],"expected_plan_type":"serial"}
   ]
 }

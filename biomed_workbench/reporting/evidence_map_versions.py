@@ -13,11 +13,14 @@ from typing import Any
 
 from ..kernel.identity import digest_value
 from ..kernel.scientific_evidence_map import ScientificEvidenceMap
+from ..kernel.scientific_evidence_map import EvidenceMapPublication
+from ..kernel.state import ProjectState
 from .scientific_dependency_reports import write_bilingual_reports
 
 
 INDEX_NAME = "evidence-map-version-index.json"
 CURRENT_NAME = "scientific-evidence-map.current.json"
+TRANSACTION_NAME = ".evidence-map-publication-transaction.json"
 
 
 def _sha256(path: Path) -> str:
@@ -232,3 +235,84 @@ def publish_evidence_map_version(
             output_root,
             workspace_root=workspace_root,
         )
+
+
+def inspect_evidence_map_publication_recovery(
+    output_root: Path,
+    *,
+    state_path: Path | None = None,
+) -> dict[str, object]:
+    """Report interrupted publication states without changing or deleting files."""
+    output_root = output_root.resolve(strict=False)
+    journal_path = output_root / TRANSACTION_NAME
+    journal = json.loads(journal_path.read_text(encoding="utf-8")) if journal_path.is_file() else None
+    index = _read_index(output_root)
+    indexed = {f"v{item['version']}" for item in index["entries"]}
+    versions_root = output_root / "versions"
+    present = {item.name for item in versions_root.iterdir() if item.is_dir()} if versions_root.is_dir() else set()
+    staged = sorted(item.name for item in output_root.glob(".evidence-map-version-*") if item.is_dir())
+    state_publications: set[str] = set()
+    if state_path is not None and state_path.is_file():
+        state = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
+        state_publications = {item.map_digest for item in state.evidence_map_versions}
+    indexed_digests = {item["map_digest"] for item in index["entries"]}
+    status = "clean"
+    if staged:
+        status = "staged"
+    elif present - indexed:
+        status = "unindexed"
+    elif state_path is not None and indexed_digests - state_publications:
+        status = "state-unregistered"
+    elif journal is not None:
+        status = str(journal.get("status", "interrupted"))
+    return {
+        "status": status,
+        "journal": journal,
+        "staged_directories": staged,
+        "unindexed_versions": sorted(present - indexed),
+        "state_unregistered_map_digests": sorted(indexed_digests - state_publications) if state_path is not None else [],
+    }
+
+
+def publish_evidence_map_transaction(
+    evidence_map: ScientificEvidenceMap,
+    publication: EvidenceMapPublication,
+    prospective_state: ProjectState,
+    *,
+    state_path: Path,
+    output_root: Path,
+    workspace_root: Path,
+) -> Path:
+    """Publish immutable map files and the already-validated state under one recoverable lock."""
+    if publication.map_digest != evidence_map.digest:
+        raise ValueError("evidence map publication differs from the map being published")
+    if not prospective_state.evidence_map_versions or prospective_state.evidence_map_versions[-1] != publication:
+        raise ValueError("prospective project state does not contain the exact evidence map publication")
+    output_root.mkdir(parents=True, exist_ok=True)
+    journal_path = output_root / TRANSACTION_NAME
+    with _publication_lock(output_root):
+        if journal_path.exists():
+            raise ValueError("an interrupted evidence-map publication requires read-only recovery inspection")
+        journal = {
+            "schema_version": 1,
+            "status": "prepared",
+            "map_digest": evidence_map.digest,
+            "target_state_digest": prospective_state.state_digest,
+            "version": evidence_map.version.version,
+        }
+        _atomic_json(journal_path, journal)
+        try:
+            version_directory = _publish_evidence_map_version_locked(
+                evidence_map,
+                output_root,
+                workspace_root=workspace_root,
+            )
+            journal["status"] = "files-published-state-pending"
+            _atomic_json(journal_path, journal)
+            _atomic_json(state_path, prospective_state.to_dict())
+            journal_path.unlink()
+            return version_directory
+        except Exception:
+            # The journal is intentionally retained. Recovery inspection is
+            # read-only and never guesses whether immutable evidence is safe to remove.
+            raise

@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from typing import Callable
 
 from ..kernel.evidence import EvidenceRecord
+from ..kernel.execution_receipts import ArtifactReloadReceipt, ObservedExecutionReceipt, ScientificReviewReceipt
+from ..kernel.execution_chain import validated_delivery_publication_is_current
 from ..kernel.artifact_store import ProjectArtifactStore
 from ..kernel.identity import digest_value, thaw
 from ..kernel.plans import PlanNode, ResearchDAG
@@ -213,6 +215,78 @@ class ResearchController:
                 return execution
         return None
 
+    def _record_completed_receipt_chain(
+        self,
+        state: ProjectState,
+        node: PlanNode,
+        execution: NodeExecution,
+    ) -> ProjectState:
+        """Atomically register each output only through an observed-and-reloaded receipt chain."""
+        manifest = self._registry.get(execution.module_id)
+        provenance = thaw(execution.provenance)
+        parameters_digest = str(provenance.get("parameters_digest") or digest_value(provenance))
+        runtime_versions = {
+            **{str(key): str(value) for key, value in dict(provenance.get("tools", {})).items()},
+            **{str(key): str(value) for key, value in dict(provenance.get("dependencies", {})).items()},
+        }
+        if not runtime_versions:
+            runtime_versions = {"module-runtime": execution.module_version}
+        request_digest = digest_value(execution.to_dict())
+        observed = ObservedExecutionReceipt.create(
+            plan_node_id=node.id,
+            module_id=execution.module_id,
+            module_version=execution.module_version,
+            compatibility_row_id=str(execution.compatibility_row_id),
+            parameters_digest=parameters_digest,
+            runtime_versions=runtime_versions,
+            output_artifact_digests={artifact.id: artifact.content_digest for artifact in execution.artifacts},
+            process_exit_code=0,
+            source_kind="command" if manifest.execution.kind == "command" else "direct",
+            execution_request_digest=request_digest,
+        )
+        state = apply_event(
+            state,
+            "execution_observed",
+            {"receipt": observed.to_dict()},
+            rationale="Record observed process completion against the exact execution request and compatibility row.",
+            affected_hypothesis_ids=node.target_hypothesis_ids,
+            replacement_action_ids=(node.id,),
+        )
+        reloads = []
+        for artifact in execution.artifacts:
+            reload_receipt = ArtifactReloadReceipt.create(
+                observed_execution=observed,
+                artifact_id=artifact.id,
+                payload_digests={payload.role: payload.sha256 for payload in artifact.payloads},
+                output_schema_valid=True,
+                content_digest=artifact.content_digest,
+            )
+            state = apply_event(
+                state,
+                "artifact_reloaded",
+                {"receipt": reload_receipt.to_dict(), "artifact": artifact.to_dict()},
+                rationale="Register one output only after content-addressed reload and output-contract validation.",
+                affected_artifact_ids=(artifact.id,),
+                affected_hypothesis_ids=node.target_hypothesis_ids,
+                replacement_action_ids=(node.id,),
+            )
+            reloads.append(reload_receipt)
+        integrity_review = ScientificReviewReceipt.create(
+            observed_execution=observed,
+            reload_receipts=tuple(reloads),
+            finding_ids=tuple(item.id for item in execution.quality_findings),
+        )
+        return apply_event(
+            state,
+            "execution_reviewed",
+            {"receipt": integrity_review.to_dict()},
+            rationale="Accept the complete observed-execution and output-reload chain for scientific artifact review.",
+            trigger_finding_ids=integrity_review.finding_ids,
+            affected_artifact_ids=tuple(artifact.id for artifact in execution.artifacts),
+            affected_hypothesis_ids=node.target_hypothesis_ids,
+            replacement_action_ids=(node.id,),
+        )
+
     def _release_reviewed_nodes(self, state: ProjectState, plan: ResearchDAG) -> ProjectState:
         """Release downstream dependencies only after every output has a retained decision."""
         decisions = {item.artifact_id: item for item in state.scientific_decisions}
@@ -277,7 +351,7 @@ class ResearchController:
                 if self._policy.require_evidence_map_for_publication
                 and self._registry.get(node.module_id).module_type == "delivery"
                 and "publication" in self._registry.get(node.module_id).domains
-                and not state.evidence_map_versions
+                and not validated_delivery_publication_is_current(state)
             }
             pending = tuple(
                 node for node in dependency_ready
@@ -335,16 +409,7 @@ class ResearchController:
                     replacement_action_ids=(node.id,),
                 )
                 if execution.status == "completed":
-                    for value in execution.artifacts:
-                        state = apply_event(
-                            state,
-                            "artifact_registered",
-                            {"artifact": value.to_dict()},
-                            rationale="Register a validated module output artifact for downstream dependencies.",
-                            affected_artifact_ids=(value.id,),
-                            affected_hypothesis_ids=node.target_hypothesis_ids,
-                            replacement_action_ids=(node.id,),
-                        )
+                    state = self._record_completed_receipt_chain(state, node, execution)
                     if self._policy.require_scientific_review:
                         state = self._status(state, current_plan.id, node, "awaiting_review", node.attempt)
                     else:
@@ -360,6 +425,14 @@ class ResearchController:
                             )
                         state = self._status(state, current_plan.id, node, "completed", node.attempt)
                 elif execution.status == "awaiting_observed_execution":
+                    state = apply_event(
+                        state,
+                        "execution_handoff_recorded",
+                        {"handoff": execution.execution_handoff.to_dict()},
+                        rationale="Record the prepared execution handoff without creating a scientific artifact.",
+                        affected_hypothesis_ids=node.target_hypothesis_ids,
+                        replacement_action_ids=(node.id,),
+                    )
                     state = self._status(
                         state,
                         current_plan.id,

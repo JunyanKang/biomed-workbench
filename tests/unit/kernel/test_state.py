@@ -97,6 +97,23 @@ class ProjectStateTests(unittest.TestCase):
         self.assertEqual(state.active_plan_id, plan.id)
         self.assertEqual(state.plans, (plan,))
 
+    def test_pending_node_cannot_jump_directly_to_completed(self):
+        state = populated_state()
+        plan = research_plan()
+        state = apply_event(
+            state,
+            "plan_created",
+            {"plan": plan.to_dict(), "activate": True},
+            rationale="Register a pending node before exercising its transition contract.",
+        )
+        with self.assertRaisesRegex(ValueError, "transition"):
+            apply_event(
+                state,
+                "node_status_changed",
+                {"plan_id": plan.id, "node_id": plan.nodes[0].id, "status": "completed", "attempt": 0},
+                rationale="A pending node must never become completed without observed execution and review.",
+            )
+
     def test_refuted_hypothesis_remains_when_a_revised_hypothesis_is_added(self):
         state = ProjectState.create(project_context())
         original = hypothesis(status="refuted")

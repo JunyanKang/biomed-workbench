@@ -9,6 +9,13 @@ from .artifacts import ScientificArtifact
 from .context import ProjectContext
 from .decisions import DecisionEvent
 from .evidence import EvidenceRecord, add_evidence
+from .execution_receipts import (
+    ArtifactReloadReceipt,
+    ExecutionHandoff,
+    ObservedExecutionReceipt,
+    ScientificReviewReceipt,
+)
+from .execution_chain import delivery_slice_digest
 from .hypotheses import Hypothesis, add_hypothesis, attach_evidence
 from .identity import digest_value, freeze_mapping, thaw
 from .plans import NODE_STATUSES, PlanNode, ResearchDAG
@@ -27,6 +34,10 @@ EVENT_TYPES = frozenset(
         "plan_revised",
         "node_status_changed",
         "node_execution_recorded",
+        "execution_handoff_recorded",
+        "execution_observed",
+        "artifact_reloaded",
+        "execution_reviewed",
         "quality_finding_recorded",
         "analysis_admission_recorded",
         "artifact_review_recorded",
@@ -45,6 +56,10 @@ def _state_basis(
     artifact_reviews: tuple[ArtifactReview, ...],
     scientific_decisions: tuple[ScientificDecision, ...],
     evidence_map_versions: tuple[EvidenceMapPublication, ...],
+    execution_handoffs: tuple[ExecutionHandoff, ...],
+    observed_executions: tuple[ObservedExecutionReceipt, ...],
+    artifact_reloads: tuple[ArtifactReloadReceipt, ...],
+    execution_reviews: tuple[ScientificReviewReceipt, ...],
     decisions: tuple[DecisionEvent, ...],
     plans: tuple[ResearchDAG, ...],
     active_plan_id: str | None,
@@ -70,6 +85,15 @@ def _state_basis(
                 "evidence_map_versions": [item.to_dict() for item in evidence_map_versions],
             }
         )
+    if execution_handoffs or observed_executions or artifact_reloads or execution_reviews:
+        basis.update(
+            {
+                "execution_handoffs": [item.to_dict() for item in execution_handoffs],
+                "observed_executions": [item.to_dict() for item in observed_executions],
+                "artifact_reloads": [item.to_dict() for item in artifact_reloads],
+                "execution_reviews": [item.to_dict() for item in execution_reviews],
+            }
+        )
     return basis
 
 
@@ -84,6 +108,10 @@ class ProjectState:
     artifact_reviews: tuple[ArtifactReview, ...]
     scientific_decisions: tuple[ScientificDecision, ...]
     evidence_map_versions: tuple[EvidenceMapPublication, ...]
+    execution_handoffs: tuple[ExecutionHandoff, ...]
+    observed_executions: tuple[ObservedExecutionReceipt, ...]
+    artifact_reloads: tuple[ArtifactReloadReceipt, ...]
+    execution_reviews: tuple[ScientificReviewReceipt, ...]
     decisions: tuple[DecisionEvent, ...]
     plans: tuple[ResearchDAG, ...]
     active_plan_id: str | None
@@ -101,6 +129,10 @@ class ProjectState:
             ("artifact_reviews", ArtifactReview),
             ("scientific_decisions", ScientificDecision),
             ("evidence_map_versions", EvidenceMapPublication),
+            ("execution_handoffs", ExecutionHandoff),
+            ("observed_executions", ObservedExecutionReceipt),
+            ("artifact_reloads", ArtifactReloadReceipt),
+            ("execution_reviews", ScientificReviewReceipt),
             ("decisions", DecisionEvent),
             ("plans", ResearchDAG),
         ):
@@ -141,6 +173,56 @@ class ProjectState:
                 raise ValueError("blocking or unassessed artifacts cannot become active evidence")
         if len({item.artifact_id for item in self.scientific_decisions}) != len(self.scientific_decisions):
             raise ValueError("each artifact may have only one scientific decision")
+        handoffs = {item.id: item for item in self.execution_handoffs}
+        if any(
+            item.plan_node_id not in plan_nodes
+            or plan_nodes[item.plan_node_id].module_id != item.module_id
+            for item in self.execution_handoffs
+        ):
+            raise ValueError("execution handoff references an unknown or mismatched plan node")
+        observed = {item.id: item for item in self.observed_executions}
+        for item in self.observed_executions:
+            node = plan_nodes.get(item.plan_node_id)
+            if node is None or node.module_id != item.module_id:
+                raise ValueError("observed execution references an unknown or mismatched plan node")
+            if item.source_kind == "handoff":
+                handoff = handoffs.get(item.handoff_id or "")
+                if (
+                    handoff is None
+                    or handoff.plan_node_id != item.plan_node_id
+                    or handoff.module_id != item.module_id
+                    or handoff.module_version != item.module_version
+                    or handoff.compatibility_row_id != item.compatibility_row_id
+                    or handoff.request_digest != item.parameters_digest
+                    or digest_value(handoff.to_dict()) != item.execution_request_digest
+                    or set(handoff.planned_output_artifact_ids.values()) != set(item.output_artifact_digests)
+                ):
+                    raise ValueError("observed execution receipt chain differs from its handoff")
+        reloads = {item.id: item for item in self.artifact_reloads}
+        for item in self.artifact_reloads:
+            execution = observed.get(item.observed_execution_receipt_id)
+            artifact = next((value for value in self.artifacts if value.id == item.artifact_id), None)
+            if (
+                execution is None
+                or artifact is None
+                or item.artifact_id not in execution.output_artifact_digests
+                or execution.output_artifact_digests[item.artifact_id] != item.content_digest
+                or artifact.content_digest != item.content_digest
+                or artifact.producing_module_id != execution.module_id
+                or artifact.producing_module_version != execution.module_version
+            ):
+                raise ValueError("artifact reload receipt chain is incomplete or mismatched")
+        for item in self.execution_reviews:
+            execution = observed.get(item.observed_execution_receipt_id)
+            linked = tuple(reloads.get(value) for value in item.artifact_reload_receipt_ids)
+            if (
+                execution is None
+                or execution.plan_node_id != item.plan_node_id
+                or any(value is None for value in linked)
+                or {value.observed_execution_receipt_id for value in linked if value is not None} != {execution.id}
+                or {value.artifact_id for value in linked if value is not None} != set(execution.output_artifact_digests)
+            ):
+                raise ValueError("execution integrity review does not cover one complete observed execution")
         if tuple(item.version.revision for item in self.evidence_map_versions) != tuple(range(1, len(self.evidence_map_versions) + 1)):
             raise ValueError("evidence map publications must have continuous revisions")
         expected = digest_value(
@@ -153,6 +235,10 @@ class ProjectState:
                 self.artifact_reviews,
                 self.scientific_decisions,
                 self.evidence_map_versions,
+                self.execution_handoffs,
+                self.observed_executions,
+                self.artifact_reloads,
+                self.execution_reviews,
                 self.decisions,
                 self.plans,
                 self.active_plan_id,
@@ -166,8 +252,8 @@ class ProjectState:
 
     @classmethod
     def create(cls, context: ProjectContext) -> "ProjectState":
-        basis = _state_basis(context, (), (), (), (), (), (), (), (), (), None, 0)
-        return cls(1, context, (), (), (), (), (), (), (), (), (), None, 0, digest_value(basis))
+        basis = _state_basis(context, (), (), (), (), (), (), (), (), (), (), (), (), (), None, 0)
+        return cls(1, context, (), (), (), (), (), (), (), (), (), (), (), (), (), None, 0, digest_value(basis))
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -180,6 +266,10 @@ class ProjectState:
             "artifact_reviews": [item.to_dict() for item in self.artifact_reviews],
             "scientific_decisions": [item.to_dict() for item in self.scientific_decisions],
             "evidence_map_versions": [item.to_dict() for item in self.evidence_map_versions],
+            "execution_handoffs": [item.to_dict() for item in self.execution_handoffs],
+            "observed_executions": [item.to_dict() for item in self.observed_executions],
+            "artifact_reloads": [item.to_dict() for item in self.artifact_reloads],
+            "execution_reviews": [item.to_dict() for item in self.execution_reviews],
             "decisions": [item.to_dict() for item in self.decisions],
             "plans": [item.to_dict() for item in self.plans],
             "active_plan_id": self.active_plan_id,
@@ -189,12 +279,14 @@ class ProjectState:
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "ProjectState":
-        expected_fields = {"schema_version", "context", "artifacts", "hypotheses", "evidence", "analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions", "decisions", "plans", "active_plan_id", "revision", "state_digest"}
-        legacy_fields = expected_fields - {"analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions"}
-        if frozenset(payload) not in {frozenset(expected_fields), frozenset(legacy_fields)}:
+        receipt_fields = {"execution_handoffs", "observed_executions", "artifact_reloads", "execution_reviews"}
+        expected_fields = {"schema_version", "context", "artifacts", "hypotheses", "evidence", "analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions", *receipt_fields, "decisions", "plans", "active_plan_id", "revision", "state_digest"}
+        pre_receipt_fields = expected_fields - receipt_fields
+        legacy_fields = pre_receipt_fields - {"analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions"}
+        if frozenset(payload) not in {frozenset(expected_fields), frozenset(pre_receipt_fields), frozenset(legacy_fields)}:
             raise ValueError("project state uses an unsupported serialized field set")
         normalized = dict(payload)
-        for field in ("analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions"):
+        for field in ("analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions", *sorted(receipt_fields)):
             normalized.setdefault(field, [])
         state = cls(
             schema_version=normalized["schema_version"],
@@ -206,6 +298,10 @@ class ProjectState:
             artifact_reviews=tuple(ArtifactReview.from_dict(item) for item in normalized["artifact_reviews"]),
             scientific_decisions=tuple(ScientificDecision.from_dict(item) for item in normalized["scientific_decisions"]),
             evidence_map_versions=tuple(EvidenceMapPublication.from_dict(item) for item in normalized["evidence_map_versions"]),
+            execution_handoffs=tuple(ExecutionHandoff.from_dict(item) for item in normalized["execution_handoffs"]),
+            observed_executions=tuple(ObservedExecutionReceipt.from_dict(item) for item in normalized["observed_executions"]),
+            artifact_reloads=tuple(ArtifactReloadReceipt.from_dict(item) for item in normalized["artifact_reloads"]),
+            execution_reviews=tuple(ScientificReviewReceipt.from_dict(item) for item in normalized["execution_reviews"]),
             decisions=tuple(DecisionEvent.from_dict(item) for item in normalized["decisions"]),
             plans=tuple(ResearchDAG.from_dict(item) for item in normalized["plans"]),
             active_plan_id=normalized["active_plan_id"],
@@ -221,6 +317,8 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
     artifacts, hypotheses, evidence = state.artifacts, state.hypotheses, state.evidence
     admissions, reviews = state.analysis_admissions, state.artifact_reviews
     scientific_decisions, evidence_map_versions = state.scientific_decisions, state.evidence_map_versions
+    execution_handoffs, observed_executions = state.execution_handoffs, state.observed_executions
+    artifact_reloads, execution_reviews = state.artifact_reloads, state.execution_reviews
     plans, active_plan_id = state.plans, state.active_plan_id
     if event_type == "artifact_registered":
         if set(payload) != {"artifact"}:
@@ -282,8 +380,28 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
         if plan_index is None:
             raise ValueError("node status references an unknown plan")
         plan = plans[plan_index]
-        if payload["node_id"] not in {node.id for node in plan.nodes}:
+        current_node = next((node for node in plan.nodes if node.id == payload["node_id"]), None)
+        if current_node is None:
             raise ValueError("node status references an unknown node")
+        transitions = {
+            "pending": {"ready", "running", "blocked", "skipped", "superseded"},
+            "ready": {"running", "blocked", "skipped", "superseded"},
+            "running": {"pending", "awaiting_observed_execution", "awaiting_review", "completed", "blocked", "failed"},
+            "prepared": {"awaiting_observed_execution", "blocked", "failed"},
+            "awaiting_observed_execution": {"awaiting_review", "blocked", "failed"},
+            "awaiting_review": {"completed", "pending", "skipped", "blocked", "failed"},
+            "blocked": {"pending", "superseded", "skipped"},
+            "failed": {"pending", "superseded", "skipped"},
+            "completed": set(),
+            "skipped": set(),
+            "superseded": set(),
+        }
+        if payload["status"] != current_node.status and payload["status"] not in transitions[current_node.status]:
+            raise ValueError(f"invalid plan-node status transition: {current_node.status} -> {payload['status']}")
+        if payload["status"] == "running" and payload["attempt"] != current_node.attempt + 1:
+            raise ValueError("running transition must increment the node attempt exactly once")
+        if payload["status"] != "running" and payload["attempt"] != current_node.attempt:
+            raise ValueError("non-running transition cannot change the node attempt")
         nodes = tuple(
             replace(node, status=payload["status"], attempt=payload["attempt"])
             if node.id == payload["node_id"]
@@ -310,6 +428,76 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
     elif event_type == "node_execution_recorded":
         if set(payload) != {"execution"} or not isinstance(payload["execution"], dict):
             raise ValueError("node_execution_recorded payload is invalid")
+        if payload["execution"].get("node_id") not in {node.id for plan in plans for node in plan.nodes}:
+            raise ValueError("node execution references an unknown plan node")
+    elif event_type == "execution_handoff_recorded":
+        if set(payload) != {"handoff"}:
+            raise ValueError("execution_handoff_recorded payload is invalid")
+        item = ExecutionHandoff.from_dict(payload["handoff"])
+        plan_node = next((node for plan in plans for node in plan.nodes if node.id == item.plan_node_id), None)
+        if (
+            plan_node is None
+            or plan_node.module_id != item.module_id
+            or item.id in {value.id for value in execution_handoffs}
+            or item.plan_node_id in {value.plan_node_id for value in execution_handoffs}
+            or set(item.planned_output_artifact_ids.values()) != set(plan_node.planned_output_artifact_ids.values())
+            or item.compatibility_row_id not in plan_node.compatibility_row_candidates
+        ):
+            raise ValueError("execution handoff is duplicate or differs from its plan node")
+        execution_handoffs = (*execution_handoffs, item)
+    elif event_type == "execution_observed":
+        if set(payload) != {"receipt"}:
+            raise ValueError("execution_observed payload is invalid")
+        item = ObservedExecutionReceipt.from_dict(payload["receipt"])
+        plan_node = next((node for plan in plans for node in plan.nodes if node.id == item.plan_node_id), None)
+        if (
+            plan_node is None
+            or plan_node.module_id != item.module_id
+            or item.id in {value.id for value in observed_executions}
+            or item.plan_node_id in {value.plan_node_id for value in observed_executions}
+            or set(item.output_artifact_digests) != set(plan_node.planned_output_artifact_ids.values())
+            or item.compatibility_row_id not in plan_node.compatibility_row_candidates
+            or (item.source_kind == "handoff" and item.handoff_id not in {value.id for value in execution_handoffs})
+        ):
+            raise ValueError("observed execution is duplicate or differs from its plan and handoff")
+        observed_executions = (*observed_executions, item)
+    elif event_type == "artifact_reloaded":
+        if set(payload) != {"receipt", "artifact"}:
+            raise ValueError("artifact_reloaded payload is invalid")
+        receipt = ArtifactReloadReceipt.from_dict(payload["receipt"])
+        artifact = ScientificArtifact.from_dict(payload["artifact"])
+        observed = next((value for value in observed_executions if value.id == receipt.observed_execution_receipt_id), None)
+        if (
+            observed is None
+            or artifact.id != receipt.artifact_id
+            or artifact.id in {value.id for value in artifacts}
+            or receipt.id in {value.id for value in artifact_reloads}
+            or not set(artifact.source_artifact_ids) <= {value.id for value in artifacts}
+            or artifact.producing_module_id != observed.module_id
+            or artifact.producing_module_version != observed.module_version
+            or artifact.content_digest != receipt.content_digest
+            or observed.output_artifact_digests.get(artifact.id) != artifact.content_digest
+        ):
+            raise ValueError("reloaded artifact is duplicate or differs from observed execution")
+        artifacts = (*artifacts, artifact)
+        artifact_reloads = (*artifact_reloads, receipt)
+    elif event_type == "execution_reviewed":
+        if set(payload) != {"receipt"}:
+            raise ValueError("execution_reviewed payload is invalid")
+        item = ScientificReviewReceipt.from_dict(payload["receipt"])
+        observed = next((value for value in observed_executions if value.id == item.observed_execution_receipt_id), None)
+        reload_by_id = {value.id: value for value in artifact_reloads}
+        linked = tuple(reload_by_id.get(value) for value in item.artifact_reload_receipt_ids)
+        if (
+            observed is None
+            or observed.plan_node_id != item.plan_node_id
+            or item.id in {value.id for value in execution_reviews}
+            or item.plan_node_id in {value.plan_node_id for value in execution_reviews}
+            or any(value is None for value in linked)
+            or {value.artifact_id for value in linked if value is not None} != set(observed.output_artifact_digests)
+        ):
+            raise ValueError("execution review is duplicate or does not cover every reloaded output")
+        execution_reviews = (*execution_reviews, item)
     elif event_type == "quality_finding_recorded":
         if set(payload) != {"finding"} or not isinstance(payload["finding"], dict):
             raise ValueError("quality_finding_recorded payload is invalid")
@@ -348,12 +536,31 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
         item = EvidenceMapPublication.from_dict(payload["publication"])
         if item.source_state_digest != state.state_digest:
             raise ValueError("evidence map publication must bind the immediately preceding project state")
+        if item.delivery_slice_digest != delivery_slice_digest(state):
+            raise ValueError("evidence map publication delivery slice is stale or mismatched")
+        active_artifacts = {value.artifact_id for value in scientific_decisions if value.active_evidence}
+        if set(item.active_artifact_ids) != active_artifacts:
+            raise ValueError("evidence map publication active artifacts differ from current decisions")
         if item.version.revision != len(evidence_map_versions) + 1:
             raise ValueError("evidence map publication revision is not continuous")
         if evidence_map_versions and item.version.parent_map_digest != evidence_map_versions[-1].map_digest:
             raise ValueError("evidence map publication parent does not match the active map")
         evidence_map_versions = (*evidence_map_versions, item)
-    return artifacts, hypotheses, evidence, admissions, reviews, scientific_decisions, evidence_map_versions, plans, active_plan_id
+    return (
+        artifacts,
+        hypotheses,
+        evidence,
+        admissions,
+        reviews,
+        scientific_decisions,
+        evidence_map_versions,
+        execution_handoffs,
+        observed_executions,
+        artifact_reloads,
+        execution_reviews,
+        plans,
+        active_plan_id,
+    )
 
 
 def apply_event(
@@ -372,7 +579,21 @@ def apply_event(
     if event_type not in EVENT_TYPES:
         raise ValueError(f"unsupported project event type: {event_type}")
     safe_payload = thaw(freeze_mapping(payload))
-    artifacts, hypotheses, evidence, admissions, reviews, scientific_decisions, evidence_map_versions, plans, active_plan_id = _apply_payload(state, event_type, safe_payload)
+    (
+        artifacts,
+        hypotheses,
+        evidence,
+        admissions,
+        reviews,
+        scientific_decisions,
+        evidence_map_versions,
+        execution_handoffs,
+        observed_executions,
+        artifact_reloads,
+        execution_reviews,
+        plans,
+        active_plan_id,
+    ) = _apply_payload(state, event_type, safe_payload)
     known_artifacts = {item.id for item in artifacts}
     known_hypotheses = {item.id for item in hypotheses}
     if not set(affected_artifact_ids) <= known_artifacts or not set(affected_hypothesis_ids) <= known_hypotheses:
@@ -414,6 +635,10 @@ def apply_event(
             reviews,
             scientific_decisions,
             evidence_map_versions,
+            execution_handoffs,
+            observed_executions,
+            artifact_reloads,
+            execution_reviews,
             decisions,
             plans,
             active_plan_id,
@@ -431,6 +656,10 @@ def apply_event(
         reviews,
         scientific_decisions,
         evidence_map_versions,
+        execution_handoffs,
+        observed_executions,
+        artifact_reloads,
+        execution_reviews,
         (*state.decisions, final_event),
         plans,
         active_plan_id,

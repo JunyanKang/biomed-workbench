@@ -36,7 +36,11 @@ from biomed_workbench.modules.compatibility import detect_environment  # noqa: E
 from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 from biomed_workbench.orchestration.controller import ResearchController  # noqa: E402
-from biomed_workbench.reporting.evidence_map_versions import publish_evidence_map_version  # noqa: E402
+from biomed_workbench.orchestration.execution_ingest import ingest_execution_bundle  # noqa: E402
+from biomed_workbench.reporting.evidence_map_versions import (  # noqa: E402
+    inspect_evidence_map_publication_recovery,
+    publish_evidence_map_transaction,
+)
 
 
 def _read(path: Path) -> dict[str, object]:
@@ -100,6 +104,10 @@ def _summary(state: ProjectState) -> dict[str, object]:
         "analysis_admissions": len(state.analysis_admissions),
         "artifact_reviews": len(state.artifact_reviews),
         "scientific_decisions": len(state.scientific_decisions),
+        "execution_handoffs": len(state.execution_handoffs),
+        "observed_executions": len(state.observed_executions),
+        "artifact_reloads": len(state.artifact_reloads),
+        "execution_reviews": len(state.execution_reviews),
         "evidence_map_versions": len(state.evidence_map_versions),
     }
 
@@ -123,6 +131,13 @@ def main() -> int:
     mapping.add_argument("--specs", required=True, type=Path)
     mapping.add_argument("--version", required=True, type=Path)
     mapping.add_argument("--publish-root", required=True, type=Path)
+    recovery = commands.add_parser("map-recovery", help="inspect interrupted evidence-map publication state without modifying files")
+    recovery.add_argument("--state", required=True, type=Path)
+    recovery.add_argument("--publish-root", required=True, type=Path)
+    ingest = commands.add_parser("ingest-execution", help="validate and ingest one observed execution against its recorded handoff")
+    ingest.add_argument("--state", required=True, type=Path)
+    ingest.add_argument("--input", required=True, type=Path)
+    ingest.add_argument("--project-root", required=True, type=Path)
     resume = commands.add_parser("resume", help="resume the active strict controller from persisted state")
     resume.add_argument("--state", required=True, type=Path)
     resume.add_argument("--project-root", required=True, type=Path)
@@ -181,11 +196,13 @@ def main() -> int:
             state = _record(state, "scientific_decision_recorded", value, field="decision", rationale="Record the explicit retain, exclude, rerun, or revise decision.")
     elif args.command == "map":
         state = _state(args.state)
+        version = EvidenceMapVersion.from_dict(_read(args.version))
         bundle = ScientificDependencyBundle.create(
             state,
             admissions=state.analysis_admissions,
             reviews=state.artifact_reviews,
             decisions=state.scientific_decisions,
+            map_kind=version.map_kind,
         )
         specs_payload = json.loads(args.specs.read_text(encoding="utf-8"))
         if not isinstance(specs_payload, list):
@@ -195,12 +212,7 @@ def main() -> int:
             bundle,
             tuple(EvidenceUnitSpec.from_dict(item) for item in specs_payload),
             workspace_root=args.workspace.resolve(strict=True),
-            version=EvidenceMapVersion.from_dict(_read(args.version)),
-        )
-        publish_evidence_map_version(
-            evidence_map,
-            args.publish_root,
-            workspace_root=args.workspace.resolve(strict=True),
+            version=version,
         )
         publication = EvidenceMapPublication.from_map(evidence_map)
         state = apply_event(
@@ -210,6 +222,33 @@ def main() -> int:
             rationale="Publish a file-verified evidence map and bind its immutable digest to project state.",
             affected_artifact_ids=tuple(item.id for item in state.artifacts),
             affected_hypothesis_ids=tuple(item.id for item in state.hypotheses),
+        )
+        publish_evidence_map_transaction(
+            evidence_map,
+            publication,
+            state,
+            state_path=args.state,
+            output_root=args.publish_root,
+            workspace_root=args.workspace.resolve(strict=True),
+        )
+        print(json.dumps(_summary(state), indent=2, sort_keys=True, ensure_ascii=False))
+        return 0
+    elif args.command == "map-recovery":
+        print(json.dumps(
+            inspect_evidence_map_publication_recovery(args.publish_root, state_path=args.state),
+            indent=2,
+            sort_keys=True,
+            ensure_ascii=False,
+        ))
+        return 0
+    elif args.command == "ingest-execution":
+        state = _state(args.state)
+        root = args.project_root.resolve(strict=True)
+        state = ingest_execution_bundle(
+            state,
+            _read(args.input),
+            registry=ModuleRegistry.discover(BUILTIN_ROOT),
+            artifact_store=ProjectArtifactStore(root / ".biomed-workbench" / "artifacts"),
         )
     else:
         state = _state(args.state)

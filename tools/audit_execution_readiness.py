@@ -86,13 +86,14 @@ def build() -> dict[str, object]:
         axis: sum(record["evidence_axes"][axis] is True for record in records)
         for axis in (
             "contract_valid",
-            "executor_reachable",
+            "adapter_static_reachable",
+            "controlled_fixture_executed_and_reloaded",
             "representative_or_public_case_validated",
-            "current_project_validated",
+            "current_project_reviewed",
         )
     }
     return {
-        "schema_version": 3,
+        "schema_version": 4,
         "registry_digest": registry.digest,
         "module_count": len(records),
         "counts": counts,
@@ -102,11 +103,12 @@ def build() -> dict[str, object]:
         "single_maturity_count_is_authoritative": False,
         "status_model": {
             "contract_valid": "The versioned module contract parses and all referenced packaged assets satisfy release rules.",
-            "executor_reachable": "At least one declared execution surface reaches an implementation rather than only a plan or handoff.",
+            "adapter_static_reachable": "At least one declared execution surface reaches packaged implementation code rather than only a suggestion or editable template.",
+            "controlled_fixture_executed_and_reloaded": "A controlled fixture has exercised the registered implementation and its declared output reload path.",
             "representative_or_public_case_validated": "A current dependency-scoped representative or public-data case passed its declared gates.",
-            "current_project_validated": "The current project has observed execution, artifact reload, scientific review, and an accepted decision; generic release reports never set this axis.",
+            "current_project_reviewed": "The current project has observed execution, artifact reload, scientific review, and an accepted decision; generic release reports never set this axis.",
             "scaffolded": "A no-edit contract exists, but no external scientific workflow is executed.",
-            "executable": "A parameterized adapter executes a controlled workflow and reloads declared outputs.",
+            "executable": "A controlled fixture executes the registered implementation and reloads declared outputs; this does not imply current-project scientific completion.",
             "validated": "Executable evidence is supplemented by a current dependency-scoped public-data acceptance case.",
         },
         "records": records,

@@ -56,6 +56,14 @@ Every planned analysis node requires one `AnalysisAdmission`. Approval requires:
 Missing fields do not receive an inferred default. An unapproved node may remain
 in the audit graph but cannot be treated as an authorized scientific analysis.
 
+Maps have two explicit purposes. A `project-snapshot` may truthfully show
+qualified inputs, pending branches, failures, conflicts, and exclusions, but it
+never releases a publication or other formal-delivery node. A
+`validated-delivery` map requires retained produced results to carry the exact
+plan-node, observed-execution, artifact-reload, bilingual-review, and decision
+chain, and requires those active results to cover the active plan's required
+output types.
+
 ## Review Every Result
 
 Every registered artifact, including negative, excluded, intermediate, data,
@@ -146,7 +154,11 @@ hide a scientifically altered map. Publication is serialized by a
 project-scoped exclusive lock. An immutable version directory that is missing
 from the append-only index, or an indexed directory that is missing from disk,
 is treated as an interrupted/corrupt publication and blocks the next release
-until it is audited.
+until it is audited. The project command publishes the immutable files, version
+index, current pointer, and project-state registration through one recoverable
+transaction journal. Its read-only recovery inspection distinguishes staged,
+unindexed, and state-unregistered interruptions and never silently deletes an
+immutable result.
 
 Recommended classification:
 

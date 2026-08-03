@@ -12,15 +12,18 @@ from biomed_workbench.kernel.scientific_dependency import (
     ScientificDependencyBundle,
     build_scientific_dependency_graph,
 )
-from biomed_workbench.kernel.state import apply_event
+from biomed_workbench.kernel.state import ProjectState, apply_event
 from biomed_workbench.kernel.scientific_evidence_map import (
     EvidenceFile,
     EvidenceMapVersion,
+    EvidenceMapPublication,
     EvidenceUnitSpec,
     NarrativeSource,
     build_scientific_evidence_map,
 )
 from biomed_workbench.reporting import (
+    inspect_evidence_map_publication_recovery,
+    publish_evidence_map_transaction,
     publish_evidence_map_version,
     render_bilingual_reports,
     verify_evidence_map_version_index,
@@ -191,6 +194,25 @@ class ScientificDependencyTests(unittest.TestCase):
         self.assertIn("SHA-256", reports.english_markdown)
         self.assertIn("10.1038/sdata.2016.18", reports.english_markdown)
 
+    def test_snapshot_may_describe_pending_input_but_validated_delivery_rejects_it(self):
+        state = state_with_plan()
+        snapshot = ScientificDependencyBundle.create(
+            state,
+            admissions=(admission(),),
+            reviews=(review(),),
+            decisions=(decision(),),
+            map_kind="project-snapshot",
+        )
+        self.assertEqual(snapshot.map_kind, "project-snapshot")
+        with self.assertRaisesRegex(ValueError, "executed, reloaded, reviewed, and retained|reload receipt"):
+            ScientificDependencyBundle.create(
+                state,
+                admissions=(admission(),),
+                reviews=(review(),),
+                decisions=(decision(),),
+                map_kind="validated-delivery",
+            )
+
     def test_missing_review_or_decision_is_rejected(self):
         state = state_with_plan()
         with self.assertRaisesRegex(ValueError, "every registered artifact"):
@@ -292,6 +314,54 @@ class ScientificDependencyTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(ValueError, "differs from its version index"):
                 verify_evidence_map_version_index(publish_root)
+
+    def test_transaction_publishes_files_and_state_without_an_unregistered_gap(self):
+        state = state_with_plan()
+        state = apply_event(state, "analysis_admission_recorded", {"admission": admission().to_dict()}, rationale="Record the approved map analysis admission.")
+        state = apply_event(state, "artifact_review_recorded", {"review": review().to_dict()}, rationale="Record the bilingual input qualification review.")
+        state = apply_event(state, "scientific_decision_recorded", {"decision": decision().to_dict()}, rationale="Retain the qualified input for the project snapshot.")
+        bundle = ScientificDependencyBundle.create(
+            state,
+            admissions=state.analysis_admissions,
+            reviews=state.artifact_reviews,
+            decisions=state.scientific_decisions,
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            workspace = root / "workspace"
+            mapped = evidence_map(
+                state,
+                bundle,
+                workspace,
+                EvidenceMapVersion(
+                    version="1.0.0",
+                    revision=1,
+                    parent_map_digest=None,
+                    change_type="initial",
+                    change_summary_zh="以可恢复事务发布首版项目快照及其项目状态登记。",
+                    change_summary_en="Publish the first project snapshot and state registration through a recoverable transaction.",
+                ),
+            )
+            publication = EvidenceMapPublication.from_map(mapped)
+            prospective = apply_event(
+                state,
+                "evidence_map_published",
+                {"publication": publication.to_dict()},
+                rationale="Bind the exact immutable map digest to the project before transaction commit.",
+            )
+            state_path = root / "project-state.json"
+            publish_root = root / "published"
+            publish_evidence_map_transaction(
+                mapped,
+                publication,
+                prospective,
+                state_path=state_path,
+                output_root=publish_root,
+                workspace_root=workspace,
+            )
+            reloaded = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
+            self.assertEqual(reloaded.state_digest, prospective.state_digest)
+            self.assertEqual(inspect_evidence_map_publication_recovery(publish_root, state_path=state_path)["status"], "clean")
 
     def test_figure_panels_create_global_story_and_file_level_mind_maps(self):
         state = state_with_plan()

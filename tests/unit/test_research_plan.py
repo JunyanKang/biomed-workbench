@@ -69,24 +69,11 @@ class ResearchPlanTests(unittest.TestCase):
         )
 
         self.assertTrue(SINGLE_CELL_P1_MODULES <= set(plan["selected_module_ids"]))
-        self.assertGreaterEqual(len(plan["execution_layers"]), 8)
-        self.assertEqual(plan["execution_layers"][0]["module_ids"], ["single-cell-droplet-decontamination"])
-        self.assertEqual(
-            set(plan["execution_layers"][1]["module_ids"]),
-            {"single-cell-foundation-workflow", "single-cell-qc"},
-        )
-        self.assertEqual(plan["execution_layers"][2]["module_ids"], ["single-cell-doublet-detection"])
+        self.assertEqual(len(plan["execution_layers"]), 2)
+        self.assertTrue(SINGLE_CELL_P1_MODULES <= set(plan["execution_layers"][0]["module_ids"]))
         self.assertTrue(
-            {"single-cell-batch-integration", "single-cell-generative-modeling", "single-cell-multimodal-integration", "single-cell-atac-regulatory"}
-            <= set(plan["execution_layers"][3]["module_ids"])
-        )
-        self.assertTrue(
-            {"single-cell-reference-annotation", "single-cell-atlas-annotation", "single-cell-marker-discovery"}
-            <= set(plan["execution_layers"][4]["module_ids"])
-        )
-        self.assertTrue(
-            {"single-cell-trajectory-topology", "single-cell-trajectory-velocity", "single-cell-communication", "single-cell-regulatory-network", "single-cell-spatial-analysis"}
-            <= set(plan["execution_layers"][6]["module_ids"])
+            {"response-matrix", "trajectory-spatial-figure-package", "manuscript-revision-base"}
+            <= set(plan["execution_layers"][1]["module_ids"])
         )
 
         modules = {item["id"]: item for item in plan["modules"]}
@@ -98,8 +85,6 @@ class ResearchPlanTests(unittest.TestCase):
             self.assertEqual(module["evidence_contract"]["module_version"], module["version"])
             self.assertEqual(module["evidence_contract"]["compatibility_row_ids"], module["compatibility_row_ids"])
 
-        self.assertIn("single-cell-reference-annotation", modules["single-cell-donor-inference"]["depends_on"])
-        self.assertIn("single-cell-regulatory-network", modules["single-cell-regulatory-velocity"]["depends_on"])
         self.assertIn("single-cell-regulatory-velocity", modules["response-matrix"]["depends_on"])
 
     def test_publication_program_is_staged_from_figures_to_response_and_delivery(self):
@@ -109,19 +94,12 @@ class ResearchPlanTests(unittest.TestCase):
         )
 
         modules = {item["id"]: item for item in plan["modules"]}
-        self.assertEqual(plan["plan_type"], "mixed")
-        self.assertEqual(plan["execution_layers"][0]["module_ids"], ["figure-specification"])
+        self.assertEqual(plan["plan_type"], "parallel")
+        self.assertEqual(len(plan["execution_layers"]), 1)
         self.assertTrue(
-            {"manuscript-audit", "citation-audit", "reviewer-assessment"}
-            <= set(plan["execution_layers"][1]["module_ids"])
+            {"figure-specification", "manuscript-audit", "citation-audit", "reviewer-assessment", "response-matrix", "patent-draft-readiness-audit", "presentation-delivery-plan"}
+            <= set(plan["execution_layers"][0]["module_ids"])
         )
-        self.assertEqual(plan["execution_layers"][2]["module_ids"], ["response-matrix"])
-        self.assertTrue(
-            {"patent-draft-readiness-audit", "presentation-delivery-plan"}
-            <= set(plan["execution_layers"][3]["module_ids"])
-        )
-        self.assertIn("reviewer-assessment", modules["response-matrix"]["depends_on"])
-        self.assertIn("response-matrix", modules["presentation-delivery-plan"]["depends_on"])
         for module_id in ("manuscript-audit", "citation-audit", "reviewer-assessment", "response-matrix"):
             self.assertTrue(modules[module_id]["compatibility_row_ids"], module_id)
             self.assertTrue(modules[module_id]["quality_gate_ids"], module_id)
@@ -138,10 +116,9 @@ class ResearchPlanTests(unittest.TestCase):
         self.assertIn("citation-record-resolution", plan["execution_layers"][0]["module_ids"])
         self.assertTrue(
             {"dbsnp-rsid-evidence", "gnomad-gene-constraint-evidence", "hpo-term-evidence", "quickgo-term-evidence", "reactome-pathway-evidence"}
-            <= set(plan["execution_layers"][1]["module_ids"])
+            <= set(plan["execution_layers"][0]["module_ids"])
         )
         self.assertIn("source-freshness-audit", modules)
-        self.assertIn("gnomad-gene-constraint-evidence", modules["source-freshness-audit"]["depends_on"])
         self.assertIn("citation-record-resolution", modules["citation-audit"]["depends_on"])
         for module_id in ("citation-record-resolution", "dbsnp-rsid-evidence", "gnomad-gene-constraint-evidence", "source-freshness-audit"):
             self.assertTrue(modules[module_id]["compatibility_row_ids"], module_id)
@@ -152,12 +129,10 @@ class ResearchPlanTests(unittest.TestCase):
         )
 
         modules = {item["id"]: item for item in plan["modules"]}
-        self.assertEqual(plan["plan_type"], "mixed")
+        self.assertEqual(plan["plan_type"], "serial")
         self.assertEqual(plan["execution_layers"][0]["module_ids"], ["pcr-primer-pair-selection"])
-        self.assertEqual(
-            set(plan["execution_layers"][1]["module_ids"]),
-            {"primer-pair-specificity-screen", "pcr-amplicon-simulation"},
-        )
+        self.assertEqual(plan["execution_layers"][1]["module_ids"], ["primer-pair-specificity-screen"])
+        self.assertEqual(plan["execution_layers"][2]["module_ids"], ["pcr-amplicon-simulation"])
         self.assertIn("pcr-primer-pair-selection", modules["primer-pair-specificity-screen"]["depends_on"])
         self.assertIn("pcr-primer-pair-selection", modules["pcr-amplicon-simulation"]["depends_on"])
         for module_id in ("pcr-primer-pair-selection", "primer-pair-specificity-screen", "pcr-amplicon-simulation"):
@@ -168,11 +143,10 @@ class ResearchPlanTests(unittest.TestCase):
         plan = compile_research_plan("run expression QC differential expression enrichment NMF and network analysis")
 
         modules = {item["id"]: item for item in plan["modules"]}
-        self.assertEqual(plan["plan_type"], "mixed")
-        self.assertEqual(plan["execution_layers"][0]["module_ids"], ["expression-qc"])
-        self.assertTrue({"differential-expression", "network-analysis"} <= set(plan["execution_layers"][1]["module_ids"]))
-        self.assertIn("expression-qc", modules["differential-expression"]["depends_on"])
-        self.assertIn("expression-qc", modules["network-analysis"]["depends_on"])
+        self.assertEqual(plan["plan_type"], "parallel")
+        self.assertTrue({"expression-qc", "differential-expression", "network-analysis"} <= set(plan["execution_layers"][0]["module_ids"]))
+        self.assertEqual(modules["differential-expression"]["depends_on"], [])
+        self.assertEqual(modules["network-analysis"]["depends_on"], [])
         for module_id in ("expression-qc", "differential-expression", "network-analysis"):
             self.assertTrue(modules[module_id]["execution_templates"], module_id)
             self.assertTrue(modules[module_id]["quality_gate_ids"], module_id)

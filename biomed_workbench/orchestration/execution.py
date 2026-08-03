@@ -15,6 +15,7 @@ from ..kernel.execution_receipts import ExecutionHandoff
 from ..kernel.identity import digest_value, freeze_mapping, thaw
 from ..kernel.plans import PlanNode, ResearchDAG
 from ..kernel.state import ProjectState
+from ..kernel.execution_chain import validate_artifact_execution_chain
 from ..modules.compatibility import ArtifactSnapshot, CompatibilityError, EnvironmentSnapshot, evaluate_compatibility, invoke_compatible
 from ..modules.contract import ArtifactPort, FormatContract, ModuleManifest
 from ..modules.registry import ModuleRegistry, ModuleRegistryError
@@ -165,6 +166,28 @@ def _inputs(manifest: ModuleManifest, node: PlanNode, artifacts: dict[str, Scien
     return merged, tuple(bound)
 
 
+def _validate_reviewed_upstream(
+    state: ProjectState,
+    dag: ResearchDAG,
+    manifest: ModuleManifest,
+    node: PlanNode,
+    artifacts: dict[str, ScientificArtifact],
+) -> None:
+    required_types = set(manifest.orchestration.requires_reviewed_upstream_types)
+    active_artifacts = {item.artifact_id for item in state.scientific_decisions if item.active_evidence}
+    for port in manifest.input_artifacts:
+        if port.source_policy != "upstream_required" and port.artifact_type not in required_types:
+            continue
+        artifact = artifacts.get(node.input_bindings.get(port.name, ""))
+        if artifact is None or artifact.producing_module_id is None:
+            raise ValueError(f"input port {port.name} requires a produced upstream artifact")
+        producer_node_id = validate_artifact_execution_chain(state, artifact.id)
+        if producer_node_id not in node.dependencies or producer_node_id not in {item.id for item in dag.nodes}:
+            raise ValueError(f"input port {port.name} is not bound to a declared upstream dependency")
+        if artifact.id not in active_artifacts:
+            raise ValueError(f"input port {port.name} requires a reviewed and retained upstream artifact")
+
+
 def _snapshots(manifest: ModuleManifest, node: PlanNode, artifacts: dict[str, ScientificArtifact]) -> tuple[ArtifactSnapshot, ...]:
     snapshots = []
     for port in manifest.input_artifacts:
@@ -284,10 +307,13 @@ def execute_node(
     if any(finding.blocks_execution for finding in quality):
         return _blocked(node, manifest, input_ids, "QualityGateError", quality=quality)
     try:
+        _validate_reviewed_upstream(state, dag, manifest, node, artifacts)
         inputs, bound = _inputs(manifest, node, artifacts)
         validate_schema_value(manifest.input_schema, inputs, "input")
     except (InputValidationError, ValueError) as exc:
-        error_class = "InputValidationError" if isinstance(exc, InputValidationError) else "ArtifactBindingError"
+        error_class = "InputValidationError" if isinstance(exc, InputValidationError) else (
+            "UpstreamReviewRequiredError" if "upstream" in str(exc) else "ArtifactBindingError"
+        )
         return _blocked(node, manifest, input_ids, error_class, quality=quality)
     if manifest.mutability != "read_only" and manifest.access != "agent_generated" and not allow_mutation:
         return _blocked(node, manifest, input_ids, "MutationPermissionError", quality=quality)
@@ -387,6 +413,7 @@ def execute_node(
             )
             if manifest.access == "agent_generated":
                 handoff = ExecutionHandoff.create(
+                    plan_node_id=node.id,
                     module_id=manifest.id,
                     module_version=manifest.version,
                     request_digest=str(invocation.output["request_digest"]),

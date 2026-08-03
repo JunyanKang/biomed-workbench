@@ -27,6 +27,7 @@ def main() -> int:
     parser.add_argument("--project-root", type=Path, help="Existing project directory used for content-addressed artifacts")
     parser.add_argument("--artifact-bindings", type=Path, help="JSON file containing project_context and exact input artifact bindings")
     parser.add_argument("--compatibility-row", help="Exact module compatibility row to execute")
+    parser.add_argument("--state", type=Path, help="Project-state path inside --project-root; a project-scoped default is used when omitted")
     args = parser.parse_args()
     try:
         raw = args.input_file.read_text(encoding="utf-8") if args.input_file else args.input
@@ -53,6 +54,7 @@ def main() -> int:
             artifact_bindings=bindings,
             compatibility_row_id=args.compatibility_row,
             allow_mutation=args.allow_mutation,
+            state_path=args.state,
         ).to_dict()
     except json.JSONDecodeError:
         print(json.dumps({"error": "input is not valid JSON"}), file=sys.stderr)

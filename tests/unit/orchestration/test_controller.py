@@ -10,7 +10,7 @@ from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
 from biomed_workbench.kernel.scientific_dependency import AnalysisAdmission, ArtifactReview, ScientificDecision
 from biomed_workbench.kernel.state import apply_event
 from biomed_workbench.orchestration.controller import ControllerPolicy, ResearchController
-from biomed_workbench.orchestration.execution import NodeExecution
+from biomed_workbench.orchestration.execution import NodeExecution, execute_node
 from biomed_workbench.orchestration.graph import build_capability_graph
 from biomed_workbench.orchestration.planner import PlanningRequest, plan_research
 from tests.unit.kernel.test_hypotheses import hypothesis
@@ -96,6 +96,47 @@ def serial_fixture():
 
 
 class ResearchControllerTests(unittest.TestCase):
+    def test_upstream_required_port_rejects_an_unreviewed_project_input_at_runtime(self):
+        payload = module_payload("reviewed-upstream-consumer", "normalized_matrix", "contrast_result")
+        payload["input_artifacts"][0]["source_policy"] = "upstream_required"
+        payload["orchestration"]["requires_reviewed_upstream_types"] = ["normalized_matrix"]
+        temporary, registry = workflow_registry((payload,))
+        self.addCleanup(temporary.cleanup)
+        state = state_with(inline_artifact("artifact-project-matrix", "normalized_matrix"))
+        node = PlanNode(
+            id="node-reviewed-upstream-consumer",
+            module_id="reviewed-upstream-consumer",
+            input_bindings={"input_data": "artifact-project-matrix"},
+            dependencies=(),
+            branch_id="branch-upstream-contract",
+            target_hypothesis_ids=(hypothesis().id,),
+            expected_evidence_types=("contrast",),
+            expected_output_artifact_types=("contrast_result",),
+            planned_output_artifact_ids={"result": "artifact-reviewed-contrast"},
+            compatibility_row_candidates=(registry.get("reviewed-upstream-consumer").compatibility_matrix[0].id,),
+            status="ready",
+            attempt=0,
+        )
+        plan = ResearchDAG.create(
+            id="plan-reviewed-upstream-consumer",
+            objective="Reject a project input that attempts to bypass the reviewed upstream contract.",
+            nodes=(node,),
+            required_output_artifact_types=("contrast_result",),
+            plan_type="single",
+            revision=1,
+            parent_plan_id=None,
+            rationale=("The runtime source policy is independently enforced after planning.",),
+        )
+        result = execute_node(
+            state,
+            plan,
+            node,
+            registry,
+            environment_provider=lambda _manifest: None,
+        )
+        self.assertEqual(result.status, "blocked")
+        self.assertEqual(result.safe_error_class, "UpstreamReviewRequiredError")
+
     def test_strict_default_requires_admission_review_and_retain_decision_before_release(self):
         temporary, registry, state, plan = serial_fixture()
         self.addCleanup(temporary.cleanup)
@@ -214,6 +255,7 @@ class ResearchControllerTests(unittest.TestCase):
         def executor(_state, _plan, node, active_registry, **_kwargs):
             manifest = active_registry.get(node.module_id)
             handoff = ExecutionHandoff.create(
+                plan_node_id=node.id,
                 module_id=manifest.id,
                 module_version=manifest.version,
                 request_digest="1" * 64,

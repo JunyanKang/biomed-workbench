@@ -31,6 +31,7 @@ class ExecutionHandoff:
     """A deterministic execution request that proves preparation, never execution."""
 
     id: str
+    plan_node_id: str
     module_id: str
     module_version: str
     request_digest: str
@@ -41,6 +42,7 @@ class ExecutionHandoff:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "execution_handoff.id"))
+        object.__setattr__(self, "plan_node_id", validate_identifier(self.plan_node_id, "execution_handoff.plan_node_id"))
         object.__setattr__(self, "module_id", validate_identifier(self.module_id, "execution_handoff.module_id"))
         object.__setattr__(self, "module_version", _version(self.module_version, "execution_handoff.module_version"))
         object.__setattr__(self, "request_digest", _digest(self.request_digest, "execution_handoff.request_digest"))
@@ -60,6 +62,7 @@ class ExecutionHandoff:
     def create(
         cls,
         *,
+        plan_node_id: str,
         module_id: str,
         module_version: str,
         request_digest: str,
@@ -68,6 +71,7 @@ class ExecutionHandoff:
         protocol: Mapping[str, Any],
     ) -> "ExecutionHandoff":
         basis = {
+            "plan_node_id": plan_node_id,
             "module_id": module_id,
             "module_version": module_version,
             "request_digest": request_digest,
@@ -85,6 +89,7 @@ class ExecutionHandoff:
     def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
+            "plan_node_id": self.plan_node_id,
             "module_id": self.module_id,
             "module_version": self.module_version,
             "request_digest": self.request_digest,
@@ -100,19 +105,32 @@ class ObservedExecutionReceipt:
     """Observed process completion bound to the exact prepared handoff."""
 
     id: str
-    handoff_id: str
+    plan_node_id: str
+    execution_request_id: str
+    execution_request_digest: str
+    source_kind: str
+    handoff_id: str | None
     module_id: str
     module_version: str
     compatibility_row_id: str
     parameters_digest: str
     runtime_versions: Mapping[str, str]
-    output_payload_digests: Mapping[str, str]
+    output_artifact_digests: Mapping[str, str]
     process_exit_code: int
     execution_state: str = "observed-completed"
 
     def __post_init__(self) -> None:
-        for field in ("id", "handoff_id", "module_id"):
+        for field in ("id", "plan_node_id", "execution_request_id", "module_id"):
             object.__setattr__(self, field, validate_identifier(getattr(self, field), f"observed_execution.{field}"))
+        object.__setattr__(self, "execution_request_digest", _digest(self.execution_request_digest, "observed_execution.execution_request_digest"))
+        if self.source_kind not in {"handoff", "command", "direct"}:
+            raise ValueError("observed execution source kind is unsupported")
+        if self.source_kind == "handoff":
+            if self.handoff_id is None or self.handoff_id != self.execution_request_id:
+                raise ValueError("handoff execution must bind its exact handoff ID")
+            object.__setattr__(self, "handoff_id", validate_identifier(self.handoff_id, "observed_execution.handoff_id"))
+        elif self.handoff_id is not None:
+            raise ValueError("direct and command execution receipts cannot declare a handoff")
         object.__setattr__(self, "module_version", _version(self.module_version, "observed_execution.module_version"))
         object.__setattr__(self, "compatibility_row_id", _version(self.compatibility_row_id, "observed_execution.compatibility_row_id"))
         object.__setattr__(self, "parameters_digest", _digest(self.parameters_digest, "observed_execution.parameters_digest"))
@@ -120,25 +138,91 @@ class ObservedExecutionReceipt:
         if not versions or any(not _VERSION_RE.fullmatch(str(value)) for value in versions.values()):
             raise ValueError("observed execution requires explicit runtime versions")
         object.__setattr__(self, "runtime_versions", versions)
-        outputs = freeze_mapping(self.output_payload_digests)
+        outputs = freeze_mapping(self.output_artifact_digests)
         if not outputs:
-            raise ValueError("observed execution requires declared output payload digests")
-        for value in outputs.values():
-            _digest(str(value), "observed_execution.output_payload_digest")
-        object.__setattr__(self, "output_payload_digests", outputs)
+            raise ValueError("observed execution requires declared output artifact digests")
+        for artifact_id, value in outputs.items():
+            validate_identifier(str(artifact_id), "observed_execution.output_artifact_id")
+            _digest(str(value), "observed_execution.output_artifact_digest")
+        object.__setattr__(self, "output_artifact_digests", outputs)
         if self.process_exit_code != 0 or self.execution_state != "observed-completed":
             raise ValueError("only an observed zero-exit execution can form a completion receipt")
+
+    @classmethod
+    def create(
+        cls,
+        *,
+        plan_node_id: str,
+        module_id: str,
+        module_version: str,
+        compatibility_row_id: str,
+        parameters_digest: str,
+        runtime_versions: Mapping[str, str],
+        output_artifact_digests: Mapping[str, str],
+        process_exit_code: int,
+        source_kind: str,
+        execution_request_digest: str,
+        handoff: ExecutionHandoff | None = None,
+    ) -> "ObservedExecutionReceipt":
+        if source_kind == "handoff":
+            if handoff is None:
+                raise ValueError("handoff execution receipt requires the prepared handoff")
+            expected = {
+                "plan_node_id": handoff.plan_node_id,
+                "module_id": handoff.module_id,
+                "module_version": handoff.module_version,
+                "compatibility_row_id": handoff.compatibility_row_id,
+                "parameters_digest": handoff.request_digest,
+                "output_artifact_ids": set(handoff.planned_output_artifact_ids.values()),
+            }
+            observed = {
+                "plan_node_id": plan_node_id,
+                "module_id": module_id,
+                "module_version": module_version,
+                "compatibility_row_id": compatibility_row_id,
+                "parameters_digest": parameters_digest,
+                "output_artifact_ids": set(output_artifact_digests),
+            }
+            if observed != expected or execution_request_digest != digest_value(handoff.to_dict()):
+                raise ValueError("observed execution differs from its prepared handoff")
+            request_id = handoff.id
+            handoff_id = handoff.id
+        else:
+            if handoff is not None:
+                raise ValueError("only handoff execution may supply a prepared handoff")
+            request_id = f"execution-request-{execution_request_digest[:24]}"
+            handoff_id = None
+        basis = {
+            "plan_node_id": plan_node_id,
+            "execution_request_id": request_id,
+            "execution_request_digest": execution_request_digest,
+            "source_kind": source_kind,
+            "handoff_id": handoff_id,
+            "module_id": module_id,
+            "module_version": module_version,
+            "compatibility_row_id": compatibility_row_id,
+            "parameters_digest": parameters_digest,
+            "runtime_versions": dict(runtime_versions),
+            "output_artifact_digests": dict(output_artifact_digests),
+            "process_exit_code": process_exit_code,
+            "execution_state": "observed-completed",
+        }
+        return cls(id=f"observed-{digest_value(basis)[:24]}", **basis)
 
     def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
+            "plan_node_id": self.plan_node_id,
+            "execution_request_id": self.execution_request_id,
+            "execution_request_digest": self.execution_request_digest,
+            "source_kind": self.source_kind,
             "handoff_id": self.handoff_id,
             "module_id": self.module_id,
             "module_version": self.module_version,
             "compatibility_row_id": self.compatibility_row_id,
             "parameters_digest": self.parameters_digest,
             "runtime_versions": thaw(self.runtime_versions),
-            "output_payload_digests": thaw(self.output_payload_digests),
+            "output_artifact_digests": thaw(self.output_artifact_digests),
             "process_exit_code": self.process_exit_code,
             "execution_state": self.execution_state,
         }
@@ -172,6 +256,28 @@ class ArtifactReloadReceipt:
             raise ValueError("artifact reload receipt requires a valid output schema")
         object.__setattr__(self, "content_digest", _digest(self.content_digest, "artifact_reload.content_digest"))
 
+    @classmethod
+    def create(
+        cls,
+        *,
+        observed_execution: ObservedExecutionReceipt,
+        artifact_id: str,
+        payload_digests: Mapping[str, str],
+        content_digest: str,
+        output_schema_valid: bool,
+    ) -> "ArtifactReloadReceipt":
+        if observed_execution.output_artifact_digests.get(artifact_id) != content_digest:
+            raise ValueError("reloaded artifact digest differs from observed execution output")
+        normalized_payloads = dict(payload_digests) or {"content": content_digest}
+        basis = {
+            "observed_execution_receipt_id": observed_execution.id,
+            "artifact_id": artifact_id,
+            "payload_digests": normalized_payloads,
+            "output_schema_valid": output_schema_valid,
+            "content_digest": content_digest,
+        }
+        return cls(id=f"reload-{digest_value(basis)[:24]}", **basis)
+
     def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
@@ -192,6 +298,8 @@ class ScientificReviewReceipt:
     """Decision on whether reloaded artifacts may become active scientific evidence."""
 
     id: str
+    plan_node_id: str
+    observed_execution_receipt_id: str
     artifact_reload_receipt_ids: tuple[str, ...]
     review_status: str
     finding_ids: tuple[str, ...]
@@ -200,6 +308,8 @@ class ScientificReviewReceipt:
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "scientific_review.id"))
+        object.__setattr__(self, "plan_node_id", validate_identifier(self.plan_node_id, "scientific_review.plan_node_id"))
+        object.__setattr__(self, "observed_execution_receipt_id", validate_identifier(self.observed_execution_receipt_id, "scientific_review.observed_execution_receipt_id"))
         reload_ids = tuple(validate_identifier(value, "scientific_review.artifact_reload_receipt_id") for value in self.artifact_reload_receipt_ids)
         if not reload_ids or len(set(reload_ids)) != len(reload_ids):
             raise ValueError("scientific review requires unique artifact reload receipts")
@@ -214,9 +324,38 @@ class ScientificReviewReceipt:
         if self.active_evidence_allowed is not (self.review_status == "accepted"):
             raise ValueError("only accepted scientific review may release active evidence")
 
+    @classmethod
+    def create(
+        cls,
+        *,
+        observed_execution: ObservedExecutionReceipt,
+        reload_receipts: tuple[ArtifactReloadReceipt, ...],
+        finding_ids: tuple[str, ...] = (),
+        review_status: str = "accepted",
+        reviewer_role: str = "execution-integrity-review",
+    ) -> "ScientificReviewReceipt":
+        if not reload_receipts or {
+            item.observed_execution_receipt_id for item in reload_receipts
+        } != {observed_execution.id}:
+            raise ValueError("execution integrity review requires reloads from one observed execution")
+        if {item.artifact_id for item in reload_receipts} != set(observed_execution.output_artifact_digests):
+            raise ValueError("execution integrity review must cover every observed output artifact")
+        basis = {
+            "plan_node_id": observed_execution.plan_node_id,
+            "observed_execution_receipt_id": observed_execution.id,
+            "artifact_reload_receipt_ids": [item.id for item in reload_receipts],
+            "review_status": review_status,
+            "finding_ids": list(finding_ids),
+            "reviewer_role": reviewer_role,
+            "active_evidence_allowed": review_status == "accepted",
+        }
+        return cls(id=f"execution-review-{digest_value(basis)[:24]}", **basis)
+
     def to_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
+            "plan_node_id": self.plan_node_id,
+            "observed_execution_receipt_id": self.observed_execution_receipt_id,
             "artifact_reload_receipt_ids": list(self.artifact_reload_receipt_ids),
             "review_status": self.review_status,
             "finding_ids": list(self.finding_ids),

@@ -34,6 +34,8 @@ The unified skill selects a single, serial, parallel, or mixed workflow. It shou
 
 After execution, register every data, table, model, Figure, and panel in the scientific evidence map together with its prerequisite conclusion, producing script, renderer, final file, caption, narrative source, DOI, path, and checksum. Chinese and English interpretation reports are rendered from the same validated map version.
 
+The public single-module entry atomically persists replayable project state and reports computational execution separately from scientific-review status. An unfinished active plan must continue through execution ingestion, review, decision, or resume; a completed plan may admit a later analysis on the same append-only ledger. An external packaged workflow becomes reviewable only when its module, version, compatibility row, runtime versions, exit status, planned output identities, and content-addressed payloads match the recorded handoff.
+
 ## Project Checkpoints
 
 For broad projects, the workbench maintains explicit checkpoints rather than treating the first successful run as completion:

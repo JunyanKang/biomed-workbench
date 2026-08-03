@@ -145,13 +145,103 @@ with zipfile.ZipFile(outdir / f'{stem}_fastqc.zip', 'w') as archive:
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
             result = json.loads(completed.stdout)
-            self.assertEqual(result["status"], "completed", result)
+            self.assertEqual(result["execution_status"], "completed", result)
+            self.assertEqual(result["scientific_status"], "awaiting_review", result)
             self.assertEqual(result["stop_reason"], "awaiting_artifact_review")
+            state_path = root / result["project_state_path"]
+            self.assertTrue(state_path.is_file())
+            persisted = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(persisted["state_digest"], result["project_state_digest"])
+            self.assertEqual(len(persisted["observed_executions"]), 1)
+            self.assertEqual(len(persisted["artifact_reloads"]), 1)
+            self.assertEqual(len(persisted["execution_reviews"]), 1)
             self.assertEqual(len(result["output_artifacts"]), 1)
             payloads = result["output_artifacts"][0]["payloads"]
             self.assertEqual({item["role"] for item in payloads}, {"archive", "report"})
             self.assertTrue(all(item["object_key"].startswith("sha256/") for item in payloads))
             self.assertNotIn(str(root), completed.stdout)
+
+            artifact_id = result["output_artifacts"][0]["id"]
+            review = {
+                "id": "review-fastqc-public-output",
+                "artifact_id": artifact_id,
+                "artifact_kind": "data",
+                "rationale_zh": "依据预先登记的技术质量标准复核 FastQC 输出及其完整来源链。",
+                "rationale_en": "Review the FastQC output and its complete provenance chain against the preregistered technical criteria.",
+                "methods_zh": "重新读取内容寻址的报告和压缩归档，并核对命令、版本、输入身份与输出摘要。",
+                "methods_en": "Reload the content-addressed report and archive and verify command, versions, input identity, and output digests.",
+                "results_zh": "登记的两类输出均已重新读取，执行回执和内容摘要一致，未发现阻断性技术问题。",
+                "results_en": "Both declared outputs were reloaded and their execution receipts and content digests agree without a blocking technical issue.",
+                "conclusion_zh": "该小型夹具的 FastQC 技术结果可以带局限保留，用于验证完整项目状态闭环。",
+                "conclusion_en": "The fixture's FastQC technical result may be retained with limitations to validate the complete project-state loop.",
+                "panels": [],
+                "technical_status": "passed",
+                "statistical_status": "warning",
+                "biological_status": "warning",
+                "robustness_status": "warning",
+                "limitations_zh": ["该小型夹具不代表生产测序文库，也不支持生物学效应结论。"],
+                "limitations_en": ["This small fixture is not a production sequencing library and supports no biological-effect claim."],
+                "recommended_action": "retain-with-caveat",
+                "source_urls": ["https://www.bioinformatics.babraham.ac.uk/projects/fastqc/"],
+            }
+            decision = {
+                "id": "decision-fastqc-public-output",
+                "review_id": review["id"],
+                "artifact_id": artifact_id,
+                "hypothesis_ids": ["hypothesis-fastqc-technical-quality"],
+                "action": "retain-with-caveat",
+                "rationale_zh": "执行和重载链完整且技术评审通过，因此在声明夹具局限后保留。",
+                "rationale_en": "The execution and reload chain is complete and technical review passed, so retain it with the fixture limitation.",
+                "active_evidence": True,
+                "next_plan_node_ids": [],
+            }
+            review_path = root / "review.json"
+            decision_path = root / "decision.json"
+            review_path.write_text(json.dumps(review), encoding="utf-8")
+            decision_path.write_text(json.dumps(decision), encoding="utf-8")
+            for command, input_path in (("review", review_path), ("decide", decision_path)):
+                appended = subprocess.run(
+                    [sys.executable, "tools/project_workflow.py", command, "--state", str(state_path), "--input", str(input_path)],
+                    cwd=ROOT,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                )
+                self.assertEqual(appended.returncode, 0, appended.stderr)
+            resumed = subprocess.run(
+                [sys.executable, "tools/project_workflow.py", "resume", "--state", str(state_path), "--project-root", str(root)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(resumed.returncode, 0, resumed.stderr)
+            self.assertEqual(json.loads(resumed.stdout)["stop_reason"], "plan_completed")
+            appended_run = subprocess.run(
+                [
+                    sys.executable,
+                    "tools/run_tool.py",
+                    "read-quality-fastqc",
+                    "--input",
+                    '{"threads":1}',
+                    "--project-root",
+                    str(root),
+                    "--artifact-bindings",
+                    str(binding_path),
+                    "--compatibility-row",
+                    "fastqc-0.12.1-java-22-fastq-sanger",
+                ],
+                cwd=ROOT,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=60,
+            )
+            self.assertEqual(appended_run.returncode, 0, appended_run.stderr)
+            appended_result = json.loads(appended_run.stdout)
+            self.assertEqual(appended_result["scientific_status"], "awaiting_review")
+            self.assertNotEqual(appended_result["output_artifacts"][0]["id"], artifact_id)
 
     def test_command_without_project_bindings_returns_specific_error(self):
         completed = subprocess.run(

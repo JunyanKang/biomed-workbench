@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Mapping
 
 from .identity import digest_value, freeze_mapping, thaw, validate_identifier
+from .execution_chain import validate_artifact_execution_chain
 if TYPE_CHECKING:
     from .state import ProjectState
 
@@ -43,6 +44,7 @@ EDGE_RELATIONS = (
     "excludes",
     "triggers",
 )
+EVIDENCE_MAP_KINDS = frozenset({"project-snapshot", "validated-delivery"})
 
 
 def _text(value: str, location: str, minimum: int = 12) -> str:
@@ -324,6 +326,7 @@ class ScientificDependencyBundle:
     admissions: tuple[AnalysisAdmission, ...]
     reviews: tuple[ArtifactReview, ...]
     decisions: tuple[ScientificDecision, ...]
+    map_kind: str
     digest: str
 
     @classmethod
@@ -334,15 +337,19 @@ class ScientificDependencyBundle:
         admissions: tuple[AnalysisAdmission, ...],
         reviews: tuple[ArtifactReview, ...],
         decisions: tuple[ScientificDecision, ...],
+        map_kind: str = "project-snapshot",
     ) -> "ScientificDependencyBundle":
-        values = cls(tuple(admissions), tuple(reviews), tuple(decisions), "0" * 64)
+        if map_kind not in EVIDENCE_MAP_KINDS:
+            raise ValueError("scientific dependency bundle map kind is unsupported")
+        values = cls(tuple(admissions), tuple(reviews), tuple(decisions), map_kind, "0" * 64)
         values._validate(state)
         basis = {
             "admissions": [item.to_dict() for item in values.admissions],
             "reviews": [item.to_dict() for item in values.reviews],
             "decisions": [item.to_dict() for item in values.decisions],
+            "map_kind": values.map_kind,
         }
-        return cls(values.admissions, values.reviews, values.decisions, digest_value(basis))
+        return cls(values.admissions, values.reviews, values.decisions, values.map_kind, digest_value(basis))
 
     def _validate(self, state: ProjectState) -> None:
         plan_nodes = {node.id: node for plan in state.plans for node in plan.nodes}
@@ -376,6 +383,21 @@ class ScientificDependencyBundle:
                 raise ValueError("scientific decision references unknown hypothesis or next analysis")
             if decision.active_evidence and review.overall_status in {"major", "fatal", "unassessed"}:
                 raise ValueError("blocking or unassessed artifacts cannot become active evidence")
+        if self.map_kind == "validated-delivery":
+            active = {item.artifact_id for item in self.decisions if item.active_evidence}
+            if not active:
+                raise ValueError("validated-delivery evidence map requires retained active evidence")
+            active_produced = {artifact_id for artifact_id in active if artifacts[artifact_id].producing_module_id is not None}
+            if not active_produced:
+                raise ValueError("validated-delivery evidence map requires an executed, reloaded, reviewed, and retained result")
+            for artifact_id in active_produced:
+                validate_artifact_execution_chain(state, artifact_id)
+            active_plan = next((item for item in state.plans if item.id == state.active_plan_id), None)
+            if active_plan is None:
+                raise ValueError("validated-delivery evidence map requires an active completed plan")
+            active_types = {artifacts[artifact_id].artifact_type for artifact_id in active_produced}
+            if not set(active_plan.required_output_artifact_types) <= active_types:
+                raise ValueError("validated-delivery active evidence does not satisfy the plan's required outputs")
 
 
 @dataclass(frozen=True)
