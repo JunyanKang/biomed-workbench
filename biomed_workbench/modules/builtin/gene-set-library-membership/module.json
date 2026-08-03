@@ -29,5 +29,23 @@
   "input_schema": {"type": "object", "additionalProperties": false, "properties": {"library_name": {"type": "string", "minLength": 1, "maxLength": 200}, "max_terms": {"type": "integer", "minimum": 1, "maximum": 5000}, "max_members_per_term": {"type": "integer", "minimum": 1, "maximum": 10000}}, "required": ["library_name"]},
   "output_schema": {"type": "object", "additionalProperties": false, "properties": {"library_name": {"type": "string"}, "is_fuzzy": {"type": "boolean"}, "term_count": {"type": "integer"}, "returned_term_count": {"type": "integer"}, "truncated": {"type": "boolean"}, "terms": {"type": "array"}, "provenance": {"type": "object"}, "limitations": {"type": "array"}}, "required": ["library_name", "is_fuzzy", "term_count", "returned_term_count", "truncated", "terms", "provenance", "limitations"]},
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room public gene-set membership retrieval capability.", "https://maayanlab.cloud/Enrichr/"]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room public gene-set membership retrieval capability.", "https://maayanlab.cloud/Enrichr/"]},
+  "routing": {
+    "method_aliases": [
+      "gene-set-library-membership",
+      "Retrieve public gene-set library membership",
+      "retrieve Enrichr gene set membership",
+      "download gene set library",
+      "gene set terms and genes",
+      "Enrichr gene set",
+      "获取基因集成员"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 2,
+    "requires_reviewed_upstream_types": []
+  }
 }

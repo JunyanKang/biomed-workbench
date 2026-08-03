@@ -80,5 +80,23 @@
     "provenance_fields": ["module-id", "module-version", "input-sha256", "model", "population-parameters", "rates", "seed", "Python-version", "msprime-version", "tree-sequence-sha256", "vcf-sha256", "quality-gates"],
     "forbidden_actions": ["Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.", "Do not infer demographic history, estimate parameters from empirical data, select scenarios after viewing simulated output, or claim real biological history from simulations.", "Do not overwrite outputs or discard failed simulations without preserving the reason."],
     "requires_observed_execution": true
+  },
+  "routing": {
+    "method_aliases": [
+      "msprime-demographic-simulation",
+      "Simulate a declared demographic history with msprime",
+      "demographic simulation",
+      "population history simulation",
+      "coalescent simulation",
+      "msprime",
+      "群体历史模拟"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 6,
+    "requires_reviewed_upstream_types": []
   }
 }

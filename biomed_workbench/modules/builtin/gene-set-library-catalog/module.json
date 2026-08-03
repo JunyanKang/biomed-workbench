@@ -29,5 +29,22 @@
   "input_schema": {"type": "object", "additionalProperties": false, "properties": {"category_id": {"type": "integer", "minimum": 1, "maximum": 10000}, "max_libraries": {"type": "integer", "minimum": 1, "maximum": 1000}}, "required": []},
   "output_schema": {"type": "object", "additionalProperties": false, "properties": {"category_id": {"type": "integer", "nullable": true}, "library_count": {"type": "integer"}, "returned_library_count": {"type": "integer"}, "truncated": {"type": "boolean"}, "libraries": {"type": "array"}, "provenance": {"type": "object"}, "limitations": {"type": "array"}}, "required": ["category_id", "library_count", "returned_library_count", "truncated", "libraries", "provenance", "limitations"]},
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room public gene-set library discovery capability informed by product-level scientific design review.", "https://maayanlab.cloud/Enrichr/"]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room public gene-set library discovery capability informed by product-level scientific design review.", "https://maayanlab.cloud/Enrichr/"]},
+  "routing": {
+    "method_aliases": [
+      "gene-set-library-catalog",
+      "Discover public gene-set libraries",
+      "discover gene set libraries",
+      "list Enrichr libraries",
+      "Enrichr gene set catalog",
+      "Enrichr 基因集资源目录"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 1,
+    "requires_reviewed_upstream_types": []
+  }
 }

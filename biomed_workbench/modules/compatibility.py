@@ -330,7 +330,20 @@ def invoke_compatible(
     raw_output = entrypoint(**inputs)
     if not isinstance(raw_output, dict):
         raise ValueError("module output must be an object")
-    _validate_output(manifest.output_schema, raw_output)
+    output_for_contract = raw_output
+    if manifest.access == "agent_generated":
+        envelope = {
+            "result_kind": raw_output.get("result_kind"),
+            "execution_state": raw_output.get("execution_state"),
+        }
+        if envelope != {"result_kind": "execution_handoff", "execution_state": "prepared-not-run"}:
+            raise ValueError("agent-generated output lacks the mandatory non-execution envelope")
+        output_for_contract = {
+            key: value
+            for key, value in raw_output.items()
+            if key not in {"result_kind", "execution_state"}
+        }
+    _validate_output(manifest.output_schema, output_for_contract)
     serialized = json.dumps(raw_output, sort_keys=True, separators=(",", ":"), default=str).encode("utf-8")
     if len(serialized) > manifest.execution.max_output_bytes:
         raise ValueError("module output exceeds the declared maximum size")

@@ -82,14 +82,29 @@ def build() -> dict[str, object]:
     for record in records:
         counts[record["level"]] = counts.get(record["level"], 0) + 1
     blocked = [record["module_id"] for record in records if not record["executor_ready"]]
+    axis_counts = {
+        axis: sum(record["evidence_axes"][axis] is True for record in records)
+        for axis in (
+            "contract_valid",
+            "executor_reachable",
+            "representative_or_public_case_validated",
+            "current_project_validated",
+        )
+    }
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "registry_digest": registry.digest,
         "module_count": len(records),
         "counts": counts,
+        "axis_counts": axis_counts,
         "blocked_module_ids": blocked,
-        "passed": not blocked,
+        "passed": axis_counts["contract_valid"] == len(records),
+        "single_maturity_count_is_authoritative": False,
         "status_model": {
+            "contract_valid": "The versioned module contract parses and all referenced packaged assets satisfy release rules.",
+            "executor_reachable": "At least one declared execution surface reaches an implementation rather than only a plan or handoff.",
+            "representative_or_public_case_validated": "A current dependency-scoped representative or public-data case passed its declared gates.",
+            "current_project_validated": "The current project has observed execution, artifact reload, scientific review, and an accepted decision; generic release reports never set this axis.",
             "scaffolded": "A no-edit contract exists, but no external scientific workflow is executed.",
             "executable": "A parameterized adapter executes a controlled workflow and reloads declared outputs.",
             "validated": "Executable evidence is supplemented by a current dependency-scoped public-data acceptance case.",

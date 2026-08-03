@@ -1,26 +1,23 @@
 import json
 import math
-import subprocess
-import sys
 import unittest
 from pathlib import Path
 
 from biomed_workbench.capabilities.revision import build_revision_base
+from biomed_workbench.runner import run
 
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def execute(capability_id, payload):
-    result = subprocess.run(
-        [sys.executable, "tools/run_tool.py", capability_id, "--input", json.dumps(payload)],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
+    parsed = run(capability_id, payload).to_dict()
+    expected_status = (
+        "awaiting_observed_execution"
+        if parsed.get("output", {}).get("result_kind") == "execution_handoff"
+        else "completed"
     )
-    parsed = json.loads(result.stdout)
-    if parsed["status"] != "completed":
+    if parsed["status"] != expected_status:
         raise AssertionError(parsed)
     return parsed["output"]
 

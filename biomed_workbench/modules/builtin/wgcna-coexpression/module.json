@@ -58,5 +58,23 @@
     "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-digests", "normalization", "feature-filter", "sample-eligibility", "missingness-and-outlier-policy", "correlation", "network-and-TOM-type", "candidate-and-selected-power", "module-parameters", "seed", "stability-policy", "actual-tool-versions", "plot-standard-version", "output-digests", "quality-gates"],
     "forbidden_actions": ["Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.", "Do not use cells or technical runs as independent samples, choose features or parameters after trait significance, silently remove outliers, force a module, call spatial layout a metric, or describe coexpression as physical interaction or causality."],
     "requires_observed_execution": true
+  },
+  "routing": {
+    "method_aliases": [
+      "wgcna-coexpression",
+      "Build a sample-aware WGCNA coexpression network",
+      "WGCNA",
+      "weighted gene coexpression network",
+      "module trait analysis",
+      "加权基因共表达网络分析",
+      "模块性状关联"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 3,
+    "requires_reviewed_upstream_types": []
   }
 }

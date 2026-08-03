@@ -13,6 +13,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from biomed_workbench.catalog import all_capabilities, resolve  # noqa: E402
+from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
+from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 from biomed_workbench.router import route  # noqa: E402
 from biomed_workbench.runner import run  # noqa: E402
 from biomed_workbench.version import VERSION  # noqa: E402
@@ -24,9 +26,16 @@ except ImportError as exc:
 
 
 mcp = FastMCP("Biomed Workbench Interoperability Adapter")
+registry = ModuleRegistry.discover(BUILTIN_ROOT)
 
 
 def _public_capability(item: Any) -> dict[str, Any]:
+    manifest = registry.get(item.id)
+    mcp_supported = (
+        manifest.mutability == "read_only"
+        and manifest.execution.kind in {"python", "service"}
+        and manifest.access not in {"agent_generated", "codex_native"}
+    )
     return {
         "id": item.id,
         "workflow": item.workflow,
@@ -37,6 +46,8 @@ def _public_capability(item: Any) -> dict[str, Any]:
         "requirements": list(item.requirements),
         "access": item.access,
         "mutability": item.mutability,
+        "execution_kind": manifest.execution.kind,
+        "mcp_execution_supported": mcp_supported,
     }
 
 
@@ -63,8 +74,17 @@ def describe_biomedical_capability(capability_id: str) -> dict[str, Any]:
 def run_read_only_biomedical_capability(capability_id: str, request_json: str) -> dict[str, Any]:
     """Run one read-only capability through the same schema and permission gates as the local plugin."""
     capability = resolve(capability_id)
+    manifest = registry.get(capability_id)
     if capability.mutability != "read_only":
         raise ValueError("MCP execution is restricted to read-only capabilities; use the Codex plugin or an independently validated host workflow for output-writing modules")
+    if manifest.execution.kind == "command":
+        raise ValueError(
+            "MCP_EXECUTION_KIND_UNSUPPORTED: scientific-command modules require project-scoped artifact bindings and the strict local execution surface"
+        )
+    if manifest.access in {"agent_generated", "codex_native"}:
+        raise ValueError(
+            "MCP_EXECUTION_KIND_UNSUPPORTED: this capability requires a Codex-owned handoff or an independently validated host equivalent"
+        )
     request = json.loads(request_json)
     if not isinstance(request, dict):
         raise ValueError("request_json must decode to an object")

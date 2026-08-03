@@ -11,6 +11,7 @@ from typing import Any, Callable, Mapping
 
 from ..kernel.artifact_store import ArtifactPayload, ProjectArtifactStore
 from ..kernel.artifacts import ScientificArtifact
+from ..kernel.execution_receipts import ExecutionHandoff
 from ..kernel.identity import digest_value, freeze_mapping, thaw
 from ..kernel.plans import PlanNode, ResearchDAG
 from ..kernel.state import ProjectState
@@ -73,18 +74,31 @@ class NodeExecution:
     compatibility_finding_codes: tuple[str, ...]
     provenance: Mapping[str, Any]
     safe_error_class: str | None
+    execution_handoff: ExecutionHandoff | None = None
 
     def __post_init__(self) -> None:
-        if self.status not in {"completed", "blocked", "failed"}:
+        if self.status not in {"awaiting_observed_execution", "completed", "blocked", "failed"}:
             raise ValueError("node execution status is unsupported")
         object.__setattr__(self, "provenance", freeze_mapping(self.provenance))
         if self.status == "completed" and (self.safe_error_class is not None or not self.artifacts or not self.compatibility_row_id):
             raise ValueError("completed execution requires artifacts and compatibility provenance")
-        if self.status != "completed" and self.safe_error_class is None:
+        if self.status == "completed" and self.execution_handoff is not None:
+            raise ValueError("completed execution cannot retain an unobserved handoff")
+        if self.status == "awaiting_observed_execution" and (
+            self.safe_error_class is not None
+            or self.execution_handoff is None
+            or self.artifacts
+            or self.output_artifact_ids
+            or not self.compatibility_row_id
+        ):
+            raise ValueError("awaiting execution requires one handoff and no scientific output artifact")
+        if self.status in {"blocked", "failed"} and self.safe_error_class is None:
             raise ValueError("blocked or failed execution requires a safe error class")
+        if self.status in {"blocked", "failed"} and self.execution_handoff is not None:
+            raise ValueError("blocked or failed execution cannot expose a handoff")
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload = {
             "node_id": self.node_id,
             "module_id": self.module_id,
             "module_version": self.module_version,
@@ -98,6 +112,22 @@ class NodeExecution:
             "provenance": thaw(self.provenance),
             "safe_error_class": self.safe_error_class,
         }
+        if self.execution_handoff is not None:
+            payload["execution_handoff"] = self.execution_handoff.to_dict()
+        return payload
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "NodeExecution":
+        values = dict(payload)
+        values["input_artifact_ids"] = tuple(values["input_artifact_ids"])
+        values["output_artifact_ids"] = tuple(values["output_artifact_ids"])
+        values["artifacts"] = tuple(ScientificArtifact.from_dict(item) for item in values["artifacts"])
+        values["quality_findings"] = tuple(QualityFinding.from_dict(item) for item in values["quality_findings"])
+        values["compatibility_finding_codes"] = tuple(values["compatibility_finding_codes"])
+        handoff = values.get("execution_handoff")
+        if handoff is not None:
+            values["execution_handoff"] = ExecutionHandoff.from_dict(handoff)
+        return cls(**values)
 
 
 def _blocked(node: PlanNode, manifest: ModuleManifest, input_ids: tuple[str, ...], error_class: str, *, quality=(), compatibility_codes=()) -> NodeExecution:
@@ -259,13 +289,22 @@ def execute_node(
     except (InputValidationError, ValueError) as exc:
         error_class = "InputValidationError" if isinstance(exc, InputValidationError) else "ArtifactBindingError"
         return _blocked(node, manifest, input_ids, error_class, quality=quality)
-    if manifest.mutability != "read_only" and not allow_mutation:
+    if manifest.mutability != "read_only" and manifest.access != "agent_generated" and not allow_mutation:
         return _blocked(node, manifest, input_ids, "MutationPermissionError", quality=quality)
     environment = environment_provider(manifest)
     snapshots = _snapshots(manifest, node, artifacts)
     decision = evaluate_compatibility(manifest, environment, snapshots)
     if not decision.allowed:
         return _blocked(node, manifest, input_ids, "CompatibilityError", quality=quality, compatibility_codes=tuple(item.code for item in decision.findings))
+    if decision.compatibility_row_id not in node.compatibility_row_candidates:
+        return _blocked(
+            node,
+            manifest,
+            input_ids,
+            "CompatibilityRowSelectionError",
+            quality=quality,
+            compatibility_codes=("UNREQUESTED_COMPATIBILITY_ROW",),
+        )
     try:
         if manifest.execution.kind == "command":
             if artifact_store is None:
@@ -346,6 +385,30 @@ def execute_node(
                 artifacts=snapshots,
                 entrypoint=lambda **kwargs: _bounded_invoke(entrypoint, kwargs, manifest.execution.timeout_seconds),
             )
+            if manifest.access == "agent_generated":
+                handoff = ExecutionHandoff.create(
+                    module_id=manifest.id,
+                    module_version=manifest.version,
+                    request_digest=str(invocation.output["request_digest"]),
+                    compatibility_row_id=str(invocation.provenance["compatibility_row_id"]),
+                    planned_output_artifact_ids=node.planned_output_artifact_ids,
+                    protocol=invocation.output,
+                )
+                return NodeExecution(
+                    node_id=node.id,
+                    module_id=manifest.id,
+                    module_version=manifest.version,
+                    status="awaiting_observed_execution",
+                    compatibility_row_id=decision.compatibility_row_id,
+                    input_artifact_ids=input_ids,
+                    output_artifact_ids=(),
+                    artifacts=(),
+                    quality_findings=quality,
+                    compatibility_finding_codes=(),
+                    provenance=invocation.provenance,
+                    safe_error_class=None,
+                    execution_handoff=handoff,
+                )
             output_artifacts = _output_artifacts(state, node, manifest, invocation.output, invocation.provenance, quality)
             invocation_provenance = invocation.provenance
     except CompatibilityError as exc:

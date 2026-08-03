@@ -2,11 +2,9 @@
 """Validate the Biomed Workbench product release surface."""
 
 import argparse
-import ast
 import hashlib
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 from packaging.version import InvalidVersion
@@ -34,6 +32,7 @@ from biomed_workbench.services.public_databases import (  # noqa: E402
     STRING_CONTRACT_VERSION,
 )
 from biomed_workbench.services.credentials import ALLOWED_CREDENTIALS  # noqa: E402
+from biomed_workbench.release_validation import validate_source_hygiene  # noqa: E402
 from biomed_workbench.version import VERSION  # noqa: E402
 from tools.validate_module import validate_module  # noqa: E402
 from tools.build_format_contract_report import build as build_format_contract_report  # noqa: E402
@@ -46,13 +45,6 @@ from tools.audit_adapter_boundaries import build as build_adapter_boundary_repor
 from tools.verify_mcp_adapter import validate_report as validate_mcp_adapter_report  # noqa: E402
 
 CATALOG_FIELDS = {"id", "workflow", "kind", "title", "description", "entrypoint", "input_schema", "requirements", "access", "mutability"}
-SECRET_PATTERNS = [
-    re.compile(r"(?:api[_-]?key|access[_-]?token|secret)\s*[:=]\s*['\"][A-Za-z0-9_-]{16,}['\"]", re.IGNORECASE),
-    re.compile(r"\b[A-Z][A-Z0-9_]*(?:API_KEY|ACCESS_TOKEN|SECRET)=[A-Za-z0-9_-]{16,}\b"),
-    re.compile(r"(?:bearer\s+)[A-Za-z0-9._-]{20,}", re.IGNORECASE),
-]
-
-
 def _scanpy_specs(row) -> list[str]:
     specs: list[str] = []
     for spec in getattr(row, "tool_versions", {}).get("scanpy", ()):
@@ -103,7 +95,6 @@ def _scanpy_is_compatible(version: str, row) -> bool:
             return True
     return False
 
-LOCAL_PATH_PATTERNS = ("/Users/" + "kangjunyan", "/private/" + "var/folders/")
 LEGACY_PATHS = (
     "scripts",
     "tools/adapters",
@@ -119,13 +110,6 @@ FORBIDDEN_INFRASTRUCTURE_MARKERS = (
     "g" + "pu",
     "local-" + "model",
 )
-
-
-def publishable_files():
-    result = subprocess.run(["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"], cwd=ROOT, check=True, capture_output=True)
-    for relative in result.stdout.decode().split("\0"):
-        if relative and (ROOT / relative).is_file():
-            yield ROOT / relative
 
 
 def main() -> int:
@@ -448,8 +432,7 @@ def main() -> int:
                 or pbmc3k_report.get("module", {}).get("version") != pbmc3k_manifest.version
                 or pbmc3k_report.get("module", {}).get("compatibility_row_id")
                 != pbmc3k_manifest.compatibility_matrix[0].id
-                or pbmc3k_report.get("module", {}).get("manifest_sha256")
-                != hashlib.sha256(pbmc3k_manifest_path.read_bytes()).hexdigest()
+                or not evidence_scope_is_current(pbmc3k_report, registry)
                 or pbmc3k_report.get("module", {}).get("template_sha256")
                 != hashlib.sha256(pbmc3k_template_path.read_bytes()).hexdigest()
                 or pbmc3k_report.get("source", {}).get("sha256")
@@ -492,8 +475,7 @@ def main() -> int:
                 != pbmc3k_atlas_manifest.version
                 or pbmc3k_atlas_report.get("module", {}).get("compatibility_row_id")
                 != pbmc3k_atlas_manifest.compatibility_matrix[0].id
-                or pbmc3k_atlas_report.get("module", {}).get("manifest_sha256")
-                != hashlib.sha256((pbmc3k_atlas_root / "module.json").read_bytes()).hexdigest()
+                or not evidence_scope_is_current(pbmc3k_atlas_report, registry)
                 or pbmc3k_atlas_report.get("module", {}).get("template_sha256")
                 != hashlib.sha256(
                     (pbmc3k_atlas_root / "templates" / "annotate_celltypist.py").read_bytes()
@@ -557,8 +539,7 @@ def main() -> int:
                 != zebrafish_regvelo_manifest.version
                 or zebrafish_regvelo_report.get("module", {}).get("compatibility_row_id")
                 != zebrafish_regvelo_manifest.compatibility_matrix[0].id
-                or zebrafish_regvelo_report.get("module", {}).get("manifest_sha256")
-                != hashlib.sha256((zebrafish_regvelo_root / "module.json").read_bytes()).hexdigest()
+                or not evidence_scope_is_current(zebrafish_regvelo_report, registry)
                 or zebrafish_regvelo_report.get("module", {}).get("template_sha256")
                 != hashlib.sha256(
                     (zebrafish_regvelo_root / "templates" / "run_regvelo.py").read_bytes()
@@ -664,12 +645,7 @@ def main() -> int:
                     "compatibility_row_id"
                 )
                 != zebrafish_cellrank_manifest.compatibility_matrix[0].id
-                or zebrafish_cellrank_report.get("module", {}).get(
-                    "manifest_sha256"
-                )
-                != hashlib.sha256(
-                    (zebrafish_cellrank_root / "module.json").read_bytes()
-                ).hexdigest()
+                or not evidence_scope_is_current(zebrafish_cellrank_report, registry)
                 or zebrafish_cellrank_report.get("module", {}).get(
                     "template_sha256"
                 )
@@ -772,8 +748,7 @@ def main() -> int:
                 or gse96583_report.get("module", {}).get("version") != gse96583_manifest.version
                 or gse96583_report.get("module", {}).get("compatibility_row_id")
                 != gse96583_manifest.compatibility_matrix[0].id
-                or gse96583_report.get("module", {}).get("manifest_sha256")
-                != hashlib.sha256((gse96583_root / "module.json").read_bytes()).hexdigest()
+                or not evidence_scope_is_current(gse96583_report, registry)
                 or gse96583_report.get("module", {}).get("template_sha256")
                 != {
                     name: hashlib.sha256((gse96583_root / "templates" / name).read_bytes()).hexdigest()
@@ -849,12 +824,7 @@ def main() -> int:
                     "compatibility_row_id"
                 )
                 != gse96583_marker_manifest.compatibility_matrix[0].id
-                or gse96583_marker_report.get("module", {}).get(
-                    "manifest_sha256"
-                )
-                != hashlib.sha256(
-                    (gse96583_marker_root / "module.json").read_bytes()
-                ).hexdigest()
+                or not evidence_scope_is_current(gse96583_marker_report, registry)
                 or gse96583_marker_report.get("module", {}).get(
                     "template_sha256"
                 )
@@ -936,12 +906,7 @@ def main() -> int:
                     "compatibility_row_id"
                 )
                 != gse96583_doublet_manifest.compatibility_matrix[0].id
-                or gse96583_doublet_report.get("module", {}).get(
-                    "manifest_sha256"
-                )
-                != hashlib.sha256(
-                    (gse96583_doublet_root / "module.json").read_bytes()
-                ).hexdigest()
+                or not evidence_scope_is_current(gse96583_doublet_report, registry)
                 or gse96583_doublet_report.get("module", {}).get(
                     "template_sha256"
                 )
@@ -1024,12 +989,7 @@ def main() -> int:
                     "compatibility_row_id"
                 )
                 != gse96583_reference_manifest.compatibility_matrix[0].id
-                or gse96583_reference_report.get("module", {}).get(
-                    "manifest_sha256"
-                )
-                != hashlib.sha256(
-                    (gse96583_reference_root / "module.json").read_bytes()
-                ).hexdigest()
+                or not evidence_scope_is_current(gse96583_reference_report, registry)
                 or gse96583_reference_report.get("module", {}).get(
                     "template_sha256"
                 )
@@ -1125,12 +1085,7 @@ def main() -> int:
                     "compatibility_row_id"
                 )
                 != gse96583_integration_manifest.compatibility_matrix[0].id
-                or gse96583_integration_report.get("module", {}).get(
-                    "manifest_sha256"
-                )
-                != hashlib.sha256(
-                    (gse96583_integration_root / "module.json").read_bytes()
-                ).hexdigest()
+                or not evidence_scope_is_current(gse96583_integration_report, registry)
                 or gse96583_integration_report.get("module", {}).get(
                     "template_sha256"
                 )
@@ -1668,37 +1623,7 @@ def main() -> int:
         if forbidden_table in router_source:
             errors.append(f"central routing table is forbidden: {forbidden_table}")
 
-    tracked = list(publishable_files())
-    for path in tracked:
-        text = path.read_text(errors="ignore")
-        relative = path.relative_to(ROOT).as_posix()
-        if any(pattern.search(text) for pattern in SECRET_PATTERNS):
-            errors.append(f"credential-like value found in {relative}")
-        if any(pattern in text for pattern in LOCAL_PATH_PATTERNS):
-            errors.append(f"machine-local path found in {relative}")
-
-    operational_roots = [ROOT / "biomed_workbench", ROOT / "tools", ROOT / "skills"]
-    credential_names = set()
-    for root in operational_roots:
-        if not root.exists():
-            continue
-        for path in root.rglob("*"):
-            if path.is_file() and "__pycache__" not in path.parts and not any(part.startswith(".") for part in path.parts):
-                text = path.read_text(errors="ignore")
-                credential_names.update(re.findall(r"\b[A-Z][A-Z0-9_]*(?:API_KEY|AUTH_TOKEN)\b", text))
-    undeclared = sorted(credential_names - set(ALLOWED_CREDENTIALS))
-    if undeclared:
-        errors.append(f"undeclared operational credentials: {undeclared}")
-
-    syntax_errors = []
-    for root in (ROOT / "biomed_workbench", ROOT / "tools"):
-        for path in root.rglob("*.py"):
-            try:
-                ast.parse(path.read_text(errors="ignore"), filename=str(path))
-            except SyntaxError as exc:
-                syntax_errors.append(f"{path.relative_to(ROOT)}:{exc.lineno}")
-    if syntax_errors:
-        errors.append(f"Python syntax errors: {syntax_errors[:10]}")
+    errors.extend(validate_source_hygiene(ROOT))
 
     if args.release:
         remaining = [path for path in LEGACY_PATHS if (ROOT / path).exists()]

@@ -9,7 +9,21 @@ from typing import Any, Mapping
 from .identity import digest_value, freeze_mapping, thaw, validate_identifier
 
 
-NODE_STATUSES = frozenset({"pending", "ready", "running", "completed", "blocked", "failed", "superseded", "skipped"})
+NODE_STATUSES = frozenset(
+    {
+        "pending",
+        "ready",
+        "running",
+        "prepared",
+        "awaiting_observed_execution",
+        "awaiting_review",
+        "completed",
+        "blocked",
+        "failed",
+        "superseded",
+        "skipped",
+    }
+)
 PLAN_TYPES = frozenset({"single", "serial", "parallel", "mixed"})
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+._-]*$")
 

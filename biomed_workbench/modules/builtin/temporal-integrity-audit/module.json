@@ -144,5 +144,22 @@
     "required": ["audit_id", "audit_version", "audit_digest", "report_reference_date", "terminal_policy", "source_count", "event_count", "assertion_count", "assertion_results", "global_issues", "issue_counts", "provenance_gate_ids", "release_safe", "overall_status", "quality_gates", "limitations"]
   },
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned implementation with module-level validation evidence."]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned implementation with module-level validation evidence."]},
+  "routing": {
+    "method_aliases": [
+      "temporal-integrity-audit",
+      "Audit temporal integrity of scientific assertions",
+      "audit temporal integrity of scientific claims",
+      "check dates chronology source versions and causal ordering in a manuscript",
+      "审计论文日期、事件顺序、来源版本、适用期和因果时间逻辑",
+      "检查未来事件被写成过去、过时或未来版本误引、虚构比较版本和时间炸弹措辞"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 1,
+    "requires_reviewed_upstream_types": []
+  }
 }

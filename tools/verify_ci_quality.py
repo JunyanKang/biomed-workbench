@@ -34,16 +34,21 @@ def _steps(job: dict[str, object]) -> list[dict[str, object]]:
 
 def verify() -> dict[str, object]:
     workflow = yaml.load(WORKFLOW.read_text(encoding="utf-8"), Loader=yaml.BaseLoader)
-    if not isinstance(workflow, dict) or set(workflow.get("jobs", {})) != {"verify", "secrets"}:
-        raise RuntimeError("CI workflow must expose verify and secrets jobs")
+    required_jobs = {"python-compatibility", "verify", "secrets"}
+    if not isinstance(workflow, dict) or set(workflow.get("jobs", {})) != required_jobs:
+        raise RuntimeError("CI workflow must expose compatibility, full verification, and secrets jobs")
     if workflow.get("permissions") != {"contents": "read"}:
         raise RuntimeError("CI permissions must remain read-only")
     jobs = workflow["jobs"]
     verify_steps = _steps(jobs["verify"])
     secret_steps = _steps(jobs["secrets"])
+    compatibility_steps = _steps(jobs["python-compatibility"])
     verify_script = "\n".join(str(step.get("run", "")) for step in verify_steps)
     secret_script = "\n".join(str(step.get("run", "")) for step in secret_steps)
-    uses = [str(step.get("uses", "")) for step in verify_steps + secret_steps]
+    uses = [str(step.get("uses", "")) for step in verify_steps + secret_steps + compatibility_steps]
+    matrix = jobs["python-compatibility"].get("strategy", {}).get("matrix", {})
+    if matrix.get("python-version") != ["3.10", "3.14.3"]:
+        raise RuntimeError("CI compatibility matrix must test Python 3.10 and the 3.14.3 scientific baseline")
     required_verify = (
         "python -m unittest discover -s tests",
         "python tools/validate_workbench.py --release",
@@ -63,7 +68,7 @@ def verify() -> dict[str, object]:
     )
     if any(marker not in verify_script for marker in required_verify):
         raise RuntimeError("CI verification or deterministic drift gate is incomplete")
-    if not any(value.startswith("actions/setup-python@") for value in uses) or uses.count("actions/checkout@v4") != 2:
+    if sum(value.startswith("actions/setup-python@") for value in uses) != 2 or uses.count("actions/checkout@v4") != 3:
         raise RuntimeError("CI checkout or Python setup is incomplete")
     checkout = next(step for step in secret_steps if step.get("uses") == "actions/checkout@v4")
     if checkout.get("with", {}).get("fetch-depth") != "0":
@@ -120,7 +125,7 @@ def verify() -> dict[str, object]:
         "passed": True,
         "evidence_id": EVIDENCE_ID,
         "evidence_type": "github-quality-and-secret-gates",
-        "workflow": {"sha256": _sha256(WORKFLOW), "jobs": ["secrets", "verify"], "read_only_permissions": True},
+        "workflow": {"sha256": _sha256(WORKFLOW), "jobs": sorted(required_jobs), "read_only_permissions": True},
         "gitleaks_config": {"sha256": _sha256(GITLEAKS_CONFIG), "default_rules_extended": True, "narrow_digest_allowlist": True},
         "requirements": {"sha256": _sha256(REQUIREMENTS), "tested_baselines": requirements},
         "quality_gates": {
@@ -131,6 +136,7 @@ def verify() -> dict[str, object]:
             "full_history_secret_scan": True,
             "gitleaks_release_checksum_verified": True,
             "secret_findings_redacted": True,
+            "python_310_and_314_contract_matrix": True,
         },
         "excluded_claims": [
             "CI does not prove scientific source-union completeness.",

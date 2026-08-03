@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any, Mapping
 
 from .identity import digest_value, freeze_mapping, thaw, validate_identifier
-from .state import ProjectState
+if TYPE_CHECKING:
+    from .state import ProjectState
 
 
 DECISION_ACTIONS = frozenset(
@@ -126,6 +127,21 @@ class AnalysisAdmission:
             "approved": self.approved,
         }
 
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "AnalysisAdmission":
+        values = dict(payload)
+        for field in (
+            "hypothesis_ids",
+            "official_sources",
+            "alternatives_considered",
+            "assumptions",
+            "acceptance_criteria",
+            "falsification_criteria",
+            "expected_artifact_types",
+        ):
+            values[field] = tuple(values[field])
+        return cls(**values)
+
 
 @dataclass(frozen=True)
 class PanelInterpretation:
@@ -149,6 +165,10 @@ class PanelInterpretation:
 
     def to_dict(self) -> dict[str, str]:
         return {field: getattr(self, field) for field in self.__dataclass_fields__}
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "PanelInterpretation":
+        return cls(**dict(payload))
 
 
 @dataclass(frozen=True)
@@ -221,6 +241,16 @@ class ArtifactReview:
         payload["overall_status"] = self.overall_status
         return payload
 
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "ArtifactReview":
+        values = dict(payload)
+        values.pop("overall_status", None)
+        values["panels"] = tuple(PanelInterpretation.from_dict(item) for item in values["panels"])
+        values["limitations_zh"] = tuple(values["limitations_zh"])
+        values["limitations_en"] = tuple(values["limitations_en"])
+        values["source_urls"] = tuple(values["source_urls"])
+        return cls(**values)
+
 
 @dataclass(frozen=True)
 class ScientificDecision:
@@ -260,6 +290,13 @@ class ScientificDecision:
             "active_evidence": self.active_evidence,
             "next_plan_node_ids": list(self.next_plan_node_ids),
         }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "ScientificDecision":
+        values = dict(payload)
+        values["hypothesis_ids"] = tuple(values["hypothesis_ids"])
+        values["next_plan_node_ids"] = tuple(values["next_plan_node_ids"])
+        return cls(**values)
 
 
 @dataclass(frozen=True)

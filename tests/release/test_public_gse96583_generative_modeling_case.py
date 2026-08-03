@@ -3,6 +3,7 @@ import json
 import re
 import unittest
 from pathlib import Path
+from tests.release.evidence_scope_assertions import assert_evidence_scope_current
 
 from biomed_workbench.modules.contract import parse_manifest
 
@@ -29,10 +30,7 @@ class PublicGSE96583GenerativeModelingCaseTests(unittest.TestCase):
         self.assertEqual(report["case_type"], "public-data-end-to-end")
         self.assertEqual(report["source"]["accession"], "GSE96583")
         self.assertEqual(report["module"]["version"], MODULE_VERSION)
-        self.assertEqual(
-            report["module"]["manifest_sha256"],
-            hashlib.sha256((MODULE_ROOT / "module.json").read_bytes()).hexdigest(),
-        )
+        assert_evidence_scope_current(self, report)
         self.assertEqual(
             report["module"]["template_sha256"],
             hashlib.sha256(

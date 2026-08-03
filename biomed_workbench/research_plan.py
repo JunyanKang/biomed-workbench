@@ -7,188 +7,7 @@ from typing import Any
 from .modules.contract import ArtifactPort, ModuleManifest
 from .modules.index import BUILTIN_ROOT
 from .modules.registry import ModuleRegistry
-from .router import ports_compatible, route
-
-
-_SINGLE_CELL_PROGRAM_STAGE: dict[str, int] = {
-    "single-cell-droplet-decontamination": 0,
-    "single-cell-foundation-workflow": 1,
-    "single-cell-qc": 1,
-    "single-cell-doublet-detection": 2,
-    "single-cell-batch-integration": 3,
-    "single-cell-generative-modeling": 3,
-    "single-cell-multimodal-integration": 3,
-    "single-cell-atac-regulatory": 3,
-    "single-cell-marker-discovery": 4,
-    "single-cell-reference-annotation": 4,
-    "single-cell-atlas-annotation": 4,
-    "single-cell-donor-inference": 5,
-    "single-cell-complex-inference": 5,
-    "single-cell-communication": 6,
-    "single-cell-regulatory-network": 6,
-    "single-cell-spatial-analysis": 6,
-    "single-cell-trajectory-topology": 6,
-    "single-cell-trajectory-velocity": 6,
-    "single-cell-fate-mapping": 7,
-    "single-cell-regulatory-velocity": 7,
-}
-
-
-_EVIDENCE_PROGRAM_STAGE: dict[str, int] = {
-    "gene-identifier-resolution": 0,
-    "citation-record-resolution": 0,
-    "ncbi-info": 0,
-    "ncbi-search": 0,
-    "uniprot-to-ensembl-evidence": 0,
-    "literature-evidence": 1,
-    "preprint-evidence": 1,
-    "ncbi-summary": 1,
-    "ncbi-fetch": 1,
-    "ncbi-link": 1,
-    "ncbi-search-summary": 1,
-    "gene-evidence": 1,
-    "ensembl-gene-evidence": 1,
-    "uniprot-protein-evidence": 1,
-    "dbsnp-rsid-evidence": 1,
-    "variant-evidence": 1,
-    "gnomad-gene-constraint-evidence": 1,
-    "hpo-term-evidence": 1,
-    "quickgo-term-evidence": 1,
-    "reactome-pathway-evidence": 1,
-    "gene-set-library-catalog": 1,
-    "structure-search": 1,
-    "structure-evidence": 1,
-    "clinical-trial-evidence": 1,
-    "cbioportal-study-evidence": 1,
-    "chemical-evidence": 1,
-    "gene-ortholog-evidence": 2,
-    "gene-set-library-membership": 2,
-    "reactome-overrepresentation-evidence": 2,
-    "cbioportal-gene-mutation-evidence": 2,
-    "cbioportal-gene-copy-number-evidence": 2,
-    "copy-number-event-summary": 2,
-    "structure-polymer-entities": 2,
-    "structure-ligands": 2,
-    "alphafold-structure-evidence": 2,
-    "protein-disorder-evidence": 2,
-    "opentargets-target-disease-evidence": 2,
-    "pdf-evidence-extraction": 2,
-    "citation-resolution-adjudication": 3,
-    "source-freshness-audit": 3,
-    "research-contract-consistency-audit": 3,
-}
-
-
-_PUBLICATION_PROGRAM_STAGE: dict[str, int] = {
-    "manuscript-revision-base": 0,
-    "figure-specification": 0,
-    "citation-audit": 1,
-    "assertion-citation-coverage-audit": 1,
-    "claim-evidence-integrity-audit": 1,
-    "temporal-integrity-audit": 1,
-    "manuscript-audit": 1,
-    "reviewer-assessment": 1,
-    "response-matrix": 2,
-    "manuscript-revision-lineage": 2,
-    "patent-disclosure-audit": 2,
-    "patent-claim-support-audit": 3,
-    "patent-claim-structure-audit": 3,
-    "patent-draft-readiness-audit": 4,
-    "patent-flowchart-svg": 4,
-    "presentation-delivery-plan": 4,
-}
-
-
-_MOLECULAR_PROGRAM_STAGE: dict[str, int] = {
-    "sequence-inspect": 0,
-    "genbank-coding-sequence-extraction": 0,
-    "open-reading-frame-annotation": 0,
-    "sequence-pairwise-alignment": 0,
-    "aligned-protein-conservation": 0,
-    "sequence-variant-localization": 0,
-    "sequence-back-translate": 0,
-    "primer-design": 1,
-    "crispr-design": 1,
-    "restriction-plan": 1,
-    "golden-gate-plan": 1,
-    "sanger-verification-coverage": 1,
-    "pcr-primer-pair-selection": 2,
-    "primer-pair-specificity-screen": 3,
-    "pcr-amplicon-simulation": 3,
-    "rna-secondary-structure-summary": 2,
-    "glycosylation-scan": 2,
-    "protein-secondary-structure": 2,
-    "cd-thermal-transition-summary": 2,
-    "itc-single-site-binding": 2,
-    "enzyme-kinetics": 2,
-    "structure-quality-assessment": 3,
-    "structure-chain-comparison": 3,
-    "structure-interactive-visualization": 3,
-    "docking-pose-review": 4,
-    "chemical-substructure-filter": 4,
-}
-
-
-_OMICS_PROGRAM_STAGE: dict[str, int] = {
-    "data-profile": 0,
-    "read-quality-fastqc": 0,
-    "read-quality-fastp": 0,
-    "read-contamination-screen": 0,
-    "quality-report-multiqc": 1,
-    "dna-align-bwa-mem-single": 1,
-    "alignment-sort-index-samtools": 2,
-    "alignment-quality-samtools": 2,
-    "variant-decompress-bgzip": 3,
-    "variant-filter-vcf": 3,
-    "variant-region-query-tabix": 3,
-    "genome-coordinate-liftover": 3,
-    "interval-overlap-bedtools": 3,
-    "multi-sample-variant-concordance": 3,
-    "tumor-mutation-burden-vcf": 3,
-    "tumor-mutation-burden": 3,
-    "assembly-reference-alignment": 3,
-    "bulk-chromatin-peak-calling": 4,
-    "sequence-motif-enrichment": 4,
-    "cool-contact-evidence": 4,
-    "expression-qc": 4,
-    "differential-expression": 5,
-    "enrichment-analysis": 5,
-    "metagene-factorization-nmf": 5,
-    "network-analysis": 5,
-    "ddr-coexpression-hypothesis-network": 5,
-    "gwas-susie-fine-mapping": 6,
-    "rrblup-genomic-prediction": 6,
-    "comparative-sequence-phylogeny": 6,
-    "msprime-demographic-simulation": 6,
-}
-
-
-_STATISTICS_PROGRAM_STAGE: dict[str, int] = {
-    "data-profile": 0,
-    "cohort-summary": 0,
-    "expression-qc": 0,
-    "survival-analysis": 1,
-    "biomarker-performance": 1,
-    "classification-gold-set-evaluation": 1,
-    "fixed-period-cosinor": 1,
-    "differential-expression": 1,
-    "dose-response": 1,
-    "growth-curve": 1,
-    "qpcr-relative-expression": 1,
-    "adverse-event-summary": 2,
-    "clinical-report-audit": 2,
-    "clinical-decision-boundary-audit": 2,
-}
-
-
-_PROGRAM_STAGE_MAPS: tuple[dict[str, int], ...] = (
-    _EVIDENCE_PROGRAM_STAGE,
-    _PUBLICATION_PROGRAM_STAGE,
-    _MOLECULAR_PROGRAM_STAGE,
-    _OMICS_PROGRAM_STAGE,
-    _STATISTICS_PROGRAM_STAGE,
-    _SINGLE_CELL_PROGRAM_STAGE,
-)
+from .router import route
 
 
 def _format_tokens(port: ArtifactPort) -> list[str]:
@@ -237,96 +56,6 @@ def _execution_templates(module: ModuleManifest) -> list[dict[str, object]]:
     return templates
 
 
-def _port_bindings(selected: tuple[ModuleManifest, ...]) -> dict[str, dict[str, str]]:
-    """Bind compatible selected producers to consumer ports in a routed plan."""
-    position = {module.id: index for index, module in enumerate(selected)}
-    bindings: dict[str, dict[str, str]] = {}
-    for consumer in selected:
-        bound = {}
-        for port in consumer.input_artifacts:
-            candidates = [
-                producer
-                for producer in selected
-                if producer.id != consumer.id
-                and position[producer.id] < position[consumer.id]
-                and any(ports_compatible(output, port) for output in producer.output_artifacts)
-            ]
-            if candidates:
-                bound[port.name] = candidates[-1].id
-        bindings[consumer.id] = bound
-    return bindings
-
-
-def _scientific_dependencies(selected: tuple[ModuleManifest, ...]) -> dict[str, tuple[str, ...]]:
-    """Add research-program ordering when artifact ports are intentionally project-owned.
-
-    Many biomedical modules accept project inputs because real analyses often
-    need human-reviewed objects rather than blindly consuming another module's
-    file. When a broad program selects several related single-cell modules,
-    the plan still needs to communicate the scientific order: input validation
-    before artifact correction, correction before annotation, annotation before
-    donor-aware inference, and inference before dynamics/regulatory delivery.
-    """
-    selected_ids = {module.id for module in selected}
-    dependencies: dict[str, set[str]] = {module.id: set() for module in selected}
-    for stage_map in _PROGRAM_STAGE_MAPS:
-        staged = {module_id: stage for module_id, stage in stage_map.items() if module_id in selected_ids}
-        if len(staged) < 2:
-            continue
-        for module_id, stage in staged.items():
-            dependencies[module_id].update(
-                upstream_id
-                for upstream_id, upstream_stage in staged.items()
-                if upstream_stage < stage
-            )
-    non_publication = {module.id for module in selected if module.domains[0] != "publication"}
-    if non_publication:
-        for module in selected:
-            if module.domains[0] == "publication":
-                dependencies[module.id].update(non_publication)
-    return {module_id: tuple(sorted(values)) for module_id, values in dependencies.items()}
-
-
-def _dependencies(
-    bindings: dict[str, dict[str, str]],
-    scientific_dependencies: dict[str, tuple[str, ...]] | None = None,
-) -> dict[str, tuple[str, ...]]:
-    dependency_map = {
-        module_id: tuple(dict.fromkeys(port_bindings.values()))
-        for module_id, port_bindings in bindings.items()
-    }
-    for module_id, extra_dependencies in (scientific_dependencies or {}).items():
-        dependency_map[module_id] = tuple(dict.fromkeys((*dependency_map.get(module_id, ()), *extra_dependencies)))
-    return dependency_map
-
-
-def _layers(selected: tuple[ModuleManifest, ...], dependencies: dict[str, tuple[str, ...]]) -> list[dict[str, object]]:
-    remaining = {module.id: set(dependencies[module.id]) for module in selected}
-    order = {module.id: index for index, module in enumerate(selected)}
-    layers = []
-    while remaining:
-        ready = sorted((module_id for module_id, needs in remaining.items() if not needs), key=order.__getitem__)
-        if not ready:
-            raise ValueError("selected module contracts contain a dependency cycle")
-        layers.append({"mode": "parallel" if len(ready) > 1 else "serial", "module_ids": ready})
-        deltas = set(ready)
-        for module_id in ready:
-            del remaining[module_id]
-        for needs in remaining.values():
-            needs.difference_update(deltas)
-    return layers
-
-
-def _plan_type(layers: list[dict[str, object]]) -> str:
-    if len(layers) == 1 and len(layers[0]["module_ids"]) == 1:
-        return "single"
-    if len(layers) == 1:
-        return "parallel"
-    if any(len(layer["module_ids"]) > 1 for layer in layers):
-        return "mixed"
-    return "serial"
-
-
 def _evidence_contract(module: ModuleManifest) -> dict[str, object]:
     return {
         "module_version": module.version,
@@ -370,9 +99,10 @@ def compile_research_plan(
     routed = route(objective, per_workflow=per_workflow, registry=active)
     selected_ids = tuple(dict.fromkeys(routed["selected_module_ids"]))
     selected = tuple(active.get(module_id) for module_id in selected_ids)
-    port_bindings = _port_bindings(selected)
-    dependencies = _dependencies(port_bindings, _scientific_dependencies(selected))
-    execution_layers = _layers(selected, dependencies)
+    objective_graph = routed["objective_graph"]
+    port_bindings = {module_id: dict(values) for module_id, values in objective_graph["port_bindings"].items()}
+    dependencies = {module_id: tuple(values) for module_id, values in objective_graph["dependencies"].items()}
+    execution_layers = objective_graph["execution_layers"]
     candidate_reasons = {
         candidate["id"]: candidate["selection_reasons"]
         for step in routed["steps"]
@@ -443,7 +173,7 @@ def compile_research_plan(
     return {
         "schema_version": 1,
         "objective": objective,
-        "plan_type": _plan_type(execution_layers),
+        "plan_type": objective_graph["plan_type"],
         "matched_workflows": routed["matched_workflows"],
         "selected_module_ids": list(selected_ids),
         "execution_layers": execution_layers,

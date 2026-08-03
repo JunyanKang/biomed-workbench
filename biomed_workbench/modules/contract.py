@@ -191,6 +191,20 @@ class AgentProtocol:
 
 
 @dataclass(frozen=True)
+class RoutingContract:
+    method_aliases: tuple[str, ...]
+    exclusion_terms: tuple[str, ...]
+    required_any_terms: tuple[str, ...]
+    named_method_priority: int
+
+
+@dataclass(frozen=True)
+class OrchestrationContract:
+    scientific_stage: int
+    requires_reviewed_upstream_types: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class ModuleManifest:
     schema_version: int
     id: str
@@ -223,6 +237,8 @@ class ModuleManifest:
     output_schema: dict[str, object]
     kernel_compatibility: tuple[str, ...]
     provenance: ProvenanceContract
+    routing: RoutingContract
+    orchestration: OrchestrationContract
     code_templates: tuple[CodeTemplate, ...] = ()
     agent_protocol: AgentProtocol | None = None
 
@@ -243,6 +259,8 @@ _CODE_TEMPLATE_FIELDS = frozenset(CodeTemplate.__dataclass_fields__)
 _AGENT_PROTOCOL_FIELDS = frozenset(AgentProtocol.__dataclass_fields__)
 _AGENT_SECTION_FIELDS = frozenset(AgentTemplateSection.__dataclass_fields__)
 _AGENT_PARAMETER_FIELDS = frozenset(AgentParameterRule.__dataclass_fields__)
+_ROUTING_FIELDS = frozenset(RoutingContract.__dataclass_fields__)
+_ORCHESTRATION_FIELDS = frozenset(OrchestrationContract.__dataclass_fields__)
 _OPTIONAL_MANIFEST_FIELDS = frozenset({"agent_protocol", "code_templates"})
 
 
@@ -286,6 +304,36 @@ def _positive_integer(value: Any, location: str) -> int:
     if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
         raise ValueError(f"{location} must be a positive integer")
     return value
+
+
+def _nonnegative_integer(value: Any, location: str) -> int:
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        raise ValueError(f"{location} must be a nonnegative integer")
+    return value
+
+
+def _routing(value: Any) -> RoutingContract:
+    payload = _object(value, "manifest.routing")
+    _exact_fields(payload, _ROUTING_FIELDS, "manifest.routing")
+    return RoutingContract(
+        method_aliases=_strings(payload["method_aliases"], "manifest.routing.method_aliases"),
+        exclusion_terms=_strings(payload["exclusion_terms"], "manifest.routing.exclusion_terms", allow_empty=True),
+        required_any_terms=_strings(payload["required_any_terms"], "manifest.routing.required_any_terms", allow_empty=True),
+        named_method_priority=_nonnegative_integer(payload["named_method_priority"], "manifest.routing.named_method_priority"),
+    )
+
+
+def _orchestration(value: Any) -> OrchestrationContract:
+    payload = _object(value, "manifest.orchestration")
+    _exact_fields(payload, _ORCHESTRATION_FIELDS, "manifest.orchestration")
+    return OrchestrationContract(
+        scientific_stage=_nonnegative_integer(payload["scientific_stage"], "manifest.orchestration.scientific_stage"),
+        requires_reviewed_upstream_types=_strings(
+            payload["requires_reviewed_upstream_types"],
+            "manifest.orchestration.requires_reviewed_upstream_types",
+            allow_empty=True,
+        ),
+    )
 
 
 def _date(value: Any, location: str) -> str:
@@ -903,6 +951,8 @@ def parse_manifest(value: Any) -> ModuleManifest:
         output_schema=_closed_schema(payload["output_schema"], "manifest.output_schema"),
         kernel_compatibility=kernel_compatibility,
         provenance=_provenance(payload["provenance"]),
+        routing=_routing(payload["routing"]),
+        orchestration=_orchestration(payload["orchestration"]),
         code_templates=tuple(
             _code_template(item, f"manifest.code_templates[{index}]")
             for index, item in enumerate(code_template_values)
@@ -911,6 +961,10 @@ def parse_manifest(value: Any) -> ModuleManifest:
     )
     if len({item.path for item in manifest.code_templates}) != len(manifest.code_templates):
         raise ValueError("manifest.code_templates contains duplicate paths")
+    input_types = {port.artifact_type for port in manifest.input_artifacts}
+    unknown_reviewed_types = set(manifest.orchestration.requires_reviewed_upstream_types) - input_types
+    if unknown_reviewed_types:
+        raise ValueError("orchestration reviewed-upstream types must be declared input artifact types")
     quality_gate_ids = {item.id for item in manifest.quality_gates}
     for template in manifest.code_templates:
         unknown = sorted(set(template.quality_gate_ids) - quality_gate_ids)
@@ -1126,6 +1180,16 @@ def manifest_to_dict(value: ModuleManifest) -> dict[str, object]:
         "output_schema": dict(value.output_schema),
         "kernel_compatibility": list(value.kernel_compatibility),
         "provenance": {"license": value.provenance.license, "concept_sources": list(value.provenance.concept_sources)},
+        "routing": {
+            "method_aliases": list(value.routing.method_aliases),
+            "exclusion_terms": list(value.routing.exclusion_terms),
+            "required_any_terms": list(value.routing.required_any_terms),
+            "named_method_priority": value.routing.named_method_priority,
+        },
+        "orchestration": {
+            "scientific_stage": value.orchestration.scientific_stage,
+            "requires_reviewed_upstream_types": list(value.orchestration.requires_reviewed_upstream_types),
+        },
     }
     if value.code_templates:
         payload["code_templates"] = [_code_template_dict(item) for item in value.code_templates]

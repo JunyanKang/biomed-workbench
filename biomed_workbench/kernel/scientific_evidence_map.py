@@ -6,6 +6,7 @@ import hashlib
 import re
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
+from typing import TYPE_CHECKING, Any, Mapping
 
 from .identity import digest_value, validate_identifier
 from .scientific_dependency import (
@@ -15,7 +16,8 @@ from .scientific_dependency import (
     ScientificDependencyBundle,
 )
 from .hypotheses import Hypothesis
-from .state import ProjectState
+if TYPE_CHECKING:
+    from .state import ProjectState
 
 
 FILE_ROLES = frozenset(
@@ -83,6 +85,58 @@ class EvidenceMapVersion:
             "change_summary_en": self.change_summary_en,
         }
 
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "EvidenceMapVersion":
+        return cls(**dict(payload))
+
+
+@dataclass(frozen=True)
+class EvidenceMapPublication:
+    """Append-only project-state reference to one validated evidence map version."""
+
+    id: str
+    version: EvidenceMapVersion
+    map_digest: str
+    edge_table_digest: str
+    source_state_digest: str
+    dependency_bundle_digest: str
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "id", validate_identifier(self.id, "evidence_map_publication.id"))
+        if not isinstance(self.version, EvidenceMapVersion):
+            raise ValueError("evidence map publication requires a version contract")
+        for field in ("map_digest", "edge_table_digest", "source_state_digest", "dependency_bundle_digest"):
+            if not _SHA256.fullmatch(getattr(self, field)):
+                raise ValueError(f"evidence map publication {field} must be SHA-256")
+
+    @classmethod
+    def from_map(cls, evidence_map: "ScientificEvidenceMap") -> "EvidenceMapPublication":
+        evidence_map.validate_integrity()
+        return cls(
+            id=f"evidence-map-{evidence_map.version.revision}-{evidence_map.digest[:16]}",
+            version=evidence_map.version,
+            map_digest=evidence_map.digest,
+            edge_table_digest=evidence_map.edge_table_digest,
+            source_state_digest=evidence_map.state_digest,
+            dependency_bundle_digest=evidence_map.dependency_bundle_digest,
+        )
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "EvidenceMapPublication":
+        values = dict(payload)
+        values["version"] = EvidenceMapVersion.from_dict(values["version"])
+        return cls(**values)
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "id": self.id,
+            "version": self.version.to_dict(),
+            "map_digest": self.map_digest,
+            "edge_table_digest": self.edge_table_digest,
+            "source_state_digest": self.source_state_digest,
+            "dependency_bundle_digest": self.dependency_bundle_digest,
+        }
+
 
 def _relative_path(value: str) -> str:
     if not isinstance(value, str) or not value.strip():
@@ -142,6 +196,10 @@ class EvidenceFile:
             "media_type": self.media_type,
         }
 
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "EvidenceFile":
+        return cls(**dict(payload))
+
 
 @dataclass(frozen=True)
 class NarrativeSource:
@@ -170,6 +228,10 @@ class NarrativeSource:
             "doi": self.doi,
             "url": self.url,
         }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "NarrativeSource":
+        return cls(**dict(payload))
 
 
 @dataclass(frozen=True)
@@ -213,6 +275,15 @@ class EvidenceUnitSpec:
             raise ValueError("each evidence unit requires at least one original-study DOI")
         object.__setattr__(self, "files", files)
         object.__setattr__(self, "narrative_sources", sources)
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "EvidenceUnitSpec":
+        values = dict(payload)
+        values["analysis_admission_ids"] = tuple(values["analysis_admission_ids"])
+        values["predecessor_unit_ids"] = tuple(values["predecessor_unit_ids"])
+        values["files"] = tuple(EvidenceFile.from_dict(item) for item in values["files"])
+        values["narrative_sources"] = tuple(NarrativeSource.from_dict(item) for item in values["narrative_sources"])
+        return cls(**values)
 
 
 @dataclass(frozen=True)

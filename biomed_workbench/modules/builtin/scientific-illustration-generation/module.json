@@ -79,5 +79,23 @@
   "credentials": [],
   "limitations": ["This module validates and emits the native-tool handoff; a bitmap exists only after Codex invokes image_gen and observes its return. It does not generate research data, validate biological truth automatically, guarantee exact text rendering, create editable vectors, perform quantitative image analysis, or replace expert figure review. Native-tool availability is a Codex host capability and is checked at invocation time."],
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent source-neutral contract for Codex-managed scientific illustration generation and editing."]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent source-neutral contract for Codex-managed scientific illustration generation and editing."]},
+  "routing": {
+    "method_aliases": [
+      "scientific-illustration-generation",
+      "Generate or edit a bounded scientific illustration",
+      "generate a scientific illustration",
+      "create graphical abstract image",
+      "edit conceptual biology image",
+      "生成科研示意图",
+      "制作图形摘要插图"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 5,
+    "requires_reviewed_upstream_types": []
+  }
 }

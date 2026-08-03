@@ -73,11 +73,21 @@ def module_slice_basis(
     ordered = tuple(sorted(set(module_ids)))
     if not ordered:
         raise ValueError("evidence scope requires at least one module")
+    def execution_manifest(module_id: str) -> dict[str, object]:
+        payload = manifest_to_dict(registry.get(module_id))
+        # Routing and cross-module orchestration affect discovery and ordering,
+        # not the observed scientific computation represented by this scope.
+        # Keeping them out prevents an alias or stage-only change from falsely
+        # invalidating an otherwise identical execution receipt.
+        payload.pop("routing", None)
+        payload.pop("orchestration", None)
+        return payload
+
     return {
         "schema_version": 1,
         "modules": [
             {
-                "manifest": manifest_to_dict(registry.get(module_id)),
+                "manifest": execution_manifest(module_id),
                 "templates": _template_digests(module_id, registry, module_root),
             }
             for module_id in ordered

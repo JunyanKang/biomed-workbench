@@ -3,6 +3,7 @@ import json
 import re
 import unittest
 from pathlib import Path
+from tests.release.evidence_scope_assertions import assert_evidence_scope_current
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -31,12 +32,7 @@ class PublicPBMC3kDropletDecontaminationCaseTests(unittest.TestCase):
         self.assertEqual(report["case_type"], "public-data-end-to-end")
         self.assertEqual(report["source"]["dataset"], "3k PBMCs from a healthy donor")
         self.assertEqual(report["module"]["version"], "1.1.0")
-        self.assertEqual(
-            report["module"]["manifest_sha256"],
-            hashlib.sha256(
-                (MODULE_ROOT / "module.json").read_bytes()
-            ).hexdigest(),
-        )
+        assert_evidence_scope_current(self, report)
         self.assertEqual(
             report["module"]["template_sha256"],
             hashlib.sha256(

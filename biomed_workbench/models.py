@@ -11,7 +11,7 @@ WORKFLOWS = frozenset({"evidence", "omics", "molecular_design", "imaging", "clin
 KINDS = frozenset({"python", "command", "service", "workflow"})
 ACCESS_MODES = frozenset({"offline", "public_api", "optional_api", "codex_native", "agent_generated"})
 MUTABILITY_MODES = frozenset({"read_only", "writes_output"})
-RESULT_STATUSES = frozenset({"completed", "failed", "blocked", "skipped"})
+RESULT_STATUSES = frozenset({"prepared", "awaiting_observed_execution", "completed", "failed", "blocked", "skipped"})
 _ID_RE = re.compile(r"^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$")
 _SECRET_KEY_RE = re.compile(r"(?:api[_-]?key|token|secret|password|credential)", re.IGNORECASE)
 

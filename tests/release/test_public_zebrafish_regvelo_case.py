@@ -3,6 +3,7 @@ import json
 import re
 import unittest
 from pathlib import Path
+from tests.release.evidence_scope_assertions import assert_evidence_scope_current
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -35,10 +36,7 @@ class PublicZebrafishRegVeloCaseTests(unittest.TestCase):
             "356bfde785af53e36f9334c4f5032c06f111d67d30b881b41e24a8ebde7a536a",
         )
         self.assertEqual(report["prior_grn"]["documented_shape"], [4508, 4508])
-        self.assertEqual(
-            report["module"]["manifest_sha256"],
-            hashlib.sha256((MODULE_ROOT / "module.json").read_bytes()).hexdigest(),
-        )
+        assert_evidence_scope_current(self, report)
         self.assertEqual(
             report["module"]["template_sha256"],
             hashlib.sha256(

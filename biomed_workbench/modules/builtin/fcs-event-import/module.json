@@ -110,5 +110,23 @@
     "verified_at": "2026-07-24"
   }],
   "code_templates": [{"path": "templates/run_fcs_event_import.py", "language": "python", "purpose": "Execute a declared FCS import and preserve its module-bound result envelope.", "quality_gate_ids": ["fcs-import-completeness", "fcs-import-interpretation-boundary"], "requires_adaptation": false}],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned implementation with module-level validation evidence.", "https://pypi.org/project/FlowIO/"]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned implementation with module-level validation evidence.", "https://pypi.org/project/FlowIO/"]},
+  "routing": {
+    "method_aliases": [
+      "fcs-event-import",
+      "Import an FCS event table for declared downstream gating",
+      "import FCS flow cytometry file",
+      "Import FCS flow cytometry data and apply a gating plan",
+      "read FCS events",
+      "导入 FCS 流式细胞术文件",
+      "读取流式事件数据"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 3,
+    "requires_reviewed_upstream_types": []
+  }
 }

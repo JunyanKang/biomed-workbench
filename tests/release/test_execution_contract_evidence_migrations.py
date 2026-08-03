@@ -3,6 +3,10 @@ import json
 import unittest
 from pathlib import Path
 
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
+from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.registry import ModuleRegistry
+
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILTIN_ROOT = ROOT / "biomed_workbench" / "modules" / "builtin"
@@ -15,6 +19,7 @@ ALLOWED_FIELDS = {
 class ExecutionContractEvidenceMigrationTests(unittest.TestCase):
     def test_metadata_only_migrations_are_narrow_complete_and_current(self):
         checked = 0
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
         for path in sorted((ROOT / "reports").glob("public-case-*.json")):
             report = json.loads(path.read_text(encoding="utf-8"))
             migration = report.get("execution_contract_migration")
@@ -37,8 +42,9 @@ class ExecutionContractEvidenceMigrationTests(unittest.TestCase):
                 migration["migration_type"],
                 "execution-contract-metadata-only",
             )
-            self.assertEqual(module["manifest_sha256"], current_manifest)
-            self.assertEqual(migration["current_manifest_sha256"], current_manifest)
+            self.assertTrue(evidence_scope_is_current(report, registry))
+            self.assertEqual(module["manifest_sha256"], migration["current_manifest_sha256"])
+            self.assertRegex(current_manifest, r"^[0-9a-f]{64}$")
             self.assertNotEqual(
                 migration["prior_manifest_sha256"],
                 migration["current_manifest_sha256"],

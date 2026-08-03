@@ -265,7 +265,20 @@ def _execute_case(module_path: Path, case_index: int) -> dict[str, Any]:
         raise ModuleValidationError(f"service test did not consume declared HTTP fixtures: {remaining}")
     if not isinstance(raw, dict):
         raise ModuleValidationError("module test output must be a JSON object")
-    _validate(manifest.output_schema, raw, "output")
+    output_for_contract = raw
+    if manifest.access == "agent_generated":
+        envelope = {
+            "result_kind": raw.get("result_kind"),
+            "execution_state": raw.get("execution_state"),
+        }
+        if envelope != {"result_kind": "execution_handoff", "execution_state": "prepared-not-run"}:
+            raise ModuleValidationError("agent-generated output lacks the mandatory non-execution envelope")
+        output_for_contract = {
+            key: value
+            for key, value in raw.items()
+            if key not in {"result_kind", "execution_state"}
+        }
+    _validate(manifest.output_schema, output_for_contract, "output")
     _assert_subset(case["expected_subset"], raw)
     return raw
 

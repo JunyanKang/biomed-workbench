@@ -128,6 +128,16 @@ def valid_manifest_payload():
             "license": "Apache-2.0",
             "concept_sources": ["Project-owned clean-room scientific contract."],
         },
+        "routing": {
+            "method_aliases": ["fixture-analysis", "analyze fixture", "分析测试数据"],
+            "exclusion_terms": [],
+            "required_any_terms": [],
+            "named_method_priority": 100,
+        },
+        "orchestration": {
+            "scientific_stage": 3,
+            "requires_reviewed_upstream_types": [],
+        },
     }
 
 

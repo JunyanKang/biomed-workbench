@@ -30,5 +30,23 @@
   "output_schema": {"type": "object", "additionalProperties": false, "properties": {"query": {"type": "object"}, "mappings": {"type": "array"}, "mapped_count": {"type": "integer"}, "unmapped_identifiers": {"type": "array"}, "edges": {"type": "array"}, "edge_count": {"type": "integer"}, "ppi_enrichment": {"type": "object"}, "provenance": {"type": "object"}, "limitations": {"type": "array"}}, "required": ["query", "mappings", "mapped_count", "unmapped_identifiers", "edges", "edge_count", "ppi_enrichment", "provenance", "limitations"]},
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
   "provenance": {"license": "Apache-2.0", "concept_sources": ["https://string-db.org/help/api/", "https://academic.oup.com/nar/article/51/D1/D638/6825349", "Project-owned bounded client, semantic validation and figure renderer."]},
-  "code_templates": [{"path": "templates/render_string_ppi_network.py", "language": "python", "purpose": "Render normalized STRING edges as vector and raster figures with Cytoscape-ready node and edge tables.", "quality_gate_ids": ["string-identifier-mapping", "string-network-semantics", "string-enrichment-semantics", "ppi-publication-render"], "requires_adaptation": false}]
+  "code_templates": [{"path": "templates/render_string_ppi_network.py", "language": "python", "purpose": "Render normalized STRING edges as vector and raster figures with Cytoscape-ready node and edge tables.", "quality_gate_ids": ["string-identifier-mapping", "string-network-semantics", "string-enrichment-semantics", "ppi-publication-render"], "requires_adaptation": false}],
+  "routing": {
+    "method_aliases": [
+      "protein-interaction-network-evidence",
+      "Retrieve and render version-pinned STRING protein networks",
+      "STRING PPI analysis",
+      "STRING 12.0",
+      "PPI 网络分析",
+      "protein interaction network",
+      "蛋白互作网络与PPI富集"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 0,
+    "requires_reviewed_upstream_types": []
+  }
 }

@@ -62,5 +62,22 @@
   "input_schema": {"type": "object", "additionalProperties": false, "properties": {"claims_text": {"type": "string", "minLength": 1, "maxLength": 500000}}, "required": ["claims_text"]},
   "output_schema": {"type": "object", "additionalProperties": false, "properties": {"claim_count": {"type": "integer"}, "claims": {"type": "array"}, "findings": {"type": "array"}, "ready_for_formal_review": {"type": "boolean"}, "limitations": {"type": "array"}}, "required": ["claim_count", "claims", "findings", "ready_for_formal_review", "limitations"]},
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room Chinese patent-claim structure capability informed by direct Nature skill review."]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room Chinese patent-claim structure capability informed by direct Nature skill review."]},
+  "routing": {
+    "method_aliases": [
+      "patent-claim-structure-audit",
+      "Check Chinese patent claim structure",
+      "patent claim structure audit",
+      "check Chinese patent claims",
+      "审计中文专利权利要求结构",
+      "检查专利权利要求编号和引用"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 3,
+    "requires_reviewed_upstream_types": []
+  }
 }

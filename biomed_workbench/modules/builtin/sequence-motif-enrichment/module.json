@@ -39,5 +39,23 @@
   "output_schema": {"type": "object", "additionalProperties": false, "properties": {"method": {"type": "string"}, "threshold": {"type": "number"}, "foreground_sequence_count": {"type": "integer"}, "background_sequence_count": {"type": "integer"}, "motif_count": {"type": "integer"}, "results": {"type": "array"}, "limitations": {"type": "array"}}, "required": ["method", "threshold", "foreground_sequence_count", "background_sequence_count", "motif_count", "results", "limitations"]},
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
   "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room known-PWM motif enrichment capability informed by product-level scientific design review.", "https://jaspar.elixir.no/", "https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisher_exact.html"]},
-  "code_templates": [{"path": "templates/run_sequence_motif_enrichment.py", "language": "python", "purpose": "Execute and reload known-PWM sequence enrichment with source provenance.", "quality_gate_ids": ["motif-sequence-background-contract", "motif-pwm-and-statistical-validity", "motif-output-provenance", "motif-claim-boundary"], "requires_adaptation": false}]
+  "code_templates": [{"path": "templates/run_sequence_motif_enrichment.py", "language": "python", "purpose": "Execute and reload known-PWM sequence enrichment with source provenance.", "quality_gate_ids": ["motif-sequence-background-contract", "motif-pwm-and-statistical-validity", "motif-output-provenance", "motif-claim-boundary"], "requires_adaptation": false}],
+  "routing": {
+    "method_aliases": [
+      "sequence-motif-enrichment",
+      "Test known sequence motif enrichment",
+      "known motif enrichment",
+      "PWM motif enrichment",
+      "peak sequence motif enrichment",
+      "JASPAR motif enrichment",
+      "转录因子 motif 富集"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 4,
+    "requires_reviewed_upstream_types": []
+  }
 }

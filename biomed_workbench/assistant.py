@@ -14,8 +14,10 @@ from .models import EvidenceItem, ExecutionResult
 from .research import ResearchAction, ResearchRecord, StageRecord
 from .runner import run
 from .kernel.artifacts import ScientificArtifact
+from .kernel.artifact_store import ProjectArtifactStore
 from .kernel.context import ProjectContext
 from .kernel.hypotheses import Hypothesis
+from .kernel.scientific_dependency import AnalysisAdmission
 from .kernel.state import ProjectState, apply_event
 from .modules.compatibility import detect_environment
 from .modules.index import BUILTIN_ROOT
@@ -65,10 +67,17 @@ class ResearchAssistant:
         executor: Executor = run,
         registry: ModuleRegistry | None = None,
         controller: ResearchController | None = None,
+        artifact_store: ProjectArtifactStore | None = None,
+        allow_mutation: bool = False,
     ) -> None:
         self._executor = executor
         self._registry = registry or ModuleRegistry.discover(BUILTIN_ROOT)
-        self._controller = controller or ResearchController(self._registry, environment_provider=detect_environment)
+        self._controller = controller or ResearchController(
+            self._registry,
+            environment_provider=detect_environment,
+            artifact_store=artifact_store,
+            allow_mutation=allow_mutation,
+        )
 
     def start(
         self,
@@ -77,6 +86,7 @@ class ResearchAssistant:
         artifacts: tuple[ScientificArtifact, ...],
         hypotheses: tuple[Hypothesis, ...],
         requests: tuple[PlanningRequest, ...],
+        admissions: tuple[AnalysisAdmission, ...] = (),
     ) -> CycleResult:
         if not isinstance(context, ProjectContext) or not artifacts or not hypotheses or not requests:
             raise ValueError("stateful research requires context, artifacts, hypotheses, and planning requests")
@@ -99,6 +109,25 @@ class ResearchAssistant:
             )
         graph = build_capability_graph(self._registry)
         plan = plan_research(state, self._registry, graph, requests)
+        if admissions:
+            if {item.plan_node_id for item in admissions} != {node.id for node in plan.nodes}:
+                raise ValueError("assistant admissions must cover every planned analysis node exactly once")
+            state = apply_event(
+                state,
+                "plan_created",
+                {"plan": plan.to_dict(), "activate": True},
+                rationale="Register the exact assistant-generated plan before scientific admission.",
+                replacement_action_ids=tuple(node.id for node in plan.nodes),
+            )
+            for admission in admissions:
+                state = apply_event(
+                    state,
+                    "analysis_admission_recorded",
+                    {"admission": admission.to_dict()},
+                    rationale="Record an explicit analysis admission before execution.",
+                    affected_hypothesis_ids=admission.hypothesis_ids,
+                    replacement_action_ids=(admission.plan_node_id,),
+                )
         return self._controller.advance(state, plan)
 
     def continue_project(
@@ -106,10 +135,30 @@ class ResearchAssistant:
         state: ProjectState | Mapping[str, object],
         *,
         requests: tuple[PlanningRequest, ...] = (),
+        admissions: tuple[AnalysisAdmission, ...] = (),
     ) -> CycleResult:
         current = state if isinstance(state, ProjectState) else ProjectState.from_dict(state)
         if requests:
             plan = plan_research(current, self._registry, build_capability_graph(self._registry), requests)
+            if admissions:
+                if {item.plan_node_id for item in admissions} != {node.id for node in plan.nodes}:
+                    raise ValueError("assistant admissions must cover every revised plan node exactly once")
+                current = apply_event(
+                    current,
+                    "plan_created" if plan.parent_plan_id is None else "plan_revised",
+                    {"plan": plan.to_dict(), "activate": True},
+                    rationale="Register the requested continuation plan before scientific admission.",
+                    replacement_action_ids=tuple(node.id for node in plan.nodes),
+                )
+                for admission in admissions:
+                    current = apply_event(
+                        current,
+                        "analysis_admission_recorded",
+                        {"admission": admission.to_dict()},
+                        rationale="Record an explicit continuation admission before execution.",
+                        affected_hypothesis_ids=admission.hypothesis_ids,
+                        replacement_action_ids=(admission.plan_node_id,),
+                    )
             return self._controller.advance(current, plan)
         return self._controller.resume(current.to_dict())
 

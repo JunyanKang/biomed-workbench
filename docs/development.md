@@ -24,10 +24,11 @@ Inspect routing, discovery, and bounded execution during module development:
 ```bash
 python3 tools/route_task.py "single-cell analysis and manuscript review"
 python3 tools/search_tools.py --workflow publication reviewer --limit 5
-python3 tools/run_tool.py sequence-inspect --input '{"sequence":"ATGCGC","alphabet":"dna"}'
+python3 tools/run_tool.py --help
+python3 tools/project_workflow.py --help
 ```
 
-These interfaces are for development, validation, and agent integration. End users should invoke the unified `biomed-workbench` skill with a scientific request rather than call internal scripts.
+These interfaces are for development, validation, and agent integration. Public execution requires an existing project root, exact artifact bindings, an approved analysis admission, and one declared compatibility row; there is no path that executes a scientific module from an unbound JSON object. End users should invoke the unified `biomed-workbench` skill with a scientific request rather than call internal scripts.
 
 ## Key Directories
 
@@ -51,12 +52,13 @@ python3 tools/create_module.py --help
 python3 tools/scaffold_bioinformatics_templates.py --check
 ```
 
-The generated registry is source-neutral and dynamically discovers valid modules. Do not add a new user-facing skill for each method, encode module names in the routing algorithm, vendor a source project, or introduce a path bridge to external code.
+The generated registry is source-neutral and dynamically discovers valid modules. Routing aliases, exclusions, required context, named-method priority, scientific stage, and reviewed-upstream requirements belong in the manifest. Do not add a new user-facing skill for each method, encode module names in the routing algorithm, maintain a second plan-stage table, vendor a source project, or introduce a path bridge to external code.
 
 ## Release Discipline
 
 - Regenerate deterministic registry and report artifacts before release.
 - Version scientific implementations, runtime compatibility, module-scoped evidence, and documentation separately. A global registry or documentation change never invalidates scientific outputs by itself; a module metadata change requires reviewed scope reissue; a runtime-policy change requires targeted compatibility retesting; only a scientific implementation, parameter-semantic, input-processing, or output-recognition change requires recomputation.
+- Routing and orchestration metadata are discovery-only evidence scope. They change registry discovery and plan compilation, but they cannot reissue or invalidate an unchanged scientific execution receipt.
 - Run `tools/assess_report_revalidation.py` before reissuing or rerunning observed evidence. Never rebind a changed scientific implementation to old outputs, and never spend compute merely because an unrelated global digest changed.
 - Keep plugin, catalog, and release versions consistent.
 - Run compatibility regression and representative execution checks when changing a baseline or widening a policy.

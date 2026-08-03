@@ -45,6 +45,7 @@ class CodexInstallEvidenceTests(unittest.TestCase):
         self.assertIn("data-profile", report["route_selected_module_ids"])
         self.assertEqual(report["executed_module_id"], "data-profile")
         self.assertEqual(report["executed_row_count"], 2)
+        self.assertEqual(report["execution_stop_reason"], "awaiting_artifact_review")
         self.assertTrue(report["new_task_required"])
         self.assertEqual(report["credentials"], ["NCBI_API_KEY"])
 

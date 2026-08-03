@@ -8,6 +8,7 @@ from collections import Counter, defaultdict
 from typing import Any, Iterable
 
 from .models import Capability
+from .objective_compiler import compile_objective, ports_compatible
 from .modules.contract import ModuleManifest
 from .modules.index import BUILTIN_ROOT
 from .modules.registry import ModuleRegistry, ModuleRegistryError
@@ -140,23 +141,6 @@ def _is_single_cell_query(normalized_query: str) -> bool:
     )
 
 
-def _is_single_cell_generic_query(normalized_query: str) -> bool:
-    if not _is_single_cell_query(normalized_query):
-        return False
-    if re.search(
-        r"\bdonor|single[-_ ]?donor|供体|整合|注释|注解|通信|marker|trajectory|velocity|fate|pca|聚类|分群|调控|motif|peak|atac|rna\s+velocity|多组学|WNN|MOFA|批次|batch|doublet|ambient|decontamination|标记|基因|differential|差异",
-        normalized_query,
-    ):
-        return False
-    if re.search(r"\bempty[ -]?drops?|空滴|decontamin|去噪|去除|清洗|空液滴", normalized_query):
-        return False
-    if any(term in normalized_query for term in ("analysis", "分析")):
-        # Explicit analytic verbs should keep a higher-level module only when explicitly anchored;
-        # here we keep generic only for workflow-entry queries.
-        return False
-    return True
-
-
 def _is_imaging_query(normalized_query: str) -> bool:
     for keyword in _IMAGING_KEYWORDS:
         normalized_keyword = _normalize(keyword)
@@ -233,6 +217,8 @@ def _is_evidence_query(normalized_query: str) -> bool:
 
 def _has_exact_route_signal(module: ModuleManifest, query: str) -> bool:
     return bool(
+        _phrase_matches(query, module.routing.method_aliases)
+        or
         _phrase_matches(query, module.intents)
         or _phrase_matches(query, module.questions)
         or _phrase_matches(query, (module.title,))
@@ -241,108 +227,45 @@ def _has_exact_route_signal(module: ModuleManifest, query: str) -> bool:
 
 def _module_allowed_for_query(module: ModuleManifest, query: str) -> bool:
     normalized_query = _normalize(query)
-    if module.id == "alphafold3-complex-prediction" and not re.search(
-        r"\balphafold[\s_-]*3\b|\baf3\b|protein[\s_-]+ligand[\s_-]+structure[\s_-]+prediction|蛋白复合物结构预测",
-        normalized_query,
+    if any(_normalize(term) in normalized_query for term in module.routing.exclusion_terms):
+        return False
+    if module.routing.required_any_terms and not any(
+        _normalize(term) in normalized_query for term in module.routing.required_any_terms
     ):
-        # AlphaFold DB confidence/disorder lookups are evidence retrieval, not
-        # requests to prepare or execute an AlphaFold 3 complex prediction.
         return False
     if _has_exact_route_signal(module, query):
         return True
     single_cell_query = _is_single_cell_query(normalized_query)
     omics_query = _is_omics_assay_query(normalized_query)
     molecular_query = _is_molecular_design_query(normalized_query)
-    if module.id.startswith("single-cell-") and not single_cell_query:
+    if any("single-cell" in _features(alias) for alias in module.routing.method_aliases) and not single_cell_query:
         return False
     if module.domains[0] == "imaging" and not _is_imaging_query(normalized_query):
         return False
     if module.domains[0] == "publication" and not _is_publication_query(normalized_query):
         return False
-    if module.id == "journal-targeting-and-compliance" and not _is_journal_targeting_query(normalized_query):
-        return False
     if module.domains[0] == "wetlab" and omics_query and not _is_wetlab_query(normalized_query):
         return False
     if module.domains[0] == "evidence" and omics_query and not _is_evidence_query(normalized_query):
-        return False
-    if module.id == "source-freshness-audit" and molecular_query and not _is_evidence_query(normalized_query) and not _is_publication_query(normalized_query):
-        return False
-    if module.id == "clinical-trial-evidence" and not _is_clinical_query(normalized_query):
-        return False
-    if module.id == "rna-secondary-structure-summary" and not re.search(
-        r"\b(rna|secondary|dot[-_ ]?bracket|fold(?:ing)?|hairpin|stem[-_ ]?loop)\b|二级结构",
-        normalized_query,
-    ):
         return False
     if (
         module.domains[0] == "omics"
         and molecular_query
         and not omics_query
-        and module.id != "sequence-inspect"
-        and module.id not in _forced_named_method_module_ids(normalized_query)
+        and not _has_exact_route_signal(module, query)
     ):
         return False
     return True
 
 
-def _has_regvelo_intent(normalized_query: str) -> bool:
-    return bool(
-        re.search(r"\bregvelo\b|\bregulatory\s+velocity\b|grn\s+informed", normalized_query)
-        or ("cellrank" in normalized_query and "velocity" in normalized_query and "regulatory" in normalized_query)
-    )
-
-
-def _has_scvi_intent(normalized_query: str) -> bool:
-    return bool(re.search(r"\bscvi\b", normalized_query) or "scanvi" in normalized_query)
-
-
-def _forced_single_cell_module_ids(normalized_query: str) -> list[str]:
-    """Return modules explicitly named by single-cell method families."""
-    if not _is_single_cell_query(normalized_query):
-        return []
-    forced: list[str] = []
-
-    def add(module_id: str) -> None:
-        if module_id not in forced:
-            forced.append(module_id)
-
-    if re.search(r"\b(scvi|scanvi)\b", normalized_query):
-        add("single-cell-generative-modeling")
-    if re.search(r"\b(harmony|scanorama|bbknn)\b", normalized_query):
-        add("single-cell-batch-integration")
-    if re.search(r"\b(wnn|mofa\+?|cite[-_ ]?seq)\b", normalized_query) or "rna+atac" in normalized_query:
-        add("single-cell-multimodal-integration")
-    if re.search(r"\b(celltypist|azimuth|popv)\b", normalized_query):
-        add("single-cell-atlas-annotation")
-    if re.search(r"\b(singler|cell ontology)\b", normalized_query):
-        add("single-cell-reference-annotation")
-    if re.search(r"\b(liana|cellphonedb|cellchat|nichenet)\b", normalized_query):
-        add("single-cell-communication")
-    if re.search(r"\b(scenic\+?|pyscenic|grnboost2|cistarget|aucell)\b", normalized_query):
-        add("single-cell-regulatory-network")
-    if _has_regvelo_intent(normalized_query):
-        add("single-cell-regulatory-velocity")
-    if re.search(r"\b(scvelo|rna velocity|pseudotime|trajectory|cellrank|fate mapping)\b", normalized_query):
-        add("single-cell-trajectory-velocity")
-    if re.search(r"\b(cellrank|fate mapping|fate probabilities|moscot)\b", normalized_query):
-        add("single-cell-fate-mapping")
-    if re.search(r"\b(donor-aware|pseudobulk|mixed model|edger|deseq2|dream)\b", normalized_query):
-        add("single-cell-donor-inference")
-    return forced
-
-
-def _forced_named_method_module_ids(normalized_query: str) -> list[str]:
-    """Resolve unambiguous method names before broad biological keywords."""
-    forced = []
-    if re.search(r"\bstring\b", normalized_query) and re.search(r"\bppi\b|protein interaction|蛋白互作", normalized_query):
-        forced.append("protein-interaction-network-evidence")
-    if re.search(r"\bhaddock\s*3?\b", normalized_query):
-        forced.append("protein-complex-docking")
-    if re.search(r"\balphafold\s*3\b|\baf3\b", normalized_query):
-        forced.append("alphafold3-complex-prediction")
-    if re.search(r"\bmsbio\s*2\b|\bmetascape\b", normalized_query):
-        forced.append("metascape-msbio-network-analysis")
-    return forced
+def _forced_named_method_module_ids(normalized_query: str, modules: Iterable[ModuleManifest]) -> list[str]:
+    """Resolve explicitly named methods solely from versioned manifest metadata."""
+    matches = []
+    for module in modules:
+        exact = _phrase_matches(normalized_query, module.routing.method_aliases)
+        if exact and module.routing.named_method_priority > 0:
+            matches.append((module.routing.named_method_priority, max(map(len, exact)), module.id))
+    return [module_id for _priority, _length, module_id in sorted(matches, key=lambda item: (-item[0], -item[1], item[2]))]
 
 
 def _phrase_matches(query: str, phrases: Iterable[str]) -> list[str]:
@@ -368,6 +291,7 @@ def _score_module(module: ModuleManifest, query: str) -> tuple[float, list[str]]
     exact_intents = _phrase_matches(query, module.intents)
     exact_questions = _phrase_matches(query, module.questions)
     title_exact = _phrase_matches(query, (module.title,))
+    alias_exact = _phrase_matches(query, module.routing.method_aliases)
     intent_overlap = query_features & set().union(*(_features(value) for value in module.intents))
     question_overlap = query_features & set().union(*(_features(value) for value in module.questions))
     title_overlap = query_features & _features(module.title)
@@ -381,6 +305,7 @@ def _score_module(module: ModuleManifest, query: str) -> tuple[float, list[str]]
     score += 20.0 * len(exact_intents)
     score += 12.0 * len(exact_questions)
     score += 14.0 * len(title_exact)
+    score += (module.routing.named_method_priority / 5.0) * len(alias_exact)
     score += 3.5 * len(intent_overlap)
     score += 2.5 * len(question_overlap)
     score += 3.0 * len(title_overlap)
@@ -391,6 +316,8 @@ def _score_module(module: ModuleManifest, query: str) -> tuple[float, list[str]]
     reasons = []
     if exact_intents:
         reasons.append(f"exact intent: {exact_intents[0]}")
+    if alias_exact:
+        reasons.append(f"named method: {alias_exact[0]}")
     if title_exact:
         reasons.append("title matches the request")
     concepts = sorted(intent_overlap | question_overlap | title_overlap | artifact_overlap, key=lambda value: (-len(value), value))
@@ -427,29 +354,25 @@ def _select_ranked_modules(
     if not ranked:
         return []
     normalized = _normalize(query)
-    has_regvelo = _has_regvelo_intent(normalized)
-    has_scvi = _has_scvi_intent(normalized)
-    forced_named_ids = _forced_named_method_module_ids(normalized)
-    if forced_named_ids:
-        forced_items = [item for module_id in forced_named_ids for item in ranked if item[1].id == module_id]
-        if forced_items:
-            return [item[1].id for item in forced_items]
+    forced_named_ids = _forced_named_method_module_ids(normalized, (item[1] for item in ranked))
 
-    if has_regvelo and not has_scvi:
-        ranked = [item for item in ranked if item[1].id != "single-cell-generative-modeling"]
-
-    if _is_single_cell_generic_query(normalized):
-        qc_item = next((item for item in ranked if item[1].id == "single-cell-qc"), None)
-        if qc_item is not None:
-            ranked = [qc_item] + [item for item in ranked if item[1].id != qc_item[1].id]
     multi_intent = any(token in normalized for token in (" and ", " then ", "同时", "并行", "以及", "并且", "并", "然后", "最后", "和"))
     exact = [item for item in ranked if any(reason.startswith("exact intent:") or reason == "title matches the request" for reason in item[2])]
     selected: list[tuple[float, ModuleManifest, list[str]]] = exact[:] if exact else [ranked[0]]
-    forced_single_cell_ids = _forced_single_cell_module_ids(normalized)
+    selected_ids = {item[1].id for item in selected}
+    for forced_id in forced_named_ids:
+        forced_item = next((item for item in ranked if item[1].id == forced_id), None)
+        if forced_item is not None and forced_id not in selected_ids:
+            selected.append(forced_item)
+            selected_ids.add(forced_id)
+    forced_single_cell_ids = [
+        module_id for module_id in forced_named_ids
+        if any(item[1].id == module_id and _is_single_cell_query(normalized) for item in ranked)
+    ]
     # Alternatives are mutually substitutable implementations, not parallel
     # workflow steps. For a dense single-cell program, however, the explicitly
     # forced modules are complementary stages and must all remain available.
-    if not forced_single_cell_ids:
+    if not forced_named_ids:
         nonredundant: list[tuple[float, ModuleManifest, list[str]]] = []
         for item in sorted(selected, key=lambda value: (-value[0], value[1].id)):
             module = item[1]
@@ -505,22 +428,6 @@ def _select_ranked_modules(
     # shares a general assay or artifact term.
     if len(exact) >= 2 and len(_features(query)) < 18 and not forced_single_cell_ids:
         return [item[1].id for item in selected]
-
-    if has_regvelo and not has_scvi:
-        forced = next((item for item in ranked if item[1].id == "single-cell-regulatory-velocity"), None)
-        if forced is not None:
-            forced_id = forced[1].id
-            if all(forced_id != entry[1].id for entry in selected):
-                selected.append(forced)
-            dedupe: list[tuple[float, ModuleManifest, list[str]]] = []
-            seen: set[str] = set()
-            for selected_item in selected:
-                module_id = selected_item[1].id
-                if module_id in seen:
-                    continue
-                seen.add(module_id)
-                dedupe.append(selected_item)
-            selected = dedupe
 
     top_score = ranked[0][0]
     threshold = max(5.0, top_score * 0.25)
@@ -581,32 +488,7 @@ def _request_ordered_modules(
         return (min(positions) if positions else len(normalized), 1, module_id)
 
     ordered = sorted(module_ids, key=position)
-    single_cell_generic_query = (
-        _is_single_cell_query(normalized)
-        and not re.search(
-            r"batch|整合|注释|注解|通信|轨迹|velocity|fate|pca|维度|聚类|分群|marker|注释|注解|双细胞|marker|双t|trajectory|trajectory",
-            normalized,
-        )
-    )
-    if single_cell_generic_query:
-        for idx, module_id in enumerate(ordered):
-            if module_id == "single-cell-qc":
-                ordered.pop(idx)
-                ordered.insert(0, module_id)
-                break
     return ordered
-
-
-def _artifact_dependency(modules: list[ModuleManifest]) -> bool:
-    for producer in modules:
-        for consumer in modules:
-            if producer.id != consumer.id and any(
-                ports_compatible(output, required)
-                for output in producer.output_artifacts
-                for required in consumer.input_artifacts
-            ):
-                return True
-    return False
 
 
 def _order_by_artifact_dependencies(
@@ -640,28 +522,6 @@ def _order_by_artifact_dependencies(
         ordered.extend(ready)
         remaining.difference_update(ready)
     return ordered
-
-
-def ports_compatible(produced, required) -> bool:
-    """Return whether two manifest ports can exchange one typed artifact."""
-    if produced.artifact_type != required.artifact_type:
-        return False
-    for output_format in produced.formats:
-        for input_format in required.formats:
-            if output_format.name != input_format.name or not set(output_format.versions) & set(input_format.versions):
-                continue
-            if not set(output_format.compression) & set(input_format.compression):
-                continue
-            if not set(output_format.orientations) & set(input_format.orientations):
-                continue
-            if input_format.coordinate_systems and not set(output_format.coordinate_systems) & set(input_format.coordinate_systems):
-                continue
-            if input_format.genome_build_policy != "not_applicable" and not set(output_format.genome_builds) & set(input_format.genome_builds):
-                continue
-            if input_format.annotation_releases and not set(output_format.annotation_releases) & set(input_format.annotation_releases):
-                continue
-            return True
-    return False
 
 
 def _expand_required_upstreams(module_ids: list[str], registry: ModuleRegistry) -> list[str]:
@@ -704,7 +564,7 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
     single_cell_query = _is_single_cell_query(normalized_query)
     imaging_query = _is_imaging_query(normalized_query)
     wetlab_query = _is_wetlab_query(normalized_query)
-    forced_named_ids = _forced_named_method_module_ids(normalized_query)
+    forced_named_ids = _forced_named_method_module_ids(normalized_query, active.all())
     forced_named_domains = {active.get(module_id).domains[0] for module_id in forced_named_ids}
     dominant_exact_domains = set()
     exact_domains = set()
@@ -925,20 +785,10 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
             for score, module, reasons in visible_ranked
         ]
         assigned_modules.update(item["id"] for item in candidates[workflow])
-    parallel_requested = any(term in _normalize(query) for term in ("parallel", "并行", "同时"))
     selected_module_ids = [module_id for workflow in workflows for module_id in selected_by_workflow[workflow]]
-    selected_modules = [active.get(module_id) for module_id in selected_module_ids]
-    dependency_present = _artifact_dependency(selected_modules)
-    if len(selected_module_ids) == 1 and len(workflows) == 1:
-        plan_type = "single"
-    elif len(workflows) == 1:
-        plan_type = "serial" if dependency_present else "parallel"
-    elif parallel_requested and not (SERIAL_DOMAINS & set(workflows)):
-        plan_type = "parallel"
-    elif parallel_requested:
-        plan_type = "mixed"
-    else:
-        plan_type = "serial"
+    selected_modules = tuple(active.get(module_id) for module_id in selected_module_ids)
+    compiled = compile_objective(query, selected_modules)
+    plan_type = compiled["plan_type"]
     steps = []
     for workflow in workflows:
         if len(workflows) == 1 and plan_type == "parallel":
@@ -946,4 +796,11 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
         else:
             mode = "parallel" if plan_type in {"parallel", "mixed"} and workflow not in SERIAL_DOMAINS else "serial"
         steps.append({"workflow": workflow, "mode": mode, "selected_module_ids": selected_by_workflow[workflow], "candidates": candidates[workflow]})
-    return {"objective": query, "matched_workflows": workflows, "plan_type": plan_type, "selected_module_ids": selected_module_ids, "steps": steps}
+    return {
+        "objective": query,
+        "matched_workflows": workflows,
+        "plan_type": plan_type,
+        "selected_module_ids": selected_module_ids,
+        "steps": steps,
+        "objective_graph": compiled,
+    }

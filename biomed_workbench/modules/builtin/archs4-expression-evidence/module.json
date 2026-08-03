@@ -29,5 +29,23 @@
   "input_schema": {"type": "object", "additionalProperties": false, "properties": {"gene_symbol": {"type": "string", "minLength": 1, "maxLength": 100}, "species": {"type": "string", "enum": ["human", "mouse"]}, "atlas": {"type": "string", "enum": ["tissue", "cellline"]}, "max_records": {"type": "integer", "minimum": 1, "maximum": 500}}, "required": ["gene_symbol"]},
   "output_schema": {"type": "object", "additionalProperties": false, "properties": {"gene_symbol": {"type": "string"}, "species": {"type": "string"}, "atlas": {"type": "string"}, "observation_count": {"type": "integer"}, "returned_count": {"type": "integer"}, "truncated": {"type": "boolean"}, "hierarchy_row_count": {"type": "integer"}, "malformed_row_count": {"type": "integer"}, "observations": {"type": "array"}, "provenance": {"type": "object"}, "limitations": {"type": "array"}}, "required": ["gene_symbol", "species", "atlas", "observation_count", "returned_count", "truncated", "hierarchy_row_count", "malformed_row_count", "observations", "provenance", "limitations"]},
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room public expression-context capability informed by direct primary-evidence review.", "https://archs4.org/help"]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room public expression-context capability informed by direct primary-evidence review.", "https://archs4.org/help"]},
+  "routing": {
+    "method_aliases": [
+      "archs4-expression-evidence",
+      "Retrieve ARCHS4 public expression context",
+      "ARCHS4 expression",
+      "public tissue expression",
+      "gene expression context",
+      "ARCHS4 tissue atlas",
+      "公共组织表达"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 0,
+    "requires_reviewed_upstream_types": []
+  }
 }

@@ -19,6 +19,8 @@ These levels are cumulative for a specific compatibility row. Evidence from one
 row must not be transferred to another row merely because its version appears
 inside an allowed range.
 
+Four independent axes are reported for every released capability: scientific-contract completeness, entry-surface reachability, observed execution evidence, and project evidence state. They answer different questions and are never collapsed into one maturity count. A module can have a complete contract while its command surface is unavailable, or have a reachable adapter while no project result has been observed and reviewed.
+
 ## Operational Labels
 
 - `validated`: the checked package and its declared compatibility evidence pass.
@@ -47,5 +49,8 @@ module. A deterministic fixture can therefore never silently promote itself to
 public-data evidence.
 
 For a user project, the final maturity decision is always made at project
-validation level. Failed or unrun gates remain visible, experimental modules are
-not promoted by prose, and a successful process exit is never sufficient.
+validation level. Project validation requires an approved analysis admission,
+observed execution, content-addressed output import, result reload, scientific
+review, an explicit decision, and evidence-map registration. Failed or unrun
+gates remain visible, experimental modules are not promoted by prose, and a
+successful process exit is never sufficient.

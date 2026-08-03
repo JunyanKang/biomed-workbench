@@ -93,11 +93,16 @@ def validate_schema_value(schema: dict[str, Any], value: Any, location: str = "v
 def run(capability_id: str, inputs: dict[str, Any], *, allow_mutation: bool = False) -> ExecutionResult:
     capability = resolve(capability_id)
     validate_inputs(capability, inputs)
-    if capability.mutability != "read_only" and not allow_mutation:
+    if capability.mutability != "read_only" and capability.access != "agent_generated" and not allow_mutation:
         raise MutationPermissionError(f"{capability_id} requires explicit mutation permission")
     entrypoint = resolve_entrypoint(capability)
     if isinstance(entrypoint, Path):
-        output: dict[str, Any] = {"workflow_path": entrypoint.as_posix()}
+        output: dict[str, Any] = {
+            "result_kind": "execution_handoff",
+            "execution_state": "prepared-not-run",
+            "workflow_path": entrypoint.as_posix(),
+        }
+        status = "prepared"
     else:
         try:
             raw_output = entrypoint(**inputs)
@@ -109,4 +114,10 @@ def run(capability_id: str, inputs: dict[str, Any], *, allow_mutation: bool = Fa
             output = asdict(raw_output)
         else:
             output = {"result": raw_output}
-    return ExecutionResult(capability_id=capability_id, status="completed", output=output)
+        status = (
+            "awaiting_observed_execution"
+            if output.get("result_kind") == "execution_handoff"
+            and output.get("execution_state") == "prepared-not-run"
+            else "completed"
+        )
+    return ExecutionResult(capability_id=capability_id, status=status, output=output)

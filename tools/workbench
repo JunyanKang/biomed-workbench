@@ -48,13 +48,17 @@ case "$command_name" in
     credentials)
         exec "$PYTHON_EXECUTABLE" "$WORKBENCH_ROOT/tools/configure_credentials.py" "$@"
         ;;
+    project)
+        exec "$PYTHON_EXECUTABLE" "$WORKBENCH_ROOT/tools/project_workflow.py" "$@"
+        ;;
     help|-h|--help)
         printf '%s\n' \
             'Usage: tools/workbench doctor [--strict]' \
             '       tools/workbench route "SCIENTIFIC OBJECTIVE"' \
             '       tools/workbench plan "SCIENTIFIC OBJECTIVE"' \
             '       tools/workbench search [--id CAPABILITY_ID | SEARCH TERMS]' \
-            '       tools/workbench run CAPABILITY_ID --input JSON' \
+            '       tools/workbench run CAPABILITY_ID --input JSON --project-root DIR --artifact-bindings FILE --compatibility-row ROW' \
+            '       tools/workbench project init|admit|review|decide|map|resume [OPTIONS]' \
             '       tools/workbench credentials [status | set NAME | remove NAME | connect-service SERVICE | mark-service SERVICE STATE | disconnect-service SERVICE | location]' \
             '       tools/workbench validate [--release]'
         ;;

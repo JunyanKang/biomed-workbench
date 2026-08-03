@@ -102,5 +102,24 @@
   "code_templates": [
     {"path": "templates/run_cfu_enumeration.py", "language": "python", "purpose": "Execute observed-plate CFU enumeration with a project-bound request and diagnostic-status validation.", "quality_gate_ids": ["cfu-observed-plate-contract", "cfu-countable-range-policy", "cfu-heterogeneity-and-claim-boundary"], "requires_adaptation": false}
   ],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned clean-room CFU enumeration implementation with observed-count, dilution-exposure, censored-plate, uncertainty, and heterogeneity contracts."]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Project-owned clean-room CFU enumeration implementation with observed-count, dilution-exposure, censored-plate, uncertainty, and heterogeneity contracts."]},
+  "routing": {
+    "method_aliases": [
+      "cfu-enumeration",
+      "Estimate CFU per mL from observed dilution plates",
+      "enumerate bacterial CFU",
+      "analyze dilution plate colony counts",
+      "calculate CFU per mL",
+      "serial dilution colony count",
+      "菌落计数 CFU",
+      "稀释涂布 CFU/mL"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 3,
+    "requires_reviewed_upstream_types": []
+  }
 }

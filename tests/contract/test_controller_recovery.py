@@ -1,6 +1,6 @@
 import unittest
 
-from biomed_workbench.orchestration.controller import ResearchController
+from biomed_workbench.orchestration.controller import ControllerPolicy, ResearchController
 from tests.unit.orchestration.test_controller import completed_execution, serial_fixture
 
 
@@ -14,7 +14,16 @@ class ControllerRecoveryContractTests(unittest.TestCase):
             calls.append(node.id)
             return completed_execution(current_state, node, active_registry)
 
-        controller = ResearchController(registry, environment_provider=lambda _manifest: None, node_executor=executor)
+        controller = ResearchController(
+            registry,
+            environment_provider=lambda _manifest: None,
+            node_executor=executor,
+            policy=ControllerPolicy(
+                require_approved_admission=False,
+                require_scientific_review=False,
+                require_evidence_map_for_publication=False,
+            ),
+        )
         first = controller.advance(state, plan)
         first_calls = tuple(calls)
         second = controller.resume(first.state.to_dict())

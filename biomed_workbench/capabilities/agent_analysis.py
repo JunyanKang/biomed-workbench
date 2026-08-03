@@ -49,6 +49,8 @@ def prepare_agent_analysis(manifest: ModuleManifest, inputs: dict[str, Any]) -> 
         for item in manifest.dependencies
     ]
     return {
+        "result_kind": "execution_handoff",
+        "execution_state": "prepared-not-run",
         "handoff_type": "packaged_parameterized_project_analysis",
         "module": {"id": manifest.id, "version": manifest.version},
         "request_digest": digest_value(inputs),

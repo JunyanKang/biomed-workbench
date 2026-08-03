@@ -27,5 +27,22 @@
   "input_schema": {"type": "object", "additionalProperties": false, "properties": {"study_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$"}, "gene_symbol": {"type": "string", "pattern": "^[A-Z][A-Z0-9-]{0,39}$"}, "max_records": {"type": "integer", "minimum": 1, "maximum": 500}, "event_type": {"type": "string", "enum": ["HOMDEL_AND_AMP", "HOMDEL", "AMP", "GAIN", "HETLOSS", "DIPLOID", "ALL"]}}, "required": ["study_id", "gene_symbol"]},
   "output_schema": {"type": "object", "additionalProperties": false, "properties": {"study_id": {"type": "string"}, "gene_symbol": {"type": "string"}, "entrez_gene_id": {"type": "integer"}, "event_type": {"type": "string"}, "found": {"type": "boolean"}, "resolution_status": {"type": "string"}, "molecular_profile": {"type": "object", "nullable": true}, "sample_list": {"type": "object", "nullable": true}, "records": {"type": "array"}, "returned_count": {"type": "integer"}, "service_record_count": {"type": "integer"}, "truncated": {"type": "boolean"}, "provenance": {"type": "object"}, "limitations": {"type": "array"}}, "required": ["study_id", "gene_symbol", "event_type", "found", "resolution_status", "molecular_profile", "sample_list", "records", "returned_count", "service_record_count", "truncated", "provenance", "limitations"]},
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room cBioPortal discrete copy-number capability informed by direct public API observation."]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room cBioPortal discrete copy-number capability informed by direct public API observation."]},
+  "routing": {
+    "method_aliases": [
+      "cbioportal-gene-copy-number-evidence",
+      "Retrieve cBioPortal study-gene copy-number evidence",
+      "cBioPortal 拷贝数",
+      "cBioPortal CNA",
+      "肿瘤队列基因拷贝数",
+      "查询研究中基因扩增缺失"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 2,
+    "requires_reviewed_upstream_types": []
+  }
 }

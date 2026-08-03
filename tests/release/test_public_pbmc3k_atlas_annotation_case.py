@@ -3,6 +3,7 @@ import json
 import re
 import unittest
 from pathlib import Path
+from tests.release.evidence_scope_assertions import assert_evidence_scope_current
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -23,10 +24,7 @@ class PublicPBMC3kAtlasAnnotationReleaseTests(unittest.TestCase):
         self.assertEqual(report["reference"]["model"], "Immune_All_Low.pkl")
         self.assertEqual(report["reference"]["version"], "v2")
         self.assertEqual(report["reference"]["classes"], 98)
-        self.assertEqual(
-            report["module"]["manifest_sha256"],
-            hashlib.sha256((MODULE_ROOT / "module.json").read_bytes()).hexdigest(),
-        )
+        assert_evidence_scope_current(self, report)
         self.assertEqual(
             report["module"]["template_sha256"],
             hashlib.sha256((MODULE_ROOT / "templates" / "annotate_celltypist.py").read_bytes()).hexdigest(),

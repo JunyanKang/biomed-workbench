@@ -8,10 +8,11 @@ Biomed Workbench maintains one unified research skill and discovers scientific c
 2. `biomed_workbench/modules/builtin/<module-id>/module.json` is the source of truth for every built-in capability.
 3. `biomed_workbench/modules/contract.py` validates scientific, execution, version, dependency, format, and provenance contracts.
 4. `biomed_workbench/modules/registry.py` discovers modules recursively and rejects duplicate IDs or unresolved relationships.
-5. `biomed_workbench/router.py` ranks intents, questions, artifact types, and the primary routing workflow read from manifests; it selects a compact nonredundant module set by incremental query-feature coverage, rejects declared alternatives, and derives serial versus parallel execution from artifact dependencies without module-specific IDs. Later domain entries are descriptive tags and cannot create phantom workflow steps.
-6. `biomed_workbench/runner.py` validates structured input and invokes resolved entrypoints.
-7. `biomed_workbench/catalog.py` provides the v0.2 compatibility projection; it does not define or load a second capability registry.
-8. `biomed_workbench/modules/index.json` and `tools/catalog.json` are generated release artifacts and are never edited manually.
+5. Every manifest declares its own routing aliases, exclusions, required context, named-method priority, scientific stage, and reviewed-upstream artifact requirements. `biomed_workbench/router.py` ranks those declarations without module-specific IDs.
+6. `biomed_workbench/objective_compiler.py` is the only component allowed to compile selected modules into one serial, parallel, or mixed objective graph. The research-plan projection consumes that graph unchanged; it does not maintain a second stage map or dependency table.
+7. `biomed_workbench/runner.py` validates structured input and invokes resolved entrypoints.
+8. `biomed_workbench/catalog.py` provides the v0.2 compatibility projection; it does not define or load a second capability registry.
+9. `biomed_workbench/modules/index.json` and `tools/catalog.json` are generated release artifacts and are never edited manually.
 
 The plugin does not own environment provisioning, execution infrastructure, remote job systems, or model-hosting infrastructure.
 
@@ -19,7 +20,7 @@ The plugin does not own environment provisioning, execution infrastructure, remo
 
 `biomed_workbench/kernel/` stores immutable project context, typed scientific artifacts, falsifiable hypotheses, directional evidence, plan nodes, DAGs, decisions, and canonical state digests. Every transition is append-only and links its prior and resulting state digest. Deserialization replays the complete event ledger; a changed payload, event order, lineage link, or digest is rejected.
 
-`biomed_workbench/orchestration/` builds a capability graph from module manifests, searches validated artifact paths, plans single/serial/parallel/mixed DAGs, evaluates cross-module scientific quality, applies declared compatibility policies, executes bounded entrypoints, adjudicates hypotheses, and controls retries or child-plan revisions. When a node remains blocked or fails after its retry budget, the default controller may create one child plan only by replacing it with a manifest-declared alternative whose complete input and output artifact contracts are identical; completed upstream artifacts and downstream bindings are retained. Other scientific strategy changes require an explicit replanning policy. The graph and controller contain no built-in module IDs.
+`biomed_workbench/orchestration/` builds a capability graph from module manifests, searches validated artifact paths, evaluates cross-module scientific quality, applies declared compatibility policies, executes bounded entrypoints, adjudicates hypotheses, and controls retries or child-plan revisions. The default project path is a state machine: approved analysis admission precedes execution; observed outputs are imported and reloaded; every produced artifact awaits scientific review and an explicit retain, exclude, revise, or redirect decision; retained findings are then published into a versioned scientific evidence map. Publication work cannot proceed from an execution handoff or an unreviewed artifact. When a node remains blocked or fails after its retry budget, the default controller may create one child plan only by replacing it with a manifest-declared alternative whose complete input and output artifact contracts are identical; completed upstream artifacts and downstream bindings are retained. Other scientific strategy changes require an explicit replanning policy. The graph and controller contain no built-in module IDs.
 
 Scientific artifacts preserve format and schema version, compression, orientation, companion indexes, coordinates, genome build, annotation release, identifier namespace, producer module/tool versions, experimental unit, denominator, processing level, quality status, source artifact lineage, and content digest. Unknown or incompatible metadata is not inferred from a filename.
 
@@ -41,6 +42,7 @@ Every `module.json` is closed and versioned. It declares:
 - input/output format names and versions, representation, compression, required indexes, coordinate systems, genome builds, annotation releases, and orientations;
 - explicit compatibility rows joining one module version to validated tool, dependency, platform, and input/output format combinations;
 - access, mutation, credential, timeout, output-size, license, and clean-room provenance boundaries.
+- module-owned routing and orchestration metadata, including aliases, exclusions, required context, named-method priority, scientific stage, and reviewed upstream artifact types;
 - optional module-local `code_templates` with language, purpose, blocking quality-gate binding, and adaptation policy.
 
 The first `domains[]` value is the module's routing workflow. It may introduce a future scientific workflow without router edits. Additional values describe cross-cutting scientific scope, but routing and the compatibility catalog never treat them as separate required workflow branches.

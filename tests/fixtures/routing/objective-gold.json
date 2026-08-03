@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "en-fastqc-then-multiqc",
+      "query": "Run FastQC then MultiQC for sequencing quality control",
+      "per_workflow": 5,
+      "required_module_ids": ["read-quality-fastqc", "quality-report-multiqc"],
+      "forbidden_module_ids": ["read-quality-fastp", "expression-qc"],
+      "expected_plan_type": "serial"
+    },
+    {
+      "id": "zh-harmony-single-cell",
+      "query": "对单细胞 RNA 数据做 Harmony 批次整合",
+      "per_workflow": 5,
+      "required_module_ids": ["single-cell-batch-integration", "single-cell-qc"],
+      "forbidden_module_ids": ["single-cell-communication", "spatial-multimethod-inference"],
+      "expected_plan_type": "serial"
+    },
+    {
+      "id": "zh-independent-publication-audits",
+      "query": "同时审查论文时间逻辑和未引证的经验性主张",
+      "per_workflow": 5,
+      "required_module_ids": ["temporal-integrity-audit", "assertion-citation-coverage-audit"],
+      "forbidden_module_ids": ["patent-claim-structure-audit", "journal-targeting-and-compliance"],
+      "expected_plan_type": "parallel"
+    },
+    {
+      "id": "en-string-ppi",
+      "query": "Build a STRING 12.0 PPI network for these proteins",
+      "per_workflow": 5,
+      "required_module_ids": ["protein-interaction-network-evidence"],
+      "forbidden_module_ids": ["protein-complex-docking", "metascape-msbio-network-analysis"],
+      "expected_plan_type": "single"
+    },
+    {
+      "id": "en-journal-targeting",
+      "query": "Recommend a journal for this developmental single-cell project and audit manuscript requirements",
+      "per_workflow": 5,
+      "required_module_ids": ["journal-targeting-and-compliance"],
+      "forbidden_module_ids": ["patent-draft-readiness-audit", "reviewer-assessment"],
+      "expected_plan_type": "mixed"
+    }
+  ]
+}

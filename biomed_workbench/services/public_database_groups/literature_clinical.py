@@ -1,0 +1,458 @@
+"""Internal literature clinical public database operations."""
+
+from __future__ import annotations
+
+from ..public_databases import (
+    Any,
+    BIORXIV_CONTRACT_VERSION,
+    CLINICAL_TRIALS_CONTRACT_VERSION,
+    CROSSREF_CONTRACT_VERSION,
+    EUROPE_PMC_CONTRACT_VERSION,
+    Mapping,
+    PUBCHEM_CONTRACT_VERSION,
+    PublicDatabaseError,
+    PublicJSONClient,
+    _CT_PHASES,
+    _CT_SPONSOR_CLASSES,
+    _CT_STATUSES,
+    _CT_STUDY_TYPES,
+    _DATE_RE,
+    _NCT_RE,
+    _clean_text,
+    _require_doi,
+    quote,
+)
+
+__all__ = ['_clinical_trial_params', '_essie_quote', '_range_expression', '_trim_clinical_trial', 'clinical_trial_records', 'preprint_record', 'pubchem_compound', 'resolve_citation_record']
+
+def resolve_citation_record(doi: str, *, client: PublicJSONClient | None = None) -> dict[str, Any]:
+    """Resolve one DOI against Crossref and Europe PMC without merging conflicts."""
+    doi = _require_doi(doi)
+    client = client or PublicJSONClient()
+    crossref_payload = client.get("https://api.crossref.org", f"/v1/works/{quote(doi, safe='')}")
+    message = crossref_payload.get("message")
+    if not isinstance(message, dict) or str(message.get("DOI", "")).lower() != doi:
+        raise PublicDatabaseError("Crossref response did not preserve the requested DOI")
+    europe_payload = client.get(
+        "https://www.ebi.ac.uk",
+        "/europepmc/webservices/rest/search",
+        {"query": f'DOI:"{doi}"', "format": "json", "resultType": "core", "pageSize": 25},
+    )
+    result_list = europe_payload.get("resultList", {}).get("result", [])
+    if not isinstance(result_list, list):
+        raise PublicDatabaseError("Europe PMC search result schema is not recognized")
+    europe_records = [record for record in result_list if isinstance(record, dict) and str(record.get("doi", "")).lower() == doi]
+    crossref = {
+        "doi": doi,
+        "title": _clean_text((message.get("title") or [None])[0]),
+        "type": _clean_text(message.get("type")),
+        "publisher": _clean_text(message.get("publisher")),
+        "container_title": _clean_text((message.get("container-title") or [None])[0]),
+        "published": message.get("published") or message.get("published-print") or message.get("published-online"),
+        "authors": message.get("author") if isinstance(message.get("author"), list) else [],
+        "is_referenced_by_count": message.get("is-referenced-by-count"),
+        "relation": message.get("relation") if isinstance(message.get("relation"), dict) else {},
+        "update_to": message.get("update-to") if isinstance(message.get("update-to"), list) else [],
+    }
+    return {
+        "query": {"doi": doi},
+        "crossref": crossref,
+        "europe_pmc_records": europe_records,
+        "agreement": {
+            "doi_confirmed_by_crossref": True,
+            "europe_pmc_exact_doi_matches": len(europe_records),
+            "title_comparison_required": bool(europe_records and crossref["title"]),
+        },
+        "provenance": {
+            "retrieved_at_runtime": True,
+            "services": ["Crossref REST API", "Europe PMC REST API"],
+            "contracts": [CROSSREF_CONTRACT_VERSION, EUROPE_PMC_CONTRACT_VERSION],
+        },
+        "limitations": [
+            "Metadata deposits may be incomplete or disagree across services; disagreements must remain explicit.",
+            "A resolved DOI does not establish study validity, retraction status, or support for a scientific claim.",
+        ],
+    }
+
+
+def preprint_record(doi: str, server: str, *, client: PublicJSONClient | None = None) -> dict[str, Any]:
+    """Retrieve versioned bioRxiv or medRxiv metadata and publication links."""
+    doi = _require_doi(doi)
+    server = server.strip().lower()
+    if server not in {"biorxiv", "medrxiv"}:
+        raise ValueError("server must be biorxiv or medrxiv")
+    client = client or PublicJSONClient()
+    # bioRxiv models the DOI as two path segments and rejects an encoded slash.
+    payload = client.get("https://api.biorxiv.org", f"/details/{server}/{quote(doi, safe='/')}/na/json")
+    collection = payload.get("collection")
+    if not isinstance(collection, list):
+        raise PublicDatabaseError("bioRxiv details response schema is not recognized")
+    versions = [record for record in collection if isinstance(record, dict) and str(record.get("doi", "")).lower() == doi]
+    if not versions:
+        raise PublicDatabaseError("bioRxiv details response did not contain the requested DOI")
+    versions.sort(key=lambda record: (str(record.get("version", "")), str(record.get("date", ""))))
+    published = [record.get("published") for record in versions if record.get("published") and record.get("published") != "NA"]
+    return {
+        "query": {"doi": doi, "server": server},
+        "versions": versions,
+        "latest_version": versions[-1],
+        "published_dois": sorted({str(value).lower() for value in published}),
+        "version_count": len(versions),
+        "provenance": {
+            "retrieved_at_runtime": True,
+            "service": f"{server} details API",
+            "contract": BIORXIV_CONTRACT_VERSION,
+        },
+        "limitations": [
+            "A preprint is not peer reviewed unless an independently verified publication record is supplied.",
+            "Versions must not be collapsed; conclusions and citations must identify the analyzed version.",
+        ],
+    }
+
+
+def pubchem_compound(identifier: str, namespace: str = "name", *, client: PublicJSONClient | None = None) -> dict[str, Any]:
+    """Retrieve identity-critical PubChem properties and synonyms."""
+    value = identifier.strip()
+    namespace = namespace.strip().lower()
+    if namespace not in {"name", "cid", "inchikey"}:
+        raise ValueError("namespace must be name, cid, or inchikey")
+    if not value or len(value) > 500 or (namespace == "cid" and not value.isdigit()):
+        raise ValueError("compound identifier is invalid")
+    client = client or PublicJSONClient()
+    encoded = quote(value, safe="")
+    properties = "Title,IUPACName,MolecularFormula,MolecularWeight,SMILES,ConnectivitySMILES,InChI,InChIKey,XLogP,TPSA,Charge"
+    property_payload = client.get(
+        "https://pubchem.ncbi.nlm.nih.gov",
+        f"/rest/pug/compound/{namespace}/{encoded}/property/{properties}/JSON",
+    )
+    rows = property_payload.get("PropertyTable", {}).get("Properties", [])
+    if not isinstance(rows, list) or not rows:
+        raise PublicDatabaseError("PubChem response contained no compound properties")
+    synonym_payload = client.get(
+        "https://pubchem.ncbi.nlm.nih.gov",
+        f"/rest/pug/compound/cid/{rows[0].get('CID')}/synonyms/JSON",
+    )
+    information = synonym_payload.get("InformationList", {}).get("Information", [])
+    synonyms = information[0].get("Synonym", []) if isinstance(information, list) and information and isinstance(information[0], dict) else []
+    return {
+        "query": {"identifier": value, "namespace": namespace},
+        "compounds": rows,
+        "synonyms": synonyms[:200] if isinstance(synonyms, list) else [],
+        "identity_checks": {
+            "result_count": len(rows),
+            "unique_cids": sorted({row.get("CID") for row in rows if isinstance(row, dict) and row.get("CID") is not None}),
+            "stereochemistry_fields_retained": all("SMILES" in row and "ConnectivitySMILES" in row and "InChIKey" in row for row in rows if isinstance(row, dict)),
+        },
+        "provenance": {
+            "retrieved_at_runtime": True,
+            "service": "PubChem PUG REST",
+            "contract": PUBCHEM_CONTRACT_VERSION,
+        },
+        "limitations": [
+            "Name searches can be ambiguous; a scientific claim requires reviewed CID, structure, charge, stereochemistry, and salt form.",
+            "Database properties are identifiers and descriptors, not evidence of biological activity or clinical efficacy.",
+        ],
+    }
+
+
+def _essie_quote(value: str) -> str:
+    if not value.strip() or any(character in value for character in "\r\n"):
+        raise ValueError("ClinicalTrials.gov phrase filters must be nonempty single-line strings")
+    return '"' + value.replace('"', '\\"') + '"'
+
+
+def _range_expression(area: str, lower: Any, upper: Any, *, dates: bool = False) -> str:
+    if lower is None and upper is None:
+        raise ValueError(f"{area} range must contain at least one bound")
+    values = []
+    for name, value in (("minimum", lower), ("maximum", upper)):
+        if value is None:
+            values.append("MIN" if name == "minimum" else "MAX")
+        elif dates:
+            if not isinstance(value, str) or not _DATE_RE.fullmatch(value):
+                raise ValueError(f"{area} {name} must use YYYY-MM-DD")
+            values.append(value)
+        else:
+            if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+                raise ValueError(f"{area} {name} must be a non-negative integer")
+            values.append(str(value))
+    if lower is not None and upper is not None and lower > upper:
+        raise ValueError(f"{area} minimum exceeds maximum")
+    return f"AREA[{area}]RANGE[{values[0]},{values[1]}]"
+
+
+def _clinical_trial_params(query: str | None, filters: Mapping[str, Any], advanced_query: str | None) -> tuple[dict[str, Any], list[str]]:
+    allowed = {
+        "condition", "intervention", "overall_status", "phase", "study_type", "enrollment_min", "enrollment_max",
+        "primary_completion_start", "primary_completion_end", "first_posted_start", "first_posted_end",
+        "location_country", "lead_sponsor_class", "investigator", "sex", "healthy_volunteers",
+        "minimum_age", "maximum_age", "location_city", "location_state", "location_recruiting_only",
+        "sponsor_name", "sponsor_scope", "eligibility_keywords", "investigator_role",
+    }
+    unknown = sorted(set(filters) - allowed)
+    if unknown:
+        raise ValueError(f"unsupported ClinicalTrials.gov filters: {', '.join(unknown)}")
+    params: dict[str, Any] = {}
+    if query:
+        if len(query) > 2_000 or any(character in query for character in "\r\n"):
+            raise ValueError("query must be a bounded single-line expression")
+        params["query.term"] = query
+    if filters.get("condition"):
+        params["query.cond"] = str(filters["condition"])
+    if filters.get("intervention"):
+        params["query.intr"] = str(filters["intervention"])
+    statuses = list(filters.get("overall_status") or [])
+    if any(status not in _CT_STATUSES for status in statuses):
+        raise ValueError("overall_status contains an unsupported API v2 enum")
+    if statuses:
+        params["filter.overallStatus"] = "|".join(statuses)
+    advanced = []
+    phases = list(filters.get("phase") or [])
+    if any(phase not in _CT_PHASES for phase in phases):
+        raise ValueError("phase contains an unsupported API v2 enum")
+    if phases:
+        phase_terms = [f"AREA[Phase]{phase}" for phase in phases]
+        advanced.append(phase_terms[0] if len(phase_terms) == 1 else "(" + " OR ".join(phase_terms) + ")")
+    study_type = filters.get("study_type")
+    if study_type:
+        if study_type not in _CT_STUDY_TYPES:
+            raise ValueError("study_type contains an unsupported API v2 enum")
+        advanced.append(f"AREA[StudyType]{study_type}")
+    if filters.get("enrollment_min") is not None or filters.get("enrollment_max") is not None:
+        advanced.append(_range_expression("EnrollmentCount", filters.get("enrollment_min"), filters.get("enrollment_max")))
+    if filters.get("primary_completion_start") or filters.get("primary_completion_end"):
+        advanced.append(_range_expression("PrimaryCompletionDate", filters.get("primary_completion_start"), filters.get("primary_completion_end"), dates=True))
+    if filters.get("first_posted_start") or filters.get("first_posted_end"):
+        advanced.append(_range_expression("StudyFirstPostDate", filters.get("first_posted_start"), filters.get("first_posted_end"), dates=True))
+    sponsor_class = filters.get("lead_sponsor_class")
+    if sponsor_class:
+        if sponsor_class not in _CT_SPONSOR_CLASSES:
+            raise ValueError("lead_sponsor_class contains an unsupported API v2 enum")
+        advanced.append(f"AREA[LeadSponsorClass]{sponsor_class}")
+    if filters.get("investigator"):
+        name = _essie_quote(str(filters["investigator"]))
+        role = filters.get("investigator_role", "any")
+        if role == "official":
+            advanced.append(f"AREA[OverallOfficialName]{name}")
+        elif role == "responsible_party":
+            advanced.append(f"AREA[ResponsiblePartyInvestigatorFullName]{name}")
+        elif role == "any":
+            advanced.append(f"(AREA[OverallOfficialName]{name} OR AREA[ResponsiblePartyInvestigatorFullName]{name})")
+        else:
+            raise ValueError("investigator_role must be any, official, or responsible_party")
+    elif filters.get("investigator_role") is not None:
+        raise ValueError("investigator_role requires investigator")
+    if filters.get("sponsor_name"):
+        name = _essie_quote(str(filters["sponsor_name"]))
+        scope = filters.get("sponsor_scope", "lead")
+        if scope == "lead":
+            advanced.append(f"AREA[LeadSponsorName]{name}")
+        elif scope == "any":
+            advanced.append(f"(AREA[LeadSponsorName]{name} OR AREA[CollaboratorName]{name})")
+        else:
+            raise ValueError("sponsor_scope must be lead or any")
+    elif filters.get("sponsor_scope") is not None:
+        raise ValueError("sponsor_scope requires sponsor_name")
+    eligibility_keywords = filters.get("eligibility_keywords") or []
+    if not isinstance(eligibility_keywords, list) or len(eligibility_keywords) > 20:
+        raise ValueError("eligibility_keywords must be a list of at most 20 phrases")
+    for keyword in eligibility_keywords:
+        advanced.append(f"AREA[EligibilityCriteria]{_essie_quote(str(keyword))}")
+    sex = filters.get("sex")
+    if sex:
+        if sex not in {"FEMALE", "MALE", "ALL"}:
+            raise ValueError("sex must be FEMALE, MALE, or ALL")
+        advanced.append(f"AREA[Sex]{sex}")
+    if filters.get("healthy_volunteers") is not None:
+        if not isinstance(filters["healthy_volunteers"], bool):
+            raise ValueError("healthy_volunteers must be boolean")
+        advanced.append(f"AREA[HealthyVolunteers]{'y' if filters['healthy_volunteers'] else 'n'}")
+    if filters.get("minimum_age"):
+        advanced.append(f"AREA[MinimumAge]RANGE[{filters['minimum_age']},MAX]")
+    if filters.get("maximum_age"):
+        advanced.append(f"AREA[MaximumAge]RANGE[MIN,{filters['maximum_age']}]")
+    location_terms = []
+    for key, area in (("location_city", "LocationCity"), ("location_state", "LocationState")):
+        if filters.get(key):
+            location_terms.append(f"AREA[{area}]{_essie_quote(str(filters[key]))}")
+    if filters.get("location_recruiting_only"):
+        if not isinstance(filters["location_recruiting_only"], bool):
+            raise ValueError("location_recruiting_only must be boolean")
+        location_terms.append("AREA[LocationStatus]RECRUITING")
+    if filters.get("location_country"):
+        location_terms.append(f"AREA[LocationCountry]{_essie_quote(str(filters['location_country']))}")
+    if location_terms:
+        advanced.append("SEARCH[Location](" + " AND ".join(location_terms) + ")")
+    if advanced_query:
+        if len(advanced_query) > 4_000 or any(character in advanced_query for character in "\r\n"):
+            raise ValueError("advanced_query must be a bounded single-line Essie expression")
+        advanced.append(f"({advanced_query})")
+    if advanced:
+        params["filter.advanced"] = " AND ".join(advanced)
+    if not params:
+        raise ValueError("at least one query, filter, or advanced expression is required")
+    return params, advanced
+
+
+def _trim_clinical_trial(study: Mapping[str, Any], *, include_full_record: bool) -> dict[str, Any]:
+    protocol = study.get("protocolSection", {}) if isinstance(study, Mapping) else {}
+    identification = protocol.get("identificationModule", {}) or {}
+    design = protocol.get("designModule", {}) or {}
+    status = protocol.get("statusModule", {}) or {}
+    conditions = protocol.get("conditionsModule", {}) or {}
+    arms = protocol.get("armsInterventionsModule", {}) or {}
+    sponsor = (protocol.get("sponsorCollaboratorsModule", {}) or {}).get("leadSponsor", {}) or {}
+    contacts = protocol.get("contactsLocationsModule", {}) or {}
+    outcomes = protocol.get("outcomesModule", {}) or {}
+    eligibility = protocol.get("eligibilityModule", {}) or {}
+    nct_id = identification.get("nctId")
+    if not isinstance(nct_id, str) or not _NCT_RE.fullmatch(nct_id):
+        raise PublicDatabaseError("ClinicalTrials.gov study lacks a valid NCT identifier")
+    locations = contacts.get("locations", []) or []
+    record = {
+        "nct_id": nct_id.upper(),
+        "brief_title": _clean_text(identification.get("briefTitle")),
+        "official_title": _clean_text(identification.get("officialTitle")),
+        "overall_status": status.get("overallStatus"),
+        "status_dates": {
+            "verified": status.get("statusVerifiedDate"),
+            "first_posted": (status.get("studyFirstPostDateStruct") or {}).get("date"),
+            "last_update_posted": (status.get("lastUpdatePostDateStruct") or {}).get("date"),
+            "primary_completion": (status.get("primaryCompletionDateStruct") or {}).get("date"),
+        },
+        "study_type": design.get("studyType"),
+        "phases": design.get("phases", []) or [],
+        "enrollment": design.get("enrollmentInfo", {}) or {},
+        "design_info": design.get("designInfo", {}) or {},
+        "conditions": conditions.get("conditions", []) or [],
+        "interventions": [
+            {"type": item.get("type"), "name": item.get("name"), "other_names": item.get("otherNames", []) or []}
+            for item in arms.get("interventions", []) or []
+            if isinstance(item, Mapping)
+        ],
+        "lead_sponsor": {"name": sponsor.get("name"), "class": sponsor.get("class")},
+        "eligibility": {
+            "sex": eligibility.get("sex"),
+            "minimum_age": eligibility.get("minimumAge"),
+            "maximum_age": eligibility.get("maximumAge"),
+            "healthy_volunteers": eligibility.get("healthyVolunteers"),
+        },
+        "outcome_counts": {
+            "primary": len(outcomes.get("primaryOutcomes", []) or []),
+            "secondary": len(outcomes.get("secondaryOutcomes", []) or []),
+            "other": len(outcomes.get("otherOutcomes", []) or []),
+        },
+        "locations": [
+            {
+                "facility": item.get("facility"), "status": item.get("status"), "city": item.get("city"),
+                "state": item.get("state"), "country": item.get("country"),
+            }
+            for item in locations
+            if isinstance(item, Mapping)
+        ],
+        "has_results": bool(study.get("hasResults")),
+        "results_section_present": isinstance(study.get("resultsSection"), Mapping),
+    }
+    if include_full_record:
+        record["source_record"] = dict(study)
+    return record
+
+
+def clinical_trial_records(
+    query: str | None = None,
+    page_size: int = 100,
+    filters: Mapping[str, Any] | None = None,
+    max_records: int = 1_000,
+    advanced_query: str | None = None,
+    include_full_record: bool = False,
+    *,
+    client: PublicJSONClient | None = None,
+) -> dict[str, Any]:
+    """Retrieve a count-verified, deterministically ordered API v2 cohort."""
+    query = query.strip() if query else None
+    if not 1 <= page_size <= 1_000 or not 1 <= max_records <= 10_000:
+        raise ValueError("page_size must be 1..1000 and max_records must be 1..10000")
+    if not isinstance(include_full_record, bool):
+        raise ValueError("include_full_record must be boolean")
+    declared_filters = dict(filters or {})
+    base_params, generated_advanced = _clinical_trial_params(query, declared_filters, advanced_query)
+    client = client or PublicJSONClient()
+    raw_studies: list[dict[str, Any]] = []
+    provenance = []
+    total_count: int | None = None
+    page_token: str | None = None
+    page_index = 0
+    while len(raw_studies) < max_records:
+        remaining = max_records - len(raw_studies)
+        params = {**base_params, "pageSize": min(page_size, remaining), "format": "json"}
+        if page_index == 0:
+            params["countTotal"] = "true"
+        if page_token:
+            params["pageToken"] = page_token
+        payload, request_meta = client.get_with_metadata("https://clinicaltrials.gov", "/api/v2/studies", params)
+        page = payload.get("studies", [])
+        if not isinstance(page, list):
+            raise PublicDatabaseError("ClinicalTrials.gov response schema is not recognized")
+        if page_index == 0:
+            try:
+                total_count = int(payload["totalCount"])
+            except (KeyError, TypeError, ValueError):
+                raise PublicDatabaseError("ClinicalTrials.gov first page lacks a valid totalCount") from None
+        raw_studies.extend(item for item in page if isinstance(item, dict))
+        provenance.append(
+            {
+                "page_index": page_index,
+                "page_token_used": page_token,
+                "request": request_meta,
+                "parameters": params,
+                "studies_in_page": len(page),
+                "total_count": total_count if page_index == 0 else None,
+            }
+        )
+        page_token = payload.get("nextPageToken")
+        page_index += 1
+        if not page_token:
+            break
+    assert total_count is not None
+    by_id: dict[str, dict[str, Any]] = {}
+    duplicate_ids = []
+    for study in raw_studies:
+        record = _trim_clinical_trial(study, include_full_record=include_full_record)
+        if record["nct_id"] in by_id:
+            duplicate_ids.append(record["nct_id"])
+        else:
+            by_id[record["nct_id"]] = record
+    nct_ids = sorted(by_id)
+    records_truncated = total_count > len(nct_ids)
+    if not records_truncated and len(nct_ids) != total_count:
+        raise PublicDatabaseError("ClinicalTrials.gov completed pagination does not reconcile with totalCount")
+    return {
+        "query": {
+            "term": query,
+            "filters": declared_filters,
+            "advanced_query": advanced_query,
+            "generated_advanced_terms": generated_advanced,
+            "page_size": page_size,
+            "max_records": max_records,
+            "include_full_record": include_full_record,
+        },
+        "api_total_count": total_count,
+        "returned_count": len(nct_ids),
+        "nct_ids": nct_ids,
+        "studies": [by_id[nct_id] for nct_id in nct_ids],
+        "records_truncated": records_truncated,
+        "next_page_token_present": bool(page_token),
+        "duplicate_nct_ids": sorted(set(duplicate_ids)),
+        "local_post_filters_applied": [],
+        "provenance": {
+            "retrieved_at_runtime": True,
+            "service": "ClinicalTrials.gov API v2",
+            "contract": CLINICAL_TRIALS_CONTRACT_VERSION,
+            "requests": provenance,
+        },
+        "limitations": [
+            "Registry records are sponsor-submitted and require status, dates, protocol, amendments, results, and linked publications to be interpreted together.",
+            "A registered or completed study is not evidence of efficacy, and missing results must remain explicit.",
+            "When records_truncated is true, the returned cohort is incomplete and cannot support prevalence or exhaustive-review claims.",
+        ],
+    }

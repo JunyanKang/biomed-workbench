@@ -64,5 +64,25 @@
     "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-digests", "mode", "organism", "identifier-namespace", "database-and-release", "mapping-losses", "ranking-statistic-or-selection-rule", "parameters", "actual-tool-versions", "plot-standard-version", "output-digests", "quality-gates"],
     "forbidden_actions": ["Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.", "Do not invent a background, run GSEA on significance-filtered genes, silently deduplicate rankings, switch databases, relax thresholds after seeing results, fill empty results, or claim pathway activation or causality from enrichment alone."],
     "requires_observed_execution": true
+  },
+  "routing": {
+    "method_aliases": [
+      "functional-enrichment",
+      "Run GO/KEGG ORA or preranked GSEA",
+      "GO enrichment",
+      "KEGG enrichment",
+      "GSEA",
+      "fgsea",
+      "clusterProfiler",
+      "GO KEGG 富集分析",
+      "预排序 GSEA"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 3,
+    "requires_reviewed_upstream_types": []
   }
 }

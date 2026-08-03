@@ -19,6 +19,7 @@ class RunnerCliTests(unittest.TestCase):
         payload = json.loads(result.stderr)
 
         self.assertEqual(result.returncode, 2)
+        self.assertEqual(payload["code"], "INPUT_ARTIFACT_REQUIRED")
         self.assertIn("error", payload)
         self.assertNotIn("Traceback", result.stderr)
 

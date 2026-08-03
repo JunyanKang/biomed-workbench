@@ -1,11 +1,10 @@
 import unittest
 
 from biomed_workbench.assistant import ResearchAssistant
-from biomed_workbench.orchestration.controller import ResearchController
 from biomed_workbench.orchestration.planner import PlanningRequest
 from tests.unit.kernel.test_context import project_context
 from tests.unit.kernel.test_hypotheses import hypothesis
-from tests.unit.orchestration.test_controller import completed_execution
+from tests.unit.orchestration.test_controller import ResearchController, completed_execution
 from tests.unit.orchestration.test_planner import inline_artifact, module_payload, workflow_registry
 
 

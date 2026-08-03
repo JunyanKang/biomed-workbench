@@ -257,5 +257,25 @@
   "schema_version": 1,
   "title": "Apply a sequential flow-cytometry gating plan",
   "tool_requirements": [],
-  "version": "1.1.0"
+  "version": "1.1.0",
+  "routing": {
+    "method_aliases": [
+      "flow-cytometry-summary",
+      "Apply a sequential flow-cytometry gating plan",
+      "flow cytometry summary",
+      "Import FCS flow cytometry data and apply a gating plan",
+      "汇总流式细胞术门控结果",
+      "流式门控",
+      "导入 FCS 流式细胞术文件并做门控"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 3,
+    "requires_reviewed_upstream_types": [
+      "cytometry_event_table"
+    ]
+  }
 }

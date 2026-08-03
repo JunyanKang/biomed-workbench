@@ -89,6 +89,82 @@ def build_report(codex_cli: Path, source: Path) -> dict[str, Any]:
             ),
             "installed route probe",
         )
+        project_root = isolated_home / "scientific-project"
+        project_root.mkdir()
+        binding_path = isolated_home / "data-profile-bindings.json"
+        binding_path.write_text(
+            json.dumps(
+                {
+                    "project_context": {
+                        "project_id": "installed-data-profile",
+                        "objective": "Verify strict public execution from the isolated installed plugin cache.",
+                        "scientific_question": "Does the registered table retain complete row and missing-value accounting?",
+                        "species": ["human"],
+                        "biological_scope": {"verification": "installed-cache"},
+                        "study_design": "release-verification",
+                        "experimental_unit": "record",
+                        "comparisons": [{"id": "accounting-check", "numerator_group": "observed", "denominator_group": "declared", "covariates": []}],
+                        "constraints": [],
+                        "required_deliverables": ["table-profile"],
+                        "required_evidence_types": ["technical-accounting"],
+                        "privacy_level": "public",
+                    },
+                    "hypotheses": [
+                        {
+                            "id": "hypothesis-installed-table-accounting",
+                            "statement": "The registered table retains complete row and missing-value accounting after profiling.",
+                            "biological_scope": {"verification": "installed-cache"},
+                            "experimental_unit": "record",
+                            "comparison_id": "accounting-check",
+                            "expected_direction": "no-change",
+                            "expected_observations": ["The output reports exactly two registered rows."],
+                            "disconfirming_observations": ["The output row accounting differs from the two registered rows."],
+                            "alternative_explanations": ["An input-binding or installed-cache defect could alter the observed accounting."],
+                            "required_evidence_types": ["technical-accounting"],
+                            "minimum_independent_evidence_groups": 1,
+                            "permitted_claim_strength": "descriptive",
+                            "status": "active",
+                            "supporting_evidence_ids": [],
+                            "conflicting_evidence_ids": [],
+                            "missing_evidence_types": ["technical-accounting"],
+                            "parent_hypothesis_id": None,
+                            "revision": 1,
+                        }
+                    ],
+                    "analysis_admission": {
+                        "rationale_zh": "在隔离安装副本中验证公开入口、项目绑定和表格行数核对。",
+                        "rationale_en": "Verify the public entry, project binding, and table row accounting in the isolated installation.",
+                        "method": "Use the packaged data-profile implementation through the strict project-bound public entry.",
+                        "official_sources": ["https://github.com/JunyanKang/biomed-workbench"],
+                        "alternatives_considered": ["An internal runner probe would not validate the strict public entry."],
+                        "assumptions": ["The two inline records are the complete bounded release fixture."],
+                        "parameter_justifications": {"rows": "Two rows cover present and missing values without external data."},
+                        "acceptance_criteria": ["The execution completes and stops for scientific artifact review with two accounted rows."],
+                        "falsification_criteria": ["Any public-entry error, row mismatch, or missing review gate fails installation verification."],
+                        "approved": True,
+                    },
+                    "artifacts": {
+                        "records": {
+                            "artifact_id": "artifact-installed-table",
+                            "format_name": "inline-json",
+                            "format_version": "1",
+                            "compression": "none",
+                            "orientation": "request-object",
+                            "indexes": [],
+                            "scientific_scope": {"verification": "installed-cache"},
+                            "denominator": "two-registered-records",
+                            "processing_level": "declared",
+                            "quality_status": "passed",
+                            "representation": "structured",
+                            "content": {},
+                            "payload_files": [],
+                        }
+                    },
+                },
+                sort_keys=True,
+            ),
+            encoding="utf-8",
+        )
         execution = json_output(
             run(
                 [
@@ -97,6 +173,12 @@ def build_report(codex_cli: Path, source: Path) -> dict[str, Any]:
                     "data-profile",
                     "--input",
                     '{"rows":[{"sample":"S1","value":1.2},{"sample":"S2","value":null}]}',
+                    "--project-root",
+                    str(project_root),
+                    "--artifact-bindings",
+                    str(binding_path),
+                    "--compatibility-row",
+                    "python-3.14.3-inline-json-1",
                 ],
                 cwd=installed_resolved,
                 env=installed_env,
@@ -108,7 +190,12 @@ def build_report(codex_cli: Path, source: Path) -> dict[str, Any]:
             raise RuntimeError("installed cache does not expose exactly one metadata-bearing skill")
         if "data-profile" not in route.get("selected_module_ids", []):
             raise RuntimeError("installed router did not select data-profile for the bounded table objective")
-        if execution.get("status") != "completed" or execution.get("capability_id") != "data-profile" or execution.get("output", {}).get("row_count") != 2:
+        output_rows = (
+            execution.get("output_artifacts", [{}])[0]
+            .get("content", {})
+            .get("row_count")
+        )
+        if execution.get("status") != "completed" or execution.get("module_id") != "data-profile" or execution.get("stop_reason") != "awaiting_artifact_review" or output_rows != 2:
             raise RuntimeError("installed data-profile execution did not complete with two accounted rows")
         source_registry = json.loads((source / "biomed_workbench" / "modules" / "index.json").read_text(encoding="utf-8"))
         checks = [
@@ -118,7 +205,7 @@ def build_report(codex_cli: Path, source: Path) -> dict[str, Any]:
             ("manifest_version_resolution", installation.get("version") == plugin_manifest["version"]),
             ("installed_cache_module_index", registry["module_count"] == source_registry["module_count"] and registry["registry_digest"] == source_registry["registry_digest"]),
             ("installed_cache_routing", "data-profile" in route["selected_module_ids"]),
-            ("installed_cache_execution", execution["status"] == "completed" and execution["output"]["row_count"] == 2),
+            ("installed_cache_execution", execution["status"] == "completed" and execution["stop_reason"] == "awaiting_artifact_review" and output_rows == 2),
             ("installed_skill_metadata", len(skill_paths) == 1),
             ("cache_snapshot_isolation", installed_resolved.is_relative_to(isolated_home) and installed_resolved != source.resolve()),
             ("new_task_reload_required", True),
@@ -140,8 +227,9 @@ def build_report(codex_cli: Path, source: Path) -> dict[str, Any]:
             "installed_skill_sha256": hashlib.sha256(skill_paths[0].read_bytes()).hexdigest(),
             "credentials": registry["credentials"],
             "route_selected_module_ids": route["selected_module_ids"],
-            "executed_module_id": execution["capability_id"],
-            "executed_row_count": execution["output"]["row_count"],
+            "executed_module_id": execution["module_id"],
+            "executed_row_count": output_rows,
+            "execution_stop_reason": execution["stop_reason"],
             "new_task_required": True,
             "checks": [{"operation": operation, "passed": passed} for operation, passed in checks],
         }

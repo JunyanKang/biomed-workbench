@@ -130,7 +130,15 @@ def run_scenario(fixture):
         node_executor=executor,
         evidence_mapper=mapper,
         replanner=lambda _state, current, _executions, _findings: child_plan(fixture, current),
-        policy=ControllerPolicy(max_plan_revisions=2, max_node_attempts=1, parallel_workers=3, stop_on_fatal=True),
+        policy=ControllerPolicy(
+            max_plan_revisions=2,
+            max_node_attempts=1,
+            parallel_workers=3,
+            stop_on_fatal=True,
+            require_approved_admission=False,
+            require_scientific_review=False,
+            require_evidence_map_for_publication=False,
+        ),
     )
     result = controller.advance(state, parent)
     replayed = ProjectState.from_dict(result.state.to_dict())

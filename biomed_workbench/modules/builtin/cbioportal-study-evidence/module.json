@@ -29,5 +29,21 @@
   "input_schema": {"type": "object", "additionalProperties": false, "properties": {"study_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$"}}, "required": ["study_id"]},
   "output_schema": {"type": "object", "additionalProperties": false, "properties": {"study_id": {"type": "string"}, "found": {"type": "boolean"}, "study": {"type": "object", "nullable": true}, "provenance": {"type": "object"}, "limitations": {"type": "array"}}, "required": ["study_id", "found", "study", "provenance", "limitations"]},
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room cBioPortal study-record capability informed by direct public API observation."]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room cBioPortal study-record capability informed by direct public API observation."]},
+  "routing": {
+    "method_aliases": [
+      "cbioportal-study-evidence",
+      "Retrieve cBioPortal cancer study evidence",
+      "cBioPortal study evidence",
+      "cancer genomics cohort record",
+      "cBioPortal队列信息"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 1,
+    "requires_reviewed_upstream_types": []
+  }
 }

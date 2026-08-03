@@ -88,5 +88,22 @@
   "credentials": [],
   "limitations": ["The validated row covers one static 8-bit untagged-sRGB PNG, JPEG, or WebP on macOS arm64 or Linux x86-64 and emits PNG only. It does not perform color-profile conversion, animation processing, semantic foreground segmentation, hair or microscopy-specific matting, manual mask refinement, calibrated image analysis, or batch processing. JPEG key backgrounds may contain compression artifacts and need wider declared thresholds plus full-resolution review. Compute resource provisioning remains outside plugin scope."],
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room implementation informed by general chroma-key compositing, alpha-matte, and despill principles.", "https://www.w3.org/TR/png-3/", "https://developers.google.com/speed/webp/docs/riff_container", "https://pillow.readthedocs.io/en/stable/releasenotes/12.1.1.html"]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room implementation informed by general chroma-key compositing, alpha-matte, and despill principles.", "https://www.w3.org/TR/png-3/", "https://developers.google.com/speed/webp/docs/riff_container", "https://pillow.readthedocs.io/en/stable/releasenotes/12.1.1.html"]},
+  "routing": {
+    "method_aliases": [
+      "image-chroma-key-remove",
+      "Remove a uniform chroma-key background from a static communication image",
+      "remove chroma key background",
+      "make scientific illustration background transparent",
+      "despill green screen image",
+      "去除科研示意图纯色背景"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 1,
+    "requires_reviewed_upstream_types": []
+  }
 }

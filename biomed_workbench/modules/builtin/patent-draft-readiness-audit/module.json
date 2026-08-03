@@ -30,5 +30,25 @@
   "input_schema": {"type": "object", "additionalProperties": false, "properties": {"draft": {"type": "object"}}, "required": ["draft"]},
   "output_schema": {"type": "object", "additionalProperties": false, "properties": {"claim_count": {"type": "integer"}, "source_count": {"type": "integer"}, "evidence_count": {"type": "integer"}, "figure_count": {"type": "integer"}, "findings": {"type": "array"}, "error_count": {"type": "integer"}, "warning_count": {"type": "integer"}, "ready_for_professional_review": {"type": "boolean"}, "limitations": {"type": "array"}}, "required": ["claim_count", "source_count", "evidence_count", "figure_count", "findings", "error_count", "warning_count", "ready_for_professional_review", "limitations"]},
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room patent-draft validation capability informed by direct Nature skill review."]}
+  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room patent-draft validation capability informed by direct Nature skill review."]},
+  "routing": {
+    "method_aliases": [
+      "patent-draft-readiness-audit",
+      "Audit structured patent draft readiness",
+      "patent draft readiness audit",
+      "validate structured patent draft",
+      "patent readiness",
+      "patent readiness from research evidence",
+      "patent draft readiness",
+      "审计专利草案完整性和可追溯性",
+      "检查专利草案证据映射和交付质量门"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 4,
+    "requires_reviewed_upstream_types": []
+  }
 }

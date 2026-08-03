@@ -57,5 +57,23 @@
     "id": "pymupdf-1272-python-3143", "module_version": "0.1.0", "tool_versions": {"PyMuPDF": [">=1.27,<1.28"]}, "dependency_versions": {"python": [">=3.14,<3.15"]}, "input_formats": {"source_pdf": ["application-pdf@1.4", "application-pdf@1.5", "application-pdf@1.6", "application-pdf@1.7", "application-pdf@2.0"]}, "output_formats": {"page_evidence": ["normalized-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["pdf-evidence-extraction-regression-v1"], "end_to_end_evidence_ids": ["pdf-evidence-extraction-e2e-v1"], "verified_at": "2026-07-23"
   }],
   "quality_gates": [{"id": "pdf-readable-and-bounded", "severity": "fatal", "blocks_interpretation": true, "description": "The PDF is unencrypted, within the declared page bound, and each page extraction is explicitly bounded."}, {"id": "pdf-content-boundary", "severity": "fatal", "blocks_interpretation": true, "description": "The output labels PDF text as untrusted source evidence and records that embedded instructions are not executable."}],
-  "evidence_effects": ["creates-page-addressable-pdf-evidence", "records-pdf-extraction-coverage-and-provenance"]
+  "evidence_effects": ["creates-page-addressable-pdf-evidence", "records-pdf-extraction-coverage-and-provenance"],
+  "routing": {
+    "method_aliases": [
+      "pdf-evidence-extraction",
+      "Extract page-addressable PDF evidence",
+      "extract PDF evidence",
+      "read paper PDF",
+      "PDF page text",
+      "PDF 论文证据提取",
+      "按页提取 PDF"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 2,
+    "requires_reviewed_upstream_types": []
+  }
 }

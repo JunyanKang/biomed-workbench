@@ -7,7 +7,8 @@ from dataclasses import dataclass
 from typing import Callable
 
 from ..kernel.evidence import EvidenceRecord
-from ..kernel.identity import digest_value
+from ..kernel.artifact_store import ProjectArtifactStore
+from ..kernel.identity import digest_value, thaw
 from ..kernel.plans import PlanNode, ResearchDAG
 from ..kernel.state import ProjectState, apply_event
 from ..modules.compatibility import EnvironmentSnapshot
@@ -30,12 +31,23 @@ class ControllerPolicy:
     max_node_attempts: int = 2
     parallel_workers: int = 4
     stop_on_fatal: bool = True
+    require_approved_admission: bool = True
+    require_scientific_review: bool = True
+    require_evidence_map_for_publication: bool = True
 
     def __post_init__(self) -> None:
         if self.max_plan_revisions < 0 or self.max_node_attempts < 1 or not 1 <= self.parallel_workers <= 16:
             raise ValueError("controller policy bounds are invalid")
-        if not isinstance(self.stop_on_fatal, bool):
-            raise ValueError("controller stop_on_fatal must be boolean")
+        if any(
+            not isinstance(value, bool)
+            for value in (
+                self.stop_on_fatal,
+                self.require_approved_admission,
+                self.require_scientific_review,
+                self.require_evidence_map_for_publication,
+            )
+        ):
+            raise ValueError("controller policy flags must be boolean")
 
 
 @dataclass(frozen=True)
@@ -57,6 +69,10 @@ class ResearchController:
         evidence_mapper: EvidenceMapper | None = None,
         replanner: Replanner | None = None,
         policy: ControllerPolicy | None = None,
+        artifact_store: ProjectArtifactStore | None = None,
+        allow_mutation: bool = False,
+        entrypoint_resolver: Callable[[str], Callable[..., object]] | None = None,
+        command_executable_resolver: Callable[[str], str | None] | None = None,
     ) -> None:
         self._registry = registry
         self._environment_provider = environment_provider
@@ -64,6 +80,12 @@ class ResearchController:
         self._evidence_mapper = evidence_mapper or (lambda _execution, _node, _state: ())
         self._replanner = replanner
         self._policy = policy or ControllerPolicy()
+        self._artifact_store = artifact_store
+        self._allow_mutation = allow_mutation
+        self._entrypoint_resolver = entrypoint_resolver
+        self._command_executable_resolver = command_executable_resolver
+        if not isinstance(allow_mutation, bool):
+            raise ValueError("controller allow_mutation must be boolean")
 
     def _declared_alternative_replan(
         self,
@@ -175,7 +197,54 @@ class ResearchController:
             node,
             self._registry,
             environment_provider=self._environment_provider,
+            entrypoint_resolver=self._entrypoint_resolver,
+            artifact_store=self._artifact_store,
+            command_executable_resolver=self._command_executable_resolver,
+            allow_mutation=self._allow_mutation,
         )
+
+    @staticmethod
+    def _recorded_execution(state: ProjectState, node_id: str) -> NodeExecution | None:
+        for event in reversed(state.decisions):
+            if event.event_type != "node_execution_recorded":
+                continue
+            execution = NodeExecution.from_dict(thaw(event.payload)["execution"])
+            if execution.node_id == node_id:
+                return execution
+        return None
+
+    def _release_reviewed_nodes(self, state: ProjectState, plan: ResearchDAG) -> ProjectState:
+        """Release downstream dependencies only after every output has a retained decision."""
+        decisions = {item.artifact_id: item for item in state.scientific_decisions}
+        evidence_ids = {item.id for item in state.evidence}
+        for node in tuple(item for item in plan.nodes if item.status == "awaiting_review"):
+            output_ids = tuple(node.planned_output_artifact_ids.values())
+            if not output_ids or not set(output_ids) <= set(decisions):
+                continue
+            node_decisions = tuple(decisions[artifact_id] for artifact_id in output_ids)
+            if not all(item.active_evidence for item in node_decisions):
+                state = self._status(state, plan.id, node, "skipped", node.attempt)
+                plan = self._active_plan(state)
+                continue
+            execution = self._recorded_execution(state, node.id)
+            if execution is None or execution.status != "completed":
+                raise ValueError("reviewed plan node has no matching completed execution record")
+            for evidence in self._evidence_mapper(execution, node, state):
+                if evidence.id in evidence_ids:
+                    continue
+                state = apply_event(
+                    state,
+                    "evidence_added",
+                    {"evidence": evidence.to_dict()},
+                    rationale="Release reviewed module evidence after an explicit retain decision.",
+                    affected_artifact_ids=(evidence.artifact_id,),
+                    affected_hypothesis_ids=(evidence.hypothesis_id,),
+                    replacement_action_ids=(node.id,),
+                )
+                evidence_ids.add(evidence.id)
+            state = self._status(state, plan.id, node, "completed", node.attempt)
+            plan = self._active_plan(state)
+        return state
 
     def advance(self, state: ProjectState, plan: ResearchDAG) -> CycleResult:
         if plan.id not in {item.id for item in state.plans}:
@@ -196,12 +265,39 @@ class ResearchController:
 
         while True:
             active = self._active_plan(state)
+            if self._policy.require_scientific_review:
+                state = self._release_reviewed_nodes(state, active)
+            active = self._active_plan(state)
             completed_ids = {node.id for node in active.nodes if node.status == "completed"}
-            pending = tuple(node for node in active.nodes if node.status in {"pending", "ready"} and set(node.dependencies) <= completed_ids)
+            dependency_ready = tuple(node for node in active.nodes if node.status in {"pending", "ready"} and set(node.dependencies) <= completed_ids)
+            approved_nodes = {item.plan_node_id for item in state.analysis_admissions if item.approved}
+            publication_blocked = {
+                node.id
+                for node in dependency_ready
+                if self._policy.require_evidence_map_for_publication
+                and self._registry.get(node.module_id).module_type == "delivery"
+                and "publication" in self._registry.get(node.module_id).domains
+                and not state.evidence_map_versions
+            }
+            pending = tuple(
+                node for node in dependency_ready
+                if (not self._policy.require_approved_admission or node.id in approved_nodes)
+                and node.id not in publication_blocked
+            )
             if not pending:
                 statuses = {node.status for node in active.nodes}
                 if statuses == {"completed"}:
                     stop_reason = "plan_completed"
+                elif dependency_ready and self._policy.require_approved_admission:
+                    stop_reason = "awaiting_analysis_admission"
+                elif publication_blocked:
+                    stop_reason = "awaiting_evidence_map"
+                elif "awaiting_review" in statuses and self._policy.require_scientific_review:
+                    stop_reason = "awaiting_artifact_review"
+                elif "awaiting_observed_execution" in statuses or "prepared" in statuses:
+                    stop_reason = "awaiting_observed_execution"
+                elif "skipped" in statuses:
+                    stop_reason = "scientific_decision_excluded"
                 elif "failed" in statuses:
                     stop_reason = "failed"
                 else:
@@ -249,17 +345,28 @@ class ResearchController:
                             affected_hypothesis_ids=node.target_hypothesis_ids,
                             replacement_action_ids=(node.id,),
                         )
-                    for evidence in self._evidence_mapper(execution, node, state):
-                        state = apply_event(
-                            state,
-                            "evidence_added",
-                            {"evidence": evidence.to_dict()},
-                            rationale="Link normalized module evidence to its target hypothesis.",
-                            affected_artifact_ids=(evidence.artifact_id,),
-                            affected_hypothesis_ids=(evidence.hypothesis_id,),
-                            replacement_action_ids=(node.id,),
-                        )
-                    state = self._status(state, current_plan.id, node, "completed", node.attempt)
+                    if self._policy.require_scientific_review:
+                        state = self._status(state, current_plan.id, node, "awaiting_review", node.attempt)
+                    else:
+                        for evidence in self._evidence_mapper(execution, node, state):
+                            state = apply_event(
+                                state,
+                                "evidence_added",
+                                {"evidence": evidence.to_dict()},
+                                rationale="Link normalized module evidence to its target hypothesis.",
+                                affected_artifact_ids=(evidence.artifact_id,),
+                                affected_hypothesis_ids=(evidence.hypothesis_id,),
+                                replacement_action_ids=(node.id,),
+                            )
+                        state = self._status(state, current_plan.id, node, "completed", node.attempt)
+                elif execution.status == "awaiting_observed_execution":
+                    state = self._status(
+                        state,
+                        current_plan.id,
+                        node,
+                        "awaiting_observed_execution",
+                        node.attempt,
+                    )
                 elif execution.status == "failed" and node.attempt < self._policy.max_node_attempts:
                     state = self._status(state, current_plan.id, node, "pending", node.attempt)
                 else:
@@ -293,6 +400,15 @@ class ResearchController:
                     followup.assessments,
                     followup.stop_reason,
                 )
+
+        if stop_reason in {
+            "awaiting_analysis_admission",
+            "awaiting_artifact_review",
+            "awaiting_observed_execution",
+            "awaiting_evidence_map",
+            "scientific_decision_excluded",
+        }:
+            return CycleResult(state, self._active_plan(state), tuple(executions), (), stop_reason)
 
         assessments = []
         for hypothesis in state.hypotheses:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any, Mapping
 
 from ..kernel.artifacts import ScientificArtifact
 from ..kernel.identity import digest_value, validate_identifier
@@ -51,6 +52,13 @@ class QualityFinding:
             "blocks_interpretation": self.blocks_interpretation,
             "remediation_artifact_types": list(self.remediation_artifact_types),
         }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "QualityFinding":
+        values = dict(payload)
+        values["subject_ids"] = tuple(values["subject_ids"])
+        values["remediation_artifact_types"] = tuple(values["remediation_artifact_types"])
+        return cls(**values)
 
 
 def _finding(code: str, severity: str, subjects: tuple[str, ...], message: str, remediation: tuple[str, ...] = ("quality_report",), *, blocks_execution: bool | None = None) -> QualityFinding:

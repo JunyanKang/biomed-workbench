@@ -60,5 +60,22 @@
     "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-digests", "normalization", "missingness-policy", "support-count-semantics", "formula", "coefficient", "factor-levels", "actual-tool-versions", "plot-standard-version", "output-digests", "quality-gates"],
     "forbidden_actions": ["Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.", "Do not invent protein support counts, impute design variables, treat technical runs as replicates, repair rank deficiency silently, select a coefficient after reviewing significance, or present generated but unexecuted code as evidence."],
     "requires_observed_execution": true
+  },
+  "routing": {
+    "method_aliases": [
+      "proteomics-deqms",
+      "Run peptide-count-aware DEqMS proteomics inference",
+      "DEqMS",
+      "proteomics differential abundance",
+      "peptide count adjusted proteomics",
+      "蛋白质组 DEqMS 差异分析"
+    ],
+    "exclusion_terms": [],
+    "required_any_terms": [],
+    "named_method_priority": 100
+  },
+  "orchestration": {
+    "scientific_stage": 3,
+    "requires_reviewed_upstream_types": []
   }
 }
