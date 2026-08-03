@@ -23,6 +23,7 @@ class JournalStandardsTests(unittest.TestCase):
             )[0]
             journal_rows = [line for line in table.splitlines() if line.startswith("| [")]
             self.assertEqual(len(journal_rows), catalog["journal_count"])
+            self.assertEqual(len(journal_rows), 100)
             self.assertIn("JCR 2026", text)
             self.assertIn("2025 JIF", text)
             for profile in catalog["journals"]:
@@ -30,7 +31,8 @@ class JournalStandardsTests(unittest.TestCase):
 
     def test_active_catalog_is_versioned_complete_and_official_source_bound(self):
         catalog, digest = _load_catalog()
-        self.assertGreaterEqual(catalog["journal_count"], 50)
+        repository_root = Path(CATALOG_ROOT).parents[2]
+        self.assertEqual(catalog["journal_count"], 100)
         self.assertEqual(catalog["journal_count"], len(catalog["journals"]))
         self.assertEqual(len({row["id"] for row in catalog["journals"]}), catalog["journal_count"])
         self.assertEqual(len(digest), 64)
@@ -39,10 +41,42 @@ class JournalStandardsTests(unittest.TestCase):
             self.assertRegex(profile["reviewed_on"], r"^20\d\d-\d\d-\d\d$")
             self.assertTrue(profile["official_sources"])
             self.assertTrue(all(url.startswith("https://") for url in profile["official_sources"]))
+            metric = profile["journal_metrics"]
+            self.assertEqual(metric["edition"], "2026")
+            self.assertEqual(metric["metric_year"], 2025)
+            self.assertTrue(metric["categories"])
+            self.assertIn(
+                metric["source"]["level"],
+                {
+                    "primary_clarivate",
+                    "secondary_institutional_jcr_repost",
+                    "secondary_specialist_jcr_index",
+                },
+            )
+            self.assertTrue(metric["source"]["url"].startswith("https://"))
+            self.assertRegex(metric["source"]["selected_record_sha256"], r"^[0-9a-f]{64}$")
+            if metric["jif"] is None:
+                self.assertEqual(metric["jif_status"], "not_assigned")
+            else:
+                self.assertGreater(metric["jif"], 0)
+                self.assertEqual(metric["jif_status"], "reported")
+
+        sortable = [
+            profile["journal_metrics"]["jif"]
+            for profile in catalog["journals"]
+            if profile["journal_metrics"]["jif"] is not None
+        ]
+        self.assertEqual(sortable, sorted(sortable, reverse=True))
 
         index = json.loads((Path(CATALOG_ROOT) / "index.json").read_text(encoding="utf-8"))
         self.assertEqual(index["active_catalog_version"], catalog["catalog_version"])
         self.assertEqual(index["active_catalog_sha256"], digest)
+        source_path = repository_root / catalog["metric_source_manifest"]["file"]
+        self.assertTrue(source_path.is_file())
+        self.assertEqual(
+            catalog["metric_source_manifest"]["sha256"],
+            index["metric_source_sha256"],
+        )
 
     def test_recommendation_excludes_impact_factor_and_acceptance_probability(self):
         result = journal_targeting_and_compliance(
@@ -56,6 +90,13 @@ class JournalStandardsTests(unittest.TestCase):
             top_k=3,
         )
         self.assertEqual(len(result["recommendations"]), 3)
+        recommended_titles = {row["title"] for row in result["recommendations"]}
+        self.assertIn("Developmental Cell", recommended_titles)
+        self.assertFalse(any("Oncology" in title or "Cancer" in title for title in recommended_titles))
+        self.assertTrue(all(row["journal_metrics"] for row in result["recommendations"]))
+        self.assertTrue(
+            all(row["journal_metrics"]["source"]["level"] for row in result["recommendations"])
+        )
         self.assertFalse(result["policy"]["impact_factor_used"])
         self.assertFalse(result["policy"]["acceptance_probability_claimed"])
         rendered = json.dumps(result).lower()

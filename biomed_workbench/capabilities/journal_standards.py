@@ -10,7 +10,37 @@ from typing import Any
 
 
 CATALOG_ROOT = Path(__file__).resolve().parents[1] / "knowledge" / "journal_standards"
-TOKEN_RE = re.compile(r"[a-z0-9]+(?:[- ][a-z0-9]+)*", re.IGNORECASE)
+TOKEN_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*", re.IGNORECASE)
+STOPWORDS = {
+    "and",
+    "are",
+    "for",
+    "from",
+    "into",
+    "our",
+    "the",
+    "their",
+    "this",
+    "through",
+    "using",
+    "with",
+    "research",
+    "researcher",
+    "researchers",
+    "seeking",
+    "study",
+    "studies",
+}
+TOKEN_ALIASES = {
+    "biological": "biology",
+    "biologist": "biology",
+    "biologists": "biology",
+    "cellular": "cell",
+    "developmental": "development",
+    "genomic": "genomics",
+    "medical": "medicine",
+    "regenerative": "regeneration",
+}
 
 
 def _load_catalog(version: str | None = None) -> tuple[dict[str, Any], str]:
@@ -28,31 +58,67 @@ def _load_catalog(version: str | None = None) -> tuple[dict[str, Any], str]:
         raise ValueError("active journal standard catalog failed digest verification")
     if catalog.get("journal_count") != len(catalog.get("journals", [])) or len(catalog["journals"]) < 50:
         raise ValueError("journal standard catalog is incomplete")
+    if selected == index["active_catalog_version"]:
+        if len(catalog["journals"]) != 100:
+            raise ValueError("active journal standard catalog must contain 100 journals")
+        manifest = catalog.get("metric_source_manifest", {})
+        source_file = CATALOG_ROOT.parents[2] / str(manifest.get("file", ""))
+        if not source_file.is_file():
+            raise ValueError("active journal metric source manifest is unavailable")
+        source_digest = hashlib.sha256(source_file.read_bytes()).hexdigest()
+        if source_digest != manifest.get("sha256") or source_digest != index.get("metric_source_sha256"):
+            raise ValueError("active journal metric source manifest failed digest verification")
+        previous_jif = float("inf")
+        seen_unassigned = False
+        for profile in catalog["journals"]:
+            metric = profile.get("journal_metrics")
+            if not isinstance(metric, dict) or not metric.get("categories") or not metric.get("source"):
+                raise ValueError("active journal standard has incomplete metric provenance")
+            jif = metric.get("jif")
+            if jif is None:
+                seen_unassigned = True
+            elif seen_unassigned or not isinstance(jif, (int, float)) or isinstance(jif, bool) or jif > previous_jif:
+                raise ValueError("active journal standards are not sorted by descending JIF")
+            else:
+                previous_jif = float(jif)
     return catalog, digest
 
 
 def _tokens(values: list[str] | str) -> set[str]:
     text = " ".join(values) if isinstance(values, list) else values
     return {
-        token.strip().lower()
+        TOKEN_ALIASES.get(token.strip().lower(), token.strip().lower())
         for token in TOKEN_RE.findall(text.lower())
-        if len(token.strip()) >= 3
+        if len(token.strip()) >= 3 and token.strip().lower() not in STOPWORDS
     }
 
 
+def _matched_terms(profile_terms: list[str], project_tokens: set[str]) -> list[str]:
+    """Return declared profile concepts whose meaningful tokens occur in the project."""
+    matches = []
+    for term in profile_terms:
+        term_tokens = _tokens(term)
+        if term_tokens and term_tokens.issubset(project_tokens):
+            matches.append(term)
+    return matches
+
+
 def _fit_score(profile: dict[str, Any], project: dict[str, Any]) -> tuple[float, list[str], list[str]]:
-    topics = _tokens([str(value) for value in project.get("topics", [])])
-    methods = _tokens([str(value) for value in project.get("methods", [])])
+    project_concepts = _tokens(
+        [
+            str(project.get("summary", "")),
+            *[str(value) for value in project.get("topics", [])],
+            *[str(value) for value in project.get("methods", [])],
+        ]
+    )
     audience = _tokens(str(project.get("intended_audience", "")))
-    summary = _tokens(str(project.get("summary", "")))
     study_type = str(project.get("study_type", "")).strip().lower()
-    profile_topics = _tokens(profile["topic_fit_terms"])
     profile_audience = _tokens(profile["audience"])
     profile_types = {value.lower() for value in profile["favored_article_types"]}
-    topic_hits = sorted((topics | methods | summary) & profile_topics)
+    topic_hits = _matched_terms(profile["topic_fit_terms"], project_concepts)
     audience_hits = sorted(audience & profile_audience)
     type_hits = sorted(value for value in profile_types if study_type and (study_type in value or value in study_type))
-    score = min(6.0, 1.5 * len(topic_hits)) + min(2.0, len(audience_hits)) + min(2.0, 2.0 * len(type_hits))
+    score = min(6.0, 2.0 * len(topic_hits)) + min(2.0, 0.5 * len(audience_hits)) + min(2.0, 2.0 * len(type_hits))
     reasons = []
     if topic_hits:
         reasons.append("topic overlap: " + ", ".join(topic_hits[:6]))
@@ -208,6 +274,7 @@ def journal_targeting_and_compliance(
                 "standard_version": profile["standard_version"],
                 "reviewed_on": profile["reviewed_on"],
                 "official_sources": profile["official_sources"],
+                "journal_metrics": profile.get("journal_metrics"),
             }
         )
     ranked.sort(key=lambda row: (-row["fit_score_0_to_10"], row["title"]))
@@ -230,7 +297,8 @@ def journal_targeting_and_compliance(
         "policy": {
             "impact_factor_used": False,
             "acceptance_probability_claimed": False,
-            "official_unknowns_are_not_inferred": True,
+            "metric_source_levels_are_explicit": True,
+            "secondary_metrics_require_primary_recheck_when_available": True,
             "target_standard_version_is_mandatory_for_drafting": True,
             "live_source_recheck_required_before_submission": True,
         },

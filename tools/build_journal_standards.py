@@ -9,6 +9,7 @@ from convention or memory.
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
 from pathlib import Path
@@ -16,8 +17,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT_ROOT = ROOT / "biomed_workbench" / "knowledge" / "journal_standards"
-VERSION = "2026.07.31"
-REVIEWED_ON = "2026-07-31"
+METRICS_PATH = OUT_ROOT / "sources" / "jcr-2026-secondary-selected.tsv"
+VERSION = "2026.08.03"
+REVIEWED_ON = "2026-08-03"
 
 
 FAMILY_RULES = {
@@ -344,18 +346,225 @@ JOURNALS = [
     ("plos-biology", "PLOS Biology", "general_biology", "A broad biology readership seeking important, rigorous, openly accessible research.", ["Research Article", "Methods and Resources", "Short Report", "Review"], ["biology", "open science", "methods", "development", "genomics"], "https://journals.plos.org/plosbiology/s/submission-guidelines", {}),
     ("blood", "Blood", "general_biology", "Hematologists and researchers studying blood biology, malignancy, and clinical hematology.", ["Regular Article", "Brief Report", "Review", "Clinical Trial"], ["hematology", "blood", "leukemia", "immunology", "clinical"], "https://ashpublications.org/blood/pages/manuscript_types", {}),
     ("circulation", "Circulation", "general_biology", "Cardiovascular clinicians and scientists seeking mechanistic and clinical advances.", ["Original Research Article", "Research Letter", "Review", "Clinical Trial"], ["cardiovascular", "heart", "clinical", "trial", "vascular"], "https://www.ahajournals.org/circ/author-instructions", {}),
+    ("ca-cancer-j-clin", "CA: A Cancer Journal for Clinicians", "general_biology", "Clinicians, cancer researchers, and policy leaders seeking authoritative syntheses that can change oncology practice.", ["Review", "Guideline", "Special Article"], ["oncology", "cancer prevention", "clinical practice", "epidemiology", "guideline"], "https://acsjournals.onlinelibrary.wiley.com/journal/15424863", {}),
+    ("nature-reviews-molecular-cell-biology", "Nature Reviews Molecular Cell Biology", "nature", "Researchers seeking authoritative syntheses across molecular and cell biology.", ["Review", "Perspective", "Comment"], ["molecular biology", "cell biology", "mechanism", "gene regulation", "organelle"], "https://www.nature.com/nrm/content", {}),
+    ("nature-reviews-microbiology", "Nature Reviews Microbiology", "nature", "Microbiologists and infection researchers seeking broad, authoritative syntheses.", ["Review", "Perspective", "Comment"], ["microbiology", "infection", "microbiome", "pathogen", "host defense"], "https://www.nature.com/nrmicro/content", {}),
+    ("nature-reviews-clinical-oncology", "Nature Reviews Clinical Oncology", "nature", "Oncologists and cancer researchers seeking clinically consequential synthesis.", ["Review", "Perspective", "Consensus Statement"], ["oncology", "clinical cancer", "therapy", "diagnostics", "trial"], "https://www.nature.com/nrclinonc/content", {}),
+    ("nature-reviews-drug-discovery", "Nature Reviews Drug Discovery", "nature", "Drug-discovery scientists, translational researchers, and industry leaders.", ["Review", "Perspective", "Analysis"], ["drug discovery", "pharmacology", "therapeutics", "biotechnology", "translation"], "https://www.nature.com/nrd/content", {}),
+    ("signal-transduction-targeted-therapy", "Signal Transduction and Targeted Therapy", "nature", "Researchers connecting signaling mechanisms with targeted therapeutic development.", ["Article", "Review", "Perspective"], ["signaling", "targeted therapy", "molecular medicine", "cancer", "immunology"], "https://www.nature.com/sigtrans/", {}),
+    ("annals-of-oncology", "Annals of Oncology", "general_biology", "Medical oncologists and translational cancer researchers focused on practice-changing evidence.", ["Original Article", "Review", "Guideline", "Letter"], ["oncology", "clinical trial", "precision medicine", "cancer therapy", "biomarker"], "https://www.annalsofoncology.org/content/authorinfo", {}),
+    ("nature-reviews-disease-primers", "Nature Reviews Disease Primers", "nature", "Multidisciplinary readers seeking integrated disease mechanisms, diagnosis, management, and outlook.", ["Primer", "Perspective", "Comment"], ["disease mechanism", "diagnosis", "clinical management", "epidemiology", "translation"], "https://www.nature.com/nrdp/content", {}),
+    ("world-psychiatry", "World Psychiatry", "general_biology", "Psychiatrists, neuroscientists, and mental-health policy readers seeking field-wide evidence.", ["Research Report", "Review", "Forum", "Perspective"], ["psychiatry", "mental health", "clinical neuroscience", "public health", "policy"], "https://onlinelibrary.wiley.com/page/journal/20515545/homepage/forauthors.html", {}),
+    ("nature-reviews-cancer", "Nature Reviews Cancer", "nature", "Cancer researchers and clinicians seeking authoritative mechanistic and translational synthesis.", ["Review", "Perspective", "Comment"], ["cancer biology", "oncology", "therapy", "tumor microenvironment", "metastasis"], "https://www.nature.com/nrc/content", {}),
+    ("nature-reviews-genetics", "Nature Reviews Genetics", "nature", "Geneticists and genomic scientists seeking authoritative synthesis across inheritance and genome function.", ["Review", "Perspective", "Comment"], ["genetics", "genomics", "inheritance", "functional genomics", "population genetics"], "https://www.nature.com/nrg/content", {}),
+    ("nature-reviews-cardiology", "Nature Reviews Cardiology", "nature", "Cardiovascular clinicians and scientists seeking integrated clinical and mechanistic reviews.", ["Review", "Perspective", "Consensus Statement"], ["cardiology", "cardiovascular", "heart", "vascular", "clinical"], "https://www.nature.com/nrcardio/content", {}),
+    ("nature-reviews-immunology", "Nature Reviews Immunology", "nature", "Immunologists seeking authoritative conceptual and translational synthesis.", ["Review", "Perspective", "Comment"], ["immunology", "immune regulation", "infection", "inflammation", "therapy"], "https://www.nature.com/nri/content", {}),
+    ("european-heart-journal", "European Heart Journal", "general_biology", "Cardiovascular clinicians and scientists focused on high-impact clinical and translational research.", ["Original Article", "Clinical Research", "Review", "Guideline"], ["cardiology", "cardiovascular", "trial", "heart disease", "vascular"], "https://academic.oup.com/eurheartj/pages/General_Instructions", {}),
+    ("journal-of-clinical-oncology", "Journal of Clinical Oncology", "general_biology", "Clinical oncologists and cancer researchers seeking definitive patient-centered evidence.", ["Original Report", "Clinical Trial", "Review", "Special Article"], ["clinical oncology", "cancer therapy", "trial", "biomarker", "outcomes"], "https://ascopubs.org/jco/authors/manuscript-guidelines", {}),
+    ("nature-reviews-bioengineering", "Nature Reviews Bioengineering", "nature", "Bioengineers, biomedical scientists, and clinicians seeking field-defining synthesis.", ["Review", "Perspective", "Comment"], ["bioengineering", "biomaterials", "device", "synthetic biology", "translation"], "https://www.nature.com/natrevbioeng/content", {}),
+    ("molecular-cancer", "Molecular Cancer", "general_biology", "Cancer biologists and translational researchers connecting mechanism to therapeutic opportunity.", ["Research", "Review", "Methodology"], ["molecular oncology", "cancer biology", "therapy", "biomarker", "tumor"], "https://molecular-cancer.biomedcentral.com/submission-guidelines", {}),
+    ("journal-of-hepatology", "Journal of Hepatology", "general_biology", "Hepatologists and liver researchers focused on mechanistic and clinical advances.", ["Original Article", "Rapid Communication", "Review", "Guideline"], ["hepatology", "liver", "clinical trial", "metabolism", "infection"], "https://www.journal-of-hepatology.eu/content/authorinfo", {}),
+    ("nature-reviews-endocrinology", "Nature Reviews Endocrinology", "nature", "Endocrinologists and metabolism researchers seeking authoritative clinical and mechanistic synthesis.", ["Review", "Perspective", "Consensus Statement"], ["endocrinology", "metabolism", "diabetes", "hormone", "clinical"], "https://www.nature.com/nrendo/content", {}),
+    ("nature-nanotechnology", "Nature Nanotechnology", "nature", "Researchers developing nanoscale concepts and technologies across biology, medicine, physics, and materials.", ["Article", "Letter", "Review", "Analysis"], ["nanotechnology", "nanomedicine", "materials", "device", "delivery"], "https://www.nature.com/nnano/content", {}),
+    ("lancet-diabetes-endocrinology", "The Lancet Diabetes & Endocrinology", "lancet", "Clinicians and researchers focused on diabetes, endocrinology, metabolism, and population health.", ["Article", "Review", "Series", "Personal View"], ["diabetes", "endocrinology", "metabolism", "trial", "public health"], "https://www.thelancet.com/journals/landia/home", {}),
+    ("physiological-reviews", "Physiological Reviews", "general_biology", "Physiologists and biomedical scientists seeking authoritative integrative reviews.", ["Comprehensive Review", "Short Review", "Perspective"], ["physiology", "homeostasis", "organ system", "mechanism", "disease"], "https://journals.physiology.org/author-info.physrev", {}),
+    ("nature-reviews-rheumatology", "Nature Reviews Rheumatology", "nature", "Rheumatologists and immunologists seeking clinical and mechanistic synthesis.", ["Review", "Perspective", "Consensus Statement"], ["rheumatology", "autoimmunity", "inflammation", "clinical", "therapy"], "https://www.nature.com/nrrheum/content", {}),
+    ("molecular-plant", "Molecular Plant", "cell_press", "Plant biologists seeking mechanistic, genomic, and translational advances.", ["Article", "Resource", "Review", "Perspective"], ["plant biology", "molecular biology", "genomics", "development", "crop"], "https://www.cell.com/molecular-plant/home", {}),
+    ("nature-reviews-neurology", "Nature Reviews Neurology", "nature", "Neurologists and neuroscientists seeking authoritative clinical synthesis.", ["Review", "Perspective", "Consensus Statement"], ["neurology", "brain disease", "clinical neuroscience", "diagnostics", "therapy"], "https://www.nature.com/nrneurol/content", {}),
+    ("cell-research", "Cell Research", "nature", "Cell and molecular biologists seeking broadly important mechanistic advances.", ["Article", "Letter", "Review"], ["cell biology", "molecular biology", "mechanism", "genomics", "disease"], "https://www.nature.com/cr/authors-and-referees", {}),
+    ("gastroenterology", "Gastroenterology", "general_biology", "Gastroenterologists and digestive-disease researchers seeking mechanistic and clinical advances.", ["Original Research", "Clinical Trial", "Review", "Guideline"], ["gastroenterology", "gut", "liver", "microbiome", "clinical"], "https://www.gastrojournal.org/content/authorinfo", {}),
+    ("cancer-discovery", "Cancer Discovery", "general_biology", "Cancer researchers and clinicians seeking major mechanistic and translational discoveries.", ["Research Article", "Research Brief", "Review", "Perspective"], ["cancer biology", "oncology", "precision medicine", "therapy", "tumor"], "https://aacrjournals.org/cancerdiscovery/pages/instructions-for-authors", {}),
+    ("european-urology", "European Urology", "general_biology", "Urologists and researchers focused on clinically consequential urologic evidence.", ["Original Article", "Review", "Guideline", "Research Letter"], ["urology", "oncology", "surgery", "clinical trial", "outcomes"], "https://www.europeanurology.com/content/authorinfo", {}),
+    ("nature-reviews-neuroscience", "Nature Reviews Neuroscience", "nature", "Neuroscientists seeking authoritative synthesis from molecules to cognition and disease.", ["Review", "Perspective", "Comment"], ["neuroscience", "brain", "circuit", "cognition", "neurological disease"], "https://www.nature.com/nrn/content", {}),
+    ("cancer-communications", "Cancer Communications", "general_biology", "Cancer researchers and clinicians focused on translational and clinical oncology.", ["Research Article", "Review", "Method"], ["cancer", "oncology", "therapy", "biomarker", "translation"], "https://onlinelibrary.wiley.com/page/journal/25233548/homepage/forauthors.html", {}),
+    ("lancet-public-health", "The Lancet Public Health", "lancet", "Public-health researchers, clinicians, and policy makers seeking population-level evidence.", ["Article", "Review", "Comment", "Health Policy"], ["public health", "epidemiology", "policy", "population", "health equity"], "https://www.thelancet.com/journals/lanpub/home", {}),
+    ("nature-aging", "Nature Aging", "nature", "Researchers studying aging mechanisms, longevity, age-related disease, and healthy lifespan.", ["Article", "Resource", "Review", "Perspective"], ["aging", "longevity", "geroscience", "neuroscience", "age-related disease"], "https://www.nature.com/nataging/content", {}),
+    ("jama-internal-medicine", "JAMA Internal Medicine", "jama", "Internists, health researchers, and policy makers seeking rigorous evidence that changes care.", ["Original Investigation", "Research Letter", "Review", "Clinical Trial"], ["internal medicine", "clinical", "health policy", "trial", "outcomes"], "https://jamanetwork.com/journals/jamainternalmedicine/pages/instructions-for-authors", {}),
+    ("trends-cell-biology", "Trends in Cell Biology", "cell_press", "Cell biologists seeking concise, authoritative synthesis of emerging concepts.", ["Review", "Opinion", "Forum"], ["cell biology", "organelle", "signaling", "development", "mechanism"], "https://www.cell.com/trends/cell-biology/home", {}),
+    ("jama-oncology", "JAMA Oncology", "jama", "Oncologists and cancer researchers seeking clinically influential evidence.", ["Original Investigation", "Research Letter", "Review", "Clinical Trial"], ["oncology", "cancer", "trial", "therapy", "outcomes"], "https://jamanetwork.com/journals/jamaoncology/pages/instructions-for-authors", {}),
+    ("cellular-molecular-immunology", "Cellular & Molecular Immunology", "nature", "Immunologists seeking mechanistic and translational advances.", ["Article", "Review", "Perspective"], ["immunology", "immune regulation", "inflammation", "infection", "therapy"], "https://www.nature.com/cmi/authors-and-referees", {}),
+    ("jama-neurology", "JAMA Neurology", "jama", "Neurologists and clinical neuroscientists seeking practice-relevant evidence.", ["Original Investigation", "Research Letter", "Review", "Clinical Trial"], ["neurology", "clinical neuroscience", "brain disease", "trial", "diagnostics"], "https://jamanetwork.com/journals/jamaneurology/pages/instructions-for-authors", {}),
+    ("cancer-research", "Cancer Research", "general_biology", "Cancer biologists and translational researchers seeking rigorous mechanistic advances.", ["Research Article", "Priority Report", "Review"], ["cancer biology", "tumor", "metastasis", "therapy", "genomics"], "https://aacrjournals.org/cancerres/pages/instructions-for-authors", {}),
+    ("lancet-global-health", "The Lancet Global Health", "lancet", "Global-health researchers, clinicians, and policy makers focused on equitable population impact.", ["Article", "Review", "Comment", "Health Policy"], ["global health", "public health", "epidemiology", "health equity", "policy"], "https://www.thelancet.com/journals/langlo/home", {}),
+    ("jacc", "Journal of the American College of Cardiology", "general_biology", "Cardiovascular clinicians and researchers seeking practice-changing clinical evidence.", ["Original Research", "Clinical Trial", "Review", "State-of-the-Art Review"], ["cardiology", "heart", "clinical trial", "imaging", "outcomes"], "https://www.jacc.org/author-center", {}),
+    ("lancet-microbe", "The Lancet Microbe", "lancet", "Microbiologists, infectious-disease researchers, and clinicians seeking translational evidence.", ["Article", "Review", "Comment", "Personal View"], ["microbiology", "infectious disease", "pathogen", "microbiome", "public health"], "https://www.thelancet.com/journals/lanmic/home", {}),
+    ("trends-cancer", "Trends in Cancer", "cell_press", "Cancer researchers seeking concise synthesis of emerging mechanisms and therapeutic directions.", ["Review", "Opinion", "Forum"], ["cancer", "oncology", "therapy", "tumor microenvironment", "genomics"], "https://www.cell.com/trends/cancer/home", {}),
+    ("lancet-psychiatry", "The Lancet Psychiatry", "lancet", "Mental-health clinicians, researchers, and policy makers seeking high-impact clinical evidence.", ["Article", "Review", "Comment", "Personal View"], ["psychiatry", "mental health", "trial", "public health", "policy"], "https://www.thelancet.com/journals/lanpsy/home", {}),
+    ("lancet-planetary-health", "The Lancet Planetary Health", "lancet", "Researchers and policy makers studying environmental change and population health.", ["Article", "Review", "Comment", "Health Policy"], ["planetary health", "environment", "public health", "climate", "policy"], "https://www.thelancet.com/journals/lanplh/home", {}),
+    ("npj-digital-medicine", "npj Digital Medicine", "nature", "Clinicians, data scientists, and engineers evaluating digital and computational health interventions.", ["Article", "Review", "Perspective", "Brief Communication"], ["digital health", "clinical AI", "medical informatics", "wearables", "implementation"], "https://www.nature.com/npjdigitalmed/submission-guidelines", {}),
 ]
 
 
-def _profile(row: tuple) -> dict:
+PUBLISHER_LABELS = {
+    "AMER ASSOC ADVANCEMENT SCIENCE": "AAAS",
+    "AMER ASSOC CANCER RESEARCH": "American Association for Cancer Research",
+    "AMER MEDICAL ASSOC": "American Medical Association",
+    "AMER PHYSIOLOGICAL SOC": "American Physiological Society",
+    "BMC": "Springer Nature · BMC",
+    "BMJ PUBLISHING GROUP": "BMJ Group",
+    "CELL PRESS": "Elsevier · Cell Press",
+    "CHIN SOCIETY IMMUNOLOGY": "Chinese Society for Immunology · Springer Nature",
+    "COLD SPRING HARBOR LAB PRESS": "Cold Spring Harbor Laboratory Press",
+    "ELIFE SCIENCES PUBL LTD": "eLife Sciences Publications",
+    "ELSEVIER": "Elsevier",
+    "ELSEVIER INC": "Elsevier",
+    "ELSEVIER SCI LTD": "Elsevier",
+    "ELSEVIER SCIENCE INC": "Elsevier",
+    "LIPPINCOTT WILLIAMS & WILKINS": "Wolters Kluwer",
+    "MASSACHUSETTS MEDICAL SOC": "Massachusetts Medical Society",
+    "NATL ACAD SCIENCES": "National Academy of Sciences",
+    "NATURE PORTFOLIO": "Springer Nature · Nature Portfolio",
+    "OXFORD UNIV PRESS": "Oxford University Press",
+    "PUBLIC LIBRARY SCIENCE": "Public Library of Science",
+    "SPRINGER NATURE": "Springer Nature",
+    "SPRINGERNATURE": "Springer Nature",
+    "W B SAUNDERS CO-ELSEVIER INC": "Elsevier",
+    "WILEY": "Wiley",
+}
+
+PUBLISHER_BY_ID = {
+    "annals-of-oncology": "European Society for Medical Oncology · Elsevier",
+    "blood": "American Society of Hematology",
+    "ca-cancer-j-clin": "American Cancer Society · Wiley",
+    "cancer-discovery": "American Association for Cancer Research",
+    "cancer-research": "American Association for Cancer Research",
+    "circulation": "American Heart Association · Wolters Kluwer",
+    "european-heart-journal": "European Society of Cardiology · Oxford University Press",
+    "european-urology": "European Association of Urology · Elsevier",
+    "gastroenterology": "American Gastroenterological Association · Elsevier",
+    "jacc": "American College of Cardiology · Elsevier",
+    "journal-of-clinical-oncology": "American Society of Clinical Oncology",
+    "journal-of-hepatology": "European Association for the Study of the Liver · Elsevier",
+    "world-psychiatry": "World Psychiatric Association · Wiley",
+}
+
+PUBLISHER_BY_FAMILY = {
+    "bmj": "BMJ Group",
+    "cell_press": "Elsevier · Cell Press",
+    "jama": "American Medical Association",
+    "lancet": "Elsevier · The Lancet Group",
+    "nejm": "Massachusetts Medical Society",
+    "science": "AAAS",
+}
+
+
+def _load_metrics() -> dict[str, dict]:
+    if not METRICS_PATH.is_file():
+        raise RuntimeError(f"reviewed metric source is unavailable: {METRICS_PATH}")
+    with METRICS_PATH.open(encoding="utf-8", newline="") as handle:
+        source_rows = list(csv.DictReader(handle, delimiter="\t"))
+    required = {
+        "journal_id",
+        "publisher",
+        "issn",
+        "eissn",
+        "jif",
+        "category",
+        "edition",
+        "quartile",
+        "source_level",
+        "source_name",
+        "source_url",
+        "retrieved_on",
+        "source_artifact_sha256",
+    }
+    if not source_rows or set(source_rows[0]) != required:
+        raise RuntimeError("reviewed metric source schema is inconsistent")
+    grouped: dict[str, dict] = {}
+    for source_row in source_rows:
+        journal_id = source_row["journal_id"].strip()
+        if not journal_id:
+            raise RuntimeError("metric row has no journal_id")
+        raw_jif = source_row["jif"].strip()
+        metric = grouped.setdefault(
+            journal_id,
+            {
+                "edition": "2026",
+                "metric_year": 2025,
+                "jif": None if raw_jif == "N/A" else float(raw_jif),
+                "jif_status": "not_assigned" if raw_jif == "N/A" else "reported",
+                "publisher": source_row["publisher"].strip(),
+                "issn": source_row["issn"].strip() or None,
+                "eissn": source_row["eissn"].strip() or None,
+                "categories": [],
+                "source": {
+                    "level": source_row["source_level"].strip(),
+                    "name": source_row["source_name"].strip(),
+                    "url": source_row["source_url"].strip(),
+                    "retrieved_on": source_row["retrieved_on"].strip(),
+                    "source_artifact_sha256": (
+                        None
+                        if source_row["source_artifact_sha256"].strip() == "N/A"
+                        else source_row["source_artifact_sha256"].strip()
+                    ),
+                    "direct_clarivate_access": False,
+                },
+            },
+        )
+        expected = (
+            None if raw_jif == "N/A" else float(raw_jif),
+            source_row["publisher"].strip(),
+            source_row["source_url"].strip(),
+        )
+        observed = (metric["jif"], metric["publisher"], metric["source"]["url"])
+        if observed != expected:
+            raise RuntimeError(f"metric rows disagree for {journal_id}")
+        category = {
+            "name": source_row["category"].strip(),
+            "edition": source_row["edition"].strip(),
+            "quartile": source_row["quartile"].strip(),
+        }
+        if category not in metric["categories"]:
+            metric["categories"].append(category)
+    for metric in grouped.values():
+        metric["categories"].sort(key=lambda row: (row["name"], row["edition"], row["quartile"]))
+        if not metric["categories"]:
+            raise RuntimeError("journal metric has no category")
+        if not metric["source"]["url"].startswith("https://"):
+            raise RuntimeError("journal metric source must use HTTPS")
+        if metric["source"]["level"] not in {
+            "primary_clarivate",
+            "secondary_institutional_jcr_repost",
+            "secondary_specialist_jcr_index",
+        }:
+            raise RuntimeError("journal metric source level is not allowed")
+        selected_record = {
+            "edition": metric["edition"],
+            "metric_year": metric["metric_year"],
+            "jif": metric["jif"],
+            "jif_status": metric["jif_status"],
+            "publisher": metric["publisher"],
+            "issn": metric["issn"],
+            "eissn": metric["eissn"],
+            "categories": metric["categories"],
+            "source_level": metric["source"]["level"],
+            "source_url": metric["source"]["url"],
+        }
+        metric["source"]["selected_record_sha256"] = hashlib.sha256(
+            json.dumps(selected_record, ensure_ascii=False, sort_keys=True).encode("utf-8")
+        ).hexdigest()
+    return grouped
+
+
+def _profile(row: tuple, metrics: dict[str, dict]) -> dict:
     journal_id, title, family_name, audience, article_types, topics, scope_url, overrides = row
     family = FAMILY_RULES[family_name]
+    if journal_id not in metrics:
+        raise RuntimeError(f"journal has no reviewed 2026 metric record: {journal_id}")
+    journal_metric = metrics[journal_id]
     constraints = dict(family["default_constraints"])
     constraints.update(overrides)
     exact_fields = sorted({*family.get("exact_default_fields", []), *overrides})
     return {
         "id": journal_id,
         "title": title,
+        "publisher": PUBLISHER_BY_ID.get(
+            journal_id,
+            PUBLISHER_BY_FAMILY.get(
+                family_name,
+                PUBLISHER_LABELS.get(journal_metric["publisher"], journal_metric["publisher"].title()),
+            ),
+        ),
         "publisher_family": family_name,
         "standard_version": VERSION,
         "reviewed_on": REVIEWED_ON,
@@ -378,6 +587,7 @@ def _profile(row: tuple) -> dict:
         "figure_and_table_requirements": family["figure_rules"],
         "reporting_requirements": family["reporting_requirements"],
         "official_sources": [scope_url, *family["official_sources"]],
+        "journal_metrics": journal_metric,
         "recommendation_policy": {
             "eligible": True,
             "impact_factor_used": False,
@@ -387,21 +597,170 @@ def _profile(row: tuple) -> dict:
     }
 
 
+ZH_CATEGORIES = {
+    "BIOCHEMICAL RESEARCH METHODS": "生化研究方法",
+    "BIOCHEMISTRY & MOLECULAR BIOLOGY": "生物化学与分子生物学",
+    "BIOLOGY": "生物学",
+    "BIOPHYSICS": "生物物理学",
+    "BIOTECHNOLOGY & APPLIED MICROBIOLOGY": "生物技术与应用微生物学",
+    "CARDIAC & CARDIOVASCULAR SYSTEMS": "心脏与心血管系统",
+    "CELL & TISSUE ENGINEERING": "细胞与组织工程",
+    "CELL BIOLOGY": "细胞生物学",
+    "CLINICAL NEUROLOGY": "临床神经病学",
+    "CRITICAL CARE MEDICINE": "重症医学",
+    "DEVELOPMENTAL BIOLOGY": "发育生物学",
+    "ENDOCRINOLOGY & METABOLISM": "内分泌与代谢",
+    "ENGINEERING, BIOMEDICAL": "生物医学工程",
+    "ENVIRONMENTAL SCIENCES": "环境科学",
+    "GASTROENTEROLOGY & HEPATOLOGY": "胃肠病学与肝病学",
+    "GENETICS & HEREDITY": "遗传学与遗传",
+    "GERIATRICS & GERONTOLOGY": "老年医学与老年学",
+    "HEALTH CARE SCIENCES & SERVICES": "卫生保健科学与服务",
+    "HEALTH POLICY & SERVICES": "卫生政策与服务",
+    "HEMATOLOGY": "血液学",
+    "IMMUNOLOGY": "免疫学",
+    "INFECTIOUS DISEASES": "感染病学",
+    "MATHEMATICAL & COMPUTATIONAL BIOLOGY": "数学与计算生物学",
+    "MATERIALS SCIENCE, BIOMATERIALS": "材料科学：生物材料",
+    "MATERIALS SCIENCE, MULTIDISCIPLINARY": "综合材料科学",
+    "MEDICAL INFORMATICS": "医学信息学",
+    "MEDICINE, GENERAL & INTERNAL": "综合与内科医学",
+    "MEDICINE, RESEARCH & EXPERIMENTAL": "实验与研究医学",
+    "MICROBIOLOGY": "微生物学",
+    "MULTIDISCIPLINARY SCIENCES": "综合科学",
+    "NANOSCIENCE & NANOTECHNOLOGY": "纳米科学与纳米技术",
+    "NEUROSCIENCES": "神经科学",
+    "ONCOLOGY": "肿瘤学",
+    "PARASITOLOGY": "寄生虫学",
+    "PERIPHERAL VASCULAR DISEASE": "外周血管疾病",
+    "PHARMACOLOGY & PHARMACY": "药理学与药学",
+    "PHYSIOLOGY": "生理学",
+    "PLANT SCIENCES": "植物科学",
+    "PSYCHIATRY": "精神病学",
+    "PUBLIC, ENVIRONMENTAL & OCCUPATIONAL HEALTH": "公共、环境与职业健康",
+    "RESPIRATORY SYSTEM": "呼吸系统",
+    "RHEUMATOLOGY": "风湿病学",
+    "UROLOGY & NEPHROLOGY": "泌尿学与肾脏学",
+    "VIROLOGY": "病毒学",
+}
+
+
+def _metric_source_label(level: str, *, zh: bool) -> str:
+    labels = {
+        "primary_clarivate": ("Clarivate JCR / Journals API", "Clarivate JCR / Journals API"),
+        "secondary_institutional_jcr_repost": (
+            "Institutional JCR repost (secondary)",
+            "高校公开转载的 JCR 数据（二级来源）",
+        ),
+        "secondary_specialist_jcr_index": (
+            "Specialist JCR index (secondary fallback)",
+            "专业期刊指标索引（二级后备来源）",
+        ),
+    }
+    return labels[level][1 if zh else 0]
+
+
+def _coverage_table(profiles: list[dict], *, zh: bool) -> str:
+    if zh:
+        lines = [
+            "| 期刊 | 出版机构 | JCR 学科类别 | JCR 2026 分区 | 2025 JIF | 指标来源 |",
+            "| --- | --- | --- | --- | ---: | --- |",
+        ]
+    else:
+        lines = [
+            "| Journal | Publisher / publishing organization | JCR categories | JCR 2026 quartiles | 2025 JIF | Metric provenance |",
+            "| --- | --- | --- | --- | ---: | --- |",
+        ]
+    for profile in profiles:
+        metric = profile["journal_metrics"]
+        categories = []
+        quartiles = []
+        for category in metric["categories"]:
+            category_name = (
+                ZH_CATEGORIES.get(category["name"], category["name"])
+                if zh
+                else category["name"].title()
+            )
+            categories.append(f"{category_name} ({category['edition']})")
+            quartiles.append(f"{category_name}: {category['quartile']}")
+        jif = "未获分配" if zh and metric["jif"] is None else ("Not assigned" if metric["jif"] is None else f"{metric['jif']:.1f}")
+        source = metric["source"]
+        source_label = _metric_source_label(source["level"], zh=zh)
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    f"[{profile['title']}]({profile['official_sources'][0]})",
+                    profile["publisher"],
+                    "<br>".join(categories),
+                    "<br>".join(quartiles),
+                    jif,
+                    f"[{source_label}]({source['url']})",
+                ]
+            )
+            + " |"
+        )
+    return "\n".join(lines)
+
+
+def _refresh_coverage_table(path: Path, profiles: list[dict], *, zh: bool) -> None:
+    start = "<!-- journal-coverage-table:start -->"
+    end = "<!-- journal-coverage-table:end -->"
+    text = path.read_text(encoding="utf-8")
+    if text.count(start) != 1 or text.count(end) != 1:
+        raise RuntimeError(f"journal coverage markers are inconsistent: {path}")
+    before, remainder = text.split(start, 1)
+    _, after = remainder.split(end, 1)
+    rendered = f"{before}{start}\n{_coverage_table(profiles, zh=zh)}\n{end}{after}"
+    path.write_text(rendered, encoding="utf-8")
+
+
 def main() -> None:
-    if len(JOURNALS) < 50:
-        raise RuntimeError("journal catalog must contain at least 50 journals")
-    profiles = [_profile(row) for row in JOURNALS]
+    if len(JOURNALS) != 100:
+        raise RuntimeError("active journal catalog must contain exactly 100 journals")
+    metrics = _load_metrics()
+    journal_ids = {row[0] for row in JOURNALS}
+    if set(metrics) != journal_ids:
+        missing = sorted(journal_ids - set(metrics))
+        extra = sorted(set(metrics) - journal_ids)
+        raise RuntimeError(f"metric coverage mismatch; missing={missing}; extra={extra}")
+    profiles = [_profile(row, metrics) for row in JOURNALS]
+    profiles.sort(
+        key=lambda row: (
+            row["journal_metrics"]["jif"] is None,
+            -(row["journal_metrics"]["jif"] or 0.0),
+            row["title"].casefold(),
+        )
+    )
     if len({row["id"] for row in profiles}) != len(profiles):
         raise RuntimeError("journal IDs must be unique")
+    metrics_source_sha256 = hashlib.sha256(METRICS_PATH.read_bytes()).hexdigest()
     snapshot = {
         "schema_version": 1,
         "catalog_version": VERSION,
         "reviewed_on": REVIEWED_ON,
-        "official_source_policy": (
-            "Only publisher or journal author instructions, content definitions, scope pages, and reporting "
-            "standards may define submission rules. Unknown numerical limits remain null."
-        ),
+        "source_policy": {
+            "submission_rules": (
+                "Only publisher or journal author instructions, content definitions, scope pages, and reporting "
+                "standards may define submission rules. Unknown numerical limits remain null."
+            ),
+            "journal_metrics": (
+                "JIF, JCR categories, editions, and quartiles prefer direct Clarivate JCR or Journals API records. "
+                "When access is unavailable, reviewed institutional reposts of the same annual JCR export may be "
+                "used as explicitly labelled secondary evidence; specialist indexes are allowed only as a "
+                "declared fallback. CiteScore and SJR must never be relabelled as JIF or JCR quartiles."
+            ),
+            "publisher_cross_check": (
+                "Publisher and journal sites verify title identity, publisher, scope, and author guidance; they "
+                "do not silently replace the recorded JCR provenance."
+            ),
+        },
         "journal_count": len(profiles),
+        "metric_source_manifest": {
+            "file": str(METRICS_PATH.relative_to(ROOT)),
+            "sha256": metrics_source_sha256,
+            "selected_journal_count": len(metrics),
+        },
         "journals": profiles,
     }
     OUT_ROOT.mkdir(parents=True, exist_ok=True)
@@ -409,6 +768,8 @@ def main() -> None:
     payload = json.dumps(snapshot, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
     snapshot_path.write_text(payload, encoding="utf-8")
     digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    _refresh_coverage_table(ROOT / "docs" / "journal-standards.md", profiles, zh=False)
+    _refresh_coverage_table(ROOT / "docs" / "journal-standards.zh-CN.md", profiles, zh=True)
     index = {
         "schema_version": 1,
         "active_catalog_version": VERSION,
@@ -416,11 +777,15 @@ def main() -> None:
         "active_catalog_sha256": digest,
         "reviewed_on": REVIEWED_ON,
         "journal_count": len(profiles),
+        "metric_source_file": str(METRICS_PATH.relative_to(ROOT)),
+        "metric_source_sha256": metrics_source_sha256,
         "update_policy": {
             "history_is_immutable": True,
             "one_journal_may_advance_independently": True,
             "source_change_requires_new_version": True,
             "unverified_required_field_blocks_submission_ready": True,
+            "metric_source_tiers_are_enforced": True,
+            "active_catalog_is_sorted_by_descending_jif": True,
         },
         "journal_versions": {
             row["id"]: {
