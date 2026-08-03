@@ -17,6 +17,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "quality.yml"
 REQUIREMENTS = ROOT / "requirements-ci.txt"
+COMPAT_REQUIREMENTS = ROOT / "requirements-compat.txt"
 GITLEAKS_CONFIG = ROOT / ".gitleaks.toml"
 EVIDENCE_ID = "github-quality-and-secret-gates-v1"
 
@@ -44,11 +45,23 @@ def verify() -> dict[str, object]:
     secret_steps = _steps(jobs["secrets"])
     compatibility_steps = _steps(jobs["python-compatibility"])
     verify_script = "\n".join(str(step.get("run", "")) for step in verify_steps)
+    compatibility_script = "\n".join(str(step.get("run", "")) for step in compatibility_steps)
     secret_script = "\n".join(str(step.get("run", "")) for step in secret_steps)
     uses = [str(step.get("uses", "")) for step in verify_steps + secret_steps + compatibility_steps]
     matrix = jobs["python-compatibility"].get("strategy", {}).get("matrix", {})
     if matrix.get("python-version") != ["3.10", "3.14.3"]:
         raise RuntimeError("CI compatibility matrix must test Python 3.10 and the 3.14.3 scientific baseline")
+    compatibility_setup = next(
+        (step for step in compatibility_steps if str(step.get("uses", "")).startswith("actions/setup-python@")),
+        None,
+    )
+    if (
+        compatibility_setup is None
+        or compatibility_setup.get("with", {}).get("cache-dependency-path") != "requirements-compat.txt"
+        or "python -m pip install --requirement requirements-compat.txt" not in compatibility_script
+        or "requirements-ci.txt" in compatibility_script
+    ):
+        raise RuntimeError("cross-version tests must use the minimal compatibility dependency baseline")
     required_verify = (
         "python -m unittest discover -s tests",
         "python tools/validate_workbench.py --release",
@@ -107,6 +120,18 @@ def verify() -> dict[str, object]:
     if requirements != expected:
         raise RuntimeError("CI requirements differ from the verified repository baseline")
 
+    compatibility_requirements = {}
+    for line in COMPAT_REQUIREMENTS.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        name, separator, version = line.partition("==")
+        if not separator or not name or not version or name in compatibility_requirements:
+            raise RuntimeError("compatibility requirements must use unique exact tested baselines")
+        compatibility_requirements[name] = version
+    if compatibility_requirements != {"packaging": "26.2", "pytest": "9.1.1"}:
+        raise RuntimeError("compatibility requirements differ from the verified cross-version baseline")
+
     gitleaks_config = tomllib.loads(GITLEAKS_CONFIG.read_text(encoding="utf-8"))
     allowlists = gitleaks_config.get("allowlists", [])
     expected_digest_pattern = r'"output_sha256"\s*:\s*"[0-9a-f]{64}"'
@@ -128,6 +153,11 @@ def verify() -> dict[str, object]:
         "workflow": {"sha256": _sha256(WORKFLOW), "jobs": sorted(required_jobs), "read_only_permissions": True},
         "gitleaks_config": {"sha256": _sha256(GITLEAKS_CONFIG), "default_rules_extended": True, "narrow_digest_allowlist": True},
         "requirements": {"sha256": _sha256(REQUIREMENTS), "tested_baselines": requirements},
+        "compatibility_requirements": {
+            "sha256": _sha256(COMPAT_REQUIREMENTS),
+            "tested_baselines": compatibility_requirements,
+            "scientific_dependencies_excluded": True,
+        },
         "quality_gates": {
             "complete_unittest_suite": True,
             "release_validator": True,
@@ -137,6 +167,7 @@ def verify() -> dict[str, object]:
             "gitleaks_release_checksum_verified": True,
             "secret_findings_redacted": True,
             "python_310_and_314_contract_matrix": True,
+            "cross_version_dependencies_are_minimal": True,
         },
         "excluded_claims": [
             "CI does not prove scientific source-union completeness.",

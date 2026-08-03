@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[2]
 REPORT = ROOT / "reports" / "ci-quality-verification.json"
 WORKFLOW = ROOT / ".github" / "workflows" / "quality.yml"
 REQUIREMENTS = ROOT / "requirements-ci.txt"
+COMPAT_REQUIREMENTS = ROOT / "requirements-compat.txt"
 
 
 class CIQualityEvidenceTests(unittest.TestCase):
@@ -18,6 +19,15 @@ class CIQualityEvidenceTests(unittest.TestCase):
         self.assertEqual(report["evidence_id"], "github-quality-and-secret-gates-v1")
         self.assertEqual(report["workflow"]["sha256"], hashlib.sha256(WORKFLOW.read_bytes()).hexdigest())
         self.assertEqual(report["requirements"]["sha256"], hashlib.sha256(REQUIREMENTS.read_bytes()).hexdigest())
+        self.assertEqual(
+            report["compatibility_requirements"]["sha256"],
+            hashlib.sha256(COMPAT_REQUIREMENTS.read_bytes()).hexdigest(),
+        )
+        self.assertEqual(
+            report["compatibility_requirements"]["tested_baselines"],
+            {"packaging": "26.2", "pytest": "9.1.1"},
+        )
+        self.assertTrue(report["compatibility_requirements"]["scientific_dependencies_excluded"])
         self.assertTrue(all(report["quality_gates"].values()))
         self.assertGreaterEqual(len(report["excluded_claims"]), 3)
 
