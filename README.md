@@ -7,7 +7,7 @@
 <p align="center"><strong>将生物医学问题编译为可执行、可审查、可演进的科学证据链</strong></p>
 
 <p align="center">
-  面向 Codex 的生物医学研究编排平台<br>
+  智能体驱动的生物医学研究工作台<br>
   Evidence · Analysis · Scientific Review · Publication
 </p>
 
@@ -19,7 +19,7 @@
   <a href="https://github.com/JunyanKang/biomed-workbench/actions"><img alt="Quality" src="https://img.shields.io/github/actions/workflow/status/JunyanKang/biomed-workbench/quality.yml?branch=main&amp;label=quality"></a>
   <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-4388C7"></a>
   <img alt="198 scientific modules" src="https://img.shields.io/badge/scientific%20modules-198-36A58B">
-  <img alt="Codex native" src="https://img.shields.io/badge/Codex-native-E05A47">
+  <img alt="Codex first" src="https://img.shields.io/badge/Codex-first-E05A47">
   <img alt="Versioned evidence maps" src="https://img.shields.io/badge/evidence%20maps-versioned-C7953E">
 </p>
 
@@ -31,7 +31,7 @@
 
 复杂研究真正稀缺的，从来不只是某一个分析工具，而是贯穿整个项目的科学秩序：问题如何被拆解，方法为什么被选择，数据能否进入推断，结果是否经得起统计与生物学审查，以及每一项结论将把研究带向何处。
 
-Biomed Workbench 把这种秩序带入 Codex。用户以自然语言描述研究目标，工作台据此组织证据检索、组学分析、单细胞与空间研究、分子设计、实验定量、图表与论文交付，并以显式依赖、质量门控和版本化证据地图维持项目的连续性。
+Biomed Workbench 把这种秩序带入智能体协作环境。用户以自然语言描述研究目标，工作台据此组织证据检索、组学分析、单细胞与空间研究、分子设计、实验定量、图表与论文交付，并以显式依赖、质量门控和版本化证据地图维持项目的连续性。Codex 是当前首要且完整通过发布流程验证的参考宿主；支持标准技能目录或 MCP 的其他智能体可以复用同一科学注册表，但其执行、权限、运行环境和证据交付仍需在对应宿主中独立实现并验收。
 
 它所交付的不是一串运行记录，而是一套能够回答四个问题的研究系统：
 
@@ -82,7 +82,7 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 | [单细胞、轨迹与跨系统整合](docs/capabilities/single-cell-integration-reference-cross-species.md) | Scanpy/Seurat、scVI/scANVI、Harmony、CCA/RPCA、FastMNN、scIB、WNN、MOFA+；公共 PBMC 多组学数据验收的 MultiVI；Hydra–涡虫跨物种数据验收的 SAMap |
 | [空间组学](docs/capabilities/trajectory-spatial-complete-analysis.md) | Visium 与 Xenium 数据结构；Xenium–SpatialData–Squidpy 图像/分割流程；Slide-seq 上验收的 RCTD、公共数据验收的 Tangram；PASTE 多切片对齐与三维坐标重建 |
 | [跨尺度通用分析](docs/capabilities/omics-and-single-cell.md) | 文件与读段质控、差异表达和差异可及性、DEqMS、GO/KEGG、GSEA、WGCNA、NMF、motif、网络分析、JSD、统一统计审查与作图规范 |
-| [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | STRING 功能/物理互作网络；HADDOCK3 复合物对接、DockQ 参考评价与 PRODIGY 亲和力估计；AlphaFold Server 提交包、结果导入、置信度审查与发表图件；经许可的本地 AlphaFold 3 运行入口；MSBio2/Metascape 与 Cytoscape 网络交付；序列、ORF、PCR、CRISPR、克隆、结构质量、结构比较与实验验证设计 |
+| [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | STRING 功能/物理互作网络；HADDOCK3 复合物对接、DockQ 参考评价与 PRODIGY 亲和力估计；AlphaFold Server 人工提交包、真实结果档案的多任务/多模型重读、置信度与跨链接触审查、可复绘发表图件；资源与许可门禁下的本地官方 AlphaFold 3 入口；MSBio2/Metascape 与 Cytoscape 网络交付；序列、ORF、PCR、CRISPR、克隆、结构质量、结构比较与实验验证设计 |
 | [临床与实验研究](docs/capabilities/clinical-and-experimental.md) | 队列与生存、biomarker、流式、qPCR、剂量反应、Western blot、biodistribution、xenograft、稳定性与实验定量 |
 | [成像与科学可视化](docs/capabilities/imaging-and-visualization.md) | 图像 profiling、分割、共定位、追踪、组织图像配准、统一绘图规格、图组编排与视觉质量审查 |
 | [论文与转化交付](docs/capabilities/publication-and-translation.md) | 54 本生命医学高水平期刊的版本化规范、期刊推荐、逐项稿件审查、图表规格、引用审计、审稿模拟、回复矩阵、修订谱系、专利准备与展示材料 |
@@ -107,9 +107,9 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 - **产物可重验：** 实际软件版本、随机种子、参数、代码和文件校验指纹随结果登记，序列化对象在交付前重新读取。
 - **图与文字同源：** 图中各部分、图注、结果段落和 DOI 从同一张证据地图派生，降低不同交付物之间的叙述漂移。
 
-## 在 Codex 中开始研究
+## 开始一个研究项目
 
-安装后，直接描述项目目标。用户无需记忆模块名称，也无需手工拼接内部 skill。
+安装后，直接向智能体描述项目目标。用户无需记忆模块名称，也无需手工拼接内部技能。下列交互以当前完整验证的 Codex 路径为参考；其他宿主只有在承担相同的文件访问、权限确认、科学执行、产物重读和证据登记职责时，才能完成等价节点。
 
 > 从原始数据和样本设计开始，建立 donor-aware 的单细胞与空间组学研究程序。比较整合、注释、解卷积、轨迹和通讯方案；每一步给出方法依据、质量门控、图组计划和进入下一步的判定标准。
 
@@ -123,7 +123,19 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 
 ## 安装
 
-把这个 GitHub 项目链接交给 Codex，请它安装最新版 Biomed Workbench、核对统一研究入口和模块注册表，并报告实际版本与依赖状态。安装完成后，开启一个新的研究任务并直接描述科学目标。更新时，用同样的自然语言要求 Codex 拉取新版本、保护本地修改、完成发布完整性检查并重新加载。其他智能体如需接入，可使用隔离的 Agent Skills 或只读 MCP 适配层；这些适配器复用同一注册表，不改变 Codex 原生工作流和科学证据。
+在 Codex 中可以直接说：
+
+> 安装 [JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench) 这个仓库的当前发布版本；核对统一研究入口、科学模块注册表、实际版本和依赖状态，保护已有本地修改，并在完成发布完整性检查后重新加载。
+
+安装完成后，开启一个新的研究任务并直接描述科学目标。更新时，用同样的自然语言要求 Codex 更新到该仓库的当前发布版本、保护本地修改、完成发布完整性检查并重新加载。
+
+Biomed Workbench 采用 **Codex 优先、开放互操作** 的宿主策略：Codex 是当前完整验证的参考实现；支持 Agent Skills 约定的智能体可以读取统一研究入口，支持本地标准输入输出 MCP 的宿主可以使用受限的发现、路由、契约查询和只读执行接口。这些入口共享科学注册表，却不自动提供 Codex 的文件操作、权限交互、运行环境、网页认证、原生图像生成或项目证据交付。因此，“其他智能体可接入”表示具备明确的互操作路径，不表示已经获得与 Codex 等价的全流程认证。
+
+其他智能体不要照搬上面的 Codex 插件安装提示，可以改为：
+
+> 获取 [JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench) 的当前发布版本作为本地研究能力包。若当前宿主支持 Agent Skills，请加载统一研究入口；若支持本地标准输入输出 MCP，请配置受限互操作接口。不要把仓库中的 Codex 插件元数据当作当前宿主已经完成安装或全流程验证，并报告本宿主实际能够承担的文件访问、权限、运行环境、产物重读和证据交付能力。
+
+完整获取仓库时仍会包含 `.codex-plugin` 和 `.agents/plugins`；它们只是很小的 Codex 发布元数据，其他宿主可以保留但不加载。科学模块、注册表和验证记录仍需与这些文件保持同一版本，因此不建议从仓库中手工删除。
 
 面向不同智能体的支持环境、更新与验证说明：[中文](docs/installation.zh-CN.md) · [English](docs/installation.md)；接口说明：[中文](docs/agent-integration.zh-CN.md) · [English](docs/agent-integration.md)。
 

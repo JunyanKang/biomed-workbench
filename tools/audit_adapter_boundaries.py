@@ -59,7 +59,26 @@ def build() -> dict[str, object]:
     )
     english = (ROOT / "docs" / "agent-integration.md").read_text(encoding="utf-8") if not missing_optional else ""
     chinese = (ROOT / "docs" / "agent-integration.zh-CN.md").read_text(encoding="utf-8") if not missing_optional else ""
-    codex_first_documented = "Biomed Workbench is Codex-first" in english and "Biomed Workbench 首先是 Codex 插件" in chinese
+    documentation_markers = {
+        "english": {
+            "reference_host": "primary reference host",
+            "not_exclusive": "does not make the scientific registry exclusive to Codex",
+            "not_equivalent_certification": "entry compatibility rather than end-to-end certification",
+            "codex_native_boundary": "`access: codex_native`",
+        },
+        "chinese": {
+            "reference_host": "首要参考宿主",
+            "not_exclusive": "并不表示科学注册表只能由 Codex 使用",
+            "not_equivalent_certification": "入口兼容，而非全流程认证",
+            "codex_native_boundary": "`access: codex_native`",
+        },
+    }
+    documented = {"english": english, "chinese": chinese}
+    missing_documentation_markers = {
+        language: [marker_id for marker_id, marker in markers.items() if marker not in documented[language]]
+        for language, markers in documentation_markers.items()
+    }
+    codex_first_documented = not any(missing_documentation_markers.values())
     reverse_dependencies = _scientific_reverse_dependencies()
     passed = not missing_codex and not missing_optional and read_only_gate and shared_core_imports and codex_first_documented and not reverse_dependencies
     return {
@@ -73,6 +92,7 @@ def build() -> dict[str, object]:
         "mcp_read_only_gate_present": read_only_gate,
         "mcp_reuses_primary_registry_router_runner": shared_core_imports,
         "codex_first_boundary_documented": codex_first_documented,
+        "missing_documentation_markers": missing_documentation_markers,
         "scientific_module_reverse_dependencies": reverse_dependencies,
         "missing_codex_files": missing_codex,
         "missing_optional_adapter_files": missing_optional,

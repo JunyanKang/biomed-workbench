@@ -47,7 +47,13 @@ class ReleaseSurfaceTests(unittest.TestCase):
         english_readme = (ROOT / "README.en.md").read_text()
         development = (ROOT / "docs" / "development.md").read_text()
 
-        self.assertIn("把这个 GitHub 项目链接交给 Codex", readme)
+        repository_link = "[JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench)"
+        self.assertIn(f"安装 {repository_link} 这个仓库的当前发布版本", readme)
+        self.assertIn(f"Install the current release of {repository_link}", english_readme)
+        self.assertIn("其他智能体不要照搬上面的 Codex 插件安装提示", readme)
+        self.assertIn("保留但不加载", readme)
+        self.assertIn("should not copy the Codex plugin-install request verbatim", english_readme)
+        self.assertIn("present but unloaded", english_readme)
         self.assertNotIn("codex plugin marketplace add", readme)
         self.assertNotIn("codex plugin add", readme)
         self.assertIn("开启一个新的研究任务", readme)

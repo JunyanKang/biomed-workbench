@@ -1,10 +1,10 @@
 # Architecture
 
-Biomed Workbench exposes one Codex skill and discovers scientific capabilities from independent, versioned modules. A module owns its scientific contract; the router, runner, catalog projection, and assistant contain no module-specific registration tables.
+Biomed Workbench maintains one unified research skill and discovers scientific capabilities from independent, versioned modules. Codex is the fully validated reference host; another host may read the same scientific core through the declared skills-directory or bounded MCP interoperability path. A module owns its scientific contract, and no host, router, runner, catalog projection, or assistant contains a second module-specific registration table.
 
 ## Runtime Layers
 
-1. `skills/biomed-workbench/SKILL.md` is the only user-facing Codex entry.
+1. `skills/biomed-workbench/SKILL.md` is the unified research entry. Codex loads it directly; another host can connect only within the declared interoperability boundary.
 2. `biomed_workbench/modules/builtin/<module-id>/module.json` is the source of truth for every built-in capability.
 3. `biomed_workbench/modules/contract.py` validates scientific, execution, version, dependency, format, and provenance contracts.
 4. `biomed_workbench/modules/registry.py` discovers modules recursively and rejects duplicate IDs or unresolved relationships.

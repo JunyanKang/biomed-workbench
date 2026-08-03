@@ -22,8 +22,11 @@ class SkillEntrypointE2ETests(unittest.TestCase):
         self.assertIn("scientific result", self.lower)
         self.assertIn("limitations", self.lower)
 
-    def test_codex_routes_and_synthesizes_without_another_general_llm(self):
-        self.assertIn("codex is the only general-purpose reasoning layer", self.lower)
+    def test_reference_host_and_external_host_responsibilities_are_explicit(self):
+        self.assertIn("codex is the primary reference host", self.lower)
+        self.assertIn("the host reasoning layer remains responsible", self.lower)
+        self.assertIn("reading this skill alone is not equivalent product certification", self.lower)
+        self.assertIn("`access: codex_native` operations remain codex-owned", self.lower)
         self.assertIn("single", self.lower)
         self.assertIn("serial", self.lower)
         self.assertIn("parallel", self.lower)

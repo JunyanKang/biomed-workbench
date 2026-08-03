@@ -1,10 +1,10 @@
 # 系统架构
 
-Biomed Workbench 只暴露一个面向用户的 Codex 入口；所有科学能力都来自相互独立、带版本的模块。模块自身拥有科学契约，路由、执行器和目录不会另建一份容易漂移的注册表。
+Biomed Workbench 只维护一个面向用户的统一研究入口；所有科学能力都来自相互独立、带版本的模块。Codex 是当前完整验证的参考宿主，其他宿主可以通过技能目录或受限 MCP 读取同一科学核心。模块自身拥有科学契约，任何宿主、路由、执行器或目录都不能另建一份容易漂移的注册表。
 
 ## 运行层
 
-1. `skills/biomed-workbench/SKILL.md` 是用户入口。
+1. `skills/biomed-workbench/SKILL.md` 是统一研究入口；Codex 直接加载它，其他宿主只能按已声明的互操作边界接入。
 2. `biomed_workbench/modules/builtin/<module-id>/module.json` 是内置能力的唯一登记来源。
 3. `modules/contract.py` 校验科学问题、输入输出、版本、依赖、格式、质量门控和来源。
 4. `modules/registry.py` 递归发现模块，并拒绝重复标识和失效关系。

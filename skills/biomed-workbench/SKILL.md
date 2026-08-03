@@ -5,7 +5,7 @@ description: Use when a biomedical research task involves scientific databases, 
 
 # Biomed Workbench
 
-This is the workbench's single research entry. The user states a scientific objective in ordinary language; Codex resolves the project context, compiles the scientific dependency graph, and coordinates registered capabilities without exposing internal module selection as user work. Codex is the only general-purpose reasoning layer. Registered modules contribute bounded methods, data access, artifact contracts, and quality gates; Codex remains responsible for cross-method reasoning, scientific review, and the final decision narrative.
+This is the workbench's single research entry. The user states a scientific objective in ordinary language; the host agent resolves project context, compiles the scientific dependency graph, and coordinates registered capabilities without exposing internal module selection as user work. Codex is the primary reference host and the only host currently covered by the complete release path. Registered modules contribute bounded methods, data access, artifact contracts, and quality gates; the host reasoning layer remains responsible for cross-method reasoning, scientific review, and the final decision narrative. Another host may assume those responsibilities only through its own validated file, permission, runtime, artifact-reload, and evidence-delivery implementation; reading this Skill alone is not equivalent product certification. `access: codex_native` operations remain Codex-owned unless that host provides an independently validated equivalent.
 
 ## Research Loop
 
@@ -15,7 +15,7 @@ Complete every applicable stage. Routing and tool output are intermediate state,
 2. **Plan**: route the full objective, then select the smallest scientifically sufficient set of capabilities. Classify sequencing work by research scale, measurement family, assay, biological target, controls, and normalization strategy before choosing tools. Use `single` for one bounded analysis, `serial` when an output becomes a later input, `parallel` for independent branches, and `mixed` for parallel investigation followed by dependent synthesis.
 3. **Investigate**: execute selected capabilities with validated inputs. Preserve identifiers, database provenance, parameters, warnings, and artifacts. In serial work, validate each result before using it downstream; in parallel work, keep branches isolated until synthesis.
 4. **Design**: when the objective asks what to test next, translate findings into controls, perturbations, readouts, replication, quality thresholds, and falsifying outcomes. Separate proposed validation from completed evidence.
-5. **Interpret**: have Codex integrate the outputs using domain knowledge. Distinguish observation, calculation, inference, and hypothesis; do not inflate association into mechanism or statistical significance into biological importance.
+5. **Interpret**: have the host reasoning layer integrate the outputs using domain knowledge. Distinguish observation, calculation, inference, and hypothesis; do not inflate association into mechanism or statistical significance into biological importance.
 6. **Deliver**: return the scientific result or requested artifact, not capability IDs, routing scores, or command transcripts. Make the conclusion, supporting evidence, practical next decision, and limitations easy to find.
 7. **Map**: register each data, table, model, figure and panel in the scientific evidence map. Bind prerequisite conclusions, producing scripts, renderers, final files, captions, narrative sources, DOI records, paths and checksums before report generation.
 8. **Audit**: confirm every material claim is traceable to supplied data, a reviewed capability result, or an identified source; report failed or skipped steps, unresolved uncertainty, decision history, and reproducibility details.
@@ -51,7 +51,7 @@ Treat `fatal` findings as branch stops and `major` findings as interpretation bl
 
 Resolve `WORKBENCH_ROOT` as the directory two levels above this `SKILL.md`; do not depend on the user's working directory.
 
-Before the first operation in a newly installed or updated package, run the bounded health check. Resolve failed checks before scientific execution; do not ask the user to diagnose interpreter or registry details that Codex can inspect directly.
+Before the first operation in a newly installed or updated package, run the bounded health check. Resolve failed checks before scientific execution; do not ask the user to diagnose interpreter or registry details that the host agent can inspect directly.
 
 ```bash
 "$WORKBENCH_ROOT/tools/workbench" doctor --strict

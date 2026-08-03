@@ -7,7 +7,7 @@
 <p align="center"><strong>Compile biomedical questions into executable, reviewable, evolving chains of scientific evidence</strong></p>
 
 <p align="center">
-  A biomedical research orchestration platform for Codex<br>
+  An agent-driven biomedical research workbench<br>
   Evidence · Analysis · Scientific Review · Publication
 </p>
 
@@ -19,7 +19,7 @@
   <a href="https://github.com/JunyanKang/biomed-workbench/actions"><img alt="Quality" src="https://img.shields.io/github/actions/workflow/status/JunyanKang/biomed-workbench/quality.yml?branch=main&amp;label=quality"></a>
   <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-4388C7"></a>
   <img alt="198 scientific modules" src="https://img.shields.io/badge/scientific%20modules-198-36A58B">
-  <img alt="Codex native" src="https://img.shields.io/badge/Codex-native-E05A47">
+  <img alt="Codex first" src="https://img.shields.io/badge/Codex-first-E05A47">
   <img alt="Versioned evidence maps" src="https://img.shields.io/badge/evidence%20maps-versioned-C7953E">
 </p>
 
@@ -31,7 +31,7 @@
 
 What ambitious research lacks is rarely one more isolated tool. The harder problem is scientific continuity: how a question is decomposed, why a method is admitted, whether data support inference, how results survive technical and biological review, and which next step can genuinely change the state of knowledge.
 
-Biomed Workbench brings that continuity into Codex. Researchers describe an objective in natural language; the workbench coordinates evidence retrieval, omics, single-cell and spatial analysis, molecular design, quantitative experiments, scientific figures, and publication—while maintaining explicit dependencies, quality gates, and a versioned scientific evidence map.
+Biomed Workbench brings that continuity into agent-assisted research. Researchers describe an objective in natural language; the workbench coordinates evidence retrieval, omics, single-cell and spatial analysis, molecular design, quantitative experiments, scientific figures, and publication—while maintaining explicit dependencies, quality gates, and a versioned scientific evidence map. Codex is the primary reference host and the only host currently covered by the complete release path. Other agents that support a skills-directory convention or MCP can reuse the same scientific registry, but execution, permissions, runtime management, and evidence delivery still require independent implementation and validation in that host.
 
 The result is a research system built to answer four durable questions:
 
@@ -82,7 +82,7 @@ Within the data-analysis layer, capabilities are further organized by data scale
 | [Single-cell measurements, trajectories, and integration](docs/capabilities/single-cell-integration-reference-cross-species.md) | Scanpy/Seurat, scVI/scANVI, Harmony, CCA/RPCA, FastMNN, scIB, WNN and MOFA+; MultiVI accepted on public PBMC multiome data; SAMap accepted on the public Hydra–planarian case |
 | [Spatial measurements](docs/capabilities/trajectory-spatial-complete-analysis.md) | Visium and Xenium data structures; Xenium–SpatialData–Squidpy image/segmentation analysis; RCTD accepted on Slide-seq and Tangram on public data; PASTE slice alignment and three-dimensional coordinates |
 | [Universal analysis and project methods](docs/capabilities/omics-and-single-cell.md) | format validation, sample design, differential testing, DEqMS, GO/KEGG, GSEA, WGCNA, motifs, networks, evidence review and visualization specifications that can serve several measurement scales |
-| [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | STRING functional and physical interaction networks; HADDOCK3 complex docking with DockQ reference evaluation and PRODIGY affinity estimates; AlphaFold Server submission packages, result import, confidence review and publication figures; permission-gated local AlphaFold 3 entry; MSBio2/Metascape and Cytoscape network delivery; sequence, ORF, PCR, CRISPR, cloning, structure quality, comparison and validation design |
+| [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | STRING functional and physical interaction networks; HADDOCK3 complex docking with DockQ reference evaluation and PRODIGY affinity estimates; manual AlphaFold Server submission packages, multi-job/multi-model reload from real result archives, confidence and cross-chain-contact review, and replot-ready publication figures; resource- and permission-gated local official AlphaFold 3 entry; MSBio2/Metascape and Cytoscape network delivery; sequence, ORF, PCR, CRISPR, cloning, structure quality, comparison and validation design |
 | [Clinical and experimental research](docs/capabilities/clinical-and-experimental.md) | Cohort and survival analysis, biomarkers, flow cytometry, qPCR, dose response, western blot, biodistribution, xenograft, stability and quantitative assays |
 | [Imaging and scientific visualization](docs/capabilities/imaging-and-visualization.md) | Image profiling, segmentation, colocalization, tracking, tissue-image registration, unified figure specifications, multi-part figure composition and visual QA |
 | [Publication and translation](docs/capabilities/publication-and-translation.md) | Versioned standards for 54 journals, project-to-journal fit, article-structure and limit review, figure specifications, manuscript review, citation audit, reviewer simulation, response matrices, revision lineage, patent preparation and presentations |
@@ -105,9 +105,9 @@ Explore the full capability map: [中文](docs/capabilities/README.zh-CN.md) · 
 - **Artifacts are re-verifiable.** Actual software versions, seeds, parameters, code, and checksums accompany results; serialized objects are reloaded before delivery.
 - **Figures and prose share a source.** Figure elements, captions, results text, and DOI records derive from the same validated evidence map.
 
-## Start in Codex
+## Start a research project
 
-After installation, describe the project objective directly. Researchers do not need to memorize module IDs or assemble internal skills.
+After installation, describe the project objective directly to the agent. Researchers do not need to memorize module IDs or assemble internal skills. The examples below use the fully validated Codex path. Another host can complete an equivalent node only when it supplies the same file access, permission handling, scientific execution, artifact reload, and evidence-registration responsibilities.
 
 > Build a donor-aware single-cell and spatial research program from the raw data and sample design. Compare integration, annotation, deconvolution, trajectory, and communication strategies; define method rationale, quality gates, figure plans, and decision criteria at every stage.
 
@@ -121,7 +121,19 @@ The workbench inspects real project files and experimental design before compili
 
 ## Installation
 
-Give the `JunyanKang/biomed-workbench` repository to Codex and ask it to install the current release, verify the unified entry and module registry, preserve local changes, and report the exact revision and unmet dependencies. After installation, open a new task and describe the scientific objective directly. Other agents may use the isolated Agent Skills or read-only MCP adapters; those adapters reuse the same registry without changing Codex-native behavior or scientific evidence. Details: [中文](docs/installation.zh-CN.md) · [English](docs/installation.md); optional adapters: [中文](docs/agent-integration.zh-CN.md) · [English](docs/agent-integration.md).
+In Codex, say:
+
+> Install the current release of [JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench). Verify the unified research entry, scientific-module registry, exact revision, and dependency state; preserve existing local changes; run the release-integrity checks; then reload the plugin.
+
+After installation, open a new task and describe the scientific objective directly. Use the same natural-language request for updates, including preservation of local changes and release-integrity verification.
+
+Biomed Workbench follows a **Codex-first, interoperable** host strategy. Codex is the complete validated reference implementation. Agents that support the Agent Skills convention may read the unified research entry, while hosts with local stdio MCP support may use bounded discovery, routing, contract-inspection, and read-only execution interfaces. These entries share the scientific registry but do not automatically supply Codex file operations, permission interaction, runtime management, browser authentication, native image generation, or project evidence delivery. “Usable by other agents” therefore means that a defined interoperability path exists, not that every host has received equivalent end-to-end certification. Details: [中文](docs/installation.zh-CN.md) · [English](docs/installation.md); interoperability boundaries: [中文](docs/agent-integration.zh-CN.md) · [English](docs/agent-integration.md).
+
+Another agent should not copy the Codex plugin-install request verbatim. Use:
+
+> Obtain the current release of [JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench) as a local research-capability package. If this host supports Agent Skills, load the unified research entry; if it supports local stdio MCP, configure the bounded interoperability interface. Do not treat the repository's Codex plugin metadata as proof that this host has installed or validated the complete product path. Report which file-access, permission, runtime, artifact-reload, and evidence-delivery responsibilities this host can actually satisfy.
+
+A full repository checkout still includes `.codex-plugin` and `.agents/plugins`. They are small Codex release metadata and may remain present but unloaded in another host. Keep them with the repository because the scientific modules, registry, and validation records must remain version-aligned; do not manually prune them from a checkout.
 
 ## Data access and credentials
 

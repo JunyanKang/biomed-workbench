@@ -4,22 +4,26 @@ Languages: [English](installation.md) · [中文](installation.zh-CN.md)
 
 ## Brief installation
 
-Give `https://github.com/JunyanKang/biomed-workbench` to Codex and ask:
+In Codex, say:
 
-> Install the current release from this repository. Verify the Codex plugin identity, unified research entry, scientific-module registry and exact revision; preserve existing local changes; then report the validation result and any scientific backend still missing for my project in plain language.
+> Install the current release of [JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench). Verify the Codex plugin identity, unified research entry, scientific-module registry, and exact revision; preserve existing local changes; then report the validation result and any scientific backend still missing for my project in plain language.
 
 After installation or update, ask Codex to reload the plugin and open a new task so the current skill and tool entries are discovered.
 
-## Codex-native entry
+## Reference host and other agents
 
-Codex reads the installation metadata in `.codex-plugin` and `.agents/plugins`, uses `skills/biomed-workbench/SKILL.md` as the unified research entry, and maps native features such as image generation to explicit scientific contracts. This is the primary, release-validated product path.
+Codex reads the installation metadata in `.codex-plugin` and `.agents/plugins`, uses `skills/biomed-workbench/SKILL.md` as the unified research entry, and maps file operations, permission interaction, runtime coordination, and native image generation to explicit scientific contracts. This is the reference implementation currently covered by the complete release path. The project permits other agents to access the same scientific core without treating interface readability as end-to-end capability certification.
 
 ## Optional interoperability adapters
 
-- **Agent Skills:** another agent that supports a skills-directory convention may read the same skill guidance, but it must provide its own file access, permission checks, runtime execution, artifact reload and evidence registration.
+Another agent should not copy the Codex plugin-install request verbatim. Tell it:
+
+> Obtain the current release of [JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench) as a local research-capability package. If this host supports Agent Skills, load the unified research entry; if it supports local stdio MCP, configure the bounded interoperability interface. Do not treat the repository's Codex plugin metadata as proof that this host has installed or validated the complete product path. Report which file-access, permission, runtime, artifact-reload, and evidence-delivery responsibilities this host can actually satisfy.
+
+- **Agent Skills:** another agent that supports Agent Skills or an equivalent skills-directory convention may read the same skill guidance, but it must independently provide and validate file access, permission checks, runtime execution, artifact reload and evidence registration.
 - **Read-only MCP:** an agent with local stdio MCP support may register `tools/mcp_server.py` for capability discovery, natural-language routing, contract inspection and read-only execution. Output-writing research workflows, Codex-native tools and project-level scientific decisions are not automatically proxied through MCP.
 
-These adapters sit outside the scientific modules and read the same registry. They do not duplicate modules, rewrite templates or rebind prior execution evidence. See [Optional Interoperability Adapters](agent-integration.md).
+A full checkout still includes `.codex-plugin` and `.agents/plugins`. These are small Codex release metadata and may remain present but unloaded in another host. Keeping them preserves version alignment among scientific modules, the registry, and release records; do not manually prune them from a working checkout. The adapters sit outside scientific modules and read the same registry. They do not duplicate modules, rewrite templates, or rebind prior execution evidence. They establish an interoperability path, not host-level parity with Codex. See [Codex-First Operation And Cross-Host Interoperability](agent-integration.md).
 
 ## Local development and updates
 

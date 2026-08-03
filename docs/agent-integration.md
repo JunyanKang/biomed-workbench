@@ -1,14 +1,22 @@
-# Optional Interoperability Adapters
+# Codex-First Operation And Cross-Host Interoperability
 
 Languages: [English](agent-integration.md) · [中文](agent-integration.zh-CN.md)
 
-Biomed Workbench is Codex-first. `.codex-plugin`, `.agents/plugins`, and `skills/biomed-workbench/SKILL.md` define the release-validated native entry; Codex file access, permission handling, native image generation, and project collaboration provide the complete product experience.
+Biomed Workbench is an agent-driven biomedical research workbench released with Codex as its primary reference host. `.codex-plugin`, `.agents/plugins`, and `skills/biomed-workbench/SKILL.md` define the product path currently covered by the complete release suite; Codex file access, permission handling, runtime coordination, native image generation, and project delivery together provide that reference implementation.
 
-Other agents may connect through isolated adapters. Those adapters do not enter scientific modules, parameterized templates, quality gates, or prior execution evidence.
+“Codex-first” describes validation order and support depth; it does not make the scientific registry exclusive to Codex. Other agents may connect through a skills-directory convention or the bounded MCP interface. Adapters stay outside scientific modules and do not copy parameterized templates, rewrite quality gates, or rebind prior execution evidence. Another host may claim the same research node only after independently implementing and validating the corresponding responsibilities.
+
+| Boundary | Codex reference path | Agent Skills host | Read-only MCP host |
+| --- | --- | --- | --- |
+| Unified skill and registry access | Fully validated | Readable; loading behavior is host-validated | Available through bounded tools |
+| File writes, permission handling, and runtime management | Covered by the Codex product path | Host-supplied and host-validated | Not provided |
+| External scientific software and browser authentication | Interactive execution under module contracts | Host-supplied and host-validated | Not provided |
+| Artifact reload, scientific review, and evidence maps | Covered by the complete release flow | Host-supplied and host-validated | A bounded result is not a project deliverable |
+| Native image generation and collaboration handoffs | Codex-native | Requires an independently validated equivalent | Not provided |
 
 ## Agent Skills adapter
 
-An agent that supports a skills-directory convention may read `skills/biomed-workbench/SKILL.md` and reuse its research process and module entry. This is guidance-level compatibility: the host must provide file access, command execution, permission handling, runtime isolation, artifact reload, and evidence registration. A node remains unexecuted whenever the host cannot satisfy one of those responsibilities.
+An agent that supports Agent Skills or an equivalent skills-directory convention may read `skills/biomed-workbench/SKILL.md` and reuse its research process and module entry. This is entry compatibility rather than end-to-end certification: the host must provide file access, command execution, permission handling, runtime isolation, artifact reload, and evidence registration. A node remains unexecuted whenever the host cannot satisfy one of those responsibilities.
 
 ## Read-only MCP adapter
 
@@ -26,4 +34,4 @@ MCP does not proxy output-writing research workflows, replace Codex-native image
 
 ## Verification
 
-The complete release suite validates the Codex-native path. A separate adapter-boundary audit checks adapter location, read-only permissions, registry identity, and absence of reverse dependencies from scientific modules. Adapter validation cannot raise a scientific module's maturity or replace public-data or real-project acceptance.
+The complete release suite validates the Codex reference path. A separate adapter-boundary audit checks adapter location, read-only permissions, registry identity, and absence of reverse dependencies from scientific modules. That audit shows that an interface has not forked or overreached; it does not certify complete scientific execution in an external host, raise a module's maturity, or replace public-data, real-service-result, or real-project acceptance.

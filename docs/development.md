@@ -64,9 +64,9 @@ The generated registry is source-neutral and dynamically discovers valid modules
 - Review generated reports for local paths, credentials, temporary files, and bridge artifacts.
 - Keep README counts and public claims synchronized with generated evidence.
 
-## Codex And Adapter Boundaries
+## Reference Host And Adapter Boundaries
 
-Codex is the primary product entry. Optional Agent Skills and MCP support are interoperability adapters that read the existing skill, registry, router and runner. Keep adapter implementation and documentation outside scientific module directories; a new host must not copy modules, rewrite packaged templates, change quality gates, or cause prior scientific execution evidence to be reissued.
+Codex is the fully validated reference host. Optional Agent Skills and MCP support are interoperability adapters that read the existing skill, registry, router, and runner. Entry compatibility is not end-to-end host certification. Keep adapter implementation and documentation outside scientific module directories; a new host must not copy modules, rewrite packaged templates, change quality gates, or cause prior scientific execution evidence to be reissued.
 
 Run `tools/audit_adapter_boundaries.py` and regenerate `reports/adapter-boundary-audit.json` after adapter changes. `access: codex_native` remains a Codex-owned native handoff; another host may complete that node only through a separately validated equivalent. Validate adapters independently from scientific maturity, and keep installation identity, adapter compatibility and scientific evidence identity separate.
 
