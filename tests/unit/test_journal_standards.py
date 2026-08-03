@@ -10,6 +10,24 @@ from biomed_workbench.capabilities.journal_standards import (
 
 
 class JournalStandardsTests(unittest.TestCase):
+    def test_bilingual_guides_list_every_catalog_journal_and_metric_frame(self):
+        catalog, _ = _load_catalog()
+        repository_root = Path(CATALOG_ROOT).parents[2]
+        for relative_path in (
+            "docs/journal-standards.md",
+            "docs/journal-standards.zh-CN.md",
+        ):
+            text = (repository_root / relative_path).read_text(encoding="utf-8")
+            table = text.split("<!-- journal-coverage-table:start -->", 1)[1].split(
+                "<!-- journal-coverage-table:end -->", 1
+            )[0]
+            journal_rows = [line for line in table.splitlines() if line.startswith("| [")]
+            self.assertEqual(len(journal_rows), catalog["journal_count"])
+            self.assertIn("JCR 2026", text)
+            self.assertIn("2025 JIF", text)
+            for profile in catalog["journals"]:
+                self.assertIn(f"| [{profile['title']}]", table)
+
     def test_active_catalog_is_versioned_complete_and_official_source_bound(self):
         catalog, digest = _load_catalog()
         self.assertGreaterEqual(catalog["journal_count"], 50)
