@@ -730,6 +730,222 @@
   "maturity": "validated",
   "module_type": "analysis",
   "mutability": "read_only",
+  "observed_output_contracts": [
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "single_cell_multimodal_evidence"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "seurat-rds",
+              "mofa-hdf5",
+              "tab-separated-values",
+              "inline-json"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "multimodal-integrated",
+              "modality-resolved",
+              "reload-validated"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "multimodal-cell-alignment",
+          "metric_key": "multimodal-cell-alignment",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "multimodal-matrix-semantics",
+          "metric_key": "multimodal-matrix-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "multimodal-wnn-weights-graphs",
+          "metric_key": "multimodal-wnn-weights-graphs",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "multimodal-mofa-factors",
+          "metric_key": "multimodal-mofa-factors",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "multimodal-backend-separation",
+          "metric_key": "multimodal-backend-separation",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "multimodal-source-and-output-reload",
+          "metric_key": "multimodal-source-and-output-reload",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "application/octet-stream",
+            "application/x-hdf5",
+            "text/tab-separated-values"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "application/octet-stream",
+            "application/x-hdf5",
+            "text/tab-separated-values"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "multimodal_integration_evidence",
+      "required_postflight_gate_ids": [
+        "multimodal-cell-alignment",
+        "multimodal-matrix-semantics",
+        "multimodal-wnn-weights-graphs",
+        "multimodal-mofa-factors",
+        "multimodal-backend-separation",
+        "multimodal-source-and-output-reload"
+      ],
+      "semantic_profile": "single-cell-multimodal-integration-multimodal-integration-evidence-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 3
+  },
   "output_artifacts": [
     {
       "artifact_type": "single_cell_multimodal_evidence",
@@ -968,6 +1184,21 @@
   "questions": [
     "Which paired-cell neighborhoods and latent factors are jointly supported across RNA, chromatin accessibility, and protein views while retaining modality-specific evidence and uncertainty?"
   ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "single-cell-multimodal-integration",
+      "Integrate paired RNA, ATAC, and protein modalities with WNN and MOFA+",
+      "RNA ATAC WNN integration",
+      "CITE-seq RNA ADT WNN",
+      "MOFA+ multimodal factor analysis",
+      "MOFA+",
+      "\u5355\u7ec6\u80deRNA+ATAC\u6570\u636e",
+      "\u5355\u7ec6\u80de RNA ATAC CITE-seq WNN MOFA+ \u591a\u7ec4\u5b66\u6574\u5408"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
   "schema_version": 1,
   "title": "Integrate paired RNA, ATAC, and protein modalities with WNN and MOFA+",
   "tool_requirements": [
@@ -1089,169 +1320,5 @@
       "version_source": "https://biofam.github.io/MOFA2/"
     }
   ],
-  "version": "1.1.0",
-  "routing": {
-    "method_aliases": [
-      "single-cell-multimodal-integration",
-      "Integrate paired RNA, ATAC, and protein modalities with WNN and MOFA+",
-      "RNA ATAC WNN integration",
-      "CITE-seq RNA ADT WNN",
-      "MOFA+ multimodal factor analysis",
-      "MOFA+",
-      "单细胞RNA+ATAC数据",
-      "单细胞 RNA ATAC CITE-seq WNN MOFA+ 多组学整合"
-    ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
-  },
-  "orchestration": {
-    "scientific_stage": 3,
-    "requires_reviewed_upstream_types": []
-  },
-  "observed_output_contracts": [
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "single_cell_multimodal_evidence"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "seurat-rds",
-              "mofa-hdf5",
-              "tab-separated-values",
-              "inline-json"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "multimodal-integrated",
-              "modality-resolved",
-              "reload-validated"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "application/octet-stream",
-            "application/x-hdf5",
-            "text/tab-separated-values"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "application/octet-stream",
-            "application/x-hdf5",
-            "text/tab-separated-values"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "multimodal_integration_evidence",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "multimodal-cell-alignment",
-        "multimodal-matrix-semantics",
-        "multimodal-wnn-weights-graphs",
-        "multimodal-mofa-factors",
-        "multimodal-backend-separation",
-        "multimodal-source-and-output-reload"
-      ]
-    }
-  ]
+  "version": "1.1.0"
 }

@@ -471,6 +471,210 @@
   "maturity": "validated",
   "module_type": "analysis",
   "mutability": "read_only",
+  "observed_output_contracts": [
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "single_cell_trajectory_evidence"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "tab-separated-values",
+              "monocle-object-directory",
+              "inline-json"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "lineage-inferred",
+              "direction-validated",
+              "gam-tested",
+              "reload-validated"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "topology-input-accounting",
+          "metric_key": "topology-input-accounting",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "topology-lineage-coverage",
+          "metric_key": "topology-lineage-coverage",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "topology-independent-direction",
+          "metric_key": "topology-independent-direction",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "topology-tradeseq-completeness",
+          "metric_key": "topology-tradeseq-completeness",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "topology-output-reload",
+          "metric_key": "topology-output-reload",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "application/zip",
+            "text/tab-separated-values"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "application/zip",
+            "text/tab-separated-values"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "trajectory_topology_evidence",
+      "required_postflight_gate_ids": [
+        "topology-input-accounting",
+        "topology-lineage-coverage",
+        "topology-independent-direction",
+        "topology-tradeseq-completeness",
+        "topology-output-reload"
+      ],
+      "semantic_profile": "single-cell-trajectory-topology-trajectory-topology-evidence-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 6
+  },
   "output_artifacts": [
     {
       "artifact_type": "single_cell_trajectory_evidence",
@@ -676,6 +880,23 @@
   "questions": [
     "Which branches and lineage-dependent gene programs are supported by independent topology methods and external temporal direction?"
   ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "single-cell-trajectory-topology",
+      "Infer lineage topology with Slingshot, Monocle3, and tradeSeq",
+      "Slingshot lineage inference",
+      "Monocle3 trajectory graph",
+      "tradeSeq trajectory differential expression",
+      "single-cell trajectory pseudotime lineage topology",
+      "trajectory pseudotime",
+      "trajectory topology",
+      "trajectory pseudotime branching topology",
+      "\u5355\u7ec6\u80de\u5206\u652f\u8f68\u8ff9 Slingshot Monocle3 tradeSeq"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
   "schema_version": 1,
   "title": "Infer lineage topology with Slingshot, Monocle3, and tradeSeq",
   "tool_requirements": [
@@ -797,168 +1018,5 @@
       "version_source": "https://bioconductor.org/packages/3.18/bioc/html/tradeSeq.html"
     }
   ],
-  "version": "1.1.0",
-  "routing": {
-    "method_aliases": [
-      "single-cell-trajectory-topology",
-      "Infer lineage topology with Slingshot, Monocle3, and tradeSeq",
-      "Slingshot lineage inference",
-      "Monocle3 trajectory graph",
-      "tradeSeq trajectory differential expression",
-      "single-cell trajectory pseudotime lineage topology",
-      "trajectory pseudotime",
-      "trajectory topology",
-      "trajectory pseudotime branching topology",
-      "单细胞分支轨迹 Slingshot Monocle3 tradeSeq"
-    ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
-  },
-  "orchestration": {
-    "scientific_stage": 6,
-    "requires_reviewed_upstream_types": []
-  },
-  "observed_output_contracts": [
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "single_cell_trajectory_evidence"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "tab-separated-values",
-              "monocle-object-directory",
-              "inline-json"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "lineage-inferred",
-              "direction-validated",
-              "gam-tested",
-              "reload-validated"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "application/zip",
-            "text/tab-separated-values"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "application/zip",
-            "text/tab-separated-values"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "trajectory_topology_evidence",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "topology-input-accounting",
-        "topology-lineage-coverage",
-        "topology-independent-direction",
-        "topology-tradeseq-completeness",
-        "topology-output-reload"
-      ]
-    }
-  ]
+  "version": "1.1.0"
 }

@@ -6,7 +6,9 @@ from tools.audit_execution_readiness import build
 class ExecutionReadinessTests(unittest.TestCase):
     def test_statuses_distinguish_contract_executor_and_public_validation(self):
         report = build()
-        self.assertEqual(report["schema_version"], 5)
+        self.assertEqual(report["schema_version"], 6)
+        self.assertIn("controlled_fixture_process_json_round_trip", report["axis_counts"])
+        self.assertIn("controlled_fixture_artifact_payload_reloaded", report["axis_counts"])
         self.assertEqual(report["axis_counts"]["contract_valid"], report["module_count"])
         self.assertLess(report["axis_counts"]["representative_or_public_case_validated"], report["module_count"])
         self.assertEqual(report["axis_counts"]["current_project_reviewed"], 0)

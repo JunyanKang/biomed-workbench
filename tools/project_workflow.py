@@ -38,6 +38,7 @@ from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 from biomed_workbench.orchestration.controller import ResearchController  # noqa: E402
 from biomed_workbench.orchestration.execution_ingest import ingest_execution_bundle  # noqa: E402
 from biomed_workbench.reporting.evidence_map_versions import (  # noqa: E402
+    abort_prepared_evidence_map_publication,
     complete_evidence_map_publication_recovery,
     inspect_evidence_map_publication_recovery,
     publish_evidence_map_transaction,
@@ -132,10 +133,17 @@ def main() -> int:
     mapping.add_argument("--specs", required=True, type=Path)
     mapping.add_argument("--version", required=True, type=Path)
     mapping.add_argument("--publish-root", required=True, type=Path)
+    mapping.add_argument(
+        "--authorize-delivery-node",
+        action="append",
+        default=[],
+        help="authorize one exact publication-delivery node from its retained upstream evidence slice",
+    )
     recovery = commands.add_parser("map-recovery", help="inspect interrupted evidence-map publication state without modifying files")
     recovery.add_argument("--state", required=True, type=Path)
     recovery.add_argument("--publish-root", required=True, type=Path)
     recovery.add_argument("--complete", action="store_true", help="complete a verified files-published/state-pending transaction")
+    recovery.add_argument("--abort-prepared", action="store_true", help="abandon a verified prepared transaction before immutable files exist")
     ingest = commands.add_parser("ingest-execution", help="validate and ingest one observed execution against its recorded handoff")
     ingest.add_argument("--state", required=True, type=Path)
     ingest.add_argument("--input", required=True, type=Path)
@@ -215,6 +223,7 @@ def main() -> int:
             tuple(EvidenceUnitSpec.from_dict(item) for item in specs_payload),
             workspace_root=args.workspace.resolve(strict=True),
             version=version,
+            authorized_delivery_node_ids=tuple(args.authorize_delivery_node),
         )
         publication = EvidenceMapPublication.from_map(evidence_map)
         state = apply_event(
@@ -236,8 +245,15 @@ def main() -> int:
         print(json.dumps(_summary(state), indent=2, sort_keys=True, ensure_ascii=False))
         return 0
     elif args.command == "map-recovery":
+        if args.complete and args.abort_prepared:
+            raise ValueError("map recovery accepts only one modifying action at a time")
         if args.complete:
             result = complete_evidence_map_publication_recovery(
+                args.publish_root,
+                state_path=args.state,
+            )
+        elif args.abort_prepared:
+            result = abort_prepared_evidence_map_publication(
                 args.publish_root,
                 state_path=args.state,
             )

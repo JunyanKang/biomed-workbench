@@ -618,6 +618,412 @@
   "maturity": "validated",
   "module_type": "analysis",
   "mutability": "read_only",
+  "observed_output_contracts": [
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "single_cell_trajectory_object"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "h5ad"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "dynamical-velocity-modeled",
+              "direction-validated",
+              "reload-validated"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-input-and-layer-semantics",
+          "metric_key": "velocity-input-and-layer-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-dynamics-fit",
+          "metric_key": "velocity-dynamics-fit",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-independent-direction",
+          "metric_key": "velocity-independent-direction",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-confidence",
+          "metric_key": "velocity-confidence",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-source-preservation",
+          "metric_key": "velocity-source-preservation",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-output-reload",
+          "metric_key": "velocity-output-reload",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/x-hdf5"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "trajectory_velocity_object",
+      "required_postflight_gate_ids": [
+        "velocity-input-and-layer-semantics",
+        "velocity-dynamics-fit",
+        "velocity-independent-direction",
+        "velocity-confidence",
+        "velocity-source-preservation",
+        "velocity-output-reload"
+      ],
+      "semantic_profile": "single-cell-trajectory-velocity-trajectory-velocity-object-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    },
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "single_cell_trajectory_validation"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "inline-json"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "derived"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-input-and-layer-semantics",
+          "metric_key": "velocity-input-and-layer-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-dynamics-fit",
+          "metric_key": "velocity-dynamics-fit",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-independent-direction",
+          "metric_key": "velocity-independent-direction",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-confidence",
+          "metric_key": "velocity-confidence",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-source-preservation",
+          "metric_key": "velocity-source-preservation",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "velocity-output-reload",
+          "metric_key": "velocity-output-reload",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "trajectory_velocity_validation",
+      "required_postflight_gate_ids": [
+        "velocity-input-and-layer-semantics",
+        "velocity-dynamics-fit",
+        "velocity-independent-direction",
+        "velocity-confidence",
+        "velocity-source-preservation",
+        "velocity-output-reload"
+      ],
+      "semantic_profile": "single-cell-trajectory-velocity-trajectory-velocity-validation-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 6
+  },
   "output_artifacts": [
     {
       "artifact_type": "single_cell_trajectory_object",
@@ -832,6 +1238,21 @@
   "questions": [
     "Does splicing kinetics support a reproducible and independently directed cellular trajectory rather than an attractive but unvalidated arrow field?"
   ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "single-cell-trajectory-velocity",
+      "Infer and validate RNA velocity, pseudotime, and latent time",
+      "RNA velocity",
+      "trajectory velocity",
+      "run scVelo RNA velocity and latent time",
+      "infer trajectory and velocity pseudotime",
+      "validate RNA velocity direction with experimental time",
+      "scVelo RNA velocity \u62df\u65f6\u5e8f\u548c\u6f5c\u5728\u65f6\u95f4\u65b9\u5411\u9a8c\u8bc1"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
   "schema_version": 1,
   "title": "Infer and validate RNA velocity, pseudotime, and latent time",
   "tool_requirements": [
@@ -914,292 +1335,5 @@
       "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/"
     }
   ],
-  "version": "1.1.0",
-  "routing": {
-    "method_aliases": [
-      "single-cell-trajectory-velocity",
-      "Infer and validate RNA velocity, pseudotime, and latent time",
-      "RNA velocity",
-      "trajectory velocity",
-      "run scVelo RNA velocity and latent time",
-      "infer trajectory and velocity pseudotime",
-      "validate RNA velocity direction with experimental time",
-      "scVelo RNA velocity 拟时序和潜在时间方向验证"
-    ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
-  },
-  "orchestration": {
-    "scientific_stage": 6,
-    "requires_reviewed_upstream_types": []
-  },
-  "observed_output_contracts": [
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "single_cell_trajectory_object"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "h5ad"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "dynamical-velocity-modeled",
-              "direction-validated",
-              "reload-validated"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/x-hdf5"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "trajectory_velocity_object",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "velocity-input-and-layer-semantics",
-        "velocity-dynamics-fit",
-        "velocity-independent-direction",
-        "velocity-confidence",
-        "velocity-source-preservation",
-        "velocity-output-reload"
-      ]
-    },
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "single_cell_trajectory_validation"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "inline-json"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "derived"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "trajectory_velocity_validation",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "velocity-input-and-layer-semantics",
-        "velocity-dynamics-fit",
-        "velocity-independent-direction",
-        "velocity-confidence",
-        "velocity-source-preservation",
-        "velocity-output-reload"
-      ]
-    }
-  ]
+  "version": "1.1.0"
 }

@@ -9,7 +9,7 @@ from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, Mapping
 
 from .identity import digest_value, validate_identifier
-from .execution_chain import delivery_slice_digest
+from .execution_chain import delivery_slice_digest, validate_delivery_prerequisites
 from .scientific_dependency import (
     AnalysisAdmission,
     ArtifactReview,
@@ -65,7 +65,7 @@ class EvidenceMapVersion:
             raise ValueError("evidence map revision must be positive")
         if self.change_type not in CHANGE_TYPES:
             raise ValueError("evidence map change_type is unsupported")
-        if self.map_kind not in {"project-snapshot", "validated-delivery"}:
+        if self.map_kind not in {"project-snapshot", "delivery-authorization", "validated-delivery"}:
             raise ValueError("evidence map kind is unsupported")
         if self.parent_map_digest is not None and not _SHA256.fullmatch(self.parent_map_digest):
             raise ValueError("evidence map parent digest must be SHA-256")
@@ -108,12 +108,17 @@ class EvidenceMapPublication:
     map_kind: str
     delivery_slice_digest: str
     active_artifact_ids: tuple[str, ...]
+    covered_plan_id: str | None
+    covered_node_ids: tuple[str, ...]
+    covered_artifact_ids: tuple[str, ...]
+    authorized_delivery_node_ids: tuple[str, ...]
+    delivery_scope_digest: str
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "evidence_map_publication.id"))
         if not isinstance(self.version, EvidenceMapVersion):
             raise ValueError("evidence map publication requires a version contract")
-        for field in ("map_digest", "edge_table_digest", "source_state_digest", "dependency_bundle_digest", "delivery_slice_digest"):
+        for field in ("map_digest", "edge_table_digest", "source_state_digest", "dependency_bundle_digest", "delivery_slice_digest", "delivery_scope_digest"):
             if not _SHA256.fullmatch(getattr(self, field)):
                 raise ValueError(f"evidence map publication {field} must be SHA-256")
         if self.map_kind != self.version.map_kind:
@@ -122,6 +127,18 @@ class EvidenceMapPublication:
         if len(set(active)) != len(active):
             raise ValueError("evidence map publication active artifact IDs must be unique")
         object.__setattr__(self, "active_artifact_ids", active)
+        if self.covered_plan_id is not None:
+            object.__setattr__(self, "covered_plan_id", validate_identifier(self.covered_plan_id, "evidence_map_publication.covered_plan_id"))
+        for field in ("covered_node_ids", "covered_artifact_ids", "authorized_delivery_node_ids"):
+            values = tuple(validate_identifier(value, f"evidence_map_publication.{field}") for value in getattr(self, field))
+            if len(set(values)) != len(values):
+                raise ValueError(f"evidence map publication {field} must be unique")
+            object.__setattr__(self, field, values)
+        if self.map_kind == "delivery-authorization":
+            if self.covered_plan_id is None or len(self.authorized_delivery_node_ids) != 1 or not self.covered_artifact_ids:
+                raise ValueError("delivery authorization requires one exact plan, delivery node, and retained artifact slice")
+        elif self.authorized_delivery_node_ids:
+            raise ValueError("only delivery-authorization maps may authorize delivery nodes")
 
     @classmethod
     def from_map(cls, evidence_map: "ScientificEvidenceMap") -> "EvidenceMapPublication":
@@ -136,6 +153,11 @@ class EvidenceMapPublication:
             map_kind=evidence_map.version.map_kind,
             delivery_slice_digest=evidence_map.delivery_slice_digest,
             active_artifact_ids=evidence_map.active_evidence_artifact_ids,
+            covered_plan_id=evidence_map.covered_plan_id,
+            covered_node_ids=evidence_map.covered_node_ids,
+            covered_artifact_ids=evidence_map.covered_artifact_ids,
+            authorized_delivery_node_ids=evidence_map.authorized_delivery_node_ids,
+            delivery_scope_digest=evidence_map.delivery_scope_digest,
         )
 
     @classmethod
@@ -145,6 +167,11 @@ class EvidenceMapPublication:
         values.setdefault("map_kind", values["version"].map_kind)
         values.setdefault("delivery_slice_digest", values["source_state_digest"])
         values["active_artifact_ids"] = tuple(values.get("active_artifact_ids", ()))
+        values.setdefault("covered_plan_id", None)
+        values["covered_node_ids"] = tuple(values.get("covered_node_ids", ()))
+        values["covered_artifact_ids"] = tuple(values.get("covered_artifact_ids", values["active_artifact_ids"]))
+        values["authorized_delivery_node_ids"] = tuple(values.get("authorized_delivery_node_ids", ()))
+        values.setdefault("delivery_scope_digest", values["delivery_slice_digest"])
         return cls(**values)
 
     def to_dict(self) -> dict[str, object]:
@@ -158,6 +185,11 @@ class EvidenceMapPublication:
             "map_kind": self.map_kind,
             "delivery_slice_digest": self.delivery_slice_digest,
             "active_artifact_ids": list(self.active_artifact_ids),
+            "covered_plan_id": self.covered_plan_id,
+            "covered_node_ids": list(self.covered_node_ids),
+            "covered_artifact_ids": list(self.covered_artifact_ids),
+            "authorized_delivery_node_ids": list(self.authorized_delivery_node_ids),
+            "delivery_scope_digest": self.delivery_scope_digest,
         }
 
 
@@ -366,6 +398,11 @@ class ScientificEvidenceMap:
     dependency_bundle_digest: str
     delivery_slice_digest: str
     active_evidence_artifact_ids: tuple[str, ...]
+    covered_plan_id: str | None
+    covered_node_ids: tuple[str, ...]
+    covered_artifact_ids: tuple[str, ...]
+    authorized_delivery_node_ids: tuple[str, ...]
+    delivery_scope_digest: str
     hypotheses: tuple[Hypothesis, ...]
     units: tuple[EvidenceMapUnit, ...]
     edges: tuple[EvidenceMapEdge, ...]
@@ -382,6 +419,11 @@ class ScientificEvidenceMap:
             "dependency_bundle_digest": self.dependency_bundle_digest,
             "delivery_slice_digest": self.delivery_slice_digest,
             "active_evidence_artifact_ids": list(self.active_evidence_artifact_ids),
+            "covered_plan_id": self.covered_plan_id,
+            "covered_node_ids": list(self.covered_node_ids),
+            "covered_artifact_ids": list(self.covered_artifact_ids),
+            "authorized_delivery_node_ids": list(self.authorized_delivery_node_ids),
+            "delivery_scope_digest": self.delivery_scope_digest,
             "hypotheses": [hypothesis.to_dict() for hypothesis in self.hypotheses],
             "units": [unit.to_dict() for unit in self.units],
             "edges": [edge.to_dict() for edge in self.edges],
@@ -462,10 +504,27 @@ def build_scientific_evidence_map(
     *,
     workspace_root: Path,
     version: EvidenceMapVersion,
+    authorized_delivery_node_ids: tuple[str, ...] = (),
 ) -> ScientificEvidenceMap:
     if bundle.map_kind != version.map_kind:
         raise ValueError("evidence map version and dependency bundle kinds differ")
     bundle._validate(state)
+    if version.map_kind == "delivery-authorization":
+        if len(authorized_delivery_node_ids) != 1:
+            raise ValueError("delivery-authorization maps require exactly one authorized delivery node")
+        authorization_scope = validate_delivery_prerequisites(state, authorized_delivery_node_ids[0])
+        covered_plan_id = authorization_scope.plan_id
+        covered_node_ids = authorization_scope.covered_node_ids
+        covered_artifact_ids = authorization_scope.covered_artifact_ids
+        delivery_scope = authorization_scope.digest
+    else:
+        if authorized_delivery_node_ids:
+            raise ValueError("authorized delivery nodes require a delivery-authorization map")
+        active_plan = next((item for item in state.plans if item.id == state.active_plan_id), None)
+        covered_plan_id = active_plan.id if active_plan is not None else None
+        covered_node_ids = tuple(item.id for item in active_plan.nodes) if active_plan is not None else ()
+        covered_artifact_ids = tuple(sorted(item.artifact_id for item in bundle.decisions if item.active_evidence))
+        delivery_scope = delivery_slice_digest(state)
     specs = tuple(unit_specs)
     if len({item.id for item in specs}) != len(specs):
         raise ValueError("evidence map unit IDs must be unique")
@@ -567,6 +626,11 @@ def build_scientific_evidence_map(
         bundle.digest,
         delivery_slice_digest(state),
         tuple(sorted(item.artifact_id for item in bundle.decisions if item.active_evidence)),
+        covered_plan_id,
+        covered_node_ids,
+        covered_artifact_ids,
+        tuple(authorized_delivery_node_ids),
+        delivery_scope,
         tuple(sorted(state.hypotheses, key=lambda item: item.id)),
         ordered_units,
         ordered_edges,

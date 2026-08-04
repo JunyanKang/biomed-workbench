@@ -1,154 +1,491 @@
 {
-  "schema_version": 1,
-  "id": "single-cell-cross-species-integration",
-  "version": "1.0.0",
-  "title": "Cross-species single-cell integration and label transfer",
-  "description": "Build a versioned one-to-one, one-to-many and many-to-many orthology ledger; compare conservative scVI, scANVI, Harmony and Seurat CCA/RPCA baselines with SAMap, SATURN and CAME; and require leave-one-species-out validation, species-specific-state retention and raw-count inference.",
-  "module_type": "analysis",
-  "domains": ["omics", "statistics"],
-  "intents": ["cross-species integration", "SAMap", "SATURN", "CAME", "orthology ledger", "leave-one-species-out label transfer", "跨物种单细胞整合", "同源基因映射"],
-  "questions": ["Which cross-species representation transfers conserved cell states while retaining unsupported and species-specific biology?"],
-  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "maturity": "validated",
-  "input_artifacts": [
-    {
-      "name": "species_expression_and_orthology",
-      "artifact_type": "cross_species_single_cell_evidence",
-      "processing_levels": ["quality-controlled", "raw-count-preserved", "species-annotated", "sample-annotated", "orthology-versioned"],
-      "required_metadata": ["species-key", "sample-or-donor-key", "reviewed-label-key", "raw-count-location", "feature-namespace", "orthology-resource-and-release", "source-sha256"],
-      "source_policy": "project_or_upstream",
-      "formats": [
-        {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["internal"], "required_indexes": ["cell-id", "gene-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-per-species"], "orientations": ["cell-by-gene-per-species"]},
-        {"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": ["orthogroup-id", "species-gene-pair"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-orthology-release"], "orientations": ["orthology-relation-ledger"]},
-        {"name": "csv", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": ["species"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["species-input-and-protein-embedding-manifest"]}
-      ]
-    }
-  ],
-  "output_artifacts": [
-    {
-      "name": "cross_species_integration_evidence",
-      "artifact_type": "cross_species_integration_evidence",
-      "processing_levels": ["method-native", "orthology-audited", "loso-validated", "inference-bounded", "reloaded"],
-      "required_metadata": ["method-and-version", "input-digests", "orthology-release", "parameters", "seed", "species-specific-state-review", "quality-gates"],
-      "source_policy": "upstream_required",
-      "formats": [
-        {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container"], "compression": ["internal"], "required_indexes": ["species-prefixed-cell-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-per-species"], "orientations": ["cell-by-gene-or-latent"]},
-        {"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": ["orthogroup-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-orthology-release"], "orientations": ["audited-orthology-ledger"]},
-        {"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["method-by-metric-and-boundary"]}
-      ]
-    }
-  ],
-  "preconditions": ["Species, sample/donor, raw counts, feature namespaces, reviewed labels and orthology release are explicit; cell identifiers are species-prefixed; unsupported query states are retained."],
-  "assumptions": ["One-to-one shared-gene matrices are conservative baselines; SAMap uses sequence homology plus expression neighborhoods, SATURN uses protein embeddings and macrogenes, and CAME uses a pairwise heterogeneous graph with broader orthology relations."],
-  "quality_gates": [
-    {"id": "orthology-ledger-and-feature-coverage", "severity": "fatal", "description": "Require versioned resource, release, confidence and one-to-one/one-to-many/many-to-many relations; report feature coverage per species and forbid silent first-hit collapse.", "blocks_interpretation": true},
-    {"id": "native-method-and-baseline-comparison", "severity": "fatal", "description": "Compare at least one conservative one-to-one baseline with requested SAMap, SATURN or CAME native outputs while retaining identical cells, labels, species and samples.", "blocks_interpretation": true},
-    {"id": "held-out-species-and-state-retention", "severity": "fatal", "description": "Require leave-one-species-out label transfer, species mixing and label preservation, unsupported-label accounting, species-specific-state review and conserved-module consistency where available.", "blocks_interpretation": true},
-    {"id": "cross-species-inference-boundary", "severity": "fatal", "description": "Forbid integrated, corrected, imputed or latent values for confirmatory cross-condition differential inference; require species-specific raw counts and sample/donor/species replication.", "blocks_interpretation": true}
-  ],
-  "limitations": ["Cross-species proximity is evidence of shared state, not proof of cellular homology. Orthology databases and protein embeddings are release-dependent. SAMap requires sequence-derived maps; SATURN is compute-intensive and sensitive to protein embeddings; CAME is pairwise. Species-specific states must not be forced into reference labels."],
-  "evidence_effects": ["adds-cross-species-orthology-samap-saturn-came-loso-evidence"],
-  "alternatives": ["single-cell-integration-benchmark", "single-cell-reference-mapping"],
-  "complements": ["single-cell-generative-modeling", "single-cell-atlas-annotation", "single-cell-marker-discovery"],
-  "tool_requirements": [
-    {"name": "SAMap", "ecosystem": "python", "identity": "sc-samap", "required": false, "tested_versions": ["3.0.1"], "allowed_versions": [">=3.0,<3.1"], "version_source": "https://github.com/atarashansky/SAMap/releases/tag/v3.0.1", "verified_at": "2026-08-01", "version_probe": ["python", "-c", "import importlib.metadata; print(importlib.metadata.version('sc-samap'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "samap-301-distribution-and-result-container", "affected_versions": [">=3.0,<3.1"], "category": "api", "description": "SAMap 3.0.1 is distributed as sc-samap, imports through samap, requires Python 3.11 or newer and exposes integrated AnnData through SAMAP.samap.adata.", "compatibility_effect": "requires-parser", "required_action": "Probe the sc-samap distribution and extract the integrated AnnData from the SAM result container before H5AD validation.", "source": "https://github.com/atarashansky/SAMap/releases/tag/v3.0.1"}], "platforms": ["any"]},
-    {"name": "SATURN", "ecosystem": "python", "identity": "SATURN", "required": false, "tested_versions": ["1.0.0"], "allowed_versions": [">=1.0,<1.1"], "version_source": "https://github.com/snap-stanford/SATURN", "verified_at": "2026-07-31", "version_probe": ["python", "train-saturn.py", "--help"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [], "platforms": ["linux", "macos"]},
-    {"name": "CAME", "ecosystem": "python", "identity": "came", "required": false, "tested_versions": ["0.2.7"], "allowed_versions": [">=0.2,<0.3"], "version_source": "https://xingyanliu.github.io/CAME/", "verified_at": "2026-07-31", "version_probe": ["python", "-c", "import importlib.metadata; print(importlib.metadata.version('came'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [], "platforms": ["any"]}
-  ],
-  "dependencies": [
-    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.12.11"], "allowed_versions": [">=3.11,<3.13"], "version_source": "https://www.python.org/", "verified_at": "2026-08-01", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run method-isolated cross-species adapters and evaluation.", "conflicts": [], "platforms": ["any"]},
-    {"name": "NCBI BLAST+", "ecosystem": "system", "identity": "blastp", "required": false, "tested_versions": ["2.17.0"], "allowed_versions": [">=2.14,<3"], "version_source": "https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html", "verified_at": "2026-07-31", "version_probe": ["blastp", "-version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Generate SAMap bidirectional protein homology maps.", "conflicts": [], "platforms": ["any"]}
-  ],
-  "compatibility_matrix": [
-    {"id": "samap301-saturn1-came027-v1", "module_version": "1.0.0", "tool_versions": {"SAMap": [">=3.0,<3.1"], "SATURN": [">=1.0,<1.1"], "CAME": [">=0.2,<0.3"]}, "dependency_versions": {"python": [">=3.11,<3.13"], "NCBI BLAST+": [">=2.14,<3"]}, "input_formats": {"species_expression_and_orthology": ["h5ad@0.1.0", "tab-separated-values@1", "csv@1"]}, "output_formats": {"cross_species_integration_evidence": ["h5ad@0.1.0", "tab-separated-values@1", "inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["cross-species-contract-regression-v1"], "end_to_end_evidence_ids": ["cross-species-adapter-v1"], "verified_at": "2026-08-01"}
-  ],
   "access": "agent_generated",
-  "mutability": "read_only",
-  "credentials": [],
-  "input_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "objective": {"type": "string", "minLength": 12},
-      "methods": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["orthology-ledger", "classical-baselines", "samap", "saturn", "came"]}},
-      "species_artifact_ids": {"type": "array", "minItems": 2, "items": {"type": "string", "minLength": 1}},
-      "orthology_artifact_id": {"type": "string", "minLength": 1},
-      "species_key": {"type": "string", "minLength": 1},
-      "sample_key": {"type": "string", "minLength": 1},
-      "label_key": {"type": "string", "minLength": 1},
-      "seed": {"type": "integer"}
-    },
-    "required": ["objective", "methods", "species_artifact_ids", "orthology_artifact_id", "species_key", "sample_key", "label_key", "seed"]
-  },
-  "output_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {"handoff_type": {"type": "string"}, "module": {"type": "object"}, "request_digest": {"type": "string"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}},
-    "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]
-  },
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {
-    "license": "Apache-2.0",
-    "concept_sources": [
-      "https://github.com/atarashansky/SAMap",
-      "https://www.nature.com/articles/s41592-024-02191-z",
-      "https://github.com/snap-stanford/SATURN",
-      "https://xingyanliu.github.io/CAME/tut_notebooks/getting_started_pipeline_un.html",
-      "https://genome.cshlp.org/content/early/2022/12/16/gr.276868.122",
-      "https://www.nature.com/articles/s41467-023-41855-w"
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not silently collapse many-to-many orthology, tune against desired labels, force query-specific states into reference labels, select by UMAP appearance, overwrite raw counts, or use integrated values for confirmatory differential inference."
+    ],
+    "languages": [
+      "python",
+      "r"
+    ],
+    "mode": "packaged_parameterized_workflow",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "evolutionary distance",
+          "orthology complexity",
+          "species count",
+          "protein embeddings",
+          "compute",
+          "reference direction"
+        ],
+        "id": "cross-species-method",
+        "parameter": "baseline-samap-saturn-came",
+        "selection_rule": "Always include a one-to-one baseline; use SAMap for sequence-plus-neighborhood mapping, SATURN for multi-species protein-embedding integration, and CAME for pairwise many-to-many graph transfer.",
+        "validation_rule": "Block any method whose sequence map, protein embedding, graph relation or declared direction is absent."
+      },
+      {
+        "decision_inputs": [
+          "species",
+          "labels",
+          "samples",
+          "modules",
+          "unsupported states"
+        ],
+        "id": "cross-species-admission",
+        "parameter": "mixing-preservation-loso-specific-state",
+        "selection_rule": "Retain all metric families and method-native outputs; do not rank by UMAP appearance or require species signal to vanish.",
+        "validation_rule": "Block claims when held-out species, unsupported labels or species-specific states were not evaluated."
+      }
+    ],
+    "postflight_checks": [
+      "Reload every H5AD and report; reconcile cells, species, genes, orthology relations, parameters, seeds, native models, unsupported states and input/output digests."
+    ],
+    "preflight_checks": [
+      "Inspect actual counts, species, samples/donors, reviewed labels, unknown states, feature identifiers, orthology evidence, sequence maps, protein embeddings, compute and runtime versions."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "input-digests",
+      "species",
+      "samples",
+      "orthology-resource-release-confidence",
+      "method-version",
+      "protein-embedding-release",
+      "parameters",
+      "seed",
+      "output-digests",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "orthology-and-baselines",
+        "output_artifact_types": [
+          "cross_species_integration_evidence"
+        ],
+        "purpose": "Freeze gene relationships and construct a conservative method-neutral baseline.",
+        "required_logic": [
+          "Retain resource, release, confidence and one-to-one/one-to-many/many-to-many relations.",
+          "Report per-species coverage and prepare only complete high-confidence one-to-one orthogroups for classical baselines.",
+          "Compare scVI/scANVI, Harmony and CCA/RPCA without treating any one method as a default winner."
+        ],
+        "template_files": [
+          "templates/build_orthology_ledger.py",
+          "templates/prepare_shared_ortholog_baseline.py"
+        ]
+      },
+      {
+        "id": "native-cross-species-methods",
+        "output_artifact_types": [
+          "cross_species_integration_evidence"
+        ],
+        "purpose": "Run sequence-, protein-embedding- or graph-based methods with their native contracts.",
+        "required_logic": [
+          "Use SAMap only with reviewed bidirectional sequence maps.",
+          "Use SATURN with versioned protein embeddings and compute/resource provenance.",
+          "Use CAME pairwise with explicit reference/query direction and broad orthology mappings."
+        ],
+        "template_files": [
+          "templates/run_samap.py",
+          "templates/run_saturn.py",
+          "templates/run_came.py"
+        ]
+      },
+      {
+        "id": "held-out-adjudication",
+        "output_artifact_types": [
+          "cross_species_integration_evidence"
+        ],
+        "purpose": "Separate conserved state transfer from overcorrection and forced labels.",
+        "required_logic": [
+          "Run leave-one-species-out label transfer and list unsupported truth labels.",
+          "Score species mixing and biological preservation separately; review species-specific populations in unintegrated and integrated spaces.",
+          "Compare conserved module scores when available and return inference to species-specific raw counts."
+        ],
+        "template_files": [
+          "templates/evaluate_cross_species.py"
+        ]
+      }
     ]
   },
-  "code_templates": [
-    {"path": "templates/build_orthology_ledger.py", "language": "python", "purpose": "Build a release-aware relation ledger and quantify feature coverage before method selection.", "quality_gate_ids": ["orthology-ledger-and-feature-coverage"], "requires_adaptation": false},
-    {"path": "templates/prepare_shared_ortholog_baseline.py", "language": "python", "purpose": "Prepare a conservative count-backed one-to-one ortholog matrix for scVI, scANVI, Harmony and Seurat CCA/RPCA baseline comparison.", "quality_gate_ids": ["orthology-ledger-and-feature-coverage", "native-method-and-baseline-comparison", "cross-species-inference-boundary"], "requires_adaptation": false},
-    {"path": "templates/run_samap.py", "language": "python", "purpose": "Run SAMap with precomputed sequence-homology maps and native output retention.", "quality_gate_ids": ["orthology-ledger-and-feature-coverage", "native-method-and-baseline-comparison", "held-out-species-and-state-retention"], "requires_adaptation": false},
-    {"path": "templates/run_saturn.py", "language": "python", "purpose": "Validate species count matrices and protein embeddings, then invoke the official SATURN entrypoint with explicit parameters.", "quality_gate_ids": ["native-method-and-baseline-comparison", "held-out-species-and-state-retention"], "requires_adaptation": false},
-    {"path": "templates/run_came.py", "language": "python", "purpose": "Run pairwise CAME with one-to-many and many-to-many gene relations retained in the heterogeneous graph.", "quality_gate_ids": ["orthology-ledger-and-feature-coverage", "native-method-and-baseline-comparison", "held-out-species-and-state-retention"], "requires_adaptation": false},
-    {"path": "templates/evaluate_cross_species.py", "language": "python", "purpose": "Evaluate species mixing, biology preservation, leave-one-species-out transfer, unsupported states and conserved modules.", "quality_gate_ids": ["held-out-species-and-state-retention", "cross-species-inference-boundary"], "requires_adaptation": false}
+  "alternatives": [
+    "single-cell-integration-benchmark",
+    "single-cell-reference-mapping"
   ],
-  "agent_protocol": {
-    "schema_version": 1,
-    "mode": "packaged_parameterized_workflow",
-    "languages": ["python", "r"],
-    "template_sections": [
-      {"id": "orthology-and-baselines", "purpose": "Freeze gene relationships and construct a conservative method-neutral baseline.", "required_logic": ["Retain resource, release, confidence and one-to-one/one-to-many/many-to-many relations.", "Report per-species coverage and prepare only complete high-confidence one-to-one orthogroups for classical baselines.", "Compare scVI/scANVI, Harmony and CCA/RPCA without treating any one method as a default winner."], "output_artifact_types": ["cross_species_integration_evidence"], "template_files": ["templates/build_orthology_ledger.py", "templates/prepare_shared_ortholog_baseline.py"]},
-      {"id": "native-cross-species-methods", "purpose": "Run sequence-, protein-embedding- or graph-based methods with their native contracts.", "required_logic": ["Use SAMap only with reviewed bidirectional sequence maps.", "Use SATURN with versioned protein embeddings and compute/resource provenance.", "Use CAME pairwise with explicit reference/query direction and broad orthology mappings."], "output_artifact_types": ["cross_species_integration_evidence"], "template_files": ["templates/run_samap.py", "templates/run_saturn.py", "templates/run_came.py"]},
-      {"id": "held-out-adjudication", "purpose": "Separate conserved state transfer from overcorrection and forced labels.", "required_logic": ["Run leave-one-species-out label transfer and list unsupported truth labels.", "Score species mixing and biological preservation separately; review species-specific populations in unintegrated and integrated spaces.", "Compare conserved module scores when available and return inference to species-specific raw counts."], "output_artifact_types": ["cross_species_integration_evidence"], "template_files": ["templates/evaluate_cross_species.py"]}
-    ],
-    "parameter_rules": [
-      {"id": "cross-species-method", "parameter": "baseline-samap-saturn-came", "decision_inputs": ["evolutionary distance", "orthology complexity", "species count", "protein embeddings", "compute", "reference direction"], "selection_rule": "Always include a one-to-one baseline; use SAMap for sequence-plus-neighborhood mapping, SATURN for multi-species protein-embedding integration, and CAME for pairwise many-to-many graph transfer.", "validation_rule": "Block any method whose sequence map, protein embedding, graph relation or declared direction is absent."},
-      {"id": "cross-species-admission", "parameter": "mixing-preservation-loso-specific-state", "decision_inputs": ["species", "labels", "samples", "modules", "unsupported states"], "selection_rule": "Retain all metric families and method-native outputs; do not rank by UMAP appearance or require species signal to vanish.", "validation_rule": "Block claims when held-out species, unsupported labels or species-specific states were not evaluated."}
-    ],
-    "preflight_checks": ["Inspect actual counts, species, samples/donors, reviewed labels, unknown states, feature identifiers, orthology evidence, sequence maps, protein embeddings, compute and runtime versions."],
-    "postflight_checks": ["Reload every H5AD and report; reconcile cells, species, genes, orthology relations, parameters, seeds, native models, unsupported states and input/output digests."],
-    "provenance_fields": ["module-id", "module-version", "input-digests", "species", "samples", "orthology-resource-release-confidence", "method-version", "protein-embedding-release", "parameters", "seed", "output-digests", "quality-gates"],
-    "forbidden_actions": ["Do not silently collapse many-to-many orthology, tune against desired labels, force query-specific states into reference labels, select by UMAP appearance, overwrite raw counts, or use integrated values for confirmatory differential inference."],
-    "requires_observed_execution": true
+  "assumptions": [
+    "One-to-one shared-gene matrices are conservative baselines; SAMap uses sequence homology plus expression neighborhoods, SATURN uses protein embeddings and macrogenes, and CAME uses a pairwise heterogeneous graph with broader orthology relations."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/build_orthology_ledger.py",
+      "purpose": "Build a release-aware relation ledger and quantify feature coverage before method selection.",
+      "quality_gate_ids": [
+        "orthology-ledger-and-feature-coverage"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/prepare_shared_ortholog_baseline.py",
+      "purpose": "Prepare a conservative count-backed one-to-one ortholog matrix for scVI, scANVI, Harmony and Seurat CCA/RPCA baseline comparison.",
+      "quality_gate_ids": [
+        "orthology-ledger-and-feature-coverage",
+        "native-method-and-baseline-comparison",
+        "cross-species-inference-boundary"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/run_samap.py",
+      "purpose": "Run SAMap with precomputed sequence-homology maps and native output retention.",
+      "quality_gate_ids": [
+        "orthology-ledger-and-feature-coverage",
+        "native-method-and-baseline-comparison",
+        "held-out-species-and-state-retention"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/run_saturn.py",
+      "purpose": "Validate species count matrices and protein embeddings, then invoke the official SATURN entrypoint with explicit parameters.",
+      "quality_gate_ids": [
+        "native-method-and-baseline-comparison",
+        "held-out-species-and-state-retention"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/run_came.py",
+      "purpose": "Run pairwise CAME with one-to-many and many-to-many gene relations retained in the heterogeneous graph.",
+      "quality_gate_ids": [
+        "orthology-ledger-and-feature-coverage",
+        "native-method-and-baseline-comparison",
+        "held-out-species-and-state-retention"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/evaluate_cross_species.py",
+      "purpose": "Evaluate species mixing, biology preservation, leave-one-species-out transfer, unsupported states and conserved modules.",
+      "quality_gate_ids": [
+        "held-out-species-and-state-retention",
+        "cross-species-inference-boundary"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "NCBI BLAST+": [
+          ">=2.14,<3"
+        ],
+        "python": [
+          ">=3.11,<3.13"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "cross-species-adapter-v1"
+      ],
+      "id": "samap301-saturn1-came027-v1",
+      "input_formats": {
+        "species_expression_and_orthology": [
+          "h5ad@0.1.0",
+          "tab-separated-values@1",
+          "csv@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "cross_species_integration_evidence": [
+          "h5ad@0.1.0",
+          "tab-separated-values@1",
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "cross-species-contract-regression-v1"
+      ],
+      "tool_versions": {
+        "CAME": [
+          ">=0.2,<0.3"
+        ],
+        "SAMap": [
+          ">=3.0,<3.1"
+        ],
+        "SATURN": [
+          ">=1.0,<1.1"
+        ]
+      },
+      "verified_at": "2026-08-01"
+    }
+  ],
+  "complements": [
+    "single-cell-generative-modeling",
+    "single-cell-atlas-annotation",
+    "single-cell-marker-discovery"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.11,<3.13"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run method-isolated cross-species adapters and evaluation.",
+      "required": true,
+      "tested_versions": [
+        "3.12.11"
+      ],
+      "verified_at": "2026-08-01",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=2.14,<3"
+      ],
+      "conflicts": [],
+      "ecosystem": "system",
+      "identity": "blastp",
+      "name": "NCBI BLAST+",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Generate SAMap bidirectional protein homology maps.",
+      "required": false,
+      "tested_versions": [
+        "2.17.0"
+      ],
+      "verified_at": "2026-07-31",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "blastp",
+        "-version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html"
+    }
+  ],
+  "description": "Build a versioned one-to-one, one-to-many and many-to-many orthology ledger; compare conservative scVI, scANVI, Harmony and Seurat CCA/RPCA baselines with SAMap, SATURN and CAME; and require leave-one-species-out validation, species-specific-state retention and raw-count inference.",
+  "domains": [
+    "omics",
+    "statistics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "evidence_effects": [
+    "adds-cross-species-orthology-samap-saturn-came-loso-evidence"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
   },
-  "routing": {
-    "method_aliases": [
-      "single-cell-cross-species-integration",
-      "Cross-species single-cell integration and label transfer",
-      "cross-species integration",
-      "SAMap",
-      "SATURN",
-      "CAME",
-      "orthology ledger",
-      "leave-one-species-out label transfer",
-      "跨物种单细胞整合",
-      "同源基因映射"
+  "id": "single-cell-cross-species-integration",
+  "input_artifacts": [
+    {
+      "artifact_type": "cross_species_single_cell_evidence",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-per-species"
+          ],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad",
+          "orientations": [
+            "cell-by-gene-per-species"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [
+            "cell-id",
+            "gene-id"
+          ],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-orthology-release"
+          ],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "orthology-relation-ledger"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [
+            "orthogroup-id",
+            "species-gene-pair"
+          ],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "csv",
+          "orientations": [
+            "species-input-and-protein-embedding-manifest"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [
+            "species"
+          ],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "species_expression_and_orthology",
+      "processing_levels": [
+        "quality-controlled",
+        "raw-count-preserved",
+        "species-annotated",
+        "sample-annotated",
+        "orthology-versioned"
+      ],
+      "required_metadata": [
+        "species-key",
+        "sample-or-donor-key",
+        "reviewed-label-key",
+        "raw-count-location",
+        "feature-namespace",
+        "orthology-resource-and-release",
+        "source-sha256"
+      ],
+      "source_policy": "project_or_upstream"
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "label_key": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "methods": {
+        "items": {
+          "enum": [
+            "orthology-ledger",
+            "classical-baselines",
+            "samap",
+            "saturn",
+            "came"
+          ],
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "orthology_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "sample_key": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "seed": {
+        "type": "integer"
+      },
+      "species_artifact_ids": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "minItems": 2,
+        "type": "array"
+      },
+      "species_key": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "methods",
+      "species_artifact_ids",
+      "orthology_artifact_id",
+      "species_key",
+      "sample_key",
+      "label_key",
+      "seed"
     ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
+    "type": "object"
   },
-  "orchestration": {
-    "scientific_stage": 3,
-    "requires_reviewed_upstream_types": []
-  },
+  "intents": [
+    "cross-species integration",
+    "SAMap",
+    "SATURN",
+    "CAME",
+    "orthology ledger",
+    "leave-one-species-out label transfer",
+    "\u8de8\u7269\u79cd\u5355\u7ec6\u80de\u6574\u5408",
+    "\u540c\u6e90\u57fa\u56e0\u6620\u5c04"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Cross-species proximity is evidence of shared state, not proof of cellular homology. Orthology databases and protein embeddings are release-dependent. SAMap requires sequence-derived maps; SATURN is compute-intensive and sensitive to protein embeddings; CAME is pairwise. Species-specific states must not be forced into reference labels."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
   "observed_output_contracts": [
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -227,6 +564,44 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "orthology-ledger-and-feature-coverage",
+          "metric_key": "orthology-ledger-and-feature-coverage",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "native-method-and-baseline-comparison",
+          "metric_key": "native-method-and-baseline-comparison",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "held-out-species-and-state-retention",
+          "metric_key": "held-out-species-and-state-retention",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "cross-species-inference-boundary",
+          "metric_key": "cross-species-inference-boundary",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -237,6 +612,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -280,13 +663,339 @@
         }
       ],
       "port": "cross_species_integration_evidence",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "orthology-ledger-and-feature-coverage",
         "native-method-and-baseline-comparison",
         "held-out-species-and-state-retention",
         "cross-species-inference-boundary"
-      ]
+      ],
+      "semantic_profile": "single-cell-cross-species-integration-cross-species-integration-evidence-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
     }
-  ]
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 3
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "cross_species_integration_evidence",
+      "formats": [
+        {
+          "annotation_releases": [
+            "inherited-per-species"
+          ],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad",
+          "orientations": [
+            "cell-by-gene-or-latent"
+          ],
+          "representations": [
+            "container"
+          ],
+          "required_indexes": [
+            "species-prefixed-cell-id"
+          ],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-orthology-release"
+          ],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "audited-orthology-ledger"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [
+            "orthogroup-id"
+          ],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "method-by-metric-and-boundary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "cross_species_integration_evidence",
+      "processing_levels": [
+        "method-native",
+        "orthology-audited",
+        "loso-validated",
+        "inference-bounded",
+        "reloaded"
+      ],
+      "required_metadata": [
+        "method-and-version",
+        "input-digests",
+        "orthology-release",
+        "parameters",
+        "seed",
+        "species-specific-state-review",
+        "quality-gates"
+      ],
+      "source_policy": "upstream_required"
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Species, sample/donor, raw counts, feature namespaces, reviewed labels and orthology release are explicit; cell identifiers are species-prefixed; unsupported query states are retained."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://github.com/atarashansky/SAMap",
+      "https://www.nature.com/articles/s41592-024-02191-z",
+      "https://github.com/snap-stanford/SATURN",
+      "https://xingyanliu.github.io/CAME/tut_notebooks/getting_started_pipeline_un.html",
+      "https://genome.cshlp.org/content/early/2022/12/16/gr.276868.122",
+      "https://www.nature.com/articles/s41467-023-41855-w"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require versioned resource, release, confidence and one-to-one/one-to-many/many-to-many relations; report feature coverage per species and forbid silent first-hit collapse.",
+      "id": "orthology-ledger-and-feature-coverage",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Compare at least one conservative one-to-one baseline with requested SAMap, SATURN or CAME native outputs while retaining identical cells, labels, species and samples.",
+      "id": "native-method-and-baseline-comparison",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require leave-one-species-out label transfer, species mixing and label preservation, unsupported-label accounting, species-specific-state review and conserved-module consistency where available.",
+      "id": "held-out-species-and-state-retention",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Forbid integrated, corrected, imputed or latent values for confirmatory cross-condition differential inference; require species-specific raw counts and sample/donor/species replication.",
+      "id": "cross-species-inference-boundary",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which cross-species representation transfers conserved cell states while retaining unsupported and species-specific biology?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "single-cell-cross-species-integration",
+      "Cross-species single-cell integration and label transfer",
+      "cross-species integration",
+      "SAMap",
+      "SATURN",
+      "CAME",
+      "orthology ledger",
+      "leave-one-species-out label transfer",
+      "\u8de8\u7269\u79cd\u5355\u7ec6\u80de\u6574\u5408",
+      "\u540c\u6e90\u57fa\u56e0\u6620\u5c04"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Cross-species single-cell integration and label transfer",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=3.0,<3.1"
+      ],
+      "ecosystem": "python",
+      "identity": "sc-samap",
+      "mismatch_policy": "block",
+      "name": "SAMap",
+      "platforms": [
+        "any"
+      ],
+      "required": false,
+      "tested_versions": [
+        "3.0.1"
+      ],
+      "verified_at": "2026-08-01",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=3.0,<3.1"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "SAMap 3.0.1 is distributed as sc-samap, imports through samap, requires Python 3.11 or newer and exposes integrated AnnData through SAMAP.samap.adata.",
+          "id": "samap-301-distribution-and-result-container",
+          "required_action": "Probe the sc-samap distribution and extract the integrated AnnData from the SAM result container before H5AD validation.",
+          "source": "https://github.com/atarashansky/SAMap/releases/tag/v3.0.1"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('sc-samap'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/atarashansky/SAMap/releases/tag/v3.0.1"
+    },
+    {
+      "allowed_versions": [
+        ">=1.0,<1.1"
+      ],
+      "ecosystem": "python",
+      "identity": "SATURN",
+      "mismatch_policy": "block",
+      "name": "SATURN",
+      "platforms": [
+        "linux",
+        "macos"
+      ],
+      "required": false,
+      "tested_versions": [
+        "1.0.0"
+      ],
+      "verified_at": "2026-07-31",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python",
+        "train-saturn.py",
+        "--help"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/snap-stanford/SATURN"
+    },
+    {
+      "allowed_versions": [
+        ">=0.2,<0.3"
+      ],
+      "ecosystem": "python",
+      "identity": "came",
+      "mismatch_policy": "block",
+      "name": "CAME",
+      "platforms": [
+        "any"
+      ],
+      "required": false,
+      "tested_versions": [
+        "0.2.7"
+      ],
+      "verified_at": "2026-07-31",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('came'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://xingyanliu.github.io/CAME/"
+    }
+  ],
+  "version": "1.0.0"
 }

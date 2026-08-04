@@ -23,6 +23,7 @@ from biomed_workbench.kernel.scientific_evidence_map import (
     build_scientific_evidence_map,
 )
 from biomed_workbench.reporting import (
+    abort_prepared_evidence_map_publication,
     complete_evidence_map_publication_recovery,
     inspect_evidence_map_publication_recovery,
     publish_evidence_map_transaction,
@@ -448,6 +449,75 @@ class ScientificDependencyTests(unittest.TestCase):
                 state_path=second_state_path,
             )
             self.assertEqual(recovered_after_state_write["status"], "clean")
+
+    def test_prepared_transaction_can_be_verified_aborted_and_retried_but_not_after_immutable_publish(self):
+        state = state_with_plan()
+        state = apply_event(state, "analysis_admission_recorded", {"admission": admission().to_dict()}, rationale="Record admission.")
+        state = apply_event(state, "artifact_review_recorded", {"review": review().to_dict()}, rationale="Record review.")
+        state = apply_event(state, "scientific_decision_recorded", {"decision": decision().to_dict()}, rationale="Record decision.")
+        bundle = ScientificDependencyBundle.create(
+            state, admissions=state.analysis_admissions, reviews=state.artifact_reviews,
+            decisions=state.scientific_decisions,
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            workspace = root / "workspace"
+            mapped = evidence_map(
+                state, bundle, workspace,
+                EvidenceMapVersion(
+                    version="1.0.0", revision=1, parent_map_digest=None, change_type="initial",
+                    change_summary_zh="验证 prepared 阶段的安全放弃与重新发布。",
+                    change_summary_en="Verify safe abort and retry from the prepared transaction stage.",
+                ),
+            )
+            publication = EvidenceMapPublication.from_map(mapped)
+            prospective = apply_event(
+                state, "evidence_map_published", {"publication": publication.to_dict()},
+                rationale="Prepare the exact map publication state.",
+            )
+            state_path = root / "project-state.json"
+            state_path.write_text(json.dumps(state.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            publish_root = root / "published"
+            from biomed_workbench.reporting import evidence_map_versions as versions
+
+            with patch.object(versions, "_publish_evidence_map_version_locked", side_effect=OSError("simulated pre-publish failure")):
+                with self.assertRaisesRegex(OSError, "pre-publish"):
+                    publish_evidence_map_transaction(
+                        mapped, publication, prospective, state_path=state_path,
+                        output_root=publish_root, workspace_root=workspace,
+                    )
+            inspected = inspect_evidence_map_publication_recovery(publish_root, state_path=state_path)
+            self.assertEqual(inspected["status"], "prepared")
+            self.assertEqual(inspected["allowed_actions"], ["abort-prepared"])
+            aborted = abort_prepared_evidence_map_publication(publish_root, state_path=state_path)
+            self.assertEqual(aborted["status"], "clean")
+            publish_evidence_map_transaction(
+                mapped, publication, prospective, state_path=state_path,
+                output_root=publish_root, workspace_root=workspace,
+            )
+            self.assertEqual(inspect_evidence_map_publication_recovery(publish_root, state_path=state_path)["status"], "clean")
+
+            second_state_path = root / "second-project-state.json"
+            second_state_path.write_text(json.dumps(state.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            second_root = root / "second-published"
+            original_publish = versions._publish_evidence_map_version_locked
+
+            def publish_then_interrupt(*args, **kwargs):
+                original_publish(*args, **kwargs)
+                raise OSError("simulated post-publish status failure")
+
+            with patch.object(versions, "_publish_evidence_map_version_locked", side_effect=publish_then_interrupt):
+                with self.assertRaisesRegex(OSError, "post-publish"):
+                    publish_evidence_map_transaction(
+                        mapped, publication, prospective, state_path=second_state_path,
+                        output_root=second_root, workspace_root=workspace,
+                    )
+            self.assertNotIn(
+                "abort-prepared",
+                inspect_evidence_map_publication_recovery(second_root, state_path=second_state_path)["allowed_actions"],
+            )
+            with self.assertRaisesRegex(ValueError, "indexed immutable evidence"):
+                abort_prepared_evidence_map_publication(second_root, state_path=second_state_path)
 
     def test_figure_panels_create_global_story_and_file_level_mind_maps(self):
         state = state_with_plan()

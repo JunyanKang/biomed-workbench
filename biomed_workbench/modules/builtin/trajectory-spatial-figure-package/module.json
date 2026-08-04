@@ -1,72 +1,348 @@
 {
-  "schema_version": 1,
-  "id": "trajectory-spatial-figure-package",
-  "version": "1.0.0",
-  "title": "Render complete trajectory and spatial figure packages",
-  "description": "Validate analysis-specific required plot inventories and render final-size editable PDF/SVG plus 600-dpi TIFF figure packages for trajectory topology, velocity, fate mapping, RegVelo, spatial platform QC, spatial statistics, deconvolution, domains, communication, image analysis and multislice 3D reconstruction using a single versioned R graphic contract.",
-  "module_type": "delivery",
-  "domains": ["publication", "omics", "scientific-communication"],
-  "intents": ["trajectory figures", "velocity figures", "CellRank figures", "RegVelo figures", "spatial figures", "publication figure package", "轨迹统一作图", "空间组学统一作图"],
-  "questions": ["Does this trajectory or spatial analysis have a complete, traceable and journal-sized figure inventory with consistent typography, strokes, color, legends and source data?"],
-  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "maturity": "validated",
-  "input_artifacts": [{"name": "analysis_figure_tables", "artifact_type": "analysis_specific_figure_source_data", "source_policy": "project_or_upstream", "processing_levels": ["tested", "reloaded", "panel-mapped"], "required_metadata": ["analysis-type", "panel-id", "claim", "source-artifact", "source-sha256", "units", "statistics"], "formats": [{"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["declared-when-spatial"], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["panel-source-data"]}]}],
-  "output_artifacts": [{"name": "trajectory_spatial_figure_package", "artifact_type": "trajectory_spatial_figure_package", "processing_levels": ["profile-complete", "final-size", "vector-exported", "raster-exported", "reloaded"], "required_metadata": ["module-version", "style-version", "analysis-type", "journal-profile", "required-plots", "input-and-output-digests", "backend-versions", "quality-gates"], "formats": [
-    {"name": "pdf", "versions": ["1.7"], "representations": ["binary"], "compression": ["internal"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["multipanel-publication-figure"]},
-    {"name": "svg", "versions": ["1.1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["editable-vector-figure"]},
-    {"name": "tiff", "versions": ["6.0"], "representations": ["binary"], "compression": ["lzw"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["600-dpi-publication-figure"]},
-    {"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["figure-contract-and-digests"]}
-  ]}],
-  "preconditions": ["Analysis type and target journal profile are declared; every panel has source data, units, sample identity and statistical meaning; final canvas size is chosen before rendering."],
-  "assumptions": ["Source tables already passed their analysis-specific quality gates; the figure renderer does not repair or reinterpret biological results."],
-  "quality_gates": [
-    {"id": "analysis-figure-profile-complete", "severity": "fatal", "description": "Require every analysis-specific mandatory plot ID or explicitly mark the package incomplete; optional plots remain data-driven.", "blocks_interpretation": true},
-    {"id": "final-size-vector-raster-contract", "severity": "fatal", "description": "Use 5-7 pt final-size typography, at least 0.5 pt strokes, outside legends, colorblind-safe encodings, editable PDF/SVG and 600-dpi TIFF.", "blocks_interpretation": true},
-    {"id": "panel-source-data-provenance", "severity": "fatal", "description": "Bind each panel to reloaded source tables, claim, units, sample/experimental unit, statistics and cryptographic digests.", "blocks_interpretation": true}
-  ],
-  "limitations": ["The generic renderer supplies a validated visual grammar; analysis-specific adapters must format source tables and may add official method-native plot layers. A complete-looking figure cannot rescue invalid upstream analysis."],
-  "evidence_effects": ["adds-complete-versioned-trajectory-and-spatial-figure-package-evidence"],
-  "alternatives": ["figure-specification"],
-  "complements": ["single-cell-trajectory-topology", "single-cell-trajectory-velocity", "single-cell-fate-mapping", "single-cell-regulatory-velocity", "single-cell-spatial-analysis", "spatial-platform-image-foundation", "spatial-multimethod-inference", "spatial-multislice-integration"],
-  "tool_requirements": [{"name": "r-figure-stack", "ecosystem": "r", "identity": "r-figure-stack", "required": true, "tested_versions": ["1.0.0"], "allowed_versions": [">=1,<2"], "version_source": "https://ggplot2.tidyverse.org/", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(packageVersion('ggplot2'))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [], "platforms": ["any"]}],
-  "dependencies": [{"name": "r", "ecosystem": "runtime", "identity": "r-runtime", "required": true, "tested_versions": ["4.3.2"], "allowed_versions": [">=4.3,<4.4"], "version_source": "https://cran.r-project.org/", "verified_at": "2026-07-30", "version_probe": ["Rscript", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Render all formal trajectory and spatial figure outputs with one R backend.", "conflicts": [], "platforms": ["any"]}],
-  "compatibility_matrix": [{"id": "r43-ggplot352-figure-contract-120", "module_version": "1.0.0", "tool_versions": {"r-figure-stack": [">=1,<2"]}, "dependency_versions": {"r": [">=4.3,<4.4"]}, "input_formats": {"analysis_figure_tables": ["tab-separated-values@1"]}, "output_formats": {"trajectory_spatial_figure_package": ["pdf@1.7", "svg@1.1", "tiff@6.0", "inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["trajectory-spatial-figure-package-regression-v1"], "end_to_end_evidence_ids": ["trajectory-spatial-figure-package-synthetic-e2e-v1"], "verified_at": "2026-07-30"}],
   "access": "agent_generated",
-  "mutability": "read_only",
-  "credentials": [],
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {"objective": {"type": "string", "minLength": 12}, "analysis_type": {"type": "string", "enum": ["trajectory-topology", "trajectory-velocity", "fate-mapping", "regulatory-velocity", "spatial-platform-qc", "spatial-core-analysis", "spatial-deconvolution", "spatial-domain-benchmark", "spatial-communication", "spatial-image-analysis", "spatial-multislice"]}, "figure_manifest_artifact_id": {"type": "string", "minLength": 1}, "journal_profile": {"type": "string", "enum": ["nature", "science", "cell", "screen"]}, "width_mm": {"type": "number", "exclusiveMinimum": 0}, "height_mm": {"type": "number", "exclusiveMinimum": 0}, "dpi": {"type": "integer", "minimum": 300}}, "required": ["objective", "analysis_type", "figure_manifest_artifact_id", "journal_profile", "width_mm", "height_mm", "dpi"]},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"handoff_type": {"type": "string"}, "module": {"type": "object"}, "request_digest": {"type": "string"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}}, "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]},
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["https://research-figure-guide.nature.com/figures/building-and-exporting-figure-panels/", "https://scvelo.readthedocs.io/", "https://cellrank.readthedocs.io/", "https://squidpy.readthedocs.io/", "https://cell2location.readthedocs.io/en/latest/", "https://github.com/zcang/COMMOT"]},
-  "code_templates": [
-    {"path": "templates/export_figure_contract.py", "language": "python", "purpose": "Export the versioned analysis-specific figure inventory and visual tokens.", "quality_gate_ids": ["analysis-figure-profile-complete"], "requires_adaptation": false},
-    {"path": "templates/render_figure_package.R", "language": "r", "purpose": "Validate panel source data and render PDF/SVG/TIFF at final publication size.", "quality_gate_ids": ["analysis-figure-profile-complete", "final-size-vector-raster-contract", "panel-source-data-provenance"], "requires_adaptation": false}
-  ],
-  "agent_protocol": {"schema_version": 1, "mode": "packaged_parameterized_workflow", "languages": ["r", "python", "notebook"], "template_sections": [{"id": "bind-figure-profile", "purpose": "Select the exact required plot inventory for the analysis.", "required_logic": ["Export the versioned profile from visualization.py.", "Map every required panel ID to a reloaded source table, claim, units and statistical meaning.", "Block complete status when any mandatory panel is missing."], "output_artifact_types": ["trajectory_spatial_figure_package"], "template_files": ["templates/export_figure_contract.py"]}, {"id": "render-and-reload", "purpose": "Render consistent final-size vector and raster outputs.", "required_logic": ["Use R/ggplot2 with global typography, stroke, color, axes and legend tokens.", "Export individual panels and aggregate editable PDF/SVG plus 600-dpi TIFF.", "Reload files, validate dimensions/size and record every input/output digest."], "output_artifact_types": ["trajectory_spatial_figure_package"], "template_files": ["templates/render_figure_package.R"]}], "parameter_rules": [{"id": "analysis-profile", "parameter": "analysis-type-required-plots", "decision_inputs": ["upstream module", "available validated outputs", "scientific claims"], "selection_rule": "Choose exactly one registered trajectory or spatial profile; required plots cannot be removed for aesthetics.", "validation_rule": "Fail complete-profile status if a required ID has no source table; record optional omissions."}, {"id": "final-size-layout", "parameter": "canvas-grid-legend", "decision_inputs": ["journal", "column width", "panel count", "label density"], "selection_rule": "Set final canvas before rendering, keep 5-7 pt text and at least 0.5 pt strokes, and place legends outside panels.", "validation_rule": "Inspect PDF/SVG text editability, TIFF dpi, clipping, overlap, category order and colorblind accessibility."}], "preflight_checks": ["Inspect every upstream object/table and map claims, units, sample identity, statistical tests and panel IDs.", "Detect exact R, ggplot2, patchwork, svglite, ragg, jsonlite and digest versions."], "postflight_checks": ["Reload individual and aggregate PDF/SVG/TIFF outputs and verify file size, dimensions, fonts, labels, legends, clipping and digest manifest.", "Confirm all required plots are present and visual encodings agree across comparable panels."], "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "style-version", "analysis-type", "journal-profile", "figure-manifest-sha256", "panel-source-digests", "statistics-and-units", "canvas-and-dpi", "actual-R-package-versions", "output-digests", "quality-gates"], "forbidden_actions": ["Use the R backend for formal plotting; do not silently switch to Python plotting.", "Do not fabricate missing panels or source data, hide failed/discordant results, place legends over data, use text below 5 pt or strokes below 0.5 pt, alter comparable axes, or claim a profile complete when required panels are absent."], "requires_observed_execution": true},
-  "routing": {
-    "method_aliases": [
-      "trajectory-spatial-figure-package",
-      "Render complete trajectory and spatial figure packages",
-      "trajectory figures",
-      "velocity figures",
-      "CellRank figures",
-      "RegVelo figures",
-      "spatial figures",
-      "publication figure package",
-      "轨迹统一作图",
-      "空间组学统一作图"
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Use the R backend for formal plotting; do not silently switch to Python plotting.",
+      "Do not fabricate missing panels or source data, hide failed/discordant results, place legends over data, use text below 5 pt or strokes below 0.5 pt, alter comparable axes, or claim a profile complete when required panels are absent."
     ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
+    "languages": [
+      "r",
+      "python",
+      "notebook"
+    ],
+    "mode": "packaged_parameterized_workflow",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "upstream module",
+          "available validated outputs",
+          "scientific claims"
+        ],
+        "id": "analysis-profile",
+        "parameter": "analysis-type-required-plots",
+        "selection_rule": "Choose exactly one registered trajectory or spatial profile; required plots cannot be removed for aesthetics.",
+        "validation_rule": "Fail complete-profile status if a required ID has no source table; record optional omissions."
+      },
+      {
+        "decision_inputs": [
+          "journal",
+          "column width",
+          "panel count",
+          "label density"
+        ],
+        "id": "final-size-layout",
+        "parameter": "canvas-grid-legend",
+        "selection_rule": "Set final canvas before rendering, keep 5-7 pt text and at least 0.5 pt strokes, and place legends outside panels.",
+        "validation_rule": "Inspect PDF/SVG text editability, TIFF dpi, clipping, overlap, category order and colorblind accessibility."
+      }
+    ],
+    "postflight_checks": [
+      "Reload individual and aggregate PDF/SVG/TIFF outputs and verify file size, dimensions, fonts, labels, legends, clipping and digest manifest.",
+      "Confirm all required plots are present and visual encodings agree across comparable panels."
+    ],
+    "preflight_checks": [
+      "Inspect every upstream object/table and map claims, units, sample identity, statistical tests and panel IDs.",
+      "Detect exact R, ggplot2, patchwork, svglite, ragg, jsonlite and digest versions."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "style-version",
+      "analysis-type",
+      "journal-profile",
+      "figure-manifest-sha256",
+      "panel-source-digests",
+      "statistics-and-units",
+      "canvas-and-dpi",
+      "actual-R-package-versions",
+      "output-digests",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "bind-figure-profile",
+        "output_artifact_types": [
+          "trajectory_spatial_figure_package"
+        ],
+        "purpose": "Select the exact required plot inventory for the analysis.",
+        "required_logic": [
+          "Export the versioned profile from visualization.py.",
+          "Map every required panel ID to a reloaded source table, claim, units and statistical meaning.",
+          "Block complete status when any mandatory panel is missing."
+        ],
+        "template_files": [
+          "templates/export_figure_contract.py"
+        ]
+      },
+      {
+        "id": "render-and-reload",
+        "output_artifact_types": [
+          "trajectory_spatial_figure_package"
+        ],
+        "purpose": "Render consistent final-size vector and raster outputs.",
+        "required_logic": [
+          "Use R/ggplot2 with global typography, stroke, color, axes and legend tokens.",
+          "Export individual panels and aggregate editable PDF/SVG plus 600-dpi TIFF.",
+          "Reload files, validate dimensions/size and record every input/output digest."
+        ],
+        "template_files": [
+          "templates/render_figure_package.R"
+        ]
+      }
+    ]
   },
-  "orchestration": {
-    "scientific_stage": 6,
-    "requires_reviewed_upstream_types": []
+  "alternatives": [
+    "figure-specification"
+  ],
+  "assumptions": [
+    "Source tables already passed their analysis-specific quality gates; the figure renderer does not repair or reinterpret biological results."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/export_figure_contract.py",
+      "purpose": "Export the versioned analysis-specific figure inventory and visual tokens.",
+      "quality_gate_ids": [
+        "analysis-figure-profile-complete"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "r",
+      "path": "templates/render_figure_package.R",
+      "purpose": "Validate panel source data and render PDF/SVG/TIFF at final publication size.",
+      "quality_gate_ids": [
+        "analysis-figure-profile-complete",
+        "final-size-vector-raster-contract",
+        "panel-source-data-provenance"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "r": [
+          ">=4.3,<4.4"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "trajectory-spatial-figure-package-synthetic-e2e-v1"
+      ],
+      "id": "r43-ggplot352-figure-contract-120",
+      "input_formats": {
+        "analysis_figure_tables": [
+          "tab-separated-values@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "trajectory_spatial_figure_package": [
+          "pdf@1.7",
+          "svg@1.1",
+          "tiff@6.0",
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "trajectory-spatial-figure-package-regression-v1"
+      ],
+      "tool_versions": {
+        "r-figure-stack": [
+          ">=1,<2"
+        ]
+      },
+      "verified_at": "2026-07-30"
+    }
+  ],
+  "complements": [
+    "single-cell-trajectory-topology",
+    "single-cell-trajectory-velocity",
+    "single-cell-fate-mapping",
+    "single-cell-regulatory-velocity",
+    "single-cell-spatial-analysis",
+    "spatial-platform-image-foundation",
+    "spatial-multimethod-inference",
+    "spatial-multislice-integration"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=4.3,<4.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "r-runtime",
+      "name": "r",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Render all formal trajectory and spatial figure outputs with one R backend.",
+      "required": true,
+      "tested_versions": [
+        "4.3.2"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/"
+    }
+  ],
+  "description": "Validate analysis-specific required plot inventories and render final-size editable PDF/SVG plus 600-dpi TIFF figure packages for trajectory topology, velocity, fate mapping, RegVelo, spatial platform QC, spatial statistics, deconvolution, domains, communication, image analysis and multislice 3D reconstruction using a single versioned R graphic contract.",
+  "domains": [
+    "publication",
+    "omics",
+    "scientific-communication"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "evidence_effects": [
+    "adds-complete-versioned-trajectory-and-spatial-figure-package-evidence"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
   },
+  "id": "trajectory-spatial-figure-package",
+  "input_artifacts": [
+    {
+      "artifact_type": "analysis_specific_figure_source_data",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "declared-when-spatial"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "panel-source-data"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "analysis_figure_tables",
+      "processing_levels": [
+        "tested",
+        "reloaded",
+        "panel-mapped"
+      ],
+      "required_metadata": [
+        "analysis-type",
+        "panel-id",
+        "claim",
+        "source-artifact",
+        "source-sha256",
+        "units",
+        "statistics"
+      ],
+      "source_policy": "project_or_upstream"
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "analysis_type": {
+        "enum": [
+          "trajectory-topology",
+          "trajectory-velocity",
+          "fate-mapping",
+          "regulatory-velocity",
+          "spatial-platform-qc",
+          "spatial-core-analysis",
+          "spatial-deconvolution",
+          "spatial-domain-benchmark",
+          "spatial-communication",
+          "spatial-image-analysis",
+          "spatial-multislice"
+        ],
+        "type": "string"
+      },
+      "dpi": {
+        "minimum": 300,
+        "type": "integer"
+      },
+      "figure_manifest_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "height_mm": {
+        "exclusiveMinimum": 0,
+        "type": "number"
+      },
+      "journal_profile": {
+        "enum": [
+          "nature",
+          "science",
+          "cell",
+          "screen"
+        ],
+        "type": "string"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "width_mm": {
+        "exclusiveMinimum": 0,
+        "type": "number"
+      }
+    },
+    "required": [
+      "objective",
+      "analysis_type",
+      "figure_manifest_artifact_id",
+      "journal_profile",
+      "width_mm",
+      "height_mm",
+      "dpi"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "trajectory figures",
+    "velocity figures",
+    "CellRank figures",
+    "RegVelo figures",
+    "spatial figures",
+    "publication figure package",
+    "\u8f68\u8ff9\u7edf\u4e00\u4f5c\u56fe",
+    "\u7a7a\u95f4\u7ec4\u5b66\u7edf\u4e00\u4f5c\u56fe"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "The generic renderer supplies a validated visual grammar; analysis-specific adapters must format source tables and may add official method-native plot layers. A complete-looking figure cannot rescue invalid upstream analysis."
+  ],
+  "maturity": "validated",
+  "module_type": "delivery",
+  "mutability": "read_only",
   "observed_output_contracts": [
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -146,6 +422,35 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "analysis-figure-profile-complete",
+          "metric_key": "analysis-figure-profile-complete",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "final-size-vector-raster-contract",
+          "metric_key": "final-size-vector-raster-contract",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "panel-source-data-provenance",
+          "metric_key": "panel-source-data-provenance",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -157,6 +462,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -201,12 +514,277 @@
         }
       ],
       "port": "trajectory_spatial_figure_package",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "analysis-figure-profile-complete",
         "final-size-vector-raster-contract",
         "panel-source-data-provenance"
+      ],
+      "semantic_profile": "trajectory-spatial-figure-package-trajectory-spatial-figure-package-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 6
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "trajectory_spatial_figure_package",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "pdf",
+          "orientations": [
+            "multipanel-publication-figure"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.7"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "svg",
+          "orientations": [
+            "editable-vector-figure"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "lzw"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tiff",
+          "orientations": [
+            "600-dpi-publication-figure"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "6.0"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "figure-contract-and-digests"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "trajectory_spatial_figure_package",
+      "processing_levels": [
+        "profile-complete",
+        "final-size",
+        "vector-exported",
+        "raster-exported",
+        "reloaded"
+      ],
+      "required_metadata": [
+        "module-version",
+        "style-version",
+        "analysis-type",
+        "journal-profile",
+        "required-plots",
+        "input-and-output-digests",
+        "backend-versions",
+        "quality-gates"
       ]
     }
-  ]
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Analysis type and target journal profile are declared; every panel has source data, units, sample identity and statistical meaning; final canvas size is chosen before rendering."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://research-figure-guide.nature.com/figures/building-and-exporting-figure-panels/",
+      "https://scvelo.readthedocs.io/",
+      "https://cellrank.readthedocs.io/",
+      "https://squidpy.readthedocs.io/",
+      "https://cell2location.readthedocs.io/en/latest/",
+      "https://github.com/zcang/COMMOT"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require every analysis-specific mandatory plot ID or explicitly mark the package incomplete; optional plots remain data-driven.",
+      "id": "analysis-figure-profile-complete",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Use 5-7 pt final-size typography, at least 0.5 pt strokes, outside legends, colorblind-safe encodings, editable PDF/SVG and 600-dpi TIFF.",
+      "id": "final-size-vector-raster-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Bind each panel to reloaded source tables, claim, units, sample/experimental unit, statistics and cryptographic digests.",
+      "id": "panel-source-data-provenance",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Does this trajectory or spatial analysis have a complete, traceable and journal-sized figure inventory with consistent typography, strokes, color, legends and source data?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "trajectory-spatial-figure-package",
+      "Render complete trajectory and spatial figure packages",
+      "trajectory figures",
+      "velocity figures",
+      "CellRank figures",
+      "RegVelo figures",
+      "spatial figures",
+      "publication figure package",
+      "\u8f68\u8ff9\u7edf\u4e00\u4f5c\u56fe",
+      "\u7a7a\u95f4\u7ec4\u5b66\u7edf\u4e00\u4f5c\u56fe"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Render complete trajectory and spatial figure packages",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1,<2"
+      ],
+      "ecosystem": "r",
+      "identity": "r-figure-stack",
+      "mismatch_policy": "block",
+      "name": "r-figure-stack",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.0.0"
+      ],
+      "verified_at": "2026-07-30",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(packageVersion('ggplot2'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://ggplot2.tidyverse.org/"
+    }
+  ],
+  "version": "1.0.0"
 }

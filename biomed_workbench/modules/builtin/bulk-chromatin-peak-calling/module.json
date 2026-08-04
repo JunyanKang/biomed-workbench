@@ -1,1012 +1,671 @@
 {
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
+      "Do not fabricate treatment/control files, spike-in identity, scale factors, RNase H pairs or sensitivity, output peaks, summits, statistics, or a fallback result when execution fails.",
+      "Do not call S9.6 signal a locus-level R-loop without RNase H sensitivity and orthogonal support, or call a peak direct TF binding, enhancer activity, condition effect, causal target regulation, or replicate-level conclusion without additional evidence."
+    ],
+    "languages": [
+      "python",
+      "notebook"
+    ],
+    "mode": "packaged_parameterized_workflow",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "assay",
+          "factor-or-mark",
+          "fragmentation-profile",
+          "matched-input",
+          "biological-question"
+        ],
+        "id": "chromatin-control-and-peak-shape",
+        "parameter": "control_peak_mode_threshold",
+        "selection_rule": "Declare control use, narrow or broad peak mode, genome size, q threshold, duplicate policy and any fixed fragment extension from assay design before reviewing target loci or condition labels.",
+        "validation_rule": "Reject ChIP-seq without matched control; record no-control rationale and any fixed extension for CUT&RUN or CUT&Tag and do not tune settings to expected loci."
+      },
+      {
+        "decision_inputs": [
+          "spike-in material and addition stage",
+          "competitive reference alignment",
+          "absolute spike-in fragments",
+          "spike-in fraction",
+          "deposited protocol normalization",
+          "matched RNase H design",
+          "global-shift objective"
+        ],
+        "id": "cuttag-internal-reference-and-specificity-control",
+        "parameter": "alignment-scale-thresholds-and-rnaseh-role",
+        "selection_rule": "Declare raw-only, common-target or matched-reference scaling from protocol evidence before results; use exogenous scaling only when addition timing and material justify it, and use RNase H as specificity evidence.",
+        "validation_rule": "Block absent or unreliable spike-in under a scaling policy, never infer species from filenames, retain raw and scaled signals, require explicit RNase H pairs, and never treat pooled RNase H material as a biological condition replicate."
+      }
+    ],
+    "postflight_checks": [
+      "Reload every peak, summit, raw count, scale factor, RNase H annotation, table, and figure output; reconcile coordinates, finite statistics, row counts, source digests, command, versions and parameters.",
+      "Retain failed or empty output as a blocked result and limit claims to assay-specific enrichment and RNase H-sensitive DNA:RNA-hybrid evidence."
+    ],
+    "preflight_checks": [
+      "Detect MACS3, Python, matplotlib, and exact reference versions in an existing scientific runtime.",
+      "Validate treatment/control accessibility, source digests, interval or BAM semantics, build, coordinates, assay, replicate identity, output paths and frozen parameters.",
+      "When internal-reference scaling is requested, verify host and reference digests, competitive alignment accounting, declared normalization method and thresholds, and addition stage; for an S9.6 target, also verify RNase H pair design and the required target-specific plot inventory."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "treatment-sha256",
+      "control-sha256-or-absence-rationale",
+      "assay",
+      "replicate-id",
+      "genome-build",
+      "host-reference-digest",
+      "spikein-reference-digest",
+      "spikein-alignment-policy",
+      "spikein-normalization-method-thresholds-and-scale-factors",
+      "rnaseh-pair-and-control-role",
+      "peak-mode",
+      "MACS3-parameters",
+      "actual-tool-version",
+      "command",
+      "plot-standard-version",
+      "output-sha256",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
     "schema_version": 1,
-    "id": "bulk-chromatin-peak-calling",
-    "version": "0.3.0",
-    "title": "Call peaks and audit normalization for bulk chromatin profiling",
-    "description": "Validate and execute peak calling for bulk ChIP-seq, CUT&RUN, or CUT&Tag, with the measured target or antibody, control design, peak geometry, optional internal-reference normalization, and target-specific validation represented as separate parameters rather than separate assay types.",
-    "module_type": "analysis",
-    "domains": [
-        "omics"
-    ],
-    "intents": [
-        "bulk ChIP-seq peak calling",
-        "CUT&RUN peak calling",
-        "CUT&Tag peak calling",
-        "CUT&Tag with S9.6 declared as the target and optional internal-reference normalization",
-        "CUT&Tag targeting S9.6 with RNase H specificity controls",
-        "MACS3 narrowPeak broadPeak",
-        "ChIP CUTRUN CUTTag \u5cf0\u8c03\u7528",
-        "CUT&Tag \u9776\u6807 S9.6 \u3001\u53ef\u9009\u5916\u6e90\u5185\u53c2\u5f52\u4e00\u5316\u4e0e RNase H \u7279\u5f02\u6027\u8bc1\u636e"
-    ],
-    "questions": [
-        "Which assay- and parameter-specific chromatin enrichment intervals are supported by declared treatment and, when applicable, control evidence after MACS3 output reload?"
-    ],
-    "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
-    "execution": {
-        "kind": "workflow",
-        "timeout_seconds": 30,
-        "max_output_bytes": 2000000
-    },
-    "maturity": "validated",
-    "input_artifacts": [
-        {
-            "name": "treatment_reads",
-            "artifact_type": "chromatin_enrichment_reads",
-            "processing_levels": [
-                "aligned-or-intervalized",
-                "source"
-            ],
-            "required_metadata": [
-                "source-sha256",
-                "assay",
-                "genome-build",
-                "library-and-replicate-id",
-                "coordinate-system"
-            ],
-            "formats": [
-                {
-                    "name": "bam",
-                    "versions": [
-                        "1"
-                    ],
-                    "representations": [
-                        "binary"
-                    ],
-                    "compression": [
-                        "bgzf"
-                    ],
-                    "required_indexes": [
-                        "bai-or-csi"
-                    ],
-                    "coordinate_systems": [
-                        "zero-based-half-open"
-                    ],
-                    "genome_build_policy": "declared",
-                    "genome_builds": [
-                        "declared-in-project"
-                    ],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "aligned-reads"
-                    ]
-                },
-                {
-                    "name": "bed",
-                    "versions": [
-                        "3+"
-                    ],
-                    "representations": [
-                        "text"
-                    ],
-                    "compression": [
-                        "none"
-                    ],
-                    "required_indexes": [],
-                    "coordinate_systems": [
-                        "zero-based-half-open"
-                    ],
-                    "genome_build_policy": "declared",
-                    "genome_builds": [
-                        "declared-in-project"
-                    ],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "interval-records"
-                    ]
-                },
-                {
-                    "name": "bedpe",
-                    "versions": [
-                        "1"
-                    ],
-                    "representations": [
-                        "text"
-                    ],
-                    "compression": [
-                        "none"
-                    ],
-                    "required_indexes": [],
-                    "coordinate_systems": [
-                        "zero-based-half-open"
-                    ],
-                    "genome_build_policy": "declared",
-                    "genome_builds": [
-                        "declared-in-project"
-                    ],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "paired-interval-records"
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "matched_control_reads",
-            "artifact_type": "chromatin_control_reads",
-            "source_policy": "project_or_upstream",
-            "processing_levels": [
-                "aligned-or-intervalized",
-                "matched-control"
-            ],
-            "required_metadata": [
-                "source-sha256",
-                "genome-build",
-                "library-and-replicate-id",
-                "coordinate-system"
-            ],
-            "formats": [
-                {
-                    "name": "bam",
-                    "versions": [
-                        "1"
-                    ],
-                    "representations": [
-                        "binary"
-                    ],
-                    "compression": [
-                        "bgzf"
-                    ],
-                    "required_indexes": [
-                        "bai-or-csi"
-                    ],
-                    "coordinate_systems": [
-                        "zero-based-half-open"
-                    ],
-                    "genome_build_policy": "declared",
-                    "genome_builds": [
-                        "declared-in-project"
-                    ],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "aligned-reads"
-                    ]
-                },
-                {
-                    "name": "bed",
-                    "versions": [
-                        "3+"
-                    ],
-                    "representations": [
-                        "text"
-                    ],
-                    "compression": [
-                        "none"
-                    ],
-                    "required_indexes": [],
-                    "coordinate_systems": [
-                        "zero-based-half-open"
-                    ],
-                    "genome_build_policy": "declared",
-                    "genome_builds": [
-                        "declared-in-project"
-                    ],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "interval-records"
-                    ]
-                },
-                {
-                    "name": "bedpe",
-                    "versions": [
-                        "1"
-                    ],
-                    "representations": [
-                        "text"
-                    ],
-                    "compression": [
-                        "none"
-                    ],
-                    "required_indexes": [],
-                    "coordinate_systems": [
-                        "zero-based-half-open"
-                    ],
-                    "genome_build_policy": "declared",
-                    "genome_builds": [
-                        "declared-in-project"
-                    ],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "paired-interval-records"
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "spikein_alignment_summary",
-            "artifact_type": "chromatin_spikein_alignment_summary",
-            "source_policy": "project_or_upstream",
-            "processing_levels": [
-                "competitively-aligned",
-                "fragment-accounted"
-            ],
-            "required_metadata": [
-                "sample-manifest-digest",
-                "host-reference",
-                "spikein-reference",
-                "alignment-policy",
-                "library-and-replicate-id"
-            ],
-            "formats": [
-                {
-                    "name": "tab-separated-values",
-                    "versions": [
-                        "1"
-                    ],
-                    "representations": [
-                        "text"
-                    ],
-                    "compression": [
-                        "none"
-                    ],
-                    "required_indexes": [],
-                    "coordinate_systems": [],
-                    "genome_build_policy": "not_applicable",
-                    "genome_builds": [],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "sample-by-host-spikein-fragment-count"
-                    ]
-                }
-            ]
-        }
-    ],
-    "output_artifacts": [
-        {
-            "name": "chromatin_peak_evidence",
-            "artifact_type": "bulk_chromatin_peak_evidence",
-            "processing_levels": [
-                "called",
-                "reloaded",
-                "source-preserved"
-            ],
-            "required_metadata": [
-                "module-version",
-                "generated-code-sha256",
-                "treatment-sha256",
-                "control-sha256-or-absence-rationale",
-                "assay",
-                "peak-mode",
-                "genome-build",
-                "MACS3-version",
-                "parameters",
-                "output-sha256",
-                "quality-gates"
-            ],
-            "formats": [
-                {
-                    "name": "narrowpeak",
-                    "versions": [
-                        "10-column"
-                    ],
-                    "representations": [
-                        "text"
-                    ],
-                    "compression": [
-                        "none"
-                    ],
-                    "required_indexes": [],
-                    "coordinate_systems": [
-                        "zero-based-half-open"
-                    ],
-                    "genome_build_policy": "declared",
-                    "genome_builds": [
-                        "inherited-from-input"
-                    ],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "peak-records"
-                    ]
-                },
-                {
-                    "name": "broadpeak",
-                    "versions": [
-                        "9-column"
-                    ],
-                    "representations": [
-                        "text"
-                    ],
-                    "compression": [
-                        "none"
-                    ],
-                    "required_indexes": [],
-                    "coordinate_systems": [
-                        "zero-based-half-open"
-                    ],
-                    "genome_build_policy": "declared",
-                    "genome_builds": [
-                        "inherited-from-input"
-                    ],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "peak-records"
-                    ]
-                },
-                {
-                    "name": "inline-json",
-                    "versions": [
-                        "1"
-                    ],
-                    "representations": [
-                        "structured"
-                    ],
-                    "compression": [
-                        "none"
-                    ],
-                    "required_indexes": [],
-                    "coordinate_systems": [
-                        "structured-summary-no-intervals"
-                    ],
-                    "genome_build_policy": "declared",
-                    "genome_builds": [
-                        "inherited-from-input"
-                    ],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "method-quality-summary"
-                    ]
-                },
-                {
-                    "name": "tab-separated-values",
-                    "versions": [
-                        "1"
-                    ],
-                    "representations": [
-                        "text"
-                    ],
-                    "compression": [
-                        "none"
-                    ],
-                    "required_indexes": [],
-                    "coordinate_systems": [],
-                    "genome_build_policy": "not_applicable",
-                    "genome_builds": [],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "sample-by-normalization-factor",
-                        "region-by-rnaseh-sensitivity"
-                    ]
-                },
-                {
-                    "name": "pdf",
-                    "versions": [
-                        "1.7"
-                    ],
-                    "representations": [
-                        "binary"
-                    ],
-                    "compression": [
-                        "internal"
-                    ],
-                    "required_indexes": [],
-                    "coordinate_systems": [],
-                    "genome_build_policy": "not_applicable",
-                    "genome_builds": [],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "publication-figure"
-                    ]
-                },
-                {
-                    "name": "svg",
-                    "versions": [
-                        "1.1"
-                    ],
-                    "representations": [
-                        "text"
-                    ],
-                    "compression": [
-                        "none"
-                    ],
-                    "required_indexes": [],
-                    "coordinate_systems": [],
-                    "genome_build_policy": "not_applicable",
-                    "genome_builds": [],
-                    "annotation_releases": [],
-                    "orientations": [
-                        "publication-figure"
-                    ]
-                }
-            ]
-        }
-    ],
-    "preconditions": [
-        "Treatment evidence has a declared assay, genome build, coordinate semantics, biological replicate identity and immutable digest; matched input/control is available for ChIP-seq; peak shape and thresholds are declared before execution; output paths are new."
-    ],
-    "assumptions": [
-        "MACS3 intervals are assay- and parameter-specific enrichment evidence. A matched ChIP input reduces but does not eliminate technical and biological confounding; no-control CUT&RUN or CUT&Tag requires separately documented specificity controls."
-    ],
-    "quality_gates": [
-        {
-            "id": "bulk-chromatin-input-control",
-            "severity": "fatal",
-            "description": "Block unless treatment assay, format, build, coordinates, digest, replicate identity, peak mode and threshold are declared; ChIP-seq requires an explicitly matched control in this workflow.",
-            "blocks_interpretation": true
-        },
-        {
-            "id": "bulk-chromatin-macs3-output",
-            "severity": "fatal",
-            "description": "MACS3 must complete without fallback and produce nonempty, coordinate-valid narrowPeak or broadPeak output with finite statistical fields; narrow peaks also require reloadable summits.",
-            "blocks_interpretation": true
-        },
-        {
-            "id": "bulk-chromatin-provenance",
-            "severity": "fatal",
-            "description": "Reload every output and reconcile source digests, command, detected version, assay, control decision, peak mode, genome size, duplicate policy and thresholds before interpretation.",
-            "blocks_interpretation": true
-        },
-        {
-            "id": "bulk-chromatin-claim-boundary",
-            "severity": "major",
-            "description": "Do not interpret a peak as direct binding, motif occupancy, enhancer activity, condition effect, or causal target regulation without appropriate replicate-level and orthogonal evidence.",
-            "blocks_interpretation": true
-        },
-        {
-            "id": "cuttag-target-normalization-specificity",
-            "severity": "fatal",
-            "description": "When CUT&Tag uses an internal reference, the workflow must declare competitive alignment and addition timing, block unreliable reference counts, preserve scale factors, and apply target-specific controls separately; for S9.6, RNase H sensitivity is specificity evidence rather than a biological replicate.",
-            "blocks_interpretation": true
-        }
-    ],
-    "limitations": [
-        "This module does not perform alignment, duplicate marking, IDR, motif discovery, chromatin interaction calling, or causal peak-to-gene assignment. Internal-reference scaling is optional and valid only when the addition stage and material support between-library normalization. S9.6 is recorded as the CUT&Tag target or antibody; pooled or unreplicated RNase H material is only a specificity annotation, not a condition-level replicate."
-    ],
-    "evidence_effects": [
-        "adds-reloaded-bulk-chromatin-peak-evidence",
-        "records-control-and-peak-shape-policy"
-    ],
-    "alternatives": [
-        "single-cell-atac-regulatory"
-    ],
-    "complements": [
-        "single-cell-atac-regulatory",
-        "single-cell-regulatory-network",
-        "assembly-reference-alignment",
-        "figure-specification"
-    ],
-    "tool_requirements": [
-        {
-            "name": "MACS3",
-            "ecosystem": "python",
-            "identity": "MACS3",
-            "required": true,
-            "tested_versions": [
-                "3.0.3"
-            ],
-            "allowed_versions": [
-                ">=3.0.3,<3.1"
-            ],
-            "version_source": "https://macs3-project.github.io/MACS/docs/callpeak.html",
-            "verified_at": "2026-07-23",
-            "version_probe": [
-                "macs3",
-                "--version"
-            ],
-            "version_probe_kind": "command",
-            "version_probe_timeout_seconds": 30,
-            "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-            "mismatch_policy": "block",
-            "version_differences": [
-                {
-                    "id": "macs3-bulk-peak-semantics",
-                    "affected_versions": [
-                        ">=3.0.3,<3.1"
-                    ],
-                    "category": "output-format",
-                    "description": "MACS3 callpeak duplicate handling, broad versus narrow output and summit behavior are release- and parameter-coupled.",
-                    "compatibility_effect": "requires-parser",
-                    "required_action": "Record and reload the exact peak mode, duplicate policy, thresholds and output fields before comparing projects or assays.",
-                    "source": "https://macs3-project.github.io/MACS/docs/callpeak.html"
-                }
-            ],
-            "platforms": [
-                "any"
-            ]
-        }
-    ],
-    "dependencies": [
-        {
-            "name": "python",
-            "ecosystem": "runtime",
-            "identity": "python-runtime",
-            "required": true,
-            "tested_versions": [
-                "3.14.3"
-            ],
-            "allowed_versions": [
-                ">=3.14,<3.15"
-            ],
-            "version_source": "https://www.python.org/downloads/release/python-3143/",
-            "verified_at": "2026-07-30",
-            "version_probe": [
-                "biomed_workbench.modules.compatibility:probe_python_runtime"
-            ],
-            "version_probe_kind": "python_callable",
-            "version_probe_timeout_seconds": 5,
-            "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-            "purpose": "Run the MACS3 and optional CUT&Tag internal-reference wrappers in an already configured scientific runtime.",
-            "conflicts": [],
-            "platforms": [
-                "any"
-            ]
-        },
-        {
-            "name": "matplotlib",
-            "ecosystem": "python",
-            "identity": "matplotlib",
-            "required": true,
-            "tested_versions": [
-                "3.10.8"
-            ],
-            "allowed_versions": [
-                ">=3.10,<3.11"
-            ],
-            "version_source": "https://matplotlib.org/stable/api/index.html",
-            "verified_at": "2026-07-30",
-            "version_probe": [
-                "python3",
-                "-c",
-                "import matplotlib;print(matplotlib.__version__)"
-            ],
-            "version_probe_kind": "command",
-            "version_probe_timeout_seconds": 30,
-            "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-            "purpose": "Render standardized vector-first internal-reference and target-specific QC figures.",
-            "conflicts": [],
-            "platforms": [
-                "any"
-            ]
-        }
-    ],
-    "compatibility_matrix": [
-        {
-            "id": "agent-protocol-2-macs3-304-python-3143-matplotlib-310",
-                "module_version": "0.3.0",
-            "tool_versions": {
-                "MACS3": [
-                    ">=3.0.3,<3.1"
-                ]
-            },
-            "dependency_versions": {
-                "python": [
-                    ">=3.14,<3.15"
-                ],
-                "matplotlib": [
-                    ">=3.10,<3.11"
-                ]
-            },
-            "input_formats": {
-                "treatment_reads": [
-                    "bam@1",
-                    "bed@3+",
-                    "bedpe@1"
-                ],
-                "matched_control_reads": [
-                    "bam@1",
-                    "bed@3+",
-                    "bedpe@1"
-                ],
-                "spikein_alignment_summary": [
-                    "tab-separated-values@1"
-                ]
-            },
-            "output_formats": {
-                "chromatin_peak_evidence": [
-                    "narrowpeak@10-column",
-                    "broadpeak@9-column",
-                    "inline-json@1",
-                    "tab-separated-values@1",
-                    "pdf@1.7",
-                    "svg@1.1"
-                ]
-            },
-            "platforms": [
-                "any"
-            ],
-            "regression_evidence_ids": [
-                "bulk-chromatin-peak-calling-regression-v2"
-            ],
-            "end_to_end_evidence_ids": [
-                "bulk-chromatin-peak-calling-e2e-v2"
-            ],
-            "verified_at": "2026-07-30"
-        }
-    ],
-    "access": "agent_generated",
-    "mutability": "read_only",
-    "credentials": [],
-    "input_schema": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-            "objective": {
-                "type": "string",
-                "minLength": 12
-            },
-            "assay": {
-                "type": "string",
-                "enum": [
-                    "chip-seq",
-                    "cutrun",
-                    "cuttag"
-                ]
-            },
-            "target_or_antibody": {
-                "type": "string",
-                "minLength": 1
-            },
-            "specificity_control": {
-                "type": "string",
-                "enum": [
-                    "none",
-                    "matched-input",
-                    "igg",
-                    "rnaseh",
-                    "other-declared"
-                ]
-            },
-            "treatment_artifact_id": {
-                "type": "string",
-                "minLength": 1
-            },
-            "control_artifact_id": {
-                "type": "string",
-                "minLength": 1
-            },
-            "spikein_summary_artifact_id": {
-                "type": "string",
-                "minLength": 1
-            },
-            "rnaseh_control_artifact_id": {
-                "type": "string",
-                "minLength": 1
-            },
-            "spikein_reference": {
-                "type": "string",
-                "minLength": 1
-            },
-            "spikein_policy": {
-                "type": "string",
-                "enum": [
-                    "required",
-                    "not-applicable"
-                ]
-            },
-            "spikein_normalization_method": {
-                "type": "string",
-                "enum": [
-                    "none",
-                    "exogenous-target",
-                    "matched-reference"
-                ]
-            },
-            "spikein_target_fragments": {
-                "type": "number",
-                "exclusiveMinimum": 0
-            },
-            "minimum_spikein_fragments": {
-                "type": "integer",
-                "minimum": 1
-            },
-            "minimum_spikein_fraction": {
-                "type": "number",
-                "exclusiveMinimum": 0,
-                "maximum": 1
-            },
-            "input_format": {
-                "type": "string",
-                "enum": [
-                    "BAM",
-                    "BED",
-                    "BEDPE"
-                ]
-            },
-            "genome_build": {
-                "type": "string",
-                "minLength": 1
-            },
-            "genome_size": {
-                "type": "string",
-                "minLength": 1
-            },
-            "peak_mode": {
-                "type": "string",
-                "enum": [
-                    "narrow",
-                    "broad"
-                ]
-            },
-            "qvalue": {
-                "type": "number",
-                "exclusiveMinimum": 0,
-                "maximum": 1
-            },
-            "duplicate_policy": {
-                "type": "string",
-                "enum": [
-                    "all",
-                    "auto"
-                ]
-            },
-            "nomodel_extsize": {
-                "type": "integer",
-                "minimum": 1,
-                "maximum": 2000
-            },
-            "design_notes": {
-                "type": "string",
-                "minLength": 1
-            }
-        },
-        "required": [
-            "objective",
-            "assay",
-            "target_or_antibody",
-            "specificity_control",
-            "treatment_artifact_id",
-            "input_format",
-            "genome_build",
-            "genome_size",
-            "peak_mode",
-            "qvalue",
-            "duplicate_policy",
-            "design_notes"
+    "template_sections": [
+      {
+        "id": "inspect-bulk-chromatin-contract",
+        "output_artifact_types": [
+          "bulk_chromatin_peak_evidence"
+        ],
+        "purpose": "Establish assay, treatment, control, build, peak shape and output semantics.",
+        "required_logic": [
+          "Inspect treatment and control files, assay, library, replicate, genome build, coordinate system, source digests and peak-shape rationale before execution.",
+          "Require a matched input/control for ChIP-seq; preserve and justify no-control CUT&RUN or CUT&Tag handling.",
+          "Keep assay, measured target or antibody, internal-reference strategy, and specificity controls as separate fields; for an S9.6 target, require declared host-plus-exogenous accounting when scaling is requested and record the RNase H control role."
+        ],
+        "template_files": [
+          "templates/call_macs3_chromatin.py",
+          "templates/normalize_cuttag_internal_reference.py"
         ]
-    },
-    "output_schema": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-            "handoff_type": {
-                "type": "string",
-                "enum": [
-                    "packaged_parameterized_project_analysis"
-                ]
-            },
-            "module": {
-                "type": "object"
-            },
-            "request_digest": {
-                "type": "string",
-                "pattern": "^[0-9a-f]{64}$"
-            },
-            "request_fields": {
-                "type": "array"
-            },
-            "languages": {
-                "type": "array"
-            },
-            "code_plan": {
-                "type": "array"
-            },
-            "parameter_rules": {
-                "type": "array"
-            },
-            "preflight_checks": {
-                "type": "array"
-            },
-            "postflight_checks": {
-                "type": "array"
-            },
-            "provenance_fields": {
-                "type": "array"
-            },
-            "forbidden_actions": {
-                "type": "array"
-            },
-            "tool_profiles": {
-                "type": "array"
-            },
-            "dependency_profiles": {
-                "type": "array"
-            },
-            "quality_gate_ids": {
-                "type": "array"
-            },
-            "execution_policy": {
-                "type": "object"
-            }
-        },
-        "required": [
-            "handoff_type",
-            "module",
-            "request_digest",
-            "request_fields",
-            "languages",
-            "code_plan",
-            "parameter_rules",
-            "preflight_checks",
-            "postflight_checks",
-            "provenance_fields",
-            "forbidden_actions",
-            "tool_profiles",
-            "dependency_profiles",
-            "quality_gate_ids",
-            "execution_policy"
+      },
+      {
+        "id": "call-and-reload-bulk-peaks",
+        "output_artifact_types": [
+          "bulk_chromatin_peak_evidence"
+        ],
+        "purpose": "Call MACS3 with an explicit assay-specific parameter policy and reload outputs.",
+        "required_logic": [
+          "Run MACS3 only after executable and version detection succeeds; retain exact arguments, stderr, source digests, control policy, peak mode, duplicate policy, fixed extension policy and thresholds.",
+          "Reload narrowPeak or broadPeak records, require finite statistics, and require summit output for narrow peaks without generating a fallback peak set."
+        ],
+        "template_files": [
+          "templates/call_macs3_chromatin.py"
         ]
-    },
-    "kernel_compatibility": [
-        ">=0.2.0,<0.3.0"
-    ],
-    "provenance": {
-        "license": "Apache-2.0",
-        "concept_sources": [
-            "Independent clean-room replacement for bulk chromatin peak-calling capability identified during product capability planning.",
-            "https://macs3-project.github.io/MACS/docs/callpeak.html",
-            "https://pmc.ncbi.nlm.nih.gov/articles/PMC7888926/",
-            "https://yezhengstat.github.io/CUTTag_tutorial/"
+      },
+      {
+        "id": "audit-cuttag-internal-reference-and-specificity",
+        "output_artifact_types": [
+          "bulk_chromatin_peak_evidence"
+        ],
+        "purpose": "Audit optional internal-reference support and apply target-specific controls without promoting a control to a biological replicate.",
+        "required_logic": [
+          "Derive host and spike-in counts from competitive alignment to declared references and block samples below explicitly declared absolute-count or fraction thresholds.",
+          "Choose raw-only, a declared common exogenous target, or an explicit matched-reference scale according to protocol and deposited-study semantics; retain every raw count and factor and never substitute one policy for another.",
+          "Pair each RNase H-treated library to its declared untreated reference, annotate sensitivity descriptively, and generate the required standardized QC and locus plots."
+        ],
+        "template_files": [
+          "templates/normalize_cuttag_internal_reference.py"
         ]
-    },
-    "code_templates": [
-        {
-            "path": "templates/call_macs3_chromatin.py",
-            "language": "python",
-            "purpose": "Execute, reload, and provenance-bind bulk chromatin MACS3 peak evidence.",
-            "quality_gate_ids": [
-                "bulk-chromatin-input-control",
-                "bulk-chromatin-macs3-output",
-                "bulk-chromatin-provenance",
-                "bulk-chromatin-claim-boundary"
-            ],
-            "requires_adaptation": false
-        },
-        {
-            "path": "templates/normalize_cuttag_internal_reference.py",
-            "language": "python",
-            "purpose": "Audit optional CUT&Tag internal-reference support, calculate per-library scale factors, apply declared target-specific controls, and render standardized QC figures.",
-            "quality_gate_ids": [
-                "bulk-chromatin-input-control",
-                "bulk-chromatin-provenance",
-                "bulk-chromatin-claim-boundary",
-                "cuttag-target-normalization-specificity"
-            ],
-            "requires_adaptation": false
-        }
-    ],
-    "agent_protocol": {
-        "schema_version": 1,
-        "mode": "packaged_parameterized_workflow",
-        "languages": [
-            "python",
-            "notebook"
-        ],
-        "template_sections": [
-            {
-                "id": "inspect-bulk-chromatin-contract",
-                "purpose": "Establish assay, treatment, control, build, peak shape and output semantics.",
-                "required_logic": [
-                    "Inspect treatment and control files, assay, library, replicate, genome build, coordinate system, source digests and peak-shape rationale before execution.",
-                    "Require a matched input/control for ChIP-seq; preserve and justify no-control CUT&RUN or CUT&Tag handling.",
-                    "Keep assay, measured target or antibody, internal-reference strategy, and specificity controls as separate fields; for an S9.6 target, require declared host-plus-exogenous accounting when scaling is requested and record the RNase H control role."
-                ],
-                "output_artifact_types": [
-                    "bulk_chromatin_peak_evidence"
-                ],
-                "template_files": [
-                    "templates/call_macs3_chromatin.py",
-                    "templates/normalize_cuttag_internal_reference.py"
-                ]
-            },
-            {
-                "id": "call-and-reload-bulk-peaks",
-                "purpose": "Call MACS3 with an explicit assay-specific parameter policy and reload outputs.",
-                "required_logic": [
-                    "Run MACS3 only after executable and version detection succeeds; retain exact arguments, stderr, source digests, control policy, peak mode, duplicate policy, fixed extension policy and thresholds.",
-                    "Reload narrowPeak or broadPeak records, require finite statistics, and require summit output for narrow peaks without generating a fallback peak set."
-                ],
-                "output_artifact_types": [
-                    "bulk_chromatin_peak_evidence"
-                ],
-                "template_files": [
-                    "templates/call_macs3_chromatin.py"
-                ]
-            },
-            {
-                "id": "audit-cuttag-internal-reference-and-specificity",
-                "purpose": "Audit optional internal-reference support and apply target-specific controls without promoting a control to a biological replicate.",
-                "required_logic": [
-                    "Derive host and spike-in counts from competitive alignment to declared references and block samples below explicitly declared absolute-count or fraction thresholds.",
-                    "Choose raw-only, a declared common exogenous target, or an explicit matched-reference scale according to protocol and deposited-study semantics; retain every raw count and factor and never substitute one policy for another.",
-                    "Pair each RNase H-treated library to its declared untreated reference, annotate sensitivity descriptively, and generate the required standardized QC and locus plots."
-                ],
-                "output_artifact_types": [
-                    "bulk_chromatin_peak_evidence"
-                ],
-                "template_files": [
-                    "templates/normalize_cuttag_internal_reference.py"
-                ]
-            }
-        ],
-        "parameter_rules": [
-            {
-                "id": "chromatin-control-and-peak-shape",
-                "parameter": "control_peak_mode_threshold",
-                "decision_inputs": [
-                    "assay",
-                    "factor-or-mark",
-                    "fragmentation-profile",
-                    "matched-input",
-                    "biological-question"
-                ],
-                "selection_rule": "Declare control use, narrow or broad peak mode, genome size, q threshold, duplicate policy and any fixed fragment extension from assay design before reviewing target loci or condition labels.",
-                "validation_rule": "Reject ChIP-seq without matched control; record no-control rationale and any fixed extension for CUT&RUN or CUT&Tag and do not tune settings to expected loci."
-            },
-            {
-                "id": "cuttag-internal-reference-and-specificity-control",
-                "parameter": "alignment-scale-thresholds-and-rnaseh-role",
-                "decision_inputs": [
-                    "spike-in material and addition stage",
-                    "competitive reference alignment",
-                    "absolute spike-in fragments",
-                    "spike-in fraction",
-                    "deposited protocol normalization",
-                    "matched RNase H design",
-                    "global-shift objective"
-                ],
-                "selection_rule": "Declare raw-only, common-target or matched-reference scaling from protocol evidence before results; use exogenous scaling only when addition timing and material justify it, and use RNase H as specificity evidence.",
-                "validation_rule": "Block absent or unreliable spike-in under a scaling policy, never infer species from filenames, retain raw and scaled signals, require explicit RNase H pairs, and never treat pooled RNase H material as a biological condition replicate."
-            }
-        ],
-        "preflight_checks": [
-            "Detect MACS3, Python, matplotlib, and exact reference versions in an existing scientific runtime.",
-            "Validate treatment/control accessibility, source digests, interval or BAM semantics, build, coordinates, assay, replicate identity, output paths and frozen parameters.",
-            "When internal-reference scaling is requested, verify host and reference digests, competitive alignment accounting, declared normalization method and thresholds, and addition stage; for an S9.6 target, also verify RNase H pair design and the required target-specific plot inventory."
-        ],
-        "postflight_checks": [
-            "Reload every peak, summit, raw count, scale factor, RNase H annotation, table, and figure output; reconcile coordinates, finite statistics, row counts, source digests, command, versions and parameters.",
-            "Retain failed or empty output as a blocked result and limit claims to assay-specific enrichment and RNase H-sensitive DNA:RNA-hybrid evidence."
-        ],
-        "provenance_fields": [
-            "module-id",
-            "module-version",
-            "generated-code-sha256",
-            "treatment-sha256",
-            "control-sha256-or-absence-rationale",
-            "assay",
-            "replicate-id",
-            "genome-build",
-            "host-reference-digest",
-            "spikein-reference-digest",
-            "spikein-alignment-policy",
-            "spikein-normalization-method-thresholds-and-scale-factors",
-            "rnaseh-pair-and-control-role",
-            "peak-mode",
-            "MACS3-parameters",
-            "actual-tool-version",
-            "command",
-            "plot-standard-version",
-            "output-sha256",
-            "quality-gates"
-        ],
-        "forbidden_actions": [
-            "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
-            "Do not fabricate treatment/control files, spike-in identity, scale factors, RNase H pairs or sensitivity, output peaks, summits, statistics, or a fallback result when execution fails.",
-            "Do not call S9.6 signal a locus-level R-loop without RNase H sensitivity and orthogonal support, or call a peak direct TF binding, enhancer activity, condition effect, causal target regulation, or replicate-level conclusion without additional evidence."
-        ],
-        "requires_observed_execution": true
-    },
-  "routing": {
-    "method_aliases": [
-      "bulk-chromatin-peak-calling",
-      "Call peaks and audit normalization for bulk chromatin profiling",
-      "bulk ChIP-seq peak calling",
-      "CUT&RUN peak calling",
-      "CUT&Tag peak calling",
-      "CUT&Tag with S9.6 declared as the target and optional internal-reference normalization",
-      "CUT&Tag targeting S9.6 with RNase H specificity controls",
-      "MACS3 narrowPeak broadPeak",
-      "ChIP CUTRUN CUTTag 峰调用",
-      "CUT&Tag 靶标 S9.6 、可选外源内参归一化与 RNase H 特异性证据"
-    ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
+      }
+    ]
   },
-  "orchestration": {
-    "scientific_stage": 4,
-    "requires_reviewed_upstream_types": []
+  "alternatives": [
+    "single-cell-atac-regulatory"
+  ],
+  "assumptions": [
+    "MACS3 intervals are assay- and parameter-specific enrichment evidence. A matched ChIP input reduces but does not eliminate technical and biological confounding; no-control CUT&RUN or CUT&Tag requires separately documented specificity controls."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/call_macs3_chromatin.py",
+      "purpose": "Execute, reload, and provenance-bind bulk chromatin MACS3 peak evidence.",
+      "quality_gate_ids": [
+        "bulk-chromatin-input-control",
+        "bulk-chromatin-macs3-output",
+        "bulk-chromatin-provenance",
+        "bulk-chromatin-claim-boundary"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/normalize_cuttag_internal_reference.py",
+      "purpose": "Audit optional CUT&Tag internal-reference support, calculate per-library scale factors, apply declared target-specific controls, and render standardized QC figures.",
+      "quality_gate_ids": [
+        "bulk-chromatin-input-control",
+        "bulk-chromatin-provenance",
+        "bulk-chromatin-claim-boundary",
+        "cuttag-target-normalization-specificity"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "matplotlib": [
+          ">=3.10,<3.11"
+        ],
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "bulk-chromatin-peak-calling-e2e-v2"
+      ],
+      "id": "agent-protocol-2-macs3-304-python-3143-matplotlib-310",
+      "input_formats": {
+        "matched_control_reads": [
+          "bam@1",
+          "bed@3+",
+          "bedpe@1"
+        ],
+        "spikein_alignment_summary": [
+          "tab-separated-values@1"
+        ],
+        "treatment_reads": [
+          "bam@1",
+          "bed@3+",
+          "bedpe@1"
+        ]
+      },
+      "module_version": "0.3.0",
+      "output_formats": {
+        "chromatin_peak_evidence": [
+          "narrowpeak@10-column",
+          "broadpeak@9-column",
+          "inline-json@1",
+          "tab-separated-values@1",
+          "pdf@1.7",
+          "svg@1.1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "bulk-chromatin-peak-calling-regression-v2"
+      ],
+      "tool_versions": {
+        "MACS3": [
+          ">=3.0.3,<3.1"
+        ]
+      },
+      "verified_at": "2026-07-30"
+    }
+  ],
+  "complements": [
+    "single-cell-atac-regulatory",
+    "single-cell-regulatory-network",
+    "assembly-reference-alignment",
+    "figure-specification"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run the MACS3 and optional CUT&Tag internal-reference wrappers in an already configured scientific runtime.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    },
+    {
+      "allowed_versions": [
+        ">=3.10,<3.11"
+      ],
+      "conflicts": [],
+      "ecosystem": "python",
+      "identity": "matplotlib",
+      "name": "matplotlib",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Render standardized vector-first internal-reference and target-specific QC figures.",
+      "required": true,
+      "tested_versions": [
+        "3.10.8"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import matplotlib;print(matplotlib.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://matplotlib.org/stable/api/index.html"
+    }
+  ],
+  "description": "Validate and execute peak calling for bulk ChIP-seq, CUT&RUN, or CUT&Tag, with the measured target or antibody, control design, peak geometry, optional internal-reference normalization, and target-specific validation represented as separate parameters rather than separate assay types.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "evidence_effects": [
+    "adds-reloaded-bulk-chromatin-peak-evidence",
+    "records-control-and-peak-shape-policy"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
   },
+  "id": "bulk-chromatin-peak-calling",
+  "input_artifacts": [
+    {
+      "artifact_type": "chromatin_enrichment_reads",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "bgzf"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "bam",
+          "orientations": [
+            "aligned-reads"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "required_indexes": [
+            "bai-or-csi"
+          ],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "bed",
+          "orientations": [
+            "interval-records"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "3+"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "bedpe",
+          "orientations": [
+            "paired-interval-records"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "treatment_reads",
+      "processing_levels": [
+        "aligned-or-intervalized",
+        "source"
+      ],
+      "required_metadata": [
+        "source-sha256",
+        "assay",
+        "genome-build",
+        "library-and-replicate-id",
+        "coordinate-system"
+      ]
+    },
+    {
+      "artifact_type": "chromatin_control_reads",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "bgzf"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "bam",
+          "orientations": [
+            "aligned-reads"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "required_indexes": [
+            "bai-or-csi"
+          ],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "bed",
+          "orientations": [
+            "interval-records"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "3+"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "bedpe",
+          "orientations": [
+            "paired-interval-records"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "matched_control_reads",
+      "processing_levels": [
+        "aligned-or-intervalized",
+        "matched-control"
+      ],
+      "required_metadata": [
+        "source-sha256",
+        "genome-build",
+        "library-and-replicate-id",
+        "coordinate-system"
+      ],
+      "source_policy": "project_or_upstream"
+    },
+    {
+      "artifact_type": "chromatin_spikein_alignment_summary",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "sample-by-host-spikein-fragment-count"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "spikein_alignment_summary",
+      "processing_levels": [
+        "competitively-aligned",
+        "fragment-accounted"
+      ],
+      "required_metadata": [
+        "sample-manifest-digest",
+        "host-reference",
+        "spikein-reference",
+        "alignment-policy",
+        "library-and-replicate-id"
+      ],
+      "source_policy": "project_or_upstream"
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "assay": {
+        "enum": [
+          "chip-seq",
+          "cutrun",
+          "cuttag"
+        ],
+        "type": "string"
+      },
+      "control_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "design_notes": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "duplicate_policy": {
+        "enum": [
+          "all",
+          "auto"
+        ],
+        "type": "string"
+      },
+      "genome_build": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "genome_size": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "input_format": {
+        "enum": [
+          "BAM",
+          "BED",
+          "BEDPE"
+        ],
+        "type": "string"
+      },
+      "minimum_spikein_fraction": {
+        "exclusiveMinimum": 0,
+        "maximum": 1,
+        "type": "number"
+      },
+      "minimum_spikein_fragments": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "nomodel_extsize": {
+        "maximum": 2000,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "peak_mode": {
+        "enum": [
+          "narrow",
+          "broad"
+        ],
+        "type": "string"
+      },
+      "qvalue": {
+        "exclusiveMinimum": 0,
+        "maximum": 1,
+        "type": "number"
+      },
+      "rnaseh_control_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "specificity_control": {
+        "enum": [
+          "none",
+          "matched-input",
+          "igg",
+          "rnaseh",
+          "other-declared"
+        ],
+        "type": "string"
+      },
+      "spikein_normalization_method": {
+        "enum": [
+          "none",
+          "exogenous-target",
+          "matched-reference"
+        ],
+        "type": "string"
+      },
+      "spikein_policy": {
+        "enum": [
+          "required",
+          "not-applicable"
+        ],
+        "type": "string"
+      },
+      "spikein_reference": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "spikein_summary_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "spikein_target_fragments": {
+        "exclusiveMinimum": 0,
+        "type": "number"
+      },
+      "target_or_antibody": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "treatment_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "assay",
+      "target_or_antibody",
+      "specificity_control",
+      "treatment_artifact_id",
+      "input_format",
+      "genome_build",
+      "genome_size",
+      "peak_mode",
+      "qvalue",
+      "duplicate_policy",
+      "design_notes"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "bulk ChIP-seq peak calling",
+    "CUT&RUN peak calling",
+    "CUT&Tag peak calling",
+    "CUT&Tag with S9.6 declared as the target and optional internal-reference normalization",
+    "CUT&Tag targeting S9.6 with RNase H specificity controls",
+    "MACS3 narrowPeak broadPeak",
+    "ChIP CUTRUN CUTTag \u5cf0\u8c03\u7528",
+    "CUT&Tag \u9776\u6807 S9.6 \u3001\u53ef\u9009\u5916\u6e90\u5185\u53c2\u5f52\u4e00\u5316\u4e0e RNase H \u7279\u5f02\u6027\u8bc1\u636e"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module does not perform alignment, duplicate marking, IDR, motif discovery, chromatin interaction calling, or causal peak-to-gene assignment. Internal-reference scaling is optional and valid only when the addition stage and material support between-library normalization. S9.6 is recorded as the CUT&Tag target or antibody; pooled or unreplicated RNase H material is only a specificity annotation, not a condition-level replicate."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
   "observed_output_contracts": [
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -1086,6 +745,53 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "bulk-chromatin-input-control",
+          "metric_key": "bulk-chromatin-input-control",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "bulk-chromatin-macs3-output",
+          "metric_key": "bulk-chromatin-macs3-output",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "bulk-chromatin-provenance",
+          "metric_key": "bulk-chromatin-provenance",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "bulk-chromatin-claim-boundary",
+          "metric_key": "bulk-chromatin-claim-boundary",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "cuttag-target-normalization-specificity",
+          "metric_key": "cuttag-target-normalization-specificity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -1097,6 +803,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -1141,14 +855,358 @@
         }
       ],
       "port": "chromatin_peak_evidence",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "bulk-chromatin-input-control",
         "bulk-chromatin-macs3-output",
         "bulk-chromatin-provenance",
         "bulk-chromatin-claim-boundary",
         "cuttag-target-normalization-specificity"
+      ],
+      "semantic_profile": "bulk-chromatin-peak-calling-chromatin-peak-evidence-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 4
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "bulk_chromatin_peak_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "inherited-from-input"
+          ],
+          "name": "narrowpeak",
+          "orientations": [
+            "peak-records"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "10-column"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "inherited-from-input"
+          ],
+          "name": "broadpeak",
+          "orientations": [
+            "peak-records"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "9-column"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "structured-summary-no-intervals"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "inherited-from-input"
+          ],
+          "name": "inline-json",
+          "orientations": [
+            "method-quality-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "sample-by-normalization-factor",
+            "region-by-rnaseh-sensitivity"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "pdf",
+          "orientations": [
+            "publication-figure"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.7"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "svg",
+          "orientations": [
+            "publication-figure"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.1"
+          ]
+        }
+      ],
+      "name": "chromatin_peak_evidence",
+      "processing_levels": [
+        "called",
+        "reloaded",
+        "source-preserved"
+      ],
+      "required_metadata": [
+        "module-version",
+        "generated-code-sha256",
+        "treatment-sha256",
+        "control-sha256-or-absence-rationale",
+        "assay",
+        "peak-mode",
+        "genome-build",
+        "MACS3-version",
+        "parameters",
+        "output-sha256",
+        "quality-gates"
       ]
     }
-  ]
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "packaged_parameterized_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Treatment evidence has a declared assay, genome build, coordinate semantics, biological replicate identity and immutable digest; matched input/control is available for ChIP-seq; peak shape and thresholds are declared before execution; output paths are new."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room replacement for bulk chromatin peak-calling capability identified during product capability planning.",
+      "https://macs3-project.github.io/MACS/docs/callpeak.html",
+      "https://pmc.ncbi.nlm.nih.gov/articles/PMC7888926/",
+      "https://yezhengstat.github.io/CUTTag_tutorial/"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block unless treatment assay, format, build, coordinates, digest, replicate identity, peak mode and threshold are declared; ChIP-seq requires an explicitly matched control in this workflow.",
+      "id": "bulk-chromatin-input-control",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "MACS3 must complete without fallback and produce nonempty, coordinate-valid narrowPeak or broadPeak output with finite statistical fields; narrow peaks also require reloadable summits.",
+      "id": "bulk-chromatin-macs3-output",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Reload every output and reconcile source digests, command, detected version, assay, control decision, peak mode, genome size, duplicate policy and thresholds before interpretation.",
+      "id": "bulk-chromatin-provenance",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Do not interpret a peak as direct binding, motif occupancy, enhancer activity, condition effect, or causal target regulation without appropriate replicate-level and orthogonal evidence.",
+      "id": "bulk-chromatin-claim-boundary",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "When CUT&Tag uses an internal reference, the workflow must declare competitive alignment and addition timing, block unreliable reference counts, preserve scale factors, and apply target-specific controls separately; for S9.6, RNase H sensitivity is specificity evidence rather than a biological replicate.",
+      "id": "cuttag-target-normalization-specificity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which assay- and parameter-specific chromatin enrichment intervals are supported by declared treatment and, when applicable, control evidence after MACS3 output reload?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "bulk-chromatin-peak-calling",
+      "Call peaks and audit normalization for bulk chromatin profiling",
+      "bulk ChIP-seq peak calling",
+      "CUT&RUN peak calling",
+      "CUT&Tag peak calling",
+      "CUT&Tag with S9.6 declared as the target and optional internal-reference normalization",
+      "CUT&Tag targeting S9.6 with RNase H specificity controls",
+      "MACS3 narrowPeak broadPeak",
+      "ChIP CUTRUN CUTTag \u5cf0\u8c03\u7528",
+      "CUT&Tag \u9776\u6807 S9.6 \u3001\u53ef\u9009\u5916\u6e90\u5185\u53c2\u5f52\u4e00\u5316\u4e0e RNase H \u7279\u5f02\u6027\u8bc1\u636e"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Call peaks and audit normalization for bulk chromatin profiling",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=3.0.3,<3.1"
+      ],
+      "ecosystem": "python",
+      "identity": "MACS3",
+      "mismatch_policy": "block",
+      "name": "MACS3",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "3.0.3"
+      ],
+      "verified_at": "2026-07-23",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=3.0.3,<3.1"
+          ],
+          "category": "output-format",
+          "compatibility_effect": "requires-parser",
+          "description": "MACS3 callpeak duplicate handling, broad versus narrow output and summit behavior are release- and parameter-coupled.",
+          "id": "macs3-bulk-peak-semantics",
+          "required_action": "Record and reload the exact peak mode, duplicate policy, thresholds and output fields before comparing projects or assays.",
+          "source": "https://macs3-project.github.io/MACS/docs/callpeak.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "macs3",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://macs3-project.github.io/MACS/docs/callpeak.html"
+    }
+  ],
+  "version": "0.3.0"
 }

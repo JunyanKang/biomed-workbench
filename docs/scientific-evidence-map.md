@@ -56,9 +56,15 @@ Every planned analysis node requires one `AnalysisAdmission`. Approval requires:
 Missing fields do not receive an inferred default. An unapproved node may remain
 in the audit graph but cannot be treated as an authorized scientific analysis.
 
-Maps have two explicit purposes. A `project-snapshot` may truthfully show
+Maps have three explicit purposes. A `project-snapshot` may truthfully show
 qualified inputs, pending branches, failures, conflicts, and exclusions, but it
-never releases a publication or other formal-delivery node. A
+never releases a publication or other formal-delivery node. Before one formal
+delivery node runs, a `delivery-authorization` map covers that node's exact
+transitive ancestors and bound input artifacts. Every ancestor must be complete,
+every input must be retained, and the plan bindings, execution receipts, reloads,
+reviews, and decisions must match the frozen upstream-slice digest. It authorizes
+only the named delivery node and does not require that not-yet-executed node to
+be complete. After its output is reloaded, reviewed, and retained, a terminal
 `validated-delivery` map requires retained produced results to carry the exact
 plan-node, observed-execution, artifact-reload, bilingual-review, and decision
 chain. Every node in the active plan must be completed, and every exact leaf
@@ -163,7 +169,11 @@ immutable result. The prepared journal stores a content-addressed pending
 project state, its pre-state digest, the exact publication record, and target
 identities. Explicit completion is allowed only when the current state still
 matches the pre-state and the pending state, immutable index, current pointer,
-and publication digests all verify.
+and publication digests all verify. A transaction interrupted in `prepared`
+may be explicitly abandoned only when the current project state is unchanged,
+the pending state and publication identity verify, and no staged, unindexed,
+indexed, current-pointer, or immutable version evidence exists. Inspection lists
+the only safe actions; ambiguous published evidence always requires manual review.
 
 Recommended classification:
 

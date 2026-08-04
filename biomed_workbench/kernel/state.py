@@ -15,7 +15,12 @@ from .execution_receipts import (
     ObservedExecutionReceipt,
     ScientificReviewReceipt,
 )
-from .execution_chain import delivery_slice_digest, validate_node_execution_chain, validate_validated_delivery_state
+from .execution_chain import (
+    delivery_slice_digest,
+    validate_delivery_prerequisites,
+    validate_node_execution_chain,
+    validate_validated_delivery_state,
+)
 from .hypotheses import Hypothesis, add_hypothesis, attach_evidence
 from .identity import digest_value, freeze_mapping, thaw
 from .plans import NODE_STATUSES, PlanNode, ResearchDAG
@@ -567,6 +572,17 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
             raise ValueError("evidence map publication active artifacts differ from current decisions")
         if item.map_kind == "validated-delivery":
             validate_validated_delivery_state(state)
+        elif item.map_kind == "delivery-authorization":
+            if len(item.authorized_delivery_node_ids) != 1:
+                raise ValueError("delivery authorization must name exactly one delivery node")
+            scope = validate_delivery_prerequisites(state, item.authorized_delivery_node_ids[0])
+            if (
+                item.covered_plan_id != scope.plan_id
+                or item.covered_node_ids != scope.covered_node_ids
+                or item.covered_artifact_ids != scope.covered_artifact_ids
+                or item.delivery_scope_digest != scope.digest
+            ):
+                raise ValueError("delivery authorization map does not match its exact upstream slice")
         if item.version.revision != len(evidence_map_versions) + 1:
             raise ValueError("evidence map publication revision is not continuous")
         if evidence_map_versions and item.version.parent_map_digest != evidence_map_versions[-1].map_digest:

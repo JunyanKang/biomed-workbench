@@ -216,12 +216,27 @@ class ObservedPayloadContract:
 
 
 @dataclass(frozen=True)
+class GateEvaluatorContract:
+    gate_id: str
+    evaluator: str
+    evidence_payload_role: str
+    metric_key: str
+    metric_type: str
+    operator: str
+    threshold: object
+
+
+@dataclass(frozen=True)
 class ObservedOutputContract:
     port: str
     content_schema: dict[str, object]
     payloads: tuple[ObservedPayloadContract, ...]
     required_postflight_gate_ids: tuple[str, ...]
-    reload_validator: str | None = None
+    container_reload_validator: str
+    semantic_validator: str
+    semantic_validator_sha256: str
+    semantic_profile: str
+    gate_evaluators: tuple[GateEvaluatorContract, ...]
 
 
 @dataclass(frozen=True)
@@ -284,6 +299,7 @@ _ROUTING_FIELDS = frozenset(RoutingContract.__dataclass_fields__)
 _ORCHESTRATION_FIELDS = frozenset(OrchestrationContract.__dataclass_fields__)
 _OBSERVED_OUTPUT_FIELDS = frozenset(ObservedOutputContract.__dataclass_fields__)
 _OBSERVED_PAYLOAD_FIELDS = frozenset(ObservedPayloadContract.__dataclass_fields__)
+_GATE_EVALUATOR_FIELDS = frozenset(GateEvaluatorContract.__dataclass_fields__)
 _OPTIONAL_MANIFEST_FIELDS = frozenset({"agent_protocol", "code_templates", "observed_output_contracts"})
 
 
@@ -387,20 +403,76 @@ def _observed_output(value: Any, location: str) -> ObservedOutputContract:
     )
     if len({item.role for item in contracts}) != len(contracts) or not any(item.minimum > 0 for item in contracts):
         raise ValueError(f"{location}.payloads must contain unique roles and at least one required payload")
-    reload_validator = payload["reload_validator"]
-    if reload_validator is not None and (
-        not isinstance(reload_validator, str) or not _CALLABLE_RE.fullmatch(reload_validator)
-    ):
-        raise ValueError(f"{location}.reload_validator must be null or a packaged Python callable")
+    validators = {}
+    for field in ("container_reload_validator", "semantic_validator"):
+        validator = payload[field]
+        if not isinstance(validator, str) or not _CALLABLE_RE.fullmatch(validator):
+            raise ValueError(f"{location}.{field} must be a packaged Python callable")
+        validators[field] = validator
+    validator_digest = _text(payload["semantic_validator_sha256"], f"{location}.semantic_validator_sha256")
+    if not re.fullmatch(r"[0-9a-f]{64}", validator_digest):
+        raise ValueError(f"{location}.semantic_validator_sha256 must be SHA-256")
+    semantic_profile = _text(payload["semantic_profile"], f"{location}.semantic_profile")
+    if not _NAME_RE.fullmatch(semantic_profile):
+        raise ValueError(f"{location}.semantic_profile is invalid")
+    evaluator_values = payload["gate_evaluators"]
+    if not isinstance(evaluator_values, list) or not evaluator_values:
+        raise ValueError(f"{location}.gate_evaluators must be a nonempty list")
+    gate_evaluators = tuple(
+        _gate_evaluator(item, f"{location}.gate_evaluators[{index}]")
+        for index, item in enumerate(evaluator_values)
+    )
+    required_gate_ids = _strings(
+        payload["required_postflight_gate_ids"],
+        f"{location}.required_postflight_gate_ids",
+    )
+    if {item.gate_id for item in gate_evaluators} != set(required_gate_ids) or len(gate_evaluators) != len(required_gate_ids):
+        raise ValueError(f"{location}.gate_evaluators must cover every required postflight gate exactly once")
+    payload_roles = {item.role for item in contracts}
+    if any(item.evidence_payload_role not in payload_roles for item in gate_evaluators):
+        raise ValueError(f"{location}.gate_evaluators reference an undeclared evidence payload role")
     return ObservedOutputContract(
         port=_text(payload["port"], f"{location}.port"),
         content_schema=_closed_schema(payload["content_schema"], f"{location}.content_schema"),
         payloads=contracts,
-        required_postflight_gate_ids=_strings(
-            payload["required_postflight_gate_ids"],
-            f"{location}.required_postflight_gate_ids",
-        ),
-        reload_validator=reload_validator,
+        required_postflight_gate_ids=required_gate_ids,
+        container_reload_validator=validators["container_reload_validator"],
+        semantic_validator=validators["semantic_validator"],
+        semantic_validator_sha256=validator_digest,
+        semantic_profile=semantic_profile,
+        gate_evaluators=gate_evaluators,
+    )
+
+
+def _gate_evaluator(value: Any, location: str) -> GateEvaluatorContract:
+    payload = _object(value, location)
+    _exact_fields(payload, _GATE_EVALUATOR_FIELDS, location)
+    evaluator = _text(payload["evaluator"], f"{location}.evaluator")
+    if not _CALLABLE_RE.fullmatch(evaluator):
+        raise ValueError(f"{location}.evaluator must be a packaged Python callable")
+    metric_type = _text(payload["metric_type"], f"{location}.metric_type")
+    operator = _text(payload["operator"], f"{location}.operator")
+    if metric_type not in {"boolean", "integer", "number", "string"}:
+        raise ValueError(f"{location}.metric_type is unsupported")
+    if operator not in {"equals", "not-equals", "greater-than", "greater-or-equal", "less-than", "less-or-equal"}:
+        raise ValueError(f"{location}.operator is unsupported")
+    threshold = payload["threshold"]
+    expected_types = {
+        "boolean": (bool,),
+        "integer": (int,),
+        "number": (int, float),
+        "string": (str,),
+    }[metric_type]
+    if not isinstance(threshold, expected_types) or (metric_type in {"integer", "number"} and isinstance(threshold, bool)):
+        raise ValueError(f"{location}.threshold differs from metric_type")
+    return GateEvaluatorContract(
+        gate_id=_text(payload["gate_id"], f"{location}.gate_id"),
+        evaluator=evaluator,
+        evidence_payload_role=_text(payload["evidence_payload_role"], f"{location}.evidence_payload_role"),
+        metric_key=_text(payload["metric_key"], f"{location}.metric_key"),
+        metric_type=metric_type,
+        operator=operator,
+        threshold=threshold,
     )
 
 
@@ -1154,7 +1226,22 @@ def _observed_output_dict(value: ObservedOutputContract) -> dict[str, object]:
             for item in value.payloads
         ],
         "required_postflight_gate_ids": list(value.required_postflight_gate_ids),
-        "reload_validator": value.reload_validator,
+        "container_reload_validator": value.container_reload_validator,
+        "semantic_validator": value.semantic_validator,
+        "semantic_validator_sha256": value.semantic_validator_sha256,
+        "semantic_profile": value.semantic_profile,
+        "gate_evaluators": [
+            {
+                "gate_id": item.gate_id,
+                "evaluator": item.evaluator,
+                "evidence_payload_role": item.evidence_payload_role,
+                "metric_key": item.metric_key,
+                "metric_type": item.metric_type,
+                "operator": item.operator,
+                "threshold": item.threshold,
+            }
+            for item in value.gate_evaluators
+        ],
     }
 
 

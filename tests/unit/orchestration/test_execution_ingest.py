@@ -1,5 +1,6 @@
 import hashlib
 import copy
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -56,15 +57,31 @@ class ExecutionIngestTests(unittest.TestCase):
         state = apply_event(state, "execution_handoff_recorded", {"handoff": handoff.to_dict()}, rationale="Record the exact handoff.")
         root = Path(self.enterContext(tempfile.TemporaryDirectory()))
         table = root / "enrichment.tsv"
-        table.write_text("term\tp_value\nDNA repair\t0.01\n", encoding="utf-8")
+        table.write_text(
+            "term_id\tterm_name\tp_value\tadjusted_p_value\tgene_ratio\tbackground_ratio\tgene_set_size\toverlap_genes\n"
+            "GO:0006281\tDNA repair\t0.01\t0.02\t1/1\t2/100\t25\tTP53\n",
+            encoding="utf-8",
+        )
         payload_digest = hashlib.sha256(table.read_bytes()).hexdigest()
+        semantic = root / "enrichment.semantic.json"
+        semantic.write_text(json.dumps({
+            "schema_version": 1,
+            "module_id": manifest.id,
+            "module_version": manifest.version,
+            "port": "functional_enrichment_evidence",
+            "result_schema_id": f"{manifest.id}:functional_enrichment_evidence:functional-enrichment-v1",
+            "primary_payload_sha256": payload_digest,
+            "analysis_mode": "ora",
+            "input_accounting": {"tested_entities": 1, "background_entities": 100},
+            "result_accounting": {"reported_records": 1},
+            "quality_metrics": {gate.id: True for gate in manifest.quality_gates},
+            "limitations": [],
+            "empty_result_reason": None,
+        }, sort_keys=True), encoding="utf-8")
         bundle = {
             "handoff_id": handoff.id, "process_exit_code": 0,
             "runtime_versions": {"R": "4.3.3", "clusterProfiler": "4.10.1"},
-            "postflight_results": [{
-                "gate_id": gate.id, "status": "passed", "observed_metric": f"{gate.id}=passed",
-                "threshold": "predeclared manifest gate must pass", "evidence_payload_sha256": payload_digest,
-            } for gate in manifest.quality_gates],
+            "postflight_results": [{"gate_id": gate.id} for gate in manifest.quality_gates],
             "outputs": [{
                 "port": "functional_enrichment_evidence",
                 "content": {
@@ -75,95 +92,22 @@ class ExecutionIngestTests(unittest.TestCase):
                                    "parameters_digest": handoff.request_digest,
                                    "compatibility_row_id": handoff.compatibility_row_id},
                 },
-                "payload_files": [{"role": "primary", "path": str(table), "media_type": "text/tab-separated-values"}],
+                "payload_files": [
+                    {"role": "primary", "path": str(table), "media_type": "text/tab-separated-values"},
+                    {"role": "semantic-metadata", "path": str(semantic), "media_type": "application/json"},
+                ],
             }],
         }
         return registry, state, root, bundle
 
     def test_handoff_observation_reloads_outputs_and_enters_scientific_review(self):
-        registry = ModuleRegistry.discover(BUILTIN_ROOT)
-        manifest = registry.get("functional-enrichment")
-        state = state_with(
-            inline_artifact("artifact-genes", "gene_list_or_ranking"),
-            inline_artifact("artifact-universe", "measured_gene_universe"),
+        registry, state, root, bundle = self._prepared_case()
+        state = ingest_execution_bundle(
+            state,
+            bundle,
+            registry=registry,
+            artifact_store=ProjectArtifactStore(root / "objects"),
         )
-        node = PlanNode(
-            id="node-functional-enrichment",
-            module_id=manifest.id,
-            input_bindings={"gene_evidence": "artifact-genes", "tested_universe": "artifact-universe"},
-            dependencies=(),
-            branch_id="branch-enrichment",
-            target_hypothesis_ids=(hypothesis().id,),
-            expected_evidence_types=("functional-enrichment",),
-            expected_output_artifact_types=("functional_enrichment_evidence",),
-            planned_output_artifact_ids={"functional_enrichment_evidence": "artifact-enrichment-result"},
-            compatibility_row_candidates=(manifest.compatibility_matrix[0].id,),
-            status="awaiting_observed_execution",
-            attempt=1,
-        )
-        plan = ResearchDAG.create(
-            id="plan-functional-enrichment",
-            objective="Test the registered gene set against its measured universe.",
-            nodes=(node,),
-            required_output_artifact_types=("functional_enrichment_evidence",),
-            plan_type="single",
-            revision=1,
-            parent_plan_id=None,
-            rationale=("Exercise the exact agent execution receipt re-entry path.",),
-        )
-        state = apply_event(state, "plan_created", {"plan": plan.to_dict(), "activate": True}, rationale="Register the test plan.")
-        handoff = ExecutionHandoff.create(
-            plan_node_id=node.id,
-            module_id=manifest.id,
-            module_version=manifest.version,
-            request_digest=digest_value({"genes": ["TP53"], "universe": ["TP53", "BRCA1"]}),
-            compatibility_row_id=manifest.compatibility_matrix[0].id,
-            observed_output_contract_digest=observed_output_contract_digest(manifest),
-            planned_output_artifact_ids=node.planned_output_artifact_ids,
-            protocol={"result_kind": "execution_handoff", "execution_state": "prepared-not-run"},
-        )
-        state = apply_event(state, "execution_handoff_recorded", {"handoff": handoff.to_dict()}, rationale="Record the exact handoff.")
-
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            table = root / "enrichment.tsv"
-            table.write_text("term\tp_value\nDNA repair\t0.01\n", encoding="utf-8")
-            payload_digest = hashlib.sha256(table.read_bytes()).hexdigest()
-            bundle = {
-                "handoff_id": handoff.id,
-                "process_exit_code": 0,
-                "runtime_versions": {"R": "4.3.3", "clusterProfiler": "4.10.1"},
-                "postflight_results": [{
-                    "gate_id": gate.id,
-                    "status": "passed",
-                    "observed_metric": f"{gate.id}=passed on reloaded output",
-                    "threshold": "predeclared manifest gate must pass",
-                    "evidence_payload_sha256": payload_digest,
-                } for gate in manifest.quality_gates],
-                "outputs": [{
-                    "port": "functional_enrichment_evidence",
-                    "content": {
-                        "artifact_type": "functional_enrichment_evidence",
-                        "format": "tab-separated-values",
-                        "processing_level": "tested",
-                        "result_summary": "One tested gene produced a reloadable enrichment result.",
-                        "record_count": 1,
-                        "provenance": {
-                            "workflow": "clusterProfiler",
-                            "workflow_version": "4.10.1",
-                            "parameters_digest": handoff.request_digest,
-                            "compatibility_row_id": handoff.compatibility_row_id,
-                        },
-                    },
-                    "payload_files": [{"role": "primary", "path": str(table), "media_type": "text/tab-separated-values"}],
-                }],
-            }
-            state = ingest_execution_bundle(
-                state,
-                bundle,
-                registry=registry,
-                artifact_store=ProjectArtifactStore(root / "objects"),
-            )
 
         self.assertEqual(state.plans[-1].nodes[0].status, "awaiting_review")
         self.assertEqual(len(state.observed_executions), 1)
@@ -178,7 +122,7 @@ class ExecutionIngestTests(unittest.TestCase):
             "wrong payload role": lambda value: value["outputs"][0]["payload_files"][0].update(role="table"),
             "wrong payload media": lambda value: value["outputs"][0]["payload_files"][0].update(media_type="text/plain"),
             "missing postflight gate": lambda value: value["postflight_results"].pop(),
-            "mismatched gate evidence": lambda value: value["postflight_results"][0].update(evidence_payload_sha256="0" * 64),
+            "caller supplied gate verdict": lambda value: value["postflight_results"][0].update(status="passed"),
             "unobserved workflow version": lambda value: value["outputs"][0]["content"]["provenance"].update(workflow_version="99.0.0"),
         }
         for label, mutate in mutations.items():
@@ -203,6 +147,45 @@ class ExecutionIngestTests(unittest.TestCase):
                 state,
                 bundle,
                 registry=registry,
+                artifact_store=ProjectArtifactStore(root / "objects"),
+            )
+
+    def test_semantic_validator_rejects_readable_but_scientifically_wrong_enrichment(self):
+        cases = {
+            "placeholder columns": (
+                "foo\tbar\nx\ty\n",
+                "placeholder or empty column names",
+            ),
+            "invalid probability": (
+                "term_id\tterm_name\tp_value\tadjusted_p_value\tgene_ratio\tbackground_ratio\tgene_set_size\toverlap_genes\n"
+                "GO:0006281\tDNA repair\t1.2\t0.02\t1/1\t2/100\t25\tTP53\n",
+                "must lie in",
+            ),
+        }
+        for label, (table_text, message) in cases.items():
+            with self.subTest(label=label):
+                registry, state, root, bundle = self._prepared_case()
+                table = Path(bundle["outputs"][0]["payload_files"][0]["path"])
+                table.write_text(table_text, encoding="utf-8")
+                semantic = Path(bundle["outputs"][0]["payload_files"][1]["path"])
+                metadata = json.loads(semantic.read_text(encoding="utf-8"))
+                metadata["primary_payload_sha256"] = hashlib.sha256(table.read_bytes()).hexdigest()
+                semantic.write_text(json.dumps(metadata, sort_keys=True), encoding="utf-8")
+                with self.assertRaisesRegex(ValueError, message):
+                    ingest_execution_bundle(
+                        state, bundle, registry=registry,
+                        artifact_store=ProjectArtifactStore(root / "objects"),
+                    )
+
+    def test_plugin_rejects_a_failed_structured_gate_even_if_caller_only_requests_evaluation(self):
+        registry, state, root, bundle = self._prepared_case()
+        semantic = Path(bundle["outputs"][0]["payload_files"][1]["path"])
+        metadata = json.loads(semantic.read_text(encoding="utf-8"))
+        metadata["quality_metrics"][registry.get("functional-enrichment").quality_gates[0].id] = False
+        semantic.write_text(json.dumps(metadata, sort_keys=True), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "did not pass"):
+            ingest_execution_bundle(
+                state, bundle, registry=registry,
                 artifact_store=ProjectArtifactStore(root / "objects"),
             )
 

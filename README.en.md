@@ -59,7 +59,7 @@ Research changes as new data, methods, and judgments arrive. Biomed Workbench pr
 1. a **project story map** showing only the consequential dependencies among figures and data results;
 2. a **result-level evidence map** expanding prior conclusions, registered data, plot-ready data, analysis scripts, figure composition, final PDF/PNG files, captions, narrative sources, and DOI records.
 
-Each file carries a clickable workspace-relative path, media type, and a verification fingerprint. A project snapshot may truthfully show pending, failed, and excluded branches; only a delivery map backed by the complete execution, reload, review, and retention chain can release a formal deliverable. Bilingual reports read the same validated map, while version numbers, parent-version fingerprints, a recoverable publication transaction, and immutable version directories preserve the lineage of scientific interpretation.
+Each file carries a clickable workspace-relative path, media type, and a verification fingerprint. A project snapshot may truthfully show pending, failed, and excluded branches. Before formal rendering or delivery, the workbench freezes the exact upstream results, reviews, decisions, and plan bindings and authorizes only the named delivery task. After that output is reloaded and reviewed, a terminal map archives the completed plan. Bilingual reports read the same validated map, while version numbers, parent-version fingerprints, a recoverable publication transaction, and immutable version directories preserve the lineage of scientific interpretation.
 
 <p align="center">
   <img src="assets/readme/scientific-evidence-map.png" width="100%" alt="Conceptual two-layer scientific evidence map with result-level file provenance">

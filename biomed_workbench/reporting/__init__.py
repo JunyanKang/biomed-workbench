@@ -2,6 +2,7 @@
 
 from .scientific_dependency_reports import BilingualReportPair, render_bilingual_reports, write_bilingual_reports
 from .evidence_map_versions import (
+    abort_prepared_evidence_map_publication,
     complete_evidence_map_publication_recovery,
     inspect_evidence_map_publication_recovery,
     publish_evidence_map_transaction,
@@ -11,6 +12,7 @@ from .evidence_map_versions import (
 
 __all__ = [
     "BilingualReportPair",
+    "abort_prepared_evidence_map_publication",
     "complete_evidence_map_publication_recovery",
     "inspect_evidence_map_publication_recovery",
     "publish_evidence_map_transaction",

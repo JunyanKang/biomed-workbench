@@ -1,140 +1,418 @@
 {
-  "schema_version": 1,
-  "id": "single-cell-mosaic-integration",
-  "version": "1.0.0",
-  "title": "Single-cell paired, unpaired and mosaic multi-omics integration",
-  "description": "Integrate count-backed RNA+protein with totalVI, paired or mosaic RNA+ATAC with MultiVI, and graph-linked paired or unpaired RNA+ATAC with GLUE; retain missing-modality semantics, native models, joint embeddings and method-specific validation.",
-  "module_type": "analysis",
-  "domains": ["omics", "statistics"],
-  "intents": ["totalVI", "MultiVI", "GLUE", "mosaic integration", "paired multiomics", "unpaired multiomics", "CITE-seq integration", "RNA ATAC integration", "多组学整合", "镶嵌整合"],
-  "questions": ["Which joint representation preserves biological state while handling the declared paired, unpaired or mosaic modality design without fabricating missing measurements?"],
-  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "maturity": "validated",
-  "input_artifacts": [
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not install into or mutate the host environment, silently intersect or reorder cells, fabricate missing modalities, infer unmeasured features without held-out validation, use desired labels to tune integration, or use latent/imputed values for confirmatory differential inference."
+    ],
+    "languages": [
+      "python",
+      "notebook"
+    ],
+    "mode": "packaged_parameterized_workflow",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "modalities",
+          "paired anchors",
+          "missingness pattern",
+          "shared peak universe",
+          "guidance graph",
+          "GPU"
+        ],
+        "id": "mosaic-method",
+        "parameter": "totalvi-multivi-scglue",
+        "selection_rule": "Use totalVI for CITE-seq RNA+protein, MultiVI for paired/mosaic RNA+ATAC, and GLUE for graph-linked paired or unpaired modalities.",
+        "validation_rule": "Block a method whose required modality, anchors, feature universe or prior graph is absent."
+      },
+      {
+        "decision_inputs": [
+          "labels",
+          "batches",
+          "modalities",
+          "paired IDs",
+          "held-out measurements"
+        ],
+        "id": "mosaic-evaluation",
+        "parameter": "mixing-preservation-anchor-reconstruction",
+        "selection_rule": "Evaluate mixing and biology separately and retain all metric families rather than constructing one winner score.",
+        "validation_rule": "Require paired-anchor and held-out reconstruction evidence when those claims are made."
+      }
+    ],
+    "postflight_checks": [
+      "Reload native models, H5AD/H5MU, latent tables and reports; reconcile cells, modalities, features, missingness, parameters, versions and digests."
+    ],
+    "preflight_checks": [
+      "Inspect actual H5AD/H5MU axes, raw counts, cell identities, modality masks, paired anchors, feature namespaces, batch/sample metadata, guidance graph and isolated runtime."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "input-digests",
+      "method-version",
+      "cell-identity-policy",
+      "modality-presence",
+      "paired-anchors",
+      "feature-universes",
+      "guidance-graph-release",
+      "parameters",
+      "seed",
+      "output-digests",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "inspect-mosaic-design",
+        "output_artifact_types": [
+          "single_cell_mosaic_integration_evidence"
+        ],
+        "purpose": "Freeze cell identity, modality presence, feature universes and model scope.",
+        "required_logic": [
+          "Inspect raw counts, union cells, paired anchors, RNA genes, protein panels, ATAC peak universes, batches, samples and source digests.",
+          "Use totalVI only for RNA+protein, MultiVI only for RNA+ATAC with paired anchors, and GLUE only with a reviewed feature guidance graph."
+        ],
+        "template_files": [
+          "templates/run_scvi_mosaic.py",
+          "templates/run_scglue.py"
+        ]
+      },
+      {
+        "id": "fit-native-model",
+        "output_artifact_types": [
+          "single_cell_mosaic_integration_evidence"
+        ],
+        "purpose": "Fit the declared backend without converting missing modalities into observations.",
+        "required_logic": [
+          "Preserve raw counts and source cell order.",
+          "Retain native models, joint embeddings, modality-presence accounting, parameters and versions.",
+          "For MultiVI use a shared peak universe; for GLUE retain graph nodes, edges and release."
+        ],
+        "template_files": [
+          "templates/run_scvi_mosaic.py",
+          "templates/run_scglue.py"
+        ]
+      },
+      {
+        "id": "benchmark-and-admit",
+        "output_artifact_types": [
+          "single_cell_mosaic_integration_evidence"
+        ],
+        "purpose": "Admit integration only when mixing and biological preservation are jointly acceptable.",
+        "required_logic": [
+          "Review modality and batch ASW within biology, label ASW, cross-modality transfer, paired-anchor FOSCTTM, rare states and donor reproducibility.",
+          "Evaluate imputation only by hiding observed measurements before fitting.",
+          "Return differential inference to raw counts and biological-sample replication."
+        ],
+        "template_files": [
+          "templates/evaluate_mosaic.py"
+        ]
+      }
+    ]
+  },
+  "alternatives": [
+    "single-cell-multimodal-integration"
+  ],
+  "assumptions": [
+    "totalVI is for RNA+protein, MultiVI is for RNA+ATAC with paired anchors and shared feature universes, and GLUE uses an external feature graph to orient paired or unpaired modalities."
+  ],
+  "code_templates": [
     {
-      "name": "multimodal_counts",
-      "artifact_type": "single_cell_multimodal_count_evidence",
-      "processing_levels": ["quality-controlled", "sample-annotated", "raw-count-preserved", "missingness-declared"],
-      "required_metadata": ["sample-or-donor-key", "batch-key", "modality-presence", "feature-namespace", "raw-count-location", "source-sha256"],
-      "source_policy": "project_or_upstream",
-      "formats": [
-        {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["internal"], "required_indexes": ["cell-id", "feature-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["cell-by-rna-with-protein-obsm", "cell-by-feature-per-modality"]},
-        {"name": "h5mu", "versions": ["0.1.0"], "representations": ["container", "sparse"], "compression": ["internal"], "required_indexes": ["union-cell-id", "modality-feature-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-in-project"], "orientations": ["union-cell-by-modality-feature"]},
-        {"name": "graphml", "versions": ["1"], "representations": ["structured", "text"], "compression": ["none"], "required_indexes": ["feature-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["declared-guidance-release"], "orientations": ["regulatory-guidance-graph"]}
-      ]
-    }
-  ],
-  "output_artifacts": [
+      "language": "python",
+      "path": "templates/run_scvi_mosaic.py",
+      "purpose": "Run totalVI for RNA+protein or MultiVI for paired/mosaic RNA+ATAC while retaining union cells and missing-modality semantics.",
+      "quality_gate_ids": [
+        "multimodal-count-identity-missingness",
+        "method-specific-feature-and-prior-contract",
+        "mosaic-benchmark-and-inference-boundary"
+      ],
+      "requires_adaptation": false
+    },
     {
-      "name": "mosaic_integration_evidence",
-      "artifact_type": "single_cell_mosaic_integration_evidence",
-      "processing_levels": ["model-native", "missingness-preserved", "benchmark-reviewed", "reloaded"],
-      "required_metadata": ["method-and-version", "input-digests", "modality-design", "parameters", "seed", "latent-semantics", "quality-gates"],
-      "source_policy": "upstream_required",
-      "formats": [
-        {"name": "h5ad", "versions": ["0.1.0"], "representations": ["container"], "compression": ["internal"], "required_indexes": ["cell-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-from-input"], "orientations": ["cell-by-feature-with-joint-latent"]},
-        {"name": "h5mu", "versions": ["0.1.0"], "representations": ["container"], "compression": ["internal"], "required_indexes": ["union-cell-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": ["inherited-from-input"], "orientations": ["union-cell-by-multimodal-feature-with-joint-latent"]},
-        {"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": ["cell-id"], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["cell-by-latent-dimension"]},
-        {"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["parameters-provenance-diagnostics"]}
-      ]
+      "language": "python",
+      "path": "templates/run_scglue.py",
+      "purpose": "Run graph-linked paired or unpaired RNA+ATAC integration with a versioned, feature-matched guidance graph.",
+      "quality_gate_ids": [
+        "multimodal-count-identity-missingness",
+        "method-specific-feature-and-prior-contract",
+        "mosaic-benchmark-and-inference-boundary"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/evaluate_mosaic.py",
+      "purpose": "Evaluate modality and batch mixing together with biological preservation, cross-modality transfer and paired-anchor FOSCTTM.",
+      "quality_gate_ids": [
+        "multimodal-count-identity-missingness",
+        "mosaic-benchmark-and-inference-boundary"
+      ],
+      "requires_adaptation": false
     }
-  ],
-  "preconditions": ["Raw counts, cell identity, paired anchors, feature universes, modality presence, batch/sample structure and any GLUE guidance graph are explicit before fitting."],
-  "assumptions": ["totalVI is for RNA+protein, MultiVI is for RNA+ATAC with paired anchors and shared feature universes, and GLUE uses an external feature graph to orient paired or unpaired modalities."],
-  "quality_gates": [
-    {"id": "multimodal-count-identity-missingness", "severity": "fatal", "description": "Require immutable nonnegative integer counts, unique union cell identities, explicit modality-presence masks, paired-anchor accounting and unchanged cells after reload.", "blocks_interpretation": true},
-    {"id": "method-specific-feature-and-prior-contract", "severity": "fatal", "description": "Require RNA+protein for totalVI, a shared peak universe and paired anchors for MultiVI, and a versioned feature-matched guidance graph for GLUE.", "blocks_interpretation": true},
-    {"id": "mosaic-benchmark-and-inference-boundary", "severity": "fatal", "description": "Evaluate modality/batch mixing together with biological preservation, paired-anchor FOSCTTM and held-out modality reconstruction; forbid integrated, imputed or latent values as confirmatory differential-inference responses.", "blocks_interpretation": true}
-  ],
-  "limitations": ["A joint latent space does not prove cell identity, regulatory linkage or modality reconstruction accuracy. totalVI does not replace protein-panel QC. MultiVI needs a shared ATAC peak universe and paired anchors. GLUE results depend on the declared guidance graph. Missing modalities remain modelled missing values rather than observations."],
-  "evidence_effects": ["adds-totalvi-multivi-glue-and-mosaic-integration-evidence"],
-  "alternatives": ["single-cell-multimodal-integration"],
-  "complements": ["single-cell-integration-benchmark", "single-cell-reference-mapping", "single-cell-atac-regulatory"],
-  "tool_requirements": [
-    {"name": "scvi-tools", "ecosystem": "python", "identity": "scvi-tools", "required": false, "tested_versions": ["1.5.0"], "allowed_versions": [">=1.4,<1.6"], "version_source": "https://docs.scvi-tools.org/en/stable/api/index.html", "verified_at": "2026-08-01", "version_probe": ["python", "-c", "import scvi; print(scvi.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "multivi-mudata-only-contract", "affected_versions": [">=1.4,<1.6"], "category": "api", "description": "MultiVI uses setup_mudata and no longer supports setup_anndata as of scvi-tools 1.4.", "compatibility_effect": "requires-parser", "required_action": "Use MuData with explicit modality mappings and validate the union cell axis and modality-presence rows.", "source": "https://docs.scvi-tools.org/en/stable/api/reference/scvi.model.MULTIVI.html"}, {"id": "multivi-150-anndata-mudata-serialization", "affected_versions": [">=1.4,<1.6"], "category": "api", "description": "The validated scvi-tools 1.5.0 serialization stack uses anndata 0.12.7 with mudata 0.3.8; unconstrained anndata 0.13 changes layer-container serialization used by this MuData release.", "compatibility_effect": "requires-parser", "required_action": "Resolve anndata 0.12.7 and mudata 0.3.8 together, then reload both the saved MuData and the native MultiVI model before accepting results.", "source": "https://docs.scvi-tools.org/en/stable/api/reference/scvi.model.MULTIVI.html"}], "platforms": ["any"]},
-    {"name": "scglue", "ecosystem": "python", "identity": "scglue", "required": false, "tested_versions": ["0.4.1"], "allowed_versions": [">=0.4,<0.5"], "version_source": "https://scglue.readthedocs.io/en/latest/", "verified_at": "2026-07-31", "version_probe": ["python", "-c", "import scglue; print(scglue.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [], "platforms": ["any"]}
-  ],
-  "dependencies": [
-    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": false, "tested_versions": ["3.11", "3.12"], "allowed_versions": [">=3.10,<3.13"], "version_source": "https://www.python.org/", "verified_at": "2026-07-31", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Run method-isolated multimodal integration adapters.", "conflicts": [], "platforms": ["any"]}
   ],
   "compatibility_matrix": [
-    {"id": "scvi15-scglue041-mosaic-v1", "module_version": "1.0.0", "tool_versions": {"scvi-tools": [">=1.4,<1.6"], "scglue": [">=0.4,<0.5"]}, "dependency_versions": {"python": [">=3.10,<3.13"]}, "input_formats": {"multimodal_counts": ["h5ad@0.1.0", "h5mu@0.1.0", "graphml@1"]}, "output_formats": {"mosaic_integration_evidence": ["h5ad@0.1.0", "h5mu@0.1.0", "tab-separated-values@1", "inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["single-cell-mosaic-integration-regression-v1"], "end_to_end_evidence_ids": ["single-cell-mosaic-integration-adapter-v1", "pbmc-multiome-multivi-150-public-e2e-v1"], "verified_at": "2026-08-01"}
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.10,<3.13"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "single-cell-mosaic-integration-adapter-v1",
+        "pbmc-multiome-multivi-150-public-e2e-v1"
+      ],
+      "id": "scvi15-scglue041-mosaic-v1",
+      "input_formats": {
+        "multimodal_counts": [
+          "h5ad@0.1.0",
+          "h5mu@0.1.0",
+          "graphml@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "mosaic_integration_evidence": [
+          "h5ad@0.1.0",
+          "h5mu@0.1.0",
+          "tab-separated-values@1",
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "single-cell-mosaic-integration-regression-v1"
+      ],
+      "tool_versions": {
+        "scglue": [
+          ">=0.4,<0.5"
+        ],
+        "scvi-tools": [
+          ">=1.4,<1.6"
+        ]
+      },
+      "verified_at": "2026-08-01"
+    }
   ],
-  "access": "agent_generated",
-  "mutability": "read_only",
+  "complements": [
+    "single-cell-integration-benchmark",
+    "single-cell-reference-mapping",
+    "single-cell-atac-regulatory"
+  ],
   "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.10,<3.13"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run method-isolated multimodal integration adapters.",
+      "required": false,
+      "tested_versions": [
+        "3.11",
+        "3.12"
+      ],
+      "verified_at": "2026-07-31",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/"
+    }
+  ],
+  "description": "Integrate count-backed RNA+protein with totalVI, paired or mosaic RNA+ATAC with MultiVI, and graph-linked paired or unpaired RNA+ATAC with GLUE; retain missing-modality semantics, native models, joint embeddings and method-specific validation.",
+  "domains": [
+    "omics",
+    "statistics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "evidence_effects": [
+    "adds-totalvi-multivi-glue-and-mosaic-integration-evidence"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "single-cell-mosaic-integration",
+  "input_artifacts": [
+    {
+      "artifact_type": "single_cell_multimodal_count_evidence",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad",
+          "orientations": [
+            "cell-by-rna-with-protein-obsm",
+            "cell-by-feature-per-modality"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [
+            "cell-id",
+            "feature-id"
+          ],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-in-project"
+          ],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5mu",
+          "orientations": [
+            "union-cell-by-modality-feature"
+          ],
+          "representations": [
+            "container",
+            "sparse"
+          ],
+          "required_indexes": [
+            "union-cell-id",
+            "modality-feature-id"
+          ],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "declared-guidance-release"
+          ],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "graphml",
+          "orientations": [
+            "regulatory-guidance-graph"
+          ],
+          "representations": [
+            "structured",
+            "text"
+          ],
+          "required_indexes": [
+            "feature-id"
+          ],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "multimodal_counts",
+      "processing_levels": [
+        "quality-controlled",
+        "sample-annotated",
+        "raw-count-preserved",
+        "missingness-declared"
+      ],
+      "required_metadata": [
+        "sample-or-donor-key",
+        "batch-key",
+        "modality-presence",
+        "feature-namespace",
+        "raw-count-location",
+        "source-sha256"
+      ],
+      "source_policy": "project_or_upstream"
+    }
+  ],
   "input_schema": {
-    "type": "object",
     "additionalProperties": false,
     "properties": {
-      "objective": {"type": "string", "minLength": 12},
-      "method": {"type": "string", "enum": ["totalvi", "multivi", "scglue"]},
-      "multimodal_artifact_id": {"type": "string", "minLength": 1},
-      "guidance_graph_artifact_id": {"type": "string"},
-      "batch_key": {"type": "string", "minLength": 1},
-      "sample_key": {"type": "string", "minLength": 1},
-      "seed": {"type": "integer"}
+      "batch_key": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "guidance_graph_artifact_id": {
+        "type": "string"
+      },
+      "method": {
+        "enum": [
+          "totalvi",
+          "multivi",
+          "scglue"
+        ],
+        "type": "string"
+      },
+      "multimodal_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "sample_key": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "seed": {
+        "type": "integer"
+      }
     },
-    "required": ["objective", "method", "multimodal_artifact_id", "batch_key", "sample_key", "seed"]
+    "required": [
+      "objective",
+      "method",
+      "multimodal_artifact_id",
+      "batch_key",
+      "sample_key",
+      "seed"
+    ],
+    "type": "object"
   },
-  "output_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {"handoff_type": {"type": "string"}, "module": {"type": "object"}, "request_digest": {"type": "string"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}},
-    "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]
-  },
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["https://docs.scvi-tools.org/en/latest/user_guide/models/totalvi.html", "https://docs.scvi-tools.org/en/stable/api/reference/scvi.model.MULTIVI.html", "https://docs.scvi-tools.org/en/latest/tutorials/notebooks/multimodal/MultiVI_tutorial.html", "https://www.nature.com/articles/s41587-022-01284-4", "https://scglue.readthedocs.io/en/latest/"]},
-  "code_templates": [
-    {"path": "templates/run_scvi_mosaic.py", "language": "python", "purpose": "Run totalVI for RNA+protein or MultiVI for paired/mosaic RNA+ATAC while retaining union cells and missing-modality semantics.", "quality_gate_ids": ["multimodal-count-identity-missingness", "method-specific-feature-and-prior-contract", "mosaic-benchmark-and-inference-boundary"], "requires_adaptation": false},
-    {"path": "templates/run_scglue.py", "language": "python", "purpose": "Run graph-linked paired or unpaired RNA+ATAC integration with a versioned, feature-matched guidance graph.", "quality_gate_ids": ["multimodal-count-identity-missingness", "method-specific-feature-and-prior-contract", "mosaic-benchmark-and-inference-boundary"], "requires_adaptation": false},
-    {"path": "templates/evaluate_mosaic.py", "language": "python", "purpose": "Evaluate modality and batch mixing together with biological preservation, cross-modality transfer and paired-anchor FOSCTTM.", "quality_gate_ids": ["multimodal-count-identity-missingness", "mosaic-benchmark-and-inference-boundary"], "requires_adaptation": false}
+  "intents": [
+    "totalVI",
+    "MultiVI",
+    "GLUE",
+    "mosaic integration",
+    "paired multiomics",
+    "unpaired multiomics",
+    "CITE-seq integration",
+    "RNA ATAC integration",
+    "\u591a\u7ec4\u5b66\u6574\u5408",
+    "\u9576\u5d4c\u6574\u5408"
   ],
-  "agent_protocol": {
-    "schema_version": 1,
-    "mode": "packaged_parameterized_workflow",
-    "languages": ["python", "notebook"],
-    "template_sections": [
-      {"id": "inspect-mosaic-design", "purpose": "Freeze cell identity, modality presence, feature universes and model scope.", "required_logic": ["Inspect raw counts, union cells, paired anchors, RNA genes, protein panels, ATAC peak universes, batches, samples and source digests.", "Use totalVI only for RNA+protein, MultiVI only for RNA+ATAC with paired anchors, and GLUE only with a reviewed feature guidance graph."], "output_artifact_types": ["single_cell_mosaic_integration_evidence"], "template_files": ["templates/run_scvi_mosaic.py", "templates/run_scglue.py"]},
-      {"id": "fit-native-model", "purpose": "Fit the declared backend without converting missing modalities into observations.", "required_logic": ["Preserve raw counts and source cell order.", "Retain native models, joint embeddings, modality-presence accounting, parameters and versions.", "For MultiVI use a shared peak universe; for GLUE retain graph nodes, edges and release."], "output_artifact_types": ["single_cell_mosaic_integration_evidence"], "template_files": ["templates/run_scvi_mosaic.py", "templates/run_scglue.py"]},
-      {"id": "benchmark-and-admit", "purpose": "Admit integration only when mixing and biological preservation are jointly acceptable.", "required_logic": ["Review modality and batch ASW within biology, label ASW, cross-modality transfer, paired-anchor FOSCTTM, rare states and donor reproducibility.", "Evaluate imputation only by hiding observed measurements before fitting.", "Return differential inference to raw counts and biological-sample replication."], "output_artifact_types": ["single_cell_mosaic_integration_evidence"], "template_files": ["templates/evaluate_mosaic.py"]}
-    ],
-    "parameter_rules": [
-      {"id": "mosaic-method", "parameter": "totalvi-multivi-scglue", "decision_inputs": ["modalities", "paired anchors", "missingness pattern", "shared peak universe", "guidance graph", "GPU"], "selection_rule": "Use totalVI for CITE-seq RNA+protein, MultiVI for paired/mosaic RNA+ATAC, and GLUE for graph-linked paired or unpaired modalities.", "validation_rule": "Block a method whose required modality, anchors, feature universe or prior graph is absent."},
-      {"id": "mosaic-evaluation", "parameter": "mixing-preservation-anchor-reconstruction", "decision_inputs": ["labels", "batches", "modalities", "paired IDs", "held-out measurements"], "selection_rule": "Evaluate mixing and biology separately and retain all metric families rather than constructing one winner score.", "validation_rule": "Require paired-anchor and held-out reconstruction evidence when those claims are made."}
-    ],
-    "preflight_checks": ["Inspect actual H5AD/H5MU axes, raw counts, cell identities, modality masks, paired anchors, feature namespaces, batch/sample metadata, guidance graph and isolated runtime."],
-    "postflight_checks": ["Reload native models, H5AD/H5MU, latent tables and reports; reconcile cells, modalities, features, missingness, parameters, versions and digests."],
-    "provenance_fields": ["module-id", "module-version", "input-digests", "method-version", "cell-identity-policy", "modality-presence", "paired-anchors", "feature-universes", "guidance-graph-release", "parameters", "seed", "output-digests", "quality-gates"],
-    "forbidden_actions": ["Do not install into or mutate the host environment, silently intersect or reorder cells, fabricate missing modalities, infer unmeasured features without held-out validation, use desired labels to tune integration, or use latent/imputed values for confirmatory differential inference."],
-    "requires_observed_execution": true
-  },
-  "routing": {
-    "method_aliases": [
-      "single-cell-mosaic-integration",
-      "Single-cell paired, unpaired and mosaic multi-omics integration",
-      "totalVI",
-      "MultiVI",
-      "GLUE",
-      "mosaic integration",
-      "paired multiomics",
-      "unpaired multiomics",
-      "CITE-seq integration",
-      "RNA ATAC integration",
-      "多组学整合",
-      "镶嵌整合"
-    ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
-  },
-  "orchestration": {
-    "scientific_stage": 3,
-    "requires_reviewed_upstream_types": []
-  },
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "A joint latent space does not prove cell identity, regulatory linkage or modality reconstruction accuracy. totalVI does not replace protein-panel QC. MultiVI needs a shared ATAC peak universe and paired anchors. GLUE results depend on the declared guidance graph. Missing modalities remain modelled missing values rather than observations."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
   "observed_output_contracts": [
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -213,6 +491,35 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "multimodal-count-identity-missingness",
+          "metric_key": "multimodal-count-identity-missingness",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "method-specific-feature-and-prior-contract",
+          "metric_key": "method-specific-feature-and-prior-contract",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "mosaic-benchmark-and-inference-boundary",
+          "metric_key": "mosaic-benchmark-and-inference-boundary",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -223,6 +530,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -266,12 +581,337 @@
         }
       ],
       "port": "mosaic_integration_evidence",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "multimodal-count-identity-missingness",
         "method-specific-feature-and-prior-contract",
         "mosaic-benchmark-and-inference-boundary"
-      ]
+      ],
+      "semantic_profile": "single-cell-mosaic-integration-mosaic-integration-evidence-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
     }
-  ]
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 3
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "single_cell_mosaic_integration_evidence",
+      "formats": [
+        {
+          "annotation_releases": [
+            "inherited-from-input"
+          ],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5ad",
+          "orientations": [
+            "cell-by-feature-with-joint-latent"
+          ],
+          "representations": [
+            "container"
+          ],
+          "required_indexes": [
+            "cell-id"
+          ],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [
+            "inherited-from-input"
+          ],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "h5mu",
+          "orientations": [
+            "union-cell-by-multimodal-feature-with-joint-latent"
+          ],
+          "representations": [
+            "container"
+          ],
+          "required_indexes": [
+            "union-cell-id"
+          ],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "cell-by-latent-dimension"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [
+            "cell-id"
+          ],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "parameters-provenance-diagnostics"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "mosaic_integration_evidence",
+      "processing_levels": [
+        "model-native",
+        "missingness-preserved",
+        "benchmark-reviewed",
+        "reloaded"
+      ],
+      "required_metadata": [
+        "method-and-version",
+        "input-digests",
+        "modality-design",
+        "parameters",
+        "seed",
+        "latent-semantics",
+        "quality-gates"
+      ],
+      "source_policy": "upstream_required"
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Raw counts, cell identity, paired anchors, feature universes, modality presence, batch/sample structure and any GLUE guidance graph are explicit before fitting."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://docs.scvi-tools.org/en/latest/user_guide/models/totalvi.html",
+      "https://docs.scvi-tools.org/en/stable/api/reference/scvi.model.MULTIVI.html",
+      "https://docs.scvi-tools.org/en/latest/tutorials/notebooks/multimodal/MultiVI_tutorial.html",
+      "https://www.nature.com/articles/s41587-022-01284-4",
+      "https://scglue.readthedocs.io/en/latest/"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require immutable nonnegative integer counts, unique union cell identities, explicit modality-presence masks, paired-anchor accounting and unchanged cells after reload.",
+      "id": "multimodal-count-identity-missingness",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require RNA+protein for totalVI, a shared peak universe and paired anchors for MultiVI, and a versioned feature-matched guidance graph for GLUE.",
+      "id": "method-specific-feature-and-prior-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Evaluate modality/batch mixing together with biological preservation, paired-anchor FOSCTTM and held-out modality reconstruction; forbid integrated, imputed or latent values as confirmatory differential-inference responses.",
+      "id": "mosaic-benchmark-and-inference-boundary",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Which joint representation preserves biological state while handling the declared paired, unpaired or mosaic modality design without fabricating missing measurements?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "single-cell-mosaic-integration",
+      "Single-cell paired, unpaired and mosaic multi-omics integration",
+      "totalVI",
+      "MultiVI",
+      "GLUE",
+      "mosaic integration",
+      "paired multiomics",
+      "unpaired multiomics",
+      "CITE-seq integration",
+      "RNA ATAC integration",
+      "\u591a\u7ec4\u5b66\u6574\u5408",
+      "\u9576\u5d4c\u6574\u5408"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Single-cell paired, unpaired and mosaic multi-omics integration",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.4,<1.6"
+      ],
+      "ecosystem": "python",
+      "identity": "scvi-tools",
+      "mismatch_policy": "block",
+      "name": "scvi-tools",
+      "platforms": [
+        "any"
+      ],
+      "required": false,
+      "tested_versions": [
+        "1.5.0"
+      ],
+      "verified_at": "2026-08-01",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.4,<1.6"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "MultiVI uses setup_mudata and no longer supports setup_anndata as of scvi-tools 1.4.",
+          "id": "multivi-mudata-only-contract",
+          "required_action": "Use MuData with explicit modality mappings and validate the union cell axis and modality-presence rows.",
+          "source": "https://docs.scvi-tools.org/en/stable/api/reference/scvi.model.MULTIVI.html"
+        },
+        {
+          "affected_versions": [
+            ">=1.4,<1.6"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "The validated scvi-tools 1.5.0 serialization stack uses anndata 0.12.7 with mudata 0.3.8; unconstrained anndata 0.13 changes layer-container serialization used by this MuData release.",
+          "id": "multivi-150-anndata-mudata-serialization",
+          "required_action": "Resolve anndata 0.12.7 and mudata 0.3.8 together, then reload both the saved MuData and the native MultiVI model before accepting results.",
+          "source": "https://docs.scvi-tools.org/en/stable/api/reference/scvi.model.MULTIVI.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python",
+        "-c",
+        "import scvi; print(scvi.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://docs.scvi-tools.org/en/stable/api/index.html"
+    },
+    {
+      "allowed_versions": [
+        ">=0.4,<0.5"
+      ],
+      "ecosystem": "python",
+      "identity": "scglue",
+      "mismatch_policy": "block",
+      "name": "scglue",
+      "platforms": [
+        "any"
+      ],
+      "required": false,
+      "tested_versions": [
+        "0.4.1"
+      ],
+      "verified_at": "2026-07-31",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python",
+        "-c",
+        "import scglue; print(scglue.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scglue.readthedocs.io/en/latest/"
+    }
+  ],
+  "version": "1.0.0"
 }

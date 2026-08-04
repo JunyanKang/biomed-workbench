@@ -396,7 +396,7 @@ class ResearchController:
                 if self._policy.require_evidence_map_for_publication
                 and self._registry.get(node.module_id).module_type == "delivery"
                 and "publication" in self._registry.get(node.module_id).domains
-                and not validated_delivery_publication_is_current(state)
+                and not validated_delivery_publication_is_current(state, node.id)
             }
             pending = tuple(
                 node for node in dependency_ready
@@ -407,10 +407,10 @@ class ResearchController:
                 statuses = {node.status for node in active.nodes}
                 if statuses == {"completed"}:
                     stop_reason = "plan_completed"
-                elif dependency_ready and self._policy.require_approved_admission:
-                    stop_reason = "awaiting_analysis_admission"
                 elif publication_blocked:
                     stop_reason = "awaiting_evidence_map"
+                elif dependency_ready and self._policy.require_approved_admission:
+                    stop_reason = "awaiting_analysis_admission"
                 elif "awaiting_review" in statuses and self._policy.require_scientific_review:
                     stop_reason = "awaiting_artifact_review"
                 elif "awaiting_observed_execution" in statuses or "prepared" in statuses:

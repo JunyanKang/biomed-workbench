@@ -748,6 +748,890 @@
   "maturity": "validated",
   "module_type": "analysis",
   "mutability": "read_only",
+  "observed_output_contracts": [
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "pseudobulk_count_matrix"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "count-matrix"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "raw-counts",
+              "aggregated"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-raw-count-and-axis-identity",
+          "metric_key": "pseudobulk-raw-count-and-axis-identity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-experimental-unit-semantics",
+          "metric_key": "pseudobulk-experimental-unit-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-count-conservation-and-eligibility",
+          "metric_key": "pseudobulk-count-conservation-and-eligibility",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-design-estimability",
+          "metric_key": "donor-design-estimability",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-model-and-filter-validity",
+          "metric_key": "donor-model-and-filter-validity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-sample-diagnostics",
+          "metric_key": "donor-sample-diagnostics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-engine-sensitivity",
+          "metric_key": "donor-engine-sensitivity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-result-reload-and-claim-scope",
+          "metric_key": "donor-result-reload-and-claim-scope",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "text/tab-separated-values"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "text/tab-separated-values"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "pseudobulk_counts",
+      "required_postflight_gate_ids": [
+        "pseudobulk-raw-count-and-axis-identity",
+        "pseudobulk-experimental-unit-semantics",
+        "pseudobulk-count-conservation-and-eligibility",
+        "donor-design-estimability",
+        "donor-model-and-filter-validity",
+        "donor-sample-diagnostics",
+        "donor-engine-sensitivity",
+        "donor-result-reload-and-claim-scope"
+      ],
+      "semantic_profile": "single-cell-donor-inference-pseudobulk-counts-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    },
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "pseudobulk_sample_manifest"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "tabular"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "derived"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-raw-count-and-axis-identity",
+          "metric_key": "pseudobulk-raw-count-and-axis-identity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-experimental-unit-semantics",
+          "metric_key": "pseudobulk-experimental-unit-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-count-conservation-and-eligibility",
+          "metric_key": "pseudobulk-count-conservation-and-eligibility",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-design-estimability",
+          "metric_key": "donor-design-estimability",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-model-and-filter-validity",
+          "metric_key": "donor-model-and-filter-validity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-sample-diagnostics",
+          "metric_key": "donor-sample-diagnostics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-engine-sensitivity",
+          "metric_key": "donor-engine-sensitivity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-result-reload-and-claim-scope",
+          "metric_key": "donor-result-reload-and-claim-scope",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "text/tab-separated-values"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "text/tab-separated-values"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "pseudobulk_metadata",
+      "required_postflight_gate_ids": [
+        "pseudobulk-raw-count-and-axis-identity",
+        "pseudobulk-experimental-unit-semantics",
+        "pseudobulk-count-conservation-and-eligibility",
+        "donor-design-estimability",
+        "donor-model-and-filter-validity",
+        "donor-sample-diagnostics",
+        "donor-engine-sensitivity",
+        "donor-result-reload-and-claim-scope"
+      ],
+      "semantic_profile": "single-cell-donor-inference-pseudobulk-metadata-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    },
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "donor_aware_differential_result"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "tabular"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "derived",
+              "statistically-tested"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-raw-count-and-axis-identity",
+          "metric_key": "pseudobulk-raw-count-and-axis-identity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-experimental-unit-semantics",
+          "metric_key": "pseudobulk-experimental-unit-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-count-conservation-and-eligibility",
+          "metric_key": "pseudobulk-count-conservation-and-eligibility",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-design-estimability",
+          "metric_key": "donor-design-estimability",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-model-and-filter-validity",
+          "metric_key": "donor-model-and-filter-validity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-sample-diagnostics",
+          "metric_key": "donor-sample-diagnostics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-engine-sensitivity",
+          "metric_key": "donor-engine-sensitivity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-result-reload-and-claim-scope",
+          "metric_key": "donor-result-reload-and-claim-scope",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "text/tab-separated-values"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "text/tab-separated-values"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "differential_results",
+      "required_postflight_gate_ids": [
+        "pseudobulk-raw-count-and-axis-identity",
+        "pseudobulk-experimental-unit-semantics",
+        "pseudobulk-count-conservation-and-eligibility",
+        "donor-design-estimability",
+        "donor-model-and-filter-validity",
+        "donor-sample-diagnostics",
+        "donor-engine-sensitivity",
+        "donor-result-reload-and-claim-scope"
+      ],
+      "semantic_profile": "single-cell-donor-inference-differential-results-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    },
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "donor_aware_inference_report"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "inline-json"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "derived"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-raw-count-and-axis-identity",
+          "metric_key": "pseudobulk-raw-count-and-axis-identity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-experimental-unit-semantics",
+          "metric_key": "pseudobulk-experimental-unit-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "pseudobulk-count-conservation-and-eligibility",
+          "metric_key": "pseudobulk-count-conservation-and-eligibility",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-design-estimability",
+          "metric_key": "donor-design-estimability",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-model-and-filter-validity",
+          "metric_key": "donor-model-and-filter-validity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-sample-diagnostics",
+          "metric_key": "donor-sample-diagnostics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-engine-sensitivity",
+          "metric_key": "donor-engine-sensitivity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "donor-result-reload-and-claim-scope",
+          "metric_key": "donor-result-reload-and-claim-scope",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "inference_report",
+      "required_postflight_gate_ids": [
+        "pseudobulk-raw-count-and-axis-identity",
+        "pseudobulk-experimental-unit-semantics",
+        "pseudobulk-count-conservation-and-eligibility",
+        "donor-design-estimability",
+        "donor-model-and-filter-validity",
+        "donor-sample-diagnostics",
+        "donor-engine-sensitivity",
+        "donor-result-reload-and-claim-scope"
+      ],
+      "semantic_profile": "single-cell-donor-inference-inference-report-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 5
+  },
   "output_artifacts": [
     {
       "artifact_type": "pseudobulk_count_matrix",
@@ -1068,6 +1952,21 @@
   "questions": [
     "Which condition-associated expression changes are reproducible within declared cell types when biological samples, pairing, covariates, count uncertainty, model estimability, and multiple testing are handled without treating cells as independent replicates?"
   ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "single-cell-donor-inference",
+      "Generate and validate donor-aware single-cell pseudobulk inference",
+      "donor-aware",
+      "pseudobulk",
+      "donor-aware single-cell pseudobulk differential expression",
+      "single-cell biological replicate inference with edgeR DESeq2 or limma",
+      "pseudobulk mixed paired design by cell type",
+      "\u5355\u7ec6\u80de\u4f9b\u4f53\u611f\u77e5pseudobulk\u5dee\u5f02\u5206\u6790"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
   "schema_version": 1,
   "title": "Generate and validate donor-aware single-cell pseudobulk inference",
   "tool_requirements": [
@@ -1229,564 +2128,5 @@
       "version_source": "https://bioconductor.org/packages/3.18/bioc/html/limma.html"
     }
   ],
-  "version": "1.0.0",
-  "routing": {
-    "method_aliases": [
-      "single-cell-donor-inference",
-      "Generate and validate donor-aware single-cell pseudobulk inference",
-      "donor-aware",
-      "pseudobulk",
-      "donor-aware single-cell pseudobulk differential expression",
-      "single-cell biological replicate inference with edgeR DESeq2 or limma",
-      "pseudobulk mixed paired design by cell type",
-      "单细胞供体感知pseudobulk差异分析"
-    ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
-  },
-  "orchestration": {
-    "scientific_stage": 5,
-    "requires_reviewed_upstream_types": []
-  },
-  "observed_output_contracts": [
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "pseudobulk_count_matrix"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "count-matrix"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "raw-counts",
-              "aggregated"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "text/tab-separated-values"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "text/tab-separated-values"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "pseudobulk_counts",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "pseudobulk-raw-count-and-axis-identity",
-        "pseudobulk-experimental-unit-semantics",
-        "pseudobulk-count-conservation-and-eligibility",
-        "donor-design-estimability",
-        "donor-model-and-filter-validity",
-        "donor-sample-diagnostics",
-        "donor-engine-sensitivity",
-        "donor-result-reload-and-claim-scope"
-      ]
-    },
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "pseudobulk_sample_manifest"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "tabular"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "derived"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "text/tab-separated-values"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "text/tab-separated-values"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "pseudobulk_metadata",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "pseudobulk-raw-count-and-axis-identity",
-        "pseudobulk-experimental-unit-semantics",
-        "pseudobulk-count-conservation-and-eligibility",
-        "donor-design-estimability",
-        "donor-model-and-filter-validity",
-        "donor-sample-diagnostics",
-        "donor-engine-sensitivity",
-        "donor-result-reload-and-claim-scope"
-      ]
-    },
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "donor_aware_differential_result"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "tabular"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "derived",
-              "statistically-tested"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "text/tab-separated-values"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "text/tab-separated-values"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "differential_results",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "pseudobulk-raw-count-and-axis-identity",
-        "pseudobulk-experimental-unit-semantics",
-        "pseudobulk-count-conservation-and-eligibility",
-        "donor-design-estimability",
-        "donor-model-and-filter-validity",
-        "donor-sample-diagnostics",
-        "donor-engine-sensitivity",
-        "donor-result-reload-and-claim-scope"
-      ]
-    },
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "donor_aware_inference_report"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "inline-json"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "derived"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "inference_report",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "pseudobulk-raw-count-and-axis-identity",
-        "pseudobulk-experimental-unit-semantics",
-        "pseudobulk-count-conservation-and-eligibility",
-        "donor-design-estimability",
-        "donor-model-and-filter-validity",
-        "donor-sample-diagnostics",
-        "donor-engine-sensitivity",
-        "donor-result-reload-and-claim-scope"
-      ]
-    }
-  ]
+  "version": "1.0.0"
 }

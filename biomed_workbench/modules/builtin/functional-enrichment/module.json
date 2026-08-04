@@ -1,92 +1,528 @@
 {
-  "schema_version": 1,
-  "id": "functional-enrichment",
-  "version": "1.0.0",
-  "title": "Run GO/KEGG ORA or preranked GSEA",
-  "description": "Execute explicitly separated GO/KEGG over-representation analysis or preranked GSEA with clusterProfiler and fgsea semantics, declared organism and identifier namespace, explicit ORA universe or complete ranking, versioned resources, standardized figures, empty-result preservation, and output reload.",
-  "module_type": "analysis",
-  "domains": ["omics", "functional-genomics"],
-  "intents": ["GO enrichment", "KEGG enrichment", "GSEA", "fgsea", "clusterProfiler", "GO KEGG 富集分析", "预排序 GSEA"],
-  "questions": ["Which declared GO or KEGG terms are over-represented in a selected list, or enriched along a complete ranked vector, under the explicit resource and multiplicity contract?"],
-  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "maturity": "validated",
-  "input_artifacts": [
-    {"name": "gene_evidence", "artifact_type": "gene_list_or_ranking", "processing_levels": ["declared", "identifier-validated"], "required_metadata": ["source-sha256", "analysis-mode", "organism", "identifier-namespace", "ranking-statistic-or-selection-rule"], "formats": [{"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["gene-list", "gene-by-ranked-statistic"]}]},
-    {"name": "tested_universe", "artifact_type": "measured_gene_universe", "source_policy": "project_or_upstream", "processing_levels": ["tested", "identifier-validated"], "required_metadata": ["source-sha256", "selection-origin"], "formats": [{"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["gene-list"]}]}
-  ],
-  "output_artifacts": [{"name": "functional_enrichment_evidence", "artifact_type": "functional_enrichment_evidence", "processing_levels": ["tested", "multiplicity-adjusted", "reloaded"], "required_metadata": ["module-version", "generated-code-sha256", "mode", "organism", "identifier-namespace", "database-and-release", "parameters", "actual-tool-versions", "quality-gates"], "formats": [
-    {"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["term-by-enrichment-statistic"]},
-    {"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["method-quality-summary"]},
-    {"name": "pdf", "versions": ["1.7"], "representations": ["binary"], "compression": ["internal"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["publication-figure"]},
-    {"name": "svg", "versions": ["1.1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["publication-figure"]}
-  ]}],
-  "preconditions": ["Analysis mode, organism, identifier namespace, database source/release, size limits and multiplicity policy are declared; ORA has a measured/tested universe and GSEA has a complete finite unique ranking."],
-  "assumptions": ["Identifiers are biological features appropriate to the declared organism and resource; the ranking direction and statistic have a stable scientific interpretation."],
-  "quality_gates": [
-    {"id": "enrichment-input-semantics", "severity": "fatal", "description": "Block ORA without a selected list contained in an explicit tested universe and block GSEA without a complete finite uniquely named ranking, declared direction and deterministic tie policy.", "blocks_interpretation": true},
-    {"id": "enrichment-resource-provenance", "severity": "fatal", "description": "Require organism, source and target identifier namespaces, OrgDb or KEGG source and release, conversion losses, gene-set size limits, adjustment method, seed and exact package versions.", "blocks_interpretation": true},
-    {"id": "enrichment-output-claim", "severity": "major", "description": "Preserve empty results and separate ORA from GSEA; do not convert term association into pathway activation, direction, direct regulation, or causality without supporting evidence.", "blocks_interpretation": true}
-  ],
-  "limitations": ["GO/KEGG results depend on identifier mapping, tested universe or ranking, database version and gene-set correlation. Empty results are retained rather than rescued by post hoc thresholds."],
-  "evidence_effects": ["adds-versioned-functional-association-evidence"],
-  "alternatives": ["enrichment-analysis"],
-  "complements": ["proteomics-deqms", "wgcna-coexpression", "figure-specification"],
-  "tool_requirements": [
-    {"name": "clusterProfiler", "ecosystem": "r", "identity": "clusterProfiler", "required": true, "tested_versions": ["4.10.1"], "allowed_versions": [">=4.10,<4.11"], "version_source": "https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('clusterProfiler')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "clusterprofiler-ora-gsea-api", "affected_versions": [">=4.10,<4.11"], "category": "api", "description": "GO and KEGG ORA/GSEA arguments and returned enrichment objects are version-coupled.", "compatibility_effect": "requires-parameter", "required_action": "Record the exact mode, organism, namespace, resource, size thresholds, adjustment and seed, then reload returned fields.", "source": "https://bioconductor.org/packages/release/bioc/manuals/clusterProfiler/man/clusterProfiler.pdf"}], "platforms": ["any"]},
-    {"name": "fgsea", "ecosystem": "r", "identity": "fgsea", "required": true, "tested_versions": ["1.28.0"], "allowed_versions": [">=1.28,<1.29"], "version_source": "https://bioconductor.org/packages/release/bioc/html/fgsea.html", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('fgsea')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "fgsea-multilevel-semantics", "affected_versions": [">=1.28,<1.29"], "category": "behavior", "description": "Multilevel precision, pathway size, score type and leading-edge output depend on declared arguments and package version.", "compatibility_effect": "requires-parameter", "required_action": "Retain the complete ranking, size limits, exponent, epsilon, seed, score direction and leading edge.", "source": "https://bioconductor.org/packages/release/bioc/manuals/fgsea/man/fgsea.pdf"}], "platforms": ["any"]}
-  ],
-  "dependencies": [
-    {"name": "r", "ecosystem": "runtime", "identity": "r-runtime", "required": true, "tested_versions": ["4.3.2"], "allowed_versions": [">=4.3,<4.4"], "version_source": "https://cran.r-project.org/", "verified_at": "2026-07-30", "version_probe": ["Rscript", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute the verified enrichment R template.", "conflicts": [], "platforms": ["any"]},
-    {"name": "enrichplot", "ecosystem": "r", "identity": "enrichplot", "required": true, "tested_versions": ["1.22.0"], "allowed_versions": [">=1.22,<1.23"], "version_source": "https://bioconductor.org/packages/release/bioc/html/enrichplot.html", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('enrichplot')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Render official enrichment plot families.", "conflicts": [], "platforms": ["any"]},
-    {"name": "AnnotationDbi", "ecosystem": "r", "identity": "AnnotationDbi", "required": true, "tested_versions": ["1.64.1"], "allowed_versions": [">=1.64,<1.65"], "version_source": "https://bioconductor.org/packages/release/bioc/html/AnnotationDbi.html", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('AnnotationDbi')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Bind GO identifiers to a declared organism database.", "conflicts": [], "platforms": ["any"]},
-    {"name": "ggplot2", "ecosystem": "r", "identity": "ggplot2", "required": true, "tested_versions": ["3.5.2"], "allowed_versions": [">=3.5,<3.6"], "version_source": "https://ggplot2.tidyverse.org/", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('ggplot2')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Apply the vector-first final-size figure contract.", "conflicts": [], "platforms": ["any"]},
-    {"name": "jsonlite", "ecosystem": "r", "identity": "jsonlite", "required": true, "tested_versions": ["2.0.0"], "allowed_versions": [">=2.0,<2.1"], "version_source": "https://cran.r-project.org/package=jsonlite", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('jsonlite')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Write machine-readable enrichment reports.", "conflicts": [], "platforms": ["any"]},
-    {"name": "digest", "ecosystem": "r", "identity": "digest", "required": true, "tested_versions": ["0.6.39"], "allowed_versions": [">=0.6.39,<0.7"], "version_source": "https://cran.r-project.org/package=digest", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('digest')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Bind input and output provenance digests.", "conflicts": [], "platforms": ["any"]}
-  ],
-  "compatibility_matrix": [{"id": "clusterprofiler-410-fgsea-128-r43", "module_version": "1.0.0", "tool_versions": {"clusterProfiler": [">=4.10,<4.11"], "fgsea": [">=1.28,<1.29"]}, "dependency_versions": {"r": [">=4.3,<4.4"], "enrichplot": [">=1.22,<1.23"], "AnnotationDbi": [">=1.64,<1.65"], "ggplot2": [">=3.5,<3.6"], "jsonlite": [">=2.0,<2.1"], "digest": [">=0.6.39,<0.7"]}, "input_formats": {"gene_evidence": ["tab-separated-values@1"], "tested_universe": ["tab-separated-values@1"]}, "output_formats": {"functional_enrichment_evidence": ["tab-separated-values@1", "inline-json@1", "pdf@1.7", "svg@1.1"]}, "platforms": ["any"], "regression_evidence_ids": ["functional-enrichment-regression-v1"], "end_to_end_evidence_ids": ["functional-enrichment-e2e-v1"], "verified_at": "2026-07-30"}],
   "access": "agent_generated",
-  "mutability": "read_only",
-  "credentials": [],
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {"objective": {"type": "string", "minLength": 12}, "mode": {"type": "string", "enum": ["go-ora", "kegg-ora", "go-gsea", "kegg-gsea"]}, "gene_artifact_id": {"type": "string", "minLength": 1}, "universe_artifact_id": {"type": "string", "minLength": 1}, "organism": {"type": "string", "minLength": 2}, "orgdb": {"type": "string", "minLength": 3}, "key_type": {"type": "string", "minLength": 2}, "ontology": {"type": "string", "enum": ["BP", "MF", "CC", "ALL"]}, "ranking_statistic": {"type": "string", "minLength": 3}, "tie_policy": {"type": "string", "minLength": 3}, "min_gene_set_size": {"type": "integer", "minimum": 1}, "max_gene_set_size": {"type": "integer", "minimum": 2}, "p_cutoff": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}, "seed": {"type": "integer"}}, "required": ["objective", "mode", "gene_artifact_id", "organism", "key_type", "min_gene_set_size", "max_gene_set_size", "p_cutoff", "seed"]},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"handoff_type": {"type": "string"}, "module": {"type": "object"}, "request_digest": {"type": "string"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}}, "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]},
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["https://bioconductor.org/packages/release/bioc/manuals/clusterProfiler/man/clusterProfiler.pdf", "https://bioconductor.org/packages/release/bioc/manuals/fgsea/man/fgsea.pdf", "https://github.com/YuLab-SMU/clusterProfiler", "https://github.com/alserglab/fgsea", "docs/capabilities/advanced-omics-evidence-standard.md"]},
-  "code_templates": [{"path": "templates/run_clusterprofiler_fgsea.R", "language": "r", "purpose": "Execute, plot, reload, and provenance-bind explicit GO/KEGG ORA or preranked GSEA.", "quality_gate_ids": ["enrichment-input-semantics", "enrichment-resource-provenance", "enrichment-output-claim"], "requires_adaptation": false}],
   "agent_protocol": {
-    "schema_version": 1,
-    "mode": "packaged_parameterized_workflow",
-    "languages": ["r", "notebook"],
-    "template_sections": [{"id": "validate-run-and-reload-enrichment", "purpose": "Separate ORA and GSEA input semantics, execute the declared GO or KEGG method, render official plot families, and preserve empty results.", "required_logic": ["Require selected genes plus tested universe for ORA or a complete finite unique ranked vector with direction and tie policy for GSEA.", "Record organism, identifier namespace, mapping losses, OrgDb or KEGG source, release, size limits, adjustment, seed and exact versions before execution.", "Reload all results and figures, preserve empty output, and maintain association-level claim boundaries."], "output_artifact_types": ["functional_enrichment_evidence"], "template_files": ["templates/run_clusterprofiler_fgsea.R"]}],
-    "parameter_rules": [{"id": "ora-vs-gsea-input", "parameter": "mode-universe-ranking", "decision_inputs": ["scientific question", "selection rule", "tested genes", "complete ranking", "ranking direction"], "selection_rule": "Use ORA only for a predeclared selected set with its measured universe; use GSEA only for the complete ranking and a declared statistic direction.", "validation_rule": "Block incompatible inputs, duplicate or nonfinite rankings, missing universe, post hoc threshold relaxation and significance-selected GSEA."}, {"id": "resource-and-size-policy", "parameter": "organism-namespace-resource-size", "decision_inputs": ["organism", "identifier source", "database release", "gene-set size distribution"], "selection_rule": "Declare the exact identifier namespace, resource/release and gene-set size limits before inspecting enriched terms.", "validation_rule": "Report mapping losses and all parameters and keep GO, KEGG, ORA and GSEA results distinct."}],
-    "preflight_checks": ["Detect exact R, clusterProfiler, fgsea, enrichplot, AnnotationDbi, ggplot2, jsonlite, digest and selected OrgDb versions.", "Inspect actual list, universe or ranking and freeze database, mapping, size, p-adjustment and seed parameters."],
-    "postflight_checks": ["Reload complete term tables and PDF/SVG figures, validate bounds and ordering, retain empty results and block causal language."],
-    "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-digests", "mode", "organism", "identifier-namespace", "database-and-release", "mapping-losses", "ranking-statistic-or-selection-rule", "parameters", "actual-tool-versions", "plot-standard-version", "output-digests", "quality-gates"],
-    "forbidden_actions": ["Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.", "Do not invent a background, run GSEA on significance-filtered genes, silently deduplicate rankings, switch databases, relax thresholds after seeing results, fill empty results, or claim pathway activation or causality from enrichment alone."],
-    "requires_observed_execution": true
-  },
-  "routing": {
-    "method_aliases": [
-      "functional-enrichment",
-      "Run GO/KEGG ORA or preranked GSEA",
-      "GO enrichment",
-      "KEGG enrichment",
-      "GSEA",
-      "fgsea",
-      "clusterProfiler",
-      "GO KEGG 富集分析",
-      "预排序 GSEA"
+    "forbidden_actions": [
+      "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
+      "Do not invent a background, run GSEA on significance-filtered genes, silently deduplicate rankings, switch databases, relax thresholds after seeing results, fill empty results, or claim pathway activation or causality from enrichment alone."
     ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
+    "languages": [
+      "r",
+      "notebook"
+    ],
+    "mode": "packaged_parameterized_workflow",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "scientific question",
+          "selection rule",
+          "tested genes",
+          "complete ranking",
+          "ranking direction"
+        ],
+        "id": "ora-vs-gsea-input",
+        "parameter": "mode-universe-ranking",
+        "selection_rule": "Use ORA only for a predeclared selected set with its measured universe; use GSEA only for the complete ranking and a declared statistic direction.",
+        "validation_rule": "Block incompatible inputs, duplicate or nonfinite rankings, missing universe, post hoc threshold relaxation and significance-selected GSEA."
+      },
+      {
+        "decision_inputs": [
+          "organism",
+          "identifier source",
+          "database release",
+          "gene-set size distribution"
+        ],
+        "id": "resource-and-size-policy",
+        "parameter": "organism-namespace-resource-size",
+        "selection_rule": "Declare the exact identifier namespace, resource/release and gene-set size limits before inspecting enriched terms.",
+        "validation_rule": "Report mapping losses and all parameters and keep GO, KEGG, ORA and GSEA results distinct."
+      }
+    ],
+    "postflight_checks": [
+      "Reload complete term tables and PDF/SVG figures, validate bounds and ordering, retain empty results and block causal language."
+    ],
+    "preflight_checks": [
+      "Detect exact R, clusterProfiler, fgsea, enrichplot, AnnotationDbi, ggplot2, jsonlite, digest and selected OrgDb versions.",
+      "Inspect actual list, universe or ranking and freeze database, mapping, size, p-adjustment and seed parameters."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "input-digests",
+      "mode",
+      "organism",
+      "identifier-namespace",
+      "database-and-release",
+      "mapping-losses",
+      "ranking-statistic-or-selection-rule",
+      "parameters",
+      "actual-tool-versions",
+      "plot-standard-version",
+      "output-digests",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "validate-run-and-reload-enrichment",
+        "output_artifact_types": [
+          "functional_enrichment_evidence"
+        ],
+        "purpose": "Separate ORA and GSEA input semantics, execute the declared GO or KEGG method, render official plot families, and preserve empty results.",
+        "required_logic": [
+          "Require selected genes plus tested universe for ORA or a complete finite unique ranked vector with direction and tie policy for GSEA.",
+          "Record organism, identifier namespace, mapping losses, OrgDb or KEGG source, release, size limits, adjustment, seed and exact versions before execution.",
+          "Reload all results and figures, preserve empty output, and maintain association-level claim boundaries."
+        ],
+        "template_files": [
+          "templates/run_clusterprofiler_fgsea.R"
+        ]
+      }
+    ]
   },
-  "orchestration": {
-    "scientific_stage": 3,
-    "requires_reviewed_upstream_types": []
+  "alternatives": [
+    "enrichment-analysis"
+  ],
+  "assumptions": [
+    "Identifiers are biological features appropriate to the declared organism and resource; the ranking direction and statistic have a stable scientific interpretation."
+  ],
+  "code_templates": [
+    {
+      "language": "r",
+      "path": "templates/run_clusterprofiler_fgsea.R",
+      "purpose": "Execute, plot, reload, and provenance-bind explicit GO/KEGG ORA or preranked GSEA.",
+      "quality_gate_ids": [
+        "enrichment-input-semantics",
+        "enrichment-resource-provenance",
+        "enrichment-output-claim"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "AnnotationDbi": [
+          ">=1.64,<1.65"
+        ],
+        "digest": [
+          ">=0.6.39,<0.7"
+        ],
+        "enrichplot": [
+          ">=1.22,<1.23"
+        ],
+        "ggplot2": [
+          ">=3.5,<3.6"
+        ],
+        "jsonlite": [
+          ">=2.0,<2.1"
+        ],
+        "r": [
+          ">=4.3,<4.4"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "functional-enrichment-e2e-v1"
+      ],
+      "id": "clusterprofiler-410-fgsea-128-r43",
+      "input_formats": {
+        "gene_evidence": [
+          "tab-separated-values@1"
+        ],
+        "tested_universe": [
+          "tab-separated-values@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "functional_enrichment_evidence": [
+          "tab-separated-values@1",
+          "inline-json@1",
+          "pdf@1.7",
+          "svg@1.1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "functional-enrichment-regression-v1"
+      ],
+      "tool_versions": {
+        "clusterProfiler": [
+          ">=4.10,<4.11"
+        ],
+        "fgsea": [
+          ">=1.28,<1.29"
+        ]
+      },
+      "verified_at": "2026-07-30"
+    }
+  ],
+  "complements": [
+    "proteomics-deqms",
+    "wgcna-coexpression",
+    "figure-specification"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=4.3,<4.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "r-runtime",
+      "name": "r",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the verified enrichment R template.",
+      "required": true,
+      "tested_versions": [
+        "4.3.2"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.22,<1.23"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "enrichplot",
+      "name": "enrichplot",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Render official enrichment plot families.",
+      "required": true,
+      "tested_versions": [
+        "1.22.0"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('enrichplot')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://bioconductor.org/packages/release/bioc/html/enrichplot.html"
+    },
+    {
+      "allowed_versions": [
+        ">=1.64,<1.65"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "AnnotationDbi",
+      "name": "AnnotationDbi",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Bind GO identifiers to a declared organism database.",
+      "required": true,
+      "tested_versions": [
+        "1.64.1"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('AnnotationDbi')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://bioconductor.org/packages/release/bioc/html/AnnotationDbi.html"
+    },
+    {
+      "allowed_versions": [
+        ">=3.5,<3.6"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "ggplot2",
+      "name": "ggplot2",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Apply the vector-first final-size figure contract.",
+      "required": true,
+      "tested_versions": [
+        "3.5.2"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('ggplot2')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://ggplot2.tidyverse.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=2.0,<2.1"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "jsonlite",
+      "name": "jsonlite",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Write machine-readable enrichment reports.",
+      "required": true,
+      "tested_versions": [
+        "2.0.0"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('jsonlite')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=jsonlite"
+    },
+    {
+      "allowed_versions": [
+        ">=0.6.39,<0.7"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "digest",
+      "name": "digest",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Bind input and output provenance digests.",
+      "required": true,
+      "tested_versions": [
+        "0.6.39"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('digest')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=digest"
+    }
+  ],
+  "description": "Execute explicitly separated GO/KEGG over-representation analysis or preranked GSEA with clusterProfiler and fgsea semantics, declared organism and identifier namespace, explicit ORA universe or complete ranking, versioned resources, standardized figures, empty-result preservation, and output reload.",
+  "domains": [
+    "omics",
+    "functional-genomics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "evidence_effects": [
+    "adds-versioned-functional-association-evidence"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
   },
+  "id": "functional-enrichment",
+  "input_artifacts": [
+    {
+      "artifact_type": "gene_list_or_ranking",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "gene-list",
+            "gene-by-ranked-statistic"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "gene_evidence",
+      "processing_levels": [
+        "declared",
+        "identifier-validated"
+      ],
+      "required_metadata": [
+        "source-sha256",
+        "analysis-mode",
+        "organism",
+        "identifier-namespace",
+        "ranking-statistic-or-selection-rule"
+      ]
+    },
+    {
+      "artifact_type": "measured_gene_universe",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "gene-list"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "tested_universe",
+      "processing_levels": [
+        "tested",
+        "identifier-validated"
+      ],
+      "required_metadata": [
+        "source-sha256",
+        "selection-origin"
+      ],
+      "source_policy": "project_or_upstream"
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "gene_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "key_type": {
+        "minLength": 2,
+        "type": "string"
+      },
+      "max_gene_set_size": {
+        "minimum": 2,
+        "type": "integer"
+      },
+      "min_gene_set_size": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "mode": {
+        "enum": [
+          "go-ora",
+          "kegg-ora",
+          "go-gsea",
+          "kegg-gsea"
+        ],
+        "type": "string"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "ontology": {
+        "enum": [
+          "BP",
+          "MF",
+          "CC",
+          "ALL"
+        ],
+        "type": "string"
+      },
+      "organism": {
+        "minLength": 2,
+        "type": "string"
+      },
+      "orgdb": {
+        "minLength": 3,
+        "type": "string"
+      },
+      "p_cutoff": {
+        "exclusiveMinimum": 0,
+        "maximum": 1,
+        "type": "number"
+      },
+      "ranking_statistic": {
+        "minLength": 3,
+        "type": "string"
+      },
+      "seed": {
+        "type": "integer"
+      },
+      "tie_policy": {
+        "minLength": 3,
+        "type": "string"
+      },
+      "universe_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "mode",
+      "gene_artifact_id",
+      "organism",
+      "key_type",
+      "min_gene_set_size",
+      "max_gene_set_size",
+      "p_cutoff",
+      "seed"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "GO enrichment",
+    "KEGG enrichment",
+    "GSEA",
+    "fgsea",
+    "clusterProfiler",
+    "GO KEGG \u5bcc\u96c6\u5206\u6790",
+    "\u9884\u6392\u5e8f GSEA"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "GO/KEGG results depend on identifier mapping, tested universe or ranking, database version and gene-set correlation. Empty results are retained rather than rescued by post hoc thresholds."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
   "observed_output_contracts": [
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -164,6 +600,35 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "enrichment-input-semantics",
+          "metric_key": "enrichment-input-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "enrichment-resource-provenance",
+          "metric_key": "enrichment-resource-provenance",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "enrichment-output-claim",
+          "metric_key": "enrichment-output-claim",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -175,6 +640,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -219,12 +692,325 @@
         }
       ],
       "port": "functional_enrichment_evidence",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "enrichment-input-semantics",
         "enrichment-resource-provenance",
         "enrichment-output-claim"
+      ],
+      "semantic_profile": "functional-enrichment-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 3
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "functional_enrichment_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "term-by-enrichment-statistic"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "method-quality-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "pdf",
+          "orientations": [
+            "publication-figure"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.7"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "svg",
+          "orientations": [
+            "publication-figure"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.1"
+          ]
+        }
+      ],
+      "name": "functional_enrichment_evidence",
+      "processing_levels": [
+        "tested",
+        "multiplicity-adjusted",
+        "reloaded"
+      ],
+      "required_metadata": [
+        "module-version",
+        "generated-code-sha256",
+        "mode",
+        "organism",
+        "identifier-namespace",
+        "database-and-release",
+        "parameters",
+        "actual-tool-versions",
+        "quality-gates"
       ]
     }
-  ]
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Analysis mode, organism, identifier namespace, database source/release, size limits and multiplicity policy are declared; ORA has a measured/tested universe and GSEA has a complete finite unique ranking."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://bioconductor.org/packages/release/bioc/manuals/clusterProfiler/man/clusterProfiler.pdf",
+      "https://bioconductor.org/packages/release/bioc/manuals/fgsea/man/fgsea.pdf",
+      "https://github.com/YuLab-SMU/clusterProfiler",
+      "https://github.com/alserglab/fgsea",
+      "docs/capabilities/advanced-omics-evidence-standard.md"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block ORA without a selected list contained in an explicit tested universe and block GSEA without a complete finite uniquely named ranking, declared direction and deterministic tie policy.",
+      "id": "enrichment-input-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require organism, source and target identifier namespaces, OrgDb or KEGG source and release, conversion losses, gene-set size limits, adjustment method, seed and exact package versions.",
+      "id": "enrichment-resource-provenance",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Preserve empty results and separate ORA from GSEA; do not convert term association into pathway activation, direction, direct regulation, or causality without supporting evidence.",
+      "id": "enrichment-output-claim",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which declared GO or KEGG terms are over-represented in a selected list, or enriched along a complete ranked vector, under the explicit resource and multiplicity contract?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "functional-enrichment",
+      "Run GO/KEGG ORA or preranked GSEA",
+      "GO enrichment",
+      "KEGG enrichment",
+      "GSEA",
+      "fgsea",
+      "clusterProfiler",
+      "GO KEGG \u5bcc\u96c6\u5206\u6790",
+      "\u9884\u6392\u5e8f GSEA"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Run GO/KEGG ORA or preranked GSEA",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=4.10,<4.11"
+      ],
+      "ecosystem": "r",
+      "identity": "clusterProfiler",
+      "mismatch_policy": "block",
+      "name": "clusterProfiler",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "4.10.1"
+      ],
+      "verified_at": "2026-07-30",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=4.10,<4.11"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parameter",
+          "description": "GO and KEGG ORA/GSEA arguments and returned enrichment objects are version-coupled.",
+          "id": "clusterprofiler-ora-gsea-api",
+          "required_action": "Record the exact mode, organism, namespace, resource, size thresholds, adjustment and seed, then reload returned fields.",
+          "source": "https://bioconductor.org/packages/release/bioc/manuals/clusterProfiler/man/clusterProfiler.pdf"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('clusterProfiler')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://bioconductor.org/packages/release/bioc/html/clusterProfiler.html"
+    },
+    {
+      "allowed_versions": [
+        ">=1.28,<1.29"
+      ],
+      "ecosystem": "r",
+      "identity": "fgsea",
+      "mismatch_policy": "block",
+      "name": "fgsea",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.28.0"
+      ],
+      "verified_at": "2026-07-30",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.28,<1.29"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parameter",
+          "description": "Multilevel precision, pathway size, score type and leading-edge output depend on declared arguments and package version.",
+          "id": "fgsea-multilevel-semantics",
+          "required_action": "Retain the complete ranking, size limits, exponent, epsilon, seed, score direction and leading edge.",
+          "source": "https://bioconductor.org/packages/release/bioc/manuals/fgsea/man/fgsea.pdf"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('fgsea')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://bioconductor.org/packages/release/bioc/html/fgsea.html"
+    }
+  ],
+  "version": "1.0.0"
 }

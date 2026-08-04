@@ -560,6 +560,584 @@
   "maturity": "validated",
   "module_type": "analysis",
   "mutability": "read_only",
+  "observed_output_contracts": [
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "single_cell_analysis_object"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "h5ad",
+              "seurat-rds"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "quality-controlled",
+              "normalized",
+              "clustered"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-input-semantics",
+          "metric_key": "single-cell-input-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-cell-accounting",
+          "metric_key": "single-cell-cell-accounting",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-raw-count-preservation",
+          "metric_key": "single-cell-raw-count-preservation",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-qc-context",
+          "metric_key": "single-cell-qc-context",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-cluster-stability",
+          "metric_key": "single-cell-cluster-stability",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/x-hdf5"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "analysis_object",
+      "required_postflight_gate_ids": [
+        "single-cell-input-semantics",
+        "single-cell-cell-accounting",
+        "single-cell-raw-count-preservation",
+        "single-cell-qc-context",
+        "single-cell-cluster-stability"
+      ],
+      "semantic_profile": "single-cell-foundation-workflow-analysis-object-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    },
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "single_cell_qc_report"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "inline-json"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "derived"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-input-semantics",
+          "metric_key": "single-cell-input-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-cell-accounting",
+          "metric_key": "single-cell-cell-accounting",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-raw-count-preservation",
+          "metric_key": "single-cell-raw-count-preservation",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-qc-context",
+          "metric_key": "single-cell-qc-context",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-cluster-stability",
+          "metric_key": "single-cell-cluster-stability",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "qc_report",
+      "required_postflight_gate_ids": [
+        "single-cell-input-semantics",
+        "single-cell-cell-accounting",
+        "single-cell-raw-count-preservation",
+        "single-cell-qc-context",
+        "single-cell-cluster-stability"
+      ],
+      "semantic_profile": "single-cell-foundation-workflow-qc-report-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    },
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "single_cell_cluster_model"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "inline-json"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "derived"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-input-semantics",
+          "metric_key": "single-cell-input-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-cell-accounting",
+          "metric_key": "single-cell-cell-accounting",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-raw-count-preservation",
+          "metric_key": "single-cell-raw-count-preservation",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-qc-context",
+          "metric_key": "single-cell-qc-context",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "single-cell-cluster-stability",
+          "metric_key": "single-cell-cluster-stability",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "cluster_model",
+      "required_postflight_gate_ids": [
+        "single-cell-input-semantics",
+        "single-cell-cell-accounting",
+        "single-cell-raw-count-preservation",
+        "single-cell-qc-context",
+        "single-cell-cluster-stability"
+      ],
+      "semantic_profile": "single-cell-foundation-workflow-cluster-model-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 1
+  },
   "output_artifacts": [
     {
       "artifact_type": "single_cell_analysis_object",
@@ -829,6 +1407,20 @@
   "questions": [
     "Can the supplied single-cell object be transformed into a traceable, quality-controlled analysis object and stable cluster model without guessing matrix semantics, treating cells as replicates, or overwriting raw counts?"
   ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "single-cell-foundation-workflow",
+      "Generate and validate a project-specific single-cell foundation workflow",
+      "single-cell standard workflow",
+      "single-cell RNA-seq",
+      "Scanpy or Seurat single-cell preprocessing",
+      "single-cell QC normalization PCA UMAP Leiden clustering",
+      "\u5355\u7ec6\u80de\u8f93\u5165\u8d28\u63a7\u9884\u5904\u7406\u964d\u7ef4\u805a\u7c7b\u6807\u51c6\u6d41\u7a0b"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
   "schema_version": 1,
   "title": "Generate and validate a project-specific single-cell foundation workflow",
   "tool_requirements": [
@@ -913,423 +1505,5 @@
       "version_source": "https://satijalab.org/seurat/articles/seurat5_essential_commands.html"
     }
   ],
-  "version": "1.0.0",
-  "routing": {
-    "method_aliases": [
-      "single-cell-foundation-workflow",
-      "Generate and validate a project-specific single-cell foundation workflow",
-      "single-cell standard workflow",
-      "single-cell RNA-seq",
-      "Scanpy or Seurat single-cell preprocessing",
-      "single-cell QC normalization PCA UMAP Leiden clustering",
-      "单细胞输入质控预处理降维聚类标准流程"
-    ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
-  },
-  "orchestration": {
-    "scientific_stage": 1,
-    "requires_reviewed_upstream_types": []
-  },
-  "observed_output_contracts": [
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "single_cell_analysis_object"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "h5ad",
-              "seurat-rds"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "quality-controlled",
-              "normalized",
-              "clustered"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/x-hdf5"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "analysis_object",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "single-cell-input-semantics",
-        "single-cell-cell-accounting",
-        "single-cell-raw-count-preservation",
-        "single-cell-qc-context",
-        "single-cell-cluster-stability"
-      ]
-    },
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "single_cell_qc_report"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "inline-json"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "derived"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "qc_report",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "single-cell-input-semantics",
-        "single-cell-cell-accounting",
-        "single-cell-raw-count-preservation",
-        "single-cell-qc-context",
-        "single-cell-cluster-stability"
-      ]
-    },
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "single_cell_cluster_model"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "inline-json"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "derived"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "cluster_model",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "single-cell-input-semantics",
-        "single-cell-cell-accounting",
-        "single-cell-raw-count-preservation",
-        "single-cell-qc-context",
-        "single-cell-cluster-stability"
-      ]
-    }
-  ]
+  "version": "1.0.0"
 }

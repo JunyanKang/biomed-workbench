@@ -274,13 +274,77 @@ def inspect_evidence_map_publication_recovery(
         status = "state-unregistered"
     elif journal is not None:
         status = str(journal.get("status", "interrupted"))
+    allowed_actions: list[str] = []
+    if isinstance(journal, dict):
+        if journal.get("status") == "files-published-state-pending":
+            allowed_actions.append("complete")
+        elif (
+            journal.get("status") == "prepared"
+            and not staged
+            and not present - indexed
+            and journal.get("map_digest") not in indexed_digests
+        ):
+            allowed_actions.append("abort-prepared")
     return {
         "status": status,
         "journal": journal,
         "staged_directories": staged,
         "unindexed_versions": sorted(present - indexed),
         "state_unregistered_map_digests": sorted(indexed_digests - state_publications) if state_path is not None else [],
+        "allowed_actions": allowed_actions,
     }
+
+
+def abort_prepared_evidence_map_publication(
+    output_root: Path,
+    *,
+    state_path: Path,
+) -> dict[str, object]:
+    """Abandon a verified pre-publication transaction without touching immutable evidence."""
+    output_root = output_root.resolve(strict=True)
+    journal_path = output_root / TRANSACTION_NAME
+    with _publication_lock(output_root):
+        if not journal_path.is_file():
+            raise ValueError("no interrupted evidence-map publication is available")
+        journal = json.loads(journal_path.read_text(encoding="utf-8"))
+        required = {
+            "schema_version", "status", "map_digest", "version", "pre_state_digest",
+            "pending_state_digest", "pending_state_path", "publication", "target_state_name",
+        }
+        if set(journal) != required or journal["schema_version"] != 2 or journal["status"] != "prepared":
+            raise ValueError("only a verified prepared evidence-map transaction may be aborted")
+        if state_path.name != journal["target_state_name"] or not state_path.is_file():
+            raise ValueError("prepared transaction recovery target is missing or mismatched")
+        current = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
+        if current.state_digest != journal["pre_state_digest"]:
+            raise ValueError("project state changed after the prepared evidence-map transaction")
+        pending_path = output_root / str(journal["pending_state_path"])
+        if not pending_path.resolve().is_relative_to(output_root) or not pending_path.is_file():
+            raise ValueError("prepared transaction pending state is missing or outside the publication root")
+        pending = ProjectState.from_dict(json.loads(pending_path.read_text(encoding="utf-8")))
+        publication = EvidenceMapPublication.from_dict(journal["publication"])
+        if (
+            pending.state_digest != journal["pending_state_digest"]
+            or not pending.evidence_map_versions
+            or pending.evidence_map_versions[-1] != publication
+            or publication.map_digest != journal["map_digest"]
+        ):
+            raise ValueError("prepared transaction pending state or publication identity is invalid")
+        index = _read_index(output_root)
+        if any(
+            item.get("map_digest") == publication.map_digest or item.get("version") == journal["version"]
+            for item in index["entries"]
+        ):
+            raise ValueError("prepared transaction already has indexed immutable evidence and cannot be aborted")
+        version_directory = output_root / "versions" / f"v{journal['version']}"
+        current_pointer = output_root / CURRENT_NAME
+        pointer = json.loads(current_pointer.read_text(encoding="utf-8")) if current_pointer.is_file() else {}
+        staged = tuple(output_root.glob(".evidence-map-version-*"))
+        if version_directory.exists() or pointer.get("map_digest") == publication.map_digest or staged:
+            raise ValueError("prepared transaction has ambiguous or immutable published files; manual review is required")
+        _remove_pending_state(pending_path)
+        journal_path.unlink()
+    return inspect_evidence_map_publication_recovery(output_root, state_path=state_path)
 
 
 def complete_evidence_map_publication_recovery(

@@ -146,6 +146,7 @@ def assess_execution_readiness(
     public_data_validated: bool = False,
     public_data_validated_assays: frozenset[str] = frozenset(),
     controlled_fixture_receipt_digest: str | None = None,
+    controlled_fixture_round_trip_kind: str | None = None,
 ) -> ExecutionReadiness:
     paths = referenced_template_paths(manifest)
     fixture_path = module_path / "tests" / "cases.json"
@@ -169,6 +170,8 @@ def assess_execution_readiness(
                 "adapter_static_reachable": executor_ready,
                 "fixture_declared": fixture_declared,
                 "controlled_fixture_executed_and_reloaded": controlled_fixture_executed,
+                "controlled_fixture_process_json_round_trip": controlled_fixture_executed and controlled_fixture_round_trip_kind == "process-json",
+                "controlled_fixture_artifact_payload_reloaded": controlled_fixture_executed and controlled_fixture_round_trip_kind == "artifact-payload",
                 "representative_or_public_case_validated": public_data_validated,
                 "current_project_reviewed": False,
             },
@@ -313,6 +316,8 @@ def assess_execution_readiness(
             "adapter_static_reachable": executor_ready,
             "fixture_declared": fixture_declared,
             "controlled_fixture_executed_and_reloaded": controlled_fixture_executed,
+            "controlled_fixture_process_json_round_trip": controlled_fixture_executed and controlled_fixture_round_trip_kind == "process-json",
+            "controlled_fixture_artifact_payload_reloaded": controlled_fixture_executed and controlled_fixture_round_trip_kind == "artifact-payload",
             "representative_or_public_case_validated": public_data_validated and executor_ready,
             "current_project_reviewed": False,
         },

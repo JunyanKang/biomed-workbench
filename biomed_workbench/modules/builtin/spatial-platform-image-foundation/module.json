@@ -1,657 +1,29 @@
 {
-  "schema_version": 1,
-  "id": "spatial-platform-image-foundation",
-  "version": "1.0.0",
-  "title": "Import and quality-control spatial platforms and tissue images",
-  "description": "Import Visium, Visium HD, Stereo-seq, Slide-seq, Xenium, CosMx and MERFISH/MERSCOPE data with platform-aware QC, standardized coordinates, image and boundary provenance, plus Squidpy segmentation and SpatialData landmark registration.",
-  "module_type": "analysis",
-  "domains": [
-    "omics",
-    "imaging",
-    "spatial-omics"
-  ],
-  "intents": [
-    "Visium import",
-    "Stereo-seq QC",
-    "Slide-seq QC",
-    "Xenium import",
-    "CosMx QC",
-    "MERFISH import",
-    "spatial segmentation",
-    "spatial registration",
-    "空间组学导入质控",
-    "组织图像分割配准"
-  ],
-  "questions": [
-    "Can platform output be admitted into a coordinate-explicit SpatialData/AnnData analysis without losing image, boundary, control-probe or sample provenance?"
-  ],
-  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
-  "execution": {
-    "kind": "workflow",
-    "timeout_seconds": 30,
-    "max_output_bytes": 2000000
-  },
-  "maturity": "validated",
-  "input_artifacts": [
-    {
-      "name": "spatial_platform_output",
-      "artifact_type": "vendor_spatial_output_or_spatial_object",
-      "source_policy": "project_input",
-      "processing_levels": [
-        "raw",
-        "vendor-processed",
-        "coordinate-annotated"
-      ],
-      "required_metadata": [
-        "platform",
-        "biological-sample-id",
-        "coordinate-unit",
-        "source-sha256"
-      ],
-      "formats": [
-        {
-          "name": "vendor-directory",
-          "versions": [
-            "declared"
-          ],
-          "representations": [
-            "container"
-          ],
-          "compression": [
-            "none"
-          ],
-          "required_indexes": [],
-          "coordinate_systems": [
-            "platform-native"
-          ],
-          "genome_build_policy": "declared",
-          "genome_builds": [
-            "declared-in-project-or-not-applicable"
-          ],
-          "annotation_releases": [],
-          "orientations": [
-            "Visium",
-            "Visium-HD",
-            "Stereo-seq",
-            "Xenium",
-            "CosMx",
-            "MERSCOPE"
-          ]
-        },
-        {
-          "name": "h5ad",
-          "versions": [
-            "0.1.0"
-          ],
-          "representations": [
-            "binary"
-          ],
-          "compression": [
-            "internal"
-          ],
-          "required_indexes": [
-            "observation-id",
-            "feature-id"
-          ],
-          "coordinate_systems": [
-            "declared-spatial"
-          ],
-          "genome_build_policy": "declared",
-          "genome_builds": [
-            "declared-in-project-or-not-applicable"
-          ],
-          "annotation_releases": [],
-          "orientations": [
-            "observation-by-feature"
-          ]
-        }
-      ]
-    }
-  ],
-  "output_artifacts": [
-    {
-      "name": "platform_qc_evidence",
-      "artifact_type": "platform_qc_evidence",
-      "processing_levels": [
-        "imported",
-        "quality-controlled",
-        "coordinate-explicit",
-        "reloaded"
-      ],
-      "required_metadata": [
-        "module-version",
-        "platform",
-        "reader-and-version",
-        "coordinate-system",
-        "coordinate-unit",
-        "sample-key",
-        "input-and-output-digests",
-        "quality-gates"
-      ],
-      "formats": [
-        {
-          "name": "h5ad",
-          "versions": [
-            "0.1.0"
-          ],
-          "representations": [
-            "binary"
-          ],
-          "compression": [
-            "internal"
-          ],
-          "required_indexes": [
-            "observation-id",
-            "feature-id"
-          ],
-          "coordinate_systems": [
-            "declared-spatial"
-          ],
-          "genome_build_policy": "declared",
-          "genome_builds": [
-            "declared-in-project-or-not-applicable"
-          ],
-          "annotation_releases": [],
-          "orientations": [
-            "observation-by-feature"
-          ]
-        },
-        {
-          "name": "spatialdata-zarr",
-          "versions": [
-            "0.5"
-          ],
-          "representations": [
-            "container"
-          ],
-          "compression": [
-            "internal"
-          ],
-          "required_indexes": [],
-          "coordinate_systems": [
-            "named-transform-graph"
-          ],
-          "genome_build_policy": "declared",
-          "genome_builds": [
-            "declared-in-project-or-not-applicable"
-          ],
-          "annotation_releases": [],
-          "orientations": [
-            "multimodal-spatial-elements"
-          ]
-        },
-        {
-          "name": "tab-separated-values",
-          "versions": [
-            "1"
-          ],
-          "representations": [
-            "text"
-          ],
-          "compression": [
-            "none"
-          ],
-          "required_indexes": [],
-          "coordinate_systems": [
-            "declared-spatial"
-          ],
-          "genome_build_policy": "not_applicable",
-          "genome_builds": [],
-          "annotation_releases": [],
-          "orientations": [
-            "observation-qc",
-            "sample-qc"
-          ]
-        },
-        {
-          "name": "inline-json",
-          "versions": [
-            "1"
-          ],
-          "representations": [
-            "structured"
-          ],
-          "compression": [
-            "none"
-          ],
-          "required_indexes": [],
-          "coordinate_systems": [],
-          "genome_build_policy": "not_applicable",
-          "genome_builds": [],
-          "annotation_releases": [],
-          "orientations": [
-            "provenance-and-gates"
-          ]
-        }
-      ]
-    }
-  ],
-  "preconditions": [
-    "Platform, biological sample identity, source files, coordinate system/unit, matrix semantics, genome build or panel version, image channels, boundary source and output paths are declared."
-  ],
-  "assumptions": [
-    "Vendor outputs are complete for the declared software release; platform-specific negative controls and image transformations are retained when available."
-  ],
-  "quality_gates": [
-    {
-      "id": "spatial-platform-contract",
-      "severity": "fatal",
-      "description": "Require unique observations/features, finite nonnegative integer counts, finite 2D/3D coordinates, sample identity, coordinate units and reader provenance.",
-      "blocks_interpretation": true
-    },
-    {
-      "id": "platform-specific-qc",
-      "severity": "major",
-      "description": "Report spot/bin tissue assignment for sequencing platforms and negative-control, unassigned-transcript, panel-detection and boundary metrics for imaging platforms when available; never impute absent controls.",
-      "blocks_interpretation": true
-    },
-    {
-      "id": "image-transform-integrity",
-      "severity": "fatal",
-      "description": "Preserve named coordinate systems and transformations, quantify segmentation/registration error, and block expression-image joins that fail round-trip or boundary checks.",
-      "blocks_interpretation": true
-    }
-  ],
-  "limitations": [
-    "Platform thresholds are project-reviewed rather than universal. Slide-seq enters through a coordinate-explicit AnnData adapter. Cellpose requires an isolated runtime and a project-declared image channel."
-  ],
-  "evidence_effects": [
-    "adds-platform-aware-spatial-input-and-image-qc-evidence"
-  ],
-  "alternatives": [
-    "single-cell-spatial-analysis"
-  ],
-  "complements": [
-    "spatial-multimethod-inference",
-    "spatial-multislice-integration",
-    "trajectory-spatial-figure-package"
-  ],
-  "tool_requirements": [
-    {
-      "name": "spatialdata-io",
-      "ecosystem": "python",
-      "identity": "spatialdata-io",
-      "required": false,
-      "tested_versions": [
-        "0.4.0"
-      ],
-      "allowed_versions": [
-        ">=0.4,<0.5"
-      ],
-      "version_source": "https://github.com/scverse/spatialdata-io/tree/v0.4.0",
-      "verified_at": "2026-08-01",
-      "version_probe": [
-        "python",
-        "-c",
-        "import importlib.metadata; print(importlib.metadata.version('spatialdata-io'))"
-      ],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "mismatch_policy": "block",
-      "version_differences": [],
-      "platforms": [
-        "any"
-      ]
-    },
-    {
-      "name": "spatialdata",
-      "ecosystem": "python",
-      "identity": "spatialdata",
-      "required": false,
-      "tested_versions": [
-        "0.5.0"
-      ],
-      "allowed_versions": [
-        ">=0.5,<0.6"
-      ],
-      "version_source": "https://spatialdata.scverse.org/en/stable/",
-      "verified_at": "2026-08-01",
-      "version_probe": [
-        "python",
-        "-c",
-        "import importlib.metadata; print(importlib.metadata.version('spatialdata'))"
-      ],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "mismatch_policy": "block",
-      "version_differences": [],
-      "platforms": [
-        "any"
-      ]
-    },
-    {
-      "name": "squidpy",
-      "ecosystem": "python",
-      "identity": "squidpy",
-      "required": false,
-      "tested_versions": [
-        "1.6.6"
-      ],
-      "allowed_versions": [
-        ">=1.6,<1.7"
-      ],
-      "version_source": "https://squidpy.readthedocs.io/en/stable/api/squidpy.im.segment.html",
-      "verified_at": "2026-08-01",
-      "version_probe": [
-        "python",
-        "-c",
-        "import squidpy; print(squidpy.__version__)"
-      ],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "mismatch_policy": "block",
-      "version_differences": [
-        {
-          "id": "squidpy166-scanpy111-spatialdata05-image-container",
-          "affected_versions": [
-            ">=1.6,<1.7"
-          ],
-          "category": "api",
-          "description": "Squidpy 1.6.6 segments an ImageContainer rather than a SpatialData object and is validated with Scanpy 1.11.5 plus SpatialData 0.5.0.",
-          "compatibility_effect": "requires-parser",
-          "required_action": "Select an explicit image pyramid level and channel, segment through ImageContainer, parse the labels into SpatialData with inherited transforms, then reload the output store.",
-          "source": "https://squidpy.readthedocs.io/en/stable/api/squidpy.im.segment.html"
-        }
-      ],
-      "platforms": [
-        "any"
-      ]
-    }
-  ],
-  "dependencies": [
-    {
-      "name": "python",
-      "ecosystem": "runtime",
-      "identity": "python-runtime",
-      "required": true,
-      "tested_versions": [
-        "3.12.11"
-      ],
-      "allowed_versions": [
-        ">=3.12,<3.15"
-      ],
-      "version_source": "https://www.python.org/",
-      "verified_at": "2026-08-01",
-      "version_probe": [
-        "biomed_workbench.modules.compatibility:probe_python_runtime"
-      ],
-      "version_probe_kind": "python_callable",
-      "version_probe_timeout_seconds": 5,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Run generic platform QC and coordinate validation; vendor readers use a compatible isolated workspace runtime.",
-      "conflicts": [],
-      "platforms": [
-        "any"
-      ]
-    }
-  ],
-  "compatibility_matrix": [
-    {
-      "id": "spatialdata-io04-spatialdata05-squidpy166-python312",
-      "module_version": "1.0.0",
-      "tool_versions": {
-        "spatialdata-io": [
-          ">=0.4,<0.5"
-        ],
-        "spatialdata": [
-          ">=0.5,<0.6"
-        ],
-        "squidpy": [
-          ">=1.6,<1.7"
-        ]
-      },
-      "dependency_versions": {
-        "python": [
-          ">=3.12,<3.15"
-        ]
-      },
-      "input_formats": {
-        "spatial_platform_output": [
-          "vendor-directory@declared",
-          "h5ad@0.1.0"
-        ]
-      },
-      "output_formats": {
-        "platform_qc_evidence": [
-          "h5ad@0.1.0",
-          "spatialdata-zarr@0.5",
-          "tab-separated-values@1",
-          "inline-json@1"
-        ]
-      },
-      "platforms": [
-        "any"
-      ],
-      "regression_evidence_ids": [
-        "spatial-platform-image-foundation-regression-v1"
-      ],
-      "end_to_end_evidence_ids": [
-        "spatial-platform-generic-h5ad-qc-e2e-v1",
-        "xenium-kidney-spatialdata-squidpy-public-e2e-v1"
-      ],
-      "verified_at": "2026-08-01"
-    }
-  ],
   "access": "agent_generated",
-  "mutability": "read_only",
-  "credentials": [],
-  "input_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "objective": {
-        "type": "string",
-        "minLength": 12
-      },
-      "platform": {
-        "type": "string",
-        "enum": [
-          "visium",
-          "visium-hd",
-          "stereoseq",
-          "slide-seq",
-          "xenium",
-          "cosmx",
-          "merfish",
-          "generic"
-        ]
-      },
-      "input_artifact_id": {
-        "type": "string",
-        "minLength": 1
-      },
-      "sample_key": {
-        "type": "string",
-        "minLength": 1
-      },
-      "coordinate_unit": {
-        "type": "string",
-        "minLength": 1
-      },
-      "image_mode": {
-        "type": "string",
-        "enum": [
-          "none",
-          "segment-watershed",
-          "segment-cellpose",
-          "register-landmarks"
-        ]
-      },
-      "seed": {
-        "type": "integer"
-      }
-    },
-    "required": [
-      "objective",
-      "platform",
-      "input_artifact_id",
-      "sample_key",
-      "coordinate_unit",
-      "image_mode",
-      "seed"
-    ]
-  },
-  "output_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "handoff_type": {
-        "type": "string"
-      },
-      "module": {
-        "type": "object"
-      },
-      "request_digest": {
-        "type": "string"
-      },
-      "request_fields": {
-        "type": "array"
-      },
-      "languages": {
-        "type": "array"
-      },
-      "code_plan": {
-        "type": "array"
-      },
-      "parameter_rules": {
-        "type": "array"
-      },
-      "preflight_checks": {
-        "type": "array"
-      },
-      "postflight_checks": {
-        "type": "array"
-      },
-      "provenance_fields": {
-        "type": "array"
-      },
-      "forbidden_actions": {
-        "type": "array"
-      },
-      "tool_profiles": {
-        "type": "array"
-      },
-      "dependency_profiles": {
-        "type": "array"
-      },
-      "quality_gate_ids": {
-        "type": "array"
-      },
-      "execution_policy": {
-        "type": "object"
-      }
-    },
-    "required": [
-      "handoff_type",
-      "module",
-      "request_digest",
-      "request_fields",
-      "languages",
-      "code_plan",
-      "parameter_rules",
-      "preflight_checks",
-      "postflight_checks",
-      "provenance_fields",
-      "forbidden_actions",
-      "tool_profiles",
-      "dependency_profiles",
-      "quality_gate_ids",
-      "execution_policy"
-    ]
-  },
-  "kernel_compatibility": [
-    ">=0.2.0,<0.3.0"
-  ],
-  "provenance": {
-    "license": "Apache-2.0",
-    "concept_sources": [
-      "https://spatialdata.scverse.org/projects/io/en/stable/api.html",
-      "https://www.10xgenomics.com/support/software/space-ranger/latest",
-      "https://www.10xgenomics.com/support/software/xenium-ranger/latest/tutorials/outputs/XR-output-overview",
-      "https://squidpy.readthedocs.io/en/stable/api/squidpy.im.segment.html",
-      "https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.estimate_transform",
-      "https://www.nature.com/articles/s41467-023-40218-9"
-    ]
-  },
-  "code_templates": [
-    {
-      "path": "templates/import_platform_qc.py",
-      "language": "python",
-      "purpose": "Use official SpatialData-IO readers or a coordinate-explicit AnnData adapter and emit platform-aware QC.",
-      "quality_gate_ids": [
-        "spatial-platform-contract",
-        "platform-specific-qc"
-      ],
-      "requires_adaptation": false
-    },
-    {
-      "path": "templates/segment_register.py",
-      "language": "python",
-      "purpose": "Run explicit Squidpy segmentation or paired-landmark SpatialData registration.",
-      "quality_gate_ids": [
-        "image-transform-integrity"
-      ],
-      "requires_adaptation": false
-    }
-  ],
   "agent_protocol": {
-    "schema_version": 1,
-    "mode": "packaged_parameterized_workflow",
+    "forbidden_actions": [
+      "Use only project-approved isolated runtimes; do not mutate the host environment.",
+      "Do not guess platform, coordinate unit, bin size, image channel, sample identity or transform; do not impute absent negative controls; do not resample source imagery merely to simplify coordinates; do not overwrite vendor output."
+    ],
     "languages": [
       "python",
       "r",
       "notebook"
     ],
-    "template_sections": [
-      {
-        "id": "import-platform-and-qc",
-        "purpose": "Import vendor output without losing platform semantics.",
-        "required_logic": [
-          "Select the official reader from the declared platform and software release.",
-          "Validate raw counts, sample identity, physical coordinates, platform controls and element transformations.",
-          "Reload standardized outputs and reconcile observations, features, coordinates, images and boundaries."
-        ],
-        "output_artifact_types": [
-          "platform_qc_evidence"
-        ],
-        "template_files": [
-          "templates/import_platform_qc.py"
-        ]
-      },
-      {
-        "id": "segment-register-and-join",
-        "purpose": "Link tissue images, boundaries and expression under explicit transformations.",
-        "required_logic": [
-          "Choose existing boundaries, watershed or Cellpose before seeing biological labels.",
-            "Declare the image, channel, paired landmarks and transform family; retain transform metadata and quantify registration error.",
-          "Block joins with invalid boundaries, coordinate mismatch or failed round-trip checks."
-        ],
-        "output_artifact_types": [
-          "platform_qc_evidence"
-        ],
-        "template_files": [
-          "templates/segment_register.py"
-        ]
-      }
-    ],
+    "mode": "packaged_parameterized_workflow",
     "parameter_rules": [
       {
-        "id": "platform-reader",
-        "parameter": "platform-reader-release",
         "decision_inputs": [
           "vendor output",
           "software release",
           "platform geometry"
         ],
+        "id": "platform-reader",
+        "parameter": "platform-reader-release",
         "selection_rule": "Use the official SpatialData-IO reader for supported vendor directories; require an explicit AnnData coordinate adapter for Slide-seq or generic data.",
         "validation_rule": "Record every reader argument and enumerate imported tables, images, labels, shapes and points."
       },
       {
-        "id": "image-operation",
-        "parameter": "segmentation-registration",
         "decision_inputs": [
           "image channel",
           "existing boundaries",
@@ -659,17 +31,19 @@
           "landmarks",
           "section modality"
         ],
-          "selection_rule": "Use existing validated boundaries when present; otherwise predeclare watershed or Cellpose. Use paired landmarks for an explicit SpatialData transform.",
-          "validation_rule": "Review boundary quality, transcript assignment, pre/post overlays and registration residual error."
+        "id": "image-operation",
+        "parameter": "segmentation-registration",
+        "selection_rule": "Use existing validated boundaries when present; otherwise predeclare watershed or Cellpose. Use paired landmarks for an explicit SpatialData transform.",
+        "validation_rule": "Review boundary quality, transcript assignment, pre/post overlays and registration residual error."
       }
-    ],
-    "preflight_checks": [
-      "Inspect exact platform files, vendor software release, panel/genome annotation, coordinate unit, sample key, image channels, boundaries and transforms.",
-        "Detect exact workspace-isolated Python, SpatialData, SpatialData-IO, Squidpy and optional Cellpose versions."
     ],
     "postflight_checks": [
       "Reload every H5AD/Zarr/TSV/JSON output and reconcile dimensions, coordinate systems, transforms and digests.",
       "Review platform-specific controls, segmentation overlays and registration error before downstream inference."
+    ],
+    "preflight_checks": [
+      "Inspect exact platform files, vendor software release, panel/genome annotation, coordinate unit, sample key, image channels, boundaries and transforms.",
+      "Detect exact workspace-isolated Python, SpatialData, SpatialData-IO, Squidpy and optional Cellpose versions."
     ],
     "provenance_fields": [
       "module-id",
@@ -688,37 +62,320 @@
       "output-digests",
       "quality-gates"
     ],
-    "forbidden_actions": [
-      "Use only project-approved isolated runtimes; do not mutate the host environment.",
-      "Do not guess platform, coordinate unit, bin size, image channel, sample identity or transform; do not impute absent negative controls; do not resample source imagery merely to simplify coordinates; do not overwrite vendor output."
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "import-platform-and-qc",
+        "output_artifact_types": [
+          "platform_qc_evidence"
+        ],
+        "purpose": "Import vendor output without losing platform semantics.",
+        "required_logic": [
+          "Select the official reader from the declared platform and software release.",
+          "Validate raw counts, sample identity, physical coordinates, platform controls and element transformations.",
+          "Reload standardized outputs and reconcile observations, features, coordinates, images and boundaries."
+        ],
+        "template_files": [
+          "templates/import_platform_qc.py"
+        ]
+      },
+      {
+        "id": "segment-register-and-join",
+        "output_artifact_types": [
+          "platform_qc_evidence"
+        ],
+        "purpose": "Link tissue images, boundaries and expression under explicit transformations.",
+        "required_logic": [
+          "Choose existing boundaries, watershed or Cellpose before seeing biological labels.",
+          "Declare the image, channel, paired landmarks and transform family; retain transform metadata and quantify registration error.",
+          "Block joins with invalid boundaries, coordinate mismatch or failed round-trip checks."
+        ],
+        "template_files": [
+          "templates/segment_register.py"
+        ]
+      }
+    ]
+  },
+  "alternatives": [
+    "single-cell-spatial-analysis"
+  ],
+  "assumptions": [
+    "Vendor outputs are complete for the declared software release; platform-specific negative controls and image transformations are retained when available."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/import_platform_qc.py",
+      "purpose": "Use official SpatialData-IO readers or a coordinate-explicit AnnData adapter and emit platform-aware QC.",
+      "quality_gate_ids": [
+        "spatial-platform-contract",
+        "platform-specific-qc"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/segment_register.py",
+      "purpose": "Run explicit Squidpy segmentation or paired-landmark SpatialData registration.",
+      "quality_gate_ids": [
+        "image-transform-integrity"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.12,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "spatial-platform-generic-h5ad-qc-e2e-v1",
+        "xenium-kidney-spatialdata-squidpy-public-e2e-v1"
+      ],
+      "id": "spatialdata-io04-spatialdata05-squidpy166-python312",
+      "input_formats": {
+        "spatial_platform_output": [
+          "vendor-directory@declared",
+          "h5ad@0.1.0"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "platform_qc_evidence": [
+          "h5ad@0.1.0",
+          "spatialdata-zarr@0.5",
+          "tab-separated-values@1",
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "spatial-platform-image-foundation-regression-v1"
+      ],
+      "tool_versions": {
+        "spatialdata": [
+          ">=0.5,<0.6"
+        ],
+        "spatialdata-io": [
+          ">=0.4,<0.5"
+        ],
+        "squidpy": [
+          ">=1.6,<1.7"
+        ]
+      },
+      "verified_at": "2026-08-01"
+    }
+  ],
+  "complements": [
+    "spatial-multimethod-inference",
+    "spatial-multislice-integration",
+    "trajectory-spatial-figure-package"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.12,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run generic platform QC and coordinate validation; vendor readers use a compatible isolated workspace runtime.",
+      "required": true,
+      "tested_versions": [
+        "3.12.11"
+      ],
+      "verified_at": "2026-08-01",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/"
+    }
+  ],
+  "description": "Import Visium, Visium HD, Stereo-seq, Slide-seq, Xenium, CosMx and MERFISH/MERSCOPE data with platform-aware QC, standardized coordinates, image and boundary provenance, plus Squidpy segmentation and SpatialData landmark registration.",
+  "domains": [
+    "omics",
+    "imaging",
+    "spatial-omics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "evidence_effects": [
+    "adds-platform-aware-spatial-input-and-image-qc-evidence"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "spatial-platform-image-foundation",
+  "input_artifacts": [
+    {
+      "artifact_type": "vendor_spatial_output_or_spatial_object",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "platform-native"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project-or-not-applicable"
+          ],
+          "name": "vendor-directory",
+          "orientations": [
+            "Visium",
+            "Visium-HD",
+            "Stereo-seq",
+            "Xenium",
+            "CosMx",
+            "MERSCOPE"
+          ],
+          "representations": [
+            "container"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "declared"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [
+            "declared-spatial"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project-or-not-applicable"
+          ],
+          "name": "h5ad",
+          "orientations": [
+            "observation-by-feature"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "required_indexes": [
+            "observation-id",
+            "feature-id"
+          ],
+          "versions": [
+            "0.1.0"
+          ]
+        }
+      ],
+      "name": "spatial_platform_output",
+      "processing_levels": [
+        "raw",
+        "vendor-processed",
+        "coordinate-annotated"
+      ],
+      "required_metadata": [
+        "platform",
+        "biological-sample-id",
+        "coordinate-unit",
+        "source-sha256"
+      ],
+      "source_policy": "project_input"
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "coordinate_unit": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "image_mode": {
+        "enum": [
+          "none",
+          "segment-watershed",
+          "segment-cellpose",
+          "register-landmarks"
+        ],
+        "type": "string"
+      },
+      "input_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "platform": {
+        "enum": [
+          "visium",
+          "visium-hd",
+          "stereoseq",
+          "slide-seq",
+          "xenium",
+          "cosmx",
+          "merfish",
+          "generic"
+        ],
+        "type": "string"
+      },
+      "sample_key": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "seed": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "objective",
+      "platform",
+      "input_artifact_id",
+      "sample_key",
+      "coordinate_unit",
+      "image_mode",
+      "seed"
     ],
-    "requires_observed_execution": true
+    "type": "object"
   },
-  "routing": {
-    "method_aliases": [
-      "spatial-platform-image-foundation",
-      "Import and quality-control spatial platforms and tissue images",
-      "Visium import",
-      "Stereo-seq QC",
-      "Slide-seq QC",
-      "Xenium import",
-      "CosMx QC",
-      "MERFISH import",
-      "spatial segmentation",
-      "spatial registration",
-      "空间组学导入质控",
-      "组织图像分割配准"
-    ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
-  },
-  "orchestration": {
-    "scientific_stage": 3,
-    "requires_reviewed_upstream_types": []
-  },
+  "intents": [
+    "Visium import",
+    "Stereo-seq QC",
+    "Slide-seq QC",
+    "Xenium import",
+    "CosMx QC",
+    "MERFISH import",
+    "spatial segmentation",
+    "spatial registration",
+    "\u7a7a\u95f4\u7ec4\u5b66\u5bfc\u5165\u8d28\u63a7",
+    "\u7ec4\u7ec7\u56fe\u50cf\u5206\u5272\u914d\u51c6"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Platform thresholds are project-reviewed rather than universal. Slide-seq enters through a coordinate-explicit AnnData adapter. Cellpose requires an isolated runtime and a project-declared image channel."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
   "observed_output_contracts": [
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -797,6 +454,35 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "spatial-platform-contract",
+          "metric_key": "spatial-platform-contract",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "platform-specific-qc",
+          "metric_key": "platform-specific-qc",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "image-transform-integrity",
+          "metric_key": "image-transform-integrity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -808,6 +494,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -852,12 +546,358 @@
         }
       ],
       "port": "platform_qc_evidence",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "spatial-platform-contract",
         "platform-specific-qc",
         "image-transform-integrity"
+      ],
+      "semantic_profile": "spatial-platform-image-foundation-platform-qc-evidence-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 3
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "platform_qc_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [
+            "declared-spatial"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project-or-not-applicable"
+          ],
+          "name": "h5ad",
+          "orientations": [
+            "observation-by-feature"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "required_indexes": [
+            "observation-id",
+            "feature-id"
+          ],
+          "versions": [
+            "0.1.0"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [
+            "named-transform-graph"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project-or-not-applicable"
+          ],
+          "name": "spatialdata-zarr",
+          "orientations": [
+            "multimodal-spatial-elements"
+          ],
+          "representations": [
+            "container"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "0.5"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "declared-spatial"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "observation-qc",
+            "sample-qc"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "provenance-and-gates"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "platform_qc_evidence",
+      "processing_levels": [
+        "imported",
+        "quality-controlled",
+        "coordinate-explicit",
+        "reloaded"
+      ],
+      "required_metadata": [
+        "module-version",
+        "platform",
+        "reader-and-version",
+        "coordinate-system",
+        "coordinate-unit",
+        "sample-key",
+        "input-and-output-digests",
+        "quality-gates"
       ]
     }
-  ]
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Platform, biological sample identity, source files, coordinate system/unit, matrix semantics, genome build or panel version, image channels, boundary source and output paths are declared."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://spatialdata.scverse.org/projects/io/en/stable/api.html",
+      "https://www.10xgenomics.com/support/software/space-ranger/latest",
+      "https://www.10xgenomics.com/support/software/xenium-ranger/latest/tutorials/outputs/XR-output-overview",
+      "https://squidpy.readthedocs.io/en/stable/api/squidpy.im.segment.html",
+      "https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.estimate_transform",
+      "https://www.nature.com/articles/s41467-023-40218-9"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require unique observations/features, finite nonnegative integer counts, finite 2D/3D coordinates, sample identity, coordinate units and reader provenance.",
+      "id": "spatial-platform-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Report spot/bin tissue assignment for sequencing platforms and negative-control, unassigned-transcript, panel-detection and boundary metrics for imaging platforms when available; never impute absent controls.",
+      "id": "platform-specific-qc",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Preserve named coordinate systems and transformations, quantify segmentation/registration error, and block expression-image joins that fail round-trip or boundary checks.",
+      "id": "image-transform-integrity",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Can platform output be admitted into a coordinate-explicit SpatialData/AnnData analysis without losing image, boundary, control-probe or sample provenance?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "spatial-platform-image-foundation",
+      "Import and quality-control spatial platforms and tissue images",
+      "Visium import",
+      "Stereo-seq QC",
+      "Slide-seq QC",
+      "Xenium import",
+      "CosMx QC",
+      "MERFISH import",
+      "spatial segmentation",
+      "spatial registration",
+      "\u7a7a\u95f4\u7ec4\u5b66\u5bfc\u5165\u8d28\u63a7",
+      "\u7ec4\u7ec7\u56fe\u50cf\u5206\u5272\u914d\u51c6"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Import and quality-control spatial platforms and tissue images",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=0.4,<0.5"
+      ],
+      "ecosystem": "python",
+      "identity": "spatialdata-io",
+      "mismatch_policy": "block",
+      "name": "spatialdata-io",
+      "platforms": [
+        "any"
+      ],
+      "required": false,
+      "tested_versions": [
+        "0.4.0"
+      ],
+      "verified_at": "2026-08-01",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('spatialdata-io'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/scverse/spatialdata-io/tree/v0.4.0"
+    },
+    {
+      "allowed_versions": [
+        ">=0.5,<0.6"
+      ],
+      "ecosystem": "python",
+      "identity": "spatialdata",
+      "mismatch_policy": "block",
+      "name": "spatialdata",
+      "platforms": [
+        "any"
+      ],
+      "required": false,
+      "tested_versions": [
+        "0.5.0"
+      ],
+      "verified_at": "2026-08-01",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python",
+        "-c",
+        "import importlib.metadata; print(importlib.metadata.version('spatialdata'))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://spatialdata.scverse.org/en/stable/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.6,<1.7"
+      ],
+      "ecosystem": "python",
+      "identity": "squidpy",
+      "mismatch_policy": "block",
+      "name": "squidpy",
+      "platforms": [
+        "any"
+      ],
+      "required": false,
+      "tested_versions": [
+        "1.6.6"
+      ],
+      "verified_at": "2026-08-01",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.6,<1.7"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parser",
+          "description": "Squidpy 1.6.6 segments an ImageContainer rather than a SpatialData object and is validated with Scanpy 1.11.5 plus SpatialData 0.5.0.",
+          "id": "squidpy166-scanpy111-spatialdata05-image-container",
+          "required_action": "Select an explicit image pyramid level and channel, segment through ImageContainer, parse the labels into SpatialData with inherited transforms, then reload the output store.",
+          "source": "https://squidpy.readthedocs.io/en/stable/api/squidpy.im.segment.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python",
+        "-c",
+        "import squidpy; print(squidpy.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://squidpy.readthedocs.io/en/stable/api/squidpy.im.segment.html"
+    }
+  ],
+  "version": "1.0.0"
 }

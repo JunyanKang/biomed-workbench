@@ -44,7 +44,7 @@ EDGE_RELATIONS = (
     "excludes",
     "triggers",
 )
-EVIDENCE_MAP_KINDS = frozenset({"project-snapshot", "validated-delivery"})
+EVIDENCE_MAP_KINDS = frozenset({"project-snapshot", "delivery-authorization", "validated-delivery"})
 
 
 def _text(value: str, location: str, minimum: int = 12) -> str:

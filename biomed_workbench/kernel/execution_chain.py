@@ -2,12 +2,31 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from .identity import digest_value
 
 if TYPE_CHECKING:
     from .state import ProjectState
+
+
+@dataclass(frozen=True)
+class DeliveryPrerequisiteScope:
+    plan_id: str
+    delivery_node_id: str
+    covered_node_ids: tuple[str, ...]
+    covered_artifact_ids: tuple[str, ...]
+    digest: str
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "plan_id": self.plan_id,
+            "delivery_node_id": self.delivery_node_id,
+            "covered_node_ids": list(self.covered_node_ids),
+            "covered_artifact_ids": list(self.covered_artifact_ids),
+            "digest": self.digest,
+        }
 
 
 def validate_artifact_execution_chain(
@@ -117,6 +136,111 @@ def validate_validated_delivery_state(state: "ProjectState") -> tuple[str, ...]:
     return required_ids
 
 
+def validate_delivery_prerequisites(
+    state: "ProjectState",
+    delivery_node_id: str,
+) -> DeliveryPrerequisiteScope:
+    """Validate the exact retained upstream slice that may authorize delivery."""
+    active_plan = next((item for item in state.plans if item.id == state.active_plan_id), None)
+    if active_plan is None:
+        raise ValueError("delivery authorization requires an active plan")
+    nodes = {item.id: item for item in active_plan.nodes}
+    delivery = nodes.get(delivery_node_id)
+    if delivery is None:
+        raise ValueError("delivery authorization references a node outside the active plan")
+    if delivery.status not in {"pending", "ready"}:
+        raise ValueError("delivery authorization requires a not-yet-executed delivery node")
+    ancestor_ids: set[str] = set()
+    frontier = list(delivery.dependencies)
+    while frontier:
+        node_id = frontier.pop()
+        if node_id in ancestor_ids:
+            continue
+        ancestor = nodes.get(node_id)
+        if ancestor is None:
+            raise ValueError("delivery authorization has an unknown upstream dependency")
+        ancestor_ids.add(node_id)
+        frontier.extend(ancestor.dependencies)
+    if any(nodes[node_id].status != "completed" for node_id in ancestor_ids):
+        raise ValueError("delivery authorization requires every transitive ancestor to be completed")
+    ancestor_artifact_ids: set[str] = set()
+    for node_id in sorted(ancestor_ids):
+        ancestor_artifact_ids.update(
+            validate_node_execution_chain(
+                state,
+                node_id,
+                require_completed_node=True,
+                require_active_decisions=True,
+            )
+        )
+    input_artifact_ids = set(delivery.input_bindings.values())
+    registered_artifacts = {item.id: item for item in state.artifacts}
+    if not input_artifact_ids or not input_artifact_ids <= set(registered_artifacts):
+        raise ValueError("delivery authorization requires exact registered input artifact bindings")
+    active_decisions = {
+        item.artifact_id: item for item in state.scientific_decisions if item.active_evidence
+    }
+    if not input_artifact_ids <= set(active_decisions):
+        raise ValueError("delivery authorization inputs lack retained scientific decisions")
+    for artifact_id in input_artifact_ids:
+        artifact = registered_artifacts[artifact_id]
+        if artifact.producing_module_id is not None:
+            producing_node_id = validate_artifact_execution_chain(state, artifact_id)
+            if producing_node_id not in ancestor_ids:
+                raise ValueError("delivery input was not produced by an authorized ancestor")
+    covered_artifact_ids = tuple(sorted(ancestor_artifact_ids | input_artifact_ids))
+    covered_node_ids = tuple(sorted(ancestor_ids))
+    observed_ids = {
+        item.observed_execution_receipt_id
+        for item in state.artifact_reloads
+        if item.artifact_id in covered_artifact_ids
+    }
+    reload_ids = {
+        item.id for item in state.artifact_reloads if item.artifact_id in covered_artifact_ids
+    }
+    review_ids = {active_decisions[item].review_id for item in covered_artifact_ids}
+    basis = {
+        "project_id": state.context.project_id,
+        "plan_id": active_plan.id,
+        "delivery_node": delivery.to_dict(),
+        "covered_nodes": [nodes[item].to_dict() for item in covered_node_ids],
+        "covered_artifacts": [registered_artifacts[item].to_dict() for item in covered_artifact_ids],
+        "analysis_admissions": [
+            item.to_dict()
+            for item in sorted(state.analysis_admissions, key=lambda value: value.id)
+            if item.plan_node_id in {*covered_node_ids, delivery_node_id}
+        ],
+        "artifact_reviews": [
+            item.to_dict()
+            for item in sorted(state.artifact_reviews, key=lambda value: value.id)
+            if item.id in review_ids
+        ],
+        "active_decisions": [active_decisions[item].to_dict() for item in covered_artifact_ids],
+        "observed_executions": [
+            item.to_dict()
+            for item in sorted(state.observed_executions, key=lambda value: value.id)
+            if item.id in observed_ids
+        ],
+        "artifact_reloads": [
+            item.to_dict()
+            for item in sorted(state.artifact_reloads, key=lambda value: value.id)
+            if item.id in reload_ids
+        ],
+        "execution_reviews": [
+            item.to_dict()
+            for item in sorted(state.execution_reviews, key=lambda value: value.id)
+            if item.observed_execution_receipt_id in observed_ids
+        ],
+    }
+    return DeliveryPrerequisiteScope(
+        plan_id=active_plan.id,
+        delivery_node_id=delivery_node_id,
+        covered_node_ids=covered_node_ids,
+        covered_artifact_ids=covered_artifact_ids,
+        digest=digest_value(basis),
+    )
+
+
 def delivery_slice_digest(state: "ProjectState") -> str:
     """Digest only state that can change the validity of a delivery evidence map."""
     active_decisions = tuple(sorted((item for item in state.scientific_decisions if item.active_evidence), key=lambda item: item.id))
@@ -154,9 +278,32 @@ def delivery_slice_digest(state: "ProjectState") -> str:
     return digest_value(basis)
 
 
-def validated_delivery_publication_is_current(state: "ProjectState") -> bool:
+def validated_delivery_publication_is_current(state: "ProjectState", delivery_node_id: str | None = None) -> bool:
     if not state.evidence_map_versions:
         return False
+    if delivery_node_id is not None:
+        try:
+            scope = validate_delivery_prerequisites(state, delivery_node_id)
+        except ValueError:
+            return False
+        publication = next(
+            (
+                item
+                for item in reversed(state.evidence_map_versions)
+                if item.map_kind == "delivery-authorization"
+                and delivery_node_id in item.authorized_delivery_node_ids
+            ),
+            None,
+        )
+        if publication is None:
+            return False
+        return (
+            publication.covered_plan_id == scope.plan_id
+            and delivery_node_id in publication.authorized_delivery_node_ids
+            and tuple(publication.covered_node_ids) == scope.covered_node_ids
+            and tuple(publication.covered_artifact_ids) == scope.covered_artifact_ids
+            and publication.delivery_scope_digest == scope.digest
+        )
     publication = state.evidence_map_versions[-1]
     return (
         publication.map_kind == "validated-delivery"

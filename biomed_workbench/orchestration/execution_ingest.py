@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import hashlib
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -18,7 +19,7 @@ from .execution import _output_artifacts
 
 _BUNDLE_FIELDS = {"handoff_id", "process_exit_code", "runtime_versions", "outputs", "postflight_results"}
 _OUTPUT_FIELDS = {"port", "content", "payload_files"}
-_POSTFLIGHT_FIELDS = {"gate_id", "status", "observed_metric", "threshold", "evidence_payload_sha256"}
+_POSTFLIGHT_FIELDS = {"gate_id"}
 
 
 def _reload_validator(identifier: str):
@@ -29,6 +30,15 @@ def _reload_validator(identifier: str):
     if not callable(function):
         raise ValueError("reload validator entrypoint is not callable")
     return function
+
+
+def _validator_source_sha256(identifier: str) -> str:
+    module_name, _ = identifier.split(":", 1)
+    module = importlib.import_module(module_name)
+    source_path = Path(str(getattr(module, "__file__", "")))
+    if not source_path.is_file() or source_path.suffix != ".py":
+        raise ValueError("semantic validator must resolve to packaged Python source")
+    return hashlib.sha256(source_path.read_bytes()).hexdigest()
 
 
 def _validate_payload_contract(
@@ -130,20 +140,30 @@ def ingest_execution_bundle(
                 )
             )
         payloads_by_port[port.name] = tuple(imported)
-        if contract.reload_validator is not None:
-            accepted = _reload_validator(contract.reload_validator)(
+        reloaded_payloads = tuple(
+            {
+                **payload.to_dict(),
+                "path": str(artifact_store.resolve(payload)),
+            }
+            for payload in payloads_by_port[port.name]
+        )
+        accepted = _reload_validator(contract.container_reload_validator)(
+            content=content,
+            payloads=reloaded_payloads,
+            context={"module_id": manifest.id, "module_version": manifest.version, "port": port.name},
+        )
+        if accepted is not True:
+            raise ValueError(f"observed output container reload validator rejected port {port.name}")
+        if _validator_source_sha256(contract.semantic_validator) != contract.semantic_validator_sha256:
+            raise ValueError(f"semantic validator source digest differs from the frozen contract for port {port.name}")
+        accepted = _reload_validator(contract.semantic_validator)(
                 content=content,
-                payloads=tuple(
-                    {
-                        **payload.to_dict(),
-                        "path": str(artifact_store.resolve(payload)),
-                    }
-                    for payload in payloads_by_port[port.name]
-                ),
+                payloads=reloaded_payloads,
                 context={"module_id": manifest.id, "module_version": manifest.version, "port": port.name},
-            )
-            if accepted is not True:
-                raise ValueError(f"observed output reload validator rejected port {port.name}")
+                profile=contract.semantic_profile,
+        )
+        if accepted is not True:
+            raise ValueError(f"observed output semantic validator rejected port {port.name}")
     normalized_output = next(iter(content_by_port.values())) if len(content_by_port) == 1 else content_by_port
     postflight_results = bundle["postflight_results"]
     if not isinstance(postflight_results, list) or any(
@@ -158,18 +178,37 @@ def ingest_execution_bundle(
     }
     if len(by_gate) != len(postflight_results) or set(by_gate) != required_gate_ids:
         raise ValueError("postflight results must cover every required manifest gate exactly once")
-    payload_digests = {
-        payload.sha256 for values in payloads_by_port.values() for payload in values
-    }
-    for gate_id, result in by_gate.items():
-        if result["status"] != "passed":
-            raise ValueError(f"required postflight gate did not pass: {gate_id}")
-        if not isinstance(result["observed_metric"], str) or not result["observed_metric"].strip():
-            raise ValueError(f"postflight result lacks an observed metric: {gate_id}")
-        if not isinstance(result["threshold"], str) or not result["threshold"].strip():
-            raise ValueError(f"postflight result lacks its predeclared threshold: {gate_id}")
-        if result["evidence_payload_sha256"] not in payload_digests:
-            raise ValueError(f"postflight evidence digest does not match an imported payload: {gate_id}")
+    evaluated_results: dict[str, dict[str, object]] = {}
+    for gate_id in sorted(by_gate):
+        evaluations = []
+        for contract in manifest.observed_output_contracts:
+            evaluator = next(item for item in contract.gate_evaluators if item.gate_id == gate_id)
+            payloads = tuple(
+                {
+                    **payload.to_dict(),
+                    "path": str(artifact_store.resolve(payload)),
+                }
+                for payload in payloads_by_port[contract.port]
+            )
+            result = _reload_validator(evaluator.evaluator)(
+                payloads=payloads,
+                metric_key=evaluator.metric_key,
+                metric_type=evaluator.metric_type,
+                operator=evaluator.operator,
+                threshold=evaluator.threshold,
+            )
+            if not isinstance(result, Mapping) or set(result) != {
+                "status", "observed_metric", "threshold", "evidence_payload_sha256"
+            }:
+                raise ValueError(f"packaged gate evaluator returned an invalid result: {gate_id}")
+            if result["status"] != "passed":
+                raise ValueError(f"required postflight gate did not pass: {gate_id}")
+            evaluations.append({"port": contract.port, **dict(result)})
+        evaluated_results[gate_id] = {
+            "gate_id": gate_id,
+            "evaluations": evaluations,
+            "status": "passed",
+        }
     provenance = {
         "module_id": manifest.id,
         "module_version": manifest.version,
@@ -197,7 +236,7 @@ def ingest_execution_bundle(
         parameters_digest=handoff.request_digest,
         runtime_versions={str(key): str(value) for key, value in runtime_versions.items()},
         output_artifact_digests={artifact.id: artifact.content_digest for artifact in artifacts},
-        postflight_result_digests={gate_id: digest_value(dict(result)) for gate_id, result in by_gate.items()},
+        postflight_result_digests={gate_id: digest_value(result) for gate_id, result in evaluated_results.items()},
         process_exit_code=int(bundle["process_exit_code"]),
         source_kind="handoff",
         execution_request_digest=digest_value(handoff.to_dict()),
@@ -223,11 +262,11 @@ def ingest_execution_bundle(
             artifact_id=artifact.id,
             payload_digests={payload.role: payload.sha256 for payload in artifact.payloads},
             observed_output_contract_digest=current_contract_digest,
-            reload_validator_id=(
-                f"validator-{digest_value(contract.reload_validator)[:24]}"
-                if contract.reload_validator
-                else None
-            ),
+            reload_validator_id=f"validator-{digest_value({
+                'container': contract.container_reload_validator,
+                'semantic': contract.semantic_validator,
+                'semantic_sha256': contract.semantic_validator_sha256,
+            })[:24]}",
             output_schema_valid=True,
             content_digest=artifact.content_digest,
         )

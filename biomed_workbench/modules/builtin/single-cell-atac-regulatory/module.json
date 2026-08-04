@@ -38,7 +38,7 @@
         "id": "recalled-peak-matrix",
         "parameter": "grouping-reproducibility-filter-and-requantification",
         "selection_rule": "Call sample or predeclared-group pseudobulk peaks, construct a frozen reproducible or union peak set with explicit blacklist/width/support filters, and quantify that set with Signac FeatureMatrix.",
-        "validation_rule": "Preserve the original assay, require exact cell order and sparse integer counts, create a distinct recalled assay, and rerun TF-IDF, LSI and RNA–ATAC WNN before downstream comparison."
+        "validation_rule": "Preserve the original assay, require exact cell order and sparse integer counts, create a distinct recalled assay, and rerun TF-IDF, LSI and RNA\u2013ATAC WNN before downstream comparison."
       },
       {
         "decision_inputs": [
@@ -122,7 +122,7 @@
         "required_logic": [
           "Declare grouping, MACS3 or ArchR parameters, reproducibility or union rule, standard chromosomes, blacklist, width and support filters before inspecting final embeddings or target differential results.",
           "Use Signac FeatureMatrix on the indexed fragments and frozen peak set, preserve exact cell order and sparse integer counts, create a new ATAC_recalled assay, and retain the original assay.",
-          "Rerun TF-IDF, LSI and RNA–ATAC WNN from the rebuilt assay and report FRiP, sparsity, LSI-depth correlation and biological-structure sensitivity before selecting a primary representation."
+          "Rerun TF-IDF, LSI and RNA\u2013ATAC WNN from the rebuilt assay and report FRiP, sparsity, LSI-depth correlation and biological-structure sensitivity before selecting a primary representation."
         ],
         "template_files": [
           "templates/call_macs3_fragments.py",
@@ -714,6 +714,10 @@
   "input_schema": {
     "additionalProperties": false,
     "properties": {
+      "blacklist_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
       "declared_thresholds": {
         "type": "object"
       },
@@ -729,6 +733,14 @@
         "type": "string"
       },
       "motif_resource": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "paired_counts_artifact_id": {
         "minLength": 1,
         "type": "string"
       },
@@ -750,18 +762,7 @@
         ],
         "type": "string"
       },
-      "peak_reproducibility_rule": {
-        "minLength": 3,
-        "type": "string"
-      },
-      "peak_shift": {
-        "type": "integer"
-      },
       "peak_extsize": {
-        "minimum": 1,
-        "type": "integer"
-      },
-      "peak_min_width": {
         "minimum": 1,
         "type": "integer"
       },
@@ -769,20 +770,16 @@
         "minimum": 2,
         "type": "integer"
       },
-      "blacklist_artifact_id": {
-        "minLength": 1,
+      "peak_min_width": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "peak_reproducibility_rule": {
+        "minLength": 3,
         "type": "string"
       },
-      "retain_original_assay": {
-        "type": "boolean"
-      },
-      "objective": {
-        "minLength": 12,
-        "type": "string"
-      },
-      "paired_counts_artifact_id": {
-        "minLength": 1,
-        "type": "string"
+      "peak_shift": {
+        "type": "integer"
       },
       "requested_analyses": {
         "items": {
@@ -798,6 +795,9 @@
         "minItems": 1,
         "type": "array",
         "uniqueItems": true
+      },
+      "retain_original_assay": {
+        "type": "boolean"
       }
     },
     "required": [
@@ -828,6 +828,233 @@
   "maturity": "validated",
   "module_type": "analysis",
   "mutability": "read_only",
+  "observed_output_contracts": [
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "single_cell_atac_regulatory_evidence"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "narrowpeak",
+              "rds",
+              "tab-separated-values",
+              "inline-json"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "peak-called",
+              "peak-recalled-and-requantified",
+              "motif-resolved",
+              "deviation-modeled",
+              "RNA-linked",
+              "reload-validated"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "atac-fragment-accounting",
+          "metric_key": "atac-fragment-accounting",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "atac-peak-coordinate-reload",
+          "metric_key": "atac-peak-coordinate-reload",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "atac-recalled-peak-matrix",
+          "metric_key": "atac-recalled-peak-matrix",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "atac-paired-cell-and-count-preservation",
+          "metric_key": "atac-paired-cell-and-count-preservation",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "atac-motif-and-background-contract",
+          "metric_key": "atac-motif-and-background-contract",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "atac-regulatory-method-separation",
+          "metric_key": "atac-regulatory-method-separation",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "atac-output-reload",
+          "metric_key": "atac-output-reload",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "application/octet-stream",
+            "text/tab-separated-values"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "application/octet-stream",
+            "text/tab-separated-values"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "atac_regulatory_evidence",
+      "required_postflight_gate_ids": [
+        "atac-fragment-accounting",
+        "atac-peak-coordinate-reload",
+        "atac-recalled-peak-matrix",
+        "atac-paired-cell-and-count-preservation",
+        "atac-motif-and-background-contract",
+        "atac-regulatory-method-separation",
+        "atac-output-reload"
+      ],
+      "semantic_profile": "single-cell-atac-regulatory-atac-regulatory-evidence-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 3
+  },
   "output_artifacts": [
     {
       "artifact_type": "single_cell_atac_regulatory_evidence",
@@ -1099,6 +1326,20 @@
   "questions": [
     "Which accessible regions, motif deviations, and RNA-linked peaks are supported by validated single-cell ATAC and paired RNA evidence?"
   ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "single-cell-atac-regulatory",
+      "Recall scATAC peaks, rebuild the assay, and infer regulatory evidence",
+      "single-cell ATAC peak calling",
+      "MACS3 10x fragments peak calling",
+      "chromVAR motif activity",
+      "Signac peak to gene links",
+      "\u5355\u7ec6\u80de ATAC peak calling motif chromVAR peak-to-gene \u8c03\u63a7\u5206\u6790"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
   "schema_version": 1,
   "title": "Recall scATAC peaks, rebuild the assay, and infer regulatory evidence",
   "tool_requirements": [
@@ -1258,170 +1499,5 @@
       "version_source": "https://bioconductor.org/packages/3.18/bioc/html/motifmatchr.html"
     }
   ],
-  "version": "1.2.0",
-  "routing": {
-    "method_aliases": [
-      "single-cell-atac-regulatory",
-      "Recall scATAC peaks, rebuild the assay, and infer regulatory evidence",
-      "single-cell ATAC peak calling",
-      "MACS3 10x fragments peak calling",
-      "chromVAR motif activity",
-      "Signac peak to gene links",
-      "单细胞 ATAC peak calling motif chromVAR peak-to-gene 调控分析"
-    ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
-  },
-  "orchestration": {
-    "scientific_stage": 3,
-    "requires_reviewed_upstream_types": []
-  },
-  "observed_output_contracts": [
-    {
-      "content_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "artifact_type": {
-            "enum": [
-              "single_cell_atac_regulatory_evidence"
-            ],
-            "type": "string"
-          },
-          "format": {
-            "enum": [
-              "narrowpeak",
-              "rds",
-              "tab-separated-values",
-              "inline-json"
-            ],
-            "type": "string"
-          },
-          "processing_level": {
-            "enum": [
-              "peak-called",
-              "peak-recalled-and-requantified",
-              "motif-resolved",
-              "deviation-modeled",
-              "RNA-linked",
-              "reload-validated"
-            ],
-            "type": "string"
-          },
-          "provenance": {
-            "additionalProperties": false,
-            "properties": {
-              "compatibility_row_id": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "parameters_digest": {
-                "pattern": "^[0-9a-f]{64}$",
-                "type": "string"
-              },
-              "workflow": {
-                "maxLength": 200,
-                "minLength": 1,
-                "type": "string"
-              },
-              "workflow_version": {
-                "maxLength": 100,
-                "minLength": 1,
-                "type": "string"
-              }
-            },
-            "required": [
-              "workflow",
-              "workflow_version",
-              "parameters_digest",
-              "compatibility_row_id"
-            ],
-            "type": "object"
-          },
-          "record_count": {
-            "minimum": 0,
-            "type": "integer"
-          },
-          "result_summary": {
-            "maxLength": 4000,
-            "minLength": 8,
-            "type": "string"
-          }
-        },
-        "required": [
-          "artifact_type",
-          "format",
-          "processing_level",
-          "result_summary",
-          "record_count",
-          "provenance"
-        ],
-        "type": "object"
-      },
-      "payloads": [
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "application/octet-stream",
-            "text/tab-separated-values"
-          ],
-          "minimum": 1,
-          "role": "primary"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "application/octet-stream",
-            "text/tab-separated-values"
-          ],
-          "minimum": 0,
-          "role": "source-data"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/pdf",
-            "image/svg+xml",
-            "image/tiff",
-            "image/png"
-          ],
-          "minimum": 0,
-          "role": "figure"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/octet-stream",
-            "application/zip",
-            "application/x-hdf5"
-          ],
-          "minimum": 0,
-          "role": "model"
-        },
-        {
-          "maximum": 1,
-          "media_types": [
-            "application/json",
-            "text/plain"
-          ],
-          "minimum": 0,
-          "role": "log"
-        }
-      ],
-      "port": "atac_regulatory_evidence",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
-      "required_postflight_gate_ids": [
-        "atac-fragment-accounting",
-        "atac-peak-coordinate-reload",
-        "atac-recalled-peak-matrix",
-        "atac-paired-cell-and-count-preservation",
-        "atac-motif-and-background-contract",
-        "atac-regulatory-method-separation",
-        "atac-output-reload"
-      ]
-    }
-  ]
+  "version": "1.2.0"
 }

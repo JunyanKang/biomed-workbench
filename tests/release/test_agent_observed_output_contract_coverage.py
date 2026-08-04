@@ -1,4 +1,7 @@
+import hashlib
+import importlib
 import unittest
+from pathlib import Path
 
 from biomed_workbench.modules.index import BUILTIN_ROOT
 from biomed_workbench.modules.registry import ModuleRegistry
@@ -18,7 +21,16 @@ class AgentObservedOutputContractCoverageTests(unittest.TestCase):
                     self.assertTrue(blocking <= set(contract.required_postflight_gate_ids))
                     self.assertTrue(any(item.minimum > 0 for item in contract.payloads))
                     self.assertFalse(contract.content_schema.get("additionalProperties", True))
-                    self.assertIsNotNone(contract.reload_validator)
+                    self.assertTrue(contract.container_reload_validator)
+                    self.assertTrue(contract.semantic_validator)
+                    module_name, _ = contract.semantic_validator.split(":", 1)
+                    source = Path(importlib.import_module(module_name).__file__)
+                    self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(), contract.semantic_validator_sha256)
+                    self.assertEqual(
+                        {item.gate_id for item in contract.gate_evaluators},
+                        set(contract.required_postflight_gate_ids),
+                    )
+                    self.assertIn("semantic-metadata", {item.role for item in contract.payloads if item.minimum > 0})
 
 
 if __name__ == "__main__":

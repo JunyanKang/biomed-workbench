@@ -6,9 +6,17 @@ from dataclasses import replace
 from biomed_workbench.kernel.artifacts import ScientificArtifact
 from biomed_workbench.kernel.evidence import EvidenceRecord
 from biomed_workbench.kernel.execution_receipts import ExecutionHandoff
+from biomed_workbench.kernel.execution_chain import (
+    delivery_slice_digest,
+    validate_delivery_prerequisites,
+    validated_delivery_publication_is_current,
+)
 from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
 from biomed_workbench.kernel.scientific_dependency import AnalysisAdmission, ArtifactReview, ScientificDecision
+from biomed_workbench.kernel.scientific_evidence_map import EvidenceMapPublication, EvidenceMapVersion
 from biomed_workbench.kernel.state import apply_event
+from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.registry import ModuleRegistry
 from biomed_workbench.orchestration.controller import ControllerPolicy, ResearchController
 from biomed_workbench.orchestration.execution import NodeExecution, execute_node
 from biomed_workbench.orchestration.graph import build_capability_graph
@@ -96,6 +104,223 @@ def serial_fixture():
 
 
 class ResearchControllerTests(unittest.TestCase):
+    def test_delivery_authorization_map_releases_a_publication_node_without_a_completion_cycle(self):
+        payload = module_payload("publication-delivery", "analysis_result", "publication_package")
+        payload["module_type"] = "delivery"
+        payload["domains"] = ["publication"]
+        temporary, registry = workflow_registry((payload,))
+        self.addCleanup(temporary.cleanup)
+        state = state_with(inline_artifact("artifact-reviewed-result", "analysis_result"))
+        node = PlanNode(
+            id="node-publication-delivery",
+            module_id="publication-delivery",
+            input_bindings={"input_data": "artifact-reviewed-result"},
+            dependencies=(), branch_id="branch-publication",
+            target_hypothesis_ids=(hypothesis().id,),
+            expected_evidence_types=("publication-delivery",),
+            expected_output_artifact_types=("publication_package",),
+            planned_output_artifact_ids={"profile": "artifact-publication-package"},
+            compatibility_row_candidates=(registry.get("publication-delivery").compatibility_matrix[0].id,),
+            status="pending", attempt=0,
+        )
+        plan = ResearchDAG.create(
+            id="plan-publication-delivery", objective="Release a publication package from retained evidence.",
+            nodes=(node,), required_output_artifact_types=("publication_package",), plan_type="single",
+            revision=1, parent_plan_id=None,
+            rationale=("Authorize the delivery node from its exact retained input slice.",),
+        )
+        state = apply_event(state, "plan_created", {"plan": plan.to_dict(), "activate": True}, rationale="Register delivery plan.")
+        admission = AnalysisAdmission(
+            id="admission-publication-delivery", plan_node_id=node.id, hypothesis_ids=node.target_hypothesis_ids,
+            rationale_zh="基于已保留证据生成可审查的发表交付包。",
+            rationale_en="Generate a reviewable publication package from retained evidence.",
+            method="Execute the registered publication renderer against exact retained artifact identities.",
+            official_sources=("https://example.org/publication",), alternatives_considered=("Retain the evidence without rendering if authorization fails.",),
+            assumptions=("The retained input identity is current.",), parameter_justifications={"profile": "Use the registered profile."},
+            acceptance_criteria=("Reload the complete publication package.",), falsification_criteria=("A stale input identity blocks delivery.",),
+            expected_artifact_types=node.expected_output_artifact_types, approved=True,
+        )
+        state = apply_event(state, "analysis_admission_recorded", {"admission": admission.to_dict()}, rationale="Approve delivery.")
+        input_review = ArtifactReview(
+            id="review-artifact-reviewed-result", artifact_id="artifact-reviewed-result", artifact_kind="data",
+            rationale_zh="对登记输入进行技术和科学复核。", rationale_en="Review the registered input technically and scientifically.",
+            methods_zh="核对输入身份、范围和来源。", methods_en="Verify input identity, scope, and provenance.",
+            results_zh="输入完整且适合进入发表交付。", results_en="The input is complete and eligible for publication delivery.",
+            conclusion_zh="保留该输入作为当前证据。", conclusion_en="Retain this input as current evidence.", panels=(),
+            technical_status="passed", statistical_status="passed", biological_status="passed", robustness_status="passed",
+            limitations_zh=("该测试验证交付授权状态机。",), limitations_en=("This test validates the delivery authorization state machine.",),
+            recommended_action="retain-as-evidence", source_urls=("https://example.org/publication",),
+        )
+        state = apply_event(state, "artifact_review_recorded", {"review": input_review.to_dict()}, rationale="Review input.")
+        retained = ScientificDecision(
+            id="decision-artifact-reviewed-result", review_id=input_review.id, artifact_id="artifact-reviewed-result",
+            hypothesis_ids=(hypothesis().id,), action="retain-as-evidence",
+            rationale_zh="输入通过评审并保留用于交付。", rationale_en="The reviewed input is retained for delivery.",
+            active_evidence=True, next_plan_node_ids=(node.id,),
+        )
+        state = apply_event(state, "scientific_decision_recorded", {"decision": retained.to_dict()}, rationale="Retain input.")
+
+        controller = _StrictResearchController(
+            registry, environment_provider=lambda _manifest: None,
+            node_executor=lambda current, _plan, current_node, active_registry, **_kwargs: completed_execution(current, current_node, active_registry),
+        )
+        blocked = controller.advance(state, plan)
+        self.assertEqual(blocked.stop_reason, "awaiting_evidence_map")
+        scope = validate_delivery_prerequisites(blocked.state, node.id)
+        publication = EvidenceMapPublication(
+            id="evidence-map-authorization", version=EvidenceMapVersion(
+                version="1.0.0", revision=1, parent_map_digest=None, change_type="initial",
+                change_summary_zh="发布精确上游证据切片以授权发表交付。",
+                change_summary_en="Publish the exact upstream evidence slice to authorize delivery.",
+                map_kind="delivery-authorization",
+            ),
+            map_digest="1" * 64, edge_table_digest="2" * 64,
+            source_state_digest=blocked.state.state_digest, dependency_bundle_digest="3" * 64,
+            map_kind="delivery-authorization", delivery_slice_digest=delivery_slice_digest(blocked.state),
+            active_artifact_ids=("artifact-reviewed-result",), covered_plan_id=scope.plan_id,
+            covered_node_ids=scope.covered_node_ids, covered_artifact_ids=scope.covered_artifact_ids,
+            authorized_delivery_node_ids=(node.id,), delivery_scope_digest=scope.digest,
+        )
+        authorized = apply_event(
+            blocked.state, "evidence_map_published", {"publication": publication.to_dict()},
+            rationale="Authorize this exact delivery node from its retained upstream slice.",
+        )
+        released = controller.resume(authorized.to_dict())
+        self.assertEqual(released.stop_reason, "awaiting_artifact_review")
+        self.assertEqual(len(released.executions), 1)
+
+    def test_registered_delivery_modules_each_have_a_reachable_authorized_execution(self):
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
+        delivery_module_ids = (
+            "patent-flowchart-svg",
+            "presentation-delivery-plan",
+            "trajectory-spatial-figure-package",
+        )
+        for module_id in delivery_module_ids:
+            with self.subTest(module_id=module_id):
+                manifest = registry.get(module_id)
+                self.assertEqual(manifest.module_type, "delivery")
+                input_port = manifest.input_artifacts[0]
+                output_port = manifest.output_artifacts[0]
+                input_id = f"artifact-input-{module_id}"
+                node_id = f"node-{module_id}"
+                state = state_with(inline_artifact(input_id, input_port.artifact_type))
+                node = PlanNode(
+                    id=node_id,
+                    module_id=module_id,
+                    input_bindings={input_port.name: input_id},
+                    dependencies=(),
+                    branch_id=f"branch-{module_id}",
+                    target_hypothesis_ids=(hypothesis().id,),
+                    expected_evidence_types=("publication-delivery",),
+                    expected_output_artifact_types=(output_port.artifact_type,),
+                    planned_output_artifact_ids={output_port.name: f"artifact-output-{module_id}"},
+                    compatibility_row_candidates=(manifest.compatibility_matrix[0].id,),
+                    status="pending",
+                    attempt=0,
+                )
+                plan = ResearchDAG.create(
+                    id=f"plan-{module_id}",
+                    objective=f"Authorize the registered {module_id} delivery.",
+                    nodes=(node,),
+                    required_output_artifact_types=(output_port.artifact_type,),
+                    plan_type="single",
+                    revision=1,
+                    parent_plan_id=None,
+                    rationale=("Bind authorization to the exact retained input and delivery node.",),
+                )
+                state = apply_event(
+                    state,
+                    "plan_created",
+                    {"plan": plan.to_dict(), "activate": True},
+                    rationale="Register the delivery plan.",
+                )
+                admission = AnalysisAdmission(
+                    id=f"admission-{module_id}",
+                    plan_node_id=node_id,
+                    hypothesis_ids=node.target_hypothesis_ids,
+                    rationale_zh="依据当前保留证据生成指定的研究交付物。",
+                    rationale_en="Generate the specified research deliverable from current retained evidence.",
+                    method=f"Execute registered delivery module {module_id} with its exact input binding.",
+                    official_sources=("https://github.com/JunyanKang/biomed-workbench",),
+                    alternatives_considered=("Keep the retained evidence without delivery if authorization fails.",),
+                    assumptions=("The registered input identity is current.",),
+                    parameter_justifications={"contract": "Use the registered compatibility row."},
+                    acceptance_criteria=("Reload every declared delivery artifact.",),
+                    falsification_criteria=("Any input-identity drift blocks delivery.",),
+                    expected_artifact_types=node.expected_output_artifact_types,
+                    approved=True,
+                )
+                state = apply_event(
+                    state,
+                    "analysis_admission_recorded",
+                    {"admission": admission.to_dict()},
+                    rationale="Approve the exact delivery method.",
+                )
+                review = ArtifactReview(
+                    id=f"review-{module_id}", artifact_id=input_id, artifact_kind="data",
+                    rationale_zh="复核交付输入的身份、范围和来源。",
+                    rationale_en="Review the delivery input identity, scope, and provenance.",
+                    methods_zh="逐项核对登记内容、科学范围、来源记录和身份校验值。",
+                    methods_en="Verify the registered content, scientific scope, provenance record, and identity digest.",
+                    results_zh="登记输入的身份、科学范围、来源记录和内容校验均保持一致。",
+                    results_en="The registered input identity, scientific scope, provenance, and content digest are consistent.",
+                    conclusion_zh="该输入通过技术与科学复核，可保留为当前交付节点的有效证据。",
+                    conclusion_en="The input passes technical and scientific review and may be retained as current evidence for delivery.", panels=(),
+                    technical_status="passed", statistical_status="passed", biological_status="passed", robustness_status="passed",
+                    limitations_zh=("该受控样例验证授权闭环，不代表外部渲染后端已经执行。",),
+                    limitations_en=("This controlled fixture validates authorization closure, not execution of an external renderer.",),
+                    recommended_action="retain-as-evidence",
+                    source_urls=("https://github.com/JunyanKang/biomed-workbench",),
+                )
+                state = apply_event(
+                    state, "artifact_review_recorded", {"review": review.to_dict()}, rationale="Review delivery input."
+                )
+                decision = ScientificDecision(
+                    id=f"decision-{module_id}", review_id=review.id, artifact_id=input_id,
+                    hypothesis_ids=(hypothesis().id,), action="retain-as-evidence",
+                    rationale_zh="该输入的身份、范围和来源通过复核，因此保留为交付节点的有效证据。",
+                    rationale_en="The input identity, scope, and provenance passed review, so it is retained as active evidence for delivery.",
+                    active_evidence=True, next_plan_node_ids=(node_id,),
+                )
+                state = apply_event(
+                    state, "scientific_decision_recorded", {"decision": decision.to_dict()}, rationale="Retain delivery input."
+                )
+                controller = _StrictResearchController(
+                    registry,
+                    environment_provider=lambda _manifest: None,
+                    node_executor=lambda current, _plan, current_node, active_registry, **_kwargs: completed_execution(
+                        current, current_node, active_registry
+                    ),
+                )
+                blocked = controller.advance(state, plan)
+                self.assertEqual(blocked.stop_reason, "awaiting_evidence_map")
+                scope = validate_delivery_prerequisites(blocked.state, node_id)
+                publication = EvidenceMapPublication(
+                    id=f"evidence-map-{module_id}",
+                    version=EvidenceMapVersion(
+                        version="1.0.0", revision=1, parent_map_digest=None, change_type="initial",
+                        change_summary_zh="发布精确证据切片以授权交付。",
+                        change_summary_en="Publish the exact evidence slice to authorize delivery.",
+                        map_kind="delivery-authorization",
+                    ),
+                    map_digest="1" * 64, edge_table_digest="2" * 64,
+                    source_state_digest=blocked.state.state_digest, dependency_bundle_digest="3" * 64,
+                    map_kind="delivery-authorization", delivery_slice_digest=delivery_slice_digest(blocked.state),
+                    active_artifact_ids=(input_id,), covered_plan_id=scope.plan_id,
+                    covered_node_ids=scope.covered_node_ids, covered_artifact_ids=scope.covered_artifact_ids,
+                    authorized_delivery_node_ids=(node_id,), delivery_scope_digest=scope.digest,
+                )
+                authorized = apply_event(
+                    blocked.state, "evidence_map_published", {"publication": publication.to_dict()},
+                    rationale="Authorize only this delivery node and exact retained slice.",
+                )
+                self.assertTrue(validated_delivery_publication_is_current(authorized, node_id))
+                self.assertFalse(validated_delivery_publication_is_current(authorized, f"other-{node_id}"))
+                released = controller.resume(authorized.to_dict())
+                self.assertEqual(released.stop_reason, "awaiting_artifact_review")
+                self.assertEqual(tuple(item.module_id for item in released.executions), (module_id,))
+
     def test_upstream_required_port_rejects_an_unreviewed_project_input_at_runtime(self):
         payload = module_payload("reviewed-upstream-consumer", "normalized_matrix", "contrast_result")
         payload["input_artifacts"][0]["source_policy"] = "upstream_required"

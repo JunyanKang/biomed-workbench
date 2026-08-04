@@ -36,6 +36,12 @@ _LOCAL_PATH_PATTERNS = (
     re.compile(r"file://"),
     re.compile(r"[A-Za-z]:\\\\Users\\\\"),
 )
+_TEMPORARY_PATH_PREFIXES = (
+    "/tmp/",
+    "/private/tmp/",
+    "/var/" + "folders/",
+    "/private/" + "var/folders/",
+)
 _CASE_REQUIRED_FIELDS = frozenset({"name", "input", "expected_subset"})
 _CASE_OPTIONAL_FIELDS = frozenset({"http_fixtures"})
 _HTTP_FIXTURE_REQUIRED_FIELDS = frozenset({"url", "status", "headers"})
@@ -179,6 +185,22 @@ def _validated_output_projection(expected: Any, actual: Any) -> Any:
             for key, value in expected.items()
         }
     return actual
+
+
+def _normalized_output_identity(value: Any) -> Any:
+    """Normalize machine-local paths while retaining the complete returned structure."""
+    if isinstance(value, dict):
+        return {key: _normalized_output_identity(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_normalized_output_identity(item) for item in value]
+    if isinstance(value, str):
+        if value.startswith(_TEMPORARY_PATH_PREFIXES):
+            return f"<temporary-path>/{Path(value).name}"
+        normalized = value
+        for pattern in _LOCAL_PATH_PATTERNS:
+            normalized = pattern.sub("<machine-local>/", normalized)
+        return normalized
+    return value
 
 
 def _resolve_entrypoint(manifest: ModuleManifest):
@@ -409,18 +431,35 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
                 for index in range(len(cases)):
                     if execute_tests:
                         output = _run_case_isolated(module_path, manifest, index)
+                        normalized_output = _normalized_output_identity(output)
                         fixture_receipts.append({
                             "case_name": cases[index]["name"],
                             "case_digest": hashlib.sha256(
                                 json.dumps(cases[index], sort_keys=True, separators=(",", ":")).encode("utf-8")
                             ).hexdigest(),
-                            "reloaded_output_digest": hashlib.sha256(
+                            "module_id": manifest.id,
+                            "module_version": manifest.version,
+                            "compatibility_row_id": manifest.compatibility_matrix[0].id,
+                            "full_normalized_output_digest": hashlib.sha256(
+                                json.dumps(
+                                    normalized_output,
+                                    sort_keys=True,
+                                    separators=(",", ":"),
+                                ).encode("utf-8")
+                            ).hexdigest(),
+                            "validated_projection_digest": hashlib.sha256(
                                 json.dumps(
                                     _validated_output_projection(cases[index]["expected_subset"], output),
                                     sort_keys=True,
                                     separators=(",", ":"),
                                 ).encode("utf-8")
                             ).hexdigest(),
+                            "runtime_versions": {
+                                "python": ".".join(str(value) for value in sys.version_info[:3]),
+                                "kernel": VERSION,
+                            },
+                            "reload_method": "isolated-process-json-decode-and-schema-subset-validation",
+                            "round_trip_kind": "process-json",
                         })
                         executed += 1
         except (ModuleValidationError, InputValidationError) as exc:
@@ -434,7 +473,7 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
         else None
     )
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "module_id": manifest.id if manifest else module_path.name,
         "module_version": manifest.version if manifest else None,
         "kernel_version": VERSION,

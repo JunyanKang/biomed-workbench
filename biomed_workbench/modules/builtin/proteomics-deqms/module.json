@@ -1,85 +1,464 @@
 {
-  "schema_version": 1,
-  "id": "proteomics-deqms",
-  "version": "1.0.0",
-  "title": "Run peptide-count-aware DEqMS proteomics inference",
-  "description": "Generate and execute a coefficient-bound limma plus DEqMS workflow with explicit protein-support counts, full-rank design validation, official variance/count diagnostics, standardized figures, output reload, and provenance.",
-  "module_type": "analysis",
-  "domains": ["omics", "proteomics"],
-  "intents": ["DEqMS", "proteomics differential abundance", "peptide count adjusted proteomics", "蛋白质组 DEqMS 差异分析"],
-  "questions": ["Which proteins change for the declared contrast after DEqMS models the dependence of variance on peptide or PSM support?"],
-  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "maturity": "validated",
-  "input_artifacts": [
-    {"name": "protein_abundance", "artifact_type": "protein_abundance_matrix", "processing_levels": ["normalized", "sample-level"], "required_metadata": ["source-sha256", "abundance-scale", "normalization", "missingness-policy", "protein-id-namespace"], "formats": [{"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["protein-by-sample"]}]},
-    {"name": "protein_support", "artifact_type": "protein_support_count", "processing_levels": ["quantified", "contrast-ready"], "required_metadata": ["source-sha256", "count-semantics", "aggregation-rule"], "formats": [{"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["protein-by-support-count"]}]},
-    {"name": "sample_design", "artifact_type": "proteomics_sample_design", "processing_levels": ["declared", "reviewed"], "required_metadata": ["source-sha256", "experimental-unit", "formula", "contrast"], "formats": [{"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["sample-by-design-variable"]}]}
-  ],
-  "output_artifacts": [{"name": "deqms_inference", "artifact_type": "deqms_proteomics_inference", "processing_levels": ["modeled", "diagnosed", "reloaded"], "required_metadata": ["module-version", "generated-code-sha256", "input-digests", "formula", "coefficient", "count-semantics", "actual-tool-versions", "quality-gates"], "formats": [
-    {"name": "tab-separated-values", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["protein-by-effect-and-statistic"]},
-    {"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["method-quality-summary"]},
-    {"name": "pdf", "versions": ["1.7"], "representations": ["binary"], "compression": ["internal"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["publication-figure"]},
-    {"name": "svg", "versions": ["1.1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["publication-figure"]}
-  ]}],
-  "preconditions": ["Abundance, protein support counts, and design refer to the same biological samples and protein identifiers; normalization, missingness, experimental unit, formula, and a directional limma contrast are declared before modeling."],
-  "assumptions": ["The supplied support count has the peptide or PSM semantics justified for the upstream quantification method and declared contrast."],
-  "quality_gates": [
-    {"id": "deqms-input-design", "severity": "fatal", "description": "Block unless sample order, protein identifiers, normalized abundance scale, support-count semantics, biological replication, full-rank formula, and coefficient direction are explicit and valid.", "blocks_interpretation": true},
-    {"id": "deqms-model-diagnostics", "severity": "fatal", "description": "Require the same coefficient in spectraCounteBayes and outputResult, positive support counts, residual degrees of freedom, official variance/count and residual diagnostics, and reloadable bounded statistics.", "blocks_interpretation": true},
-    {"id": "deqms-claim-boundary", "severity": "major", "description": "Report abundance association for the declared contrast without converting statistical significance into causal, pathway, or direct-regulation claims.", "blocks_interpretation": true}
-  ],
-  "limitations": ["This module does not guess normalization, missingness, imputation, peptide-to-protein roll-up, support-count construction, or experimental design. Consequential results require biological validation."],
-  "evidence_effects": ["adds-peptide-count-aware-protein-inference"],
-  "alternatives": ["differential-expression"],
-  "complements": ["functional-enrichment", "wgcna-coexpression", "figure-specification"],
-  "tool_requirements": [{"name": "DEqMS", "ecosystem": "r", "identity": "DEqMS", "required": true, "tested_versions": ["1.20.0"], "allowed_versions": [">=1.20,<1.21"], "version_source": "https://bioconductor.org/packages/release/bioc/html/DEqMS.html", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('DEqMS')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "deqms-coefficient-count-model", "affected_versions": [">=1.20,<1.21"], "category": "api", "description": "spectraCounteBayes and outputResult require an explicitly matched coefficient and fit count field.", "compatibility_effect": "requires-parameter", "required_action": "Record and verify the same coefficient index and the upstream protein support-count semantics.", "source": "https://bioconductor.org/packages/release/bioc/manuals/DEqMS/man/DEqMS.pdf"}], "platforms": ["any"]}],
-  "dependencies": [
-    {"name": "r", "ecosystem": "runtime", "identity": "r-runtime", "required": true, "tested_versions": ["4.3.2"], "allowed_versions": [">=4.3,<4.4"], "version_source": "https://cran.r-project.org/", "verified_at": "2026-07-30", "version_probe": ["Rscript", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute the verified DEqMS R template.", "conflicts": [], "platforms": ["any"]},
-    {"name": "limma", "ecosystem": "r", "identity": "limma", "required": true, "tested_versions": ["3.58.1"], "allowed_versions": [">=3.58,<3.59"], "version_source": "https://bioconductor.org/packages/release/bioc/html/limma.html", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('limma')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Fit the full-rank protein abundance linear model.", "conflicts": [], "platforms": ["any"]},
-    {"name": "jsonlite", "ecosystem": "r", "identity": "jsonlite", "required": true, "tested_versions": ["2.0.0"], "allowed_versions": [">=2.0,<2.1"], "version_source": "https://cran.r-project.org/package=jsonlite", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('jsonlite')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Write the machine-readable DEqMS quality report.", "conflicts": [], "platforms": ["any"]},
-    {"name": "digest", "ecosystem": "r", "identity": "digest", "required": true, "tested_versions": ["0.6.39"], "allowed_versions": [">=0.6.39,<0.7"], "version_source": "https://cran.r-project.org/package=digest", "verified_at": "2026-07-30", "version_probe": ["Rscript", "-e", "cat(as.character(packageVersion('digest')))"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Bind source and result artifacts to SHA-256 provenance.", "conflicts": [], "platforms": ["any"]}
-  ],
-  "compatibility_matrix": [{"id": "deqms-120-r43-tsv1", "module_version": "1.0.0", "tool_versions": {"DEqMS": [">=1.20,<1.21"]}, "dependency_versions": {"r": [">=4.3,<4.4"], "limma": [">=3.58,<3.59"], "jsonlite": [">=2.0,<2.1"], "digest": [">=0.6.39,<0.7"]}, "input_formats": {"protein_abundance": ["tab-separated-values@1"], "protein_support": ["tab-separated-values@1"], "sample_design": ["tab-separated-values@1"]}, "output_formats": {"deqms_inference": ["tab-separated-values@1", "inline-json@1", "pdf@1.7", "svg@1.1"]}, "platforms": ["any"], "regression_evidence_ids": ["proteomics-deqms-regression-v1"], "end_to_end_evidence_ids": ["proteomics-deqms-e2e-v1"], "verified_at": "2026-07-30"}],
   "access": "agent_generated",
-  "mutability": "read_only",
-  "credentials": [],
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {"objective": {"type": "string", "minLength": 12}, "abundance_artifact_id": {"type": "string", "minLength": 1}, "support_count_artifact_id": {"type": "string", "minLength": 1}, "design_artifact_id": {"type": "string", "minLength": 1}, "formula": {"type": "string", "minLength": 2}, "contrast": {"type": "string", "minLength": 1}, "factor_columns": {"type": "array", "items": {"type": "string"}}, "support_count_semantics": {"type": "string", "minLength": 8}, "normalization": {"type": "string", "minLength": 3}, "missingness_policy": {"type": "string", "minLength": 3}}, "required": ["objective", "abundance_artifact_id", "support_count_artifact_id", "design_artifact_id", "formula", "contrast", "factor_columns", "support_count_semantics", "normalization", "missingness_policy"]},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"handoff_type": {"type": "string"}, "module": {"type": "object"}, "request_digest": {"type": "string"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}}, "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]},
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["https://bioconductor.org/packages/release/bioc/manuals/DEqMS/man/DEqMS.pdf", "https://www.nature.com/articles/s41596-026-01349-7", "https://github.com/yafeng/DEqMS", "docs/capabilities/advanced-omics-evidence-standard.md"]},
-  "code_templates": [{"path": "templates/run_deqms.R", "language": "r", "purpose": "Fit, diagnose, reload, and provenance-bind coefficient-specific limma plus DEqMS protein inference.", "quality_gate_ids": ["deqms-input-design", "deqms-model-diagnostics", "deqms-claim-boundary"], "requires_adaptation": false}],
   "agent_protocol": {
-    "schema_version": 1,
-    "mode": "packaged_parameterized_workflow",
-    "languages": ["r", "notebook"],
-    "template_sections": [{"id": "fit-diagnose-reload-deqms", "purpose": "Validate protein abundance, support, sample design, coefficient, DEqMS fit, official diagnostics, and result reload.", "required_logic": ["Inspect ordered samples, protein identifiers, abundance scale, missingness, normalization, support-count construction, experimental units, factor levels, design rank and coefficient direction.", "Execute limma, attach the declared protein count, call spectraCounteBayes and outputResult with the same coefficient, and retain official DEqMS diagnostics.", "Reload tables and figures, verify p-value bounds and provenance, and block causal or pathway claims."], "output_artifact_types": ["deqms_proteomics_inference"], "template_files": ["templates/run_deqms.R"]}],
-    "parameter_rules": [{"id": "deqms-design-support", "parameter": "formula-coefficient-support-count", "decision_inputs": ["experimental design", "quantification method", "missingness", "peptide or PSM evidence", "contrast"], "selection_rule": "Declare a full-rank design and directional coefficient and construct the protein support count according to the upstream quantification design before inspecting differential significance.", "validation_rule": "Require ordered sample identity, residual degrees of freedom, positive integer support, the same coefficient in both DEqMS calls, and official count-variance diagnostics."}],
-    "preflight_checks": ["Detect exact R, DEqMS, limma, jsonlite and digest versions in the project-approved runtime.", "Inspect actual matrices and design; block ambiguous support-count semantics, non-biological replication, rank deficiency, or unrecorded preprocessing."],
-    "postflight_checks": ["Reload the full DEqMS result and every PDF/SVG diagnostic, verify coefficient identity, finite effects, bounded p values, digests, versions and quality gates."],
-    "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-digests", "normalization", "missingness-policy", "support-count-semantics", "formula", "coefficient", "factor-levels", "actual-tool-versions", "plot-standard-version", "output-digests", "quality-gates"],
-    "forbidden_actions": ["Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.", "Do not invent protein support counts, impute design variables, treat technical runs as replicates, repair rank deficiency silently, select a coefficient after reviewing significance, or present generated but unexecuted code as evidence."],
-    "requires_observed_execution": true
-  },
-  "routing": {
-    "method_aliases": [
-      "proteomics-deqms",
-      "Run peptide-count-aware DEqMS proteomics inference",
-      "DEqMS",
-      "proteomics differential abundance",
-      "peptide count adjusted proteomics",
-      "蛋白质组 DEqMS 差异分析"
+    "forbidden_actions": [
+      "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
+      "Do not invent protein support counts, impute design variables, treat technical runs as replicates, repair rank deficiency silently, select a coefficient after reviewing significance, or present generated but unexecuted code as evidence."
     ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
+    "languages": [
+      "r",
+      "notebook"
+    ],
+    "mode": "packaged_parameterized_workflow",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "experimental design",
+          "quantification method",
+          "missingness",
+          "peptide or PSM evidence",
+          "contrast"
+        ],
+        "id": "deqms-design-support",
+        "parameter": "formula-coefficient-support-count",
+        "selection_rule": "Declare a full-rank design and directional coefficient and construct the protein support count according to the upstream quantification design before inspecting differential significance.",
+        "validation_rule": "Require ordered sample identity, residual degrees of freedom, positive integer support, the same coefficient in both DEqMS calls, and official count-variance diagnostics."
+      }
+    ],
+    "postflight_checks": [
+      "Reload the full DEqMS result and every PDF/SVG diagnostic, verify coefficient identity, finite effects, bounded p values, digests, versions and quality gates."
+    ],
+    "preflight_checks": [
+      "Detect exact R, DEqMS, limma, jsonlite and digest versions in the project-approved runtime.",
+      "Inspect actual matrices and design; block ambiguous support-count semantics, non-biological replication, rank deficiency, or unrecorded preprocessing."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "input-digests",
+      "normalization",
+      "missingness-policy",
+      "support-count-semantics",
+      "formula",
+      "coefficient",
+      "factor-levels",
+      "actual-tool-versions",
+      "plot-standard-version",
+      "output-digests",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "fit-diagnose-reload-deqms",
+        "output_artifact_types": [
+          "deqms_proteomics_inference"
+        ],
+        "purpose": "Validate protein abundance, support, sample design, coefficient, DEqMS fit, official diagnostics, and result reload.",
+        "required_logic": [
+          "Inspect ordered samples, protein identifiers, abundance scale, missingness, normalization, support-count construction, experimental units, factor levels, design rank and coefficient direction.",
+          "Execute limma, attach the declared protein count, call spectraCounteBayes and outputResult with the same coefficient, and retain official DEqMS diagnostics.",
+          "Reload tables and figures, verify p-value bounds and provenance, and block causal or pathway claims."
+        ],
+        "template_files": [
+          "templates/run_deqms.R"
+        ]
+      }
+    ]
   },
-  "orchestration": {
-    "scientific_stage": 3,
-    "requires_reviewed_upstream_types": []
+  "alternatives": [
+    "differential-expression"
+  ],
+  "assumptions": [
+    "The supplied support count has the peptide or PSM semantics justified for the upstream quantification method and declared contrast."
+  ],
+  "code_templates": [
+    {
+      "language": "r",
+      "path": "templates/run_deqms.R",
+      "purpose": "Fit, diagnose, reload, and provenance-bind coefficient-specific limma plus DEqMS protein inference.",
+      "quality_gate_ids": [
+        "deqms-input-design",
+        "deqms-model-diagnostics",
+        "deqms-claim-boundary"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "digest": [
+          ">=0.6.39,<0.7"
+        ],
+        "jsonlite": [
+          ">=2.0,<2.1"
+        ],
+        "limma": [
+          ">=3.58,<3.59"
+        ],
+        "r": [
+          ">=4.3,<4.4"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "proteomics-deqms-e2e-v1"
+      ],
+      "id": "deqms-120-r43-tsv1",
+      "input_formats": {
+        "protein_abundance": [
+          "tab-separated-values@1"
+        ],
+        "protein_support": [
+          "tab-separated-values@1"
+        ],
+        "sample_design": [
+          "tab-separated-values@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "deqms_inference": [
+          "tab-separated-values@1",
+          "inline-json@1",
+          "pdf@1.7",
+          "svg@1.1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "proteomics-deqms-regression-v1"
+      ],
+      "tool_versions": {
+        "DEqMS": [
+          ">=1.20,<1.21"
+        ]
+      },
+      "verified_at": "2026-07-30"
+    }
+  ],
+  "complements": [
+    "functional-enrichment",
+    "wgcna-coexpression",
+    "figure-specification"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=4.3,<4.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "r-runtime",
+      "name": "r",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the verified DEqMS R template.",
+      "required": true,
+      "tested_versions": [
+        "4.3.2"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=3.58,<3.59"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "limma",
+      "name": "limma",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Fit the full-rank protein abundance linear model.",
+      "required": true,
+      "tested_versions": [
+        "3.58.1"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('limma')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://bioconductor.org/packages/release/bioc/html/limma.html"
+    },
+    {
+      "allowed_versions": [
+        ">=2.0,<2.1"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "jsonlite",
+      "name": "jsonlite",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Write the machine-readable DEqMS quality report.",
+      "required": true,
+      "tested_versions": [
+        "2.0.0"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('jsonlite')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=jsonlite"
+    },
+    {
+      "allowed_versions": [
+        ">=0.6.39,<0.7"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "digest",
+      "name": "digest",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Bind source and result artifacts to SHA-256 provenance.",
+      "required": true,
+      "tested_versions": [
+        "0.6.39"
+      ],
+      "verified_at": "2026-07-30",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('digest')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=digest"
+    }
+  ],
+  "description": "Generate and execute a coefficient-bound limma plus DEqMS workflow with explicit protein-support counts, full-rank design validation, official variance/count diagnostics, standardized figures, output reload, and provenance.",
+  "domains": [
+    "omics",
+    "proteomics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "evidence_effects": [
+    "adds-peptide-count-aware-protein-inference"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
   },
+  "id": "proteomics-deqms",
+  "input_artifacts": [
+    {
+      "artifact_type": "protein_abundance_matrix",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "protein-by-sample"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "protein_abundance",
+      "processing_levels": [
+        "normalized",
+        "sample-level"
+      ],
+      "required_metadata": [
+        "source-sha256",
+        "abundance-scale",
+        "normalization",
+        "missingness-policy",
+        "protein-id-namespace"
+      ]
+    },
+    {
+      "artifact_type": "protein_support_count",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "protein-by-support-count"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "protein_support",
+      "processing_levels": [
+        "quantified",
+        "contrast-ready"
+      ],
+      "required_metadata": [
+        "source-sha256",
+        "count-semantics",
+        "aggregation-rule"
+      ]
+    },
+    {
+      "artifact_type": "proteomics_sample_design",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "sample-by-design-variable"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "sample_design",
+      "processing_levels": [
+        "declared",
+        "reviewed"
+      ],
+      "required_metadata": [
+        "source-sha256",
+        "experimental-unit",
+        "formula",
+        "contrast"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "abundance_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "contrast": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "design_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "factor_columns": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "formula": {
+        "minLength": 2,
+        "type": "string"
+      },
+      "missingness_policy": {
+        "minLength": 3,
+        "type": "string"
+      },
+      "normalization": {
+        "minLength": 3,
+        "type": "string"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "support_count_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "support_count_semantics": {
+        "minLength": 8,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "abundance_artifact_id",
+      "support_count_artifact_id",
+      "design_artifact_id",
+      "formula",
+      "contrast",
+      "factor_columns",
+      "support_count_semantics",
+      "normalization",
+      "missingness_policy"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "DEqMS",
+    "proteomics differential abundance",
+    "peptide count adjusted proteomics",
+    "\u86cb\u767d\u8d28\u7ec4 DEqMS \u5dee\u5f02\u5206\u6790"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module does not guess normalization, missingness, imputation, peptide-to-protein roll-up, support-count construction, or experimental design. Consequential results require biological validation."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
   "observed_output_contracts": [
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -157,6 +536,35 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "deqms-input-design",
+          "metric_key": "deqms-input-design",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "deqms-model-diagnostics",
+          "metric_key": "deqms-model-diagnostics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "deqms-claim-boundary",
+          "metric_key": "deqms-claim-boundary",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -168,6 +576,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -212,12 +628,281 @@
         }
       ],
       "port": "deqms_inference",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "deqms-input-design",
         "deqms-model-diagnostics",
         "deqms-claim-boundary"
+      ],
+      "semantic_profile": "proteomics-deqms-deqms-inference-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 3
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "deqms_proteomics_inference",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "protein-by-effect-and-statistic"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "method-quality-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "internal"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "pdf",
+          "orientations": [
+            "publication-figure"
+          ],
+          "representations": [
+            "binary"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.7"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "svg",
+          "orientations": [
+            "publication-figure"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.1"
+          ]
+        }
+      ],
+      "name": "deqms_inference",
+      "processing_levels": [
+        "modeled",
+        "diagnosed",
+        "reloaded"
+      ],
+      "required_metadata": [
+        "module-version",
+        "generated-code-sha256",
+        "input-digests",
+        "formula",
+        "coefficient",
+        "count-semantics",
+        "actual-tool-versions",
+        "quality-gates"
       ]
     }
-  ]
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Abundance, protein support counts, and design refer to the same biological samples and protein identifiers; normalization, missingness, experimental unit, formula, and a directional limma contrast are declared before modeling."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://bioconductor.org/packages/release/bioc/manuals/DEqMS/man/DEqMS.pdf",
+      "https://www.nature.com/articles/s41596-026-01349-7",
+      "https://github.com/yafeng/DEqMS",
+      "docs/capabilities/advanced-omics-evidence-standard.md"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block unless sample order, protein identifiers, normalized abundance scale, support-count semantics, biological replication, full-rank formula, and coefficient direction are explicit and valid.",
+      "id": "deqms-input-design",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require the same coefficient in spectraCounteBayes and outputResult, positive support counts, residual degrees of freedom, official variance/count and residual diagnostics, and reloadable bounded statistics.",
+      "id": "deqms-model-diagnostics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Report abundance association for the declared contrast without converting statistical significance into causal, pathway, or direct-regulation claims.",
+      "id": "deqms-claim-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which proteins change for the declared contrast after DEqMS models the dependence of variance on peptide or PSM support?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "proteomics-deqms",
+      "Run peptide-count-aware DEqMS proteomics inference",
+      "DEqMS",
+      "proteomics differential abundance",
+      "peptide count adjusted proteomics",
+      "\u86cb\u767d\u8d28\u7ec4 DEqMS \u5dee\u5f02\u5206\u6790"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Run peptide-count-aware DEqMS proteomics inference",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=1.20,<1.21"
+      ],
+      "ecosystem": "r",
+      "identity": "DEqMS",
+      "mismatch_policy": "block",
+      "name": "DEqMS",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.20.0"
+      ],
+      "verified_at": "2026-07-30",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=1.20,<1.21"
+          ],
+          "category": "api",
+          "compatibility_effect": "requires-parameter",
+          "description": "spectraCounteBayes and outputResult require an explicitly matched coefficient and fit count field.",
+          "id": "deqms-coefficient-count-model",
+          "required_action": "Record and verify the same coefficient index and the upstream protein support-count semantics.",
+          "source": "https://bioconductor.org/packages/release/bioc/manuals/DEqMS/man/DEqMS.pdf"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('DEqMS')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://bioconductor.org/packages/release/bioc/html/DEqMS.html"
+    }
+  ],
+  "version": "1.0.0"
 }

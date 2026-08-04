@@ -1,6 +1,429 @@
-{"schema_version":1,"id":"rrblup-genomic-prediction","version":"0.1.0","title":"Evaluate grouped held-out RR-BLUP genomic prediction","description":"Direct Codex to validate project genotype, phenotype and externally declared group folds, run grouped held-out RR-BLUP prediction, and reload fold-wise performance without training-test leakage.","module_type":"analysis","domains":["omics","genetics"],"intents":["genomic prediction","genomic selection","RR-BLUP","breeding value prediction","基因组预测"],"questions":["How accurately does a frozen RR-BLUP model predict phenotypes for individuals held out by the declared biological group folds?"],"entrypoint":"biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis","execution":{"kind":"workflow","timeout_seconds":30,"max_output_bytes":2000000},"maturity":"validated","input_artifacts":[{"name":"genotype_matrix","artifact_type":"diploid_genotype_matrix","processing_levels":["quality-controlled","imputed-if-declared"],"required_metadata":["source-sha256","genome-build-or-marker-panel","allele-coding","marker-filter-policy","individual-identifiers"],"formats":[{"name":"tsv","versions":["1"],"representations":["text"],"compression":["none"],"required_indexes":[],"coordinate_systems":["marker-panel-declared"],"genome_build_policy":"declared","genome_builds":["declared-in-project"],"annotation_releases":[],"orientations":["individual-by-marker"]}]},{"name":"phenotype_table","artifact_type":"phenotype_table","processing_levels":["declared-trait"],"required_metadata":["source-sha256","trait-definition","measurement-unit","individual-identifiers"],"formats":[{"name":"tsv","versions":["1"],"representations":["text"],"compression":["none"],"required_indexes":[],"coordinate_systems":[],"genome_build_policy":"not_applicable","genome_builds":[],"annotation_releases":[],"orientations":["individual-by-trait"]}]},{"name":"group_fold_assignments","artifact_type":"external_prediction_folds","processing_levels":["frozen"],"required_metadata":["source-sha256","folding-rationale","group-identity","leakage-policy"],"formats":[{"name":"tsv","versions":["1"],"representations":["text"],"compression":["none"],"required_indexes":[],"coordinate_systems":[],"genome_build_policy":"not_applicable","genome_builds":[],"annotation_releases":[],"orientations":["individual-by-fold"]}]}],"output_artifacts":[{"name":"genomic_prediction_evidence","artifact_type":"held_out_genomic_prediction_evidence","processing_levels":["group-held-out","reloaded"],"required_metadata":["module-version","input-sha256","rrBLUP-version","fold-policy","fold-performance","output-sha256","quality-gates"],"formats":[{"name":"normalized-json","versions":["1"],"representations":["structured"],"compression":["none"],"required_indexes":[],"coordinate_systems":[],"genome_build_policy":"not_applicable","genome_builds":[],"annotation_releases":[],"orientations":["individual-by-held-out-prediction"]}]}],"preconditions":["Genotype dosage coding, trait, biological grouping and fold assignments are declared before fitting; each individual occurs in exactly one fold and output path is new."],"assumptions":["The held-out group design reflects the prediction population and the additive RR-BLUP model is appropriate for the stated prediction objective."],"quality_gates":[{"id":"genomic-prediction-input-contract","severity":"fatal","description":"Require unique shared individual IDs, finite phenotype values, declared 0/1/2 nonmonomorphic markers, input digests and trait definition.","blocks_interpretation":true},{"id":"genomic-prediction-fold-isolation","severity":"fatal","description":"Require frozen external groups with every individual assigned exactly once and no training-test individual overlap in every fold.","blocks_interpretation":true},{"id":"genomic-prediction-fit-reload","severity":"fatal","description":"Require compatible R packages, per-fold fit completion and reloadable held-out predictions, variance components, RMSE, correlation and bias.","blocks_interpretation":true},{"id":"genomic-prediction-claim-boundary","severity":"major","description":"Held-out prediction does not establish causal markers, heritability, parent value, clinical utility or population-general performance.","blocks_interpretation":true}],"limitations":["This module does not impute genotypes, infer ancestry, create folds, tune model classes, establish heritability, select parents or establish causal marker effects. It expects a compatible R runtime before execution."],"evidence_effects":["adds-group-held-out-genomic-prediction-evidence"],"alternatives":[],"complements":["gwas-susie-fine-mapping","multi-sample-variant-concordance"],"tool_requirements":[{"name":"rrBLUP","ecosystem":"r","identity":"rrBLUP","required":true,"tested_versions":["4.6.3"],"allowed_versions":[">=4.6,<4.7"],"version_source":"https://cran.r-project.org/package=rrBLUP","verified_at":"2026-07-23","version_probe":["Rscript","-e","cat(as.character(packageVersion('rrBLUP')))"],"version_probe_kind":"command","version_probe_timeout_seconds":30,"version_pattern":"([0-9]+(?:\\.[0-9]+)+)","mismatch_policy":"block","version_differences":[{"id":"rrblup-mixed-solve-reml","affected_versions":[">=4.6,<4.7"],"category":"behavior","description":"mixed.solve REML fit and returned variance components and effects are version coupled.","compatibility_effect":"requires-parser","required_action":"Record package version, fold definition, marker matrix and reloaded held-out predictions.","source":"https://cran.r-project.org/package=rrBLUP"}],"platforms":["any"]}],"dependencies":[{"name":"R","ecosystem":"runtime","identity":"r-runtime","required":true,"tested_versions":["4.3.2"],"allowed_versions":[">=4.0,<4.6"],"version_source":"https://cran.r-project.org/","verified_at":"2026-07-23","version_probe":["Rscript","--version"],"version_probe_kind":"command","version_probe_timeout_seconds":30,"version_pattern":"([0-9]+(?:\\.[0-9]+)+)","purpose":"Run grouped RR-BLUP in an existing scientific runtime.","conflicts":[],"platforms":["any"]},{"name":"digest","ecosystem":"r","identity":"digest","required":true,"tested_versions":["0.6.39"],"allowed_versions":[">=0.6,<0.7"],"version_source":"https://cran.r-project.org/package=digest","verified_at":"2026-07-23","version_probe":["Rscript","-e","cat(as.character(packageVersion('digest')))"],"version_probe_kind":"command","version_probe_timeout_seconds":30,"version_pattern":"([0-9]+(?:\\.[0-9]+)+)","purpose":"Bind inputs to SHA-256 digests.","conflicts":[],"platforms":["any"]},{"name":"jsonlite","ecosystem":"r","identity":"jsonlite","required":true,"tested_versions":["2.0.0"],"allowed_versions":[">=2.0,<2.1"],"version_source":"https://cran.r-project.org/package=jsonlite","verified_at":"2026-07-23","version_probe":["Rscript","-e","cat(as.character(packageVersion('jsonlite')))"],"version_probe_kind":"command","version_probe_timeout_seconds":30,"version_pattern":"([0-9]+(?:\\.[0-9]+)+)","purpose":"Serialize reloadable held-out outputs.","conflicts":[],"platforms":["any"]}],"compatibility_matrix":[{"id":"agent-protocol-1-rrblup-463-r-432","module_version":"0.1.0","tool_versions":{"rrBLUP":[">=4.6,<4.7"]},"dependency_versions":{"R":[">=4.0,<4.6"],"digest":[">=0.6,<0.7"],"jsonlite":[">=2.0,<2.1"]},"input_formats":{"genotype_matrix":["tsv@1"],"phenotype_table":["tsv@1"],"group_fold_assignments":["tsv@1"]},"output_formats":{"genomic_prediction_evidence":["normalized-json@1"]},"platforms":["any"],"regression_evidence_ids":["rrblup-genomic-prediction-regression-v1"],"end_to_end_evidence_ids":["rrblup-genomic-prediction-e2e-v1"],"verified_at":"2026-07-23"}],"access":"agent_generated","mutability":"read_only","credentials":[],"input_schema":{"type":"object","additionalProperties":false,"properties":{"objective":{"type":"string","minLength":12},"genotype_artifact_id":{"type":"string","minLength":1},"phenotype_artifact_id":{"type":"string","minLength":1},"fold_artifact_id":{"type":"string","minLength":1},"trait_name":{"type":"string","minLength":1},"genome_or_marker_panel":{"type":"string","minLength":1},"folding_rationale":{"type":"string","minLength":12},"design_notes":{"type":"string","minLength":1}},"required":["objective","genotype_artifact_id","phenotype_artifact_id","fold_artifact_id","trait_name","genome_or_marker_panel","folding_rationale","design_notes"]},"output_schema":{"type":"object","additionalProperties":false,"properties":{"handoff_type":{"type":"string","enum":["packaged_parameterized_project_analysis"]},"module":{"type":"object"},"request_digest":{"type":"string","pattern":"^[0-9a-f]{64}$"},"request_fields":{"type":"array"},"languages":{"type":"array"},"code_plan":{"type":"array"},"parameter_rules":{"type":"array"},"preflight_checks":{"type":"array"},"postflight_checks":{"type":"array"},"provenance_fields":{"type":"array"},"forbidden_actions":{"type":"array"},"tool_profiles":{"type":"array"},"dependency_profiles":{"type":"array"},"quality_gate_ids":{"type":"array"},"execution_policy":{"type":"object"}},"required":["handoff_type","module","request_digest","request_fields","languages","code_plan","parameter_rules","preflight_checks","postflight_checks","provenance_fields","forbidden_actions","tool_profiles","dependency_profiles","quality_gate_ids","execution_policy"]},"kernel_compatibility":[">=0.2.0,<0.3.0"],"provenance":{"license":"Apache-2.0","concept_sources":["Independent clean-room replacement for unreliable source genomic prediction logic.","https://cran.r-project.org/package=rrBLUP"]},"code_templates":[{"path":"templates/run_rrblup_grouped_prediction.R","language":"r","purpose":"Fit and reload strict group-held-out RR-BLUP genomic predictions.","quality_gate_ids":["genomic-prediction-input-contract","genomic-prediction-fold-isolation","genomic-prediction-fit-reload","genomic-prediction-claim-boundary"],"requires_adaptation":false}],"agent_protocol":{"schema_version":1,"mode":"packaged_parameterized_workflow","languages":["r","notebook"],"template_sections":[{"id":"freeze-prediction-contract","purpose":"Validate genotype, phenotype and held-out group identity.","required_logic":["Inspect dosages, phenotype semantics, individual identifiers, grouping rationale and immutable source digests.","Reject random or result-tuned folds and every source of training-test individual overlap."],"output_artifact_types":["held_out_genomic_prediction_evidence"],"template_files":["templates/run_rrblup_grouped_prediction.R"]},{"id":"fit-reload-and-bound","purpose":"Fit every fold and preserve held-out predictions only.","required_logic":["Detect R package versions, fit training data only and reload predictions with fold-level metrics and variance components.","Retain uncertainty and prevent causal or breeding-value claims beyond held-out evaluation."],"output_artifact_types":["held_out_genomic_prediction_evidence"],"template_files":["templates/run_rrblup_grouped_prediction.R"]}],"parameter_rules":[{"id":"external-fold-policy","parameter":"external-group-folds","decision_inputs":["family-or-site-structure","deployment-population","trait-design"],"selection_rule":"Declare groups and folds before fitting and preserve them across all compared models.","validation_rule":"Do not randomize, merge or alter folds after viewing performance."}],"preflight_checks":["Detect R, rrBLUP, digest and jsonlite in an existing compatible environment.","Validate all IDs, dosage range, trait values, marker variation, group-fold mapping and output paths."],"postflight_checks":["Reload every fold prediction and reconcile digests, versions, fold isolation, metrics, bias and variance components."],"provenance_fields":["module-id","module-version","input-sha256","trait","fold-policy","R-version","rrBLUP-version","fold-results","output-sha256","quality-gates"],"forbidden_actions":["Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.","Do not impute genotypes, create folds, tune models or include held-out individuals in fitting.","Do not call prediction accuracy causal marker evidence, heritability, parent value or clinical utility."],"requires_observed_execution":true},"routing":{"method_aliases":["rrblup-genomic-prediction","Evaluate grouped held-out RR-BLUP genomic prediction","genomic prediction","genomic selection","RR-BLUP","breeding value prediction","基因组预测"],"exclusion_terms":[],"required_any_terms":[],"named_method_priority":100},"orchestration":{"scientific_stage":6,"requires_reviewed_upstream_types":[]},
+{
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
+      "Do not impute genotypes, create folds, tune models or include held-out individuals in fitting.",
+      "Do not call prediction accuracy causal marker evidence, heritability, parent value or clinical utility."
+    ],
+    "languages": [
+      "r",
+      "notebook"
+    ],
+    "mode": "packaged_parameterized_workflow",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "family-or-site-structure",
+          "deployment-population",
+          "trait-design"
+        ],
+        "id": "external-fold-policy",
+        "parameter": "external-group-folds",
+        "selection_rule": "Declare groups and folds before fitting and preserve them across all compared models.",
+        "validation_rule": "Do not randomize, merge or alter folds after viewing performance."
+      }
+    ],
+    "postflight_checks": [
+      "Reload every fold prediction and reconcile digests, versions, fold isolation, metrics, bias and variance components."
+    ],
+    "preflight_checks": [
+      "Detect R, rrBLUP, digest and jsonlite in an existing compatible environment.",
+      "Validate all IDs, dosage range, trait values, marker variation, group-fold mapping and output paths."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "input-sha256",
+      "trait",
+      "fold-policy",
+      "R-version",
+      "rrBLUP-version",
+      "fold-results",
+      "output-sha256",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "freeze-prediction-contract",
+        "output_artifact_types": [
+          "held_out_genomic_prediction_evidence"
+        ],
+        "purpose": "Validate genotype, phenotype and held-out group identity.",
+        "required_logic": [
+          "Inspect dosages, phenotype semantics, individual identifiers, grouping rationale and immutable source digests.",
+          "Reject random or result-tuned folds and every source of training-test individual overlap."
+        ],
+        "template_files": [
+          "templates/run_rrblup_grouped_prediction.R"
+        ]
+      },
+      {
+        "id": "fit-reload-and-bound",
+        "output_artifact_types": [
+          "held_out_genomic_prediction_evidence"
+        ],
+        "purpose": "Fit every fold and preserve held-out predictions only.",
+        "required_logic": [
+          "Detect R package versions, fit training data only and reload predictions with fold-level metrics and variance components.",
+          "Retain uncertainty and prevent causal or breeding-value claims beyond held-out evaluation."
+        ],
+        "template_files": [
+          "templates/run_rrblup_grouped_prediction.R"
+        ]
+      }
+    ]
+  },
+  "alternatives": [],
+  "assumptions": [
+    "The held-out group design reflects the prediction population and the additive RR-BLUP model is appropriate for the stated prediction objective."
+  ],
+  "code_templates": [
+    {
+      "language": "r",
+      "path": "templates/run_rrblup_grouped_prediction.R",
+      "purpose": "Fit and reload strict group-held-out RR-BLUP genomic predictions.",
+      "quality_gate_ids": [
+        "genomic-prediction-input-contract",
+        "genomic-prediction-fold-isolation",
+        "genomic-prediction-fit-reload",
+        "genomic-prediction-claim-boundary"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "R": [
+          ">=4.0,<4.6"
+        ],
+        "digest": [
+          ">=0.6,<0.7"
+        ],
+        "jsonlite": [
+          ">=2.0,<2.1"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "rrblup-genomic-prediction-e2e-v1"
+      ],
+      "id": "agent-protocol-1-rrblup-463-r-432",
+      "input_formats": {
+        "genotype_matrix": [
+          "tsv@1"
+        ],
+        "group_fold_assignments": [
+          "tsv@1"
+        ],
+        "phenotype_table": [
+          "tsv@1"
+        ]
+      },
+      "module_version": "0.1.0",
+      "output_formats": {
+        "genomic_prediction_evidence": [
+          "normalized-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "rrblup-genomic-prediction-regression-v1"
+      ],
+      "tool_versions": {
+        "rrBLUP": [
+          ">=4.6,<4.7"
+        ]
+      },
+      "verified_at": "2026-07-23"
+    }
+  ],
+  "complements": [
+    "gwas-susie-fine-mapping",
+    "multi-sample-variant-concordance"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=4.0,<4.6"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "r-runtime",
+      "name": "R",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Run grouped RR-BLUP in an existing scientific runtime.",
+      "required": true,
+      "tested_versions": [
+        "4.3.2"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=0.6,<0.7"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "digest",
+      "name": "digest",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Bind inputs to SHA-256 digests.",
+      "required": true,
+      "tested_versions": [
+        "0.6.39"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('digest')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=digest"
+    },
+    {
+      "allowed_versions": [
+        ">=2.0,<2.1"
+      ],
+      "conflicts": [],
+      "ecosystem": "r",
+      "identity": "jsonlite",
+      "name": "jsonlite",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Serialize reloadable held-out outputs.",
+      "required": true,
+      "tested_versions": [
+        "2.0.0"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('jsonlite')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=jsonlite"
+    }
+  ],
+  "description": "Direct Codex to validate project genotype, phenotype and externally declared group folds, run grouped held-out RR-BLUP prediction, and reload fold-wise performance without training-test leakage.",
+  "domains": [
+    "omics",
+    "genetics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "evidence_effects": [
+    "adds-group-held-out-genomic-prediction-evidence"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
+  },
+  "id": "rrblup-genomic-prediction",
+  "input_artifacts": [
+    {
+      "artifact_type": "diploid_genotype_matrix",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "marker-panel-declared"
+          ],
+          "genome_build_policy": "declared",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "tsv",
+          "orientations": [
+            "individual-by-marker"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "genotype_matrix",
+      "processing_levels": [
+        "quality-controlled",
+        "imputed-if-declared"
+      ],
+      "required_metadata": [
+        "source-sha256",
+        "genome-build-or-marker-panel",
+        "allele-coding",
+        "marker-filter-policy",
+        "individual-identifiers"
+      ]
+    },
+    {
+      "artifact_type": "phenotype_table",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tsv",
+          "orientations": [
+            "individual-by-trait"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "phenotype_table",
+      "processing_levels": [
+        "declared-trait"
+      ],
+      "required_metadata": [
+        "source-sha256",
+        "trait-definition",
+        "measurement-unit",
+        "individual-identifiers"
+      ]
+    },
+    {
+      "artifact_type": "external_prediction_folds",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tsv",
+          "orientations": [
+            "individual-by-fold"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "group_fold_assignments",
+      "processing_levels": [
+        "frozen"
+      ],
+      "required_metadata": [
+        "source-sha256",
+        "folding-rationale",
+        "group-identity",
+        "leakage-policy"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "design_notes": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "fold_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "folding_rationale": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "genome_or_marker_panel": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "genotype_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "phenotype_artifact_id": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "trait_name": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "genotype_artifact_id",
+      "phenotype_artifact_id",
+      "fold_artifact_id",
+      "trait_name",
+      "genome_or_marker_panel",
+      "folding_rationale",
+      "design_notes"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "genomic prediction",
+    "genomic selection",
+    "RR-BLUP",
+    "breeding value prediction",
+    "\u57fa\u56e0\u7ec4\u9884\u6d4b"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module does not impute genotypes, infer ancestry, create folds, tune model classes, establish heritability, select parents or establish causal marker effects. It expects a compatible R runtime before execution."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
   "observed_output_contracts": [
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -74,6 +497,44 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "genomic-prediction-input-contract",
+          "metric_key": "genomic-prediction-input-contract",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "genomic-prediction-fold-isolation",
+          "metric_key": "genomic-prediction-fold-isolation",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "genomic-prediction-fit-reload",
+          "metric_key": "genomic-prediction-fit-reload",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "genomic-prediction-claim-boundary",
+          "metric_key": "genomic-prediction-claim-boundary",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -82,6 +543,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -123,13 +592,229 @@
         }
       ],
       "port": "genomic_prediction_evidence",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "genomic-prediction-input-contract",
         "genomic-prediction-fold-isolation",
         "genomic-prediction-fit-reload",
         "genomic-prediction-claim-boundary"
+      ],
+      "semantic_profile": "rrblup-genomic-prediction-genomic-prediction-evidence-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 6
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "held_out_genomic_prediction_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "normalized-json",
+          "orientations": [
+            "individual-by-held-out-prediction"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "genomic_prediction_evidence",
+      "processing_levels": [
+        "group-held-out",
+        "reloaded"
+      ],
+      "required_metadata": [
+        "module-version",
+        "input-sha256",
+        "rrBLUP-version",
+        "fold-policy",
+        "fold-performance",
+        "output-sha256",
+        "quality-gates"
       ]
     }
-  ]
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "packaged_parameterized_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Genotype dosage coding, trait, biological grouping and fold assignments are declared before fitting; each individual occurs in exactly one fold and output path is new."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room replacement for unreliable source genomic prediction logic.",
+      "https://cran.r-project.org/package=rrBLUP"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require unique shared individual IDs, finite phenotype values, declared 0/1/2 nonmonomorphic markers, input digests and trait definition.",
+      "id": "genomic-prediction-input-contract",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require frozen external groups with every individual assigned exactly once and no training-test individual overlap in every fold.",
+      "id": "genomic-prediction-fold-isolation",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require compatible R packages, per-fold fit completion and reloadable held-out predictions, variance components, RMSE, correlation and bias.",
+      "id": "genomic-prediction-fit-reload",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Held-out prediction does not establish causal markers, heritability, parent value, clinical utility or population-general performance.",
+      "id": "genomic-prediction-claim-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "How accurately does a frozen RR-BLUP model predict phenotypes for individuals held out by the declared biological group folds?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "rrblup-genomic-prediction",
+      "Evaluate grouped held-out RR-BLUP genomic prediction",
+      "genomic prediction",
+      "genomic selection",
+      "RR-BLUP",
+      "breeding value prediction",
+      "\u57fa\u56e0\u7ec4\u9884\u6d4b"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Evaluate grouped held-out RR-BLUP genomic prediction",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=4.6,<4.7"
+      ],
+      "ecosystem": "r",
+      "identity": "rrBLUP",
+      "mismatch_policy": "block",
+      "name": "rrBLUP",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "4.6.3"
+      ],
+      "verified_at": "2026-07-23",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=4.6,<4.7"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parser",
+          "description": "mixed.solve REML fit and returned variance components and effects are version coupled.",
+          "id": "rrblup-mixed-solve-reml",
+          "required_action": "Record package version, fold definition, marker matrix and reloaded held-out predictions.",
+          "source": "https://cran.r-project.org/package=rrBLUP"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('rrBLUP')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/package=rrBLUP"
+    }
+  ],
+  "version": "0.1.0"
 }

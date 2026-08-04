@@ -1,681 +1,21 @@
 {
-  "schema_version": 1,
-  "id": "alphafold3-complex-prediction",
-  "version": "1.2.0",
-  "title": "Prepare, run and review AlphaFold 3 biomolecular-complex predictions",
-  "description": "Prepare official AlphaFold Server packages for manual Google-authenticated submission, stream and verify observed Server ZIP archives without expanding large MSA or template payloads, read local AlphaFold 3 results, enforce origin-specific reuse terms, audit ranked structures and confidence outputs, and export R-rendered publication figures with replot tables. An optional local official runtime is gated by current host headroom and explicit user permission.",
-  "module_type": "analysis",
-  "domains": [
-    "molecular_design"
-  ],
-  "intents": [
-    "AlphaFold 3 complex prediction",
-    "protein ligand structure prediction",
-    "AlphaFold3蛋白复合物结构预测"
-  ],
-  "questions": [
-    "Which AlphaFold 3 complex samples and chain-pair hypotheses remain interpretable after identity, license, confidence, clash and output-integrity review?"
-  ],
-  "entrypoint": "agent-generated-analysis",
-  "execution": {
-    "kind": "workflow",
-    "timeout_seconds": 30,
-    "max_output_bytes": 3000000
-  },
-  "maturity": "validated",
-  "input_artifacts": [
-    {
-      "name": "alphafold3_request",
-      "artifact_type": "structure_prediction_request",
-      "formats": [
-        {
-          "name": "inline-json",
-          "versions": [
-            "1"
-          ],
-          "representations": [
-            "structured"
-          ],
-          "compression": [
-            "none"
-          ],
-          "required_indexes": [],
-          "coordinate_systems": [],
-          "genome_build_policy": "not_applicable",
-          "genome_builds": [],
-          "annotation_releases": [],
-          "orientations": [
-            "request-object"
-          ]
-        }
-      ],
-      "processing_levels": [
-        "declared"
-      ],
-      "required_metadata": []
-    }
-  ],
-  "output_artifacts": [
-    {
-      "name": "alphafold3_prediction_bundle",
-      "artifact_type": "structure_prediction_bundle",
-      "formats": [
-        {
-          "name": "alphafold3-output",
-          "versions": [
-            "3.0.3"
-          ],
-          "representations": [
-            "container"
-          ],
-          "compression": [
-            "none"
-          ],
-          "required_indexes": [],
-          "coordinate_systems": [
-            "cartesian-angstrom"
-          ],
-          "genome_build_policy": "not_applicable",
-          "genome_builds": [],
-          "annotation_releases": [],
-          "orientations": [
-            "module-output"
-          ]
-        }
-      ],
-      "processing_levels": [
-        "derived"
-      ],
-      "required_metadata": [
-        "model-version",
-        "output-origin",
-        "terms-version",
-        "input-digest",
-        "output-digests"
-      ]
-    },
-    {
-      "name": "alphafold3_figure_bundle",
-      "artifact_type": "structure_figure_bundle",
-      "formats": [
-        {
-          "name": "publication-figure-set",
-          "versions": [
-            "1"
-          ],
-          "representations": [
-            "container"
-          ],
-          "compression": [
-            "none"
-          ],
-          "required_indexes": [],
-          "coordinate_systems": [],
-          "genome_build_policy": "not_applicable",
-          "genome_builds": [],
-          "annotation_releases": [],
-          "orientations": [
-            "module-output"
-          ]
-        }
-      ],
-      "processing_levels": [
-        "derived"
-      ],
-      "required_metadata": [
-        "style-version",
-        "source-digests",
-        "replot-table"
-      ]
-    }
-  ],
-  "preconditions": [
-    "For AlphaFold Server, Codex confirms non-commercial eligibility, current terms, interactive Google-account access, immutable entity identities, and manual user review before submission. Local inference additionally requires approved weights, complete versioned databases, a compatible Linux NVIDIA host, at least half of current resource headroom remaining unused, and explicit user permission."
-  ],
-  "assumptions": [
-    "Every sequence, chain ID, modification, CCD ligand, SMILES ligand, covalent context and model seed describes the intended molecular system."
-  ],
-  "quality_gates": [
-    {
-      "id": "af3-input-identity",
-      "severity": "fatal",
-      "description": "Require unique chain IDs, bounded valid sequences, explicit ligand identity and a closed official AlphaFold 3 input dialect.",
-      "blocks_interpretation": true
-    },
-    {
-      "id": "af3-license-runtime",
-      "severity": "fatal",
-      "description": "Record the current code, model-weight and output terms plus runtime, database and weight provenance before inference.",
-      "blocks_interpretation": true
-    },
-    {
-      "id": "af3-output-confidence",
-      "severity": "fatal",
-      "description": "Reconcile all seeds and samples, ranking scores, pTM, ipTM, chain and chain-pair confidence, clashes, mmCIF models and documented confidence files.",
-      "blocks_interpretation": true
-    },
-    {
-      "id": "af3-publication-figures",
-      "severity": "major",
-      "description": "Export confidence and structural figure panels as PDF, SVG and 600-dpi PNG with source tables, labels, legends and model-confidence semantics.",
-      "blocks_interpretation": true
-    }
-  ],
-  "limitations": [
-    "AlphaFold Server submission is manual because the official service uses interactive Google sign-in and documents no public submission API; the workbench stores no password, token, cookie or browser session.",
-    "Server outputs are non-commercial and must not be connected to automated ligand or peptide binding or interaction prediction systems; origin-specific handoffs enforce this restriction.",
-    "The repository does not bundle AlphaFold 3 model weights or reference databases and cannot grant rights beyond current terms.",
-    "AlphaFold 3 outputs are theoretical predictions and do not establish binding, affinity, kinetics, function, mechanism or clinical validity."
-  ],
-  "evidence_effects": [
-    "produces-biomolecular-complex-structure-hypotheses",
-    "produces-confidence-aware-structure-figures",
-    "blocks-prediction-as-experimental-proof"
-  ],
-  "alternatives": [
-    "protein-complex-docking",
-    "alphafold-structure-evidence"
-  ],
-  "complements": [
-    "structure-quality-assessment",
-    "structure-chain-comparison",
-    "structure-interactive-visualization",
-    "protein-interaction-network-evidence"
-  ],
-  "tool_requirements": [
-    {
-      "name": "alphafold3",
-      "ecosystem": "python",
-      "identity": "run_alphafold.py",
-      "required": false,
-      "tested_versions": [
-        "3.0.3"
-      ],
-      "allowed_versions": [
-        ">=3.0.3,<3.1"
-      ],
-      "version_source": "https://github.com/google-deepmind/alphafold3",
-      "verified_at": "2026-08-02",
-      "version_probe": [
-        "run_alphafold.py",
-        "--help"
-      ],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "mismatch_policy": "block",
-      "version_differences": [
-        {
-          "id": "af3-input-output-contract",
-          "affected_versions": [
-            ">=3.0.3,<3.1"
-          ],
-          "category": "input-format",
-          "description": "The workflow emits the documented AlphaFold Server v1 and local AlphaFold 3 v4 JSON dialects and reads documented ranking, summary confidence and mmCIF outputs.",
-          "compatibility_effect": "requires-format",
-          "required_action": "Revalidate entity fields, dialect versions, output names, origin-specific terms and confidence semantics after every AlphaFold 3 or Server release.",
-          "source": "https://github.com/google-deepmind/alphafold3/blob/v3.0.3/docs/input.md"
-        }
-      ],
-      "platforms": [
-        "linux-x86_64"
-      ]
-    },
-    {
-      "name": "matplotlib",
-      "ecosystem": "python",
-      "identity": "matplotlib",
-      "required": true,
-      "tested_versions": [
-        "3.10.8"
-      ],
-      "allowed_versions": [
-        ">=3.10,<3.11"
-      ],
-      "version_source": "https://matplotlib.org/stable/api/index.html",
-      "verified_at": "2026-08-02",
-      "version_probe": [
-        "python3",
-        "-c",
-        "import matplotlib; print(matplotlib.__version__)"
-      ],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "mismatch_policy": "block",
-      "version_differences": [
-        {
-          "id": "af3-confidence-figure-export",
-          "affected_versions": [
-            ">=3.10,<3.11"
-          ],
-          "category": "behavior",
-          "description": "Matplotlib remains the verified fallback renderer when the R renderer is unavailable.",
-          "compatibility_effect": "requires-format",
-          "required_action": "Reload every figure and retain its source table and style version.",
-          "source": "https://matplotlib.org/stable/api/index.html"
-        }
-      ],
-      "platforms": [
-        "any"
-      ]
-    },
-    {
-      "name": "ggplot2",
-      "ecosystem": "r",
-      "identity": "ggplot2",
-      "required": true,
-      "tested_versions": [
-        "3.5.2"
-      ],
-      "allowed_versions": [
-        ">=3.5,<3.6"
-      ],
-      "version_source": "https://ggplot2.tidyverse.org/",
-      "verified_at": "2026-08-02",
-      "version_probe": [
-        "Rscript",
-        "-e",
-        "cat(as.character(packageVersion('ggplot2')))"
-      ],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "mismatch_policy": "block",
-      "version_differences": [],
-      "platforms": [
-        "any"
-      ]
-    },
-    {
-      "name": "patchwork",
-      "ecosystem": "r",
-      "identity": "patchwork",
-      "required": true,
-      "tested_versions": [
-        "1.3.2"
-      ],
-      "allowed_versions": [
-        ">=1.3,<1.4"
-      ],
-      "version_source": "https://patchwork.data-imaginist.com/",
-      "verified_at": "2026-08-02",
-      "version_probe": [
-        "Rscript",
-        "-e",
-        "cat(as.character(packageVersion('patchwork')))"
-      ],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "mismatch_policy": "block",
-      "version_differences": [],
-      "platforms": [
-        "any"
-      ]
-    },
-    {
-      "name": "scales",
-      "ecosystem": "r",
-      "identity": "scales",
-      "required": true,
-      "tested_versions": [
-        "1.4.0"
-      ],
-      "allowed_versions": [
-        ">=1.4,<1.5"
-      ],
-      "version_source": "https://scales.r-lib.org/",
-      "verified_at": "2026-08-02",
-      "version_probe": [
-        "Rscript",
-        "-e",
-        "cat(as.character(packageVersion('scales')))"
-      ],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "mismatch_policy": "block",
-      "version_differences": [],
-      "platforms": [
-        "any"
-      ]
-    },
-    {
-      "name": "svglite",
-      "ecosystem": "r",
-      "identity": "svglite",
-      "required": true,
-      "tested_versions": [
-        "2.2.1"
-      ],
-      "allowed_versions": [
-        ">=2.2,<2.3"
-      ],
-      "version_source": "https://svglite.r-lib.org/",
-      "verified_at": "2026-08-02",
-      "version_probe": [
-        "Rscript",
-        "-e",
-        "cat(as.character(packageVersion('svglite')))"
-      ],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "mismatch_policy": "block",
-      "version_differences": [],
-      "platforms": [
-        "any"
-      ]
-    },
-    {
-      "name": "ragg",
-      "ecosystem": "r",
-      "identity": "ragg",
-      "required": true,
-      "tested_versions": [
-        "1.5.0"
-      ],
-      "allowed_versions": [
-        ">=1.5,<1.6"
-      ],
-      "version_source": "https://ragg.r-lib.org/",
-      "verified_at": "2026-08-02",
-      "version_probe": [
-        "Rscript",
-        "-e",
-        "cat(as.character(packageVersion('ragg')))"
-      ],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "mismatch_policy": "block",
-      "version_differences": [],
-      "platforms": [
-        "any"
-      ]
-    }
-  ],
-  "dependencies": [
-    {
-      "name": "python",
-      "ecosystem": "runtime",
-      "identity": "python-runtime",
-      "required": true,
-      "tested_versions": [
-        "3.14.3"
-      ],
-      "allowed_versions": [
-        ">=3.12,<3.15"
-      ],
-      "version_source": "https://www.python.org/downloads/",
-      "verified_at": "2026-08-02",
-      "version_probe": [
-        "biomed_workbench.modules.compatibility:probe_python_runtime"
-      ],
-      "version_probe_kind": "python_callable",
-      "version_probe_timeout_seconds": 5,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Prepare Server/local requests, enforce access and resource gates, stream Server archives and audit outputs without embedding model assets or authentication secrets.",
-      "conflicts": [],
-      "platforms": [
-        "any"
-      ]
-    },
-    {
-      "name": "r",
-      "ecosystem": "runtime",
-      "identity": "r-runtime",
-      "required": true,
-      "tested_versions": [
-        "4.3.2"
-      ],
-      "allowed_versions": [
-        ">=4.3,<4.4"
-      ],
-      "version_source": "https://cran.r-project.org/",
-      "verified_at": "2026-08-02",
-      "version_probe": [
-        "Rscript",
-        "--version"
-      ],
-      "version_probe_kind": "command",
-      "version_probe_timeout_seconds": 30,
-      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
-      "purpose": "Render the verified publication figure set from replot tables.",
-      "conflicts": [],
-      "platforms": [
-        "any"
-      ]
-    }
-  ],
-  "compatibility_matrix": [
-    {
-      "id": "alphafold3-3-0-3-server-and-local-adapter",
-      "module_version": "1.2.0",
-      "tool_versions": {
-        "alphafold3": [
-          ">=3.0.3,<3.1"
-        ],
-        "matplotlib": [
-          ">=3.10,<3.11"
-        ],
-        "ggplot2": [
-          ">=3.5,<3.6"
-        ],
-        "patchwork": [
-          ">=1.3,<1.4"
-        ],
-        "scales": [
-          ">=1.4,<1.5"
-        ],
-        "svglite": [
-          ">=2.2,<2.3"
-        ],
-        "ragg": [
-          ">=1.5,<1.6"
-        ]
-      },
-      "dependency_versions": {
-        "python": [
-          ">=3.12,<3.15"
-        ],
-        "r": [
-          ">=4.3,<4.4"
-        ]
-      },
-      "input_formats": {
-        "alphafold3_request": [
-          "inline-json@1"
-        ]
-      },
-      "output_formats": {
-        "alphafold3_prediction_bundle": [
-          "alphafold3-output@3.0.3"
-        ],
-        "alphafold3_figure_bundle": [
-          "publication-figure-set@1"
-        ]
-      },
-      "platforms": [
-        "linux-x86_64",
-        "macos-arm64"
-      ],
-      "regression_evidence_ids": [
-        "alphafold3-server-archive-regression-v3"
-      ],
-      "end_to_end_evidence_ids": [
-        "alphafold3-server-live-import-v3"
-      ],
-      "verified_at": "2026-08-02"
-    }
-  ],
   "access": "agent_generated",
-  "mutability": "writes_output",
-  "credentials": [],
-  "input_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "objective": {
-        "type": "string"
-      },
-      "request_path": {
-        "type": "string"
-      },
-      "output_directory": {
-        "type": "string"
-      },
-      "execution_mode": {
-        "type": "string",
-        "enum": [
-          "server-package",
-          "server-result-import",
-          "prepare-local",
-          "local-inference"
-        ]
-      }
-    },
-    "required": [
-      "objective",
-      "request_path",
-      "output_directory",
-      "execution_mode"
-    ]
-  },
-  "output_schema": {
-    "type": "object",
-    "additionalProperties": false,
-    "properties": {
-      "handoff_type": {
-        "type": "string",
-        "enum": [
-          "packaged_parameterized_project_analysis"
-        ]
-      },
-      "module": {
-        "type": "object"
-      },
-      "request_digest": {
-        "type": "string",
-        "pattern": "^[0-9a-f]{64}$"
-      },
-      "request_fields": {
-        "type": "array"
-      },
-      "languages": {
-        "type": "array"
-      },
-      "code_plan": {
-        "type": "array"
-      },
-      "parameter_rules": {
-        "type": "array"
-      },
-      "preflight_checks": {
-        "type": "array"
-      },
-      "postflight_checks": {
-        "type": "array"
-      },
-      "provenance_fields": {
-        "type": "array"
-      },
-      "forbidden_actions": {
-        "type": "array"
-      },
-      "tool_profiles": {
-        "type": "array"
-      },
-      "dependency_profiles": {
-        "type": "array"
-      },
-      "quality_gate_ids": {
-        "type": "array"
-      },
-      "execution_policy": {
-        "type": "object"
-      }
-    },
-    "required": [
-      "handoff_type",
-      "module",
-      "request_digest",
-      "request_fields",
-      "languages",
-      "code_plan",
-      "parameter_rules",
-      "preflight_checks",
-      "postflight_checks",
-      "provenance_fields",
-      "forbidden_actions",
-      "tool_profiles",
-      "dependency_profiles",
-      "quality_gate_ids",
-      "execution_policy"
-    ]
-  },
-  "kernel_compatibility": [
-    ">=0.2.0,<0.3.0"
-  ],
-  "provenance": {
-    "license": "Apache-2.0",
-    "concept_sources": [
-      "https://github.com/google-deepmind/alphafold3",
-      "https://www.nature.com/articles/s41586-024-07487-w",
-      "Project-owned input builder, output auditor and confidence renderer."
-    ]
-  },
-  "code_templates": [
-    {
-      "path": "templates/run_alphafold3_complex_prediction.py",
-      "language": "python",
-      "purpose": "Prepare the official input dialect, connect an approved runtime, stream Server archives, parse outputs and reload all derived tables.",
-      "quality_gate_ids": [
-        "af3-input-identity",
-        "af3-license-runtime",
-        "af3-output-confidence"
-      ],
-      "requires_adaptation": false
-    },
-    {
-      "path": "templates/render_alphafold3_publication_figures.R",
-      "language": "r",
-      "purpose": "Render confidence and orthogonal C-alpha projection figures as editable PDF/SVG and 600-dpi PNG from replot tables.",
-      "quality_gate_ids": [
-        "af3-publication-figures"
-      ],
-      "requires_adaptation": false
-    }
-  ],
   "agent_protocol": {
-    "schema_version": 1,
-    "mode": "packaged_parameterized_workflow",
+    "forbidden_actions": [
+      "Do not ask the user to paste a Google password into a project file or store a password, OAuth token, browser cookie or recovery secret.",
+      "Do not automate the public AlphaFold Server through an undocumented interface.",
+      "Do not pass AlphaFold Server outputs or derivatives to automated ligand or peptide docking or interaction-prediction systems.",
+      "Do not deploy or execute local AlphaFold 3 without the half-headroom resource gate and explicit user permission.",
+      "Do not bundle or redistribute AlphaFold 3 weights or imply rights beyond current terms.",
+      "Do not treat pTM, ipTM, ranking score or a rendered complex as binding or functional proof."
+    ],
     "languages": [
       "python",
       "r"
     ],
-    "template_sections": [
-      {
-        "id": "prepare-run-review-alphafold3",
-        "purpose": "Prepare an official Server submission package, import complete Server or local outputs, optionally connect an approved local runtime, and render confidence-aware figures.",
-        "required_logic": [
-          "Use AlphaFold Server as the default route; require interactive Google sign-in, current terms review and manual submission; record access errors as actionable states; tag imported output origin; prohibit docking handoff for Server outputs; execute locally only after the half-headroom resource gate and explicit permission."
-        ],
-        "output_artifact_types": [
-          "structure_prediction_bundle",
-          "structure_figure_bundle"
-        ],
-        "template_files": [
-          "templates/run_alphafold3_complex_prediction.py",
-          "templates/render_alphafold3_publication_figures.R"
-        ]
-      }
-    ],
+    "mode": "packaged_parameterized_workflow",
     "parameter_rules": [
       {
-        "id": "select-af3-execution-mode",
-        "parameter": "server-package-import-or-local",
         "decision_inputs": [
           "license-eligibility",
           "interactive-access-state",
@@ -684,15 +24,17 @@
           "host-headroom",
           "user-permission"
         ],
+        "id": "select-af3-execution-mode",
+        "parameter": "server-package-import-or-local",
         "selection_rule": "Default to a manually submitted AlphaFold Server package and result import. Use local inference only when current Linux/NVIDIA, CPU, available-memory, free-disk and free-GPU headroom leaves at least 50 percent unused and the user explicitly authorizes deployment or execution.",
         "validation_rule": "Block submission, execution or interpretation when terms, access state, molecular identity, runtime provenance, output origin, confidence files or chain-pair scope are unresolved."
       }
     ],
-    "preflight_checks": [
-      "Verify current Server and output terms, non-commercial eligibility, privacy implications, interactive Google-account status, entity identity, copy counts, seeds, modifications and ligand representation. For local execution, additionally verify approved weights, complete databases, current available resources and explicit user permission."
-    ],
     "postflight_checks": [
       "Reconcile every seed and sample, reload ranking and confidence files, verify mmCIF and figure exports, bind every digest, preserve terms notices, and apply output-origin reuse restrictions."
+    ],
+    "preflight_checks": [
+      "Verify current Server and output terms, non-commercial eligibility, privacy implications, interactive Google-account status, entity identity, copy counts, seeds, modifications and ligand representation. For local execution, additionally verify approved weights, complete databases, current available resources and explicit user permission."
     ],
     "provenance_fields": [
       "module-version",
@@ -706,38 +48,274 @@
       "figure-style-version",
       "host-resource-gate"
     ],
-    "forbidden_actions": [
-      "Do not ask the user to paste a Google password into a project file or store a password, OAuth token, browser cookie or recovery secret.",
-      "Do not automate the public AlphaFold Server through an undocumented interface.",
-      "Do not pass AlphaFold Server outputs or derivatives to automated ligand or peptide docking or interaction-prediction systems.",
-      "Do not deploy or execute local AlphaFold 3 without the half-headroom resource gate and explicit user permission.",
-      "Do not bundle or redistribute AlphaFold 3 weights or imply rights beyond current terms.",
-      "Do not treat pTM, ipTM, ranking score or a rendered complex as binding or functional proof."
-    ],
-    "requires_observed_execution": true
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "prepare-run-review-alphafold3",
+        "output_artifact_types": [
+          "structure_prediction_bundle",
+          "structure_figure_bundle"
+        ],
+        "purpose": "Prepare an official Server submission package, import complete Server or local outputs, optionally connect an approved local runtime, and render confidence-aware figures.",
+        "required_logic": [
+          "Use AlphaFold Server as the default route; require interactive Google sign-in, current terms review and manual submission; record access errors as actionable states; tag imported output origin; prohibit docking handoff for Server outputs; execute locally only after the half-headroom resource gate and explicit permission."
+        ],
+        "template_files": [
+          "templates/run_alphafold3_complex_prediction.py",
+          "templates/render_alphafold3_publication_figures.R"
+        ]
+      }
+    ]
   },
-  "routing": {
-    "method_aliases": [
-      "alphafold3-complex-prediction",
-      "Prepare, run and review AlphaFold 3 biomolecular-complex predictions",
-      "AlphaFold 3 complex prediction",
-      "protein ligand structure prediction",
-      "AlphaFold3蛋白复合物结构预测"
-    ],
-    "exclusion_terms": [
-      "alphafold database lookup",
-      "alphafold confidence lookup",
-      "protein disorder lookup"
-    ],
-    "required_any_terms": [],
-    "named_method_priority": 100
+  "alternatives": [
+    "protein-complex-docking",
+    "alphafold-structure-evidence"
+  ],
+  "assumptions": [
+    "Every sequence, chain ID, modification, CCD ligand, SMILES ligand, covalent context and model seed describes the intended molecular system."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_alphafold3_complex_prediction.py",
+      "purpose": "Prepare the official input dialect, connect an approved runtime, stream Server archives, parse outputs and reload all derived tables.",
+      "quality_gate_ids": [
+        "af3-input-identity",
+        "af3-license-runtime",
+        "af3-output-confidence"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "r",
+      "path": "templates/render_alphafold3_publication_figures.R",
+      "purpose": "Render confidence and orthogonal C-alpha projection figures as editable PDF/SVG and 600-dpi PNG from replot tables.",
+      "quality_gate_ids": [
+        "af3-publication-figures"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.12,<3.15"
+        ],
+        "r": [
+          ">=4.3,<4.4"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "alphafold3-server-live-import-v3"
+      ],
+      "id": "alphafold3-3-0-3-server-and-local-adapter",
+      "input_formats": {
+        "alphafold3_request": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.2.0",
+      "output_formats": {
+        "alphafold3_figure_bundle": [
+          "publication-figure-set@1"
+        ],
+        "alphafold3_prediction_bundle": [
+          "alphafold3-output@3.0.3"
+        ]
+      },
+      "platforms": [
+        "linux-x86_64",
+        "macos-arm64"
+      ],
+      "regression_evidence_ids": [
+        "alphafold3-server-archive-regression-v3"
+      ],
+      "tool_versions": {
+        "alphafold3": [
+          ">=3.0.3,<3.1"
+        ],
+        "ggplot2": [
+          ">=3.5,<3.6"
+        ],
+        "matplotlib": [
+          ">=3.10,<3.11"
+        ],
+        "patchwork": [
+          ">=1.3,<1.4"
+        ],
+        "ragg": [
+          ">=1.5,<1.6"
+        ],
+        "scales": [
+          ">=1.4,<1.5"
+        ],
+        "svglite": [
+          ">=2.2,<2.3"
+        ]
+      },
+      "verified_at": "2026-08-02"
+    }
+  ],
+  "complements": [
+    "structure-quality-assessment",
+    "structure-chain-comparison",
+    "structure-interactive-visualization",
+    "protein-interaction-network-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.12,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Prepare Server/local requests, enforce access and resource gates, stream Server archives and audit outputs without embedding model assets or authentication secrets.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-02",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/"
+    },
+    {
+      "allowed_versions": [
+        ">=4.3,<4.4"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "r-runtime",
+      "name": "r",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Render the verified publication figure set from replot tables.",
+      "required": true,
+      "tested_versions": [
+        "4.3.2"
+      ],
+      "verified_at": "2026-08-02",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://cran.r-project.org/"
+    }
+  ],
+  "description": "Prepare official AlphaFold Server packages for manual Google-authenticated submission, stream and verify observed Server ZIP archives without expanding large MSA or template payloads, read local AlphaFold 3 results, enforce origin-specific reuse terms, audit ranked structures and confidence outputs, and export R-rendered publication figures with replot tables. An optional local official runtime is gated by current host headroom and explicit user permission.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "produces-biomolecular-complex-structure-hypotheses",
+    "produces-confidence-aware-structure-figures",
+    "blocks-prediction-as-experimental-proof"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 3000000,
+    "timeout_seconds": 30
   },
-  "orchestration": {
-    "scientific_stage": 3,
-    "requires_reviewed_upstream_types": []
+  "id": "alphafold3-complex-prediction",
+  "input_artifacts": [
+    {
+      "artifact_type": "structure_prediction_request",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "alphafold3_request",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "execution_mode": {
+        "enum": [
+          "server-package",
+          "server-result-import",
+          "prepare-local",
+          "local-inference"
+        ],
+        "type": "string"
+      },
+      "objective": {
+        "type": "string"
+      },
+      "output_directory": {
+        "type": "string"
+      },
+      "request_path": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "request_path",
+      "output_directory",
+      "execution_mode"
+    ],
+    "type": "object"
   },
+  "intents": [
+    "AlphaFold 3 complex prediction",
+    "protein ligand structure prediction",
+    "AlphaFold3\u86cb\u767d\u590d\u5408\u7269\u7ed3\u6784\u9884\u6d4b"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "AlphaFold Server submission is manual because the official service uses interactive Google sign-in and documents no public submission API; the workbench stores no password, token, cookie or browser session.",
+    "Server outputs are non-commercial and must not be connected to automated ligand or peptide binding or interaction prediction systems; origin-specific handoffs enforce this restriction.",
+    "The repository does not bundle AlphaFold 3 model weights or reference databases and cannot grant rights beyond current terms.",
+    "AlphaFold 3 outputs are theoretical predictions and do not establish binding, affinity, kinetics, function, mechanism or clinical validity."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "writes_output",
   "observed_output_contracts": [
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -810,6 +388,44 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "af3-input-identity",
+          "metric_key": "af3-input-identity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "af3-license-runtime",
+          "metric_key": "af3-license-runtime",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "af3-output-confidence",
+          "metric_key": "af3-output-confidence",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "af3-publication-figures",
+          "metric_key": "af3-publication-figures",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -818,6 +434,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -859,15 +483,18 @@
         }
       ],
       "port": "alphafold3_prediction_bundle",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "af3-input-identity",
         "af3-license-runtime",
         "af3-output-confidence",
         "af3-publication-figures"
-      ]
+      ],
+      "semantic_profile": "alphafold3-complex-prediction-alphafold3-prediction-bundle-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
     },
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -940,6 +567,44 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "af3-input-identity",
+          "metric_key": "af3-input-identity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "af3-license-runtime",
+          "metric_key": "af3-license-runtime",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "af3-output-confidence",
+          "metric_key": "af3-output-confidence",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "af3-publication-figures",
+          "metric_key": "af3-publication-figures",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -948,6 +613,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -989,13 +662,438 @@
         }
       ],
       "port": "alphafold3_figure_bundle",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "af3-input-identity",
         "af3-license-runtime",
         "af3-output-confidence",
         "af3-publication-figures"
+      ],
+      "semantic_profile": "alphafold3-complex-prediction-alphafold3-figure-bundle-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 3
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "structure_prediction_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "alphafold3-output",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "container"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "3.0.3"
+          ]
+        }
+      ],
+      "name": "alphafold3_prediction_bundle",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "model-version",
+        "output-origin",
+        "terms-version",
+        "input-digest",
+        "output-digests"
+      ]
+    },
+    {
+      "artifact_type": "structure_figure_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "publication-figure-set",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "container"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "alphafold3_figure_bundle",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "style-version",
+        "source-digests",
+        "replot-table"
       ]
     }
-  ]
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "packaged_parameterized_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "For AlphaFold Server, Codex confirms non-commercial eligibility, current terms, interactive Google-account access, immutable entity identities, and manual user review before submission. Local inference additionally requires approved weights, complete versioned databases, a compatible Linux NVIDIA host, at least half of current resource headroom remaining unused, and explicit user permission."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://github.com/google-deepmind/alphafold3",
+      "https://www.nature.com/articles/s41586-024-07487-w",
+      "Project-owned input builder, output auditor and confidence renderer."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require unique chain IDs, bounded valid sequences, explicit ligand identity and a closed official AlphaFold 3 input dialect.",
+      "id": "af3-input-identity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Record the current code, model-weight and output terms plus runtime, database and weight provenance before inference.",
+      "id": "af3-license-runtime",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Reconcile all seeds and samples, ranking scores, pTM, ipTM, chain and chain-pair confidence, clashes, mmCIF models and documented confidence files.",
+      "id": "af3-output-confidence",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Export confidence and structural figure panels as PDF, SVG and 600-dpi PNG with source tables, labels, legends and model-confidence semantics.",
+      "id": "af3-publication-figures",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which AlphaFold 3 complex samples and chain-pair hypotheses remain interpretable after identity, license, confidence, clash and output-integrity review?"
+  ],
+  "routing": {
+    "exclusion_terms": [
+      "alphafold database lookup",
+      "alphafold confidence lookup",
+      "protein disorder lookup"
+    ],
+    "method_aliases": [
+      "alphafold3-complex-prediction",
+      "Prepare, run and review AlphaFold 3 biomolecular-complex predictions",
+      "AlphaFold 3 complex prediction",
+      "protein ligand structure prediction",
+      "AlphaFold3\u86cb\u767d\u590d\u5408\u7269\u7ed3\u6784\u9884\u6d4b"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Prepare, run and review AlphaFold 3 biomolecular-complex predictions",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=3.0.3,<3.1"
+      ],
+      "ecosystem": "python",
+      "identity": "run_alphafold.py",
+      "mismatch_policy": "block",
+      "name": "alphafold3",
+      "platforms": [
+        "linux-x86_64"
+      ],
+      "required": false,
+      "tested_versions": [
+        "3.0.3"
+      ],
+      "verified_at": "2026-08-02",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=3.0.3,<3.1"
+          ],
+          "category": "input-format",
+          "compatibility_effect": "requires-format",
+          "description": "The workflow emits the documented AlphaFold Server v1 and local AlphaFold 3 v4 JSON dialects and reads documented ranking, summary confidence and mmCIF outputs.",
+          "id": "af3-input-output-contract",
+          "required_action": "Revalidate entity fields, dialect versions, output names, origin-specific terms and confidence semantics after every AlphaFold 3 or Server release.",
+          "source": "https://github.com/google-deepmind/alphafold3/blob/v3.0.3/docs/input.md"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "run_alphafold.py",
+        "--help"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/google-deepmind/alphafold3"
+    },
+    {
+      "allowed_versions": [
+        ">=3.10,<3.11"
+      ],
+      "ecosystem": "python",
+      "identity": "matplotlib",
+      "mismatch_policy": "block",
+      "name": "matplotlib",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "3.10.8"
+      ],
+      "verified_at": "2026-08-02",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=3.10,<3.11"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-format",
+          "description": "Matplotlib remains the verified fallback renderer when the R renderer is unavailable.",
+          "id": "af3-confidence-figure-export",
+          "required_action": "Reload every figure and retain its source table and style version.",
+          "source": "https://matplotlib.org/stable/api/index.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import matplotlib; print(matplotlib.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://matplotlib.org/stable/api/index.html"
+    },
+    {
+      "allowed_versions": [
+        ">=3.5,<3.6"
+      ],
+      "ecosystem": "r",
+      "identity": "ggplot2",
+      "mismatch_policy": "block",
+      "name": "ggplot2",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "3.5.2"
+      ],
+      "verified_at": "2026-08-02",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('ggplot2')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://ggplot2.tidyverse.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.3,<1.4"
+      ],
+      "ecosystem": "r",
+      "identity": "patchwork",
+      "mismatch_policy": "block",
+      "name": "patchwork",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.3.2"
+      ],
+      "verified_at": "2026-08-02",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('patchwork')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://patchwork.data-imaginist.com/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.4,<1.5"
+      ],
+      "ecosystem": "r",
+      "identity": "scales",
+      "mismatch_policy": "block",
+      "name": "scales",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.4.0"
+      ],
+      "verified_at": "2026-08-02",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('scales')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://scales.r-lib.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=2.2,<2.3"
+      ],
+      "ecosystem": "r",
+      "identity": "svglite",
+      "mismatch_policy": "block",
+      "name": "svglite",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "2.2.1"
+      ],
+      "verified_at": "2026-08-02",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('svglite')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://svglite.r-lib.org/"
+    },
+    {
+      "allowed_versions": [
+        ">=1.5,<1.6"
+      ],
+      "ecosystem": "r",
+      "identity": "ragg",
+      "mismatch_policy": "block",
+      "name": "ragg",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "1.5.0"
+      ],
+      "verified_at": "2026-08-02",
+      "version_differences": [],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "Rscript",
+        "-e",
+        "cat(as.character(packageVersion('ragg')))"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://ragg.r-lib.org/"
+    }
+  ],
+  "version": "1.2.0"
 }

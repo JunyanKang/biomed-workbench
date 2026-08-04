@@ -1,53 +1,386 @@
 {
-  "schema_version": 1,
-  "id": "genome-coordinate-liftover",
-  "version": "0.1.0",
-  "title": "Convert declared genomic intervals between reference assemblies",
-  "description": "Direct Codex to validate coordinate semantics and immutable UCSC chain provenance, run CrossMap on BED intervals in an existing compatible environment, and retain mapped, split, and unmapped records with complete record accounting. It never guesses assemblies, silently drops unmapped intervals, or represents coordinate conversion as biological homology evidence.",
-  "module_type": "transform",
-  "domains": ["omics"],
-  "intents": ["genome coordinate liftover", "hg19 hg38 coordinate conversion", "BED assembly conversion", "基因组坐标转换", "参考基因组版本转换"],
-  "questions": ["Which declared genomic intervals map from one declared reference assembly to another under one immutable chain file, and which intervals remain split, unmapped, or scientifically unsuitable for downstream interpretation?"],
-  "maturity": "validated",
-  "entrypoint": "agent-generated-analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 2000000},
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {"objective": {"type": "string", "minLength": 12, "maxLength": 4000}, "interval_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256}, "source_assembly": {"type": "string", "minLength": 2, "maxLength": 128}, "target_assembly": {"type": "string", "minLength": 2, "maxLength": 128}, "chain_artifact_id": {"type": "string", "minLength": 1, "maxLength": 256}, "chain_source_url": {"type": "string", "pattern": "^https://.*$"}, "coordinate_convention": {"type": "string", "enum": ["zero-based-half-open"]}, "split_mapping_policy": {"type": "string", "enum": ["retain-and-flag", "block-downstream", "predeclared-aggregation"]}, "unmapped_policy": {"type": "string", "enum": ["retain-and-report", "block-if-any"]}, "declared_thresholds": {"type": "object"}, "design_notes": {"type": "string", "minLength": 1, "maxLength": 8000}}, "required": ["objective", "interval_artifact_id", "source_assembly", "target_assembly", "chain_artifact_id", "chain_source_url", "coordinate_convention", "split_mapping_policy", "unmapped_policy", "declared_thresholds", "design_notes"]},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"handoff_type": {"type": "string", "enum": ["packaged_parameterized_project_analysis"]}, "module": {"type": "object"}, "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}}, "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]},
-  "input_artifacts": [{"name": "source_intervals", "artifact_type": "genomic_intervals", "formats": [{"name": "bed", "versions": ["1"], "representations": ["text"], "compression": ["none", "gzip"], "required_indexes": [], "coordinate_systems": ["zero-based-half-open"], "genome_build_policy": "required", "genome_builds": ["declared-in-project"], "annotation_releases": ["declared-if-applicable"], "orientations": ["interval-records"]}], "processing_levels": ["features", "peaks", "regions", "variants-derived"], "required_metadata": ["source-assembly", "reference-sequence-digest", "coordinate-convention", "interval-record-identity", "source-artifact-digest"]}, {"name": "assembly_chain", "artifact_type": "coordinate_mapping_chain", "formats": [{"name": "ucsc-chain", "versions": ["1"], "representations": ["text"], "compression": ["gzip", "none"], "required_indexes": [], "coordinate_systems": ["zero-based-half-open"], "genome_build_policy": "required", "genome_builds": ["source-and-target-declared-in-project"], "annotation_releases": ["source-release-declared"], "orientations": ["source-to-target-blocks"]}], "processing_levels": ["release-specific"], "required_metadata": ["source-assembly", "target-assembly", "chain-source-url", "chain-sha256", "download-date"]}],
-  "output_artifacts": [{"name": "lifted_intervals", "artifact_type": "genomic_intervals", "formats": [{"name": "bed", "versions": ["1"], "representations": ["text"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["zero-based-half-open"], "genome_build_policy": "required", "genome_builds": ["declared-target-assembly"], "annotation_releases": ["inherited-if-applicable"], "orientations": ["interval-records"]}], "processing_levels": ["mapped", "split-mapped"], "required_metadata": ["source-artifact-digest", "chain-sha256", "source-assembly", "target-assembly", "record-accounting"]}, {"name": "liftover_audit", "artifact_type": "analysis_provenance", "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["validation-and-provenance-summary"]}], "processing_levels": ["validated"], "required_metadata": ["tool-version", "chain-sha256", "input-digest", "mapped-count", "unmapped-count", "split-count", "quality-gate-results"]}],
-  "assumptions": ["The supplied BED records and chain file describe the declared source and target assemblies; liftover does not establish locus orthology, allele equivalence, functional conservation, or compatibility with a downstream annotation release."],
-  "preconditions": ["Source and target assemblies, zero-based half-open BED semantics, stable record identifiers, chain URL and SHA256, downstream split/unmapped policy, and all output paths are declared before execution."],
-  "quality_gates": [{"id": "liftover-coordinate-and-assembly-identity", "severity": "fatal", "description": "Block if BED coordinates, source assembly, target assembly, coordinate convention, record identifiers, or reference sequence provenance are absent or contradictory.", "blocks_interpretation": true}, {"id": "liftover-chain-integrity", "severity": "fatal", "description": "Block if the chain file is unreadable, lacks the declared assembly direction, or its SHA256 differs from the declared immutable artifact.", "blocks_interpretation": true}, {"id": "liftover-record-accounting", "severity": "fatal", "description": "Every input record must be accounted as mapped, split-mapped, or unmapped. Silent record loss, duplicate ambiguity, or output coordinates with non-positive width block use.", "blocks_interpretation": true}, {"id": "liftover-downstream-claim-boundary", "severity": "major", "description": "Split or unmapped records remain explicit. Coordinate conversion is not proof of allele, gene, peak, regulatory, or cross-species biological equivalence.", "blocks_interpretation": true}],
-  "evidence_effects": ["adds-chain-provenance-bound-coordinate-mapping", "preserves-mapped-split-and-unmapped-record-accounting", "blocks-assembly-or-coordinate-semantic-ambiguity"],
-  "alternatives": [], "complements": ["interval-overlap-bedtools", "single-cell-atac-regulatory", "variant-region-query-tabix", "comparative-sequence-phylogeny"],
-  "tool_requirements": [{"name": "CrossMap", "ecosystem": "python", "identity": "CrossMap", "required": true, "tested_versions": ["0.7.0"], "allowed_versions": [">=0.7,<0.8"], "version_source": "https://crossmap.readthedocs.io/", "verified_at": "2026-07-23", "version_probe": ["CrossMap", "-v"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "v?([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "crossmap-bed-unmapped-sidecar", "affected_versions": [">=0.7,<0.8"], "category": "output-format", "description": "BED conversion writes mapped records and an .unmap sidecar whose parsing is release-coupled.", "compatibility_effect": "requires-parser", "required_action": "Capture command output and reconcile the mapped BED plus unmapped sidecar against every input record.", "source": "https://crossmap.readthedocs.io/"}], "platforms": ["any"]}],
-  "dependencies": [{"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.14.3"], "allowed_versions": [">=3.12,<3.15"], "version_source": "https://www.python.org/downloads/", "verified_at": "2026-07-23", "version_probe": ["python3", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Validate declared BED records, invoke CrossMap without shell execution, and serialize complete record-level provenance.", "conflicts": [], "platforms": ["any"]}],
-  "compatibility_matrix": [{"id": "agent-protocol-1-crossmap-070-python-3143-bed-1-chain-1", "module_version": "0.1.0", "tool_versions": {"CrossMap": [">=0.7,<0.8"]}, "dependency_versions": {"python": [">=3.12,<3.15"]}, "input_formats": {"source_intervals": ["bed@1"], "assembly_chain": ["ucsc-chain@1"]}, "output_formats": {"lifted_intervals": ["bed@1"], "liftover_audit": ["inline-json@1"]}, "platforms": ["any"], "regression_evidence_ids": ["genome-coordinate-liftover-regression-v1"], "end_to_end_evidence_ids": ["genome-coordinate-liftover-e2e-v1"], "verified_at": "2026-07-23"}],
-  "access": "agent_generated", "mutability": "read_only", "credentials": [], "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["Independent clean-room replacement for coordinate liftover capabilities identified during product capability planning.", "https://crossmap.readthedocs.io/", "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/"]},
-  "limitations": ["This module does not discover the appropriate assembly, retrieve a chain file automatically, validate reference allele sequence, normalize variants, determine gene or peak equivalence, infer orthology, or use a coordinate conversion as biological evidence."],
-  "code_templates": [{"path": "templates/run_crossmap_bed.py", "language": "python", "purpose": "Validate, execute and audit a declared CrossMap BED coordinate conversion against immutable project inputs.", "quality_gate_ids": ["liftover-coordinate-and-assembly-identity", "liftover-chain-integrity", "liftover-record-accounting", "liftover-downstream-claim-boundary"], "requires_adaptation": false}],
-  "agent_protocol": {"schema_version": 1, "mode": "packaged_parameterized_workflow", "languages": ["python", "notebook"], "template_sections": [{"id": "freeze-liftover-contract", "purpose": "Establish assembly, coordinate and chain semantics before transformation.", "required_logic": ["Inspect every BED record, reference build, coordinate convention, record identifier, chain direction and chain digest.", "Refuse guessed assemblies, one-based BED labels, mutable chain URLs and undeclared split or unmapped policies."], "output_artifact_types": ["genomic_intervals"], "template_files": ["templates/run_crossmap_bed.py"]}, {"id": "execute-and-reconcile-liftover", "purpose": "Run CrossMap and preserve complete record accounting.", "required_logic": ["Detect the exact CrossMap version and execute only the declared chain and input artifacts.", "Reload mapped and unmapped outputs, validate target BED widths and reconcile each source identifier exactly once or as explicit split mappings."], "output_artifact_types": ["genomic_intervals", "analysis_provenance"], "template_files": ["templates/run_crossmap_bed.py"]}], "parameter_rules": [{"id": "assembly-and-chain-selection", "parameter": "source-target-assembly-chain", "decision_inputs": ["source-assembly", "target-assembly", "reference-sequence-digest", "chain-provenance", "downstream-analysis-release"], "selection_rule": "Require a declared source-to-target chain artifact whose digest and release are compatible with the project reference assemblies.", "validation_rule": "Do not select an assembly or chain by chromosome names alone or substitute a reversed, approximate, or newly downloaded chain after failure."}], "preflight_checks": ["Detect CrossMap and Python versions in an existing compatible environment.", "Validate BED column structure, unique stable identifiers, source and target assemblies, zero-based half-open semantics, chain URL/digest and output paths."], "postflight_checks": ["Reload mapped and unmapped outputs; reconcile every input identifier, validate target interval widths, count split mappings and preserve commands, versions, digests and policy decisions."], "provenance_fields": ["module-id", "module-version", "generated-code-sha256", "input-bed-sha256", "chain-sha256", "source-assembly", "target-assembly", "coordinate-convention", "CrossMap-version", "command", "mapped-records", "unmapped-records", "split-records", "quality-gates"], "forbidden_actions": ["Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.", "Do not guess source or target assemblies, swap chain direction, silently omit unmapped records, or collapse split mappings without a predeclared policy.", "Do not treat coordinate conversion as variant normalization, reference-allele validation, gene equivalence, peak equivalence, orthology or functional conservation."], "requires_observed_execution": true},
-  "routing": {
-    "method_aliases": [
-      "genome-coordinate-liftover",
-      "Convert declared genomic intervals between reference assemblies",
-      "genome coordinate liftover",
-      "hg19 hg38 coordinate conversion",
-      "BED assembly conversion",
-      "基因组坐标转换",
-      "参考基因组版本转换"
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
+      "Do not guess source or target assemblies, swap chain direction, silently omit unmapped records, or collapse split mappings without a predeclared policy.",
+      "Do not treat coordinate conversion as variant normalization, reference-allele validation, gene equivalence, peak equivalence, orthology or functional conservation."
     ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
+    "languages": [
+      "python",
+      "notebook"
+    ],
+    "mode": "packaged_parameterized_workflow",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "source-assembly",
+          "target-assembly",
+          "reference-sequence-digest",
+          "chain-provenance",
+          "downstream-analysis-release"
+        ],
+        "id": "assembly-and-chain-selection",
+        "parameter": "source-target-assembly-chain",
+        "selection_rule": "Require a declared source-to-target chain artifact whose digest and release are compatible with the project reference assemblies.",
+        "validation_rule": "Do not select an assembly or chain by chromosome names alone or substitute a reversed, approximate, or newly downloaded chain after failure."
+      }
+    ],
+    "postflight_checks": [
+      "Reload mapped and unmapped outputs; reconcile every input identifier, validate target interval widths, count split mappings and preserve commands, versions, digests and policy decisions."
+    ],
+    "preflight_checks": [
+      "Detect CrossMap and Python versions in an existing compatible environment.",
+      "Validate BED column structure, unique stable identifiers, source and target assemblies, zero-based half-open semantics, chain URL/digest and output paths."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "generated-code-sha256",
+      "input-bed-sha256",
+      "chain-sha256",
+      "source-assembly",
+      "target-assembly",
+      "coordinate-convention",
+      "CrossMap-version",
+      "command",
+      "mapped-records",
+      "unmapped-records",
+      "split-records",
+      "quality-gates"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "freeze-liftover-contract",
+        "output_artifact_types": [
+          "genomic_intervals"
+        ],
+        "purpose": "Establish assembly, coordinate and chain semantics before transformation.",
+        "required_logic": [
+          "Inspect every BED record, reference build, coordinate convention, record identifier, chain direction and chain digest.",
+          "Refuse guessed assemblies, one-based BED labels, mutable chain URLs and undeclared split or unmapped policies."
+        ],
+        "template_files": [
+          "templates/run_crossmap_bed.py"
+        ]
+      },
+      {
+        "id": "execute-and-reconcile-liftover",
+        "output_artifact_types": [
+          "genomic_intervals",
+          "analysis_provenance"
+        ],
+        "purpose": "Run CrossMap and preserve complete record accounting.",
+        "required_logic": [
+          "Detect the exact CrossMap version and execute only the declared chain and input artifacts.",
+          "Reload mapped and unmapped outputs, validate target BED widths and reconcile each source identifier exactly once or as explicit split mappings."
+        ],
+        "template_files": [
+          "templates/run_crossmap_bed.py"
+        ]
+      }
+    ]
   },
-  "orchestration": {
-    "scientific_stage": 3,
-    "requires_reviewed_upstream_types": []
+  "alternatives": [],
+  "assumptions": [
+    "The supplied BED records and chain file describe the declared source and target assemblies; liftover does not establish locus orthology, allele equivalence, functional conservation, or compatibility with a downstream annotation release."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_crossmap_bed.py",
+      "purpose": "Validate, execute and audit a declared CrossMap BED coordinate conversion against immutable project inputs.",
+      "quality_gate_ids": [
+        "liftover-coordinate-and-assembly-identity",
+        "liftover-chain-integrity",
+        "liftover-record-accounting",
+        "liftover-downstream-claim-boundary"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.12,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "genome-coordinate-liftover-e2e-v1"
+      ],
+      "id": "agent-protocol-1-crossmap-070-python-3143-bed-1-chain-1",
+      "input_formats": {
+        "assembly_chain": [
+          "ucsc-chain@1"
+        ],
+        "source_intervals": [
+          "bed@1"
+        ]
+      },
+      "module_version": "0.1.0",
+      "output_formats": {
+        "lifted_intervals": [
+          "bed@1"
+        ],
+        "liftover_audit": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "genome-coordinate-liftover-regression-v1"
+      ],
+      "tool_versions": {
+        "CrossMap": [
+          ">=0.7,<0.8"
+        ]
+      },
+      "verified_at": "2026-07-23"
+    }
+  ],
+  "complements": [
+    "interval-overlap-bedtools",
+    "single-cell-atac-regulatory",
+    "variant-region-query-tabix",
+    "comparative-sequence-phylogeny"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.12,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Validate declared BED records, invoke CrossMap without shell execution, and serialize complete record-level provenance.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-07-23",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://www.python.org/downloads/"
+    }
+  ],
+  "description": "Direct Codex to validate coordinate semantics and immutable UCSC chain provenance, run CrossMap on BED intervals in an existing compatible environment, and retain mapped, split, and unmapped records with complete record accounting. It never guesses assemblies, silently drops unmapped intervals, or represents coordinate conversion as biological homology evidence.",
+  "domains": [
+    "omics"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "adds-chain-provenance-bound-coordinate-mapping",
+    "preserves-mapped-split-and-unmapped-record-accounting",
+    "blocks-assembly-or-coordinate-semantic-ambiguity"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 2000000,
+    "timeout_seconds": 30
   },
+  "id": "genome-coordinate-liftover",
+  "input_artifacts": [
+    {
+      "artifact_type": "genomic_intervals",
+      "formats": [
+        {
+          "annotation_releases": [
+            "declared-if-applicable"
+          ],
+          "compression": [
+            "none",
+            "gzip"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "declared-in-project"
+          ],
+          "name": "bed",
+          "orientations": [
+            "interval-records"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "source_intervals",
+      "processing_levels": [
+        "features",
+        "peaks",
+        "regions",
+        "variants-derived"
+      ],
+      "required_metadata": [
+        "source-assembly",
+        "reference-sequence-digest",
+        "coordinate-convention",
+        "interval-record-identity",
+        "source-artifact-digest"
+      ]
+    },
+    {
+      "artifact_type": "coordinate_mapping_chain",
+      "formats": [
+        {
+          "annotation_releases": [
+            "source-release-declared"
+          ],
+          "compression": [
+            "gzip",
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "source-and-target-declared-in-project"
+          ],
+          "name": "ucsc-chain",
+          "orientations": [
+            "source-to-target-blocks"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "assembly_chain",
+      "processing_levels": [
+        "release-specific"
+      ],
+      "required_metadata": [
+        "source-assembly",
+        "target-assembly",
+        "chain-source-url",
+        "chain-sha256",
+        "download-date"
+      ]
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "chain_artifact_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "chain_source_url": {
+        "pattern": "^https://.*$",
+        "type": "string"
+      },
+      "coordinate_convention": {
+        "enum": [
+          "zero-based-half-open"
+        ],
+        "type": "string"
+      },
+      "declared_thresholds": {
+        "type": "object"
+      },
+      "design_notes": {
+        "maxLength": 8000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "interval_artifact_id": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
+      "objective": {
+        "maxLength": 4000,
+        "minLength": 12,
+        "type": "string"
+      },
+      "source_assembly": {
+        "maxLength": 128,
+        "minLength": 2,
+        "type": "string"
+      },
+      "split_mapping_policy": {
+        "enum": [
+          "retain-and-flag",
+          "block-downstream",
+          "predeclared-aggregation"
+        ],
+        "type": "string"
+      },
+      "target_assembly": {
+        "maxLength": 128,
+        "minLength": 2,
+        "type": "string"
+      },
+      "unmapped_policy": {
+        "enum": [
+          "retain-and-report",
+          "block-if-any"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "interval_artifact_id",
+      "source_assembly",
+      "target_assembly",
+      "chain_artifact_id",
+      "chain_source_url",
+      "coordinate_convention",
+      "split_mapping_policy",
+      "unmapped_policy",
+      "declared_thresholds",
+      "design_notes"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "genome coordinate liftover",
+    "hg19 hg38 coordinate conversion",
+    "BED assembly conversion",
+    "\u57fa\u56e0\u7ec4\u5750\u6807\u8f6c\u6362",
+    "\u53c2\u8003\u57fa\u56e0\u7ec4\u7248\u672c\u8f6c\u6362"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This module does not discover the appropriate assembly, retrieve a chain file automatically, validate reference allele sequence, normalize variants, determine gene or peak equivalence, infer orthology, or use a coordinate conversion as biological evidence."
+  ],
+  "maturity": "validated",
+  "module_type": "transform",
+  "mutability": "read_only",
   "observed_output_contracts": [
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -121,6 +454,44 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "liftover-coordinate-and-assembly-identity",
+          "metric_key": "liftover-coordinate-and-assembly-identity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "liftover-chain-integrity",
+          "metric_key": "liftover-chain-integrity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "liftover-record-accounting",
+          "metric_key": "liftover-record-accounting",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "liftover-downstream-claim-boundary",
+          "metric_key": "liftover-downstream-claim-boundary",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -129,6 +500,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -170,15 +549,18 @@
         }
       ],
       "port": "lifted_intervals",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "liftover-coordinate-and-assembly-identity",
         "liftover-chain-integrity",
         "liftover-record-accounting",
         "liftover-downstream-claim-boundary"
-      ]
+      ],
+      "semantic_profile": "genome-coordinate-liftover-lifted-intervals-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
     },
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -251,6 +633,44 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "liftover-coordinate-and-assembly-identity",
+          "metric_key": "liftover-coordinate-and-assembly-identity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "liftover-chain-integrity",
+          "metric_key": "liftover-chain-integrity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "liftover-record-accounting",
+          "metric_key": "liftover-record-accounting",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "liftover-downstream-claim-boundary",
+          "metric_key": "liftover-downstream-claim-boundary",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -259,6 +679,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -300,13 +728,271 @@
         }
       ],
       "port": "liftover_audit",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "liftover-coordinate-and-assembly-identity",
         "liftover-chain-integrity",
         "liftover-record-accounting",
         "liftover-downstream-claim-boundary"
+      ],
+      "semantic_profile": "genome-coordinate-liftover-liftover-audit-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 3
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "genomic_intervals",
+      "formats": [
+        {
+          "annotation_releases": [
+            "inherited-if-applicable"
+          ],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "zero-based-half-open"
+          ],
+          "genome_build_policy": "required",
+          "genome_builds": [
+            "declared-target-assembly"
+          ],
+          "name": "bed",
+          "orientations": [
+            "interval-records"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "lifted_intervals",
+      "processing_levels": [
+        "mapped",
+        "split-mapped"
+      ],
+      "required_metadata": [
+        "source-artifact-digest",
+        "chain-sha256",
+        "source-assembly",
+        "target-assembly",
+        "record-accounting"
+      ]
+    },
+    {
+      "artifact_type": "analysis_provenance",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "validation-and-provenance-summary"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "liftover_audit",
+      "processing_levels": [
+        "validated"
+      ],
+      "required_metadata": [
+        "tool-version",
+        "chain-sha256",
+        "input-digest",
+        "mapped-count",
+        "unmapped-count",
+        "split-count",
+        "quality-gate-results"
       ]
     }
-  ]
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "packaged_parameterized_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Source and target assemblies, zero-based half-open BED semantics, stable record identifiers, chain URL and SHA256, downstream split/unmapped policy, and all output paths are declared before execution."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Independent clean-room replacement for coordinate liftover capabilities identified during product capability planning.",
+      "https://crossmap.readthedocs.io/",
+      "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block if BED coordinates, source assembly, target assembly, coordinate convention, record identifiers, or reference sequence provenance are absent or contradictory.",
+      "id": "liftover-coordinate-and-assembly-identity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Block if the chain file is unreadable, lacks the declared assembly direction, or its SHA256 differs from the declared immutable artifact.",
+      "id": "liftover-chain-integrity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every input record must be accounted as mapped, split-mapped, or unmapped. Silent record loss, duplicate ambiguity, or output coordinates with non-positive width block use.",
+      "id": "liftover-record-accounting",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Split or unmapped records remain explicit. Coordinate conversion is not proof of allele, gene, peak, regulatory, or cross-species biological equivalence.",
+      "id": "liftover-downstream-claim-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which declared genomic intervals map from one declared reference assembly to another under one immutable chain file, and which intervals remain split, unmapped, or scientifically unsuitable for downstream interpretation?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "genome-coordinate-liftover",
+      "Convert declared genomic intervals between reference assemblies",
+      "genome coordinate liftover",
+      "hg19 hg38 coordinate conversion",
+      "BED assembly conversion",
+      "\u57fa\u56e0\u7ec4\u5750\u6807\u8f6c\u6362",
+      "\u53c2\u8003\u57fa\u56e0\u7ec4\u7248\u672c\u8f6c\u6362"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Convert declared genomic intervals between reference assemblies",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=0.7,<0.8"
+      ],
+      "ecosystem": "python",
+      "identity": "CrossMap",
+      "mismatch_policy": "block",
+      "name": "CrossMap",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "0.7.0"
+      ],
+      "verified_at": "2026-07-23",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=0.7,<0.8"
+          ],
+          "category": "output-format",
+          "compatibility_effect": "requires-parser",
+          "description": "BED conversion writes mapped records and an .unmap sidecar whose parsing is release-coupled.",
+          "id": "crossmap-bed-unmapped-sidecar",
+          "required_action": "Capture command output and reconcile the mapped BED plus unmapped sidecar against every input record.",
+          "source": "https://crossmap.readthedocs.io/"
+        }
+      ],
+      "version_pattern": "v?([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "CrossMap",
+        "-v"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://crossmap.readthedocs.io/"
+    }
+  ],
+  "version": "0.1.0"
 }

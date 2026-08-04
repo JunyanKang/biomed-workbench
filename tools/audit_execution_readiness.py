@@ -161,7 +161,10 @@ def build() -> dict[str, object]:
     records = []
     for manifest in registry.all():
         validation = validate_module(BUILTIN_ROOT / manifest.id, require_tests=True, execute_tests=True)
-        receipt_digest = validation.get("controlled_fixture_receipt_digest") or report_receipts.get(manifest.id)
+        validation_receipt = validation.get("controlled_fixture_receipt_digest")
+        report_receipt = report_receipts.get(manifest.id)
+        receipt_digest = validation_receipt or report_receipt
+        round_trip_kind = "process-json" if validation_receipt else "artifact-payload" if report_receipt else None
         records.append(
             assess_execution_readiness(
                 BUILTIN_ROOT / manifest.id,
@@ -169,6 +172,7 @@ def build() -> dict[str, object]:
                 public_data_validated=manifest.id in validated_modules,
                 public_data_validated_assays=frozenset(validated_assays.get(manifest.id, set())),
                 controlled_fixture_receipt_digest=receipt_digest if isinstance(receipt_digest, str) else None,
+                controlled_fixture_round_trip_kind=round_trip_kind,
             ).to_dict()
         )
     counts: dict[str, int] = {}
@@ -182,12 +186,14 @@ def build() -> dict[str, object]:
             "adapter_static_reachable",
             "fixture_declared",
             "controlled_fixture_executed_and_reloaded",
+            "controlled_fixture_process_json_round_trip",
+            "controlled_fixture_artifact_payload_reloaded",
             "representative_or_public_case_validated",
             "current_project_reviewed",
         )
     }
     return {
-        "schema_version": 5,
+        "schema_version": 6,
         "registry_digest": registry.digest,
         "module_count": len(records),
         "counts": counts,
@@ -200,6 +206,8 @@ def build() -> dict[str, object]:
             "adapter_static_reachable": "At least one declared execution surface reaches packaged implementation code rather than only a suggestion or editable template.",
             "fixture_declared": "A controlled case is declared; declaration alone is not execution evidence.",
             "controlled_fixture_executed_and_reloaded": "A controlled fixture has exercised the registered implementation and its declared output reload path.",
+            "controlled_fixture_process_json_round_trip": "The controlled case returned a complete normalized process result that was decoded and checked against its closed output contract.",
+            "controlled_fixture_artifact_payload_reloaded": "The controlled case serialized one or more artifact payloads and independently reloaded their recorded byte identities.",
             "representative_or_public_case_validated": "A current dependency-scoped representative or public-data case passed its declared gates.",
             "current_project_reviewed": "The current project has observed execution, artifact reload, scientific review, and an accepted decision; generic release reports never set this axis.",
             "scaffolded": "A no-edit contract exists, but no external scientific workflow is executed.",

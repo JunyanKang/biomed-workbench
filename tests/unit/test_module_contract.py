@@ -220,9 +220,24 @@ def agent_manifest_payload():
             {"artifact_type": {"type": "string"}, "result_summary": {"type": "string"}},
             ["artifact_type", "result_summary"],
         ),
-        "payloads": [{"role": "primary", "media_types": ["application/json"], "minimum": 1, "maximum": 1}],
+        "payloads": [
+            {"role": "primary", "media_types": ["application/json"], "minimum": 1, "maximum": 1},
+            {"role": "semantic-metadata", "media_types": ["application/json"], "minimum": 1, "maximum": 1},
+        ],
         "required_postflight_gate_ids": ["missingness-reviewed"],
-        "reload_validator": None,
+        "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+        "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+        "semantic_validator_sha256": "0" * 64,
+        "semantic_profile": "standardized-scientific-output-v1",
+        "gate_evaluators": [{
+            "gate_id": "missingness-reviewed",
+            "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+            "evidence_payload_role": "semantic-metadata",
+            "metric_key": "missingness-reviewed",
+            "metric_type": "boolean",
+            "operator": "equals",
+            "threshold": True,
+        }],
     }]
     payload["output_schema"] = closed_schema(
         {

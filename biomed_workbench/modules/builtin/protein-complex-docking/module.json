@@ -1,76 +1,289 @@
 {
-  "schema_version": 1,
-  "id": "protein-complex-docking",
-  "version": "1.0.0",
-  "title": "Dock and evaluate biomolecular complexes with HADDOCK3",
-  "description": "Execute restraint-aware HADDOCK3 protein-complex docking with explicit test and production sampling profiles, optional PRODIGY and reference-backed DockQ evaluation, complete model accounting, and publication-ready structural figures plus replot tables.",
-  "module_type": "analysis",
-  "domains": ["molecular_design"],
-  "intents": ["protein protein docking", "HADDOCK3 complex docking", "蛋白复合物对接与结构评价"],
-  "questions": ["Which complex models remain supported after sampling, clustering, interface evaluation, reference comparison when available, and structural-figure review?"],
-  "entrypoint": "agent-generated-analysis",
-  "execution": {"kind": "workflow", "timeout_seconds": 30, "max_output_bytes": 3000000},
-  "maturity": "experimental",
-  "input_artifacts": [
-    {"name": "complex_docking_request", "artifact_type": "structure_analysis_request", "formats": [{"name": "inline-json", "versions": ["1"], "representations": ["structured"], "compression": ["none"], "required_indexes": [], "coordinate_systems": [], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["request-object"]}], "processing_levels": ["declared"], "required_metadata": []}
-  ],
-  "output_artifacts": [
-    {"name": "complex_docking_bundle", "artifact_type": "complex_docking_bundle", "formats": [{"name": "artifact-directory", "versions": ["1"], "representations": ["container"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["cartesian-angstrom"], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["module-output"]}], "processing_levels": ["derived"], "required_metadata": ["module-version", "compatibility-row-id", "artifact-digest"]},
-    {"name": "structure_figure_bundle", "artifact_type": "structure_figure_bundle", "formats": [{"name": "publication-figure-set", "versions": ["1"], "representations": ["container"], "compression": ["none"], "required_indexes": [], "coordinate_systems": ["cartesian-angstrom"], "genome_build_policy": "not_applicable", "genome_builds": [], "annotation_releases": [], "orientations": ["module-output"]}], "processing_levels": ["derived"], "required_metadata": ["style-version", "source-digest", "replot-table"]}
-  ],
-  "preconditions": ["Codex can inspect immutable coordinate inputs, restraints, reference availability, and separate compatible HADDOCK3 and DockQ runtimes before execution."],
-  "assumptions": ["Molecular identity, protonation and residue naming, chain mapping, restraint provenance, and coordinate units are declared and reviewed."],
-  "quality_gates": [
-    {"id": "complex-input-identity", "severity": "fatal", "description": "Require two or more parseable PDB inputs with explicit molecular identity, chain scope, coordinate units, and immutable digests.", "blocks_interpretation": true},
-    {"id": "docking-sampling-profile", "severity": "fatal", "description": "Separate the official small integration test from the production profile and record every sampling, selection, restraint, seed, and clustering parameter.", "blocks_interpretation": true},
-    {"id": "complex-result-accounting", "severity": "fatal", "description": "Reconcile every generated model, CAPRI table row, cluster, selected model, evaluation return code, and output digest.", "blocks_interpretation": true},
-    {"id": "complex-score-semantics", "severity": "fatal", "description": "Keep HADDOCK score, DockQ reference agreement, and PRODIGY affinity estimation distinct from experimental interaction and binding evidence.", "blocks_interpretation": true},
-    {"id": "structure-publication-figures", "severity": "major", "description": "Export PDF, SVG and 600-dpi PNG figures, editable scene instructions, interface contacts, score tables, legends, units, and a style-bound figure manifest.", "blocks_interpretation": true}
-  ],
-  "limitations": ["Docking generates structural hypotheses and does not establish interaction, affinity, kinetics, stoichiometry, cellular context, or mechanism.", "PRODIGY rejects unsupported non-standard residues unless the user applies a scientifically reviewed preparation step.", "HADDOCK3/PRODIGY and DockQ require isolated environments because their validated NumPy requirements conflict."],
-  "evidence_effects": ["produces-complex-docking-hypotheses", "produces-publication-ready-structure-figures", "blocks-docking-as-binding-proof"],
-  "alternatives": ["alphafold3-complex-prediction", "docking-pose-review"],
-  "complements": ["protein-interaction-network-evidence", "structure-quality-assessment", "structure-interactive-visualization"],
-  "tool_requirements": [
-    {"name": "haddock3", "ecosystem": "python", "identity": "haddock3", "required": true, "tested_versions": ["2026.7.0"], "allowed_versions": [">=2026.7,<2026.8"], "version_source": "https://github.com/haddocking/haddock3", "verified_at": "2026-08-02", "version_probe": ["haddock3", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "haddock3-official-workflow", "affected_versions": [">=2026.7,<2026.8"], "category": "behavior", "description": "The validated workflow uses topoaa, rigidbody, CAPRI evaluation, selection, flexible refinement, energy minimization, FCC clustering and analysis.", "compatibility_effect": "requires-parameter", "required_action": "Revalidate module sequence, configuration grammar, output tables and compressed final-model handling after a version change.", "source": "https://www.bonvinlab.org/haddock3-user-manual/"}], "platforms": ["macos-arm64", "linux-x86_64"]},
-    {"name": "prodigy-prot", "ecosystem": "python", "identity": "prodigy", "required": false, "tested_versions": ["2.3.0"], "allowed_versions": [">=2.3,<2.4"], "version_source": "https://github.com/haddocking/prodigy", "verified_at": "2026-08-02", "version_probe": ["prodigy", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "prodigy-complex-affinity", "affected_versions": [">=2.3,<2.4"], "category": "behavior", "description": "PRODIGY estimates affinity from a supplied complex and refuses unsupported non-standard residues.", "compatibility_effect": "requires-parser", "required_action": "Preserve parser failures and never report an estimate after silent residue deletion.", "source": "https://github.com/haddocking/prodigy"}], "platforms": ["any"]},
-    {"name": "dockq", "ecosystem": "python", "identity": "DockQ", "required": false, "tested_versions": ["2.1.3"], "allowed_versions": [">=2.1,<2.2"], "version_source": "https://github.com/wallnerlab/DockQ", "verified_at": "2026-08-02", "version_probe": ["DockQ", "--version"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "dockq-reference-mapping", "affected_versions": [">=2.1,<2.2"], "category": "parameter", "description": "DockQ reports interface and ligand RMSD, native and non-native contact fractions, F1, clashes and chain mapping against a declared reference.", "compatibility_effect": "requires-parameter", "required_action": "Require the reference and justify any allowed sequence mismatches explicitly.", "source": "https://github.com/wallnerlab/DockQ"}], "platforms": ["any"]},
-    {"name": "matplotlib", "ecosystem": "python", "identity": "matplotlib", "required": true, "tested_versions": ["3.10.8"], "allowed_versions": [">=3.10,<3.11"], "version_source": "https://matplotlib.org/stable/api/index.html", "verified_at": "2026-08-02", "version_probe": ["python3", "-c", "import matplotlib; print(matplotlib.__version__)"], "version_probe_kind": "command", "version_probe_timeout_seconds": 30, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "mismatch_policy": "block", "version_differences": [{"id": "structure-figure-export", "affected_versions": [">=3.10,<3.11"], "category": "behavior", "description": "Matplotlib renders deterministic vector and high-resolution raster structure-summary panels.", "compatibility_effect": "requires-format", "required_action": "Reload every export and retain the exact replot tables and style version.", "source": "https://matplotlib.org/stable/api/index.html"}], "platforms": ["any"]}
-  ],
-  "dependencies": [
-    {"name": "python", "ecosystem": "runtime", "identity": "python-runtime", "required": true, "tested_versions": ["3.12.10"], "allowed_versions": [">=3.12,<3.13"], "version_source": "https://www.python.org/downloads/", "verified_at": "2026-08-02", "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"], "version_probe_kind": "python_callable", "version_probe_timeout_seconds": 5, "version_pattern": "([0-9]+(?:\\.[0-9]+)+)", "purpose": "Execute the packaged runner and renderer in isolated, provenance-recorded environments.", "conflicts": [{"dependency": "numpy", "versions": [">=2", "<2"], "reason": "The validated HADDOCK3/PRODIGY environment resolved NumPy 2.5.1 while DockQ 2.1.3 requires NumPy below 2.", "required_action": "Run DockQ in a separate environment and pass only coordinate and text artifacts between stages.", "source": "https://github.com/wallnerlab/DockQ"}], "platforms": ["any"]}
-  ],
-  "compatibility_matrix": [{"id": "haddock3-2026-7-official-protein-protein-example", "module_version": "1.0.0", "tool_versions": {"haddock3": [">=2026.7,<2026.8"], "prodigy-prot": [">=2.3,<2.4"], "dockq": [">=2.1,<2.2"], "matplotlib": [">=3.10,<3.11"]}, "dependency_versions": {"python": [">=3.12,<3.13"]}, "input_formats": {"complex_docking_request": ["inline-json@1"]}, "output_formats": {"complex_docking_bundle": ["artifact-directory@1"], "structure_figure_bundle": ["publication-figure-set@1"]}, "platforms": ["macos-arm64", "linux-x86_64"], "regression_evidence_ids": ["protein-complex-docking-regression-v1"], "end_to_end_evidence_ids": ["haddock3-official-protein-protein-test-v1"], "verified_at": "2026-08-02"}],
   "access": "agent_generated",
-  "mutability": "writes_output",
-  "credentials": [],
-  "input_schema": {"type": "object", "additionalProperties": false, "properties": {"objective": {"type": "string"}, "request_path": {"type": "string"}, "output_directory": {"type": "string"}, "figure_title": {"type": "string"}}, "required": ["objective", "request_path", "output_directory"]},
-  "output_schema": {"type": "object", "additionalProperties": false, "properties": {"handoff_type": {"type": "string", "enum": ["packaged_parameterized_project_analysis"]}, "module": {"type": "object"}, "request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"}, "request_fields": {"type": "array"}, "languages": {"type": "array"}, "code_plan": {"type": "array"}, "parameter_rules": {"type": "array"}, "preflight_checks": {"type": "array"}, "postflight_checks": {"type": "array"}, "provenance_fields": {"type": "array"}, "forbidden_actions": {"type": "array"}, "tool_profiles": {"type": "array"}, "dependency_profiles": {"type": "array"}, "quality_gate_ids": {"type": "array"}, "execution_policy": {"type": "object"}}, "required": ["handoff_type", "module", "request_digest", "request_fields", "languages", "code_plan", "parameter_rules", "preflight_checks", "postflight_checks", "provenance_fields", "forbidden_actions", "tool_profiles", "dependency_profiles", "quality_gate_ids", "execution_policy"]},
-  "kernel_compatibility": [">=0.2.0,<0.3.0"],
-  "provenance": {"license": "Apache-2.0", "concept_sources": ["https://github.com/haddocking/haddock3", "https://github.com/wallnerlab/DockQ", "https://github.com/haddocking/prodigy", "Project-owned parameterized runner, output auditor and publication renderer."]},
-  "code_templates": [
-    {"path": "templates/run_haddock3_complex_docking.py", "language": "python", "purpose": "Generate and execute a closed HADDOCK3 workflow and reconcile all ranked outputs.", "quality_gate_ids": ["complex-input-identity", "docking-sampling-profile", "complex-result-accounting", "complex-score-semantics"], "requires_adaptation": false},
-    {"path": "templates/render_complex_publication_figures.py", "language": "python", "purpose": "Render structure and interface figures with PDF, SVG, PNG, editable scene instructions and replot tables.", "quality_gate_ids": ["complex-result-accounting", "structure-publication-figures"], "requires_adaptation": false}
-  ],
-  "agent_protocol": {"schema_version": 1, "mode": "packaged_parameterized_workflow", "languages": ["python"], "template_sections": [{"id": "execute-complex-docking", "purpose": "Run the packaged docking workflow in isolated validated environments.", "required_logic": ["Validate identities and preparation, freeze the sampling profile, execute HADDOCK3, and reconcile every ranked model."], "output_artifact_types": ["complex_docking_bundle"], "template_files": ["templates/run_haddock3_complex_docking.py"]}, {"id": "render-complex-figures", "purpose": "Render publication-ready structure and quality panels from admitted outputs.", "required_logic": ["Export vector and raster figures, editable scene instructions, interface tables, score tables and a digest-bound manifest."], "output_artifact_types": ["structure_figure_bundle"], "template_files": ["templates/render_complex_publication_figures.py"]}], "parameter_rules": [{"id": "select-complex-docking-profile", "parameter": "sampling-and-restraints", "decision_inputs": ["scientific-purpose", "restraint-evidence", "complex-size", "reference-availability"], "selection_rule": "Use the small official-test profile only for integration checks and the declared production profile for research sampling.", "validation_rule": "Block production interpretation when sampling, restraints, identity, preparation, clustering or reference mapping is unresolved."}], "preflight_checks": ["Resolve molecule identity, chain mapping, coordinate quality, non-standard residues, restraints, sampling profile and isolated tool environments."], "postflight_checks": ["Reload CAPRI, DockQ and PRODIGY outputs; reconcile every model; reload PDF, SVG and PNG exports; verify all digests."], "provenance_fields": ["module-version", "compatibility-row-id", "tool-and-environment-versions", "input-and-output-digests", "parameters", "quality-gate-results", "figure-style-version"], "forbidden_actions": ["Do not treat a docking score, model rank, predicted affinity or attractive figure as experimental interaction evidence.", "Do not silently remove non-standard residues, change chain mappings or increase allowed sequence mismatches.", "Do not run the official-test sampling profile as a research-grade production analysis."], "requires_observed_execution": true},
-  "routing": {
-    "method_aliases": [
-      "protein-complex-docking",
-      "Dock and evaluate biomolecular complexes with HADDOCK3",
-      "protein protein docking",
-      "HADDOCK3 complex docking",
-      "蛋白复合物对接与结构评价"
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not treat a docking score, model rank, predicted affinity or attractive figure as experimental interaction evidence.",
+      "Do not silently remove non-standard residues, change chain mappings or increase allowed sequence mismatches.",
+      "Do not run the official-test sampling profile as a research-grade production analysis."
     ],
-    "exclusion_terms": [],
-    "required_any_terms": [],
-    "named_method_priority": 100
+    "languages": [
+      "python"
+    ],
+    "mode": "packaged_parameterized_workflow",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "scientific-purpose",
+          "restraint-evidence",
+          "complex-size",
+          "reference-availability"
+        ],
+        "id": "select-complex-docking-profile",
+        "parameter": "sampling-and-restraints",
+        "selection_rule": "Use the small official-test profile only for integration checks and the declared production profile for research sampling.",
+        "validation_rule": "Block production interpretation when sampling, restraints, identity, preparation, clustering or reference mapping is unresolved."
+      }
+    ],
+    "postflight_checks": [
+      "Reload CAPRI, DockQ and PRODIGY outputs; reconcile every model; reload PDF, SVG and PNG exports; verify all digests."
+    ],
+    "preflight_checks": [
+      "Resolve molecule identity, chain mapping, coordinate quality, non-standard residues, restraints, sampling profile and isolated tool environments."
+    ],
+    "provenance_fields": [
+      "module-version",
+      "compatibility-row-id",
+      "tool-and-environment-versions",
+      "input-and-output-digests",
+      "parameters",
+      "quality-gate-results",
+      "figure-style-version"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "execute-complex-docking",
+        "output_artifact_types": [
+          "complex_docking_bundle"
+        ],
+        "purpose": "Run the packaged docking workflow in isolated validated environments.",
+        "required_logic": [
+          "Validate identities and preparation, freeze the sampling profile, execute HADDOCK3, and reconcile every ranked model."
+        ],
+        "template_files": [
+          "templates/run_haddock3_complex_docking.py"
+        ]
+      },
+      {
+        "id": "render-complex-figures",
+        "output_artifact_types": [
+          "structure_figure_bundle"
+        ],
+        "purpose": "Render publication-ready structure and quality panels from admitted outputs.",
+        "required_logic": [
+          "Export vector and raster figures, editable scene instructions, interface tables, score tables and a digest-bound manifest."
+        ],
+        "template_files": [
+          "templates/render_complex_publication_figures.py"
+        ]
+      }
+    ]
   },
-  "orchestration": {
-    "scientific_stage": 3,
-    "requires_reviewed_upstream_types": []
+  "alternatives": [
+    "alphafold3-complex-prediction",
+    "docking-pose-review"
+  ],
+  "assumptions": [
+    "Molecular identity, protonation and residue naming, chain mapping, restraint provenance, and coordinate units are declared and reviewed."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_haddock3_complex_docking.py",
+      "purpose": "Generate and execute a closed HADDOCK3 workflow and reconcile all ranked outputs.",
+      "quality_gate_ids": [
+        "complex-input-identity",
+        "docking-sampling-profile",
+        "complex-result-accounting",
+        "complex-score-semantics"
+      ],
+      "requires_adaptation": false
+    },
+    {
+      "language": "python",
+      "path": "templates/render_complex_publication_figures.py",
+      "purpose": "Render structure and interface figures with PDF, SVG, PNG, editable scene instructions and replot tables.",
+      "quality_gate_ids": [
+        "complex-result-accounting",
+        "structure-publication-figures"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.12,<3.13"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "haddock3-official-protein-protein-test-v1"
+      ],
+      "id": "haddock3-2026-7-official-protein-protein-example",
+      "input_formats": {
+        "complex_docking_request": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "complex_docking_bundle": [
+          "artifact-directory@1"
+        ],
+        "structure_figure_bundle": [
+          "publication-figure-set@1"
+        ]
+      },
+      "platforms": [
+        "macos-arm64",
+        "linux-x86_64"
+      ],
+      "regression_evidence_ids": [
+        "protein-complex-docking-regression-v1"
+      ],
+      "tool_versions": {
+        "dockq": [
+          ">=2.1,<2.2"
+        ],
+        "haddock3": [
+          ">=2026.7,<2026.8"
+        ],
+        "matplotlib": [
+          ">=3.10,<3.11"
+        ],
+        "prodigy-prot": [
+          ">=2.3,<2.4"
+        ]
+      },
+      "verified_at": "2026-08-02"
+    }
+  ],
+  "complements": [
+    "protein-interaction-network-evidence",
+    "structure-quality-assessment",
+    "structure-interactive-visualization"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.12,<3.13"
+      ],
+      "conflicts": [
+        {
+          "dependency": "numpy",
+          "reason": "The validated HADDOCK3/PRODIGY environment resolved NumPy 2.5.1 while DockQ 2.1.3 requires NumPy below 2.",
+          "required_action": "Run DockQ in a separate environment and pass only coordinate and text artifacts between stages.",
+          "source": "https://github.com/wallnerlab/DockQ",
+          "versions": [
+            ">=2",
+            "<2"
+          ]
+        }
+      ],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the packaged runner and renderer in isolated, provenance-recorded environments.",
+      "required": true,
+      "tested_versions": [
+        "3.12.10"
+      ],
+      "verified_at": "2026-08-02",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/"
+    }
+  ],
+  "description": "Execute restraint-aware HADDOCK3 protein-complex docking with explicit test and production sampling profiles, optional PRODIGY and reference-backed DockQ evaluation, complete model accounting, and publication-ready structural figures plus replot tables.",
+  "domains": [
+    "molecular_design"
+  ],
+  "entrypoint": "agent-generated-analysis",
+  "evidence_effects": [
+    "produces-complex-docking-hypotheses",
+    "produces-publication-ready-structure-figures",
+    "blocks-docking-as-binding-proof"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 3000000,
+    "timeout_seconds": 30
   },
+  "id": "protein-complex-docking",
+  "input_artifacts": [
+    {
+      "artifact_type": "structure_analysis_request",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "complex_docking_request",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "figure_title": {
+        "type": "string"
+      },
+      "objective": {
+        "type": "string"
+      },
+      "output_directory": {
+        "type": "string"
+      },
+      "request_path": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "request_path",
+      "output_directory"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "protein protein docking",
+    "HADDOCK3 complex docking",
+    "\u86cb\u767d\u590d\u5408\u7269\u5bf9\u63a5\u4e0e\u7ed3\u6784\u8bc4\u4ef7"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Docking generates structural hypotheses and does not establish interaction, affinity, kinetics, stoichiometry, cellular context, or mechanism.",
+    "PRODIGY rejects unsupported non-standard residues unless the user applies a scientifically reviewed preparation step.",
+    "HADDOCK3/PRODIGY and DockQ require isolated environments because their validated NumPy requirements conflict."
+  ],
+  "maturity": "experimental",
+  "module_type": "analysis",
+  "mutability": "writes_output",
   "observed_output_contracts": [
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -143,6 +356,53 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "complex-input-identity",
+          "metric_key": "complex-input-identity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "docking-sampling-profile",
+          "metric_key": "docking-sampling-profile",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "complex-result-accounting",
+          "metric_key": "complex-result-accounting",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "complex-score-semantics",
+          "metric_key": "complex-score-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "structure-publication-figures",
+          "metric_key": "structure-publication-figures",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -151,6 +411,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -192,16 +460,19 @@
         }
       ],
       "port": "complex_docking_bundle",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "complex-input-identity",
         "docking-sampling-profile",
         "complex-result-accounting",
         "complex-score-semantics",
         "structure-publication-figures"
-      ]
+      ],
+      "semantic_profile": "protein-complex-docking-complex-docking-bundle-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
     },
     {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "content_schema": {
         "additionalProperties": false,
         "properties": {
@@ -274,6 +545,53 @@
         ],
         "type": "object"
       },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "complex-input-identity",
+          "metric_key": "complex-input-identity",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "docking-sampling-profile",
+          "metric_key": "docking-sampling-profile",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "complex-result-accounting",
+          "metric_key": "complex-result-accounting",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "complex-score-semantics",
+          "metric_key": "complex-score-semantics",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evidence_payload_role": "semantic-metadata",
+          "gate_id": "structure-publication-figures",
+          "metric_key": "structure-publication-figures",
+          "metric_type": "boolean",
+          "operator": "equals",
+          "threshold": true
+        }
+      ],
       "payloads": [
         {
           "maximum": 1,
@@ -282,6 +600,14 @@
           ],
           "minimum": 1,
           "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
         },
         {
           "maximum": 1,
@@ -323,14 +649,384 @@
         }
       ],
       "port": "structure_figure_bundle",
-      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
       "required_postflight_gate_ids": [
         "complex-input-identity",
         "docking-sampling-profile",
         "complex-result-accounting",
         "complex-score-semantics",
         "structure-publication-figures"
+      ],
+      "semantic_profile": "protein-complex-docking-structure-figure-bundle-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 3
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "complex_docking_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "artifact-directory",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "container"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "complex_docking_bundle",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "module-version",
+        "compatibility-row-id",
+        "artifact-digest"
+      ]
+    },
+    {
+      "artifact_type": "structure_figure_bundle",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [
+            "cartesian-angstrom"
+          ],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "publication-figure-set",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "container"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "structure_figure_bundle",
+      "processing_levels": [
+        "derived"
+      ],
+      "required_metadata": [
+        "style-version",
+        "source-digest",
+        "replot-table"
       ]
     }
-  ]
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "packaged_parameterized_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Codex can inspect immutable coordinate inputs, restraints, reference availability, and separate compatible HADDOCK3 and DockQ runtimes before execution."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://github.com/haddocking/haddock3",
+      "https://github.com/wallnerlab/DockQ",
+      "https://github.com/haddocking/prodigy",
+      "Project-owned parameterized runner, output auditor and publication renderer."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Require two or more parseable PDB inputs with explicit molecular identity, chain scope, coordinate units, and immutable digests.",
+      "id": "complex-input-identity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Separate the official small integration test from the production profile and record every sampling, selection, restraint, seed, and clustering parameter.",
+      "id": "docking-sampling-profile",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Reconcile every generated model, CAPRI table row, cluster, selected model, evaluation return code, and output digest.",
+      "id": "complex-result-accounting",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Keep HADDOCK score, DockQ reference agreement, and PRODIGY affinity estimation distinct from experimental interaction and binding evidence.",
+      "id": "complex-score-semantics",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Export PDF, SVG and 600-dpi PNG figures, editable scene instructions, interface contacts, score tables, legends, units, and a style-bound figure manifest.",
+      "id": "structure-publication-figures",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which complex models remain supported after sampling, clustering, interface evaluation, reference comparison when available, and structural-figure review?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "protein-complex-docking",
+      "Dock and evaluate biomolecular complexes with HADDOCK3",
+      "protein protein docking",
+      "HADDOCK3 complex docking",
+      "\u86cb\u767d\u590d\u5408\u7269\u5bf9\u63a5\u4e0e\u7ed3\u6784\u8bc4\u4ef7"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Dock and evaluate biomolecular complexes with HADDOCK3",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=2026.7,<2026.8"
+      ],
+      "ecosystem": "python",
+      "identity": "haddock3",
+      "mismatch_policy": "block",
+      "name": "haddock3",
+      "platforms": [
+        "macos-arm64",
+        "linux-x86_64"
+      ],
+      "required": true,
+      "tested_versions": [
+        "2026.7.0"
+      ],
+      "verified_at": "2026-08-02",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=2026.7,<2026.8"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parameter",
+          "description": "The validated workflow uses topoaa, rigidbody, CAPRI evaluation, selection, flexible refinement, energy minimization, FCC clustering and analysis.",
+          "id": "haddock3-official-workflow",
+          "required_action": "Revalidate module sequence, configuration grammar, output tables and compressed final-model handling after a version change.",
+          "source": "https://www.bonvinlab.org/haddock3-user-manual/"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "haddock3",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/haddocking/haddock3"
+    },
+    {
+      "allowed_versions": [
+        ">=2.3,<2.4"
+      ],
+      "ecosystem": "python",
+      "identity": "prodigy",
+      "mismatch_policy": "block",
+      "name": "prodigy-prot",
+      "platforms": [
+        "any"
+      ],
+      "required": false,
+      "tested_versions": [
+        "2.3.0"
+      ],
+      "verified_at": "2026-08-02",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=2.3,<2.4"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-parser",
+          "description": "PRODIGY estimates affinity from a supplied complex and refuses unsupported non-standard residues.",
+          "id": "prodigy-complex-affinity",
+          "required_action": "Preserve parser failures and never report an estimate after silent residue deletion.",
+          "source": "https://github.com/haddocking/prodigy"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "prodigy",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/haddocking/prodigy"
+    },
+    {
+      "allowed_versions": [
+        ">=2.1,<2.2"
+      ],
+      "ecosystem": "python",
+      "identity": "DockQ",
+      "mismatch_policy": "block",
+      "name": "dockq",
+      "platforms": [
+        "any"
+      ],
+      "required": false,
+      "tested_versions": [
+        "2.1.3"
+      ],
+      "verified_at": "2026-08-02",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=2.1,<2.2"
+          ],
+          "category": "parameter",
+          "compatibility_effect": "requires-parameter",
+          "description": "DockQ reports interface and ligand RMSD, native and non-native contact fractions, F1, clashes and chain mapping against a declared reference.",
+          "id": "dockq-reference-mapping",
+          "required_action": "Require the reference and justify any allowed sequence mismatches explicitly.",
+          "source": "https://github.com/wallnerlab/DockQ"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "DockQ",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://github.com/wallnerlab/DockQ"
+    },
+    {
+      "allowed_versions": [
+        ">=3.10,<3.11"
+      ],
+      "ecosystem": "python",
+      "identity": "matplotlib",
+      "mismatch_policy": "block",
+      "name": "matplotlib",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "3.10.8"
+      ],
+      "verified_at": "2026-08-02",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=3.10,<3.11"
+          ],
+          "category": "behavior",
+          "compatibility_effect": "requires-format",
+          "description": "Matplotlib renders deterministic vector and high-resolution raster structure-summary panels.",
+          "id": "structure-figure-export",
+          "required_action": "Reload every export and retain the exact replot tables and style version.",
+          "source": "https://matplotlib.org/stable/api/index.html"
+        }
+      ],
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "python3",
+        "-c",
+        "import matplotlib; print(matplotlib.__version__)"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 30,
+      "version_source": "https://matplotlib.org/stable/api/index.html"
+    }
+  ],
+  "version": "1.0.0"
 }

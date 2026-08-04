@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 BUILTIN_ROOT = ROOT / "biomed_workbench" / "modules" / "builtin"
+SEMANTIC_VALIDATOR = ROOT / "biomed_workbench" / "modules" / "semantic_output_validation.py"
 
 MEDIA_TYPES = {
     "alphafold3-output": "application/zip",
@@ -62,6 +64,13 @@ def _contract(manifest: dict[str, object], port: dict[str, object]) -> dict[str,
         for item in port["formats"]  # type: ignore[index]
     ]
     media_types = sorted({MEDIA_TYPES.get(name, "application/octet-stream") for name in formats})
+    semantic_profile = (
+        "functional-enrichment-v1"
+        if manifest["id"] == "functional-enrichment"
+        else f"{manifest['id']}-{port['name']}-v1".replace("_", "-")
+    )
+    semantic_digest = hashlib.sha256(SEMANTIC_VALIDATOR.read_bytes()).hexdigest()
+    quality_gate_ids = [item["id"] for item in manifest["quality_gates"]]  # type: ignore[index]
     return {
         "port": port["name"],
         "content_schema": {
@@ -89,13 +98,29 @@ def _contract(manifest: dict[str, object], port: dict[str, object]) -> dict[str,
         },
         "payloads": [
             {"role": "primary", "media_types": media_types, "minimum": 1, "maximum": 1},
+            {"role": "semantic-metadata", "media_types": ["application/json"], "minimum": 1, "maximum": 1},
             {"role": "source-data", "media_types": media_types, "minimum": 0, "maximum": 1},
             {"role": "figure", "media_types": ["application/pdf", "image/svg+xml", "image/tiff", "image/png"], "minimum": 0, "maximum": 1},
             {"role": "model", "media_types": ["application/octet-stream", "application/zip", "application/x-hdf5"], "minimum": 0, "maximum": 1},
             {"role": "log", "media_types": ["application/json", "text/plain"], "minimum": 0, "maximum": 1},
         ],
-        "required_postflight_gate_ids": [item["id"] for item in manifest["quality_gates"]],  # type: ignore[index]
-        "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+        "required_postflight_gate_ids": quality_gate_ids,
+        "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+        "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+        "semantic_validator_sha256": semantic_digest,
+        "semantic_profile": semantic_profile,
+        "gate_evaluators": [
+            {
+                "gate_id": gate_id,
+                "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+                "evidence_payload_role": "semantic-metadata",
+                "metric_key": gate_id,
+                "metric_type": "boolean",
+                "operator": "equals",
+                "threshold": True,
+            }
+            for gate_id in quality_gate_ids
+        ],
     }
 
 
