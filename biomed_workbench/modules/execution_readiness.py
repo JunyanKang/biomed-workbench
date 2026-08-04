@@ -38,7 +38,7 @@ class ExecutionReadiness:
     assay_readiness: tuple[dict[str, object], ...]
     entry_surface_reachability: Mapping[str, dict[str, object]]
     evidence_axes: Mapping[str, bool]
-    controlled_fixture_receipt_digest: str | None
+    controlled_fixture_portable_identity_digest: str | None
     reasons: tuple[str, ...]
 
     def to_dict(self) -> dict[str, object]:
@@ -53,7 +53,7 @@ class ExecutionReadiness:
             "assay_readiness": list(self.assay_readiness),
             "entry_surface_reachability": dict(self.entry_surface_reachability),
             "evidence_axes": dict(self.evidence_axes),
-            "controlled_fixture_receipt_digest": self.controlled_fixture_receipt_digest,
+            "controlled_fixture_portable_identity_digest": self.controlled_fixture_portable_identity_digest,
             "reasons": list(self.reasons),
         }
 
@@ -145,13 +145,13 @@ def assess_execution_readiness(
     *,
     public_data_validated: bool = False,
     public_data_validated_assays: frozenset[str] = frozenset(),
-    controlled_fixture_receipt_digest: str | None = None,
+    controlled_fixture_portable_identity_digest: str | None = None,
     controlled_fixture_round_trip_kind: str | None = None,
 ) -> ExecutionReadiness:
     paths = referenced_template_paths(manifest)
     fixture_path = module_path / "tests" / "cases.json"
     fixture_declared = fixture_path.is_file()
-    controlled_fixture_executed = public_data_validated or controlled_fixture_receipt_digest is not None
+    controlled_fixture_executed = public_data_validated or controlled_fixture_portable_identity_digest is not None
     if manifest.access != "agent_generated":
         executor_ready = True
         surfaces = _entry_surfaces(manifest, executor_ready=executor_ready)
@@ -175,7 +175,7 @@ def assess_execution_readiness(
                 "representative_or_public_case_validated": public_data_validated,
                 "current_project_reviewed": False,
             },
-            controlled_fixture_receipt_digest,
+            controlled_fixture_portable_identity_digest,
             ("The registered Python, service, or scientific-command entrypoint is the execution surface; templates are reproducible examples only.",),
         )
     reasons: list[str] = []
@@ -321,6 +321,6 @@ def assess_execution_readiness(
             "representative_or_public_case_validated": public_data_validated and executor_ready,
             "current_project_reviewed": False,
         },
-        controlled_fixture_receipt_digest,
+        controlled_fixture_portable_identity_digest,
         tuple(reasons),
     )

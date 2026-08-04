@@ -129,6 +129,39 @@ def _controlled_fixture_report_receipts(registry: ModuleRegistry) -> dict[str, s
     return receipts
 
 
+_PORTABLE_RECEIPT_FIELDS = (
+    "case_name",
+    "case_digest",
+    "module_id",
+    "module_version",
+    "compatibility_row_id",
+    "validated_projection_digest",
+    "reload_method",
+    "round_trip_kind",
+)
+
+
+def _portable_validation_identity(validation: dict[str, object]) -> str | None:
+    """Bind successful execution without turning host-specific values into release metadata."""
+    receipts = validation.get("controlled_fixture_receipts")
+    observed_digest = validation.get("controlled_fixture_receipt_digest")
+    if not isinstance(observed_digest, str) or not isinstance(receipts, list) or not receipts:
+        return None
+    portable: list[dict[str, object]] = []
+    for receipt in receipts:
+        if (
+            not isinstance(receipt, dict)
+            or any(field not in receipt for field in _PORTABLE_RECEIPT_FIELDS)
+            or not isinstance(receipt.get("full_normalized_output_digest"), str)
+            or not isinstance(receipt.get("runtime_versions"), dict)
+        ):
+            return None
+        portable.append({field: receipt[field] for field in _PORTABLE_RECEIPT_FIELDS})
+    return hashlib.sha256(
+        json.dumps(portable, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
 def build() -> dict[str, object]:
     registry = ModuleRegistry.discover(BUILTIN_ROOT)
     report_receipts = _controlled_fixture_report_receipts(registry)
@@ -161,17 +194,17 @@ def build() -> dict[str, object]:
     records = []
     for manifest in registry.all():
         validation = validate_module(BUILTIN_ROOT / manifest.id, require_tests=True, execute_tests=True)
-        validation_receipt = validation.get("controlled_fixture_receipt_digest")
+        validation_identity = _portable_validation_identity(validation)
         report_receipt = report_receipts.get(manifest.id)
-        receipt_digest = validation_receipt or report_receipt
-        round_trip_kind = "process-json" if validation_receipt else "artifact-payload" if report_receipt else None
+        receipt_digest = validation_identity or report_receipt
+        round_trip_kind = "process-json" if validation_identity else "artifact-payload" if report_receipt else None
         records.append(
             assess_execution_readiness(
                 BUILTIN_ROOT / manifest.id,
                 manifest,
                 public_data_validated=manifest.id in validated_modules,
                 public_data_validated_assays=frozenset(validated_assays.get(manifest.id, set())),
-                controlled_fixture_receipt_digest=receipt_digest if isinstance(receipt_digest, str) else None,
+                controlled_fixture_portable_identity_digest=receipt_digest if isinstance(receipt_digest, str) else None,
                 controlled_fixture_round_trip_kind=round_trip_kind,
             ).to_dict()
         )
@@ -193,7 +226,7 @@ def build() -> dict[str, object]:
         )
     }
     return {
-        "schema_version": 6,
+        "schema_version": 7,
         "registry_digest": registry.digest,
         "module_count": len(records),
         "counts": counts,
@@ -208,6 +241,7 @@ def build() -> dict[str, object]:
             "controlled_fixture_executed_and_reloaded": "A controlled fixture has exercised the registered implementation and its declared output reload path.",
             "controlled_fixture_process_json_round_trip": "The controlled case returned a complete normalized process result that was decoded and checked against its closed output contract.",
             "controlled_fixture_artifact_payload_reloaded": "The controlled case serialized one or more artifact payloads and independently reloaded their recorded byte identities.",
+            "portable_receipt_identity": "The checked readiness catalog binds portable case, module, compatibility, validated projection, reload, and round-trip identity. Complete observed output and runtime digests remain in the run-specific validation receipt and are intentionally excluded from cross-host release identity.",
             "representative_or_public_case_validated": "A current dependency-scoped representative or public-data case passed its declared gates.",
             "current_project_reviewed": "The current project has observed execution, artifact reload, scientific review, and an accepted decision; generic release reports never set this axis.",
             "scaffolded": "A no-edit contract exists, but no external scientific workflow is executed.",
