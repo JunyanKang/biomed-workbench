@@ -15,7 +15,7 @@ from .execution_receipts import (
     ObservedExecutionReceipt,
     ScientificReviewReceipt,
 )
-from .execution_chain import delivery_slice_digest
+from .execution_chain import delivery_slice_digest, validate_node_execution_chain, validate_validated_delivery_state
 from .hypotheses import Hypothesis, add_hypothesis, attach_evidence
 from .identity import digest_value, freeze_mapping, thaw
 from .plans import NODE_STATUSES, PlanNode, ResearchDAG
@@ -357,7 +357,23 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
         artifact_ids = {value.id for value in artifacts}
         hypothesis_ids = {value.id for value in hypotheses}
         output_owner = {artifact_id: node.id for node in item.nodes for artifact_id in node.planned_output_artifact_ids.values()}
-        if set(output_owner) & artifact_ids:
+        inherited_output_ids: set[str] = set()
+        if event_type == "plan_revised":
+            parent = next(value for value in plans if value.id == item.parent_plan_id)
+            parent_nodes = {node.id: node for node in parent.nodes}
+            for node in item.nodes:
+                previous = parent_nodes.get(node.id)
+                if set(node.planned_output_artifact_ids.values()) & artifact_ids:
+                    if previous is None or node != previous or node.status != "completed":
+                        raise ValueError("revised plans may only inherit unchanged completed outputs")
+                    validate_node_execution_chain(
+                        state,
+                        node.id,
+                        require_completed_node=True,
+                        require_active_decisions=False,
+                    )
+                    inherited_output_ids.update(node.planned_output_artifact_ids.values())
+        if (set(output_owner) & artifact_ids) - inherited_output_ids:
             raise ValueError("planned outputs cannot overwrite registered artifacts")
         for node in item.nodes:
             if not set(node.target_hypothesis_ids) <= hypothesis_ids:
@@ -402,6 +418,13 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
             raise ValueError("running transition must increment the node attempt exactly once")
         if payload["status"] != "running" and payload["attempt"] != current_node.attempt:
             raise ValueError("non-running transition cannot change the node attempt")
+        if current_node.status == "awaiting_review" and payload["status"] == "completed":
+            validate_node_execution_chain(
+                state,
+                current_node.id,
+                require_completed_node=False,
+                require_active_decisions=True,
+            )
         nodes = tuple(
             replace(node, status=payload["status"], attempt=payload["attempt"])
             if node.id == payload["node_id"]
@@ -477,6 +500,7 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
             or artifact.producing_module_version != observed.module_version
             or artifact.content_digest != receipt.content_digest
             or observed.output_artifact_digests.get(artifact.id) != artifact.content_digest
+            or receipt.observed_output_contract_digest != observed.observed_output_contract_digest
         ):
             raise ValueError("reloaded artifact is duplicate or differs from observed execution")
         artifacts = (*artifacts, artifact)
@@ -541,6 +565,8 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
         active_artifacts = {value.artifact_id for value in scientific_decisions if value.active_evidence}
         if set(item.active_artifact_ids) != active_artifacts:
             raise ValueError("evidence map publication active artifacts differ from current decisions")
+        if item.map_kind == "validated-delivery":
+            validate_validated_delivery_state(state)
         if item.version.revision != len(evidence_map_versions) + 1:
             raise ValueError("evidence map publication revision is not continuous")
         if evidence_map_versions and item.version.parent_map_digest != evidence_map_versions[-1].map_digest:

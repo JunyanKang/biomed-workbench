@@ -75,12 +75,13 @@ def module_slice_basis(
         raise ValueError("evidence scope requires at least one module")
     def execution_manifest(module_id: str) -> dict[str, object]:
         payload = manifest_to_dict(registry.get(module_id))
-        # Routing and cross-module orchestration affect discovery and ordering,
-        # not the observed scientific computation represented by this scope.
-        # Keeping them out prevents an alias or stage-only change from falsely
-        # invalidating an otherwise identical execution receipt.
+        # Routing, cross-module scheduling, and external-result admission affect
+        # discovery or controller re-entry, not the already observed scientific
+        # computation represented by a public-case scope.  Their independent
+        # digests still bind installation state and each future handoff.
         payload.pop("routing", None)
         payload.pop("orchestration", None)
+        payload.pop("observed_output_contracts", None)
         return payload
 
     return {

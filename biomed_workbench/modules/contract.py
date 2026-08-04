@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any, Mapping
 
+from ..kernel.identity import digest_value
 from ..models import ACCESS_MODES, KINDS, MUTABILITY_MODES
 from .scientific_command import ScientificCommand
 
@@ -29,6 +30,8 @@ _NAME_RE = re.compile(r"^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$")
 _SEMVER_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$")
 _VERSION_RULE_RE = re.compile(r"^(?:==|!=|>=|<=|>|<|~=)?[^\s,]+(?:,(?:==|!=|>=|<=|>|<|~=)?[^\s,]+)*$")
 _FORMAT_TOKEN_RE = re.compile(r"^([a-z][a-z0-9+._-]*)@([^\s@]+)$")
+_MEDIA_TYPE_RE = re.compile(r"^[a-z0-9][a-z0-9.+-]*/[a-z0-9][a-z0-9.+-]*$")
+_CALLABLE_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.]*:[A-Za-z_][A-Za-z0-9_]*$")
 
 
 @dataclass(frozen=True)
@@ -205,6 +208,23 @@ class OrchestrationContract:
 
 
 @dataclass(frozen=True)
+class ObservedPayloadContract:
+    role: str
+    media_types: tuple[str, ...]
+    minimum: int
+    maximum: int
+
+
+@dataclass(frozen=True)
+class ObservedOutputContract:
+    port: str
+    content_schema: dict[str, object]
+    payloads: tuple[ObservedPayloadContract, ...]
+    required_postflight_gate_ids: tuple[str, ...]
+    reload_validator: str | None = None
+
+
+@dataclass(frozen=True)
 class ModuleManifest:
     schema_version: int
     id: str
@@ -241,6 +261,7 @@ class ModuleManifest:
     orchestration: OrchestrationContract
     code_templates: tuple[CodeTemplate, ...] = ()
     agent_protocol: AgentProtocol | None = None
+    observed_output_contracts: tuple[ObservedOutputContract, ...] = ()
 
 
 _MANIFEST_FIELDS = frozenset(ModuleManifest.__dataclass_fields__)
@@ -261,7 +282,9 @@ _AGENT_SECTION_FIELDS = frozenset(AgentTemplateSection.__dataclass_fields__)
 _AGENT_PARAMETER_FIELDS = frozenset(AgentParameterRule.__dataclass_fields__)
 _ROUTING_FIELDS = frozenset(RoutingContract.__dataclass_fields__)
 _ORCHESTRATION_FIELDS = frozenset(OrchestrationContract.__dataclass_fields__)
-_OPTIONAL_MANIFEST_FIELDS = frozenset({"agent_protocol", "code_templates"})
+_OBSERVED_OUTPUT_FIELDS = frozenset(ObservedOutputContract.__dataclass_fields__)
+_OBSERVED_PAYLOAD_FIELDS = frozenset(ObservedPayloadContract.__dataclass_fields__)
+_OPTIONAL_MANIFEST_FIELDS = frozenset({"agent_protocol", "code_templates", "observed_output_contracts"})
 
 
 def _object(value: Any, location: str) -> dict[str, Any]:
@@ -333,6 +356,51 @@ def _orchestration(value: Any) -> OrchestrationContract:
             "manifest.orchestration.requires_reviewed_upstream_types",
             allow_empty=True,
         ),
+    )
+
+
+def _observed_payload(value: Any, location: str) -> ObservedPayloadContract:
+    payload = _object(value, location)
+    _exact_fields(payload, _OBSERVED_PAYLOAD_FIELDS, location)
+    role = _text(payload["role"], f"{location}.role")
+    if not _NAME_RE.fullmatch(role):
+        raise ValueError(f"{location}.role is invalid")
+    media_types = _strings(payload["media_types"], f"{location}.media_types")
+    if any(not _MEDIA_TYPE_RE.fullmatch(item) for item in media_types):
+        raise ValueError(f"{location}.media_types contains an invalid media type")
+    minimum = _nonnegative_integer(payload["minimum"], f"{location}.minimum")
+    maximum = _positive_integer(payload["maximum"], f"{location}.maximum")
+    if minimum > maximum or maximum != 1:
+        raise ValueError(f"{location} cardinality must fit the unique artifact-payload role model")
+    return ObservedPayloadContract(role, media_types, minimum, maximum)
+
+
+def _observed_output(value: Any, location: str) -> ObservedOutputContract:
+    payload = _object(value, location)
+    _exact_fields(payload, _OBSERVED_OUTPUT_FIELDS, location)
+    payload_values = payload["payloads"]
+    if not isinstance(payload_values, list) or not payload_values:
+        raise ValueError(f"{location}.payloads must be a nonempty list")
+    contracts = tuple(
+        _observed_payload(item, f"{location}.payloads[{index}]")
+        for index, item in enumerate(payload_values)
+    )
+    if len({item.role for item in contracts}) != len(contracts) or not any(item.minimum > 0 for item in contracts):
+        raise ValueError(f"{location}.payloads must contain unique roles and at least one required payload")
+    reload_validator = payload["reload_validator"]
+    if reload_validator is not None and (
+        not isinstance(reload_validator, str) or not _CALLABLE_RE.fullmatch(reload_validator)
+    ):
+        raise ValueError(f"{location}.reload_validator must be null or a packaged Python callable")
+    return ObservedOutputContract(
+        port=_text(payload["port"], f"{location}.port"),
+        content_schema=_closed_schema(payload["content_schema"], f"{location}.content_schema"),
+        payloads=contracts,
+        required_postflight_gate_ids=_strings(
+            payload["required_postflight_gate_ids"],
+            f"{location}.required_postflight_gate_ids",
+        ),
+        reload_validator=reload_validator,
     )
 
 
@@ -919,6 +987,9 @@ def parse_manifest(value: Any) -> ModuleManifest:
     code_template_values = payload.get("code_templates", [])
     if not isinstance(code_template_values, list):
         raise ValueError("manifest.code_templates must be a list")
+    observed_output_values = payload.get("observed_output_contracts", [])
+    if not isinstance(observed_output_values, list):
+        raise ValueError("manifest.observed_output_contracts must be a list")
     manifest = ModuleManifest(
         schema_version=1,
         id=identifier,
@@ -958,6 +1029,10 @@ def parse_manifest(value: Any) -> ModuleManifest:
             for index, item in enumerate(code_template_values)
         ),
         agent_protocol=_agent_protocol(payload["agent_protocol"]) if "agent_protocol" in payload else None,
+        observed_output_contracts=tuple(
+            _observed_output(item, f"manifest.observed_output_contracts[{index}]")
+            for index, item in enumerate(observed_output_values)
+        ),
     )
     if len({item.path for item in manifest.code_templates}) != len(manifest.code_templates):
         raise ValueError("manifest.code_templates contains duplicate paths")
@@ -975,12 +1050,23 @@ def parse_manifest(value: Any) -> ModuleManifest:
             raise ValueError("agent_generated modules require workflow execution and an agent_protocol")
         if not manifest.agent_protocol.requires_observed_execution:
             raise ValueError("agent_generated modules must require observed execution")
+        output_ports = {port.name: port for port in manifest.output_artifacts}
+        observed_contracts = {item.port: item for item in manifest.observed_output_contracts}
+        if len(observed_contracts) != len(manifest.observed_output_contracts) or set(observed_contracts) != set(output_ports):
+            raise ValueError("agent_generated modules require exactly one observed output contract per output port")
+        blocking_gates = {item.id for item in manifest.quality_gates if item.blocks_interpretation}
+        for port_name, contract in observed_contracts.items():
+            unknown_gates = set(contract.required_postflight_gate_ids) - quality_gate_ids
+            if unknown_gates:
+                raise ValueError(f"observed output contract references unknown quality gate: {sorted(unknown_gates)[0]}")
+            if not blocking_gates <= set(contract.required_postflight_gate_ids):
+                raise ValueError(f"observed output contract omits a blocking quality gate for port: {port_name}")
         produced_types = {port.artifact_type for port in manifest.output_artifacts}
         declared_types = {artifact_type for section in manifest.agent_protocol.template_sections for artifact_type in section.output_artifact_types}
         if not declared_types <= produced_types:
             raise ValueError("agent_protocol template sections reference undeclared output artifact types")
-    elif manifest.agent_protocol is not None:
-        raise ValueError("agent_protocol is only valid for agent_generated modules")
+    elif manifest.agent_protocol is not None or manifest.observed_output_contracts:
+        raise ValueError("agent protocol and observed output contracts are only valid for agent_generated modules")
     _validate_compatibility(manifest)
     _validate_command_execution(manifest)
     return manifest
@@ -1052,6 +1138,29 @@ def _agent_protocol_dict(value: AgentProtocol) -> dict[str, object]:
         "forbidden_actions": list(value.forbidden_actions),
         "requires_observed_execution": value.requires_observed_execution,
     }
+
+
+def _observed_output_dict(value: ObservedOutputContract) -> dict[str, object]:
+    return {
+        "port": value.port,
+        "content_schema": dict(value.content_schema),
+        "payloads": [
+            {
+                "role": item.role,
+                "media_types": list(item.media_types),
+                "minimum": item.minimum,
+                "maximum": item.maximum,
+            }
+            for item in value.payloads
+        ],
+        "required_postflight_gate_ids": list(value.required_postflight_gate_ids),
+        "reload_validator": value.reload_validator,
+    }
+
+
+def observed_output_contract_digest(value: ModuleManifest) -> str:
+    """Return the immutable digest used to bind a workflow handoff to result admission."""
+    return digest_value([_observed_output_dict(item) for item in value.observed_output_contracts])
 
 
 def _code_template_dict(value: CodeTemplate) -> dict[str, object]:
@@ -1195,4 +1304,8 @@ def manifest_to_dict(value: ModuleManifest) -> dict[str, object]:
         payload["code_templates"] = [_code_template_dict(item) for item in value.code_templates]
     if value.agent_protocol is not None:
         payload["agent_protocol"] = _agent_protocol_dict(value.agent_protocol)
+    if value.observed_output_contracts:
+        payload["observed_output_contracts"] = [
+            _observed_output_dict(item) for item in value.observed_output_contracts
+        ]
     return payload

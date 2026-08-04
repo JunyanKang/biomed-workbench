@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -283,7 +284,7 @@ def _execute_case(module_path: Path, case_index: int) -> dict[str, Any]:
     return raw
 
 
-def _run_case_isolated(module_path: Path, manifest: ModuleManifest, case_index: int) -> None:
+def _run_case_isolated(module_path: Path, manifest: ModuleManifest, case_index: int) -> dict[str, Any]:
     command = [sys.executable, str(Path(__file__).resolve()), "--execute-case", str(module_path), str(case_index)]
     try:
         result = subprocess.run(command, text=False, capture_output=True, timeout=manifest.execution.timeout_seconds, check=False)
@@ -296,9 +297,12 @@ def _run_case_isolated(module_path: Path, manifest: ModuleManifest, case_index: 
     if len(result.stdout) > manifest.execution.max_output_bytes:
         raise ModuleValidationError(f"test case {case_index} exceeded the declared output size")
     try:
-        json.loads(result.stdout)
+        output = json.loads(result.stdout)
     except json.JSONDecodeError as exc:
         raise ModuleValidationError(f"test case {case_index} did not produce JSON") from exc
+    if not isinstance(output, dict):
+        raise ModuleValidationError(f"test case {case_index} did not reload as an object")
+    return output
 
 
 def _evidence_flags(manifest: ModuleManifest) -> tuple[bool, bool, bool, bool]:
@@ -363,6 +367,7 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
     compatibility_rows = 0
     tool_complete = dependency_complete = format_complete = compatibility_complete = False
     executed = 0
+    fixture_receipts: list[dict[str, object]] = []
     if manifest is not None:
         compatibility_rows = len(manifest.compatibility_matrix)
         tool_complete, dependency_complete, format_complete, compatibility_complete = _evidence_flags(manifest)
@@ -393,11 +398,27 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
             if manifest is not None and entrypoint_resolved:
                 for index in range(len(cases)):
                     if execute_tests:
-                        _run_case_isolated(module_path, manifest, index)
-                    executed += 1
+                        output = _run_case_isolated(module_path, manifest, index)
+                        fixture_receipts.append({
+                            "case_name": cases[index]["name"],
+                            "case_digest": hashlib.sha256(
+                                json.dumps(cases[index], sort_keys=True, separators=(",", ":")).encode("utf-8")
+                            ).hexdigest(),
+                            "reloaded_output_digest": hashlib.sha256(
+                                json.dumps(output, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                            ).hexdigest(),
+                        })
+                        executed += 1
         except (ModuleValidationError, InputValidationError) as exc:
             errors.append(str(exc))
 
+    fixture_receipt_digest = (
+        hashlib.sha256(
+            json.dumps(fixture_receipts, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
+        if fixture_receipts and not errors and manifest is not None and manifest.access != "agent_generated"
+        else None
+    )
     return {
         "schema_version": 1,
         "module_id": manifest.id if manifest else module_path.name,
@@ -412,6 +433,9 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
         "format_evidence_complete": format_complete,
         "compatibility_evidence_complete": compatibility_complete,
         "executed_test_cases": executed,
+        "fixture_declared": (module_path / "tests" / "cases.json").is_file(),
+        "controlled_fixture_receipt_digest": fixture_receipt_digest,
+        "controlled_fixture_receipts": fixture_receipts if fixture_receipt_digest else [],
     }
 
 

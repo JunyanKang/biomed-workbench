@@ -8,13 +8,13 @@ from typing import Callable
 
 from ..kernel.evidence import EvidenceRecord
 from ..kernel.execution_receipts import ArtifactReloadReceipt, ObservedExecutionReceipt, ScientificReviewReceipt
-from ..kernel.execution_chain import validated_delivery_publication_is_current
+from ..kernel.execution_chain import validate_node_execution_chain, validated_delivery_publication_is_current
 from ..kernel.artifact_store import ProjectArtifactStore
 from ..kernel.identity import digest_value, thaw
 from ..kernel.plans import PlanNode, ResearchDAG
 from ..kernel.state import ProjectState, apply_event
 from ..modules.compatibility import EnvironmentSnapshot
-from ..modules.contract import ModuleManifest
+from ..modules.contract import ModuleManifest, observed_output_contract_digest
 from ..modules.registry import ModuleRegistry
 from .execution import NodeExecution, execute_node
 from .interpretation import HypothesisAssessment, assess_hypothesis
@@ -215,6 +215,43 @@ class ResearchController:
                 return execution
         return None
 
+    @classmethod
+    def _resolved_completed_execution(cls, state: ProjectState, node: PlanNode) -> NodeExecution:
+        """Resolve direct execution or reconstruct a read-only handoff completion view."""
+        recorded = cls._recorded_execution(state, node.id)
+        if recorded is not None and recorded.status == "completed":
+            return recorded
+        output_ids = validate_node_execution_chain(
+            state,
+            node.id,
+            require_completed_node=False,
+            require_active_decisions=True,
+        )
+        observed = next(item for item in state.observed_executions if item.plan_node_id == node.id)
+        artifacts = tuple(
+            next(item for item in state.artifacts if item.id == artifact_id)
+            for artifact_id in output_ids
+        )
+        return NodeExecution(
+            node_id=node.id,
+            module_id=observed.module_id,
+            module_version=observed.module_version,
+            status="completed",
+            compatibility_row_id=observed.compatibility_row_id,
+            input_artifact_ids=tuple(node.input_bindings.values()),
+            output_artifact_ids=output_ids,
+            artifacts=artifacts,
+            quality_findings=(),
+            compatibility_finding_codes=(),
+            provenance={
+                "parameters_digest": observed.parameters_digest,
+                "tools": thaw(observed.runtime_versions),
+                "observed_execution_receipt_id": observed.id,
+                "observed_output_contract_digest": observed.observed_output_contract_digest,
+            },
+            safe_error_class=None,
+        )
+
     def _record_completed_receipt_chain(
         self,
         state: ProjectState,
@@ -237,9 +274,17 @@ class ResearchController:
             module_id=execution.module_id,
             module_version=execution.module_version,
             compatibility_row_id=str(execution.compatibility_row_id),
+            observed_output_contract_digest=(
+                observed_output_contract_digest(manifest)
+                if manifest.observed_output_contracts
+                else digest_value(manifest.output_schema)
+            ),
             parameters_digest=parameters_digest,
             runtime_versions=runtime_versions,
             output_artifact_digests={artifact.id: artifact.content_digest for artifact in execution.artifacts},
+            postflight_result_digests={
+                item.id: digest_value(item.to_dict()) for item in execution.quality_findings
+            },
             process_exit_code=0,
             source_kind="command" if manifest.execution.kind == "command" else "direct",
             execution_request_digest=request_digest,
@@ -258,6 +303,8 @@ class ResearchController:
                 observed_execution=observed,
                 artifact_id=artifact.id,
                 payload_digests={payload.role: payload.sha256 for payload in artifact.payloads},
+                observed_output_contract_digest=observed.observed_output_contract_digest,
+                reload_validator_id=None,
                 output_schema_valid=True,
                 content_digest=artifact.content_digest,
             )
@@ -300,9 +347,7 @@ class ResearchController:
                 state = self._status(state, plan.id, node, "skipped", node.attempt)
                 plan = self._active_plan(state)
                 continue
-            execution = self._recorded_execution(state, node.id)
-            if execution is None or execution.status != "completed":
-                raise ValueError("reviewed plan node has no matching completed execution record")
+            execution = self._resolved_completed_execution(state, node)
             for evidence in self._evidence_mapper(execution, node, state):
                 if evidence.id in evidence_ids:
                     continue

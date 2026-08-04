@@ -19,7 +19,7 @@ These levels are cumulative for a specific compatibility row. Evidence from one
 row must not be transferred to another row merely because its version appears
 inside an allowed range.
 
-Five independent axes are reported for every released capability: contract validity, static adapter reachability, controlled fixture execution and reload, representative or public-case acceptance, and current-project review. They are never collapsed into one maturity count. Reachable code is not proof of execution; a representative case is not proof that the current project produced and reviewed a result. Generic entry surfaces therefore never declare scientific completion before the project review and decision events exist.
+Six independent axes are reported for every released capability: contract validity, static adapter reachability, fixture declaration, receipt-bound controlled fixture execution and reload, representative or public-case acceptance, and current-project review. They are never collapsed into one maturity count. A case file proves only declaration; the execution axis additionally requires an isolated case receipt containing the case digest and reloaded-output digest. Reachable code is not proof of execution, and a representative case is not proof that the current project produced and reviewed a result. Generic entry surfaces therefore never declare scientific completion before the project review and decision events exist.
 
 ## Operational Labels
 

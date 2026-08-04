@@ -260,6 +260,7 @@ class ResearchControllerTests(unittest.TestCase):
                 module_version=manifest.version,
                 request_digest="1" * 64,
                 compatibility_row_id=manifest.compatibility_matrix[0].id,
+                observed_output_contract_digest="2" * 64,
                 planned_output_artifact_ids=node.planned_output_artifact_ids,
                 protocol={
                     "result_kind": "execution_handoff",
@@ -556,6 +557,51 @@ class ResearchControllerTests(unittest.TestCase):
         self.assertEqual(result.stop_reason, "plan_completed")
         self.assertEqual(result.active_plan.parent_plan_id, initial.id)
         self.assertEqual(tuple(execution.module_id for execution in result.executions), ("primary-normalizer", "alternative-normalizer"))
+
+    def test_replan_inherits_verified_completed_upstream_and_replaces_only_blocked_downstream(self):
+        normalizer = module_payload("normalize-matrix", "count_matrix", "normalized_matrix")
+        primary = module_payload(
+            "primary-contrast", "normalized_matrix", "contrast_result",
+            alternatives=("alternative-contrast",),
+        )
+        alternative = module_payload("alternative-contrast", "normalized_matrix", "contrast_result")
+        temporary, registry = workflow_registry((normalizer, primary, alternative))
+        self.addCleanup(temporary.cleanup)
+        state = state_with(inline_artifact("artifact-counts", "count_matrix"))
+        initial = plan_research(
+            state,
+            registry,
+            build_capability_graph(registry),
+            (PlanningRequest("request-contrast", "contrast_result", (hypothesis().id,), ("cell-state-association",)),),
+            compatible_module_ids=("normalize-matrix", "primary-contrast"),
+        )
+
+        def executor(current_state, _plan, node, active_registry, **_kwargs):
+            if node.module_id == "primary-contrast":
+                return NodeExecution(
+                    node.id, node.module_id, "1.0.0", "blocked", None,
+                    tuple(node.input_bindings.values()), (), (), (),
+                    ("UNVALIDATED_DEPENDENCY_VERSION",), {}, "CompatibilityError",
+                )
+            return completed_execution(current_state, node, active_registry)
+
+        result = ResearchController(
+            registry,
+            environment_provider=lambda _manifest: None,
+            node_executor=executor,
+            policy=ControllerPolicy(max_plan_revisions=2, max_node_attempts=1, parallel_workers=1),
+        ).advance(state, initial)
+
+        self.assertEqual(result.stop_reason, "plan_completed")
+        self.assertEqual(
+            tuple(execution.module_id for execution in result.executions),
+            ("normalize-matrix", "primary-contrast", "alternative-contrast"),
+        )
+        parent_normalizer = next(node for node in result.state.plans[0].nodes if node.module_id == "normalize-matrix")
+        child_normalizer = next(node for node in result.active_plan.nodes if node.module_id == "normalize-matrix")
+        self.assertEqual(child_normalizer, parent_normalizer)
+        self.assertEqual(child_normalizer.status, "completed")
+        self.assertIn("alternative-contrast", {node.module_id for node in result.active_plan.nodes})
 
     def test_default_controller_does_not_cycle_between_reciprocal_alternatives(self):
         primary = module_payload("primary-normalizer", "count_matrix", "normalized_matrix", alternatives=("alternative-normalizer",))

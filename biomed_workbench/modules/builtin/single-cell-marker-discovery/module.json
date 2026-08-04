@@ -656,5 +656,144 @@
   "orchestration": {
     "scientific_stage": 4,
     "requires_reviewed_upstream_types": []
-  }
+  },
+  "observed_output_contracts": [
+    {
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "single_cell_marker_evidence"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "tab-separated-values",
+              "inline-json"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "ranked-in-discovery-samples",
+              "held-out-sample-validated",
+              "reload-validated"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/tab-separated-values"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/tab-separated-values"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "marker_evidence",
+      "reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "required_postflight_gate_ids": [
+        "marker-input-semantics",
+        "marker-cluster-accounting",
+        "marker-effect-evidence",
+        "marker-sample-stability",
+        "marker-label-boundary",
+        "marker-output-reload"
+      ]
+    }
+  ]
 }

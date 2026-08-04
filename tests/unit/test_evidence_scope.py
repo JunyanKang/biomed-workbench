@@ -7,8 +7,9 @@ from biomed_workbench.modules.evidence_scope import (
     evidence_scope_is_current,
     module_evidence_scope,
 )
+from biomed_workbench.modules.contract import observed_output_contract_digest
 from biomed_workbench.modules.registry import ModuleRegistry
-from tests.unit.test_module_contract import valid_manifest_payload
+from tests.unit.test_module_contract import agent_manifest_payload, valid_manifest_payload
 
 
 def write_module(root: Path, payload: dict[str, object], template_text: str = "") -> None:
@@ -69,6 +70,31 @@ class EvidenceScopeTests(unittest.TestCase):
                 evidence_scope_is_current(
                     report, ModuleRegistry.discover(root), module_root=root
                 )
+            )
+
+    def test_result_admission_contract_has_an_independent_handoff_identity(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            payload = agent_manifest_payload()
+            payload["id"] = "agent-analysis"
+            write_module(root, payload)
+            template = root / "agent-analysis" / "templates" / "fixture.py"
+            template.parent.mkdir(parents=True, exist_ok=True)
+            template.write_text("print('fixed packaged workflow')\n", encoding="utf-8")
+            registry = ModuleRegistry.discover(root)
+            report = {
+                "module_id": "agent-analysis",
+                "evidence_scope": module_evidence_scope(registry, ["agent-analysis"], module_root=root).to_dict(),
+            }
+            original_contract_digest = observed_output_contract_digest(registry.get("agent-analysis"))
+            payload["observed_output_contracts"][0]["content_schema"]["properties"]["result_summary"]["maxLength"] = 200
+            (root / "agent-analysis" / "module.json").write_text(json.dumps(payload), encoding="utf-8")
+            changed = ModuleRegistry.discover(root)
+
+            self.assertTrue(evidence_scope_is_current(report, changed, module_root=root))
+            self.assertNotEqual(
+                original_contract_digest,
+                observed_output_contract_digest(changed.get("agent-analysis")),
             )
 
 

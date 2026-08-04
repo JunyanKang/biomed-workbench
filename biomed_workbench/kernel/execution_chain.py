@@ -10,7 +10,12 @@ if TYPE_CHECKING:
     from .state import ProjectState
 
 
-def validate_artifact_execution_chain(state: "ProjectState", artifact_id: str) -> str:
+def validate_artifact_execution_chain(
+    state: "ProjectState",
+    artifact_id: str,
+    *,
+    require_completed_node: bool = True,
+) -> str:
     """Return the producing node ID after validating one complete receipt chain."""
     artifact = next((item for item in state.artifacts if item.id == artifact_id), None)
     if artifact is None:
@@ -51,9 +56,65 @@ def validate_artifact_execution_chain(state: "ProjectState", artifact_id: str) -
         ),
         None,
     )
-    if node is None or node.status != "completed":
+    if node is None or (require_completed_node and node.status != "completed"):
         raise ValueError("produced artifact belongs to an unfinished plan node")
     return node.id
+
+
+def validate_node_execution_chain(
+    state: "ProjectState",
+    node_id: str,
+    *,
+    require_completed_node: bool = True,
+    require_active_decisions: bool = False,
+) -> tuple[str, ...]:
+    """Validate every planned output of one node as one closed execution slice."""
+    node = next((item for plan in state.plans for item in plan.nodes if item.id == node_id), None)
+    if node is None:
+        raise ValueError("execution chain references an unknown plan node")
+    output_ids = tuple(node.planned_output_artifact_ids.values())
+    if not output_ids:
+        raise ValueError("execution chain node has no planned outputs")
+    observed = tuple(item for item in state.observed_executions if item.plan_node_id == node_id)
+    if len(observed) != 1 or set(observed[0].output_artifact_digests) != set(output_ids):
+        raise ValueError("plan node has no exact observed execution covering every output")
+    for artifact_id in output_ids:
+        if validate_artifact_execution_chain(
+            state,
+            artifact_id,
+            require_completed_node=require_completed_node,
+        ) != node_id:
+            raise ValueError("plan node output is bound to another producer")
+    if require_active_decisions:
+        active = {item.artifact_id for item in state.scientific_decisions if item.active_evidence}
+        if not set(output_ids) <= active:
+            raise ValueError("plan node outputs lack retained scientific decisions")
+    return output_ids
+
+
+def validate_validated_delivery_state(state: "ProjectState") -> tuple[str, ...]:
+    """Require a terminal active plan and identity-level retained leaf deliverables."""
+    active_plan = next((item for item in state.plans if item.id == state.active_plan_id), None)
+    if active_plan is None or any(node.status != "completed" for node in active_plan.nodes):
+        raise ValueError("validated-delivery requires every active plan node to be completed")
+    dependency_ids = {dependency for node in active_plan.nodes for dependency in node.dependencies}
+    leaf_nodes = tuple(node for node in active_plan.nodes if node.id not in dependency_ids)
+    required_ids = tuple(
+        artifact_id
+        for node in leaf_nodes
+        for artifact_id in node.planned_output_artifact_ids.values()
+    )
+    active_ids = {item.artifact_id for item in state.scientific_decisions if item.active_evidence}
+    if not required_ids or not set(required_ids) <= active_ids:
+        raise ValueError("validated-delivery lacks one or more retained leaf deliverable identities")
+    for node in leaf_nodes:
+        validate_node_execution_chain(
+            state,
+            node.id,
+            require_completed_node=True,
+            require_active_decisions=True,
+        )
+    return required_ids
 
 
 def delivery_slice_digest(state: "ProjectState") -> str:

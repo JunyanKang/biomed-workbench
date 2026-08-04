@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Mapping
 
 from .identity import digest_value, freeze_mapping, thaw, validate_identifier
-from .execution_chain import validate_artifact_execution_chain
+from .execution_chain import validate_artifact_execution_chain, validate_validated_delivery_state
 if TYPE_CHECKING:
     from .state import ProjectState
 
@@ -393,8 +393,7 @@ class ScientificDependencyBundle:
             for artifact_id in active_produced:
                 validate_artifact_execution_chain(state, artifact_id)
             active_plan = next((item for item in state.plans if item.id == state.active_plan_id), None)
-            if active_plan is None:
-                raise ValueError("validated-delivery evidence map requires an active completed plan")
+            validate_validated_delivery_state(state)
             active_types = {artifacts[artifact_id].artifact_type for artifact_id in active_produced}
             if not set(active_plan.required_output_artifact_types) <= active_types:
                 raise ValueError("validated-delivery active evidence does not satisfy the plan's required outputs")

@@ -17,7 +17,7 @@ from ..kernel.plans import PlanNode, ResearchDAG
 from ..kernel.state import ProjectState
 from ..kernel.execution_chain import validate_artifact_execution_chain
 from ..modules.compatibility import ArtifactSnapshot, CompatibilityError, EnvironmentSnapshot, evaluate_compatibility, invoke_compatible
-from ..modules.contract import ArtifactPort, FormatContract, ModuleManifest
+from ..modules.contract import ArtifactPort, FormatContract, ModuleManifest, observed_output_contract_digest
 from ..modules.registry import ModuleRegistry, ModuleRegistryError
 from ..modules.scientific_command import ScientificCommandError, execute_scientific_command
 from ..runner import InputValidationError, validate_schema_value
@@ -418,6 +418,7 @@ def execute_node(
                     module_version=manifest.version,
                     request_digest=str(invocation.output["request_digest"]),
                     compatibility_row_id=str(invocation.provenance["compatibility_row_id"]),
+                    observed_output_contract_digest=observed_output_contract_digest(manifest),
                     planned_output_artifact_ids=node.planned_output_artifact_ids,
                     protocol=invocation.output,
                 )

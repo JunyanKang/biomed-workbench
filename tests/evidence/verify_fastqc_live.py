@@ -92,6 +92,34 @@ def verify(executable: Path) -> dict[str, object]:
         },
         "scientific_summary": summary,
         "html_report_validated": True,
+        "controlled_fixture_receipt": {
+            "schema_version": 1,
+            "module_id": manifest.id,
+            "module_version": manifest.version,
+            "compatibility_row_id": manifest.compatibility_matrix[0].id,
+            "input_sha256": provenance["inputs"]["reads"]["sha256"],
+            "output_payloads": [
+                {
+                    "role": item["role"],
+                    "media_type": item["media_type"],
+                    "sha256": item["sha256"],
+                    "byte_size": item["byte_size"],
+                }
+                for item in provenance["outputs"]
+            ],
+            "reload_checks": [
+                {
+                    "check_id": "fastqc-archive-parser",
+                    "passed": True,
+                    "payload_sha256": outputs["archive"].sha256,
+                },
+                {
+                    "check_id": "fastqc-html-report",
+                    "passed": True,
+                    "payload_sha256": outputs["report"].sha256,
+                },
+            ],
+        },
     }
 
 

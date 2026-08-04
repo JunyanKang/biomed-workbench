@@ -38,6 +38,7 @@ from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 from biomed_workbench.orchestration.controller import ResearchController  # noqa: E402
 from biomed_workbench.orchestration.execution_ingest import ingest_execution_bundle  # noqa: E402
 from biomed_workbench.reporting.evidence_map_versions import (  # noqa: E402
+    complete_evidence_map_publication_recovery,
     inspect_evidence_map_publication_recovery,
     publish_evidence_map_transaction,
 )
@@ -134,6 +135,7 @@ def main() -> int:
     recovery = commands.add_parser("map-recovery", help="inspect interrupted evidence-map publication state without modifying files")
     recovery.add_argument("--state", required=True, type=Path)
     recovery.add_argument("--publish-root", required=True, type=Path)
+    recovery.add_argument("--complete", action="store_true", help="complete a verified files-published/state-pending transaction")
     ingest = commands.add_parser("ingest-execution", help="validate and ingest one observed execution against its recorded handoff")
     ingest.add_argument("--state", required=True, type=Path)
     ingest.add_argument("--input", required=True, type=Path)
@@ -234,8 +236,15 @@ def main() -> int:
         print(json.dumps(_summary(state), indent=2, sort_keys=True, ensure_ascii=False))
         return 0
     elif args.command == "map-recovery":
+        if args.complete:
+            result = complete_evidence_map_publication_recovery(
+                args.publish_root,
+                state_path=args.state,
+            )
+        else:
+            result = inspect_evidence_map_publication_recovery(args.publish_root, state_path=args.state)
         print(json.dumps(
-            inspect_evidence_map_publication_recovery(args.publish_root, state_path=args.state),
+            result,
             indent=2,
             sort_keys=True,
             ensure_ascii=False,

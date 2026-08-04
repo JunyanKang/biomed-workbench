@@ -61,8 +61,9 @@ qualified inputs, pending branches, failures, conflicts, and exclusions, but it
 never releases a publication or other formal-delivery node. A
 `validated-delivery` map requires retained produced results to carry the exact
 plan-node, observed-execution, artifact-reload, bilingual-review, and decision
-chain, and requires those active results to cover the active plan's required
-output types.
+chain. Every node in the active plan must be completed, and every exact leaf
+output identity must be retained. Artifact-type coverage cannot conceal a
+pending, review-pending, failed, skipped, or otherwise unfinished sibling.
 
 ## Review Every Result
 
@@ -158,7 +159,11 @@ until it is audited. The project command publishes the immutable files, version
 index, current pointer, and project-state registration through one recoverable
 transaction journal. Its read-only recovery inspection distinguishes staged,
 unindexed, and state-unregistered interruptions and never silently deletes an
-immutable result.
+immutable result. The prepared journal stores a content-addressed pending
+project state, its pre-state digest, the exact publication record, and target
+identities. Explicit completion is allowed only when the current state still
+matches the pre-state and the pending state, immutable index, current pointer,
+and publication digests all verify.
 
 Recommended classification:
 

@@ -47,6 +47,8 @@ These interfaces are for development, validation, and agent integration. Public 
 
 Create an independent module with a stable ID, scientific description, input and output contracts, compatibility policy, quality gates, and representative tests. Bioinformatics analysis modules must include at least one substantive Python or R template with real parameterization, validation, serialization, failure handling, version provenance, and scientific quality checks.
 
+Every `agent_generated` workflow additionally requires one `observed_output_contract` per output port. This contract is distinct from the handoff schema and must close the returned content schema, require at least one payload role with allowed media types, enumerate every blocking postflight gate, and bind a packaged reload validator. The released validator reloads declared tables, structured text, and archives; checks supported HDF5, RDS, PDF, image, and structure containers or signatures; and reconciles table record counts, workflow versions, and gate evidence with imported payloads. Freeze the contract digest in `ExecutionHandoff`; reject a return when the contract drifted, a required field or payload is absent, a gate is missing, or gate evidence does not match an imported payload. Run `tools/add_observed_output_contracts.py` after a generator adds a new packaged workflow, then scientifically review the generated port formats and gate coverage rather than treating mechanical generation as acceptance.
+
 ```bash
 python3 tools/create_module.py --help
 python3 tools/scaffold_bioinformatics_templates.py --check
@@ -59,6 +61,8 @@ The generated registry is source-neutral and dynamically discovers valid modules
 - Regenerate deterministic registry and report artifacts before release.
 - Version scientific implementations, runtime compatibility, module-scoped evidence, and documentation separately. A global registry or documentation change never invalidates scientific outputs by itself; a module metadata change requires reviewed scope reissue; a runtime-policy change requires targeted compatibility retesting; only a scientific implementation, parameter-semantic, input-processing, or output-recognition change requires recomputation.
 - Routing and orchestration metadata are discovery-only evidence scope. They change registry discovery and plan compilation, but they cannot reissue or invalidate an unchanged scientific execution receipt.
+- External-result admission contracts have a separate handoff digest. Tightening that controller boundary changes installation identity and all future handoffs, while an already observed public computation remains bound to its unchanged execution protocol, templates, method fields, and dependencies.
+- A declared fixture and an executed fixture are separate readiness axes. Only an isolated case receipt carrying case and reloaded-output digests may set `controlled_fixture_executed_and_reloaded`.
 - Run `tools/assess_report_revalidation.py` before reissuing or rerunning observed evidence. Never rebind a changed scientific implementation to old outputs, and never spend compute merely because an unrelated global digest changed.
 - Keep plugin, catalog, and release versions consistent.
 - Run compatibility regression and representative execution checks when changing a baseline or widening a policy.

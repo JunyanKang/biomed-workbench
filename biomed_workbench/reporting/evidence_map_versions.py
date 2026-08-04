@@ -21,10 +21,19 @@ from .scientific_dependency_reports import write_bilingual_reports
 INDEX_NAME = "evidence-map-version-index.json"
 CURRENT_NAME = "scientific-evidence-map.current.json"
 TRANSACTION_NAME = ".evidence-map-publication-transaction.json"
+PENDING_STATE_DIRECTORY = ".evidence-map-pending-states"
 
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _remove_pending_state(path: Path) -> None:
+    path.unlink(missing_ok=True)
+    try:
+        path.parent.rmdir()
+    except OSError:
+        pass
 
 
 def _semver(value: str) -> tuple[int, int, int]:
@@ -274,6 +283,63 @@ def inspect_evidence_map_publication_recovery(
     }
 
 
+def complete_evidence_map_publication_recovery(
+    output_root: Path,
+    *,
+    state_path: Path,
+) -> dict[str, object]:
+    """Complete an interrupted files-published/state-pending transaction after full verification."""
+    output_root = output_root.resolve(strict=True)
+    journal_path = output_root / TRANSACTION_NAME
+    with _publication_lock(output_root):
+        if not journal_path.is_file():
+            raise ValueError("no interrupted evidence-map publication is available")
+        journal = json.loads(journal_path.read_text(encoding="utf-8"))
+        required = {
+            "schema_version", "status", "map_digest", "version", "pre_state_digest",
+            "pending_state_digest", "pending_state_path", "publication", "target_state_name",
+        }
+        if set(journal) != required or journal["schema_version"] != 2 or journal["status"] != "files-published-state-pending":
+            raise ValueError("evidence-map transaction is not safe to complete")
+        if state_path.name != journal["target_state_name"]:
+            raise ValueError("recovery target differs from the interrupted project state")
+        pending_path = output_root / str(journal["pending_state_path"])
+        if not pending_path.resolve().is_relative_to(output_root):
+            raise ValueError("pending project state is outside the publication root")
+        if not state_path.is_file():
+            raise ValueError("current project state is missing")
+        current_payload = json.loads(state_path.read_text(encoding="utf-8"))
+        current = ProjectState.from_dict(current_payload)
+        if pending_path.is_file():
+            pending_payload = json.loads(pending_path.read_text(encoding="utf-8"))
+            pending_state = ProjectState.from_dict(pending_payload)
+        elif current.state_digest == journal["pending_state_digest"]:
+            pending_payload = current_payload
+            pending_state = current
+        else:
+            raise ValueError("pending project state is missing")
+        if pending_state.state_digest != journal["pending_state_digest"]:
+            raise ValueError("pending project state digest is invalid")
+        publication = EvidenceMapPublication.from_dict(journal["publication"])
+        if (
+            publication.map_digest != journal["map_digest"]
+            or not pending_state.evidence_map_versions
+            or pending_state.evidence_map_versions[-1] != publication
+        ):
+            raise ValueError("pending project state does not contain the interrupted publication")
+        if current.state_digest == pending_state.state_digest:
+            pass
+        elif current.state_digest != journal["pre_state_digest"]:
+            raise ValueError("current project state changed after the interrupted publication")
+        index = verify_evidence_map_version_index(output_root)
+        if not index["entries"] or index["entries"][-1]["map_digest"] != publication.map_digest:
+            raise ValueError("immutable evidence-map files do not match the interrupted publication")
+        _atomic_json(state_path, pending_payload)
+        _remove_pending_state(pending_path)
+        journal_path.unlink()
+    return inspect_evidence_map_publication_recovery(output_root, state_path=state_path)
+
+
 def publish_evidence_map_transaction(
     evidence_map: ScientificEvidenceMap,
     publication: EvidenceMapPublication,
@@ -288,17 +354,30 @@ def publish_evidence_map_transaction(
         raise ValueError("evidence map publication differs from the map being published")
     if not prospective_state.evidence_map_versions or prospective_state.evidence_map_versions[-1] != publication:
         raise ValueError("prospective project state does not contain the exact evidence map publication")
+    if not state_path.is_file():
+        raise ValueError("evidence-map transaction requires the current persisted project state")
+    current_state = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
+    if publication.source_state_digest != current_state.state_digest:
+        raise ValueError("evidence-map publication does not start from the current persisted state")
     output_root.mkdir(parents=True, exist_ok=True)
     journal_path = output_root / TRANSACTION_NAME
     with _publication_lock(output_root):
         if journal_path.exists():
             raise ValueError("an interrupted evidence-map publication requires read-only recovery inspection")
+        pending_relative = Path(PENDING_STATE_DIRECTORY) / f"{prospective_state.state_digest}.json"
+        pending_path = output_root / pending_relative
+        pending_payload = prospective_state.to_dict()
+        _atomic_json(pending_path, pending_payload)
         journal = {
-            "schema_version": 1,
+            "schema_version": 2,
             "status": "prepared",
             "map_digest": evidence_map.digest,
-            "target_state_digest": prospective_state.state_digest,
             "version": evidence_map.version.version,
+            "pre_state_digest": current_state.state_digest,
+            "pending_state_digest": prospective_state.state_digest,
+            "pending_state_path": pending_relative.as_posix(),
+            "publication": publication.to_dict(),
+            "target_state_name": state_path.name,
         }
         _atomic_json(journal_path, journal)
         try:
@@ -310,6 +389,7 @@ def publish_evidence_map_transaction(
             journal["status"] = "files-published-state-pending"
             _atomic_json(journal_path, journal)
             _atomic_json(state_path, prospective_state.to_dict())
+            _remove_pending_state(pending_path)
             journal_path.unlink()
             return version_directory
         except Exception:

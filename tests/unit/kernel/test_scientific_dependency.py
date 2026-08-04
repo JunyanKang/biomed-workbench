@@ -3,6 +3,7 @@ import tempfile
 import hashlib
 import json
 from pathlib import Path
+from unittest.mock import patch
 
 from biomed_workbench.kernel.scientific_dependency import (
     AnalysisAdmission,
@@ -22,6 +23,7 @@ from biomed_workbench.kernel.scientific_evidence_map import (
     build_scientific_evidence_map,
 )
 from biomed_workbench.reporting import (
+    complete_evidence_map_publication_recovery,
     inspect_evidence_map_publication_recovery,
     publish_evidence_map_transaction,
     publish_evidence_map_version,
@@ -351,6 +353,7 @@ class ScientificDependencyTests(unittest.TestCase):
             )
             state_path = root / "project-state.json"
             publish_root = root / "published"
+            state_path.write_text(json.dumps(state.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
             publish_evidence_map_transaction(
                 mapped,
                 publication,
@@ -362,6 +365,89 @@ class ScientificDependencyTests(unittest.TestCase):
             reloaded = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
             self.assertEqual(reloaded.state_digest, prospective.state_digest)
             self.assertEqual(inspect_evidence_map_publication_recovery(publish_root, state_path=state_path)["status"], "clean")
+
+    def test_interrupted_transaction_can_complete_only_from_verified_pending_state(self):
+        state = state_with_plan()
+        state = apply_event(state, "analysis_admission_recorded", {"admission": admission().to_dict()}, rationale="Record admission.")
+        state = apply_event(state, "artifact_review_recorded", {"review": review().to_dict()}, rationale="Record review.")
+        state = apply_event(state, "scientific_decision_recorded", {"decision": decision().to_dict()}, rationale="Record decision.")
+        bundle = ScientificDependencyBundle.create(
+            state, admissions=state.analysis_admissions, reviews=state.artifact_reviews,
+            decisions=state.scientific_decisions,
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            workspace = root / "workspace"
+            mapped = evidence_map(
+                state, bundle, workspace,
+                EvidenceMapVersion(
+                    version="1.0.0", revision=1, parent_map_digest=None, change_type="initial",
+                    change_summary_zh="验证中断后完成项目状态登记。",
+                    change_summary_en="Verify completion of project-state registration after interruption.",
+                ),
+            )
+            publication = EvidenceMapPublication.from_map(mapped)
+            prospective = apply_event(
+                state, "evidence_map_published", {"publication": publication.to_dict()},
+                rationale="Prepare the exact publication state.",
+            )
+            state_path = root / "project-state.json"
+            state_path.write_text(json.dumps(state.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            publish_root = root / "published"
+            from biomed_workbench.reporting import evidence_map_versions as versions
+            original_atomic = versions._atomic_json
+
+            def interrupt_state_write(path, payload):
+                if Path(path) == state_path:
+                    raise OSError("simulated state-write interruption")
+                return original_atomic(path, payload)
+
+            with patch.object(versions, "_atomic_json", side_effect=interrupt_state_write):
+                with self.assertRaisesRegex(OSError, "simulated"):
+                    publish_evidence_map_transaction(
+                        mapped, publication, prospective, state_path=state_path,
+                        output_root=publish_root, workspace_root=workspace,
+                    )
+            self.assertEqual(
+                inspect_evidence_map_publication_recovery(publish_root, state_path=state_path)["status"],
+                "state-unregistered",
+            )
+            recovered = complete_evidence_map_publication_recovery(publish_root, state_path=state_path)
+            self.assertEqual(recovered["status"], "clean")
+            self.assertEqual(
+                ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8"))).state_digest,
+                prospective.state_digest,
+            )
+
+            second_state_path = root / "second-project-state.json"
+            second_state_path.write_text(json.dumps(state.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            second_publish_root = root / "second-published"
+
+            def interrupt_second_state_write(path, payload):
+                if Path(path) == second_state_path:
+                    raise OSError("simulated second state-write interruption")
+                return original_atomic(path, payload)
+
+            with patch.object(versions, "_atomic_json", side_effect=interrupt_second_state_write):
+                with self.assertRaisesRegex(OSError, "simulated second"):
+                    publish_evidence_map_transaction(
+                        mapped, publication, prospective, state_path=second_state_path,
+                        output_root=second_publish_root, workspace_root=workspace,
+                    )
+            wrong_target = root / "wrong-project-state.json"
+            wrong_target.write_text(json.dumps(state.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "recovery target differs"):
+                complete_evidence_map_publication_recovery(second_publish_root, state_path=wrong_target)
+            second_state_path.write_text(
+                json.dumps(prospective.to_dict(), indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            next((second_publish_root / ".evidence-map-pending-states").glob("*.json")).unlink()
+            recovered_after_state_write = complete_evidence_map_publication_recovery(
+                second_publish_root,
+                state_path=second_state_path,
+            )
+            self.assertEqual(recovered_after_state_write["status"], "clean")
 
     def test_figure_panels_create_global_story_and_file_level_mind_maps(self):
         state = state_with_plan()

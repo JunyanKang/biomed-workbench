@@ -36,6 +36,7 @@ class ExecutionHandoff:
     module_version: str
     request_digest: str
     compatibility_row_id: str
+    observed_output_contract_digest: str
     planned_output_artifact_ids: Mapping[str, str]
     protocol: Mapping[str, Any]
     execution_state: str = "prepared-not-run"
@@ -47,6 +48,7 @@ class ExecutionHandoff:
         object.__setattr__(self, "module_version", _version(self.module_version, "execution_handoff.module_version"))
         object.__setattr__(self, "request_digest", _digest(self.request_digest, "execution_handoff.request_digest"))
         object.__setattr__(self, "compatibility_row_id", _version(self.compatibility_row_id, "execution_handoff.compatibility_row_id"))
+        object.__setattr__(self, "observed_output_contract_digest", _digest(self.observed_output_contract_digest, "execution_handoff.observed_output_contract_digest"))
         outputs = freeze_mapping(self.planned_output_artifact_ids)
         if not outputs:
             raise ValueError("execution handoff must retain its planned output identities")
@@ -67,6 +69,7 @@ class ExecutionHandoff:
         module_version: str,
         request_digest: str,
         compatibility_row_id: str,
+        observed_output_contract_digest: str,
         planned_output_artifact_ids: Mapping[str, str],
         protocol: Mapping[str, Any],
     ) -> "ExecutionHandoff":
@@ -76,6 +79,7 @@ class ExecutionHandoff:
             "module_version": module_version,
             "request_digest": request_digest,
             "compatibility_row_id": compatibility_row_id,
+            "observed_output_contract_digest": observed_output_contract_digest,
             "planned_output_artifact_ids": dict(planned_output_artifact_ids),
             "protocol": dict(protocol),
             "execution_state": "prepared-not-run",
@@ -94,6 +98,7 @@ class ExecutionHandoff:
             "module_version": self.module_version,
             "request_digest": self.request_digest,
             "compatibility_row_id": self.compatibility_row_id,
+            "observed_output_contract_digest": self.observed_output_contract_digest,
             "planned_output_artifact_ids": thaw(self.planned_output_artifact_ids),
             "protocol": thaw(self.protocol),
             "execution_state": self.execution_state,
@@ -113,9 +118,11 @@ class ObservedExecutionReceipt:
     module_id: str
     module_version: str
     compatibility_row_id: str
+    observed_output_contract_digest: str
     parameters_digest: str
     runtime_versions: Mapping[str, str]
     output_artifact_digests: Mapping[str, str]
+    postflight_result_digests: Mapping[str, str]
     process_exit_code: int
     execution_state: str = "observed-completed"
 
@@ -133,6 +140,7 @@ class ObservedExecutionReceipt:
             raise ValueError("direct and command execution receipts cannot declare a handoff")
         object.__setattr__(self, "module_version", _version(self.module_version, "observed_execution.module_version"))
         object.__setattr__(self, "compatibility_row_id", _version(self.compatibility_row_id, "observed_execution.compatibility_row_id"))
+        object.__setattr__(self, "observed_output_contract_digest", _digest(self.observed_output_contract_digest, "observed_execution.observed_output_contract_digest"))
         object.__setattr__(self, "parameters_digest", _digest(self.parameters_digest, "observed_execution.parameters_digest"))
         versions = freeze_mapping(self.runtime_versions)
         if not versions or any(not _VERSION_RE.fullmatch(str(value)) for value in versions.values()):
@@ -145,6 +153,11 @@ class ObservedExecutionReceipt:
             validate_identifier(str(artifact_id), "observed_execution.output_artifact_id")
             _digest(str(value), "observed_execution.output_artifact_digest")
         object.__setattr__(self, "output_artifact_digests", outputs)
+        postflight = freeze_mapping(self.postflight_result_digests)
+        for gate_id, value in postflight.items():
+            validate_identifier(str(gate_id), "observed_execution.postflight_gate_id")
+            _digest(str(value), "observed_execution.postflight_result_digest")
+        object.__setattr__(self, "postflight_result_digests", postflight)
         if self.process_exit_code != 0 or self.execution_state != "observed-completed":
             raise ValueError("only an observed zero-exit execution can form a completion receipt")
 
@@ -156,9 +169,11 @@ class ObservedExecutionReceipt:
         module_id: str,
         module_version: str,
         compatibility_row_id: str,
+        observed_output_contract_digest: str,
         parameters_digest: str,
         runtime_versions: Mapping[str, str],
         output_artifact_digests: Mapping[str, str],
+        postflight_result_digests: Mapping[str, str],
         process_exit_code: int,
         source_kind: str,
         execution_request_digest: str,
@@ -172,6 +187,7 @@ class ObservedExecutionReceipt:
                 "module_id": handoff.module_id,
                 "module_version": handoff.module_version,
                 "compatibility_row_id": handoff.compatibility_row_id,
+                "observed_output_contract_digest": handoff.observed_output_contract_digest,
                 "parameters_digest": handoff.request_digest,
                 "output_artifact_ids": set(handoff.planned_output_artifact_ids.values()),
             }
@@ -180,6 +196,7 @@ class ObservedExecutionReceipt:
                 "module_id": module_id,
                 "module_version": module_version,
                 "compatibility_row_id": compatibility_row_id,
+                "observed_output_contract_digest": observed_output_contract_digest,
                 "parameters_digest": parameters_digest,
                 "output_artifact_ids": set(output_artifact_digests),
             }
@@ -201,9 +218,11 @@ class ObservedExecutionReceipt:
             "module_id": module_id,
             "module_version": module_version,
             "compatibility_row_id": compatibility_row_id,
+            "observed_output_contract_digest": observed_output_contract_digest,
             "parameters_digest": parameters_digest,
             "runtime_versions": dict(runtime_versions),
             "output_artifact_digests": dict(output_artifact_digests),
+            "postflight_result_digests": dict(postflight_result_digests),
             "process_exit_code": process_exit_code,
             "execution_state": "observed-completed",
         }
@@ -220,9 +239,11 @@ class ObservedExecutionReceipt:
             "module_id": self.module_id,
             "module_version": self.module_version,
             "compatibility_row_id": self.compatibility_row_id,
+            "observed_output_contract_digest": self.observed_output_contract_digest,
             "parameters_digest": self.parameters_digest,
             "runtime_versions": thaw(self.runtime_versions),
             "output_artifact_digests": thaw(self.output_artifact_digests),
+            "postflight_result_digests": thaw(self.postflight_result_digests),
             "process_exit_code": self.process_exit_code,
             "execution_state": self.execution_state,
         }
@@ -240,6 +261,8 @@ class ArtifactReloadReceipt:
     observed_execution_receipt_id: str
     artifact_id: str
     payload_digests: Mapping[str, str]
+    observed_output_contract_digest: str
+    reload_validator_id: str | None
     output_schema_valid: bool
     content_digest: str
 
@@ -252,6 +275,9 @@ class ArtifactReloadReceipt:
         for value in payloads.values():
             _digest(str(value), "artifact_reload.payload_digest")
         object.__setattr__(self, "payload_digests", payloads)
+        object.__setattr__(self, "observed_output_contract_digest", _digest(self.observed_output_contract_digest, "artifact_reload.observed_output_contract_digest"))
+        if self.reload_validator_id is not None:
+            object.__setattr__(self, "reload_validator_id", validate_identifier(self.reload_validator_id, "artifact_reload.reload_validator_id"))
         if self.output_schema_valid is not True:
             raise ValueError("artifact reload receipt requires a valid output schema")
         object.__setattr__(self, "content_digest", _digest(self.content_digest, "artifact_reload.content_digest"))
@@ -263,16 +289,22 @@ class ArtifactReloadReceipt:
         observed_execution: ObservedExecutionReceipt,
         artifact_id: str,
         payload_digests: Mapping[str, str],
+        observed_output_contract_digest: str,
+        reload_validator_id: str | None,
         content_digest: str,
         output_schema_valid: bool,
     ) -> "ArtifactReloadReceipt":
         if observed_execution.output_artifact_digests.get(artifact_id) != content_digest:
             raise ValueError("reloaded artifact digest differs from observed execution output")
+        if observed_execution.observed_output_contract_digest != observed_output_contract_digest:
+            raise ValueError("reloaded artifact contract differs from observed execution")
         normalized_payloads = dict(payload_digests) or {"content": content_digest}
         basis = {
             "observed_execution_receipt_id": observed_execution.id,
             "artifact_id": artifact_id,
             "payload_digests": normalized_payloads,
+            "observed_output_contract_digest": observed_output_contract_digest,
+            "reload_validator_id": reload_validator_id,
             "output_schema_valid": output_schema_valid,
             "content_digest": content_digest,
         }
@@ -284,6 +316,8 @@ class ArtifactReloadReceipt:
             "observed_execution_receipt_id": self.observed_execution_receipt_id,
             "artifact_id": self.artifact_id,
             "payload_digests": thaw(self.payload_digests),
+            "observed_output_contract_digest": self.observed_output_contract_digest,
+            "reload_validator_id": self.reload_validator_id,
             "output_schema_valid": self.output_schema_valid,
             "content_digest": self.content_digest,
         }

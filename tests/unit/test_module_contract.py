@@ -214,6 +214,16 @@ def agent_manifest_payload():
         "forbidden_actions": ["Do not install or manage the user scientific environment."],
         "requires_observed_execution": True,
     }
+    payload["observed_output_contracts"] = [{
+        "port": "profile",
+        "content_schema": closed_schema(
+            {"artifact_type": {"type": "string"}, "result_summary": {"type": "string"}},
+            ["artifact_type", "result_summary"],
+        ),
+        "payloads": [{"role": "primary", "media_types": ["application/json"], "minimum": 1, "maximum": 1}],
+        "required_postflight_gate_ids": ["missingness-reviewed"],
+        "reload_validator": None,
+    }]
     payload["output_schema"] = closed_schema(
         {
             "handoff_type": {"type": "string"}, "module": {"type": "object"}, "request_digest": {"type": "string"},
@@ -241,6 +251,12 @@ class ModuleContractTests(unittest.TestCase):
         payload = agent_manifest_payload()
         payload["access"] = "offline"
         with self.assertRaisesRegex(ValueError, "only valid"):
+            parse_manifest(payload)
+
+    def test_agent_generated_manifest_requires_one_observed_contract_per_output_port(self):
+        payload = agent_manifest_payload()
+        payload.pop("observed_output_contracts")
+        with self.assertRaisesRegex(ValueError, "exactly one observed output contract"):
             parse_manifest(payload)
 
     def test_manifest_requires_complete_scientific_and_version_contracts(self):

@@ -37,6 +37,20 @@ class FastQCEvidenceTests(unittest.TestCase):
         self.assertEqual(summary["downstream_readiness"], "requires-assay-aware-review")
         self.assertTrue(summary["flagged_modules"])
 
+    def test_report_contains_closed_execution_and_reload_receipt(self):
+        report = json.loads(REPORT.read_text(encoding="utf-8"))
+        receipt = report["controlled_fixture_receipt"]
+
+        self.assertEqual(receipt["module_id"], report["module_id"])
+        self.assertEqual(receipt["module_version"], report["module_version"])
+        self.assertEqual(receipt["compatibility_row_id"], report["compatibility_row_id"])
+        self.assertEqual(receipt["input_sha256"], report["execution"]["input"]["sha256"])
+        self.assertEqual(
+            {item["sha256"] for item in receipt["output_payloads"]},
+            {item["payload_sha256"] for item in receipt["reload_checks"]},
+        )
+        self.assertTrue(all(item["passed"] for item in receipt["reload_checks"]))
+
     def test_report_contains_no_machine_paths_or_credentials(self):
         text = REPORT.read_text(encoding="utf-8")
         for marker in ("/Users/", "/private/", "/tmp/", "/var/folders/", "NCBI_API_KEY", "ACCESS_TOKEN=", "SECRET="):
