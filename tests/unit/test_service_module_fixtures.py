@@ -5,10 +5,20 @@ import unittest
 from pathlib import Path
 
 from biomed_workbench.modules.index import BUILTIN_ROOT
-from tools.validate_module import validate_module
+from tools.validate_module import _validated_output_projection, validate_module
 
 
 class ServiceModuleFixtureTests(unittest.TestCase):
+    def test_receipt_projection_excludes_uncontracted_platform_metadata(self):
+        expected = {"result": {"count": 2}}
+        linux = {"result": {"count": 2, "runtime": "linux"}, "temporary_path": "/tmp/a"}
+        macos = {"result": {"count": 2, "runtime": "macos"}, "temporary_path": "/private/a"}
+
+        self.assertEqual(
+            _validated_output_projection(expected, linux),
+            _validated_output_projection(expected, macos),
+        )
+
     def test_service_fixture_accepts_json_array_response(self):
         source = BUILTIN_ROOT / "alphafold-structure-evidence"
         report = validate_module(source, require_tests=True, execute_tests=True)

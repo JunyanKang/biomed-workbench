@@ -171,6 +171,16 @@ def _assert_subset(expected: Any, actual: Any, location: str = "output") -> None
         raise ModuleValidationError(f"{location} differs from the validated expected value")
 
 
+def _validated_output_projection(expected: Any, actual: Any) -> Any:
+    """Return the values actually reloaded through the deterministic case contract."""
+    if isinstance(expected, dict):
+        return {
+            key: _validated_output_projection(value, actual[key])
+            for key, value in expected.items()
+        }
+    return actual
+
+
 def _resolve_entrypoint(manifest: ModuleManifest):
     return ModuleRegistry((manifest,), "standalone-validation").resolve_entrypoint(manifest.id)
 
@@ -405,7 +415,11 @@ def validate_module(path: Path | str, *, require_tests: bool = True, execute_tes
                                 json.dumps(cases[index], sort_keys=True, separators=(",", ":")).encode("utf-8")
                             ).hexdigest(),
                             "reloaded_output_digest": hashlib.sha256(
-                                json.dumps(output, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                                json.dumps(
+                                    _validated_output_projection(cases[index]["expected_subset"], output),
+                                    sort_keys=True,
+                                    separators=(",", ":"),
+                                ).encode("utf-8")
                             ).hexdigest(),
                         })
                         executed += 1
