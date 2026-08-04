@@ -257,16 +257,19 @@ def ingest_execution_bundle(
     }
     for artifact in artifacts:
         contract = contract_by_artifact_id[artifact.id]
+        validator_identity = digest_value(
+            {
+                "container": contract.container_reload_validator,
+                "semantic": contract.semantic_validator,
+                "semantic_sha256": contract.semantic_validator_sha256,
+            }
+        )
         receipt = ArtifactReloadReceipt.create(
             observed_execution=observed,
             artifact_id=artifact.id,
             payload_digests={payload.role: payload.sha256 for payload in artifact.payloads},
             observed_output_contract_digest=current_contract_digest,
-            reload_validator_id=f"validator-{digest_value({
-                'container': contract.container_reload_validator,
-                'semantic': contract.semantic_validator,
-                'semantic_sha256': contract.semantic_validator_sha256,
-            })[:24]}",
+            reload_validator_id=f"validator-{validator_identity[:24]}",
             output_schema_valid=True,
             content_digest=artifact.content_digest,
         )
