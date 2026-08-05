@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from biomed_workbench.kernel.artifact_store import ProjectArtifactStore
 from biomed_workbench.kernel.execution_receipts import ExecutionHandoff
@@ -299,6 +300,31 @@ class ExecutionIngestTests(unittest.TestCase):
         registry, state, root, bundle = self._prepared_case(contract_digest="f" * 64)
         with self.assertRaisesRegex(ValueError, "contract changed"):
             ingest_execution_bundle(state, bundle, registry=registry, artifact_store=ProjectArtifactStore(root / "objects"))
+
+    def test_ingest_rejects_a_gate_evaluator_digest_from_the_wrong_payload(self):
+        registry, state, root, bundle = self._prepared_case()
+        forged = {
+            "status": "requires_review",
+            "observed_metric": json.dumps("pending-independent-scientific-review"),
+            "threshold": json.dumps(
+                {"operator": "equals", "value": "accepted"},
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+            "evidence_payload_sha256": "f" * 64,
+            "reason": "forged evidence binding",
+            "evaluator_type": "provenance-design",
+        }
+        with patch(
+            "biomed_workbench.modules.semantic_output_validation.evaluate_structured_gate",
+            return_value=forged,
+        ), self.assertRaisesRegex(ValueError, "differs from its declared payload role"):
+            ingest_execution_bundle(
+                state,
+                bundle,
+                registry=registry,
+                artifact_store=ProjectArtifactStore(root / "objects"),
+            )
 
     def test_ingest_review_retain_and_resume_completes_handoff_node(self):
         registry, state, root, bundle = self._prepared_case()
