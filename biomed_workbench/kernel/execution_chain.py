@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Mapping
 
 from .identity import digest_value
 
@@ -27,6 +27,141 @@ class DeliveryPrerequisiteScope:
             "covered_artifact_ids": list(self.covered_artifact_ids),
             "digest": self.digest,
         }
+
+
+def _artifact_gate_requirements(state: "ProjectState", artifact_id: str) -> tuple[object, str | None, tuple[dict[str, object], ...]]:
+    """Return exact pending gate results assigned to one reloaded output artifact."""
+    reload_receipt = next((item for item in state.artifact_reloads if item.artifact_id == artifact_id), None)
+    if reload_receipt is None:
+        return None, None, ()
+    observed = next(
+        (item for item in state.observed_executions if item.id == reload_receipt.observed_execution_receipt_id),
+        None,
+    )
+    if observed is None or not observed.postflight_results:
+        return observed, None, ()
+    if observed.source_kind != "handoff":
+        raise ValueError("structured manifest gates require a handoff-bound observed execution")
+    handoff = next((item for item in state.execution_handoffs if item.id == observed.handoff_id), None)
+    if handoff is None:
+        raise ValueError("gate adjudication has no matching execution handoff")
+    ports = [port for port, value in handoff.planned_output_artifact_ids.items() if value == artifact_id]
+    if len(ports) != 1:
+        raise ValueError("gate adjudication cannot resolve the artifact output port")
+    port = str(ports[0])
+    requirements: list[dict[str, object]] = []
+    for gate_id, result in observed.postflight_results.items():
+        if not isinstance(result, Mapping):
+            raise ValueError("observed execution gate result is not structured")
+        evaluations = result.get("evaluations")
+        if not isinstance(evaluations, tuple):
+            raise ValueError("observed execution gate result lacks structured evaluations")
+        assigned = tuple(
+            item for item in evaluations
+            if isinstance(item, Mapping) and item.get("port") == port
+        )
+        if not assigned:
+            continue
+        if len(assigned) != 1:
+            raise ValueError("observed execution gate is assigned more than once to an output port")
+        evaluation = assigned[0]
+        status = str(result.get("status"))
+        if status == "failed":
+            raise ValueError(f"failed scientific gate blocks artifact completion: {gate_id}")
+        if status not in {"passed", "requires_review", "not_evaluable"}:
+            raise ValueError(f"observed execution gate has an unsupported status: {gate_id}")
+        if status in {"requires_review", "not_evaluable"}:
+            requirements.append({
+                "gate_id": str(gate_id),
+                "port": port,
+                "status": status,
+                "evaluator_type": str(evaluation.get("evaluator_type")),
+                "gate_result_digest": str(observed.postflight_result_digests[str(gate_id)]),
+                "evidence_payload_sha256": evaluation.get("evidence_payload_sha256"),
+            })
+    return observed, port, tuple(sorted(requirements, key=lambda item: str(item["gate_id"])))
+
+
+def validate_gate_adjudication_binding(state: "ProjectState", adjudication: object) -> None:
+    """Validate one adjudication against its immutable receipt, gate result, port, and evidence."""
+    artifact_id = str(getattr(adjudication, "artifact_id"))
+    observed, _port, requirements = _artifact_gate_requirements(state, artifact_id)
+    requirement = next(
+        (item for item in requirements if item["gate_id"] == getattr(adjudication, "gate_id")),
+        None,
+    )
+    if requirement is None:
+        raise ValueError("gate adjudication references no pending gate for its artifact")
+    expected = {
+        "observed_execution_receipt_id": getattr(observed, "id"),
+        "port": requirement["port"],
+        "evaluator_type": requirement["evaluator_type"],
+        "gate_result_digest": requirement["gate_result_digest"],
+        "evidence_payload_sha256": requirement["evidence_payload_sha256"],
+    }
+    actual = {key: getattr(adjudication, key) for key in expected}
+    if actual != expected:
+        raise ValueError("gate adjudication differs from its exact receipt result or evidence binding")
+
+
+def gate_adjudication_bundle_digest(state: "ProjectState", artifact_id: str) -> str | None:
+    """Digest the complete, exact adjudication set required by one artifact."""
+    _observed, _port, requirements = _artifact_gate_requirements(state, artifact_id)
+    if not requirements:
+        return None
+    required_ids = {str(item["gate_id"]) for item in requirements}
+    adjudications = tuple(
+        sorted(
+            (item for item in state.gate_adjudications if item.artifact_id == artifact_id),
+            key=lambda item: item.gate_id,
+        )
+    )
+    if {item.gate_id for item in adjudications} != required_ids:
+        raise ValueError("artifact gate adjudications do not cover every pending gate exactly once")
+    for item in adjudications:
+        validate_gate_adjudication_binding(state, item)
+    return digest_value([item.to_dict() for item in adjudications])
+
+
+def validate_gate_adjudication_chain(
+    state: "ProjectState",
+    artifact_id: str,
+    *,
+    require_review: bool = True,
+    require_decision: bool = True,
+) -> tuple[str, ...]:
+    """Require accepted gate-specific adjudication before review, retention, or completion."""
+    _observed, _port, requirements = _artifact_gate_requirements(state, artifact_id)
+    if not requirements:
+        return ()
+    by_gate = {
+        item.gate_id: item for item in state.gate_adjudications if item.artifact_id == artifact_id
+    }
+    if set(by_gate) != {str(item["gate_id"]) for item in requirements}:
+        raise ValueError("artifact has unresolved scientific gates")
+    caveat_required = False
+    for requirement in requirements:
+        item = by_gate[str(requirement["gate_id"])]
+        validate_gate_adjudication_binding(state, item)
+        if item.status in {"rejected", "unresolved"}:
+            raise ValueError("rejected or unresolved scientific gate blocks artifact completion")
+        if requirement["status"] == "not_evaluable" and item.status != "accepted-with-caveat":
+            raise ValueError("not-evaluable scientific gates require explicit accepted-with-caveat adjudication")
+        if item.status == "accepted-with-caveat":
+            caveat_required = True
+    ordered = tuple(sorted(item.id for item in by_gate.values()))
+    if require_review:
+        review = next((item for item in state.artifact_reviews if item.artifact_id == artifact_id), None)
+        if review is None or tuple(sorted(review.gate_adjudication_ids)) != ordered:
+            raise ValueError("artifact review does not cover its exact gate adjudications")
+    if require_decision:
+        decision = next((item for item in state.scientific_decisions if item.artifact_id == artifact_id), None)
+        expected_digest = gate_adjudication_bundle_digest(state, artifact_id)
+        if decision is None or decision.gate_adjudication_digest != expected_digest:
+            raise ValueError("scientific decision is not bound to the exact gate adjudication set")
+        if caveat_required and decision.action != "retain-with-caveat":
+            raise ValueError("accepted-with-caveat gate adjudication requires a caveated retain decision")
+    return ordered
 
 
 def validate_artifact_execution_chain(
@@ -77,6 +212,7 @@ def validate_artifact_execution_chain(
     )
     if node is None or (require_completed_node and node.status != "completed"):
         raise ValueError("produced artifact belongs to an unfinished plan node")
+    validate_gate_adjudication_chain(state, artifact_id)
     return node.id
 
 
@@ -215,6 +351,11 @@ def validate_delivery_prerequisites(
             for item in sorted(state.artifact_reviews, key=lambda value: value.id)
             if item.id in review_ids
         ],
+        "gate_adjudications": [
+            item.to_dict()
+            for item in sorted(state.gate_adjudications, key=lambda value: value.id)
+            if item.artifact_id in covered_artifact_ids
+        ],
         "active_decisions": [active_decisions[item].to_dict() for item in covered_artifact_ids],
         "observed_executions": [
             item.to_dict()
@@ -263,6 +404,11 @@ def delivery_slice_digest(state: "ProjectState") -> str:
             item.to_dict() for item in sorted(state.artifacts, key=lambda value: value.id) if item.id in active_artifact_ids
         ],
         "active_decisions": [item.to_dict() for item in active_decisions],
+        "gate_adjudications": [
+            item.to_dict()
+            for item in sorted(state.gate_adjudications, key=lambda value: value.id)
+            if item.artifact_id in active_artifact_ids
+        ],
         "observed_executions": [
             item.to_dict() for item in sorted(state.observed_executions, key=lambda value: value.id) if item.id in observed_ids
         ],

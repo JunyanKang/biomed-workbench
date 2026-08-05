@@ -170,6 +170,16 @@ def _unit_section(
     )
     lines.extend(f"  - {value}" for value in review.limitations_zh if zh)
     lines.extend(f"  - {value}" for value in review.limitations_en if not zh)
+    if unit.gate_adjudications:
+        lines.extend(["", f"- {'逐门科学审议' if zh else 'Gate-level scientific adjudication'}:"])
+        for adjudication in unit.gate_adjudications:
+            rationale = adjudication.rationale_zh if zh else adjudication.rationale_en
+            lines.append(
+                f"  - `{adjudication.gate_id}`: `{adjudication.status}`; "
+                f"{'结果摘要' if zh else 'result digest'} `{adjudication.gate_result_digest}`; {rationale}"
+            )
+            limitations = adjudication.limitations_zh if zh else adjudication.limitations_en
+            lines.extend(f"    - {'局限' if zh else 'Limitation'}: {value}" for value in limitations)
     lines.extend(
         [
             "",

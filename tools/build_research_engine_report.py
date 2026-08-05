@@ -25,7 +25,7 @@ KERNEL_CONTRACTS = [
     "artifact_payload", "project_context", "scientific_artifact", "hypothesis", "evidence_record",
     "decision_event", "project_state", "plan_node", "research_dag", "quality_finding",
     "node_execution", "hypothesis_assessment", "cycle_result",
-    "analysis_admission", "artifact_review", "panel_interpretation", "scientific_decision",
+    "analysis_admission", "scientific_gate_adjudication", "artifact_review", "panel_interpretation", "scientific_decision",
     "scientific_evidence_map", "global_panel_story_dag", "file_level_evidence_mind_map",
     "evidence_map_edge_table", "bilingual_evidence_report", "append_only_evidence_map_version",
     "execution_handoff", "observed_execution_receipt", "artifact_reload_receipt",

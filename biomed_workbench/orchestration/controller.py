@@ -307,9 +307,10 @@ class ResearchController:
             parameters_digest=parameters_digest,
             runtime_versions=runtime_versions,
             output_artifact_digests={artifact.id: artifact.content_digest for artifact in execution.artifacts},
-            postflight_result_digests={
-                item.id: digest_value(item.to_dict()) for item in execution.quality_findings
-            },
+            # Direct/command quality findings are already recorded as project events;
+            # manifest gate results are reserved for the handoff ingest protocol.
+            postflight_result_digests={},
+            postflight_results={},
             process_exit_code=0,
             source_kind="command" if manifest.execution.kind == "command" else "direct",
             execution_request_digest=request_digest,

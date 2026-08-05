@@ -73,6 +73,12 @@ pending, review-pending, failed, skipped, or otherwise unfinished sibling.
 
 ## Review Every Result
 
+For a handoff-produced artifact, every pending manifest gate is resolved first
+through a `ScientificGateAdjudication` bound to the exact execution receipt,
+output port, structured gate-result digest, and evidence-payload digest. The
+review names the complete adjudication set; rejected or unresolved gates block
+review, while a not-evaluable gate can proceed only with an explicit caveat.
+
 Every registered artifact, including negative, excluded, intermediate, data,
 table, model, report, and figure artifacts, requires one bilingual
 `ArtifactReview`. The review separates:

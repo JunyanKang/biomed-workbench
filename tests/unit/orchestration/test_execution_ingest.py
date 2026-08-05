@@ -7,10 +7,12 @@ from pathlib import Path
 from unittest.mock import patch
 
 from biomed_workbench.kernel.artifact_store import ProjectArtifactStore
-from biomed_workbench.kernel.execution_receipts import ExecutionHandoff
+from biomed_workbench.kernel.execution_receipts import ExecutionHandoff, ObservedExecutionReceipt
+from biomed_workbench.kernel.execution_chain import gate_adjudication_bundle_digest
 from biomed_workbench.kernel.identity import digest_value
 from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
 from biomed_workbench.kernel.state import ProjectState, apply_event
+from biomed_workbench.kernel.scientific_dependency import ScientificGateAdjudication
 from biomed_workbench.orchestration.controller import ResearchController
 from biomed_workbench.modules.index import BUILTIN_ROOT
 from biomed_workbench.modules.registry import ModuleRegistry
@@ -26,6 +28,41 @@ from tests.unit.orchestration.test_planner import inline_artifact, state_with
 
 
 class ExecutionIngestTests(unittest.TestCase):
+    def _adjudicate_pending_gates(self, state):
+        observed = state.observed_executions[-1]
+        artifact_id = "artifact-enrichment-result"
+        adjudications = []
+        for gate_id, result in observed.postflight_results.items():
+            if result["status"] not in {"requires_review", "not_evaluable"}:
+                continue
+            evaluation = result["evaluations"][0]
+            adjudication = ScientificGateAdjudication(
+                id=f"adjudication-{gate_id}",
+                artifact_id=artifact_id,
+                observed_execution_receipt_id=observed.id,
+                gate_id=gate_id,
+                port=evaluation["port"],
+                evaluator_type=evaluation["evaluator_type"],
+                gate_result_digest=observed.postflight_result_digests[gate_id],
+                evidence_payload_sha256=evaluation["evidence_payload_sha256"],
+                status="accepted-with-caveat" if result["status"] == "not_evaluable" else "accepted",
+                reviewer_identity="independent-scientific-reviewer",
+                rationale_zh="审议者逐项核对该门禁对应的富集主表、参数、统计语义与适用范围后作出独立判断。",
+                rationale_en="The reviewer independently checked the gate against the enrichment table, parameters, statistical semantics, and scope.",
+                limitations_zh=("该审议只覆盖当前登记输入、输出与方法版本，不能外推到其他数据集。",),
+                limitations_en=("This adjudication covers only the registered inputs, outputs, and method version and does not generalize to other data.",),
+                source_urls=("https://bioconductor.org/packages/clusterProfiler/",),
+            )
+            state = apply_event(
+                state,
+                "scientific_gate_adjudicated",
+                {"adjudication": adjudication.to_dict()},
+                rationale="Record one independently reviewed scientific gate result.",
+                affected_artifact_ids=(artifact_id,),
+            )
+            adjudications.append(adjudication)
+        return state, tuple(adjudications)
+
     def _prepared_case(self, *, contract_digest=None):
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
         manifest = registry.get("functional-enrichment")
@@ -61,6 +98,10 @@ class ExecutionIngestTests(unittest.TestCase):
                 "result_kind": "execution_handoff",
                 "execution_state": "prepared-not-run",
                 "observed_output_protocol_version": observed_output_protocol_version(manifest),
+                "required_postflight_gate_ids": sorted(gate.id for gate in manifest.quality_gates),
+                "required_postflight_gate_set_digest": digest_value(
+                    sorted(gate.id for gate in manifest.quality_gates)
+                ),
                 "compatibility_contract_digest": compatibility_contract_digest(
                     manifest, manifest.compatibility_matrix[0].id
                 ),
@@ -333,11 +374,20 @@ class ExecutionIngestTests(unittest.TestCase):
         )
         state = ProjectState.from_dict(state.to_dict())
         artifact_id = "artifact-enrichment-result"
+        with self.assertRaisesRegex(ValueError, "unresolved scientific gates"):
+            apply_event(
+                state,
+                "artifact_review_recorded",
+                {"review": review(id="review-generic", artifact_id=artifact_id).to_dict()},
+                rationale="A generic review must not bypass unresolved manifest gates.",
+            )
+        state, adjudications = self._adjudicate_pending_gates(state)
         artifact_review = review(
             id="review-artifact-enrichment-result",
             artifact_id=artifact_id,
             results_zh="富集结果及其主表已经按登记契约重新读取，身份、格式和门控证据完整。",
             results_en="The enrichment result and primary table were reloaded under the registered contract with complete identity, format, and gate evidence.",
+            gate_adjudication_ids=tuple(item.id for item in adjudications),
         )
         state = apply_event(
             state, "artifact_review_recorded", {"review": artifact_review.to_dict()},
@@ -348,6 +398,7 @@ class ExecutionIngestTests(unittest.TestCase):
             review_id=artifact_review.id,
             artifact_id=artifact_id,
             next_plan_node_ids=(),
+            gate_adjudication_digest=gate_adjudication_bundle_digest(state, artifact_id),
         )
         state = apply_event(
             state, "scientific_decision_recorded", {"decision": retained.to_dict()},
@@ -360,6 +411,75 @@ class ExecutionIngestTests(unittest.TestCase):
         ).resume(state.to_dict())
         self.assertEqual(result.stop_reason, "plan_completed")
         self.assertEqual(result.active_plan.nodes[0].status, "completed")
+
+    def test_gate_adjudication_must_bind_exact_receipt_result_and_evidence(self):
+        registry, state, root, bundle = self._prepared_case()
+        state = ingest_execution_bundle(
+            state, bundle, registry=registry, artifact_store=ProjectArtifactStore(root / "objects")
+        )
+        observed = state.observed_executions[-1]
+        gate_id = next(iter(observed.postflight_results))
+        evaluation = observed.postflight_results[gate_id]["evaluations"][0]
+        valid = ScientificGateAdjudication(
+            id=f"adjudication-{gate_id}", artifact_id="artifact-enrichment-result",
+            observed_execution_receipt_id=observed.id, gate_id=gate_id, port=evaluation["port"],
+            evaluator_type=evaluation["evaluator_type"], gate_result_digest=observed.postflight_result_digests[gate_id],
+            evidence_payload_sha256=evaluation["evidence_payload_sha256"], status="accepted",
+            reviewer_identity="independent-scientific-reviewer",
+            rationale_zh="审议者逐项核对门禁结果并记录与当前执行回执的精确对应关系。",
+            rationale_en="The reviewer checked the gate result and recorded its exact relationship to the execution receipt.",
+            limitations_zh=("该结论仅适用于本次登记执行与对应证据文件。",),
+            limitations_en=("The conclusion applies only to this registered execution and its evidence files.",),
+            source_urls=("https://bioconductor.org/packages/clusterProfiler/",),
+        )
+        mutations = {
+            "receipt": {"observed_execution_receipt_id": "observed-wrong-receipt"},
+            "gate": {"gate_id": "wrong-gate-id"},
+            "port": {"port": "wrong-output-port"},
+            "result digest": {"gate_result_digest": "f" * 64},
+            "evidence digest": {"evidence_payload_sha256": "f" * 64},
+        }
+        for label, mutation in mutations.items():
+            with self.subTest(label=label):
+                payload = {**valid.to_dict(), **mutation}
+                with self.assertRaisesRegex(ValueError, "no pending gate|exact receipt result or evidence"):
+                    apply_event(
+                        state, "scientific_gate_adjudicated", {"adjudication": payload},
+                        rationale="Reject a forged gate adjudication binding.",
+                    )
+
+    def test_handoff_receipt_rejects_digest_only_or_tampered_gate_results(self):
+        registry, state, root, bundle = self._prepared_case()
+        state = ingest_execution_bundle(
+            state, bundle, registry=registry, artifact_store=ProjectArtifactStore(root / "objects")
+        )
+        payload = state.observed_executions[-1].to_dict()
+        payload["postflight_results"] = {}
+        with self.assertRaisesRegex(ValueError, "same gates"):
+            ObservedExecutionReceipt.from_dict(payload)
+        payload = state.observed_executions[-1].to_dict()
+        gate_id = next(iter(payload["postflight_results"]))
+        payload["postflight_results"][gate_id]["status"] = "passed"
+        with self.assertRaisesRegex(ValueError, "digest differs"):
+            ObservedExecutionReceipt.from_dict(payload)
+
+    def test_state_rejects_a_structured_receipt_missing_one_frozen_handoff_gate(self):
+        registry, prepared_state, root, bundle = self._prepared_case()
+        completed_state = ingest_execution_bundle(
+            prepared_state, bundle, registry=registry, artifact_store=ProjectArtifactStore(root / "objects")
+        )
+        payload = completed_state.observed_executions[-1].to_dict()
+        gate_id = next(iter(payload["postflight_results"]))
+        payload["postflight_results"].pop(gate_id)
+        payload["postflight_result_digests"].pop(gate_id)
+        shortened = ObservedExecutionReceipt.from_dict(payload)
+        with self.assertRaisesRegex(ValueError, "frozen handoff gate set"):
+            apply_event(
+                prepared_state,
+                "execution_observed",
+                {"receipt": shortened.to_dict()},
+                rationale="Reject a receipt that omits a frozen manifest gate.",
+            )
 
 
 if __name__ == "__main__":

@@ -160,8 +160,10 @@ class ObservedExecutionReceipt:
             _digest(str(value), "observed_execution.postflight_result_digest")
         object.__setattr__(self, "postflight_result_digests", postflight)
         results = freeze_mapping(self.postflight_results or {})
-        if results and set(results) != set(postflight):
+        if set(results) != set(postflight):
             raise ValueError("observed execution gate results and digests must cover the same gates")
+        if self.source_kind == "handoff" and not results:
+            raise ValueError("handoff execution requires complete structured gate results")
         for gate_id, result in results.items():
             if not isinstance(result, Mapping) or result.get("status") not in {
                 "passed", "failed", "requires_review", "not_evaluable"
@@ -239,8 +241,8 @@ class ObservedExecutionReceipt:
             "process_exit_code": process_exit_code,
             "execution_state": "observed-completed",
         }
-        if postflight_results:
-            basis["postflight_results"] = dict(postflight_results)
+        if source_kind == "handoff" or postflight_results:
+            basis["postflight_results"] = dict(postflight_results or {})
         return cls(id=f"observed-{digest_value(basis)[:24]}", **basis)
 
     def to_dict(self) -> dict[str, object]:
@@ -262,7 +264,7 @@ class ObservedExecutionReceipt:
             "process_exit_code": self.process_exit_code,
             "execution_state": self.execution_state,
         }
-        if self.postflight_results:
+        if self.source_kind == "handoff" or self.postflight_results:
             payload["postflight_results"] = thaw(self.postflight_results)
         return payload
 

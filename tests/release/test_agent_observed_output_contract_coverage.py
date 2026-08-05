@@ -54,7 +54,7 @@ class AgentObservedOutputContractCoverageTests(unittest.TestCase):
                     sum(len(contract.required_postflight_gate_ids) for contract in contracts.values()),
                     len(assigned),
                 )
-                self.assertEqual({item.protocol_version for item in contracts.values()}, {"2.0.0"})
+                self.assertEqual({item.protocol_version for item in contracts.values()}, {"2.1.0"})
                 for contract in contracts.values():
                     port = next(item for item in manifest.output_artifacts if item.name == contract.port)
                     self.assertTrue(any(item.minimum > 0 for item in contract.payloads))
@@ -121,10 +121,18 @@ class AgentObservedOutputContractCoverageTests(unittest.TestCase):
                             threshold=evaluator.threshold,
                             semantic_result=semantic_result,
                         )
-                        if evaluator.evaluator_type == "system-provenance":
-                            self.assertEqual(result["status"], "passed")
-                        else:
-                            self.assertEqual(result["status"], "requires_review")
+                        self.assertEqual(result["status"], "requires_review")
+
+    def test_no_manifest_gate_is_inferred_as_system_provenance_from_its_name(self):
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
+        system_gates = [
+            (manifest.id, contract.port, evaluator.gate_id)
+            for manifest in registry.all() if manifest.access == "agent_generated"
+            for contract in manifest.observed_output_contracts
+            for evaluator in contract.gate_evaluators
+            if evaluator.evaluator_type == "system-provenance"
+        ]
+        self.assertEqual(system_gates, [])
 
     def test_high_risk_gates_are_bound_to_the_output_that_can_support_review(self):
         registry = ModuleRegistry.discover(BUILTIN_ROOT)

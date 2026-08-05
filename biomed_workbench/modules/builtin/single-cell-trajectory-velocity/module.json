@@ -718,13 +718,13 @@
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evaluator_type": "system-provenance",
+          "evaluator_type": "provenance-design",
           "evidence_payload_role": "primary",
           "gate_id": "velocity-output-reload",
-          "metric_key": "family_admission",
-          "metric_type": "boolean",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": true
+          "threshold": "accepted"
         }
       ],
       "payloads": [
@@ -785,7 +785,7 @@
         }
       ],
       "port": "trajectory_velocity_object",
-      "protocol_version": "2.0.0",
+      "protocol_version": "2.1.0",
       "required_postflight_gate_ids": [
         "velocity-input-and-layer-semantics",
         "velocity-source-preservation",
@@ -793,7 +793,7 @@
       ],
       "semantic_profile": "single-cell-object-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+      "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -958,7 +958,7 @@
         }
       ],
       "port": "trajectory_velocity_validation",
-      "protocol_version": "2.0.0",
+      "protocol_version": "2.1.0",
       "required_postflight_gate_ids": [
         "velocity-dynamics-fit",
         "velocity-independent-direction",
@@ -966,7 +966,7 @@
       ],
       "semantic_profile": "single-cell-results-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+      "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
     }
   ],
   "orchestration": {

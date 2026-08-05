@@ -2468,7 +2468,7 @@
             }
           ],
           "port": "alphafold3_prediction_bundle",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "af3-input-identity",
             "af3-license-runtime",
@@ -2477,7 +2477,7 @@
           ],
           "semantic_profile": "model-bundle-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -2612,11 +2612,11 @@
             }
           ],
           "port": "alphafold3_figure_bundle",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "figure-package-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -4219,7 +4219,7 @@
             }
           ],
           "port": "assembly_alignment",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "assembly-identity",
             "assembly-paf-reload",
@@ -4227,7 +4227,7 @@
           ],
           "semantic_profile": "genomic-records-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -6455,13 +6455,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "bulk-chromatin-accessibility-execution-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
@@ -6531,7 +6531,7 @@
             }
           ],
           "port": "bulk_assay_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "bulk-chromatin-accessibility-assay-contract",
             "bulk-chromatin-accessibility-execution-reload",
@@ -6539,7 +6539,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -7634,7 +7634,7 @@
             }
           ],
           "port": "chromatin_peak_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "bulk-chromatin-input-control",
             "bulk-chromatin-macs3-output",
@@ -7644,7 +7644,7 @@
           ],
           "semantic_profile": "genomic-records-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -8398,13 +8398,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "bulk-dna-methylation-execution-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
@@ -8474,7 +8474,7 @@
             }
           ],
           "port": "bulk_assay_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "bulk-dna-methylation-assay-contract",
             "bulk-dna-methylation-execution-reload",
@@ -8482,7 +8482,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -9152,13 +9152,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "bulk-nascent-transcription-execution-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
@@ -9228,7 +9228,7 @@
             }
           ],
           "port": "bulk_assay_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "bulk-nascent-transcription-assay-contract",
             "bulk-nascent-transcription-execution-reload",
@@ -9236,7 +9236,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -9910,13 +9910,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "bulk-r-loop-mapping-execution-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
@@ -9986,7 +9986,7 @@
             }
           ],
           "port": "bulk_assay_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "bulk-r-loop-mapping-assay-contract",
             "bulk-r-loop-mapping-execution-reload",
@@ -9994,7 +9994,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -10664,13 +10664,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "bulk-rbp-rna-binding-execution-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
@@ -10740,7 +10740,7 @@
             }
           ],
           "port": "bulk_assay_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "bulk-rbp-rna-binding-assay-contract",
             "bulk-rbp-rna-binding-execution-reload",
@@ -10748,7 +10748,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -11402,13 +11402,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "bulk-ribosome-profiling-execution-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
@@ -11478,7 +11478,7 @@
             }
           ],
           "port": "bulk_assay_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "bulk-ribosome-profiling-assay-contract",
             "bulk-ribosome-profiling-execution-reload",
@@ -11486,7 +11486,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -12138,13 +12138,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "bulk-rna-modification-enrichment-execution-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
@@ -12214,7 +12214,7 @@
             }
           ],
           "port": "bulk_assay_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "bulk-rna-modification-enrichment-assay-contract",
             "bulk-rna-modification-enrichment-execution-reload",
@@ -12222,7 +12222,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -12913,13 +12913,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "bulk-three-dimensional-genome-execution-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
@@ -12989,7 +12989,7 @@
             }
           ],
           "port": "bulk_assay_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "bulk-three-dimensional-genome-assay-contract",
             "bulk-three-dimensional-genome-execution-reload",
@@ -12997,7 +12997,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -16088,7 +16088,7 @@
             }
           ],
           "port": "substructure_filter_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "substructure-filter-input-integrity",
             "substructure-filter-query-validity",
@@ -16097,7 +16097,7 @@
           ],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -21471,7 +21471,7 @@
             }
           ],
           "port": "comparative_alignment_and_tree",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "comparative-sequence-identity-and-homology",
             "comparative-alignment-completeness",
@@ -21481,7 +21481,7 @@
           ],
           "semantic_profile": "sequence-phylogeny-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -25675,14 +25675,14 @@
             }
           ],
           "port": "validated_docking_batch",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "docking-preparation-manifest",
             "docking-preparation-identity"
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -25828,13 +25828,13 @@
             }
           ],
           "port": "validated_docking_config",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "docking-preparation-parameters"
           ],
           "semantic_profile": "configuration-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -25968,11 +25968,11 @@
             }
           ],
           "port": "docking_preparation_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -26160,7 +26160,7 @@
             }
           ],
           "port": "docking_review_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "docking-review-result-accounting",
             "docking-review-chemical-identity",
@@ -26170,7 +26170,7 @@
           ],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -31090,7 +31090,7 @@
             }
           ],
           "port": "functional_enrichment_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "enrichment-input-semantics",
             "enrichment-resource-provenance",
@@ -31098,7 +31098,7 @@
           ],
           "semantic_profile": "functional-enrichment-v2",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -33966,7 +33966,7 @@
             }
           ],
           "port": "lifted_intervals",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "liftover-coordinate-and-assembly-identity",
             "liftover-chain-integrity",
@@ -33975,7 +33975,7 @@
           ],
           "semantic_profile": "genomic-records-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -34109,11 +34109,11 @@
             }
           ],
           "port": "liftover_audit",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -36289,7 +36289,7 @@
             }
           ],
           "port": "fine_mapping_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "finemap-harmonization",
             "finemap-ld-validity",
@@ -36298,7 +36298,7 @@
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -43059,7 +43059,7 @@
             }
           ],
           "port": "metascape_analysis_bundle",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "metascape-input-design",
             "metascape-parameter-provenance",
@@ -43068,7 +43068,7 @@
           ],
           "semantic_profile": "analysis-archive-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -43203,11 +43203,11 @@
             }
           ],
           "port": "cytoscape_figure_bundle",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "figure-package-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -43986,7 +43986,7 @@
             }
           ],
           "port": "demographic_simulation_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "demography-parameter-contract",
             "demography-seed-and-output",
@@ -43995,7 +43995,7 @@
           ],
           "semantic_profile": "sequence-phylogeny-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -52183,7 +52183,7 @@
             }
           ],
           "port": "complex_docking_bundle",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "complex-input-identity",
             "docking-sampling-profile",
@@ -52192,7 +52192,7 @@
           ],
           "semantic_profile": "analysis-archive-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -52338,13 +52338,13 @@
             }
           ],
           "port": "structure_figure_bundle",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "structure-publication-figures"
           ],
           "semantic_profile": "figure-package-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -54131,7 +54131,7 @@
             }
           ],
           "port": "secondary_structure_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "secondary-structure-input-integrity",
             "secondary-structure-backend",
@@ -54141,7 +54141,7 @@
           ],
           "semantic_profile": "structure-analysis-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -54276,11 +54276,11 @@
             }
           ],
           "port": "secondary_structure_diagram",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "svg-figure-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -54414,11 +54414,11 @@
             }
           ],
           "port": "secondary_structure_diagram_manifest",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -55441,7 +55441,7 @@
             }
           ],
           "port": "deqms_inference",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "deqms-input-design",
             "deqms-model-diagnostics",
@@ -55449,7 +55449,7 @@
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -61314,7 +61314,7 @@
             }
           ],
           "port": "genomic_prediction_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "genomic-prediction-input-contract",
             "genomic-prediction-fold-isolation",
@@ -61323,7 +61323,7 @@
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -65154,13 +65154,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "atac-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -65224,7 +65224,7 @@
             }
           ],
           "port": "atac_regulatory_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "atac-fragment-accounting",
             "atac-peak-coordinate-reload",
@@ -65236,7 +65236,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -66549,13 +66549,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "atlas-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -66618,7 +66618,7 @@
             }
           ],
           "port": "atlas_annotated_single_cell_object",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "atlas-input-and-reference-semantics",
             "atlas-feature-overlap",
@@ -66631,7 +66631,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -66767,11 +66767,11 @@
             }
           ],
           "port": "atlas_annotation_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -67934,13 +67934,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "integration-raw-count-and-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -68001,7 +68001,7 @@
             }
           ],
           "port": "integrated_analysis_object",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "integration-input-and-design-semantics",
             "integration-identifiability",
@@ -68010,7 +68010,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -68165,14 +68165,14 @@
             }
           ],
           "port": "integration_benchmark",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "integration-batch-mixing",
             "integration-biological-conservation"
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -68317,13 +68317,13 @@
             }
           ],
           "port": "integration_decision",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "integration-selection-sensitivity"
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -69512,7 +69512,7 @@
             }
           ],
           "port": "communication_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "communication-input-semantics",
             "communication-cell-sample-accounting",
@@ -69523,7 +69523,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -69657,11 +69657,11 @@
             }
           ],
           "port": "communication_validation",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -71023,13 +71023,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "complex-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -71090,7 +71090,7 @@
             }
           ],
           "port": "complex_inference_tables",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "complex-design-semantics",
             "complex-cell-count-accounting",
@@ -71102,7 +71102,7 @@
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -71238,11 +71238,11 @@
             }
           ],
           "port": "complex_inference_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -72247,7 +72247,7 @@
             }
           ],
           "port": "cross_species_integration_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "orthology-ledger-and-feature-coverage",
             "native-method-and-baseline-comparison",
@@ -72256,7 +72256,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -73551,7 +73551,7 @@
             }
           ],
           "port": "pseudobulk_counts",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "pseudobulk-raw-count-and-axis-identity",
             "pseudobulk-experimental-unit-semantics",
@@ -73564,7 +73564,7 @@
           ],
           "semantic_profile": "count-matrix-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -73699,11 +73699,11 @@
             }
           ],
           "port": "pseudobulk_metadata",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -73839,11 +73839,11 @@
             }
           ],
           "port": "differential_results",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -73977,11 +73977,11 @@
             }
           ],
           "port": "inference_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -75415,7 +75415,7 @@
             }
           ],
           "port": "doublet_annotated_object",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "doublet-input-semantics",
             "doublet-sample-accounting",
@@ -75427,7 +75427,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -75561,11 +75561,11 @@
             }
           ],
           "port": "doublet_evidence_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -76719,7 +76719,7 @@
             }
           ],
           "port": "decontaminated_counts",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "droplet-input-reconciliation",
             "emptydrops-accounting",
@@ -76730,7 +76730,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -76864,11 +76864,11 @@
             }
           ],
           "port": "droplet_evidence_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -77967,13 +77967,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "fate-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -78037,7 +78037,7 @@
             }
           ],
           "port": "fate_mapping_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "fate-input-semantics",
             "fate-transition-stochasticity",
@@ -78048,7 +78048,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -79126,7 +79126,7 @@
             }
           ],
           "port": "analysis_object",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "single-cell-input-semantics",
             "single-cell-cell-accounting",
@@ -79136,7 +79136,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -79270,11 +79270,11 @@
             }
           ],
           "port": "qc_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -79408,11 +79408,11 @@
             }
           ],
           "port": "cluster_model",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -80668,7 +80668,7 @@
             }
           ],
           "port": "generative_model_object",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "generative-input-semantics",
             "generative-design-identifiability",
@@ -80680,7 +80680,7 @@
           ],
           "semantic_profile": "model-bundle-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -80816,11 +80816,11 @@
             }
           ],
           "port": "modeled_single_cell_object",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -80954,11 +80954,11 @@
             }
           ],
           "port": "generative_model_validation",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -81922,7 +81922,7 @@
             }
           ],
           "port": "integration_benchmark_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "crossed-design-and-label-isolation",
             "same-foundation-multi-method",
@@ -81931,7 +81931,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -82808,13 +82808,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "marker-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -82876,7 +82876,7 @@
             }
           ],
           "port": "marker_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "marker-input-semantics",
             "marker-cluster-accounting",
@@ -82887,7 +82887,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -83735,7 +83735,7 @@
             }
           ],
           "port": "mosaic_integration_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "multimodal-count-identity-missingness",
             "method-specific-feature-and-prior-contract",
@@ -83743,7 +83743,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -84936,13 +84936,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "multimodal-source-and-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -85008,7 +85008,7 @@
             }
           ],
           "port": "multimodal_integration_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "multimodal-cell-alignment",
             "multimodal-matrix-semantics",
@@ -85019,7 +85019,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -86693,13 +86693,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "annotation-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -86760,7 +86760,7 @@
             }
           ],
           "port": "annotated_single_cell_object",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "annotation-input-and-feature-semantics",
             "annotation-reference-coverage",
@@ -86772,7 +86772,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -86906,11 +86906,11 @@
             }
           ],
           "port": "annotation_validation_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -87854,7 +87854,7 @@
             }
           ],
           "port": "reference_mapping_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "frozen-reference-and-feature-overlap",
             "query-identity-and-unknown-retention",
@@ -87863,7 +87863,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -89230,13 +89230,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "regulatory-source-and-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -89298,7 +89298,7 @@
             }
           ],
           "port": "regulatory_network_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "regulatory-input-and-resource-semantics",
             "regulatory-grn-and-motif-separation",
@@ -89310,7 +89310,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -90524,13 +90524,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "regvelo-source-and-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -90591,7 +90591,7 @@
             }
           ],
           "port": "regulatory_velocity_object",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "regvelo-layer-and-identity-semantics",
             "regvelo-grn-contract",
@@ -90603,7 +90603,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -90737,11 +90737,11 @@
             }
           ],
           "port": "regulatory_velocity_validation",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -91820,13 +91820,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "spatial-source-and-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -91890,7 +91890,7 @@
             }
           ],
           "port": "spatial_analysis_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "spatial-input-coordinate-semantics",
             "spatial-sample-isolated-graph",
@@ -91902,7 +91902,7 @@
           ],
           "semantic_profile": "spatial-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -92874,13 +92874,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "topology-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -92944,7 +92944,7 @@
             }
           ],
           "port": "trajectory_topology_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "topology-input-accounting",
             "topology-lineage-coverage",
@@ -92954,7 +92954,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -94028,13 +94028,13 @@
             },
             {
               "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-              "evaluator_type": "system-provenance",
+              "evaluator_type": "provenance-design",
               "evidence_payload_role": "primary",
               "gate_id": "velocity-output-reload",
-              "metric_key": "family_admission",
-              "metric_type": "boolean",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
               "operator": "equals",
-              "threshold": true
+              "threshold": "accepted"
             }
           ],
           "payloads": [
@@ -94095,7 +94095,7 @@
             }
           ],
           "port": "trajectory_velocity_object",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "velocity-input-and-layer-semantics",
             "velocity-source-preservation",
@@ -94103,7 +94103,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -94268,7 +94268,7 @@
             }
           ],
           "port": "trajectory_velocity_validation",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "velocity-dynamics-fit",
             "velocity-independent-direction",
@@ -94276,7 +94276,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -95843,7 +95843,7 @@
             }
           ],
           "port": "spatial_inference_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "deconvolution-reference-contract",
             "projection-truth-and-resolution-contract",
@@ -95852,7 +95852,7 @@
           ],
           "semantic_profile": "spatial-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -97013,7 +97013,7 @@
             }
           ],
           "port": "multislice_spatial_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "multislice-order-overlap-contract",
             "alignment-quantitative-review",
@@ -97021,7 +97021,7 @@
           ],
           "semantic_profile": "spatial-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -97921,7 +97921,7 @@
             }
           ],
           "port": "platform_qc_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "spatial-platform-contract",
             "platform-specific-qc",
@@ -97929,7 +97929,7 @@
           ],
           "semantic_profile": "spatial-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -98850,7 +98850,7 @@
             }
           ],
           "port": "structure_comparison_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "structure-comparison-input-integrity",
             "structure-comparison-correspondence",
@@ -98860,7 +98860,7 @@
           ],
           "semantic_profile": "structure-analysis-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -98998,11 +98998,11 @@
             }
           ],
           "port": "superposed_coordinates",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "structure-coordinate-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -100090,7 +100090,7 @@
             }
           ],
           "port": "interactive_structure_view",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "structure-view-input-integrity",
             "structure-view-semantic-integrity",
@@ -100098,7 +100098,7 @@
           ],
           "semantic_profile": "interactive-html-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -100232,11 +100232,11 @@
             }
           ],
           "port": "visualization_manifest",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -101658,7 +101658,7 @@
             }
           ],
           "port": "structure_quality_report",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "structure-quality-input-integrity",
             "structure-quality-coordinate-accounting",
@@ -101667,7 +101667,7 @@
           ],
           "semantic_profile": "structure-analysis-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -104189,7 +104189,7 @@
             }
           ],
           "port": "trajectory_spatial_figure_package",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "analysis-figure-profile-complete",
             "final-size-vector-raster-contract",
@@ -104197,7 +104197,7 @@
           ],
           "semantic_profile": "figure-package-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -108663,7 +108663,7 @@
             }
           ],
           "port": "wgcna_network_evidence",
-          "protocol_version": "2.0.0",
+          "protocol_version": "2.1.0",
           "required_postflight_gate_ids": [
             "wgcna-input-eligibility",
             "wgcna-network-parameters",
@@ -108671,7 +108671,7 @@
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
+          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
         }
       ],
       "orchestration": {
@@ -109255,6 +109255,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "c49bdc7c65467d4da0c2e0e1f1ec257eb02b05e387060d3f3a6b427bd2cfeaa6",
+  "registry_digest": "ae474869d72950eb4f6fae4ec7165b135b4308f606f547b6fee72fb78a851daf",
   "schema_version": 1
 }

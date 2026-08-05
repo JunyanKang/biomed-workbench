@@ -15,6 +15,7 @@ from .scientific_dependency import (
     ArtifactReview,
     ScientificDecision,
     ScientificDependencyBundle,
+    ScientificGateAdjudication,
 )
 from .hypotheses import Hypothesis
 if TYPE_CHECKING:
@@ -348,6 +349,7 @@ class EvidenceMapUnit:
     admissions: tuple[AnalysisAdmission, ...]
     review: ArtifactReview
     decision: ScientificDecision
+    gate_adjudications: tuple[ScientificGateAdjudication, ...]
     evidence_origin: str
 
     def to_dict(self) -> dict[str, object]:
@@ -366,6 +368,7 @@ class EvidenceMapUnit:
             "analysis_admissions": [item.to_dict() for item in self.admissions],
             "review": self.review.to_dict(),
             "decision": self.decision.to_dict(),
+            "gate_adjudications": [item.to_dict() for item in self.gate_adjudications],
             "evidence_origin": self.evidence_origin,
         }
 
@@ -572,6 +575,12 @@ def build_scientific_evidence_map(
                 unit_admissions,
                 review,
                 decisions[spec.artifact_id],
+                tuple(
+                    sorted(
+                        (item for item in bundle.gate_adjudications if item.artifact_id == spec.artifact_id),
+                        key=lambda item: item.gate_id,
+                    )
+                ),
                 "input-qualification" if artifact.producing_module_id is None else "observed-analysis",
             )
         )
@@ -592,7 +601,9 @@ def build_scientific_evidence_map(
             edges.add(("detail", spec.group_id, predecessor, spec.id, "precedes"))
             if spec.panel_id is not None and unit_by_id[predecessor].spec.panel_id is not None:
                 edges.add(("story", "global-panel-story", predecessor, spec.id, "panel-depends-on"))
-        previous = [spec.id]
+        for adjudication in unit.gate_adjudications:
+            edges.add(("detail", spec.group_id, spec.id, adjudication.id, "gate-adjudicated-by"))
+        previous = [item.id for item in unit.gate_adjudications] or [spec.id]
         for stage in _ROLE_STAGES:
             current = sorted(
                 (item for item in spec.files if item.role in stage),

@@ -101,7 +101,10 @@ def _evaluator_contract(gate: dict[str, object]) -> dict[str, object]:
     elif any(token in gate_id for token in (
         "execution-reload", "output-reload", "raw-count-and-reload", "source-and-output-reload",
     )):
-        evaluator_type = "system-provenance"
+        # Reload wording alone does not prove the gate's complete declared scope.
+        # A gate becomes system-provenance only after a dedicated observation
+        # evaluator is explicitly registered for that exact gate.
+        evaluator_type = "provenance-design"
     elif any(token in gate_id for token in (
         "confidence", "mixing", "conservation", "periodicity", "p-site", "stability", "sensitivity",
         "moran", "capri", "geometry", "dynamics-fit", "independent-direction",
@@ -143,7 +146,7 @@ def _contract(
     semantic_digest = hashlib.sha256(SEMANTIC_VALIDATOR.read_bytes()).hexdigest()
     quality_gate_ids = [item["id"] for item in quality_gates]
     return {
-        "protocol_version": "2.0.0",
+        "protocol_version": "2.1.0",
         "port": port["name"],
         "content_schema": {
             "type": "object",

@@ -45,6 +45,7 @@ EDGE_RELATIONS = (
     "triggers",
 )
 EVIDENCE_MAP_KINDS = frozenset({"project-snapshot", "delivery-authorization", "validated-delivery"})
+GATE_ADJUDICATION_STATUSES = frozenset({"accepted", "accepted-with-caveat", "rejected", "unresolved"})
 
 
 def _text(value: str, location: str, minimum: int = 12) -> str:
@@ -67,6 +68,12 @@ def _urls(values: tuple[str, ...], location: str) -> tuple[str, ...]:
     if len(set(values)) != len(values):
         raise ValueError(f"{location} contains duplicate sources")
     return tuple(values)
+
+
+def _sha256(value: str, location: str) -> str:
+    if not isinstance(value, str) or len(value) != 64 or set(value) - set("0123456789abcdef"):
+        raise ValueError(f"{location} must be lowercase SHA-256")
+    return value
 
 
 @dataclass(frozen=True)
@@ -174,6 +181,70 @@ class PanelInterpretation:
 
 
 @dataclass(frozen=True)
+class ScientificGateAdjudication:
+    """Independent scientific disposition of one exact observed gate result."""
+
+    id: str
+    artifact_id: str
+    observed_execution_receipt_id: str
+    gate_id: str
+    port: str
+    evaluator_type: str
+    gate_result_digest: str
+    evidence_payload_sha256: str | None
+    status: str
+    reviewer_identity: str
+    rationale_zh: str
+    rationale_en: str
+    limitations_zh: tuple[str, ...]
+    limitations_en: tuple[str, ...]
+    source_urls: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        for field in ("id", "artifact_id", "observed_execution_receipt_id", "gate_id", "port"):
+            object.__setattr__(self, field, validate_identifier(getattr(self, field), f"gate_adjudication.{field}"))
+        if self.evaluator_type not in {
+            "payload-derived", "tool-native", "provenance-design", "system-provenance", "claim-boundary"
+        }:
+            raise ValueError("gate_adjudication.evaluator_type is unsupported")
+        object.__setattr__(
+            self, "gate_result_digest", _sha256(self.gate_result_digest, "gate_adjudication.gate_result_digest")
+        )
+        if self.evidence_payload_sha256 is not None:
+            object.__setattr__(
+                self,
+                "evidence_payload_sha256",
+                _sha256(self.evidence_payload_sha256, "gate_adjudication.evidence_payload_sha256"),
+            )
+        if self.status not in GATE_ADJUDICATION_STATUSES:
+            raise ValueError("gate_adjudication.status is unsupported")
+        object.__setattr__(self, "reviewer_identity", _text(self.reviewer_identity, "gate_adjudication.reviewer_identity", 4))
+        object.__setattr__(self, "rationale_zh", _text(self.rationale_zh, "gate_adjudication.rationale_zh"))
+        object.__setattr__(self, "rationale_en", _text(self.rationale_en, "gate_adjudication.rationale_en"))
+        for field in ("limitations_zh", "limitations_en"):
+            values = tuple(_text(value, f"gate_adjudication.{field}") for value in getattr(self, field))
+            if not values:
+                raise ValueError(f"gate_adjudication.{field} must state limitations")
+            object.__setattr__(self, field, values)
+        object.__setattr__(self, "source_urls", _urls(tuple(self.source_urls), "gate_adjudication.source_urls"))
+
+    def to_dict(self) -> dict[str, object]:
+        payload = {field: getattr(self, field) for field in self.__dataclass_fields__}
+        payload["limitations_zh"] = list(self.limitations_zh)
+        payload["limitations_en"] = list(self.limitations_en)
+        payload["source_urls"] = list(self.source_urls)
+        return payload
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "ScientificGateAdjudication":
+        values = dict(payload)
+        values["limitations_zh"] = tuple(values["limitations_zh"])
+        values["limitations_en"] = tuple(values["limitations_en"])
+        values["source_urls"] = tuple(values["source_urls"])
+        return cls(**values)
+
+
+@dataclass(frozen=True)
 class ArtifactReview:
     id: str
     artifact_id: str
@@ -195,6 +266,7 @@ class ArtifactReview:
     limitations_en: tuple[str, ...]
     recommended_action: str
     source_urls: tuple[str, ...]
+    gate_adjudication_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "artifact_review.id"))
@@ -225,6 +297,11 @@ class ArtifactReview:
         if self.recommended_action not in DECISION_ACTIONS:
             raise ValueError("artifact_review.recommended_action is unsupported")
         object.__setattr__(self, "source_urls", _urls(tuple(self.source_urls), "artifact_review.source_urls"))
+        object.__setattr__(
+            self,
+            "gate_adjudication_ids",
+            _ids(tuple(self.gate_adjudication_ids), "artifact_review.gate_adjudication_ids", allow_empty=True),
+        )
 
     @property
     def overall_status(self) -> str:
@@ -240,6 +317,10 @@ class ArtifactReview:
         payload["limitations_zh"] = list(self.limitations_zh)
         payload["limitations_en"] = list(self.limitations_en)
         payload["source_urls"] = list(self.source_urls)
+        if self.gate_adjudication_ids:
+            payload["gate_adjudication_ids"] = list(self.gate_adjudication_ids)
+        else:
+            payload.pop("gate_adjudication_ids", None)
         payload["overall_status"] = self.overall_status
         return payload
 
@@ -251,6 +332,7 @@ class ArtifactReview:
         values["limitations_zh"] = tuple(values["limitations_zh"])
         values["limitations_en"] = tuple(values["limitations_en"])
         values["source_urls"] = tuple(values["source_urls"])
+        values["gate_adjudication_ids"] = tuple(values.get("gate_adjudication_ids", ()))
         return cls(**values)
 
 
@@ -265,6 +347,7 @@ class ScientificDecision:
     rationale_en: str
     active_evidence: bool
     next_plan_node_ids: tuple[str, ...]
+    gate_adjudication_digest: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "scientific_decision.id"))
@@ -279,9 +362,15 @@ class ScientificDecision:
         retain = self.action in {"retain-as-evidence", "retain-with-caveat"}
         if self.active_evidence != retain:
             raise ValueError("active_evidence must be true exactly for retained decisions")
+        if self.gate_adjudication_digest is not None:
+            object.__setattr__(
+                self,
+                "gate_adjudication_digest",
+                _sha256(self.gate_adjudication_digest, "scientific_decision.gate_adjudication_digest"),
+            )
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload = {
             "id": self.id,
             "review_id": self.review_id,
             "artifact_id": self.artifact_id,
@@ -292,12 +381,16 @@ class ScientificDecision:
             "active_evidence": self.active_evidence,
             "next_plan_node_ids": list(self.next_plan_node_ids),
         }
+        if self.gate_adjudication_digest is not None:
+            payload["gate_adjudication_digest"] = self.gate_adjudication_digest
+        return payload
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "ScientificDecision":
         values = dict(payload)
         values["hypothesis_ids"] = tuple(values["hypothesis_ids"])
         values["next_plan_node_ids"] = tuple(values["next_plan_node_ids"])
+        values.setdefault("gate_adjudication_digest", None)
         return cls(**values)
 
 
@@ -326,6 +419,7 @@ class ScientificDependencyBundle:
     admissions: tuple[AnalysisAdmission, ...]
     reviews: tuple[ArtifactReview, ...]
     decisions: tuple[ScientificDecision, ...]
+    gate_adjudications: tuple[ScientificGateAdjudication, ...]
     map_kind: str
     digest: str
 
@@ -341,20 +435,28 @@ class ScientificDependencyBundle:
     ) -> "ScientificDependencyBundle":
         if map_kind not in EVIDENCE_MAP_KINDS:
             raise ValueError("scientific dependency bundle map kind is unsupported")
-        values = cls(tuple(admissions), tuple(reviews), tuple(decisions), map_kind, "0" * 64)
+        values = cls(
+            tuple(admissions), tuple(reviews), tuple(decisions), tuple(state.gate_adjudications), map_kind, "0" * 64
+        )
         values._validate(state)
         basis = {
             "admissions": [item.to_dict() for item in values.admissions],
             "reviews": [item.to_dict() for item in values.reviews],
             "decisions": [item.to_dict() for item in values.decisions],
+            "gate_adjudications": [item.to_dict() for item in values.gate_adjudications],
             "map_kind": values.map_kind,
         }
-        return cls(values.admissions, values.reviews, values.decisions, values.map_kind, digest_value(basis))
+        return cls(
+            values.admissions, values.reviews, values.decisions, values.gate_adjudications,
+            values.map_kind, digest_value(basis)
+        )
 
     def _validate(self, state: ProjectState) -> None:
         plan_nodes = {node.id: node for plan in state.plans for node in plan.nodes}
         hypotheses = {item.id for item in state.hypotheses}
         artifacts = {item.id: item for item in state.artifacts}
+        if self.gate_adjudications != state.gate_adjudications:
+            raise ValueError("scientific dependency bundle must include the exact project gate adjudications")
         if len({item.id for item in self.admissions}) != len(self.admissions):
             raise ValueError("analysis admissions contain duplicate IDs")
         if set(item.plan_node_id for item in self.admissions) != set(plan_nodes):
@@ -462,6 +564,13 @@ def build_scientific_dependency_graph(
     for review in bundle.reviews:
         node(review.id, "artifact-review", review.overall_status)
         edge(review.id, review.artifact_id, "reviews")
+    review_by_artifact = {item.artifact_id: item for item in bundle.reviews}
+    for adjudication in bundle.gate_adjudications:
+        node(adjudication.id, "gate-adjudication", adjudication.status)
+        edge(adjudication.id, adjudication.artifact_id, "reviews")
+        review = review_by_artifact.get(adjudication.artifact_id)
+        if review is not None:
+            edge(review.id, adjudication.id, "adjudicates")
     active = []
     for decision in bundle.decisions:
         node(decision.id, "scientific-decision", decision.action)

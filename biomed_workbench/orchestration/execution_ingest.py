@@ -175,6 +175,12 @@ def ingest_execution_bundle(
         raise ValueError("observed output contract changed after the execution handoff")
     if handoff.protocol.get("observed_output_protocol_version") != observed_output_protocol_version(manifest):
         raise ValueError("observed output protocol version differs from the current admission contract")
+    expected_gate_ids = sorted(gate.id for gate in manifest.quality_gates)
+    if (
+        list(handoff.protocol.get("required_postflight_gate_ids", ())) != expected_gate_ids
+        or handoff.protocol.get("required_postflight_gate_set_digest") != digest_value(expected_gate_ids)
+    ):
+        raise ValueError("execution handoff required gate set differs from the current module")
     if (
         not isinstance(bundle["process_exit_code"], int)
         or isinstance(bundle["process_exit_code"], bool)
@@ -288,6 +294,8 @@ def ingest_execution_bundle(
     }
     if len(by_gate) != len(postflight_results) or set(by_gate) != required_gate_ids:
         raise ValueError("postflight results must cover every required manifest gate exactly once")
+    if digest_value(sorted(by_gate)) != handoff.protocol["required_postflight_gate_set_digest"]:
+        raise ValueError("postflight results differ from the frozen handoff gate set")
     evaluated_results: dict[str, dict[str, object]] = {}
     for gate_id in sorted(by_gate):
         evaluations = []

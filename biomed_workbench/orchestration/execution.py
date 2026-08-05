@@ -420,9 +420,12 @@ def execute_node(
             )
             if manifest.access == "agent_generated":
                 compatibility_row_id = str(invocation.provenance["compatibility_row_id"])
+                required_gate_ids = sorted(gate.id for gate in manifest.quality_gates)
                 handoff_protocol = {
                     **dict(invocation.output),
                     "observed_output_protocol_version": observed_output_protocol_version(manifest),
+                    "required_postflight_gate_ids": required_gate_ids,
+                    "required_postflight_gate_set_digest": digest_value(required_gate_ids),
                     "compatibility_contract_digest": compatibility_contract_digest(
                         manifest, compatibility_row_id
                     ),

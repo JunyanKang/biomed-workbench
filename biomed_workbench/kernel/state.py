@@ -17,14 +17,22 @@ from .execution_receipts import (
 )
 from .execution_chain import (
     delivery_slice_digest,
+    gate_adjudication_bundle_digest,
     validate_delivery_prerequisites,
+    validate_gate_adjudication_binding,
+    validate_gate_adjudication_chain,
     validate_node_execution_chain,
     validate_validated_delivery_state,
 )
 from .hypotheses import Hypothesis, add_hypothesis, attach_evidence
 from .identity import digest_value, freeze_mapping, thaw
 from .plans import NODE_STATUSES, PlanNode, ResearchDAG
-from .scientific_dependency import AnalysisAdmission, ArtifactReview, ScientificDecision
+from .scientific_dependency import (
+    AnalysisAdmission,
+    ArtifactReview,
+    ScientificDecision,
+    ScientificGateAdjudication,
+)
 from .scientific_evidence_map import EvidenceMapPublication
 
 
@@ -46,6 +54,7 @@ EVENT_TYPES = frozenset(
         "quality_finding_recorded",
         "analysis_admission_recorded",
         "artifact_review_recorded",
+        "scientific_gate_adjudicated",
         "scientific_decision_recorded",
         "evidence_map_published",
     }
@@ -57,6 +66,7 @@ def _state_basis(
     artifacts: tuple[ScientificArtifact, ...],
     hypotheses: tuple[Hypothesis, ...],
     evidence: tuple[EvidenceRecord, ...],
+    gate_adjudications: tuple[ScientificGateAdjudication, ...],
     admissions: tuple[AnalysisAdmission, ...],
     artifact_reviews: tuple[ArtifactReview, ...],
     scientific_decisions: tuple[ScientificDecision, ...],
@@ -81,6 +91,8 @@ def _state_basis(
         "active_plan_id": active_plan_id,
         "revision": revision,
     }
+    if gate_adjudications:
+        basis["gate_adjudications"] = [item.to_dict() for item in gate_adjudications]
     if admissions or artifact_reviews or scientific_decisions or evidence_map_versions:
         basis.update(
             {
@@ -109,6 +121,7 @@ class ProjectState:
     artifacts: tuple[ScientificArtifact, ...]
     hypotheses: tuple[Hypothesis, ...]
     evidence: tuple[EvidenceRecord, ...]
+    gate_adjudications: tuple[ScientificGateAdjudication, ...]
     analysis_admissions: tuple[AnalysisAdmission, ...]
     artifact_reviews: tuple[ArtifactReview, ...]
     scientific_decisions: tuple[ScientificDecision, ...]
@@ -130,6 +143,7 @@ class ProjectState:
             ("artifacts", ScientificArtifact),
             ("hypotheses", Hypothesis),
             ("evidence", EvidenceRecord),
+            ("gate_adjudications", ScientificGateAdjudication),
             ("analysis_admissions", AnalysisAdmission),
             ("artifact_reviews", ArtifactReview),
             ("scientific_decisions", ScientificDecision),
@@ -167,6 +181,12 @@ class ProjectState:
             raise ValueError("each plan node may have only one analysis admission")
         if any(item.artifact_id not in artifact_ids for item in self.artifact_reviews):
             raise ValueError("artifact review references an unknown artifact")
+        for item in self.gate_adjudications:
+            if item.artifact_id not in artifact_ids:
+                raise ValueError("gate adjudication references an unknown artifact")
+            validate_gate_adjudication_binding(self, item)
+        if len({(item.artifact_id, item.gate_id) for item in self.gate_adjudications}) != len(self.gate_adjudications):
+            raise ValueError("each artifact gate may have only one scientific adjudication")
         review_by_id = {item.id: item for item in self.artifact_reviews}
         if len({item.artifact_id for item in self.artifact_reviews}) != len(self.artifact_reviews):
             raise ValueError("each artifact may have only one scientific review")
@@ -176,6 +196,7 @@ class ProjectState:
                 raise ValueError("scientific decision references an unknown or mismatched review")
             if item.active_evidence and review.overall_status in {"major", "fatal", "unassessed"}:
                 raise ValueError("blocking or unassessed artifacts cannot become active evidence")
+            validate_gate_adjudication_chain(self, item.artifact_id)
         if len({item.artifact_id for item in self.scientific_decisions}) != len(self.scientific_decisions):
             raise ValueError("each artifact may have only one scientific decision")
         handoffs = {item.id: item for item in self.execution_handoffs}
@@ -203,6 +224,17 @@ class ProjectState:
                     or set(handoff.planned_output_artifact_ids.values()) != set(item.output_artifact_digests)
                 ):
                     raise ValueError("observed execution receipt chain differs from its handoff")
+                if handoff.protocol.get("observed_output_protocol_version") == "2.1.0":
+                    required_gate_ids = tuple(handoff.protocol.get("required_postflight_gate_ids", ()))
+                    if (
+                        not required_gate_ids
+                        or len(set(required_gate_ids)) != len(required_gate_ids)
+                        or handoff.protocol.get("required_postflight_gate_set_digest")
+                        != digest_value(sorted(required_gate_ids))
+                        or set(required_gate_ids) != set(item.postflight_results)
+                        or set(required_gate_ids) != set(item.postflight_result_digests)
+                    ):
+                        raise ValueError("observed execution does not cover the frozen handoff gate set")
         reloads = {item.id: item for item in self.artifact_reloads}
         for item in self.artifact_reloads:
             execution = observed.get(item.observed_execution_receipt_id)
@@ -236,6 +268,7 @@ class ProjectState:
                 self.artifacts,
                 self.hypotheses,
                 self.evidence,
+                self.gate_adjudications,
                 self.analysis_admissions,
                 self.artifact_reviews,
                 self.scientific_decisions,
@@ -257,11 +290,17 @@ class ProjectState:
 
     @classmethod
     def create(cls, context: ProjectContext) -> "ProjectState":
-        basis = _state_basis(context, (), (), (), (), (), (), (), (), (), (), (), (), (), None, 0)
-        return cls(1, context, (), (), (), (), (), (), (), (), (), (), (), (), (), None, 0, digest_value(basis))
+        basis = _state_basis(context, (), (), (), (), (), (), (), (), (), (), (), (), (), (), None, 0)
+        return cls(
+            schema_version=1, context=context, artifacts=(), hypotheses=(), evidence=(),
+            gate_adjudications=(), analysis_admissions=(), artifact_reviews=(),
+            scientific_decisions=(), evidence_map_versions=(), execution_handoffs=(),
+            observed_executions=(), artifact_reloads=(), execution_reviews=(), decisions=(),
+            plans=(), active_plan_id=None, revision=0, state_digest=digest_value(basis),
+        )
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload = {
             "schema_version": self.schema_version,
             "context": self.context.to_dict(),
             "artifacts": [item.to_dict() for item in self.artifacts],
@@ -281,17 +320,21 @@ class ProjectState:
             "revision": self.revision,
             "state_digest": self.state_digest,
         }
+        if self.gate_adjudications:
+            payload["gate_adjudications"] = [item.to_dict() for item in self.gate_adjudications]
+        return payload
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "ProjectState":
         receipt_fields = {"execution_handoffs", "observed_executions", "artifact_reloads", "execution_reviews"}
-        expected_fields = {"schema_version", "context", "artifacts", "hypotheses", "evidence", "analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions", *receipt_fields, "decisions", "plans", "active_plan_id", "revision", "state_digest"}
-        pre_receipt_fields = expected_fields - receipt_fields
+        expected_fields = {"schema_version", "context", "artifacts", "hypotheses", "evidence", "gate_adjudications", "analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions", *receipt_fields, "decisions", "plans", "active_plan_id", "revision", "state_digest"}
+        pre_gate_fields = expected_fields - {"gate_adjudications"}
+        pre_receipt_fields = pre_gate_fields - receipt_fields
         legacy_fields = pre_receipt_fields - {"analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions"}
-        if frozenset(payload) not in {frozenset(expected_fields), frozenset(pre_receipt_fields), frozenset(legacy_fields)}:
+        if frozenset(payload) not in {frozenset(expected_fields), frozenset(pre_gate_fields), frozenset(pre_receipt_fields), frozenset(legacy_fields)}:
             raise ValueError("project state uses an unsupported serialized field set")
         normalized = dict(payload)
-        for field in ("analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions", *sorted(receipt_fields)):
+        for field in ("gate_adjudications", "analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions", *sorted(receipt_fields)):
             normalized.setdefault(field, [])
         state = cls(
             schema_version=normalized["schema_version"],
@@ -299,6 +342,7 @@ class ProjectState:
             artifacts=tuple(ScientificArtifact.from_dict(item) for item in normalized["artifacts"]),
             hypotheses=tuple(Hypothesis.from_dict(item) for item in normalized["hypotheses"]),
             evidence=tuple(EvidenceRecord.from_dict(item) for item in normalized["evidence"]),
+            gate_adjudications=tuple(ScientificGateAdjudication.from_dict(item) for item in normalized["gate_adjudications"]),
             analysis_admissions=tuple(AnalysisAdmission.from_dict(item) for item in normalized["analysis_admissions"]),
             artifact_reviews=tuple(ArtifactReview.from_dict(item) for item in normalized["artifact_reviews"]),
             scientific_decisions=tuple(ScientificDecision.from_dict(item) for item in normalized["scientific_decisions"]),
@@ -320,6 +364,7 @@ class ProjectState:
 
 def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, Any]):
     artifacts, hypotheses, evidence = state.artifacts, state.hypotheses, state.evidence
+    gate_adjudications = state.gate_adjudications
     admissions, reviews = state.analysis_admissions, state.artifact_reviews
     scientific_decisions, evidence_map_versions = state.scientific_decisions, state.evidence_map_versions
     execution_handoffs, observed_executions = state.execution_handoffs, state.observed_executions
@@ -478,6 +523,7 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
             raise ValueError("execution_observed payload is invalid")
         item = ObservedExecutionReceipt.from_dict(payload["receipt"])
         plan_node = next((node for plan in plans for node in plan.nodes if node.id == item.plan_node_id), None)
+        handoff = next((value for value in execution_handoffs if value.id == item.handoff_id), None)
         if (
             plan_node is None
             or plan_node.module_id != item.module_id
@@ -488,6 +534,18 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
             or (item.source_kind == "handoff" and item.handoff_id not in {value.id for value in execution_handoffs})
         ):
             raise ValueError("observed execution is duplicate or differs from its plan and handoff")
+        if item.source_kind == "handoff" and handoff is not None and handoff.protocol.get(
+            "observed_output_protocol_version"
+        ) == "2.1.0":
+            required_gate_ids = tuple(handoff.protocol.get("required_postflight_gate_ids", ()))
+            if (
+                not required_gate_ids
+                or handoff.protocol.get("required_postflight_gate_set_digest")
+                != digest_value(sorted(required_gate_ids))
+                or set(required_gate_ids) != set(item.postflight_results)
+                or set(required_gate_ids) != set(item.postflight_result_digests)
+            ):
+                raise ValueError("observed execution does not cover the frozen handoff gate set")
         observed_executions = (*observed_executions, item)
     elif event_type == "artifact_reloaded":
         if set(payload) != {"receipt", "artifact"}:
@@ -548,7 +606,30 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
         item = ArtifactReview.from_dict(payload["review"])
         if item.artifact_id not in {value.id for value in artifacts} or item.artifact_id in {value.artifact_id for value in reviews}:
             raise ValueError("artifact review requires one known, previously unreviewed artifact")
+        validate_gate_adjudication_chain(
+            state, item.artifact_id, require_review=False, require_decision=False
+        )
+        expected_gate_ids = tuple(sorted(
+            value.id for value in gate_adjudications if value.artifact_id == item.artifact_id
+        ))
+        if tuple(sorted(item.gate_adjudication_ids)) != expected_gate_ids:
+            # Input/direct artifacts have no gate adjudications; handoff artifacts must cover all pending gates.
+            raise ValueError("artifact review does not name its exact gate adjudication set")
+        for value in gate_adjudications:
+            if value.artifact_id == item.artifact_id and value.status in {"rejected", "unresolved"}:
+                raise ValueError("artifact review cannot close rejected or unresolved scientific gates")
         reviews = (*reviews, item)
+    elif event_type == "scientific_gate_adjudicated":
+        if set(payload) != {"adjudication"}:
+            raise ValueError("scientific_gate_adjudicated payload is invalid")
+        item = ScientificGateAdjudication.from_dict(payload["adjudication"])
+        if item.id in {value.id for value in gate_adjudications} or any(
+            value.artifact_id == item.artifact_id and value.gate_id == item.gate_id
+            for value in gate_adjudications
+        ):
+            raise ValueError("scientific gate adjudication is duplicate")
+        validate_gate_adjudication_binding(state, item)
+        gate_adjudications = (*gate_adjudications, item)
     elif event_type == "scientific_decision_recorded":
         if set(payload) != {"decision"}:
             raise ValueError("scientific_decision_recorded payload is invalid")
@@ -558,6 +639,14 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
             raise ValueError("scientific decision requires the matching, previously undecided review")
         if item.active_evidence and review.overall_status in {"major", "fatal", "unassessed"}:
             raise ValueError("blocking or unassessed review cannot release active evidence")
+        expected_gate_digest = gate_adjudication_bundle_digest(state, item.artifact_id)
+        if item.gate_adjudication_digest != expected_gate_digest:
+            raise ValueError("scientific decision does not bind the exact gate adjudication set")
+        if any(
+            value.artifact_id == item.artifact_id and value.status == "accepted-with-caveat"
+            for value in gate_adjudications
+        ) and item.action != "retain-with-caveat":
+            raise ValueError("accepted-with-caveat gate adjudication requires a caveated retain decision")
         scientific_decisions = (*scientific_decisions, item)
     elif event_type == "evidence_map_published":
         if set(payload) != {"publication"}:
@@ -592,6 +681,7 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
         artifacts,
         hypotheses,
         evidence,
+        gate_adjudications,
         admissions,
         reviews,
         scientific_decisions,
@@ -625,6 +715,7 @@ def apply_event(
         artifacts,
         hypotheses,
         evidence,
+        gate_adjudications,
         admissions,
         reviews,
         scientific_decisions,
@@ -673,6 +764,7 @@ def apply_event(
             artifacts,
             hypotheses,
             evidence,
+            gate_adjudications,
             admissions,
             reviews,
             scientific_decisions,
@@ -694,6 +786,7 @@ def apply_event(
         artifacts,
         hypotheses,
         evidence,
+        gate_adjudications,
         admissions,
         reviews,
         scientific_decisions,

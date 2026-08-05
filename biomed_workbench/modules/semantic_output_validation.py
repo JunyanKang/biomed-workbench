@@ -860,47 +860,18 @@ def evaluate_structured_gate(
     expected_digest = semantic_result["evidence_payload_digests"].get(evidence_payload_role)  # type: ignore[union-attr]
     if expected_digest != evidence.get("sha256"):
         raise ValueError("gate evidence payload differs from the family-admitted payload")
-    if evaluator_type in {"provenance-design", "claim-boundary", "payload-derived", "tool-native"}:
+    if evaluator_type in {
+        "provenance-design", "claim-boundary", "payload-derived", "tool-native", "system-provenance"
+    }:
         return {
             "status": "requires_review",
             "observed_metric": json.dumps("pending-independent-scientific-review"),
             "threshold": json.dumps({"operator": operator, "value": threshold}, sort_keys=True, separators=(",", ":")),
             "evidence_payload_sha256": evidence["sha256"],
             "reason": (
-                f"{gate_id} requires gate-specific design, tool-native, or claim review; "
-                "family-level file admission is not a verdict"
+                f"{gate_id} requires gate-specific observations or independent scientific review; "
+                "family-level file admission is not a manifest gate verdict"
             ),
             "evaluator_type": evaluator_type,
         }
-    if evaluator_type != "system-provenance" or metric_key != "family_admission":
-        raise ValueError(f"gate evaluator contract is unsupported: {gate_id}")
-    observed = semantic_result[metric_key]
-    expected = {
-        "boolean": bool,
-        "integer": int,
-        "number": (int, float),
-        "string": str,
-    }[metric_type]
-    if not isinstance(observed, expected) or (metric_type in {"integer", "number"} and isinstance(observed, bool)):
-        raise ValueError(f"semantic quality metric has the wrong type: {metric_key}")
-    if metric_type == "number" and not math.isfinite(float(observed)):
-        raise ValueError(f"semantic quality metric is non-finite: {metric_key}")
-    comparisons = {
-        "equals": lambda: observed == threshold,
-        "not-equals": lambda: observed != threshold,
-        "greater-than": lambda: observed > threshold,
-        "greater-or-equal": lambda: observed >= threshold,
-        "less-than": lambda: observed < threshold,
-        "less-or-equal": lambda: observed <= threshold,
-    }
-    passed = bool(comparisons[operator]())
-    return {
-        "status": "passed" if passed else "failed",
-        "observed_metric": json.dumps(observed, sort_keys=True, separators=(",", ":")),
-        "threshold": json.dumps(
-            {"operator": operator, "value": threshold}, sort_keys=True, separators=(",", ":")
-        ),
-        "evidence_payload_sha256": evidence["sha256"],
-        "reason": "system provenance and family admission were recomputed by the packaged ingest path",
-        "evaluator_type": evaluator_type,
-    }
+    raise ValueError(f"gate evaluator contract is unsupported: {gate_id}")

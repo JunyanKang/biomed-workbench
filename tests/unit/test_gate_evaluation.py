@@ -31,7 +31,7 @@ class GateEvaluationTests(unittest.TestCase):
         }
         return payloads, semantic
 
-    def test_family_admission_only_proves_a_system_reload_gate(self):
+    def test_family_admission_does_not_prove_a_complex_reload_gate(self):
         payloads, semantic = self._case()
         result = evaluate_structured_gate(
             payloads=payloads,
@@ -44,7 +44,8 @@ class GateEvaluationTests(unittest.TestCase):
             threshold=True,
             semantic_result=semantic,
         )
-        self.assertEqual(result["status"], "passed")
+        self.assertEqual(result["status"], "requires_review")
+        self.assertIn("not a manifest gate verdict", result["reason"])
 
     def test_minimal_ribosome_payload_does_not_pass_assay_or_claim_gates(self):
         payloads, semantic = self._case()

@@ -24,6 +24,7 @@ from biomed_workbench.kernel.scientific_dependency import (  # noqa: E402
     ArtifactReview,
     ScientificDecision,
     ScientificDependencyBundle,
+    ScientificGateAdjudication,
 )
 from biomed_workbench.kernel.scientific_evidence_map import (  # noqa: E402
     EvidenceMapPublication,
@@ -80,6 +81,8 @@ def _record(state: ProjectState, event_type: str, value, *, field: str, rational
         action_ids = (value.plan_node_id,)
     elif isinstance(value, ArtifactReview):
         artifact_ids = (value.artifact_id,)
+    elif isinstance(value, ScientificGateAdjudication):
+        artifact_ids = (value.artifact_id,)
     elif isinstance(value, ScientificDecision):
         artifact_ids = (value.artifact_id,)
         hypothesis_ids = value.hypothesis_ids
@@ -105,6 +108,7 @@ def _summary(state: ProjectState) -> dict[str, object]:
         "node_statuses": {node.id: node.status for node in active.nodes} if active else {},
         "analysis_admissions": len(state.analysis_admissions),
         "artifact_reviews": len(state.artifact_reviews),
+        "gate_adjudications": len(state.gate_adjudications),
         "scientific_decisions": len(state.scientific_decisions),
         "execution_handoffs": len(state.execution_handoffs),
         "observed_executions": len(state.observed_executions),
@@ -123,7 +127,7 @@ def main() -> int:
     initialize.add_argument("--hypotheses", type=Path)
     initialize.add_argument("--artifacts", type=Path)
     initialize.add_argument("--plan", type=Path)
-    for name in ("admit", "review", "decide"):
+    for name in ("admit", "adjudicate", "review", "decide"):
         command = commands.add_parser(name)
         command.add_argument("--state", required=True, type=Path)
         command.add_argument("--input", required=True, type=Path)
@@ -197,12 +201,18 @@ def main() -> int:
                 rationale="Register the initial project analysis plan before any admission.",
                 replacement_action_ids=tuple(node.id for node in plan.nodes),
             )
-    elif args.command in {"admit", "review", "decide"}:
+    elif args.command in {"admit", "adjudicate", "review", "decide"}:
         state = _state(args.state)
         payload = _read(args.input)
         if args.command == "admit":
             value = AnalysisAdmission.from_dict(payload)
             state = _record(state, "analysis_admission_recorded", value, field="admission", rationale="Record a user-approved scientific analysis admission.")
+        elif args.command == "adjudicate":
+            value = ScientificGateAdjudication.from_dict(payload)
+            state = _record(
+                state, "scientific_gate_adjudicated", value, field="adjudication",
+                rationale="Record an independent adjudication of one exact observed scientific gate.",
+            )
         elif args.command == "review":
             value = ArtifactReview.from_dict(payload)
             state = _record(state, "artifact_review_recorded", value, field="review", rationale="Record a bilingual scientific artifact review.")
