@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import hashlib
 import json
+import platform
 import sys
 from pathlib import Path
 
@@ -162,7 +164,47 @@ def _portable_validation_identity(validation: dict[str, object]) -> str | None:
     ).hexdigest()
 
 
-def build() -> dict[str, object]:
+def _write_run_receipt_archive(
+    validations: list[dict[str, object]],
+    output_directory: Path,
+) -> Path:
+    """Persist full host-specific fixture receipts separately from portable catalog identity."""
+    observed_at = datetime.now(timezone.utc).isoformat()
+    entries = [
+        {
+            "module_id": validation.get("module_id"),
+            "module_version": validation.get("module_version"),
+            "receipt_digest": validation.get("controlled_fixture_receipt_digest"),
+            "receipts": validation.get("controlled_fixture_receipts"),
+        }
+        for validation in validations
+        if validation.get("controlled_fixture_receipt_digest")
+        and validation.get("controlled_fixture_receipts")
+    ]
+    basis = {
+        "schema_version": 1,
+        "observed_at": observed_at,
+        "executor": {
+            "python_executable": sys.executable,
+            "python_version": platform.python_version(),
+            "platform": platform.platform(),
+        },
+        "entries": entries,
+    }
+    payload = {
+        **basis,
+        "archive_digest": hashlib.sha256(
+            json.dumps(basis, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest(),
+    }
+    output_directory.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    target = output_directory / f"controlled-fixture-receipts-{stamp}.json"
+    target.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return target
+
+
+def build(*, receipt_archive: Path | None = None) -> dict[str, object]:
     registry = ModuleRegistry.discover(BUILTIN_ROOT)
     report_receipts = _controlled_fixture_report_receipts(registry)
     validated_modules: set[str] = set()
@@ -192,8 +234,10 @@ def build() -> dict[str, object]:
             for module_id in module_ids:
                 validated_assays.setdefault(module_id, set()).update(value.lower() for value in assay_values)
     records = []
+    validations: list[dict[str, object]] = []
     for manifest in registry.all():
         validation = validate_module(BUILTIN_ROOT / manifest.id, require_tests=True, execute_tests=True)
+        validations.append(validation)
         validation_identity = _portable_validation_identity(validation)
         report_receipt = report_receipts.get(manifest.id)
         receipt_digest = validation_identity or report_receipt
@@ -225,7 +269,7 @@ def build() -> dict[str, object]:
             "current_project_reviewed",
         )
     }
-    return {
+    report = {
         "schema_version": 7,
         "registry_digest": registry.digest,
         "module_count": len(records),
@@ -250,13 +294,21 @@ def build() -> dict[str, object]:
         },
         "records": records,
     }
+    if receipt_archive is not None:
+        _write_run_receipt_archive(validations, receipt_archive)
+    return report
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
+    parser.add_argument(
+        "--receipt-archive",
+        type=Path,
+        help="Write complete host-specific validation receipts outside deterministic release metadata.",
+    )
     args = parser.parse_args()
-    report = build()
+    report = build(receipt_archive=args.receipt_archive)
     encoded = json.dumps(report, indent=2, sort_keys=True) + "\n"
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

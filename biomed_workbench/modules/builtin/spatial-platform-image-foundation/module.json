@@ -459,28 +459,28 @@
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "spatial-platform-contract",
-          "metric_key": "spatial-platform-contract",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "platform-specific-qc",
-          "metric_key": "platform-specific-qc",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "image-transform-integrity",
-          "metric_key": "image-transform-integrity",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         }
       ],
       "payloads": [
@@ -551,9 +551,9 @@
         "platform-specific-qc",
         "image-transform-integrity"
       ],
-      "semantic_profile": "spatial-platform-image-foundation-platform-qc-evidence-v1",
+      "semantic_profile": "spatial-results-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
     }
   ],
   "orchestration": {

@@ -13,7 +13,10 @@ from biomed_workbench.kernel.state import ProjectState, apply_event
 from biomed_workbench.orchestration.controller import ResearchController
 from biomed_workbench.modules.index import BUILTIN_ROOT
 from biomed_workbench.modules.registry import ModuleRegistry
-from biomed_workbench.modules.contract import observed_output_contract_digest
+from biomed_workbench.modules.contract import (
+    compatibility_contract_digest,
+    observed_output_contract_digest,
+)
 from biomed_workbench.orchestration.execution_ingest import ingest_execution_bundle
 from tests.unit.kernel.test_hypotheses import hypothesis
 from tests.unit.kernel.test_scientific_dependency import decision, review
@@ -52,14 +55,20 @@ class ExecutionIngestTests(unittest.TestCase):
             compatibility_row_id=manifest.compatibility_matrix[0].id,
             observed_output_contract_digest=contract_digest or observed_output_contract_digest(manifest),
             planned_output_artifact_ids=node.planned_output_artifact_ids,
-            protocol={"result_kind": "execution_handoff", "execution_state": "prepared-not-run"},
+            protocol={
+                "result_kind": "execution_handoff",
+                "execution_state": "prepared-not-run",
+                "compatibility_contract_digest": compatibility_contract_digest(
+                    manifest, manifest.compatibility_matrix[0].id
+                ),
+            },
         )
         state = apply_event(state, "execution_handoff_recorded", {"handoff": handoff.to_dict()}, rationale="Record the exact handoff.")
         root = Path(self.enterContext(tempfile.TemporaryDirectory()))
         table = root / "enrichment.tsv"
         table.write_text(
             "term_id\tterm_name\tp_value\tadjusted_p_value\tgene_ratio\tbackground_ratio\tgene_set_size\toverlap_genes\n"
-            "GO:0006281\tDNA repair\t0.01\t0.02\t1/1\t2/100\t25\tTP53\n",
+            "GO:0006281\tDNA repair\t0.01\t0.02\t1/1\t25/100\t25\tTP53\n",
             encoding="utf-8",
         )
         payload_digest = hashlib.sha256(table.read_bytes()).hexdigest()
@@ -69,18 +78,44 @@ class ExecutionIngestTests(unittest.TestCase):
             "module_id": manifest.id,
             "module_version": manifest.version,
             "port": "functional_enrichment_evidence",
-            "result_schema_id": f"{manifest.id}:functional_enrichment_evidence:functional-enrichment-v1",
+            "result_schema_id": (
+                f"{manifest.id}:functional_enrichment_evidence:"
+                f"{manifest.observed_output_contracts[0].semantic_profile}"
+            ),
             "primary_payload_sha256": payload_digest,
             "analysis_mode": "ora",
             "input_accounting": {"tested_entities": 1, "background_entities": 100},
             "result_accounting": {"reported_records": 1},
-            "quality_metrics": {gate.id: True for gate in manifest.quality_gates},
             "limitations": [],
             "empty_result_reason": None,
+            "handoff_request_digest": handoff.request_digest,
+            "compatibility_contract_digest": compatibility_contract_digest(
+                manifest, handoff.compatibility_row_id
+            ),
+            "input_artifacts": {
+                artifact.id: artifact.content_digest
+                for artifact in state.artifacts
+                if artifact.id in node.input_bindings.values()
+            },
         }, sort_keys=True), encoding="utf-8")
         bundle = {
             "handoff_id": handoff.id, "process_exit_code": 0,
-            "runtime_versions": {"R": "4.3.3", "clusterProfiler": "4.10.1"},
+            "runtime_versions": {
+                "workflow": {"identity": "clusterProfiler", "version": "4.10.1"},
+                "tools": {"clusterProfiler": "4.10.1", "fgsea": "1.28.0"},
+                "dependencies": {
+                    "AnnotationDbi": "1.64.1",
+                    "digest": "0.6.39",
+                    "enrichplot": "1.22.0",
+                    "ggplot2": "3.5.2",
+                    "jsonlite": "2.0.0",
+                    "r": "4.3.2",
+                },
+                "version_policy": "tested",
+                "compatibility_contract_digest": compatibility_contract_digest(
+                    manifest, manifest.compatibility_matrix[0].id
+                ),
+            },
             "postflight_results": [{"gate_id": gate.id} for gate in manifest.quality_gates],
             "outputs": [{
                 "port": "functional_enrichment_evidence",
@@ -115,6 +150,22 @@ class ExecutionIngestTests(unittest.TestCase):
         self.assertEqual(len(state.execution_reviews), 1)
         self.assertEqual(state.artifact_reloads[0].artifact_id, "artifact-enrichment-result")
 
+    def test_compatible_nonbaseline_runtime_is_admitted_but_not_labeled_tested(self):
+        registry, state, root, bundle = self._prepared_case()
+        bundle["runtime_versions"]["version_policy"] = "compatible"
+        bundle["runtime_versions"]["tools"]["clusterProfiler"] = "4.10.2"
+        bundle["runtime_versions"]["workflow"]["version"] = "4.10.2"
+        bundle["outputs"][0]["content"]["provenance"]["workflow_version"] = "4.10.2"
+        state = ingest_execution_bundle(
+            state,
+            bundle,
+            registry=registry,
+            artifact_store=ProjectArtifactStore(root / "objects"),
+        )
+        receipt = state.observed_executions[-1]
+        self.assertEqual(receipt.runtime_versions["workflow:clusterProfiler"], "4.10.2")
+        self.assertEqual(receipt.runtime_versions["tool:fgsea"], "1.28.0")
+
     def test_observed_result_contract_rejects_adversarial_bundles(self):
         mutations = {
             "arbitrary content": lambda value: value["outputs"][0].update(content={"arbitrary_unvalidated_field": True}),
@@ -124,6 +175,22 @@ class ExecutionIngestTests(unittest.TestCase):
             "missing postflight gate": lambda value: value["postflight_results"].pop(),
             "caller supplied gate verdict": lambda value: value["postflight_results"][0].update(status="passed"),
             "unobserved workflow version": lambda value: value["outputs"][0]["content"]["provenance"].update(workflow_version="99.0.0"),
+            "missing required tool": lambda value: value["runtime_versions"]["tools"].pop("fgsea"),
+            "missing required dependency": lambda value: value["runtime_versions"]["dependencies"].pop("AnnotationDbi"),
+            "tool version outside row": lambda value: value["runtime_versions"]["tools"].update(fgsea="99.0.0"),
+            "dependency version outside row": lambda value: value["runtime_versions"]["dependencies"].update(
+                AnnotationDbi="99.0.0"
+            ),
+            "boolean disguised as zero exit": lambda value: value.update(process_exit_code=False),
+            "unknown substitute workflow": lambda value: value["runtime_versions"].update(
+                workflow={"identity": "invented-workflow", "version": "1.0.0"}
+            ),
+            "forged compatibility contract": lambda value: value["runtime_versions"].update(
+                compatibility_contract_digest="f" * 64
+            ),
+            "tested policy with merely compatible version": lambda value: value["runtime_versions"]["tools"].update(
+                clusterProfiler="4.10.2"
+            ),
         }
         for label, mutate in mutations.items():
             with self.subTest(label=label):
@@ -177,13 +244,46 @@ class ExecutionIngestTests(unittest.TestCase):
                         artifact_store=ProjectArtifactStore(root / "objects"),
                     )
 
-    def test_plugin_rejects_a_failed_structured_gate_even_if_caller_only_requests_evaluation(self):
+    def test_semantic_validator_recomputes_enrichment_accounting_relationships(self):
         registry, state, root, bundle = self._prepared_case()
         semantic = Path(bundle["outputs"][0]["payload_files"][1]["path"])
         metadata = json.loads(semantic.read_text(encoding="utf-8"))
-        metadata["quality_metrics"][registry.get("functional-enrichment").quality_gates[0].id] = False
+        metadata["input_accounting"] = {
+            "tested_entities": 999999,
+            "background_entities": 1,
+        }
         semantic.write_text(json.dumps(metadata, sort_keys=True), encoding="utf-8")
-        with self.assertRaisesRegex(ValueError, "did not pass"):
+        with self.assertRaisesRegex(ValueError, "overlap is inconsistent"):
+            ingest_execution_bundle(
+                state,
+                bundle,
+                registry=registry,
+                artifact_store=ProjectArtifactStore(root / "objects"),
+            )
+
+    def test_semantic_metadata_must_bind_exact_input_artifact_digests(self):
+        registry, state, root, bundle = self._prepared_case()
+        semantic = Path(bundle["outputs"][0]["payload_files"][1]["path"])
+        metadata = json.loads(semantic.read_text(encoding="utf-8"))
+        metadata["input_artifacts"]["artifact-genes"] = "f" * 64
+        semantic.write_text(json.dumps(metadata, sort_keys=True), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "exact handoff inputs"):
+            ingest_execution_bundle(
+                state,
+                bundle,
+                registry=registry,
+                artifact_store=ProjectArtifactStore(root / "objects"),
+            )
+
+    def test_plugin_rejects_caller_supplied_gate_verdicts_inside_semantic_metadata(self):
+        registry, state, root, bundle = self._prepared_case()
+        semantic = Path(bundle["outputs"][0]["payload_files"][1]["path"])
+        metadata = json.loads(semantic.read_text(encoding="utf-8"))
+        metadata["quality_metrics"] = {
+            gate.id: True for gate in registry.get("functional-enrichment").quality_gates
+        }
+        semantic.write_text(json.dumps(metadata, sort_keys=True), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "fields are incomplete or unsupported"):
             ingest_execution_bundle(
                 state, bundle, registry=registry,
                 artifact_store=ProjectArtifactStore(root / "objects"),

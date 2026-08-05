@@ -706,55 +706,55 @@
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "droplet-input-reconciliation",
-          "metric_key": "droplet-input-reconciliation",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "emptydrops-accounting",
-          "metric_key": "emptydrops-accounting",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "ambient-estimate-plausibility",
-          "metric_key": "ambient-estimate-plausibility",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "decontaminated-count-validity",
-          "metric_key": "decontaminated-count-validity",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "method-separation",
-          "metric_key": "method-separation",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "droplet-source-preservation",
-          "metric_key": "droplet-source-preservation",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         }
       ],
       "payloads": [
@@ -778,6 +778,7 @@
         {
           "maximum": 1,
           "media_types": [
+            "application/json",
             "application/x-hdf5",
             "text/plain"
           ],
@@ -824,9 +825,9 @@
         "method-separation",
         "droplet-source-preservation"
       ],
-      "semantic_profile": "single-cell-droplet-decontamination-decontaminated-counts-v1",
+      "semantic_profile": "single-cell-object-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -907,55 +908,55 @@
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "droplet-input-reconciliation",
-          "metric_key": "droplet-input-reconciliation",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "emptydrops-accounting",
-          "metric_key": "emptydrops-accounting",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "ambient-estimate-plausibility",
-          "metric_key": "ambient-estimate-plausibility",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "decontaminated-count-validity",
-          "metric_key": "decontaminated-count-validity",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "method-separation",
-          "metric_key": "method-separation",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "droplet-source-preservation",
-          "metric_key": "droplet-source-preservation",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         }
       ],
       "payloads": [
@@ -1023,9 +1024,9 @@
         "method-separation",
         "droplet-source-preservation"
       ],
-      "semantic_profile": "single-cell-droplet-decontamination-droplet-evidence-report-v1",
+      "semantic_profile": "single-cell-results-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
     }
   ],
   "orchestration": {

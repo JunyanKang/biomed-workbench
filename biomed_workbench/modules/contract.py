@@ -1250,6 +1250,21 @@ def observed_output_contract_digest(value: ModuleManifest) -> str:
     return digest_value([_observed_output_dict(item) for item in value.observed_output_contracts])
 
 
+def compatibility_contract_digest(value: ModuleManifest, row_id: str) -> str:
+    """Bind one handoff to the complete frozen tool, dependency, format, and platform row."""
+    matches = [row for row in value.compatibility_matrix if row.id == row_id]
+    if len(matches) != 1:
+        raise ValueError("compatibility contract row is unavailable or ambiguous")
+    row = matches[0]
+    return digest_value(
+        {
+            "module_id": value.id,
+            "module_version": value.version,
+            "row": _compatibility_dict(row),
+        }
+    )
+
+
 def _code_template_dict(value: CodeTemplate) -> dict[str, object]:
     return {
         "path": value.path,

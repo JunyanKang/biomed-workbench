@@ -749,64 +749,64 @@
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-input-semantics",
-          "metric_key": "generative-input-semantics",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-design-identifiability",
-          "metric_key": "generative-design-identifiability",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-latent-conservation",
-          "metric_key": "generative-latent-conservation",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "scanvi-heldout-generalization",
-          "metric_key": "scanvi-heldout-generalization",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-unknown-retention",
-          "metric_key": "generative-unknown-retention",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-artifact-reload",
-          "metric_key": "generative-artifact-reload",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-bayesian-de-boundary",
-          "metric_key": "generative-bayesian-de-boundary",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         }
       ],
       "payloads": [
@@ -829,6 +829,7 @@
         {
           "maximum": 1,
           "media_types": [
+            "application/json",
             "application/zip"
           ],
           "minimum": 0,
@@ -875,9 +876,9 @@
         "generative-artifact-reload",
         "generative-bayesian-de-boundary"
       ],
-      "semantic_profile": "single-cell-generative-modeling-generative-model-object-v1",
+      "semantic_profile": "model-bundle-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -959,64 +960,64 @@
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-input-semantics",
-          "metric_key": "generative-input-semantics",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-design-identifiability",
-          "metric_key": "generative-design-identifiability",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-latent-conservation",
-          "metric_key": "generative-latent-conservation",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "scanvi-heldout-generalization",
-          "metric_key": "scanvi-heldout-generalization",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-unknown-retention",
-          "metric_key": "generative-unknown-retention",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-artifact-reload",
-          "metric_key": "generative-artifact-reload",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-bayesian-de-boundary",
-          "metric_key": "generative-bayesian-de-boundary",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         }
       ],
       "payloads": [
@@ -1039,6 +1040,7 @@
         {
           "maximum": 1,
           "media_types": [
+            "application/json",
             "application/x-hdf5"
           ],
           "minimum": 0,
@@ -1085,9 +1087,9 @@
         "generative-artifact-reload",
         "generative-bayesian-de-boundary"
       ],
-      "semantic_profile": "single-cell-generative-modeling-modeled-single-cell-object-v1",
+      "semantic_profile": "single-cell-object-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -1168,64 +1170,64 @@
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-input-semantics",
-          "metric_key": "generative-input-semantics",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-design-identifiability",
-          "metric_key": "generative-design-identifiability",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-latent-conservation",
-          "metric_key": "generative-latent-conservation",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "scanvi-heldout-generalization",
-          "metric_key": "scanvi-heldout-generalization",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-unknown-retention",
-          "metric_key": "generative-unknown-retention",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-artifact-reload",
-          "metric_key": "generative-artifact-reload",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "generative-bayesian-de-boundary",
-          "metric_key": "generative-bayesian-de-boundary",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         }
       ],
       "payloads": [
@@ -1294,9 +1296,9 @@
         "generative-artifact-reload",
         "generative-bayesian-de-boundary"
       ],
-      "semantic_profile": "single-cell-generative-modeling-generative-model-validation-v1",
+      "semantic_profile": "single-cell-results-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
     }
   ],
   "orchestration": {

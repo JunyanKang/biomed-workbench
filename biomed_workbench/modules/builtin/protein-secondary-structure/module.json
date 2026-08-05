@@ -485,46 +485,46 @@
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-input-integrity",
-          "metric_key": "secondary-structure-input-integrity",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-backend",
-          "metric_key": "secondary-structure-backend",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-residue-accounting",
-          "metric_key": "secondary-structure-residue-accounting",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-diagram",
-          "metric_key": "secondary-structure-diagram",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-output-integrity",
-          "metric_key": "secondary-structure-output-integrity",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         }
       ],
       "payloads": [
@@ -593,9 +593,9 @@
         "secondary-structure-diagram",
         "secondary-structure-output-integrity"
       ],
-      "semantic_profile": "protein-secondary-structure-secondary-structure-report-v1",
+      "semantic_profile": "structure-analysis-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -676,46 +676,46 @@
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-input-integrity",
-          "metric_key": "secondary-structure-input-integrity",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-backend",
-          "metric_key": "secondary-structure-backend",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-residue-accounting",
-          "metric_key": "secondary-structure-residue-accounting",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-diagram",
-          "metric_key": "secondary-structure-diagram",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-output-integrity",
-          "metric_key": "secondary-structure-output-integrity",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         }
       ],
       "payloads": [
@@ -738,6 +738,7 @@
         {
           "maximum": 1,
           "media_types": [
+            "application/json",
             "image/svg+xml"
           ],
           "minimum": 0,
@@ -782,9 +783,9 @@
         "secondary-structure-diagram",
         "secondary-structure-output-integrity"
       ],
-      "semantic_profile": "protein-secondary-structure-secondary-structure-diagram-v1",
+      "semantic_profile": "svg-figure-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -865,46 +866,46 @@
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-input-integrity",
-          "metric_key": "secondary-structure-input-integrity",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-backend",
-          "metric_key": "secondary-structure-backend",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-residue-accounting",
-          "metric_key": "secondary-structure-residue-accounting",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-diagram",
-          "metric_key": "secondary-structure-diagram",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
           "evidence_payload_role": "semantic-metadata",
           "gate_id": "secondary-structure-output-integrity",
-          "metric_key": "secondary-structure-output-integrity",
-          "metric_type": "boolean",
+          "metric_key": "semantic_violation_count",
+          "metric_type": "integer",
           "operator": "equals",
-          "threshold": true
+          "threshold": 0
         }
       ],
       "payloads": [
@@ -971,9 +972,9 @@
         "secondary-structure-diagram",
         "secondary-structure-output-integrity"
       ],
-      "semantic_profile": "protein-secondary-structure-secondary-structure-diagram-manifest-v1",
+      "semantic_profile": "scientific-report-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "8c4d601bd4a5fa6ea9210a4c9088816b7cbb8a264a9675d5b2b06d398fe25c5a"
+      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
     }
   ],
   "orchestration": {

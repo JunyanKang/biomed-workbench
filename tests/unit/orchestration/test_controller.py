@@ -1,7 +1,10 @@
 import threading
 import time
 import unittest
+import json
+import tempfile
 from dataclasses import replace
+from pathlib import Path
 
 from biomed_workbench.kernel.artifacts import ScientificArtifact
 from biomed_workbench.kernel.evidence import EvidenceRecord
@@ -12,15 +15,31 @@ from biomed_workbench.kernel.execution_chain import (
     validated_delivery_publication_is_current,
 )
 from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
-from biomed_workbench.kernel.scientific_dependency import AnalysisAdmission, ArtifactReview, ScientificDecision
-from biomed_workbench.kernel.scientific_evidence_map import EvidenceMapPublication, EvidenceMapVersion
-from biomed_workbench.kernel.state import apply_event
+from biomed_workbench.kernel.scientific_dependency import (
+    AnalysisAdmission,
+    ArtifactReview,
+    ScientificDecision,
+    ScientificDependencyBundle,
+)
+from biomed_workbench.kernel.scientific_evidence_map import (
+    EvidenceFile,
+    EvidenceMapPublication,
+    EvidenceMapVersion,
+    EvidenceUnitSpec,
+    NarrativeSource,
+    build_scientific_evidence_map,
+)
+from biomed_workbench.kernel.state import ProjectState, apply_event
 from biomed_workbench.modules.index import BUILTIN_ROOT
 from biomed_workbench.modules.registry import ModuleRegistry
 from biomed_workbench.orchestration.controller import ControllerPolicy, ResearchController
 from biomed_workbench.orchestration.execution import NodeExecution, execute_node
 from biomed_workbench.orchestration.graph import build_capability_graph
 from biomed_workbench.orchestration.planner import PlanningRequest, plan_research
+from biomed_workbench.reporting import (
+    publish_evidence_map_transaction,
+    verify_evidence_map_version_index,
+)
 from tests.unit.kernel.test_hypotheses import hypothesis
 from tests.unit.orchestration.test_planner import inline_artifact, module_payload, state_with, workflow_registry
 
@@ -295,31 +314,90 @@ class ResearchControllerTests(unittest.TestCase):
                 )
                 blocked = controller.advance(state, plan)
                 self.assertEqual(blocked.stop_reason, "awaiting_evidence_map")
-                scope = validate_delivery_prerequisites(blocked.state, node_id)
-                publication = EvidenceMapPublication(
-                    id=f"evidence-map-{module_id}",
-                    version=EvidenceMapVersion(
-                        version="1.0.0", revision=1, parent_map_digest=None, change_type="initial",
-                        change_summary_zh="发布精确证据切片以授权交付。",
-                        change_summary_en="Publish the exact evidence slice to authorize delivery.",
-                        map_kind="delivery-authorization",
-                    ),
-                    map_digest="1" * 64, edge_table_digest="2" * 64,
-                    source_state_digest=blocked.state.state_digest, dependency_bundle_digest="3" * 64,
-                    map_kind="delivery-authorization", delivery_slice_digest=delivery_slice_digest(blocked.state),
-                    active_artifact_ids=(input_id,), covered_plan_id=scope.plan_id,
-                    covered_node_ids=scope.covered_node_ids, covered_artifact_ids=scope.covered_artifact_ids,
-                    authorized_delivery_node_ids=(node_id,), delivery_scope_digest=scope.digest,
+                bundle = ScientificDependencyBundle.create(
+                    blocked.state,
+                    admissions=blocked.state.analysis_admissions,
+                    reviews=blocked.state.artifact_reviews,
+                    decisions=blocked.state.scientific_decisions,
+                    map_kind="delivery-authorization",
                 )
-                authorized = apply_event(
-                    blocked.state, "evidence_map_published", {"publication": publication.to_dict()},
-                    rationale="Authorize only this delivery node and exact retained slice.",
-                )
-                self.assertTrue(validated_delivery_publication_is_current(authorized, node_id))
-                self.assertFalse(validated_delivery_publication_is_current(authorized, f"other-{node_id}"))
-                released = controller.resume(authorized.to_dict())
-                self.assertEqual(released.stop_reason, "awaiting_artifact_review")
-                self.assertEqual(tuple(item.module_id for item in released.executions), (module_id,))
+                with tempfile.TemporaryDirectory() as temporary:
+                    root = Path(temporary)
+                    workspace = root / "workspace"
+                    files = {
+                        "data/input.json": '{"sample":"controlled"}\n',
+                        "scripts/render.py": "print('controlled renderer')\n",
+                        "results/qualified.json": '{"eligible":true}\n',
+                        "captions/input.md": "Reviewed delivery input and provenance.\n",
+                    }
+                    for relative, content in files.items():
+                        path = workspace / relative
+                        path.parent.mkdir(parents=True, exist_ok=True)
+                        path.write_text(content, encoding="utf-8")
+                    spec = EvidenceUnitSpec(
+                        id=f"unit-{module_id}", group_id=f"group-{module_id}",
+                        artifact_id=input_id, panel_id=None,
+                        analysis_admission_ids=(admission.id,), predecessor_unit_ids=(),
+                        prerequisite_conclusion_zh="该输入已完成身份、范围和来源复核，可用于精确交付授权。",
+                        prerequisite_conclusion_en="The input identity, scope, and provenance were reviewed for exact delivery authorization.",
+                        files=(
+                            EvidenceFile.from_workspace(id=f"file-{module_id}-input", role="registered-data", path="data/input.json", media_type="application/json", workspace_root=workspace),
+                            EvidenceFile.from_workspace(id=f"file-{module_id}-script", role="analysis-script", path="scripts/render.py", media_type="text/x-python", workspace_root=workspace),
+                            EvidenceFile.from_workspace(id=f"file-{module_id}-result", role="final-data", path="results/qualified.json", media_type="application/json", workspace_root=workspace),
+                            EvidenceFile.from_workspace(id=f"file-{module_id}-caption", role="caption", path="captions/input.md", media_type="text/markdown", workspace_root=workspace),
+                        ),
+                        narrative_sources=(NarrativeSource(
+                            id=f"source-{module_id}", role="original-study",
+                            title="The FAIR Guiding Principles for scientific data management and stewardship",
+                            doi="10.1038/sdata.2016.18",
+                            url="https://doi.org/10.1038/sdata.2016.18",
+                        ),),
+                    )
+                    mapped = build_scientific_evidence_map(
+                        blocked.state, bundle, (spec,), workspace_root=workspace,
+                        version=EvidenceMapVersion(
+                            version="1.0.0", revision=1, parent_map_digest=None,
+                            change_type="initial",
+                            change_summary_zh="以真实文件事务发布精确证据切片并授权交付。",
+                            change_summary_en="Publish the exact evidence slice through a real file transaction to authorize delivery.",
+                            map_kind="delivery-authorization",
+                        ),
+                        authorized_delivery_node_ids=(node_id,),
+                    )
+                    publication = EvidenceMapPublication.from_map(mapped)
+                    authorized = apply_event(
+                        blocked.state, "evidence_map_published", {"publication": publication.to_dict()},
+                        rationale="Authorize only this delivery node through the published retained slice.",
+                    )
+                    state_path = root / "project-state.json"
+                    state_path.write_text(
+                        json.dumps(blocked.state.to_dict(), indent=2, sort_keys=True) + "\n",
+                        encoding="utf-8",
+                    )
+                    publish_root = root / "published"
+                    publish_evidence_map_transaction(
+                        mapped, publication, authorized,
+                        state_path=state_path, output_root=publish_root, workspace_root=workspace,
+                    )
+                    verify_evidence_map_version_index(publish_root)
+                    reloaded = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
+                    self.assertTrue(validated_delivery_publication_is_current(reloaded, node_id))
+                    self.assertFalse(validated_delivery_publication_is_current(reloaded, f"other-{node_id}"))
+                    released = controller.resume(reloaded.to_dict())
+                    self.assertEqual(released.stop_reason, "awaiting_artifact_review")
+                    self.assertEqual(tuple(item.module_id for item in released.executions), (module_id,))
+
+                    index_path = publish_root / "evidence-map-version-index.json"
+                    original_index = index_path.read_text(encoding="utf-8")
+                    tampered = json.loads(original_index)
+                    tampered["entries"][0]["map_digest"] = "f" * 64
+                    index_path.write_text(json.dumps(tampered, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+                    with self.assertRaises(ValueError):
+                        verify_evidence_map_version_index(publish_root)
+                    index_path.write_text(original_index, encoding="utf-8")
+                    (publish_root / "versions/v1.0.0/scientific-evidence-map.json").unlink()
+                    with self.assertRaises(ValueError):
+                        verify_evidence_map_version_index(publish_root)
 
     def test_upstream_required_port_rejects_an_unreviewed_project_input_at_runtime(self):
         payload = module_payload("reviewed-upstream-consumer", "normalized_matrix", "contrast_result")

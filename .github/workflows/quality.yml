@@ -83,6 +83,20 @@ jobs:
       - name: Run complete test suite
         run: python -m unittest discover -s tests
 
+      - name: Capture run-specific controlled-fixture receipts
+        run: >-
+          python tools/audit_execution_readiness.py
+          --output "${RUNNER_TEMP}/execution-readiness-observed.json"
+          --receipt-archive "${RUNNER_TEMP}/controlled-fixture-receipts"
+
+      - name: Retain run-specific controlled-fixture receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: controlled-fixture-receipts-${{ github.run_id }}
+          path: ${{ runner.temp }}/controlled-fixture-receipts/*.json
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Validate release surface
         run: python tools/validate_workbench.py --release
 

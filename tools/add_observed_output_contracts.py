@@ -1,15 +1,25 @@
 #!/usr/bin/env python3
-"""Add deterministic per-port observed-result contracts to workflow manifests."""
+"""Materialize only explicitly implemented scientific output contracts.
+
+Unknown artifact families fail closed.  This tool never turns a generated
+profile name into release support.
+"""
 
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from biomed_workbench.modules.semantic_output_validation import semantic_profile_for  # noqa: E402
+
+
 BUILTIN_ROOT = ROOT / "biomed_workbench" / "modules" / "builtin"
 SEMANTIC_VALIDATOR = ROOT / "biomed_workbench" / "modules" / "semantic_output_validation.py"
 
@@ -64,11 +74,7 @@ def _contract(manifest: dict[str, object], port: dict[str, object]) -> dict[str,
         for item in port["formats"]  # type: ignore[index]
     ]
     media_types = sorted({MEDIA_TYPES.get(name, "application/octet-stream") for name in formats})
-    semantic_profile = (
-        "functional-enrichment-v1"
-        if manifest["id"] == "functional-enrichment"
-        else f"{manifest['id']}-{port['name']}-v1".replace("_", "-")
-    )
+    semantic_profile = semantic_profile_for(str(port["artifact_type"]))
     semantic_digest = hashlib.sha256(SEMANTIC_VALIDATOR.read_bytes()).hexdigest()
     quality_gate_ids = [item["id"] for item in manifest["quality_gates"]]  # type: ignore[index]
     return {
@@ -99,7 +105,12 @@ def _contract(manifest: dict[str, object], port: dict[str, object]) -> dict[str,
         "payloads": [
             {"role": "primary", "media_types": media_types, "minimum": 1, "maximum": 1},
             {"role": "semantic-metadata", "media_types": ["application/json"], "minimum": 1, "maximum": 1},
-            {"role": "source-data", "media_types": media_types, "minimum": 0, "maximum": 1},
+            {
+                "role": "source-data",
+                "media_types": sorted(set(media_types) | {"application/json"}),
+                "minimum": 0,
+                "maximum": 1,
+            },
             {"role": "figure", "media_types": ["application/pdf", "image/svg+xml", "image/tiff", "image/png"], "minimum": 0, "maximum": 1},
             {"role": "model", "media_types": ["application/octet-stream", "application/zip", "application/x-hdf5"], "minimum": 0, "maximum": 1},
             {"role": "log", "media_types": ["application/json", "text/plain"], "minimum": 0, "maximum": 1},
@@ -114,10 +125,10 @@ def _contract(manifest: dict[str, object], port: dict[str, object]) -> dict[str,
                 "gate_id": gate_id,
                 "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
                 "evidence_payload_role": "semantic-metadata",
-                "metric_key": gate_id,
-                "metric_type": "boolean",
+                "metric_key": "semantic_violation_count",
+                "metric_type": "integer",
                 "operator": "equals",
-                "threshold": True,
+                "threshold": 0,
             }
             for gate_id in quality_gate_ids
         ],

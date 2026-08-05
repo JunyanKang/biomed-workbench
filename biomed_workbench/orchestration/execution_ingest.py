@@ -12,7 +12,14 @@ from ..kernel.execution_receipts import ArtifactReloadReceipt, ObservedExecution
 from ..kernel.identity import digest_value
 from ..kernel.state import ProjectState, apply_event
 from ..modules.registry import ModuleRegistry
-from ..modules.contract import ObservedOutputContract, observed_output_contract_digest
+from ..modules.contract import (
+    ModuleManifest,
+    ObservedOutputContract,
+    CompatibilityRow,
+    compatibility_contract_digest,
+    observed_output_contract_digest,
+    version_is_allowed,
+)
 from ..runner import validate_schema_value
 from .execution import _output_artifacts
 
@@ -20,6 +27,79 @@ from .execution import _output_artifacts
 _BUNDLE_FIELDS = {"handoff_id", "process_exit_code", "runtime_versions", "outputs", "postflight_results"}
 _OUTPUT_FIELDS = {"port", "content", "payload_files"}
 _POSTFLIGHT_FIELDS = {"gate_id"}
+_RUNTIME_FIELDS = {
+    "workflow",
+    "tools",
+    "dependencies",
+    "version_policy",
+    "compatibility_contract_digest",
+}
+_WORKFLOW_FIELDS = {"identity", "version"}
+
+
+def _validate_runtime_versions(
+    manifest: ModuleManifest,
+    row: CompatibilityRow,
+    handoff: object,
+    value: object,
+) -> tuple[dict[str, str], dict[str, str], dict[str, str], str, str]:
+    """Require the complete observed runtime to satisfy the frozen compatibility row."""
+    if not isinstance(value, Mapping) or set(value) != _RUNTIME_FIELDS:
+        raise ValueError("runtime_versions must contain workflow, tools, dependencies, policy, and contract digest")
+    workflow = value["workflow"]
+    tools = value["tools"]
+    dependencies = value["dependencies"]
+    policy = value["version_policy"]
+    contract_digest = value["compatibility_contract_digest"]
+    if not isinstance(workflow, Mapping) or set(workflow) != _WORKFLOW_FIELDS:
+        raise ValueError("runtime workflow identity and version are required")
+    if not isinstance(tools, Mapping) or not isinstance(dependencies, Mapping):
+        raise ValueError("runtime tools and dependencies must be version mappings")
+    tool_versions = {str(key): str(observed) for key, observed in tools.items()}
+    dependency_versions = {str(key): str(observed) for key, observed in dependencies.items()}
+    if set(tool_versions) != set(row.tool_versions):
+        raise ValueError("runtime tools must exactly cover the selected compatibility row")
+    if set(dependency_versions) != set(row.dependency_versions):
+        raise ValueError("runtime dependencies must exactly cover the selected compatibility row")
+    for name, rules in row.tool_versions.items():
+        if not version_is_allowed(tool_versions[name], rules):
+            raise ValueError(f"runtime tool version is outside the selected compatibility row: {name}")
+    for name, rules in row.dependency_versions.items():
+        if not version_is_allowed(dependency_versions[name], rules):
+            raise ValueError(f"runtime dependency version is outside the selected compatibility row: {name}")
+    if policy not in {"tested", "compatible"}:
+        raise ValueError("runtime version_policy must be tested or compatible")
+    requirement_tools = {item.name: item for item in manifest.tool_requirements}
+    requirement_dependencies = {item.name: item for item in manifest.dependencies}
+    if policy == "tested":
+        if not set(tool_versions) <= set(requirement_tools) or not set(dependency_versions) <= set(
+            requirement_dependencies
+        ):
+            raise ValueError("tested runtime policy references an undeclared tool or dependency")
+        if any(tool_versions[name] not in requirement_tools[name].tested_versions for name in tool_versions):
+            raise ValueError("tested runtime policy requires exact manifest-tested tool versions")
+        if any(
+            dependency_versions[name] not in requirement_dependencies[name].tested_versions
+            for name in dependency_versions
+        ):
+            raise ValueError("tested runtime policy requires exact manifest-tested dependency versions")
+    expected_digest = compatibility_contract_digest(manifest, row.id)
+    handoff_protocol = getattr(handoff, "protocol", {})
+    if (
+        contract_digest != expected_digest
+        or not isinstance(handoff_protocol, Mapping)
+        or handoff_protocol.get("compatibility_contract_digest") != expected_digest
+    ):
+        raise ValueError("runtime compatibility contract is not bound to the prepared handoff")
+    workflow_identity = str(workflow["identity"])
+    workflow_version = str(workflow["version"])
+    if workflow_identity not in tool_versions or tool_versions[workflow_identity] != workflow_version:
+        raise ValueError("runtime workflow must identify one observed tool from the selected row")
+    return tool_versions, dependency_versions, {
+        **{f"tool:{key}": item for key, item in tool_versions.items()},
+        **{f"dependency:{key}": item for key, item in dependency_versions.items()},
+        f"workflow:{workflow_identity}": workflow_version,
+    }, workflow_identity, workflow_version
 
 
 def _reload_validator(identifier: str):
@@ -92,9 +172,12 @@ def ingest_execution_bundle(
     current_contract_digest = observed_output_contract_digest(manifest)
     if handoff.observed_output_contract_digest != current_contract_digest:
         raise ValueError("observed output contract changed after the execution handoff")
-    runtime_versions = bundle["runtime_versions"]
-    if not isinstance(runtime_versions, Mapping) or not runtime_versions:
-        raise ValueError("execution receipt bundle requires observed runtime versions")
+    if (
+        not isinstance(bundle["process_exit_code"], int)
+        or isinstance(bundle["process_exit_code"], bool)
+        or bundle["process_exit_code"] != 0
+    ):
+        raise ValueError("only an observed zero-exit workflow can be ingested")
     outputs = bundle["outputs"]
     if not isinstance(outputs, list) or any(not isinstance(item, Mapping) or set(item) != _OUTPUT_FIELDS for item in outputs):
         raise ValueError("execution receipt bundle outputs are invalid")
@@ -104,8 +187,25 @@ def ingest_execution_bundle(
         raise ValueError("execution receipt bundle must cover every output port exactly once")
     payloads_by_port = {}
     content_by_port = {}
+    semantic_results_by_port: dict[str, Mapping[str, object]] = {}
     contracts = {item.port: item for item in manifest.observed_output_contracts}
     row = next(item for item in manifest.compatibility_matrix if item.id == handoff.compatibility_row_id)
+    input_artifact_ids = set(node.input_bindings.values())
+    input_artifacts = {
+        artifact.id: artifact.content_digest
+        for artifact in state.artifacts
+        if artifact.id in input_artifact_ids
+    }
+    if set(input_artifacts) != input_artifact_ids:
+        raise ValueError("execution handoff input artifact identities are unavailable")
+    compatibility_digest = compatibility_contract_digest(manifest, handoff.compatibility_row_id)
+    (
+        tool_versions,
+        dependency_versions,
+        receipt_runtime_versions,
+        workflow_identity,
+        workflow_version,
+    ) = _validate_runtime_versions(manifest, row, handoff, bundle["runtime_versions"])
     for port in manifest.output_artifacts:
         item = by_port[port.name]
         if not isinstance(item["content"], Mapping):
@@ -118,14 +218,13 @@ def ingest_execution_bundle(
             for value in row.output_formats[port.name]
         }
         provenance = content["provenance"]
-        workflow = provenance["workflow"]
         if (
             content["artifact_type"] != port.artifact_type
             or content["format"] not in expected_formats
             or provenance["parameters_digest"] != handoff.request_digest
             or provenance["compatibility_row_id"] != handoff.compatibility_row_id
-            or workflow not in runtime_versions
-            or provenance["workflow_version"] != runtime_versions[workflow]
+            or provenance["workflow"] != workflow_identity
+            or provenance["workflow_version"] != workflow_version
         ):
             raise ValueError("observed output identity or provenance differs from the prepared contract")
         content_by_port[port.name] = content
@@ -156,14 +255,22 @@ def ingest_execution_bundle(
             raise ValueError(f"observed output container reload validator rejected port {port.name}")
         if _validator_source_sha256(contract.semantic_validator) != contract.semantic_validator_sha256:
             raise ValueError(f"semantic validator source digest differs from the frozen contract for port {port.name}")
-        accepted = _reload_validator(contract.semantic_validator)(
-                content=content,
-                payloads=reloaded_payloads,
-                context={"module_id": manifest.id, "module_version": manifest.version, "port": port.name},
-                profile=contract.semantic_profile,
+        semantic_result = _reload_validator(contract.semantic_validator)(
+            content=content,
+            payloads=reloaded_payloads,
+            context={
+                "module_id": manifest.id,
+                "module_version": manifest.version,
+                "port": port.name,
+                "handoff_request_digest": handoff.request_digest,
+                "compatibility_contract_digest": compatibility_digest,
+                "input_artifacts": input_artifacts,
+            },
+            profile=contract.semantic_profile,
         )
-        if accepted is not True:
+        if not isinstance(semantic_result, Mapping) or semantic_result.get("status") != "passed":
             raise ValueError(f"observed output semantic validator rejected port {port.name}")
+        semantic_results_by_port[port.name] = dict(semantic_result)
     normalized_output = next(iter(content_by_port.values())) if len(content_by_port) == 1 else content_by_port
     postflight_results = bundle["postflight_results"]
     if not isinstance(postflight_results, list) or any(
@@ -196,6 +303,7 @@ def ingest_execution_bundle(
                 metric_type=evaluator.metric_type,
                 operator=evaluator.operator,
                 threshold=evaluator.threshold,
+                semantic_result=semantic_results_by_port[contract.port],
             )
             if not isinstance(result, Mapping) or set(result) != {
                 "status", "observed_metric", "threshold", "evidence_payload_sha256"
@@ -213,8 +321,11 @@ def ingest_execution_bundle(
         "module_id": manifest.id,
         "module_version": manifest.version,
         "compatibility_row_id": handoff.compatibility_row_id,
-        "tools": {str(key): str(value) for key, value in runtime_versions.items()},
-        "dependencies": {},
+        "tools": tool_versions,
+        "dependencies": dependency_versions,
+        "compatibility_contract_digest": compatibility_contract_digest(
+            manifest, handoff.compatibility_row_id
+        ),
         "parameters_digest": handoff.request_digest,
         "output_digest": digest_value(normalized_output),
     }
@@ -234,7 +345,7 @@ def ingest_execution_bundle(
         compatibility_row_id=handoff.compatibility_row_id,
         observed_output_contract_digest=current_contract_digest,
         parameters_digest=handoff.request_digest,
-        runtime_versions={str(key): str(value) for key, value in runtime_versions.items()},
+        runtime_versions=receipt_runtime_versions,
         output_artifact_digests={artifact.id: artifact.content_digest for artifact in artifacts},
         postflight_result_digests={gate_id: digest_value(result) for gate_id, result in evaluated_results.items()},
         process_exit_code=int(bundle["process_exit_code"]),

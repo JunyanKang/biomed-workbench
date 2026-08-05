@@ -1,10 +1,41 @@
 import copy
+import hashlib
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
-from tools.audit_execution_readiness import _portable_validation_identity, build
+from tools.audit_execution_readiness import (
+    _portable_validation_identity,
+    _write_run_receipt_archive,
+    build,
+)
 
 
 class ExecutionReadinessTests(unittest.TestCase):
+    def test_run_specific_receipts_are_archived_outside_portable_catalog_identity(self):
+        validation = {
+            "module_id": "example",
+            "module_version": "1.0.0",
+            "controlled_fixture_receipt_digest": "a" * 64,
+            "controlled_fixture_receipts": [{
+                "full_normalized_output_digest": "b" * 64,
+                "runtime_versions": {"python": "3.14.3", "kernel": "0.2.0-dev"},
+            }],
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            target = _write_run_receipt_archive([validation], Path(temporary))
+            payload = json.loads(target.read_text(encoding="utf-8"))
+            digest = payload.pop("archive_digest")
+            self.assertEqual(
+                digest,
+                hashlib.sha256(
+                    json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                ).hexdigest(),
+            )
+            self.assertEqual(payload["entries"][0]["receipts"], validation["controlled_fixture_receipts"])
+            self.assertIn("platform", payload["executor"])
+
     def test_portable_fixture_identity_excludes_host_specific_observation(self):
         validation = {
             "controlled_fixture_receipt_digest": "a" * 64,
