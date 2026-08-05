@@ -641,48 +641,53 @@
       "gate_evaluators": [
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "single-cell-input-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "payload-derived",
+          "evidence_payload_role": "primary",
           "gate_id": "single-cell-cell-accounting",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "single-cell-raw-count-preservation",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "single-cell-qc-context",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "tool-native",
+          "evidence_payload_role": "primary",
           "gate_id": "single-cell-cluster-stability",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         }
       ],
       "payloads": [
@@ -745,6 +750,7 @@
         }
       ],
       "port": "analysis_object",
+      "protocol_version": "2.0.0",
       "required_postflight_gate_ids": [
         "single-cell-input-semantics",
         "single-cell-cell-accounting",
@@ -754,7 +760,7 @@
       ],
       "semantic_profile": "single-cell-object-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -830,53 +836,7 @@
         ],
         "type": "object"
       },
-      "gate_evaluators": [
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "single-cell-input-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "single-cell-cell-accounting",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "single-cell-raw-count-preservation",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "single-cell-qc-context",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "single-cell-cluster-stability",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        }
-      ],
+      "gate_evaluators": [],
       "payloads": [
         {
           "maximum": 1,
@@ -934,16 +894,11 @@
         }
       ],
       "port": "qc_report",
-      "required_postflight_gate_ids": [
-        "single-cell-input-semantics",
-        "single-cell-cell-accounting",
-        "single-cell-raw-count-preservation",
-        "single-cell-qc-context",
-        "single-cell-cluster-stability"
-      ],
+      "protocol_version": "2.0.0",
+      "required_postflight_gate_ids": [],
       "semantic_profile": "single-cell-results-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -1019,53 +974,7 @@
         ],
         "type": "object"
       },
-      "gate_evaluators": [
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "single-cell-input-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "single-cell-cell-accounting",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "single-cell-raw-count-preservation",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "single-cell-qc-context",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "single-cell-cluster-stability",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        }
-      ],
+      "gate_evaluators": [],
       "payloads": [
         {
           "maximum": 1,
@@ -1123,16 +1032,11 @@
         }
       ],
       "port": "cluster_model",
-      "required_postflight_gate_ids": [
-        "single-cell-input-semantics",
-        "single-cell-cell-accounting",
-        "single-cell-raw-count-preservation",
-        "single-cell-qc-context",
-        "single-cell-cluster-stability"
-      ],
+      "protocol_version": "2.0.0",
+      "required_postflight_gate_ids": [],
       "semantic_profile": "single-cell-results-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     }
   ],
   "orchestration": {

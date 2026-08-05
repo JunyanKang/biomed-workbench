@@ -215,6 +215,7 @@ def agent_manifest_payload():
         "requires_observed_execution": True,
     }
     payload["observed_output_contracts"] = [{
+        "protocol_version": "2.0.0",
         "port": "profile",
         "content_schema": closed_schema(
             {"artifact_type": {"type": "string"}, "result_summary": {"type": "string"}},
@@ -232,11 +233,12 @@ def agent_manifest_payload():
         "gate_evaluators": [{
             "gate_id": "missingness-reviewed",
             "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-            "evidence_payload_role": "semantic-metadata",
-            "metric_key": "missingness-reviewed",
-            "metric_type": "boolean",
+            "evaluator_type": "provenance-design",
+            "evidence_payload_role": "primary",
+            "metric_key": "scientific_review",
+            "metric_type": "string",
             "operator": "equals",
-            "threshold": True,
+            "threshold": "accepted",
         }],
     }]
     payload["output_schema"] = closed_schema(

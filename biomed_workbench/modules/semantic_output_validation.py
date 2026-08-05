@@ -819,29 +819,61 @@ def validate_observed_output_semantics(
         raise ValueError(f"semantic profile has no media-specific implementation: {profile}")
     validator(metadata, primary, payloads, record_count)
     return {
-        "status": "passed",
+        "family_admission_status": "passed",
         "profile": profile,
-        "semantic_violation_count": 0,
-        "evidence_payload_sha256": primary["sha256"],
+        "family_admission": True,
+        "evidence_payload_digests": {
+            str(item["role"]): str(item["sha256"])
+            for item in payloads
+        },
     }
 
 
 def evaluate_structured_gate(
     *,
     payloads: Sequence[Mapping[str, Any]],
+    gate_id: str,
+    evaluator_type: str,
+    evidence_payload_role: str,
     metric_key: str,
     metric_type: str,
     operator: str,
     threshold: object,
     semantic_result: Mapping[str, object],
 ) -> dict[str, object]:
-    """Compare a metric recomputed by the packaged semantic validator."""
+    """Evaluate one gate without promoting family admission into scientific proof."""
     if set(semantic_result) != {
-        "status", "profile", "semantic_violation_count", "evidence_payload_sha256"
-    } or semantic_result.get("status") != "passed":
+        "family_admission_status", "profile", "family_admission", "evidence_payload_digests"
+    } or semantic_result.get("family_admission_status") != "passed":
         raise ValueError("packaged semantic result is incomplete or unsuccessful")
-    if metric_key != "semantic_violation_count":
-        raise ValueError(f"gate metric is not produced by the packaged semantic validator: {metric_key}")
+    by_role = {str(item["role"]): item for item in payloads}
+    evidence = by_role.get(evidence_payload_role)
+    if evidence is None:
+        return {
+            "status": "not_evaluable",
+            "observed_metric": json.dumps(None),
+            "threshold": json.dumps({"operator": operator, "value": threshold}, sort_keys=True, separators=(",", ":")),
+            "evidence_payload_sha256": None,
+            "reason": f"declared evidence payload role is absent: {evidence_payload_role}",
+            "evaluator_type": evaluator_type,
+        }
+    expected_digest = semantic_result["evidence_payload_digests"].get(evidence_payload_role)  # type: ignore[union-attr]
+    if expected_digest != evidence.get("sha256"):
+        raise ValueError("gate evidence payload differs from the family-admitted payload")
+    if evaluator_type in {"provenance-design", "claim-boundary", "payload-derived", "tool-native"}:
+        return {
+            "status": "requires_review",
+            "observed_metric": json.dumps("pending-independent-scientific-review"),
+            "threshold": json.dumps({"operator": operator, "value": threshold}, sort_keys=True, separators=(",", ":")),
+            "evidence_payload_sha256": evidence["sha256"],
+            "reason": (
+                f"{gate_id} requires gate-specific design, tool-native, or claim review; "
+                "family-level file admission is not a verdict"
+            ),
+            "evaluator_type": evaluator_type,
+        }
+    if evaluator_type != "system-provenance" or metric_key != "family_admission":
+        raise ValueError(f"gate evaluator contract is unsupported: {gate_id}")
     observed = semantic_result[metric_key]
     expected = {
         "boolean": bool,
@@ -868,5 +900,7 @@ def evaluate_structured_gate(
         "threshold": json.dumps(
             {"operator": operator, "value": threshold}, sort_keys=True, separators=(",", ":")
         ),
-        "evidence_payload_sha256": semantic_result["evidence_payload_sha256"],
+        "evidence_payload_sha256": evidence["sha256"],
+        "reason": "system provenance and family admission were recomputed by the packaged ingest path",
+        "evaluator_type": evaluator_type,
     }

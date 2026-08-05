@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Callable
 
 from ..kernel.evidence import EvidenceRecord
@@ -75,6 +77,7 @@ class ResearchController:
         allow_mutation: bool = False,
         entrypoint_resolver: Callable[[str], Callable[..., object]] | None = None,
         command_executable_resolver: Callable[[str], str | None] | None = None,
+        evidence_map_root: Path | None = None,
     ) -> None:
         self._registry = registry
         self._environment_provider = environment_provider
@@ -86,8 +89,30 @@ class ResearchController:
         self._allow_mutation = allow_mutation
         self._entrypoint_resolver = entrypoint_resolver
         self._command_executable_resolver = command_executable_resolver
+        self._evidence_map_root = evidence_map_root.resolve(strict=False) if evidence_map_root is not None else None
         if not isinstance(allow_mutation, bool):
             raise ValueError("controller allow_mutation must be boolean")
+
+    def _delivery_publication_is_reachable(self, state: ProjectState, node_id: str) -> bool:
+        if not validated_delivery_publication_is_current(state, node_id) or self._evidence_map_root is None:
+            return False
+        publication = next(
+            (
+                item for item in reversed(state.evidence_map_versions)
+                if item.map_kind == "delivery-authorization"
+                and node_id in item.authorized_delivery_node_ids
+            ),
+            None,
+        )
+        if publication is None:
+            return False
+        try:
+            from ..reporting.evidence_map_versions import verify_evidence_map_publication_store
+
+            verify_evidence_map_publication_store(self._evidence_map_root, publication)
+        except (OSError, ValueError, TypeError, KeyError, json.JSONDecodeError):
+            return False
+        return True
 
     def _declared_alternative_replan(
         self,
@@ -396,7 +421,7 @@ class ResearchController:
                 if self._policy.require_evidence_map_for_publication
                 and self._registry.get(node.module_id).module_type == "delivery"
                 and "publication" in self._registry.get(node.module_id).domains
-                and not validated_delivery_publication_is_current(state, node.id)
+                and not self._delivery_publication_is_reachable(state, node.id)
             }
             pending = tuple(
                 node for node in dependency_ready

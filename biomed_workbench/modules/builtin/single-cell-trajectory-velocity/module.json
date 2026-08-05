@@ -698,57 +698,33 @@
       "gate_evaluators": [
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "velocity-input-and-layer-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "velocity-dynamics-fit",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "velocity-independent-direction",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "velocity-confidence",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "velocity-source-preservation",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "system-provenance",
+          "evidence_payload_role": "primary",
           "gate_id": "velocity-output-reload",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "family_admission",
+          "metric_type": "boolean",
           "operator": "equals",
-          "threshold": 0
+          "threshold": true
         }
       ],
       "payloads": [
@@ -809,17 +785,15 @@
         }
       ],
       "port": "trajectory_velocity_object",
+      "protocol_version": "2.0.0",
       "required_postflight_gate_ids": [
         "velocity-input-and-layer-semantics",
-        "velocity-dynamics-fit",
-        "velocity-independent-direction",
-        "velocity-confidence",
         "velocity-source-preservation",
         "velocity-output-reload"
       ],
       "semantic_profile": "single-cell-object-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -898,57 +872,33 @@
       "gate_evaluators": [
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "velocity-input-and-layer-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "tool-native",
+          "evidence_payload_role": "primary",
           "gate_id": "velocity-dynamics-fit",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "tool-native",
+          "evidence_payload_role": "primary",
           "gate_id": "velocity-independent-direction",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "tool-native",
+          "evidence_payload_role": "primary",
           "gate_id": "velocity-confidence",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "velocity-source-preservation",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "velocity-output-reload",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         }
       ],
       "payloads": [
@@ -1008,17 +958,15 @@
         }
       ],
       "port": "trajectory_velocity_validation",
+      "protocol_version": "2.0.0",
       "required_postflight_gate_ids": [
-        "velocity-input-and-layer-semantics",
         "velocity-dynamics-fit",
         "velocity-independent-direction",
-        "velocity-confidence",
-        "velocity-source-preservation",
-        "velocity-output-reload"
+        "velocity-confidence"
       ],
       "semantic_profile": "single-cell-results-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     }
   ],
   "orchestration": {

@@ -412,30 +412,33 @@
       "gate_evaluators": [
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "assembly-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "assembly-paf-reload",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "claim-boundary",
+          "evidence_payload_role": "primary",
           "gate_id": "assembly-claim-boundary",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         }
       ],
       "payloads": [
@@ -497,6 +500,7 @@
         }
       ],
       "port": "assembly_alignment",
+      "protocol_version": "2.0.0",
       "required_postflight_gate_ids": [
         "assembly-identity",
         "assembly-paf-reload",
@@ -504,7 +508,7 @@
       ],
       "semantic_profile": "genomic-records-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     }
   ],
   "orchestration": {

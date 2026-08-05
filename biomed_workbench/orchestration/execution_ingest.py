@@ -18,6 +18,7 @@ from ..modules.contract import (
     CompatibilityRow,
     compatibility_contract_digest,
     observed_output_contract_digest,
+    observed_output_protocol_version,
     version_is_allowed,
 )
 from ..runner import validate_schema_value
@@ -172,6 +173,8 @@ def ingest_execution_bundle(
     current_contract_digest = observed_output_contract_digest(manifest)
     if handoff.observed_output_contract_digest != current_contract_digest:
         raise ValueError("observed output contract changed after the execution handoff")
+    if handoff.protocol.get("observed_output_protocol_version") != observed_output_protocol_version(manifest):
+        raise ValueError("observed output protocol version differs from the current admission contract")
     if (
         not isinstance(bundle["process_exit_code"], int)
         or isinstance(bundle["process_exit_code"], bool)
@@ -268,7 +271,7 @@ def ingest_execution_bundle(
             },
             profile=contract.semantic_profile,
         )
-        if not isinstance(semantic_result, Mapping) or semantic_result.get("status") != "passed":
+        if not isinstance(semantic_result, Mapping) or semantic_result.get("family_admission_status") != "passed":
             raise ValueError(f"observed output semantic validator rejected port {port.name}")
         semantic_results_by_port[port.name] = dict(semantic_result)
     normalized_output = next(iter(content_by_port.values())) if len(content_by_port) == 1 else content_by_port
@@ -289,7 +292,9 @@ def ingest_execution_bundle(
     for gate_id in sorted(by_gate):
         evaluations = []
         for contract in manifest.observed_output_contracts:
-            evaluator = next(item for item in contract.gate_evaluators if item.gate_id == gate_id)
+            evaluator = next((item for item in contract.gate_evaluators if item.gate_id == gate_id), None)
+            if evaluator is None:
+                continue
             payloads = tuple(
                 {
                     **payload.to_dict(),
@@ -299,6 +304,9 @@ def ingest_execution_bundle(
             )
             result = _reload_validator(evaluator.evaluator)(
                 payloads=payloads,
+                gate_id=gate_id,
+                evaluator_type=evaluator.evaluator_type,
+                evidence_payload_role=evaluator.evidence_payload_role,
                 metric_key=evaluator.metric_key,
                 metric_type=evaluator.metric_type,
                 operator=evaluator.operator,
@@ -306,16 +314,36 @@ def ingest_execution_bundle(
                 semantic_result=semantic_results_by_port[contract.port],
             )
             if not isinstance(result, Mapping) or set(result) != {
-                "status", "observed_metric", "threshold", "evidence_payload_sha256"
+                "status", "observed_metric", "threshold", "evidence_payload_sha256", "reason", "evaluator_type"
             }:
                 raise ValueError(f"packaged gate evaluator returned an invalid result: {gate_id}")
-            if result["status"] != "passed":
+            if result["status"] not in {"passed", "failed", "requires_review", "not_evaluable"}:
+                raise ValueError(f"packaged gate evaluator returned an unsupported status: {gate_id}")
+            evidence = next(
+                (payload for payload in payloads if payload["role"] == evaluator.evidence_payload_role),
+                None,
+            )
+            if evidence is None:
+                if result["status"] != "not_evaluable" or result["evidence_payload_sha256"] is not None:
+                    raise ValueError(f"gate evaluator did not honor its absent evidence payload role: {gate_id}")
+            elif result["evidence_payload_sha256"] != evidence["sha256"]:
+                raise ValueError(f"gate evaluator evidence digest differs from its declared payload role: {gate_id}")
+            if result["status"] == "failed":
                 raise ValueError(f"required postflight gate did not pass: {gate_id}")
             evaluations.append({"port": contract.port, **dict(result)})
+        if not evaluations:
+            raise ValueError(f"required postflight gate has no assigned output port: {gate_id}")
+        statuses = {str(item["status"]) for item in evaluations}
+        overall_status = (
+            "failed" if "failed" in statuses
+            else "requires_review" if "requires_review" in statuses
+            else "not_evaluable" if "not_evaluable" in statuses
+            else "passed"
+        )
         evaluated_results[gate_id] = {
             "gate_id": gate_id,
             "evaluations": evaluations,
-            "status": "passed",
+            "status": overall_status,
         }
     provenance = {
         "module_id": manifest.id,
@@ -348,6 +376,7 @@ def ingest_execution_bundle(
         runtime_versions=receipt_runtime_versions,
         output_artifact_digests={artifact.id: artifact.content_digest for artifact in artifacts},
         postflight_result_digests={gate_id: digest_value(result) for gate_id, result in evaluated_results.items()},
+        postflight_results=evaluated_results,
         process_exit_code=int(bundle["process_exit_code"]),
         source_kind="handoff",
         execution_request_digest=digest_value(handoff.to_dict()),

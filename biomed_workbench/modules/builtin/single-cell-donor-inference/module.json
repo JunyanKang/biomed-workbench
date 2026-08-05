@@ -827,75 +827,83 @@
       "gate_evaluators": [
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "pseudobulk-raw-count-and-axis-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "pseudobulk-experimental-unit-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "tool-native",
+          "evidence_payload_role": "primary",
           "gate_id": "pseudobulk-count-conservation-and-eligibility",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "donor-design-estimability",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "donor-model-and-filter-validity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "donor-sample-diagnostics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "tool-native",
+          "evidence_payload_role": "primary",
           "gate_id": "donor-engine-sensitivity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "donor-result-reload-and-claim-scope",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         }
       ],
       "payloads": [
@@ -956,6 +964,7 @@
         }
       ],
       "port": "pseudobulk_counts",
+      "protocol_version": "2.0.0",
       "required_postflight_gate_ids": [
         "pseudobulk-raw-count-and-axis-identity",
         "pseudobulk-experimental-unit-semantics",
@@ -968,7 +977,7 @@
       ],
       "semantic_profile": "count-matrix-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -1044,80 +1053,7 @@
         ],
         "type": "object"
       },
-      "gate_evaluators": [
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "pseudobulk-raw-count-and-axis-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "pseudobulk-experimental-unit-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "pseudobulk-count-conservation-and-eligibility",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-design-estimability",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-model-and-filter-validity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-sample-diagnostics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-engine-sensitivity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-result-reload-and-claim-scope",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        }
-      ],
+      "gate_evaluators": [],
       "payloads": [
         {
           "maximum": 1,
@@ -1176,19 +1112,11 @@
         }
       ],
       "port": "pseudobulk_metadata",
-      "required_postflight_gate_ids": [
-        "pseudobulk-raw-count-and-axis-identity",
-        "pseudobulk-experimental-unit-semantics",
-        "pseudobulk-count-conservation-and-eligibility",
-        "donor-design-estimability",
-        "donor-model-and-filter-validity",
-        "donor-sample-diagnostics",
-        "donor-engine-sensitivity",
-        "donor-result-reload-and-claim-scope"
-      ],
+      "protocol_version": "2.0.0",
+      "required_postflight_gate_ids": [],
       "semantic_profile": "single-cell-results-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -1265,80 +1193,7 @@
         ],
         "type": "object"
       },
-      "gate_evaluators": [
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "pseudobulk-raw-count-and-axis-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "pseudobulk-experimental-unit-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "pseudobulk-count-conservation-and-eligibility",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-design-estimability",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-model-and-filter-validity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-sample-diagnostics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-engine-sensitivity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-result-reload-and-claim-scope",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        }
-      ],
+      "gate_evaluators": [],
       "payloads": [
         {
           "maximum": 1,
@@ -1397,19 +1252,11 @@
         }
       ],
       "port": "differential_results",
-      "required_postflight_gate_ids": [
-        "pseudobulk-raw-count-and-axis-identity",
-        "pseudobulk-experimental-unit-semantics",
-        "pseudobulk-count-conservation-and-eligibility",
-        "donor-design-estimability",
-        "donor-model-and-filter-validity",
-        "donor-sample-diagnostics",
-        "donor-engine-sensitivity",
-        "donor-result-reload-and-claim-scope"
-      ],
+      "protocol_version": "2.0.0",
+      "required_postflight_gate_ids": [],
       "semantic_profile": "statistical-results-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -1485,80 +1332,7 @@
         ],
         "type": "object"
       },
-      "gate_evaluators": [
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "pseudobulk-raw-count-and-axis-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "pseudobulk-experimental-unit-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "pseudobulk-count-conservation-and-eligibility",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-design-estimability",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-model-and-filter-validity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-sample-diagnostics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-engine-sensitivity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "donor-result-reload-and-claim-scope",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        }
-      ],
+      "gate_evaluators": [],
       "payloads": [
         {
           "maximum": 1,
@@ -1616,19 +1390,11 @@
         }
       ],
       "port": "inference_report",
-      "required_postflight_gate_ids": [
-        "pseudobulk-raw-count-and-axis-identity",
-        "pseudobulk-experimental-unit-semantics",
-        "pseudobulk-count-conservation-and-eligibility",
-        "donor-design-estimability",
-        "donor-model-and-filter-validity",
-        "donor-sample-diagnostics",
-        "donor-engine-sensitivity",
-        "donor-result-reload-and-claim-scope"
-      ],
+      "protocol_version": "2.0.0",
+      "required_postflight_gate_ids": [],
       "semantic_profile": "single-cell-results-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     }
   ],
   "orchestration": {

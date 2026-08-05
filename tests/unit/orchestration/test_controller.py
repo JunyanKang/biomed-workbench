@@ -123,7 +123,7 @@ def serial_fixture():
 
 
 class ResearchControllerTests(unittest.TestCase):
-    def test_delivery_authorization_map_releases_a_publication_node_without_a_completion_cycle(self):
+    def test_state_only_delivery_authorization_cannot_replace_the_immutable_store(self):
         payload = module_payload("publication-delivery", "analysis_result", "publication_package")
         payload["module_type"] = "delivery"
         payload["domains"] = ["publication"]
@@ -205,8 +205,8 @@ class ResearchControllerTests(unittest.TestCase):
             rationale="Authorize this exact delivery node from its retained upstream slice.",
         )
         released = controller.resume(authorized.to_dict())
-        self.assertEqual(released.stop_reason, "awaiting_artifact_review")
-        self.assertEqual(len(released.executions), 1)
+        self.assertEqual(released.stop_reason, "awaiting_evidence_map")
+        self.assertFalse(released.executions)
 
     def test_registered_delivery_modules_each_have_a_reachable_authorized_execution(self):
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
@@ -383,7 +383,15 @@ class ResearchControllerTests(unittest.TestCase):
                     reloaded = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
                     self.assertTrue(validated_delivery_publication_is_current(reloaded, node_id))
                     self.assertFalse(validated_delivery_publication_is_current(reloaded, f"other-{node_id}"))
-                    released = controller.resume(reloaded.to_dict())
+                    authorized_controller = _StrictResearchController(
+                        registry,
+                        environment_provider=lambda _manifest: None,
+                        node_executor=lambda current, _plan, current_node, active_registry, **_kwargs: completed_execution(
+                            current, current_node, active_registry
+                        ),
+                        evidence_map_root=publish_root,
+                    )
+                    released = authorized_controller.resume(reloaded.to_dict())
                     self.assertEqual(released.stop_reason, "awaiting_artifact_review")
                     self.assertEqual(tuple(item.module_id for item in released.executions), (module_id,))
 
@@ -394,10 +402,16 @@ class ResearchControllerTests(unittest.TestCase):
                     index_path.write_text(json.dumps(tampered, indent=2, sort_keys=True) + "\n", encoding="utf-8")
                     with self.assertRaises(ValueError):
                         verify_evidence_map_version_index(publish_root)
+                    blocked_tamper = authorized_controller.resume(reloaded.to_dict())
+                    self.assertEqual(blocked_tamper.stop_reason, "awaiting_evidence_map")
+                    self.assertFalse(blocked_tamper.executions)
                     index_path.write_text(original_index, encoding="utf-8")
                     (publish_root / "versions/v1.0.0/scientific-evidence-map.json").unlink()
                     with self.assertRaises(ValueError):
                         verify_evidence_map_version_index(publish_root)
+                    blocked_missing = authorized_controller.resume(reloaded.to_dict())
+                    self.assertEqual(blocked_missing.stop_reason, "awaiting_evidence_map")
+                    self.assertFalse(blocked_missing.executions)
 
     def test_upstream_required_port_rejects_an_unreviewed_project_input_at_runtime(self):
         payload = module_payload("reviewed-upstream-consumer", "normalized_matrix", "contrast_result")

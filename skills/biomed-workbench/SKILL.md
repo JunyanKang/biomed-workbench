@@ -84,7 +84,7 @@ For a continuing project, use the persisted state rather than reconstructing it 
 "$WORKBENCH_ROOT/tools/workbench" project ingest-execution --state PROJECT_STATE.json --input OBSERVED_EXECUTION.json --project-root PROJECT_DIR
 "$WORKBENCH_ROOT/tools/workbench" project review --state PROJECT_STATE.json --input ARTIFACT_REVIEW.json
 "$WORKBENCH_ROOT/tools/workbench" project decide --state PROJECT_STATE.json --input SCIENTIFIC_DECISION.json
-"$WORKBENCH_ROOT/tools/workbench" project resume --state PROJECT_STATE.json --project-root PROJECT_DIR
+"$WORKBENCH_ROOT/tools/workbench" project resume --state PROJECT_STATE.json --project-root PROJECT_DIR --evidence-map-root EVIDENCE_MAP_DIR
 "$WORKBENCH_ROOT/tools/workbench" project map --state PROJECT_STATE.json --workspace PROJECT_DIR --specs EVIDENCE_UNITS.json --version MAP_VERSION.json --publish-root EVIDENCE_MAP_DIR
 "$WORKBENCH_ROOT/tools/workbench" project map-recovery --state PROJECT_STATE.json --publish-root EVIDENCE_MAP_DIR
 "$WORKBENCH_ROOT/tools/workbench" project map-recovery --complete --state PROJECT_STATE.json --publish-root EVIDENCE_MAP_DIR

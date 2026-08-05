@@ -150,6 +150,43 @@ def verify_evidence_map_version_index(output_root: Path) -> dict[str, Any]:
     return index
 
 
+def verify_evidence_map_publication_store(
+    output_root: Path,
+    publication: EvidenceMapPublication,
+) -> dict[str, Any]:
+    """Re-read immutable files and bind one state publication to its exact stored map."""
+    index = verify_evidence_map_version_index(output_root)
+    matches = [
+        item for item in index["entries"]
+        if item.get("version") == publication.version.version
+        and item.get("revision") == publication.version.revision
+    ]
+    if len(matches) != 1:
+        raise ValueError("state evidence-map publication is unavailable or ambiguous in the immutable store")
+    entry = matches[0]
+    if (
+        entry.get("map_digest") != publication.map_digest
+        or entry.get("edge_table_digest") != publication.edge_table_digest
+    ):
+        raise ValueError("state evidence-map publication differs from the immutable store index")
+    map_path = output_root / "versions" / f"v{publication.version.version}" / "scientific-evidence-map.json"
+    payload = json.loads(map_path.read_text(encoding="utf-8"))
+    expected = {
+        "digest": publication.map_digest,
+        "edge_table_digest": publication.edge_table_digest,
+        "dependency_bundle_digest": publication.dependency_bundle_digest,
+        "delivery_slice_digest": publication.delivery_slice_digest,
+        "covered_plan_id": publication.covered_plan_id,
+        "covered_node_ids": list(publication.covered_node_ids),
+        "covered_artifact_ids": list(publication.covered_artifact_ids),
+        "authorized_delivery_node_ids": list(publication.authorized_delivery_node_ids),
+        "delivery_scope_digest": publication.delivery_scope_digest,
+    }
+    if any(payload.get(key) != value for key, value in expected.items()):
+        raise ValueError("state evidence-map publication differs from the immutable stored map")
+    return entry
+
+
 def _atomic_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)

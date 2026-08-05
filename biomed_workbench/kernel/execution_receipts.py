@@ -124,6 +124,7 @@ class ObservedExecutionReceipt:
     output_artifact_digests: Mapping[str, str]
     postflight_result_digests: Mapping[str, str]
     process_exit_code: int
+    postflight_results: Mapping[str, Any] | None = None
     execution_state: str = "observed-completed"
 
     def __post_init__(self) -> None:
@@ -158,6 +159,17 @@ class ObservedExecutionReceipt:
             validate_identifier(str(gate_id), "observed_execution.postflight_gate_id")
             _digest(str(value), "observed_execution.postflight_result_digest")
         object.__setattr__(self, "postflight_result_digests", postflight)
+        results = freeze_mapping(self.postflight_results or {})
+        if results and set(results) != set(postflight):
+            raise ValueError("observed execution gate results and digests must cover the same gates")
+        for gate_id, result in results.items():
+            if not isinstance(result, Mapping) or result.get("status") not in {
+                "passed", "failed", "requires_review", "not_evaluable"
+            }:
+                raise ValueError(f"observed execution has an invalid gate result: {gate_id}")
+            if digest_value(thaw(result)) != postflight[str(gate_id)]:
+                raise ValueError(f"observed execution gate result digest differs from its result: {gate_id}")
+        object.__setattr__(self, "postflight_results", results)
         if self.process_exit_code != 0 or self.execution_state != "observed-completed":
             raise ValueError("only an observed zero-exit execution can form a completion receipt")
 
@@ -174,6 +186,7 @@ class ObservedExecutionReceipt:
         runtime_versions: Mapping[str, str],
         output_artifact_digests: Mapping[str, str],
         postflight_result_digests: Mapping[str, str],
+        postflight_results: Mapping[str, Any] | None = None,
         process_exit_code: int,
         source_kind: str,
         execution_request_digest: str,
@@ -226,10 +239,12 @@ class ObservedExecutionReceipt:
             "process_exit_code": process_exit_code,
             "execution_state": "observed-completed",
         }
+        if postflight_results:
+            basis["postflight_results"] = dict(postflight_results)
         return cls(id=f"observed-{digest_value(basis)[:24]}", **basis)
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload = {
             "id": self.id,
             "plan_node_id": self.plan_node_id,
             "execution_request_id": self.execution_request_id,
@@ -247,6 +262,9 @@ class ObservedExecutionReceipt:
             "process_exit_code": self.process_exit_code,
             "execution_state": self.execution_state,
         }
+        if self.postflight_results:
+            payload["postflight_results"] = thaw(self.postflight_results)
+        return payload
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "ObservedExecutionReceipt":

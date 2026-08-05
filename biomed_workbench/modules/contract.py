@@ -219,6 +219,7 @@ class ObservedPayloadContract:
 class GateEvaluatorContract:
     gate_id: str
     evaluator: str
+    evaluator_type: str
     evidence_payload_role: str
     metric_key: str
     metric_type: str
@@ -228,6 +229,7 @@ class GateEvaluatorContract:
 
 @dataclass(frozen=True)
 class ObservedOutputContract:
+    protocol_version: str
     port: str
     content_schema: dict[str, object]
     payloads: tuple[ObservedPayloadContract, ...]
@@ -416,8 +418,8 @@ def _observed_output(value: Any, location: str) -> ObservedOutputContract:
     if not _NAME_RE.fullmatch(semantic_profile):
         raise ValueError(f"{location}.semantic_profile is invalid")
     evaluator_values = payload["gate_evaluators"]
-    if not isinstance(evaluator_values, list) or not evaluator_values:
-        raise ValueError(f"{location}.gate_evaluators must be a nonempty list")
+    if not isinstance(evaluator_values, list):
+        raise ValueError(f"{location}.gate_evaluators must be a list")
     gate_evaluators = tuple(
         _gate_evaluator(item, f"{location}.gate_evaluators[{index}]")
         for index, item in enumerate(evaluator_values)
@@ -425,6 +427,7 @@ def _observed_output(value: Any, location: str) -> ObservedOutputContract:
     required_gate_ids = _strings(
         payload["required_postflight_gate_ids"],
         f"{location}.required_postflight_gate_ids",
+        allow_empty=True,
     )
     if {item.gate_id for item in gate_evaluators} != set(required_gate_ids) or len(gate_evaluators) != len(required_gate_ids):
         raise ValueError(f"{location}.gate_evaluators must cover every required postflight gate exactly once")
@@ -432,6 +435,7 @@ def _observed_output(value: Any, location: str) -> ObservedOutputContract:
     if any(item.evidence_payload_role not in payload_roles for item in gate_evaluators):
         raise ValueError(f"{location}.gate_evaluators reference an undeclared evidence payload role")
     return ObservedOutputContract(
+        protocol_version=_text(payload["protocol_version"], f"{location}.protocol_version"),
         port=_text(payload["port"], f"{location}.port"),
         content_schema=_closed_schema(payload["content_schema"], f"{location}.content_schema"),
         payloads=contracts,
@@ -451,9 +455,12 @@ def _gate_evaluator(value: Any, location: str) -> GateEvaluatorContract:
     if not _CALLABLE_RE.fullmatch(evaluator):
         raise ValueError(f"{location}.evaluator must be a packaged Python callable")
     metric_type = _text(payload["metric_type"], f"{location}.metric_type")
+    evaluator_type = _text(payload["evaluator_type"], f"{location}.evaluator_type")
     operator = _text(payload["operator"], f"{location}.operator")
     if metric_type not in {"boolean", "integer", "number", "string"}:
         raise ValueError(f"{location}.metric_type is unsupported")
+    if evaluator_type not in {"payload-derived", "tool-native", "provenance-design", "system-provenance", "claim-boundary"}:
+        raise ValueError(f"{location}.evaluator_type is unsupported")
     if operator not in {"equals", "not-equals", "greater-than", "greater-or-equal", "less-than", "less-or-equal"}:
         raise ValueError(f"{location}.operator is unsupported")
     threshold = payload["threshold"]
@@ -468,6 +475,7 @@ def _gate_evaluator(value: Any, location: str) -> GateEvaluatorContract:
     return GateEvaluatorContract(
         gate_id=_text(payload["gate_id"], f"{location}.gate_id"),
         evaluator=evaluator,
+        evaluator_type=evaluator_type,
         evidence_payload_role=_text(payload["evidence_payload_role"], f"{location}.evidence_payload_role"),
         metric_key=_text(payload["metric_key"], f"{location}.metric_key"),
         metric_type=metric_type,
@@ -1127,12 +1135,20 @@ def parse_manifest(value: Any) -> ModuleManifest:
         if len(observed_contracts) != len(manifest.observed_output_contracts) or set(observed_contracts) != set(output_ports):
             raise ValueError("agent_generated modules require exactly one observed output contract per output port")
         blocking_gates = {item.id for item in manifest.quality_gates if item.blocks_interpretation}
+        assigned_gates: set[str] = set()
+        protocol_versions = {item.protocol_version for item in observed_contracts.values()}
+        if len(protocol_versions) != 1:
+            raise ValueError("observed output contracts must share one explicit protocol version")
         for port_name, contract in observed_contracts.items():
             unknown_gates = set(contract.required_postflight_gate_ids) - quality_gate_ids
             if unknown_gates:
                 raise ValueError(f"observed output contract references unknown quality gate: {sorted(unknown_gates)[0]}")
-            if not blocking_gates <= set(contract.required_postflight_gate_ids):
-                raise ValueError(f"observed output contract omits a blocking quality gate for port: {port_name}")
+            overlap = assigned_gates & set(contract.required_postflight_gate_ids)
+            if overlap:
+                raise ValueError(f"quality gate is assigned to more than one output port: {sorted(overlap)[0]}")
+            assigned_gates.update(contract.required_postflight_gate_ids)
+        if not blocking_gates <= assigned_gates:
+            raise ValueError("observed output contracts omit a blocking quality gate")
         produced_types = {port.artifact_type for port in manifest.output_artifacts}
         declared_types = {artifact_type for section in manifest.agent_protocol.template_sections for artifact_type in section.output_artifact_types}
         if not declared_types <= produced_types:
@@ -1214,6 +1230,7 @@ def _agent_protocol_dict(value: AgentProtocol) -> dict[str, object]:
 
 def _observed_output_dict(value: ObservedOutputContract) -> dict[str, object]:
     return {
+        "protocol_version": value.protocol_version,
         "port": value.port,
         "content_schema": dict(value.content_schema),
         "payloads": [
@@ -1234,6 +1251,7 @@ def _observed_output_dict(value: ObservedOutputContract) -> dict[str, object]:
             {
                 "gate_id": item.gate_id,
                 "evaluator": item.evaluator,
+                "evaluator_type": item.evaluator_type,
                 "evidence_payload_role": item.evidence_payload_role,
                 "metric_key": item.metric_key,
                 "metric_type": item.metric_type,
@@ -1248,6 +1266,14 @@ def _observed_output_dict(value: ObservedOutputContract) -> dict[str, object]:
 def observed_output_contract_digest(value: ModuleManifest) -> str:
     """Return the immutable digest used to bind a workflow handoff to result admission."""
     return digest_value([_observed_output_dict(item) for item in value.observed_output_contracts])
+
+
+def observed_output_protocol_version(value: ModuleManifest) -> str:
+    """Return the explicit admission-protocol identity shared by all output ports."""
+    versions = {item.protocol_version for item in value.observed_output_contracts}
+    if len(versions) != 1:
+        raise ValueError("module does not declare one observed-output protocol version")
+    return next(iter(versions))
 
 
 def compatibility_contract_digest(value: ModuleManifest, row_id: str) -> str:

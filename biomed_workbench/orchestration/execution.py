@@ -23,6 +23,7 @@ from ..modules.contract import (
     ModuleManifest,
     compatibility_contract_digest,
     observed_output_contract_digest,
+    observed_output_protocol_version,
 )
 from ..modules.registry import ModuleRegistry, ModuleRegistryError
 from ..modules.scientific_command import ScientificCommandError, execute_scientific_command
@@ -421,6 +422,7 @@ def execute_node(
                 compatibility_row_id = str(invocation.provenance["compatibility_row_id"])
                 handoff_protocol = {
                     **dict(invocation.output),
+                    "observed_output_protocol_version": observed_output_protocol_version(manifest),
                     "compatibility_contract_digest": compatibility_contract_digest(
                         manifest, compatibility_row_id
                     ),

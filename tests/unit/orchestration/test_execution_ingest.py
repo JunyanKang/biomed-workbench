@@ -16,6 +16,7 @@ from biomed_workbench.modules.registry import ModuleRegistry
 from biomed_workbench.modules.contract import (
     compatibility_contract_digest,
     observed_output_contract_digest,
+    observed_output_protocol_version,
 )
 from biomed_workbench.orchestration.execution_ingest import ingest_execution_bundle
 from tests.unit.kernel.test_hypotheses import hypothesis
@@ -58,6 +59,7 @@ class ExecutionIngestTests(unittest.TestCase):
             protocol={
                 "result_kind": "execution_handoff",
                 "execution_state": "prepared-not-run",
+                "observed_output_protocol_version": observed_output_protocol_version(manifest),
                 "compatibility_contract_digest": compatibility_contract_digest(
                     manifest, manifest.compatibility_matrix[0].id
                 ),
@@ -149,6 +151,10 @@ class ExecutionIngestTests(unittest.TestCase):
         self.assertEqual(len(state.artifact_reloads), 1)
         self.assertEqual(len(state.execution_reviews), 1)
         self.assertEqual(state.artifact_reloads[0].artifact_id, "artifact-enrichment-result")
+        gate_results = state.observed_executions[0].postflight_results
+        self.assertEqual(set(gate_results), {item.id for item in registry.get("functional-enrichment").quality_gates})
+        self.assertIn("requires_review", {item["status"] for item in gate_results.values()})
+        self.assertNotEqual({item["status"] for item in gate_results.values()}, {"passed"})
 
     def test_compatible_nonbaseline_runtime_is_admitted_but_not_labeled_tested(self):
         registry, state, root, bundle = self._prepared_case()

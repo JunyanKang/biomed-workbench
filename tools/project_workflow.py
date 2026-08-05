@@ -151,6 +151,11 @@ def main() -> int:
     resume = commands.add_parser("resume", help="resume the active strict controller from persisted state")
     resume.add_argument("--state", required=True, type=Path)
     resume.add_argument("--project-root", required=True, type=Path)
+    resume.add_argument(
+        "--evidence-map-root",
+        type=Path,
+        help="immutable evidence-map publication root; required before a publication delivery can be released",
+    )
     resume.add_argument("--allow-mutation", action="store_true")
     args = parser.parse_args()
 
@@ -285,6 +290,7 @@ def main() -> int:
             environment_provider=detect_environment,
             artifact_store=ProjectArtifactStore(root / ".biomed-workbench" / "artifacts"),
             allow_mutation=args.allow_mutation,
+            evidence_map_root=args.evidence_map_root,
         )
         cycle = controller.resume(state.to_dict())
         state = cycle.state

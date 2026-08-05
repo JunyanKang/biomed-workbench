@@ -7,6 +7,7 @@ from .evidence_map_versions import (
     inspect_evidence_map_publication_recovery,
     publish_evidence_map_transaction,
     publish_evidence_map_version,
+    verify_evidence_map_publication_store,
     verify_evidence_map_version_index,
 )
 
@@ -19,5 +20,6 @@ __all__ = [
     "publish_evidence_map_version",
     "render_bilingual_reports",
     "verify_evidence_map_version_index",
+    "verify_evidence_map_publication_store",
     "write_bilingual_reports",
 ]

@@ -62,13 +62,78 @@ MEDIA_TYPES = {
     "yaml": "application/yaml",
 }
 
+GATE_PORT_OVERRIDES = {
+    "protein-complex-docking": {
+        "structure-publication-figures": "structure_figure_bundle",
+    },
+    "single-cell-batch-integration": {
+        "integration-batch-mixing": "integration_benchmark",
+        "integration-biological-conservation": "integration_benchmark",
+        "integration-selection-sensitivity": "integration_decision",
+    },
+    "single-cell-trajectory-velocity": {
+        "velocity-dynamics-fit": "trajectory_velocity_validation",
+        "velocity-independent-direction": "trajectory_velocity_validation",
+        "velocity-confidence": "trajectory_velocity_validation",
+    },
+    "docking-pose-review": {
+        "docking-preparation-manifest": "validated_docking_batch",
+        "docking-preparation-parameters": "validated_docking_config",
+        "docking-review-result-accounting": "docking_review_report",
+        "docking-review-chemical-identity": "docking_review_report",
+        "docking-review-geometry": "docking_review_report",
+        "docking-review-score-semantics": "docking_review_report",
+        "docking-review-output-integrity": "docking_review_report",
+    },
+}
+
 
 def _bump_patch(version: str) -> str:
     major, minor, patch = (int(value) for value in version.split("."))
     return f"{major}.{minor}.{patch + 1}"
 
 
-def _contract(manifest: dict[str, object], port: dict[str, object]) -> dict[str, object]:
+def _evaluator_contract(gate: dict[str, object]) -> dict[str, object]:
+    gate_id = str(gate["id"])
+    description = str(gate["description"]).lower()
+    if any(token in gate_id for token in ("claim-boundary", "score-semantics", "truth-and-resolution")):
+        evaluator_type = "claim-boundary"
+    elif any(token in gate_id for token in (
+        "execution-reload", "output-reload", "raw-count-and-reload", "source-and-output-reload",
+    )):
+        evaluator_type = "system-provenance"
+    elif any(token in gate_id for token in (
+        "confidence", "mixing", "conservation", "periodicity", "p-site", "stability", "sensitivity",
+        "moran", "capri", "geometry", "dynamics-fit", "independent-direction",
+    )):
+        evaluator_type = "tool-native"
+    elif any(token in gate_id for token in (
+        "figure", "integrity", "accounting", "manifest", "format", "coordinate",
+    )):
+        evaluator_type = "payload-derived"
+    elif any(token in description for token in ("manual review", "orthogonal evidence", "experimental evidence")):
+        evaluator_type = "claim-boundary"
+    else:
+        evaluator_type = "provenance-design"
+    system_derived = evaluator_type == "system-provenance"
+    return {
+        "gate_id": gate_id,
+        "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+        "evaluator_type": evaluator_type,
+        "evidence_payload_role": "primary",
+        "metric_key": "family_admission" if system_derived else "scientific_review",
+        "metric_type": "boolean" if system_derived else "string",
+        "operator": "equals",
+        "threshold": True if system_derived else "accepted",
+    }
+
+
+def _contract(
+    manifest: dict[str, object],
+    port: dict[str, object],
+    *,
+    quality_gates: list[dict[str, object]],
+) -> dict[str, object]:
     formats = [
         str(item["name"])
         for item in port["formats"]  # type: ignore[index]
@@ -76,8 +141,9 @@ def _contract(manifest: dict[str, object], port: dict[str, object]) -> dict[str,
     media_types = sorted({MEDIA_TYPES.get(name, "application/octet-stream") for name in formats})
     semantic_profile = semantic_profile_for(str(port["artifact_type"]))
     semantic_digest = hashlib.sha256(SEMANTIC_VALIDATOR.read_bytes()).hexdigest()
-    quality_gate_ids = [item["id"] for item in manifest["quality_gates"]]  # type: ignore[index]
+    quality_gate_ids = [item["id"] for item in quality_gates]
     return {
+        "protocol_version": "2.0.0",
         "port": port["name"],
         "content_schema": {
             "type": "object",
@@ -120,18 +186,7 @@ def _contract(manifest: dict[str, object], port: dict[str, object]) -> dict[str,
         "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
         "semantic_validator_sha256": semantic_digest,
         "semantic_profile": semantic_profile,
-        "gate_evaluators": [
-            {
-                "gate_id": gate_id,
-                "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-                "evidence_payload_role": "semantic-metadata",
-                "metric_key": "semantic_violation_count",
-                "metric_type": "integer",
-                "operator": "equals",
-                "threshold": 0,
-            }
-            for gate_id in quality_gate_ids
-        ],
+        "gate_evaluators": [_evaluator_contract(gate) for gate in quality_gates],
     }
 
 
@@ -139,7 +194,21 @@ def update_manifest(path: Path, *, bump_version: bool) -> bool:
     manifest = json.loads(path.read_text(encoding="utf-8"))
     if manifest.get("access") != "agent_generated":
         return False
-    expected_contracts = [_contract(manifest, port) for port in manifest["output_artifacts"]]
+    output_ports = list(manifest["output_artifacts"])
+    default_port = str(output_ports[0]["name"])
+    overrides = GATE_PORT_OVERRIDES.get(str(manifest["id"]), {})
+    gates_by_port: dict[str, list[dict[str, object]]] = {
+        str(port["name"]): [] for port in output_ports
+    }
+    for gate in manifest["quality_gates"]:
+        target = overrides.get(str(gate["id"]), default_port)
+        if target not in gates_by_port:
+            raise ValueError(f"gate port override is not a declared output: {manifest['id']}:{target}")
+        gates_by_port[target].append(gate)
+    expected_contracts = [
+        _contract(manifest, port, quality_gates=gates_by_port[str(port["name"])])
+        for port in output_ports
+    ]
     if manifest.get("observed_output_contracts") == expected_contracts:
         return False
     old_version = str(manifest["version"])

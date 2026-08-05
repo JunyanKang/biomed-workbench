@@ -530,75 +530,23 @@
       "gate_evaluators": [
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "payload-derived",
+          "evidence_payload_role": "primary",
           "gate_id": "docking-preparation-manifest",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "docking-preparation-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-preparation-parameters",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-result-accounting",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-chemical-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-geometry",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-score-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-output-integrity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         }
       ],
       "payloads": [
@@ -659,19 +607,14 @@
         }
       ],
       "port": "validated_docking_batch",
+      "protocol_version": "2.0.0",
       "required_postflight_gate_ids": [
         "docking-preparation-manifest",
-        "docking-preparation-identity",
-        "docking-preparation-parameters",
-        "docking-review-result-accounting",
-        "docking-review-chemical-identity",
-        "docking-review-geometry",
-        "docking-review-score-semantics",
-        "docking-review-output-integrity"
+        "docking-preparation-identity"
       ],
       "semantic_profile": "statistical-results-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -750,75 +693,13 @@
       "gate_evaluators": [
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-preparation-manifest",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-preparation-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "docking-preparation-parameters",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-result-accounting",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-chemical-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-geometry",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-score-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-output-integrity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         }
       ],
       "payloads": [
@@ -879,19 +760,13 @@
         }
       ],
       "port": "validated_docking_config",
+      "protocol_version": "2.0.0",
       "required_postflight_gate_ids": [
-        "docking-preparation-manifest",
-        "docking-preparation-identity",
-        "docking-preparation-parameters",
-        "docking-review-result-accounting",
-        "docking-review-chemical-identity",
-        "docking-review-geometry",
-        "docking-review-score-semantics",
-        "docking-review-output-integrity"
+        "docking-preparation-parameters"
       ],
       "semantic_profile": "configuration-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -967,80 +842,7 @@
         ],
         "type": "object"
       },
-      "gate_evaluators": [
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-preparation-manifest",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-preparation-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-preparation-parameters",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-result-accounting",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-chemical-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-geometry",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-score-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-review-output-integrity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        }
-      ],
+      "gate_evaluators": [],
       "payloads": [
         {
           "maximum": 1,
@@ -1098,19 +900,11 @@
         }
       ],
       "port": "docking_preparation_report",
-      "required_postflight_gate_ids": [
-        "docking-preparation-manifest",
-        "docking-preparation-identity",
-        "docking-preparation-parameters",
-        "docking-review-result-accounting",
-        "docking-review-chemical-identity",
-        "docking-review-geometry",
-        "docking-review-score-semantics",
-        "docking-review-output-integrity"
-      ],
+      "protocol_version": "2.0.0",
+      "required_postflight_gate_ids": [],
       "semantic_profile": "scientific-report-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     },
     {
       "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -1190,75 +984,53 @@
       "gate_evaluators": [
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-preparation-manifest",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-preparation-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
-          "gate_id": "docking-preparation-parameters",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
-          "operator": "equals",
-          "threshold": 0
-        },
-        {
-          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "payload-derived",
+          "evidence_payload_role": "primary",
           "gate_id": "docking-review-result-accounting",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
           "gate_id": "docking-review-chemical-identity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "tool-native",
+          "evidence_payload_role": "primary",
           "gate_id": "docking-review-geometry",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "claim-boundary",
+          "evidence_payload_role": "primary",
           "gate_id": "docking-review-score-semantics",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         },
         {
           "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
-          "evidence_payload_role": "semantic-metadata",
+          "evaluator_type": "payload-derived",
+          "evidence_payload_role": "primary",
           "gate_id": "docking-review-output-integrity",
-          "metric_key": "semantic_violation_count",
-          "metric_type": "integer",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
           "operator": "equals",
-          "threshold": 0
+          "threshold": "accepted"
         }
       ],
       "payloads": [
@@ -1320,10 +1092,8 @@
         }
       ],
       "port": "docking_review_report",
+      "protocol_version": "2.0.0",
       "required_postflight_gate_ids": [
-        "docking-preparation-manifest",
-        "docking-preparation-identity",
-        "docking-preparation-parameters",
         "docking-review-result-accounting",
         "docking-review-chemical-identity",
         "docking-review-geometry",
@@ -1332,7 +1102,7 @@
       ],
       "semantic_profile": "scientific-report-v1",
       "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-      "semantic_validator_sha256": "202d5e1bc4eeb42503c2edfd380b5db0b6cd3a84aa7b45f22bc2628e4f22e148"
+      "semantic_validator_sha256": "4673b16e783d183638225f25559e3c052aa875248982dbf1b04941c376100d02"
     }
   ],
   "orchestration": {

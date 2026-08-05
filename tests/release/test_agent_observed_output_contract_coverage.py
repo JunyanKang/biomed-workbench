@@ -6,6 +6,7 @@ from pathlib import Path
 from biomed_workbench.modules.index import BUILTIN_ROOT
 from biomed_workbench.modules.registry import ModuleRegistry
 from biomed_workbench.modules.semantic_output_validation import (
+    evaluate_structured_gate,
     registered_semantic_profiles,
     semantic_profile_for,
     semantic_profile_is_implemented,
@@ -43,9 +44,19 @@ class AgentObservedOutputContractCoverageTests(unittest.TestCase):
                 contracts = {item.port: item for item in manifest.observed_output_contracts}
                 self.assertEqual(set(contracts), {item.name for item in manifest.output_artifacts})
                 blocking = {item.id for item in manifest.quality_gates if item.blocks_interpretation}
+                assigned = {
+                    gate_id
+                    for contract in contracts.values()
+                    for gate_id in contract.required_postflight_gate_ids
+                }
+                self.assertTrue(blocking <= assigned)
+                self.assertEqual(
+                    sum(len(contract.required_postflight_gate_ids) for contract in contracts.values()),
+                    len(assigned),
+                )
+                self.assertEqual({item.protocol_version for item in contracts.values()}, {"2.0.0"})
                 for contract in contracts.values():
                     port = next(item for item in manifest.output_artifacts if item.name == contract.port)
-                    self.assertTrue(blocking <= set(contract.required_postflight_gate_ids))
                     self.assertTrue(any(item.minimum > 0 for item in contract.payloads))
                     self.assertFalse(contract.content_schema.get("additionalProperties", True))
                     self.assertTrue(contract.container_reload_validator)
@@ -66,9 +77,11 @@ class AgentObservedOutputContractCoverageTests(unittest.TestCase):
                             ),
                             (manifest.id, port.name, format_contract.name),
                         )
-                    self.assertTrue(all(item.metric_key == "semantic_violation_count" for item in contract.gate_evaluators))
-                    self.assertTrue(all(item.metric_type == "integer" for item in contract.gate_evaluators))
-                    self.assertTrue(all(item.operator == "equals" and item.threshold == 0 for item in contract.gate_evaluators))
+                    self.assertTrue(all(item.evidence_payload_role == "primary" for item in contract.gate_evaluators))
+                    self.assertTrue(all(item.evaluator_type in {
+                        "payload-derived", "tool-native", "provenance-design", "system-provenance", "claim-boundary"
+                    } for item in contract.gate_evaluators))
+                    self.assertFalse(any(item.metric_key == "semantic_violation_count" for item in contract.gate_evaluators))
                     self.assertIn("semantic-metadata", {item.role for item in contract.payloads if item.minimum > 0})
                     source_data = next(item for item in contract.payloads if item.role == "source-data")
                     self.assertIn("application/json", source_data.media_types)
@@ -80,6 +93,57 @@ class AgentObservedOutputContractCoverageTests(unittest.TestCase):
         }
         self.assertEqual(used_profiles, set(registered_semantic_profiles()))
         self.assertLess(len(used_profiles), sum(len(item.observed_output_contracts) for item in agent_modules))
+
+    def test_family_admission_cannot_promote_any_non_system_manifest_gate(self):
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
+        digest = "a" * 64
+        payloads = ({
+            "role": "primary", "path": "content-addressed-object", "media_type": "application/json", "sha256": digest,
+        },)
+        for manifest in (item for item in registry.all() if item.access == "agent_generated"):
+            for contract in manifest.observed_output_contracts:
+                semantic_result = {
+                    "family_admission_status": "passed",
+                    "profile": contract.semantic_profile,
+                    "family_admission": True,
+                    "evidence_payload_digests": {"primary": digest},
+                }
+                for evaluator in contract.gate_evaluators:
+                    with self.subTest(module=manifest.id, port=contract.port, gate=evaluator.gate_id):
+                        result = evaluate_structured_gate(
+                            payloads=payloads,
+                            gate_id=evaluator.gate_id,
+                            evaluator_type=evaluator.evaluator_type,
+                            evidence_payload_role=evaluator.evidence_payload_role,
+                            metric_key=evaluator.metric_key,
+                            metric_type=evaluator.metric_type,
+                            operator=evaluator.operator,
+                            threshold=evaluator.threshold,
+                            semantic_result=semantic_result,
+                        )
+                        if evaluator.evaluator_type == "system-provenance":
+                            self.assertEqual(result["status"], "passed")
+                        else:
+                            self.assertEqual(result["status"], "requires_review")
+
+    def test_high_risk_gates_are_bound_to_the_output_that_can_support_review(self):
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
+        expected = {
+            ("protein-complex-docking", "structure-publication-figures"): "structure_figure_bundle",
+            ("single-cell-batch-integration", "integration-batch-mixing"): "integration_benchmark",
+            ("single-cell-batch-integration", "integration-selection-sensitivity"): "integration_decision",
+            ("single-cell-trajectory-velocity", "velocity-confidence"): "trajectory_velocity_validation",
+            ("docking-pose-review", "docking-preparation-parameters"): "validated_docking_config",
+            ("docking-pose-review", "docking-review-geometry"): "docking_review_report",
+        }
+        for (module_id, gate_id), port in expected.items():
+            manifest = registry.get(module_id)
+            observed = next(
+                contract.port
+                for contract in manifest.observed_output_contracts
+                if gate_id in contract.required_postflight_gate_ids
+            )
+            self.assertEqual(observed, port)
 
 
 if __name__ == "__main__":
