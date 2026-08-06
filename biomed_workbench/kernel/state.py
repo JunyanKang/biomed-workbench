@@ -232,6 +232,11 @@ class StateMigrationRecord:
                 raise ValueError("state migration contract upgrade provenance is invalid")
             if self.contract_version != self.contract_upgrade.to_contract_version:
                 raise ValueError("state migration contract upgrade target differs from its migration")
+            if not legacy_maps or not recoveries:
+                raise ValueError(
+                    "state migration contract upgrade requires verified legacy maps "
+                    "and admission recoveries"
+                )
         basis = {
             "id": self.id,
             "from_schema_version": self.from_schema_version,

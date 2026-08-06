@@ -1,5 +1,6 @@
 import json
 import re
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -32,6 +33,36 @@ class ReleaseSurfaceTests(unittest.TestCase):
         self.assertTrue((ROOT / "LICENSE").exists())
         self.assertEqual(plugin["license"], "Apache-2.0")
         self.assertEqual(plugin["version"], catalog["version"])
+
+    def test_top_level_help_discovers_the_complete_project_command_surface(self):
+        completed = subprocess.run(
+            [str(ROOT / "tools" / "workbench"), "help"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        for command in (
+            "prepare-revision",
+            "migrate-state-v1",
+            "upgrade-state-migration-1-1",
+        ):
+            self.assertIn(command, completed.stdout)
+        self.assertIn("tools/workbench project --help", completed.stdout)
+
+        project_help = subprocess.run(
+            [str(ROOT / "tools" / "workbench"), "project", "--help"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        for command in (
+            "prepare-revision",
+            "migrate-state-v1",
+            "upgrade-state-migration-1-1",
+        ):
+            self.assertIn(command, project_help.stdout)
 
     def test_independent_modules_replace_workflow_reference_bridges(self):
         module_files = sorted((ROOT / "biomed_workbench" / "modules" / "builtin").glob("*/module.json"))

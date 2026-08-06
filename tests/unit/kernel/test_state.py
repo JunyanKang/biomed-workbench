@@ -376,6 +376,18 @@ class ProjectStateTests(unittest.TestCase):
             prior_bytes,
         )
 
+        impossible_upgrade = migration.to_dict()
+        impossible_upgrade.pop("legacy_evidence_maps")
+        impossible_upgrade.pop("legacy_analysis_admission_recoveries")
+        impossible_upgrade["digest"] = digest_value({
+            key: value for key, value in impossible_upgrade.items() if key != "digest"
+        })
+        with self.assertRaisesRegex(
+            ValueError,
+            "requires verified legacy maps and admission recoveries",
+        ):
+            StateMigrationRecord.from_dict(impossible_upgrade)
+
     def test_contract_1_1_upgrade_rejects_changed_map_unknown_map_and_unknown_node(self):
         root, prior = self._contract_1_1_fixture()
         with tempfile.TemporaryDirectory() as temporary:
