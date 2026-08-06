@@ -27,6 +27,7 @@ NODE_STATUSES = frozenset(
 PLAN_TYPES = frozenset({"single", "serial", "parallel", "mixed"})
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+._-]*$")
 _DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
+REVISION_ACTIONS = frozenset({"rerun-same-method", "rerun-adjusted-parameters", "switch-method"})
 
 
 def _ids(values: tuple[str, ...], location: str, *, allow_empty: bool = True) -> tuple[str, ...]:
@@ -55,6 +56,59 @@ def _meaningful(value: str, location: str, minimum: int = 12) -> str:
 
 
 @dataclass(frozen=True)
+class RevisionTargetContract:
+    """Frozen node-level replacement identity prepared against a live registry."""
+
+    id: str
+    source_node_id: str
+    target_node_id: str
+    action: str
+    source_module_id: str
+    target_module_id: str
+    source_manifest_digest: str
+    target_manifest_digest: str
+    alternative_relation_digest: str
+    input_contract_digest: str
+    output_contract_digest: str
+    source_request_digest: str
+    target_request_digest: str
+    rationale: str
+    digest: str
+
+    def __post_init__(self) -> None:
+        for field in ("id", "source_node_id", "target_node_id", "source_module_id", "target_module_id"):
+            object.__setattr__(self, field, validate_identifier(getattr(self, field), f"revision_contract.{field}"))
+        if self.source_node_id == self.target_node_id:
+            raise ValueError("revision contract source and target nodes must differ")
+        if self.action not in REVISION_ACTIONS:
+            raise ValueError("revision contract action is unsupported")
+        for field in (
+            "source_manifest_digest", "target_manifest_digest", "alternative_relation_digest",
+            "input_contract_digest", "output_contract_digest", "source_request_digest",
+            "target_request_digest", "digest",
+        ):
+            if not isinstance(getattr(self, field), str) or not _DIGEST_RE.fullmatch(getattr(self, field)):
+                raise ValueError(f"revision contract {field} must be SHA-256")
+        object.__setattr__(self, "rationale", _meaningful(self.rationale, "revision_contract.rationale"))
+        basis = {field: getattr(self, field) for field in self.__dataclass_fields__ if field != "digest"}
+        if self.digest != digest_value(basis):
+            raise ValueError("revision contract digest does not match its frozen content")
+
+    @classmethod
+    def create(cls, **values: Any) -> "RevisionTargetContract":
+        if "digest" in values:
+            raise ValueError("revision contract create computes its digest")
+        return cls(**values, digest=digest_value(values))
+
+    def to_dict(self) -> dict[str, object]:
+        return {field: getattr(self, field) for field in self.__dataclass_fields__}
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "RevisionTargetContract":
+        return cls(**dict(payload))
+
+
+@dataclass(frozen=True)
 class PlanNode:
     id: str
     module_id: str
@@ -70,6 +124,8 @@ class PlanNode:
     attempt: int
     planned_request_digest: str | None = None
     revision_of_node_id: str | None = None
+    parameter_overrides: Mapping[str, Any] | None = None
+    revision_contract: RevisionTargetContract | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "plan_node.id"))
@@ -114,6 +170,23 @@ class PlanNode:
             )
             if self.revision_of_node_id == self.id:
                 raise ValueError("plan node cannot be its own revision target")
+        overrides = freeze_mapping(self.parameter_overrides or {})
+        object.__setattr__(self, "parameter_overrides", overrides)
+        if self.revision_contract is not None:
+            if not isinstance(self.revision_contract, RevisionTargetContract):
+                raise ValueError("plan node revision contract is invalid")
+            if (
+                self.revision_of_node_id is None
+                or self.revision_contract.source_node_id != self.revision_of_node_id
+                or self.revision_contract.target_node_id != self.id
+                or self.revision_contract.target_module_id != self.module_id
+                or self.revision_contract.target_request_digest != self.planned_request_digest
+            ):
+                raise ValueError("plan node differs from its frozen revision contract")
+        elif self.revision_of_node_id is not None:
+            raise ValueError("revision target node requires a frozen revision contract")
+        if self.revision_of_node_id is None and (overrides or self.planned_request_digest is not None):
+            raise ValueError("only a revision target may freeze parameter overrides or request identity")
 
     def to_dict(self) -> dict[str, object]:
         payload = {
@@ -134,6 +207,10 @@ class PlanNode:
             payload["planned_request_digest"] = self.planned_request_digest
         if self.revision_of_node_id is not None:
             payload["revision_of_node_id"] = self.revision_of_node_id
+        if self.parameter_overrides:
+            payload["parameter_overrides"] = thaw(self.parameter_overrides)
+        if self.revision_contract is not None:
+            payload["revision_contract"] = self.revision_contract.to_dict()
         return payload
 
     @classmethod
@@ -141,6 +218,9 @@ class PlanNode:
         values = dict(payload)
         values.setdefault("planned_request_digest", None)
         values.setdefault("revision_of_node_id", None)
+        values.setdefault("parameter_overrides", {})
+        contract = values.get("revision_contract")
+        values["revision_contract"] = RevisionTargetContract.from_dict(contract) if contract is not None else None
         for field in (
             "dependencies",
             "target_hypothesis_ids",

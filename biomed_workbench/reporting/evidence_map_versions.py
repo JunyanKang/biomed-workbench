@@ -172,6 +172,7 @@ def verify_evidence_map_publication_store(
     map_path = output_root / "versions" / f"v{publication.version.version}" / "scientific-evidence-map.json"
     payload = json.loads(map_path.read_text(encoding="utf-8"))
     expected = {
+        "state_digest": publication.source_state_digest,
         "digest": publication.map_digest,
         "edge_table_digest": publication.edge_table_digest,
         "dependency_bundle_digest": publication.dependency_bundle_digest,

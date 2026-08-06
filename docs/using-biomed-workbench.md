@@ -36,6 +36,8 @@ After execution, register every data, table, model, Figure, and panel in the sci
 
 The public single-module entry atomically persists replayable project state and reports computational execution separately from scientific-review status. An unfinished active plan must continue through execution ingestion, review, decision, or resume; a completed plan may admit a later analysis on the same append-only ledger. An external packaged workflow becomes reviewable only when its module, version, compatibility row, runtime versions, exit status, planned output identities, and content-addressed payloads match the recorded handoff.
 
+If review calls for a rerun or method change, the agent prepares a new plan version before recording that decision. The replacement is checked against the live method registry, carries the exact changed parameters and rationale, and receives a new analysis admission before execution. All outputs from the original analysis move together to the same replacement; a table and figure from one execution cannot be sent to conflicting reruns. Older projects that already published an evidence map are migrated to a new state file only after the old map files verify, and formal delivery resumes only after an explicit new map publication continues that history.
+
 ## Project Checkpoints
 
 For broad projects, the workbench maintains explicit checkpoints rather than treating the first successful run as completion:

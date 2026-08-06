@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Mapping
 from .identity import digest_value
 
 if TYPE_CHECKING:
+    from .plans import ResearchDAG
     from .state import ProjectState
 
 
@@ -27,6 +28,36 @@ class DeliveryPrerequisiteScope:
             "covered_artifact_ids": list(self.covered_artifact_ids),
             "digest": self.digest,
         }
+
+
+def research_plan_is_resolved(state: "ProjectState", plan: "ResearchDAG") -> bool:
+    """Return whether every node has one scientifically valid terminal resolution."""
+    from .scientific_dependency import REEXECUTE_DECISION_ACTIONS
+
+    selected_revision_ids = {
+        node_id
+        for decision in state.scientific_decisions
+        if decision.action in REEXECUTE_DECISION_ACTIONS
+        for node_id in decision.next_plan_node_ids
+    }
+    for node in plan.nodes:
+        if node.status == "completed":
+            continue
+        if (
+            node.revision_of_node_id is not None
+            and node.id not in selected_revision_ids
+            and node.status == "skipped"
+        ):
+            continue
+        if node.status == "superseded" and any(
+            decision.action in REEXECUTE_DECISION_ACTIONS
+            and decision.artifact_id in node.planned_output_artifact_ids.values()
+            and set(decision.next_plan_node_ids) <= selected_revision_ids
+            for decision in state.scientific_decisions
+        ):
+            continue
+        return False
+    return True
 
 
 def _artifact_gate_requirements(state: "ProjectState", artifact_id: str) -> tuple[object, str | None, tuple[dict[str, object], ...]]:
@@ -190,25 +221,62 @@ def validate_revision_target_contract(
     target_ids = tuple(getattr(decision, "next_plan_node_ids"))
     if len(target_ids) != 1:
         raise ValueError("rerun and method-switch decisions require exactly one revision target")
-    active_plan = next((item for item in state.plans if item.id == state.active_plan_id), None)
-    if active_plan is None:
-        raise ValueError("revision target requires one active research plan")
+    matching_plans = tuple(
+        plan
+        for plan in state.plans
+        if target_ids[0] in {node.id for node in plan.nodes}
+        and str(getattr(decision, "artifact_id")) in {
+            artifact_id
+            for node in plan.nodes
+            for artifact_id in node.planned_output_artifact_ids.values()
+        }
+    )
+    if require_pending:
+        matching_plans = tuple(plan for plan in matching_plans if plan.id == state.active_plan_id)
+    if not matching_plans:
+        raise ValueError("revision target requires one exact research-plan revision")
+    contract_plan = matching_plans[0]
     producer_by_artifact = {
         artifact_id: node
-        for node in active_plan.nodes
+        for node in contract_plan.nodes
         for artifact_id in node.planned_output_artifact_ids.values()
     }
     source = producer_by_artifact.get(str(getattr(decision, "artifact_id")))
-    target = next((node for node in active_plan.nodes if node.id == target_ids[0]), None)
+    target = next((node for node in contract_plan.nodes if node.id == target_ids[0]), None)
     if source is None or target is None or source.id == target.id:
-        raise ValueError("revision target must replace the active source node with a distinct node")
+        raise ValueError("revision target must replace its source node with a distinct node")
     if require_pending and target.status not in {"pending", "ready"}:
         raise ValueError("revision target must remain pending until its source decision is recorded")
     if target.revision_of_node_id != source.id:
         raise ValueError("revision target must explicitly name the source node it replaces")
+    contract = target.revision_contract
+    if contract is None:
+        raise ValueError("revision target lacks a frozen node-level contract")
+    if (
+        getattr(decision, "revision_contract_id", None) != contract.id
+        or contract.action != action
+        or contract.source_node_id != source.id
+        or contract.target_node_id != target.id
+        or contract.source_module_id != source.module_id
+        or contract.target_module_id != target.module_id
+        or contract.target_request_digest != target.planned_request_digest
+    ):
+        raise ValueError("scientific decision differs from its frozen node-level revision contract")
+    source_output_ids = set(source.planned_output_artifact_ids.values())
+    sibling_decisions = tuple(
+        item for item in state.scientific_decisions
+        if item.artifact_id in source_output_ids
+    )
+    if any(
+        item.action != action
+        or item.revision_contract_id != contract.id
+        or tuple(item.next_plan_node_ids) != (target.id,)
+        for item in sibling_decisions
+    ):
+        raise ValueError("one producing node cannot split outputs across conflicting revision decisions")
     ordinary_dependents = tuple(
         node.id
-        for node in active_plan.nodes
+        for node in contract_plan.nodes
         if source.id in node.dependencies and node.revision_of_node_id is None
     )
     if ordinary_dependents:
@@ -240,6 +308,8 @@ def validate_revision_target_contract(
     if observed is None:
         raise ValueError("revision source lacks an observed parameter identity")
     source_request_digest = observed.parameters_digest
+    if contract.source_request_digest != source_request_digest:
+        raise ValueError("revision contract source request differs from the observed execution")
     if action in {"rerun-same-method", "rerun-adjusted-parameters"}:
         if source.module_id != target.module_id or source.input_bindings != target.input_bindings:
             raise ValueError("same-method reruns require the same module and input-port bindings")
@@ -250,8 +320,31 @@ def validate_revision_target_contract(
     elif source.module_id == target.module_id:
         raise ValueError("method-switch target must use a distinct module")
     if registry is not None:
+        from ..modules.contract import manifest_to_dict, module_manifest_digest
+
         source_manifest = registry.get(source.module_id)
         target_manifest = registry.get(target.module_id)
+        source_manifest_payload = manifest_to_dict(source_manifest)
+        target_manifest_payload = manifest_to_dict(target_manifest)
+        expected_contract_fields = {
+            "source_manifest_digest": module_manifest_digest(source_manifest),
+            "target_manifest_digest": module_manifest_digest(target_manifest),
+            "alternative_relation_digest": digest_value({
+                "source_module_id": source.module_id,
+                "declared_alternatives": source_manifest_payload["alternatives"],
+                "target_module_id": target.module_id,
+            }),
+            "input_contract_digest": digest_value({
+                "target_ports": target_manifest_payload["input_artifacts"],
+                "bindings": dict(target.input_bindings),
+            }),
+            "output_contract_digest": digest_value({
+                "source_types": list(source.expected_output_artifact_types),
+                "target_ports": target_manifest_payload["output_artifacts"],
+            }),
+        }
+        if any(getattr(contract, field) != value for field, value in expected_contract_fields.items()):
+            raise ValueError("live module registry differs from the frozen revision contract")
         if action == "switch-method" and target.module_id not in source_manifest.alternatives:
             raise ValueError("method-switch target is not a declared source-module alternative")
         artifacts = {item.id: item for item in state.artifacts}
@@ -265,7 +358,7 @@ def validate_revision_target_contract(
             raise ValueError("revision target inputs are incompatible with its registered module")
         if (
             set(target.planned_output_artifact_ids) != {port.name for port in target_manifest.output_artifacts}
-            or tuple(port.artifact_type for port in target_manifest.output_artifacts)
+            or tuple(dict.fromkeys(port.artifact_type for port in target_manifest.output_artifacts))
             != target.expected_output_artifact_types
         ):
             raise ValueError("revision target outputs are incompatible with its registered module")

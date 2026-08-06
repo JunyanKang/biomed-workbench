@@ -11,6 +11,7 @@ from typing import Callable
 from ..kernel.evidence import EvidenceRecord
 from ..kernel.execution_receipts import ArtifactReloadReceipt, ObservedExecutionReceipt, ScientificReviewReceipt
 from ..kernel.execution_chain import (
+    research_plan_is_resolved,
     validate_node_execution_chain,
     validate_revision_target_contract,
     validated_delivery_publication_is_current,
@@ -462,30 +463,7 @@ class ResearchController:
 
     @staticmethod
     def _plan_is_resolved(state: ProjectState, plan: ResearchDAG) -> bool:
-        selected_revision_ids = {
-            node_id
-            for decision in state.scientific_decisions
-            if decision.action in REEXECUTE_DECISION_ACTIONS
-            for node_id in decision.next_plan_node_ids
-        }
-        for node in plan.nodes:
-            if node.status == "completed":
-                continue
-            if (
-                node.revision_of_node_id is not None
-                and node.id not in selected_revision_ids
-                and node.status == "skipped"
-            ):
-                continue
-            if node.status == "superseded" and any(
-                decision.action in REEXECUTE_DECISION_ACTIONS
-                and decision.artifact_id in node.planned_output_artifact_ids.values()
-                and set(decision.next_plan_node_ids) <= selected_revision_ids
-                for decision in state.scientific_decisions
-            ):
-                continue
-            return False
-        return True
+        return research_plan_is_resolved(state, plan)
 
     @staticmethod
     def _decision_triggered_node_is_ready(state: ProjectState, plan: ResearchDAG, node: PlanNode) -> bool:

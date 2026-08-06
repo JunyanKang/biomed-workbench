@@ -170,6 +170,8 @@ def _inputs(manifest: ModuleManifest, node: PlanNode, artifacts: dict[str, Scien
             if key in merged and merged[key] != value:
                 raise ValueError(f"input artifacts contain conflicting field: {key}")
             merged[key] = thaw(value)
+    for key, value in node.parameter_overrides.items():
+        merged[str(key)] = thaw(value)
     return merged, tuple(bound)
 
 
@@ -468,7 +470,7 @@ def execute_node(
                     safe_error_class=None,
                     execution_handoff=handoff,
                 )
-            direct_request_digest = digest_value(thaw(invocation.provenance.get("parameters", {})))
+            direct_request_digest = str(invocation.provenance["parameters_digest"])
             if node.planned_request_digest is not None and direct_request_digest != node.planned_request_digest:
                 raise ValueError("observed module parameters differ from the plan node request identity")
             output_artifacts = _output_artifacts(state, node, manifest, invocation.output, invocation.provenance, quality)

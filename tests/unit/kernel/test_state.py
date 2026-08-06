@@ -1,10 +1,16 @@
 import copy
+import hashlib
 import json
+import tempfile
 import unittest
 from pathlib import Path
 
 from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
-from biomed_workbench.kernel.state import ProjectState, _migrate_v1_adjudication, apply_event
+from biomed_workbench.kernel.state import ProjectState, _legacy_v1_basis, _migrate_v1_adjudication, apply_event
+from biomed_workbench.kernel.execution_chain import delivery_slice_digest
+from biomed_workbench.kernel.identity import digest_value
+from biomed_workbench.kernel.scientific_evidence_map import EvidenceMapPublication, EvidenceMapVersion
+from biomed_workbench.orchestration.state_migration import migrate_map_bound_v1_state
 from biomed_workbench.kernel.hypotheses import revise_hypothesis
 from tests.unit.kernel.test_artifacts import artifact
 from tests.unit.kernel.test_context import project_context
@@ -61,6 +67,162 @@ def populated_state():
 
 
 class ProjectStateTests(unittest.TestCase):
+    @staticmethod
+    def _map_bound_legacy_fixture(root: Path):
+        fixture = Path(__file__).parents[2] / "fixtures" / "project_state_v1_gate_adjudications.json"
+        legacy = json.loads(fixture.read_text(encoding="utf-8"))
+        edge_digest = digest_value([])
+        map_basis = {
+            "project_id": legacy["context"]["project_id"],
+            "version": {
+                "version": "1.0.0", "revision": 1, "parent_map_digest": None,
+                "change_type": "initial",
+                "change_summary_zh": "发布旧版项目状态绑定的首个证据地图版本。",
+                "change_summary_en": "Publish the first evidence-map version bound to the legacy project state.",
+                "map_kind": "project-snapshot",
+            },
+            "state_digest": legacy["state_digest"],
+            "dependency_bundle_digest": digest_value("legacy-dependency-bundle"),
+            "map_kind": "project-snapshot",
+            "delivery_slice_digest": digest_value("legacy-delivery-slice"),
+            "active_evidence_artifact_ids": [],
+            "covered_plan_id": None,
+            "covered_node_ids": [],
+            "covered_artifact_ids": [],
+            "authorized_delivery_node_ids": [],
+            "delivery_scope_digest": digest_value("legacy-delivery-scope"),
+            "units": [],
+            "edges": [],
+            "edge_table_digest": edge_digest,
+        }
+        map_payload = {**map_basis, "digest": digest_value(map_basis)}
+        publication = EvidenceMapPublication(
+            id=f"evidence-map-1-{map_payload['digest'][:16]}",
+            version=EvidenceMapVersion.from_dict(map_basis["version"]),
+            map_digest=map_payload["digest"],
+            edge_table_digest=edge_digest,
+            source_state_digest=legacy["state_digest"],
+            dependency_bundle_digest=map_basis["dependency_bundle_digest"],
+            map_kind="project-snapshot",
+            delivery_slice_digest=map_basis["delivery_slice_digest"],
+            active_artifact_ids=(),
+            covered_plan_id=None,
+            covered_node_ids=(),
+            covered_artifact_ids=(),
+            authorized_delivery_node_ids=(),
+            delivery_scope_digest=map_basis["delivery_scope_digest"],
+        )
+        version_root = root / "versions" / "v1.0.0"
+        version_root.mkdir(parents=True)
+        map_path = version_root / "scientific-evidence-map.json"
+        map_path.write_text(json.dumps(map_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        file_sha = hashlib.sha256(map_path.read_bytes()).hexdigest()
+        index = {
+            "schema_version": 1,
+            "entries": [{
+                "project_id": legacy["context"]["project_id"],
+                "version": "1.0.0", "revision": 1, "parent_map_digest": None,
+                "change_type": "initial",
+                "change_summary_zh": "发布旧版项目状态绑定的首个证据地图版本。",
+                "change_summary_en": "Publish the first evidence-map version bound to the legacy project state.",
+                "map_digest": publication.map_digest,
+                "edge_table_digest": publication.edge_table_digest,
+                "files": {"scientific-evidence-map.json": file_sha},
+            }],
+        }
+        (root / "evidence-map-version-index.json").write_text(
+            json.dumps(index, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        (root / "scientific-evidence-map.current.json").write_text(
+            json.dumps({
+                "project_id": legacy["context"]["project_id"],
+                "version": "1.0.0", "revision": 1,
+                "map_digest": publication.map_digest,
+                "edge_table_digest": publication.edge_table_digest,
+            }, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        event_payload = {"publication": publication.to_dict()}
+        sequence = legacy["revision"] + 1
+        identity_basis = {
+            "sequence": sequence,
+            "event_type": "evidence_map_published",
+            "payload": event_payload,
+            "prior_state_digest": legacy["state_digest"],
+        }
+        event = {
+            "id": f"event-{sequence:06d}-{digest_value(identity_basis)[:12]}",
+            "sequence": sequence,
+            "event_type": "evidence_map_published",
+            "payload": event_payload,
+            "rationale": "Publish the verified legacy evidence map before schema migration.",
+            "trigger_finding_ids": [],
+            "affected_artifact_ids": [],
+            "affected_hypothesis_ids": [],
+            "superseded_action_ids": [],
+            "replacement_action_ids": [],
+            "prior_results_valid": True,
+            "prior_state_digest": legacy["state_digest"],
+            "resulting_state_digest": "0" * 64,
+        }
+        legacy["decisions"].append(event)
+        legacy["evidence_map_versions"] = [publication.to_dict()]
+        legacy["revision"] = sequence
+        legacy["state_digest"] = digest_value(_legacy_v1_basis(legacy))
+        legacy["decisions"][-1]["resulting_state_digest"] = legacy["state_digest"]
+        return legacy, publication
+
+    def test_map_bound_v1_migrates_non_destructively_then_requires_explicit_republication(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            legacy, old_publication = self._map_bound_legacy_fixture(root)
+            migrated = migrate_map_bound_v1_state(legacy, evidence_map_root=root)
+
+            self.assertEqual(migrated.schema_version, 2)
+            self.assertEqual(migrated.revision, legacy["revision"])
+            self.assertEqual(migrated.evidence_map_versions, ())
+            self.assertEqual(len(migrated.state_migrations[0].legacy_evidence_maps), 1)
+            self.assertEqual(
+                migrated.state_migrations[0].legacy_evidence_maps[0].publication,
+                old_publication,
+            )
+            self.assertEqual(migrated.decisions[-1].event_type, "legacy_evidence_map_verified")
+            self.assertEqual(ProjectState.from_dict(migrated.to_dict()), migrated)
+
+            new_publication = EvidenceMapPublication(
+                id="evidence-map-2-republished",
+                version=EvidenceMapVersion(
+                    version="1.0.1", revision=2,
+                    parent_map_digest=old_publication.map_digest,
+                    change_type="patch",
+                    change_summary_zh="将已验证旧地图明确重新发布到新版项目状态。",
+                    change_summary_en="Explicitly republish the verified legacy map lineage against the migrated project state.",
+                    map_kind="project-snapshot",
+                ),
+                map_digest=digest_value("republished-map"),
+                edge_table_digest=digest_value([]),
+                source_state_digest=migrated.state_digest,
+                dependency_bundle_digest=digest_value("republished-dependency-bundle"),
+                map_kind="project-snapshot",
+                delivery_slice_digest=delivery_slice_digest(migrated),
+                active_artifact_ids=(), covered_plan_id=None, covered_node_ids=(),
+                covered_artifact_ids=(), authorized_delivery_node_ids=(),
+                delivery_scope_digest=digest_value("republished-delivery-scope"),
+            )
+            republished = apply_event(
+                migrated,
+                "evidence_map_published",
+                {"publication": new_publication.to_dict()},
+                rationale="Republish the evidence map against the migrated v2 state.",
+            )
+            self.assertEqual(republished.evidence_map_versions[-1], new_publication)
+            self.assertEqual(ProjectState.from_dict(republished.to_dict()), republished)
+
+            map_path = root / "versions" / "v1.0.0" / "scientific-evidence-map.json"
+            map_path.write_text(map_path.read_text(encoding="utf-8") + " ", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "missing or changed"):
+                migrate_map_bound_v1_state(legacy, evidence_map_root=root)
+
     def test_previous_release_v1_state_migrates_to_v2_with_exact_receipt_bindings(self):
         fixture = Path(__file__).parents[2] / "fixtures" / "project_state_v1_gate_adjudications.json"
         legacy = json.loads(fixture.read_text(encoding="utf-8"))

@@ -33,11 +33,14 @@ from biomed_workbench.kernel.scientific_evidence_map import (  # noqa: E402
     build_scientific_evidence_map,
 )
 from biomed_workbench.kernel.state import ProjectState, apply_event  # noqa: E402
+from biomed_workbench.kernel.execution_chain import validate_revision_target_contract  # noqa: E402
 from biomed_workbench.modules.compatibility import detect_environment  # noqa: E402
 from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 from biomed_workbench.orchestration.controller import ResearchController  # noqa: E402
 from biomed_workbench.orchestration.execution_ingest import ingest_execution_bundle  # noqa: E402
+from biomed_workbench.orchestration.revision import prepare_plan_revision  # noqa: E402
+from biomed_workbench.orchestration.state_migration import migrate_map_bound_v1_state  # noqa: E402
 from biomed_workbench.reporting.evidence_map_versions import (  # noqa: E402
     abort_prepared_evidence_map_publication,
     complete_evidence_map_publication_recovery,
@@ -131,6 +134,12 @@ def main() -> int:
         command = commands.add_parser(name)
         command.add_argument("--state", required=True, type=Path)
         command.add_argument("--input", required=True, type=Path)
+    prepare_revision = commands.add_parser(
+        "prepare-revision",
+        help="prepare a registry-validated child plan after source-output review and before decision",
+    )
+    prepare_revision.add_argument("--state", required=True, type=Path)
+    prepare_revision.add_argument("--input", required=True, type=Path)
     mapping = commands.add_parser("map", help="build, validate, publish, and register an evidence-map version")
     mapping.add_argument("--state", required=True, type=Path)
     mapping.add_argument("--workspace", required=True, type=Path)
@@ -161,8 +170,35 @@ def main() -> int:
         help="immutable evidence-map publication root; required before a publication delivery can be released",
     )
     resume.add_argument("--allow-mutation", action="store_true")
+    migrate = commands.add_parser(
+        "migrate-state-v1",
+        help="verify a map-bound v1 state and write a distinct v2 state awaiting map republication",
+    )
+    migrate.add_argument("--legacy-state", required=True, type=Path)
+    migrate.add_argument("--state", required=True, type=Path)
+    migrate.add_argument("--evidence-map-root", required=True, type=Path)
     args = parser.parse_args()
 
+    if args.command == "migrate-state-v1":
+        if args.state.exists():
+            raise ValueError("state migration never overwrites an existing target")
+        if args.legacy_state.resolve() == args.state.resolve():
+            raise ValueError("state migration target must differ from the legacy state")
+        state = migrate_map_bound_v1_state(
+            _read(args.legacy_state),
+            evidence_map_root=args.evidence_map_root.resolve(strict=True),
+        )
+        _write(args.state, state.to_dict())
+        summary = {
+            **_summary(state),
+            "migration_status": "awaiting-evidence-map-republication",
+            "legacy_state_preserved": True,
+            "verified_legacy_evidence_maps": sum(
+                len(item.legacy_evidence_maps) for item in state.state_migrations
+            ),
+        }
+        print(json.dumps(summary, indent=2, sort_keys=True, ensure_ascii=False))
+        return 0
     if args.command == "init":
         if args.state.exists():
             raise ValueError("state file already exists; initialization never overwrites project history")
@@ -218,7 +254,43 @@ def main() -> int:
             state = _record(state, "artifact_review_recorded", value, field="review", rationale="Record a bilingual scientific artifact review.")
         else:
             value = ScientificDecision.from_dict(payload)
+            if value.action in {"rerun-same-method", "rerun-adjusted-parameters", "switch-method"}:
+                validate_revision_target_contract(
+                    state,
+                    value,
+                    registry=ModuleRegistry.discover(BUILTIN_ROOT),
+                    require_pending=True,
+                )
             state = _record(state, "scientific_decision_recorded", value, field="decision", rationale="Record the explicit retain, exclude, rerun, or revise decision.")
+    elif args.command == "prepare-revision":
+        state = _state(args.state)
+        payload = _read(args.input)
+        required = {
+            "source_artifact_id", "action", "target_module_id", "parameter_overrides", "rationale"
+        }
+        if set(payload) != required or not isinstance(payload["parameter_overrides"], dict):
+            raise ValueError("prepare-revision input fields are incomplete or unsupported")
+        revised = prepare_plan_revision(
+            state,
+            ModuleRegistry.discover(BUILTIN_ROOT),
+            source_artifact_id=str(payload["source_artifact_id"]),
+            action=str(payload["action"]),
+            target_module_id=(str(payload["target_module_id"]) if payload["target_module_id"] is not None else None),
+            parameter_overrides=payload["parameter_overrides"],
+            rationale=str(payload["rationale"]),
+        )
+        state = apply_event(
+            state,
+            "plan_revised",
+            {"plan": revised.to_dict(), "activate": True},
+            rationale="Freeze a registry-validated node-level replacement after scientific review.",
+            superseded_action_ids=tuple(
+                node.revision_contract.source_node_id
+                for node in revised.nodes
+                if node.revision_contract is not None
+            ),
+            replacement_action_ids=tuple(node.id for node in revised.nodes),
+        )
     elif args.command == "map":
         state = _state(args.state)
         version = EvidenceMapVersion.from_dict(_read(args.version))

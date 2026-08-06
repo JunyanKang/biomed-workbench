@@ -12,6 +12,7 @@ from typing import Any, Callable, Mapping
 from .kernel.artifact_store import ProjectArtifactStore
 from .kernel.artifacts import ScientificArtifact
 from .kernel.context import ProjectContext
+from .kernel.execution_chain import research_plan_is_resolved
 from .kernel.hypotheses import Hypothesis
 from .kernel.identity import digest_value
 from .kernel.plans import PlanNode, ResearchDAG
@@ -343,7 +344,7 @@ def execute_public_module(
         if state.context != context:
             raise PublicExecutionError("PROJECT_CONTEXT_MISMATCH", "the existing project state belongs to a different exact context")
         active = next((item for item in state.plans if item.id == state.active_plan_id), None)
-        if active is not None and any(node.status != "completed" for node in active.nodes):
+        if active is not None and not research_plan_is_resolved(state, active):
             raise PublicExecutionError(
                 "PROJECT_STATE_REQUIRES_CONTINUATION",
                 "the active plan is unfinished; continue its review, decision, ingest, or resume path before admitting another run",

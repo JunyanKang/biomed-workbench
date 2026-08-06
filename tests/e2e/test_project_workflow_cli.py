@@ -9,6 +9,7 @@ from biomed_workbench.kernel.scientific_dependency import AnalysisAdmission
 from biomed_workbench.kernel.state import ProjectState
 from tests.unit.kernel.test_context import project_context
 from tests.unit.kernel.test_hypotheses import hypothesis
+from tests.unit.kernel.test_state import ProjectStateTests
 from tests.unit.orchestration.test_controller import serial_fixture
 from tests.unit.orchestration.test_planner import inline_artifact
 
@@ -17,6 +18,43 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class ProjectWorkflowCliTests(unittest.TestCase):
+    def test_map_bound_v1_migration_cli_verifies_store_and_preserves_legacy_state(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            publication_root = root / "legacy-maps"
+            legacy, old_publication = ProjectStateTests._map_bound_legacy_fixture(publication_root)
+            legacy_path = root / "project-state-v1.json"
+            migrated_path = root / "project-state-v2.json"
+            legacy_path.write_text(json.dumps(legacy, indent=2, sort_keys=True), encoding="utf-8")
+            legacy_bytes = legacy_path.read_bytes()
+
+            migrated = subprocess.run(
+                [
+                    sys.executable,
+                    "tools/project_workflow.py",
+                    "migrate-state-v1",
+                    "--legacy-state",
+                    str(legacy_path),
+                    "--state",
+                    str(migrated_path),
+                    "--evidence-map-root",
+                    str(publication_root),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(migrated.returncode, 0, migrated.stderr)
+            summary = json.loads(migrated.stdout)
+            self.assertEqual(summary["migration_status"], "awaiting-evidence-map-republication")
+            self.assertEqual(summary["verified_legacy_evidence_maps"], 1)
+            self.assertEqual(legacy_path.read_bytes(), legacy_bytes)
+            state = ProjectState.from_dict(json.loads(migrated_path.read_text(encoding="utf-8")))
+            record = state.state_migrations[0].legacy_evidence_maps[0]
+            self.assertEqual(record.publication.map_digest, old_publication.map_digest)
+            self.assertEqual(state.evidence_map_versions, ())
+
     def test_init_and_admit_persist_replayable_append_only_state(self):
         temporary_registry, _registry, _state, plan = serial_fixture()
         self.addCleanup(temporary_registry.cleanup)

@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from biomed_workbench.kernel.state import ProjectState
+
 
 ROOT = Path(__file__).resolve().parents[2]
 FASTQ = ROOT / "tests" / "fixtures" / "sequencing" / "read-qc-balanced.fastq"
@@ -184,22 +186,118 @@ with zipfile.ZipFile(outdir / f'{stem}_fastqc.zip', 'w') as archive:
                 "recommended_action": "retain-with-caveat",
                 "source_urls": ["https://www.bioinformatics.babraham.ac.uk/projects/fastqc/"],
             }
+            review_path = root / "review.json"
+            review_path.write_text(json.dumps(review), encoding="utf-8")
+            reviewed = subprocess.run(
+                [sys.executable, "tools/project_workflow.py", "review", "--state", str(state_path), "--input", str(review_path)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(reviewed.returncode, 0, reviewed.stderr)
+
+            revision_request = {
+                "source_artifact_id": artifact_id,
+                "action": "rerun-adjusted-parameters",
+                "target_module_id": None,
+                "parameter_overrides": {"threads": 2},
+                "rationale": "Repeat the bounded technical check with a changed thread parameter to validate review-triggered revision reachability.",
+            }
+            revision_path = root / "revision.json"
+            revision_path.write_text(json.dumps(revision_request), encoding="utf-8")
+            prepared = subprocess.run(
+                [sys.executable, "tools/project_workflow.py", "prepare-revision", "--state", str(state_path), "--input", str(revision_path)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(prepared.returncode, 0, prepared.stderr)
+            prepared_state = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
+            active_plan = next(item for item in prepared_state.plans if item.id == prepared_state.active_plan_id)
+            replacement = next(item for item in active_plan.nodes if item.revision_of_node_id is not None)
+            self.assertEqual(dict(replacement.parameter_overrides), {"threads": 2})
+            self.assertIsNotNone(replacement.revision_contract)
+
             decision = {
-                "id": "decision-fastqc-public-output",
+                "id": "decision-fastqc-public-rerun",
                 "review_id": review["id"],
                 "artifact_id": artifact_id,
                 "hypothesis_ids": ["hypothesis-fastqc-technical-quality"],
+                "action": "rerun-adjusted-parameters",
+                "rationale_zh": "为验证参数化修订链，使用登记的不同线程参数重新执行同一技术检查。",
+                "rationale_en": "Re-execute the same technical check with the registered changed thread parameter to validate the parameterized revision chain.",
+                "active_evidence": False,
+                "next_plan_node_ids": [replacement.id],
+                "revision_contract_id": replacement.revision_contract.id,
+            }
+            decision_path = root / "decision.json"
+            decision_path.write_text(json.dumps(decision), encoding="utf-8")
+            decided = subprocess.run(
+                [sys.executable, "tools/project_workflow.py", "decide", "--state", str(state_path), "--input", str(decision_path)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(decided.returncode, 0, decided.stderr)
+            revised_admission = prepared_state.analysis_admissions[0].to_dict()
+            revised_admission.update({
+                "id": "admission-fastqc-public-rerun",
+                "plan_node_id": replacement.id,
+                "parameter_justifications": {
+                    "threads": "Two threads deliberately differ from the reviewed source request and remain inside the registered module range."
+                },
+            })
+            revised_admission_path = root / "revised-admission.json"
+            revised_admission_path.write_text(json.dumps(revised_admission), encoding="utf-8")
+            admitted_revision = subprocess.run(
+                [sys.executable, "tools/project_workflow.py", "admit", "--state", str(state_path), "--input", str(revised_admission_path)],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(admitted_revision.returncode, 0, admitted_revision.stderr)
+            resumed = subprocess.run(
+                [sys.executable, "tools/project_workflow.py", "resume", "--state", str(state_path), "--project-root", str(root)],
+                cwd=ROOT,
+                env=environment,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(resumed.returncode, 0, resumed.stderr)
+            rerun_result = json.loads(resumed.stdout)
+            self.assertEqual(rerun_result["stop_reason"], "awaiting_artifact_review", rerun_result)
+            revised_state = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
+            revised_artifact_id = replacement.planned_output_artifact_ids["read_quality_report"]
+            self.assertIn(revised_artifact_id, {item.id for item in revised_state.artifacts})
+            revised_execution = next(item for item in revised_state.observed_executions if item.plan_node_id == replacement.id)
+            self.assertEqual(revised_execution.parameters_digest, replacement.planned_request_digest)
+
+            revised_review = {
+                **review,
+                "id": "review-fastqc-revised-output",
+                "artifact_id": revised_artifact_id,
+            }
+            revised_decision = {
+                "id": "decision-fastqc-revised-output",
+                "review_id": revised_review["id"],
+                "artifact_id": revised_artifact_id,
+                "hypothesis_ids": ["hypothesis-fastqc-technical-quality"],
                 "action": "retain-with-caveat",
-                "rationale_zh": "执行和重载链完整且技术评审通过，因此在声明夹具局限后保留。",
-                "rationale_en": "The execution and reload chain is complete and technical review passed, so retain it with the fixture limitation.",
+                "rationale_zh": "修订执行与重载链完整且技术评审通过，因此在声明夹具局限后保留。",
+                "rationale_en": "The revised execution and reload chain is complete and technical review passed, so retain it with the fixture limitation.",
                 "active_evidence": True,
                 "next_plan_node_ids": [],
             }
-            review_path = root / "review.json"
-            decision_path = root / "decision.json"
-            review_path.write_text(json.dumps(review), encoding="utf-8")
-            decision_path.write_text(json.dumps(decision), encoding="utf-8")
-            for command, input_path in (("review", review_path), ("decide", decision_path)):
+            revised_review_path = root / "revised-review.json"
+            revised_decision_path = root / "revised-decision.json"
+            revised_review_path.write_text(json.dumps(revised_review), encoding="utf-8")
+            revised_decision_path.write_text(json.dumps(revised_decision), encoding="utf-8")
+            for command, input_path in (("review", revised_review_path), ("decide", revised_decision_path)):
                 appended = subprocess.run(
                     [sys.executable, "tools/project_workflow.py", command, "--state", str(state_path), "--input", str(input_path)],
                     cwd=ROOT,
@@ -208,15 +306,15 @@ with zipfile.ZipFile(outdir / f'{stem}_fastqc.zip', 'w') as archive:
                     check=False,
                 )
                 self.assertEqual(appended.returncode, 0, appended.stderr)
-            resumed = subprocess.run(
+            completed_revision = subprocess.run(
                 [sys.executable, "tools/project_workflow.py", "resume", "--state", str(state_path), "--project-root", str(root)],
                 cwd=ROOT,
                 capture_output=True,
                 text=True,
                 check=False,
             )
-            self.assertEqual(resumed.returncode, 0, resumed.stderr)
-            self.assertEqual(json.loads(resumed.stdout)["stop_reason"], "plan_completed")
+            self.assertEqual(completed_revision.returncode, 0, completed_revision.stderr)
+            self.assertEqual(json.loads(completed_revision.stdout)["stop_reason"], "plan_completed")
             appended_run = subprocess.run(
                 [
                     sys.executable,

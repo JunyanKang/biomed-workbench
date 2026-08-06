@@ -380,6 +380,7 @@ class ScientificDecision:
     next_plan_node_ids: tuple[str, ...]
     gate_adjudication_digest: str | None = None
     next_hypothesis_ids: tuple[str, ...] = ()
+    revision_contract_id: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "scientific_decision.id"))
@@ -397,6 +398,16 @@ class ScientificDecision:
             raise ValueError("active_evidence must be true exactly for retained decisions")
         if self.action in REEXECUTE_DECISION_ACTIONS and len(self.next_plan_node_ids) != 1:
             raise ValueError("rerun and method-switch decisions require exactly one distinct next plan node")
+        if self.action in REEXECUTE_DECISION_ACTIONS:
+            if self.revision_contract_id is None:
+                raise ValueError("rerun and method-switch decisions require a frozen revision contract")
+            object.__setattr__(
+                self,
+                "revision_contract_id",
+                validate_identifier(self.revision_contract_id, "scientific_decision.revision_contract_id"),
+            )
+        elif self.revision_contract_id is not None:
+            raise ValueError("only rerun and method-switch decisions may bind a revision contract")
         if self.action in EXCLUDE_DECISION_ACTIONS | STOP_DECISION_ACTIONS and self.next_plan_node_ids:
             raise ValueError("exclude and stop decisions cannot trigger another plan node")
         if self.action == "revise-hypothesis" and not self.next_hypothesis_ids:
@@ -426,6 +437,8 @@ class ScientificDecision:
             payload["gate_adjudication_digest"] = self.gate_adjudication_digest
         if self.next_hypothesis_ids:
             payload["next_hypothesis_ids"] = list(self.next_hypothesis_ids)
+        if self.revision_contract_id is not None:
+            payload["revision_contract_id"] = self.revision_contract_id
         return payload
 
     @classmethod
@@ -435,6 +448,7 @@ class ScientificDecision:
         values["next_plan_node_ids"] = tuple(values["next_plan_node_ids"])
         values.setdefault("gate_adjudication_digest", None)
         values["next_hypothesis_ids"] = tuple(values.get("next_hypothesis_ids", ()))
+        values.setdefault("revision_contract_id", None)
         return cls(**values)
 
 

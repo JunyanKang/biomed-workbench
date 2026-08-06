@@ -330,6 +330,16 @@ def _parameter(value: Any) -> str:
     raise ScientificCommandError("INVALID_PARAMETER")
 
 
+def normalized_scientific_command_parameters(
+    command: ScientificCommand,
+    parameters: Mapping[str, Any],
+) -> dict[str, str]:
+    """Return the exact canonical parameter object used for command identity and argv."""
+    if set(parameters) != set(command.parameter_names):
+        raise ScientificCommandError("INVALID_PARAMETER")
+    return {name: _parameter(parameters[name]) for name in command.parameter_names}
+
+
 def _kill(process: subprocess.Popen[bytes]) -> None:
     if process.poll() is not None:
         return
@@ -500,9 +510,7 @@ def execute_scientific_command(
         raise ScientificCommandError("INVALID_INPUT_BINDING")
     if any(input_payloads[binding.name].role != binding.role for binding in command.inputs):
         raise ScientificCommandError("INVALID_INPUT_BINDING")
-    if set(parameters) != set(command.parameter_names):
-        raise ScientificCommandError("INVALID_PARAMETER")
-    normalized_parameters = {name: _parameter(parameters[name]) for name in command.parameter_names}
+    normalized_parameters = normalized_scientific_command_parameters(command, parameters)
     versions = {str(name): str(version) for name, version in tool_versions.items()}
     dependencies = {str(name): str(version) for name, version in dependency_versions.items()}
     if any(not _TOKEN_RE.fullmatch(name) or not _TOKEN_RE.fullmatch(version) for name, version in (*versions.items(), *dependencies.items())):

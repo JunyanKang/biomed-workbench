@@ -65,11 +65,60 @@ EVENT_TYPES = frozenset(
         "scientific_gate_adjudicated",
         "scientific_decision_recorded",
         "evidence_map_published",
+        "legacy_evidence_map_verified",
     }
 )
 
 PROJECT_STATE_SCHEMA_VERSION = 2
 STATE_MIGRATION_CONTRACT_VERSION = "1.0.0"
+
+
+@dataclass(frozen=True)
+class LegacyEvidenceMapRecord:
+    id: str
+    publication: EvidenceMapPublication
+    store_entry_digest: str
+    digest: str
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "id", validate_identifier(self.id, "legacy_evidence_map.id"))
+        if not isinstance(self.publication, EvidenceMapPublication):
+            raise ValueError("legacy evidence map requires its exact publication")
+        for field in ("store_entry_digest", "digest"):
+            value = getattr(self, field)
+            if not isinstance(value, str) or len(value) != 64 or set(value) - set("0123456789abcdef"):
+                raise ValueError(f"legacy evidence map {field} must be SHA-256")
+        basis = {
+            "id": self.id,
+            "publication": self.publication.to_dict(),
+            "store_entry_digest": self.store_entry_digest,
+        }
+        if self.digest != digest_value(basis):
+            raise ValueError("legacy evidence map digest is invalid")
+
+    @classmethod
+    def create(cls, publication: EvidenceMapPublication, *, store_entry_digest: str) -> "LegacyEvidenceMapRecord":
+        identity = f"legacy-map-{publication.version.revision}-{publication.map_digest[:16]}"
+        basis = {
+            "id": identity,
+            "publication": publication.to_dict(),
+            "store_entry_digest": store_entry_digest,
+        }
+        return cls(identity, publication, store_entry_digest, digest_value(basis))
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "id": self.id,
+            "publication": self.publication.to_dict(),
+            "store_entry_digest": self.store_entry_digest,
+            "digest": self.digest,
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "LegacyEvidenceMapRecord":
+        values = dict(payload)
+        values["publication"] = EvidenceMapPublication.from_dict(values["publication"])
+        return cls(**values)
 
 
 @dataclass(frozen=True)
@@ -82,6 +131,7 @@ class StateMigrationRecord:
     migrated_event_count: int
     contract_version: str
     digest: str
+    legacy_evidence_maps: tuple[LegacyEvidenceMapRecord, ...] = ()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "state_migration.id"))
@@ -99,6 +149,12 @@ class StateMigrationRecord:
             raise ValueError("state migration event count must equal the source revision")
         if self.contract_version != STATE_MIGRATION_CONTRACT_VERSION:
             raise ValueError("state migration contract version is unsupported")
+        legacy_maps = tuple(self.legacy_evidence_maps)
+        if any(not isinstance(item, LegacyEvidenceMapRecord) for item in legacy_maps):
+            raise ValueError("state migration legacy evidence maps are invalid")
+        if tuple(item.publication.version.revision for item in legacy_maps) != tuple(range(1, len(legacy_maps) + 1)):
+            raise ValueError("state migration legacy evidence map revisions are not continuous")
+        object.__setattr__(self, "legacy_evidence_maps", legacy_maps)
         basis = {
             "id": self.id,
             "from_schema_version": self.from_schema_version,
@@ -108,11 +164,19 @@ class StateMigrationRecord:
             "migrated_event_count": self.migrated_event_count,
             "contract_version": self.contract_version,
         }
+        if legacy_maps:
+            basis["legacy_evidence_maps"] = [item.to_dict() for item in legacy_maps]
         if self.digest != digest_value(basis):
             raise ValueError("state migration digest does not match its source identity")
 
     @classmethod
-    def create(cls, *, source_state_digest: str, source_revision: int) -> "StateMigrationRecord":
+    def create(
+        cls,
+        *,
+        source_state_digest: str,
+        source_revision: int,
+        legacy_evidence_maps: tuple[LegacyEvidenceMapRecord, ...] = (),
+    ) -> "StateMigrationRecord":
         identity = f"migration-v1-v2-{source_state_digest[:16]}"
         basis = {
             "id": identity,
@@ -123,14 +187,31 @@ class StateMigrationRecord:
             "migrated_event_count": source_revision,
             "contract_version": STATE_MIGRATION_CONTRACT_VERSION,
         }
-        return cls(**basis, digest=digest_value(basis))
+        if legacy_evidence_maps:
+            basis["legacy_evidence_maps"] = [item.to_dict() for item in legacy_evidence_maps]
+        return cls(
+            identity, 1, 2, source_state_digest, source_revision, source_revision,
+            STATE_MIGRATION_CONTRACT_VERSION, digest_value(basis), tuple(legacy_evidence_maps),
+        )
 
     def to_dict(self) -> dict[str, object]:
-        return {field: getattr(self, field) for field in self.__dataclass_fields__}
+        payload = {
+            field: getattr(self, field)
+            for field in self.__dataclass_fields__
+            if field != "legacy_evidence_maps"
+        }
+        if self.legacy_evidence_maps:
+            payload["legacy_evidence_maps"] = [item.to_dict() for item in self.legacy_evidence_maps]
+        return payload
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "StateMigrationRecord":
-        return cls(**dict(payload))
+        values = dict(payload)
+        values["legacy_evidence_maps"] = tuple(
+            LegacyEvidenceMapRecord.from_dict(item)
+            for item in values.get("legacy_evidence_maps", ())
+        )
+        return cls(**values)
 
 
 def _state_basis(
@@ -344,8 +425,21 @@ class ProjectState:
                 or {value.artifact_id for value in linked if value is not None} != set(execution.output_artifact_digests)
             ):
                 raise ValueError("execution integrity review does not cover one complete observed execution")
-        if tuple(item.version.revision for item in self.evidence_map_versions) != tuple(range(1, len(self.evidence_map_versions) + 1)):
+        legacy_maps = tuple(
+            item
+            for migration in self.state_migrations
+            for item in migration.legacy_evidence_maps
+        )
+        first_revision = len(legacy_maps) + 1
+        if tuple(item.version.revision for item in self.evidence_map_versions) != tuple(
+            range(first_revision, first_revision + len(self.evidence_map_versions))
+        ):
             raise ValueError("evidence map publications must have continuous revisions")
+        if self.evidence_map_versions and legacy_maps and (
+            self.evidence_map_versions[0].version.parent_map_digest
+            != legacy_maps[-1].publication.map_digest
+        ):
+            raise ValueError("republished evidence map does not continue the verified legacy map chain")
         expected = digest_value(
             _state_basis(
                 self.context,
@@ -603,13 +697,22 @@ def _migrate_v1_adjudication(
     return values
 
 
-def _migrate_v1_project_state(payload: Mapping[str, Any]) -> ProjectState:
+def _migrate_v1_project_state(
+    payload: Mapping[str, Any],
+    *,
+    verified_legacy_maps: tuple[LegacyEvidenceMapRecord, ...] = (),
+) -> ProjectState:
     """Migrate a digest-valid v1 event log and recover exact gate bindings from its receipt."""
     _validate_legacy_v1_envelope(payload)
-    if payload.get("evidence_map_versions"):
+    if payload.get("evidence_map_versions") and not verified_legacy_maps:
         raise ValueError(
             "legacy v1 state with a published evidence map requires explicit map republication after migration"
         )
+    legacy_publications = tuple(
+        EvidenceMapPublication.from_dict(item) for item in payload.get("evidence_map_versions", [])
+    )
+    if legacy_publications != tuple(item.publication for item in verified_legacy_maps):
+        raise ValueError("verified legacy evidence maps differ from the v1 project state")
     observed_by_id = {
         str(item["id"]): item for item in payload.get("observed_executions", [])
     }
@@ -620,6 +723,7 @@ def _migrate_v1_project_state(payload: Mapping[str, Any]) -> ProjectState:
     migration = StateMigrationRecord.create(
         source_state_digest=str(payload["state_digest"]),
         source_revision=int(payload["revision"]),
+        legacy_evidence_maps=verified_legacy_maps,
     )
     state = ProjectState.create(
         ProjectContext.from_dict(payload["context"]),
@@ -644,7 +748,15 @@ def _migrate_v1_project_state(payload: Mapping[str, Any]) -> ProjectState:
             event_payload = {"decision": decision_payload}
             migrated_decisions[str(decision_payload["id"])] = decision_payload
         elif event.event_type == "evidence_map_published":
-            raise ValueError("legacy v1 evidence-map events require explicit republication")
+            publication = EvidenceMapPublication.from_dict(event_payload["publication"])
+            record = next(
+                (item for item in verified_legacy_maps if item.publication == publication),
+                None,
+            )
+            if record is None:
+                raise ValueError("legacy v1 evidence-map event lacks a verified immutable publication")
+            event_payload = {"legacy_evidence_map_record_id": record.id}
+            event = replace(event, event_type="legacy_evidence_map_verified")
         state = apply_event(
             state,
             event.event_type,
@@ -673,6 +785,14 @@ def _migrate_v1_project_state(payload: Mapping[str, Any]) -> ProjectState:
         if actual.get(field, []) != expected.get(field, []):
             raise ValueError(f"legacy v1 migration replay differs from serialized state field: {field}")
     return state
+
+
+def migrate_v1_project_state_with_verified_maps(
+    payload: Mapping[str, Any],
+    records: tuple[LegacyEvidenceMapRecord, ...],
+) -> ProjectState:
+    """Public migration entry after an external immutable-store verification."""
+    return _migrate_v1_project_state(payload, verified_legacy_maps=records)
 
 
 def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, Any]):
@@ -727,12 +847,27 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
             for node in item.nodes:
                 previous = parent_nodes.get(node.id)
                 if set(node.planned_output_artifact_ids.values()) & artifact_ids:
-                    if previous is None or node != previous or node.status != "completed":
-                        raise ValueError("revised plans may only inherit unchanged completed outputs")
+                    reviewed_outputs = set(node.planned_output_artifact_ids.values()) <= {
+                        value.artifact_id for value in reviews
+                    }
+                    undecided_outputs = not set(node.planned_output_artifact_ids.values()) & {
+                        value.artifact_id for value in scientific_decisions
+                    }
+                    if (
+                        previous is None
+                        or node != previous
+                        or not (
+                            node.status == "completed"
+                            or (node.status == "awaiting_review" and reviewed_outputs and undecided_outputs)
+                        )
+                    ):
+                        raise ValueError(
+                            "revised plans may inherit only unchanged completed nodes or reviewed undecided sources"
+                        )
                     validate_node_execution_chain(
                         state,
                         node.id,
-                        require_completed_node=True,
+                        require_completed_node=node.status == "completed",
                         require_active_decisions=False,
                     )
                     inherited_output_ids.update(node.planned_output_artifact_ids.values())
@@ -964,6 +1099,16 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
         if item.action in REEXECUTE_DECISION_ACTIONS:
             validate_revision_target_contract(state, item, require_pending=True)
         scientific_decisions = (*scientific_decisions, item)
+    elif event_type == "legacy_evidence_map_verified":
+        if set(payload) != {"legacy_evidence_map_record_id"}:
+            raise ValueError("legacy_evidence_map_verified payload is invalid")
+        records = {
+            item.id
+            for migration in state.state_migrations
+            for item in migration.legacy_evidence_maps
+        }
+        if payload["legacy_evidence_map_record_id"] not in records:
+            raise ValueError("legacy evidence-map event is absent from the migration ledger")
     elif event_type == "evidence_map_published":
         if set(payload) != {"publication"}:
             raise ValueError("evidence_map_published payload is invalid")
@@ -988,9 +1133,20 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
                 or item.delivery_scope_digest != scope.digest
             ):
                 raise ValueError("delivery authorization map does not match its exact upstream slice")
-        if item.version.revision != len(evidence_map_versions) + 1:
+        legacy_maps = tuple(
+            value
+            for migration in state.state_migrations
+            for value in migration.legacy_evidence_maps
+        )
+        expected_revision = len(legacy_maps) + len(evidence_map_versions) + 1
+        if item.version.revision != expected_revision:
             raise ValueError("evidence map publication revision is not continuous")
-        if evidence_map_versions and item.version.parent_map_digest != evidence_map_versions[-1].map_digest:
+        expected_parent = (
+            evidence_map_versions[-1].map_digest
+            if evidence_map_versions
+            else (legacy_maps[-1].publication.map_digest if legacy_maps else None)
+        )
+        if item.version.parent_map_digest != expected_parent:
             raise ValueError("evidence map publication parent does not match the active map")
         evidence_map_versions = (*evidence_map_versions, item)
     return (

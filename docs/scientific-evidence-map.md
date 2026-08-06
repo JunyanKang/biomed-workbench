@@ -117,13 +117,19 @@ the historical node.
 
 Decision actions also have distinct execution semantics. Retention completes the
 reviewed node and releases active evidence. Exclusion and branch stop terminate
-the current branch without deleting its history. Rerun and method-switch actions
-supersede the reviewed node and activate a distinct predeclared revision node.
-That node explicitly names the source it replaces and preserves the registered
-branch, hypotheses, dependencies, inputs, outputs, and evidence scope. A
-same-method rerun preserves the observed request identity, an adjusted rerun
+the current branch without deleting its history. After review selects rerun or
+method switch, the registry prepares an immutable child plan before the decision
+is recorded. Its node-level revision contract freezes the source and target
+nodes, action, both module manifests, declared alternative relation, typed ports,
+observed and planned request identities, structured parameter overrides, and
+scientific rationale. Every output from the same source execution must bind the
+same contract, action, target, and request identity. The replacement preserves
+the registered branch, hypotheses, dependencies, inputs, outputs, and evidence
+scope; untouched downstream work is rebuilt against its new output identities.
+A same-method rerun preserves the observed request identity, an adjusted rerun
 freezes a different request identity, and a method switch must use a distinct
-compatible alternative declared by the source module.
+compatible alternative declared by the source module. The replacement receives
+its own approved analysis admission before execution.
 Additional-data decisions keep the branch blocked until new input is registered.
 Hypothesis and scope revisions request a new immutable plan revision rather than
 overwriting the original analysis.
@@ -196,6 +202,16 @@ may be explicitly abandoned only when the current project state is unchanged,
 the pending state and publication identity verify, and no staged, unindexed,
 indexed, current-pointer, or immutable version evidence exists. Inspection lists
 the only safe actions; ambiguous published evidence always requires manual review.
+
+A map-bound schema-v1 project is recovered through a separate, non-overwriting
+migration path. The legacy state is read without first treating it as current;
+its digest and event chain are checked, and every referenced immutable map is
+re-read through the version index, recorded file hashes, map content, and exact
+publication identity. The new schema-v2 file records those publications as
+verified legacy history but exposes no active evidence-map version. Formal
+delivery therefore remains blocked until an explicit new publication continues
+the last verified legacy map as its parent and binds the migrated state. The old
+state and old map bytes are never rewritten.
 
 Recommended classification:
 

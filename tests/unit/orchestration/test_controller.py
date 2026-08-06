@@ -18,7 +18,7 @@ from biomed_workbench.kernel.execution_chain import (
 )
 from biomed_workbench.kernel.identity import digest_value
 from biomed_workbench.kernel.hypotheses import revise_hypothesis
-from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
+from biomed_workbench.kernel.plans import PlanNode, ResearchDAG, RevisionTargetContract
 from biomed_workbench.kernel.scientific_dependency import (
     AnalysisAdmission,
     ArtifactReview,
@@ -35,11 +35,13 @@ from biomed_workbench.kernel.scientific_evidence_map import (
 )
 from biomed_workbench.kernel.state import ProjectState, apply_event
 from biomed_workbench.modules.index import BUILTIN_ROOT
+from biomed_workbench.modules.contract import manifest_to_dict, module_manifest_digest
 from biomed_workbench.modules.registry import ModuleRegistry
 from biomed_workbench.orchestration.controller import ControllerPolicy, ResearchController
 from biomed_workbench.orchestration.execution import NodeExecution, execute_node
 from biomed_workbench.orchestration.graph import build_capability_graph
 from biomed_workbench.orchestration.planner import PlanningRequest, plan_research
+from biomed_workbench.orchestration.revision import prepare_plan_revision
 from biomed_workbench.reporting import (
     publish_evidence_map_transaction,
     verify_evidence_map_version_index,
@@ -120,7 +122,10 @@ def serial_fixture():
             module_payload("test-contrast", "normalized_matrix", "contrast_result"),
         )
     )
-    state = state_with(inline_artifact("artifact-counts", "count_matrix"))
+    counts_payload = inline_artifact("artifact-counts", "count_matrix").to_dict()
+    counts_payload.pop("content_digest")
+    counts_payload["content"] = {"rows": [{"sample_id": "s1"}]}
+    state = state_with(ScientificArtifact.create(**counts_payload))
     request = PlanningRequest("request-contrast", "contrast_result", (hypothesis().id,), ("cell-state-association",))
     plan = plan_research(state, registry, build_capability_graph(registry), (request,))
     return temporary, registry, state, plan
@@ -168,8 +173,37 @@ def revision_fixture(action):
         if action == "rerun-adjusted-parameters"
         else observed_request_digest
     )
+    target_id = "node-revision-normalizer"
+    source_manifest_payload = manifest_to_dict(registry.get(source_module))
+    target_manifest_payload = manifest_to_dict(registry.get(target_module))
+    contract = RevisionTargetContract.create(
+        id=f"revision-contract-{action}",
+        source_node_id=source.id,
+        target_node_id=target_id,
+        action=action,
+        source_module_id=source_module,
+        target_module_id=target_module,
+        source_manifest_digest=module_manifest_digest(registry.get(source_module)),
+        target_manifest_digest=module_manifest_digest(registry.get(target_module)),
+        alternative_relation_digest=digest_value({
+            "source_module_id": source_module,
+            "declared_alternatives": source_manifest_payload["alternatives"],
+            "target_module_id": target_module,
+        }),
+        input_contract_digest=digest_value({
+            "target_ports": target_manifest_payload["input_artifacts"],
+            "bindings": {"records": "artifact-counts"},
+        }),
+        output_contract_digest=digest_value({
+            "source_types": list(source.expected_output_artifact_types),
+            "target_ports": target_manifest_payload["output_artifacts"],
+        }),
+        source_request_digest=observed_request_digest,
+        target_request_digest=planned_request_digest,
+        rationale="Freeze the controlled replacement identity for revision state-machine tests.",
+    )
     replacement = PlanNode(
-        id="node-revision-normalizer",
+        id=target_id,
         module_id=target_module,
         input_bindings={"records": "artifact-counts"},
         dependencies=(),
@@ -183,6 +217,8 @@ def revision_fixture(action):
         attempt=0,
         planned_request_digest=planned_request_digest,
         revision_of_node_id=source.id,
+        parameter_overrides={"adjustment": "registered-change"} if action == "rerun-adjusted-parameters" else {},
+        revision_contract=contract,
     )
     plan = ResearchDAG.create(
         id=f"plan-{action}",
@@ -198,6 +234,154 @@ def revision_fixture(action):
 
 
 class ResearchControllerTests(unittest.TestCase):
+    def test_multi_output_source_rejects_split_brain_revision_actions_and_targets(self):
+        temporary, registry, state, plan = revision_fixture("rerun-same-method")
+        self.addCleanup(temporary.cleanup)
+        source, target = plan.nodes
+        source = replace(
+            source,
+            expected_output_artifact_types=("normalized_matrix", "normalization_figure"),
+            planned_output_artifact_ids={
+                "profile": "artifact-primary-normalized",
+                "figure": "artifact-primary-figure",
+            },
+        )
+        target = replace(
+            target,
+            expected_output_artifact_types=source.expected_output_artifact_types,
+            planned_output_artifact_ids={
+                "profile": "artifact-revision-normalized",
+                "figure": "artifact-revision-figure",
+            },
+        )
+        state_view = SimpleNamespace(
+            plans=(SimpleNamespace(id=plan.id, nodes=(source, target)),),
+            active_plan_id=plan.id,
+            artifact_reloads=(SimpleNamespace(
+                artifact_id="artifact-primary-normalized",
+                observed_execution_receipt_id="observed-source",
+            ),),
+            observed_executions=(SimpleNamespace(
+                id="observed-source",
+                parameters_digest=target.revision_contract.source_request_digest,
+            ),),
+            artifacts=state.artifacts,
+            scientific_decisions=(SimpleNamespace(
+                artifact_id="artifact-primary-figure",
+                action="rerun-adjusted-parameters",
+                revision_contract_id="revision-contract-conflicting",
+                next_plan_node_ids=("node-conflicting-target",),
+            ),),
+        )
+        decision = SimpleNamespace(
+            action="rerun-same-method",
+            next_plan_node_ids=(target.id,),
+            artifact_id="artifact-primary-normalized",
+            revision_contract_id=target.revision_contract.id,
+        )
+        with self.assertRaisesRegex(ValueError, "split outputs across conflicting revision decisions"):
+            validate_revision_target_contract(state_view, decision)
+
+    def test_default_planner_review_then_prepare_revision_rewrites_downstream_and_resumes(self):
+        temporary, registry, state, plan = serial_fixture()
+        self.addCleanup(temporary.cleanup)
+
+        def executor(current_state, _plan, node, active_registry, **_kwargs):
+            execution = completed_execution(current_state, node, active_registry)
+            return replace(
+                execution,
+                provenance={
+                    **execution.provenance,
+                    "parameters_digest": (
+                        node.planned_request_digest
+                        or digest_value({"rows": [{"sample_id": "s1"}]})
+                    ),
+                },
+            )
+
+        controller = _StrictResearchController(
+            registry,
+            environment_provider=lambda _manifest: None,
+            node_executor=executor,
+            policy=ControllerPolicy(require_approved_admission=False),
+        )
+        waiting = controller.advance(state, plan)
+        source = next(node for node in waiting.active_plan.nodes if node.status == "awaiting_review")
+        source_artifact_id = next(iter(source.planned_output_artifact_ids.values()))
+        artifact_review = ArtifactReview(
+            id="review-default-planner-revision",
+            artifact_id=source_artifact_id,
+            artifact_kind="data",
+            rationale_zh="默认计划产物经复核后需要以相同方法按冻结请求重新执行。",
+            rationale_en="The default-plan output requires a same-method rerun with a frozen request after review.",
+            methods_zh="复核执行身份、输入绑定、输出完整性和后续依赖。",
+            methods_en="Review execution identity, input bindings, output integrity, and downstream dependencies.",
+            results_zh="轻量结果足以触发计划修订，但不用于推断生物效应。",
+            results_en="The lightweight result is sufficient to trigger plan revision but not biological inference.",
+            conclusion_zh="创建登记的替代节点并重接尚未执行的下游节点。",
+            conclusion_en="Create a registered replacement and rewire downstream nodes that have not executed.",
+            panels=(),
+            technical_status="major",
+            statistical_status="major",
+            biological_status="major",
+            robustness_status="major",
+            limitations_zh=("该夹具仅验证公开修订路径。",),
+            limitations_en=("This fixture validates only the public revision path.",),
+            recommended_action="rerun-same-method",
+            source_urls=("https://www.w3.org/TR/prov-o/",),
+        )
+        reviewed_state = apply_event(
+            waiting.state,
+            "artifact_review_recorded",
+            {"review": artifact_review.to_dict()},
+            rationale="Review the default planner output before revision preparation.",
+        )
+        revised = prepare_plan_revision(
+            reviewed_state,
+            registry,
+            source_artifact_id=source_artifact_id,
+            action="rerun-same-method",
+            target_module_id=source.module_id,
+            parameter_overrides={},
+            rationale="Repeat the reviewed method with the exact observed request and rewire untouched downstream work.",
+        )
+        self.assertEqual(revised.parent_plan_id, plan.id)
+        replacement = next(node for node in revised.nodes if node.revision_of_node_id == source.id)
+        rebuilt_downstream = next(node for node in revised.nodes if node.module_id == "test-contrast")
+        self.assertIn(replacement.id, rebuilt_downstream.dependencies)
+        self.assertNotIn(source.id, rebuilt_downstream.dependencies)
+        state = apply_event(
+            reviewed_state,
+            "plan_revised",
+            {"plan": revised.to_dict(), "activate": True},
+            rationale="Activate the registry-validated child plan.",
+        )
+        scientific_decision = ScientificDecision(
+            id="decision-default-planner-revision",
+            review_id=artifact_review.id,
+            artifact_id=source_artifact_id,
+            hypothesis_ids=(hypothesis().id,),
+            action="rerun-same-method",
+            rationale_zh="评审要求按冻结请求重新运行相同方法。",
+            rationale_en="The review requires the same method to rerun with the frozen request.",
+            active_evidence=False,
+            next_plan_node_ids=(replacement.id,),
+            revision_contract_id=replacement.revision_contract.id,
+        )
+        validate_revision_target_contract(state, scientific_decision, registry=registry, require_pending=True)
+        state = apply_event(
+            state,
+            "scientific_decision_recorded",
+            {"decision": scientific_decision.to_dict()},
+            rationale="Bind the reviewed source to its prepared node-level revision contract.",
+        )
+        resumed = controller.resume(state.to_dict())
+        self.assertEqual(resumed.stop_reason, "awaiting_artifact_review")
+        self.assertEqual(
+            next(node for node in resumed.active_plan.nodes if node.id == replacement.id).status,
+            "awaiting_review",
+        )
+
     def test_revision_target_contract_rejects_wrong_method_parameter_and_scope_semantics(self):
         def contract_state(plan, state, source):
             return SimpleNamespace(
@@ -216,6 +400,7 @@ class ResearchControllerTests(unittest.TestCase):
                     }),
                 ),),
                 artifacts=state.artifacts,
+                scientific_decisions=(),
             )
 
         def rebuilt(plan, source, target):
@@ -237,20 +422,18 @@ class ResearchControllerTests(unittest.TestCase):
             source, target = plan.nodes
             observed_digest = contract_state(plan, state, source).observed_executions[0].parameters_digest
             if action == "rerun-same-method":
-                invalid = replace(target, module_id="alternative-normalizer")
-                message = "same module"
+                with self.assertRaisesRegex(ValueError, "frozen revision contract"):
+                    replace(target, module_id="alternative-normalizer")
             elif action == "rerun-adjusted-parameters":
-                invalid = replace(target, planned_request_digest=observed_digest)
-                message = "distinct request identity"
+                with self.assertRaisesRegex(ValueError, "frozen revision contract"):
+                    replace(target, planned_request_digest=observed_digest)
             else:
-                invalid = replace(
-                    target,
-                    module_id=source.module_id,
-                    compatibility_row_candidates=source.compatibility_row_candidates,
-                )
-                message = "distinct module"
-            invalid_plan = rebuilt(plan, source, invalid)
-            cases.append((action, registry, contract_state(invalid_plan, state, source), invalid.id, message))
+                with self.assertRaisesRegex(ValueError, "frozen revision contract"):
+                    replace(
+                        target,
+                        module_id=source.module_id,
+                        compatibility_row_candidates=source.compatibility_row_candidates,
+                    )
 
         temporary, registry, state, plan = revision_fixture("rerun-same-method")
         self.addCleanup(temporary.cleanup)
@@ -265,15 +448,8 @@ class ResearchControllerTests(unittest.TestCase):
             "branch, inputs, outputs",
         ))
 
-        invalid = replace(target, revision_of_node_id=None)
-        invalid_plan = rebuilt(plan, source, invalid)
-        cases.append((
-            "rerun-same-method",
-            registry,
-            contract_state(invalid_plan, state, source),
-            invalid.id,
-            "explicitly name",
-        ))
+        with self.assertRaisesRegex(ValueError, "frozen revision contract"):
+            replace(target, revision_of_node_id=None)
 
         temporary, registry, state, plan = revision_fixture("switch-method")
         self.addCleanup(temporary.cleanup)
@@ -291,7 +467,7 @@ class ResearchControllerTests(unittest.TestCase):
             undeclared_registry,
             contract_state(plan, state, source),
             target.id,
-            "declared source-module alternative",
+            "live module registry differs",
         ))
 
         for action, registry, state, target_id, message in cases:
@@ -300,6 +476,10 @@ class ResearchControllerTests(unittest.TestCase):
                     action=action,
                     next_plan_node_ids=(target_id,),
                     artifact_id=state.artifact_reloads[0].artifact_id,
+                    revision_contract_id=next(
+                        node.revision_contract.id for node in state.plans[0].nodes
+                        if node.id == target_id
+                    ),
                 )
                 with self.assertRaisesRegex(ValueError, message):
                     validate_revision_target_contract(
@@ -905,6 +1085,11 @@ class ResearchControllerTests(unittest.TestCase):
                     active_evidence=retained,
                     next_plan_node_ids=next_ids,
                     next_hypothesis_ids=next_hypothesis_ids,
+                    revision_contract_id=(
+                        revision_node.revision_contract.id
+                        if action in {"rerun-same-method", "rerun-adjusted-parameters", "switch-method"}
+                        else None
+                    ),
                 )
                 state = apply_event(
                     state,
@@ -984,6 +1169,9 @@ class ResearchControllerTests(unittest.TestCase):
                 active_evidence=active_evidence,
                 next_plan_node_ids=(replacement.id,) if action == "rerun-same-method" else (),
                 next_hypothesis_ids=(),
+                revision_contract_id=(
+                    replacement.revision_contract.id if action == "rerun-same-method" else None
+                ),
             )
             return apply_event(
                 current,

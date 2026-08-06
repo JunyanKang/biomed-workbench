@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import importlib
+import json
 import re
 from dataclasses import dataclass
 from datetime import date
@@ -1475,3 +1476,14 @@ def manifest_to_dict(value: ModuleManifest) -> dict[str, object]:
             _observed_output_dict(item) for item in value.observed_output_contracts
         ]
     return payload
+
+
+def module_manifest_digest(value: ModuleManifest) -> str:
+    """Hash the complete public manifest without treating its credential names as secret values."""
+    payload = json.dumps(
+        manifest_to_dict(value),
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()

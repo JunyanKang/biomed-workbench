@@ -30,7 +30,8 @@ KERNEL_CONTRACTS = [
     "evidence_map_edge_table", "bilingual_evidence_report", "append_only_evidence_map_version",
     "execution_handoff", "observed_execution_receipt", "artifact_reload_receipt",
     "scientific_review_receipt", "evidence_map_publication", "state_migration_record",
-    "registered_gate_evaluator_identity", "revision_target_contract", "artifact_store_transaction",
+    "registered_gate_evaluator_identity", "revision_target_contract", "review_triggered_plan_revision",
+    "normalized_command_revision_identity", "legacy_evidence_map_record", "artifact_store_transaction",
 ]
 EXECUTION_CONTRACTS = [
     "scientific_command", "command_companion_sidecar_input", "command_digest_bound_project_implementation",
