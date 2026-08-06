@@ -43,6 +43,7 @@ from biomed_workbench.orchestration.revision import prepare_plan_revision  # noq
 from biomed_workbench.orchestration.state_migration import (  # noqa: E402
     assess_republication_prerequisites,
     migrate_map_bound_v1_state,
+    upgrade_state_migration_contract_1_1,
 )
 from biomed_workbench.reporting.evidence_map_versions import (  # noqa: E402
     abort_prepared_evidence_map_publication,
@@ -180,6 +181,25 @@ def main() -> int:
     migrate.add_argument("--legacy-state", required=True, type=Path)
     migrate.add_argument("--state", required=True, type=Path)
     migrate.add_argument("--evidence-map-root", required=True, type=Path)
+    migrate.add_argument(
+        "--delivery-node",
+        action="append",
+        default=[],
+        help="evaluate the exact delivery node with the normal delivery validator; repeat as needed",
+    )
+    upgrade = commands.add_parser(
+        "upgrade-state-migration-1-1",
+        help="verify a contract-1.1.0 v2 state and write a distinct contract-1.2.0 successor",
+    )
+    upgrade.add_argument("--prior-state", required=True, type=Path)
+    upgrade.add_argument("--state", required=True, type=Path)
+    upgrade.add_argument("--evidence-map-root", required=True, type=Path)
+    upgrade.add_argument(
+        "--delivery-node",
+        action="append",
+        default=[],
+        help="evaluate the exact delivery node with the normal delivery validator; repeat as needed",
+    )
     args = parser.parse_args()
 
     if args.command == "migrate-state-v1":
@@ -194,11 +214,47 @@ def main() -> int:
         _write(args.state, state.to_dict())
         summary = {
             **_summary(state),
-            **assess_republication_prerequisites(state),
+            **assess_republication_prerequisites(
+                state,
+                delivery_node_ids=tuple(args.delivery_node),
+            ),
             "legacy_state_preserved": True,
             "verified_legacy_evidence_maps": sum(
                 len(item.legacy_evidence_maps) for item in state.state_migrations
             ),
+        }
+        print(json.dumps(summary, indent=2, sort_keys=True, ensure_ascii=False))
+        return 0
+    if args.command == "upgrade-state-migration-1-1":
+        if args.state.exists():
+            raise ValueError("state migration contract upgrade never overwrites an existing target")
+        if args.prior_state.resolve() == args.state.resolve():
+            raise ValueError("state migration contract upgrade target must differ from the prior state")
+        prior_payload = _read(args.prior_state)
+        state = upgrade_state_migration_contract_1_1(
+            prior_payload,
+            evidence_map_root=args.evidence_map_root.resolve(strict=True),
+        )
+        prior_state_digest = prior_payload["state_digest"]
+        prior_migration = prior_payload["state_migrations"][0]
+        _write(args.state, state.to_dict())
+        migration = state.state_migrations[0]
+        summary = {
+            **_summary(state),
+            **assess_republication_prerequisites(
+                state,
+                delivery_node_ids=tuple(args.delivery_node),
+            ),
+            "prior_state_preserved": True,
+            "source_project_state_digest": prior_state_digest,
+            "upgraded_project_state_digest": state.state_digest,
+            "source_migration_digest": prior_migration.get("digest"),
+            "upgraded_migration_digest": migration.digest,
+            "verified_legacy_map_digests": [
+                item.publication.map_digest for item in migration.legacy_evidence_maps
+            ],
+            "contract_upgrade_reason": migration.contract_upgrade.reason,
+            "target_state_path": str(args.state.resolve()),
         }
         print(json.dumps(summary, indent=2, sort_keys=True, ensure_ascii=False))
         return 0

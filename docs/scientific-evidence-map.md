@@ -42,6 +42,14 @@ The same edge set is written as `scientific-evidence-map.edges.tsv`. Its digest
 is embedded in the map and both reports. Modifying an edge without rebuilding
 the map breaks the report gate.
 
+Map-bound legacy states are migrated without overwriting their source files. A
+schema-v2 state created under migration contract 1.1.0 is likewise upgraded to
+a separate 1.2.0 successor only after its prior state digest, migration and
+recovery digests, event chain, immutable map files, plan-node contracts, and map
+coverage all verify. The successor records both prior digests and the upgrade
+reason. Delivery readiness is reported as unassessed unless an exact delivery
+node was evaluated by the normal delivery validator.
+
 ## Admission Before Execution
 
 Every planned analysis node requires one `AnalysisAdmission`. Approval requires:

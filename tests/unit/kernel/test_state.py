@@ -1,6 +1,7 @@
 import copy
 import hashlib
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -18,7 +19,11 @@ from biomed_workbench.kernel.execution_chain import delivery_slice_digest
 from biomed_workbench.kernel.identity import digest_value
 from biomed_workbench.kernel.scientific_evidence_map import EvidenceMapPublication, EvidenceMapVersion
 from biomed_workbench.kernel.scientific_dependency import LegacyAnalysisAdmissionRecovery, ScientificDependencyBundle
-from biomed_workbench.orchestration.state_migration import migrate_map_bound_v1_state
+from biomed_workbench.orchestration.state_migration import (
+    _legacy_v2_state_basis,
+    migrate_map_bound_v1_state,
+    upgrade_state_migration_contract_1_1,
+)
 from biomed_workbench.kernel.hypotheses import revise_hypothesis
 from tests.unit.kernel.test_artifacts import artifact
 from tests.unit.kernel.test_context import project_context
@@ -75,6 +80,53 @@ def populated_state():
 
 
 class ProjectStateTests(unittest.TestCase):
+    @staticmethod
+    def _contract_1_1_fixture():
+        root = Path(__file__).parents[2] / "fixtures" / "state-migration-contract-1-1"
+        payload = json.loads(
+            (root / "project_state_v2_migration_contract_1_1.json").read_text(encoding="utf-8")
+        )
+        return root, payload
+
+    @staticmethod
+    def _rebase_contract_1_1_payload(payload):
+        migration = payload["state_migrations"][0]
+        for recovery in migration["legacy_analysis_admission_recoveries"]:
+            basis = {
+                key: value
+                for key, value in recovery.items()
+                if key not in {"record_type", "digest"}
+            }
+            recovery["digest"] = digest_value(basis)
+        migration["digest"] = digest_value({
+            key: value for key, value in migration.items() if key != "digest"
+        })
+        initial_basis = {
+            "schema_version": 2,
+            "context": payload["context"],
+            "artifacts": [], "hypotheses": [], "evidence": [], "decisions": [],
+            "plans": [], "active_plan_id": None, "revision": 0,
+            "state_migrations": payload["state_migrations"],
+        }
+        prior = digest_value(initial_basis)
+        for event in payload["decisions"]:
+            event["prior_state_digest"] = prior
+            identity_basis = {
+                "sequence": event["sequence"],
+                "event_type": event["event_type"],
+                "payload": event["payload"],
+                "prior_state_digest": prior,
+            }
+            event["id"] = f"event-{event['sequence']:06d}-{digest_value(identity_basis)[:12]}"
+            event["resulting_state_digest"] = digest_value({
+                "legacy_contract_event": event["sequence"],
+                "prior": prior,
+            })
+            prior = event["resulting_state_digest"]
+        payload["state_digest"] = digest_value(_legacy_v2_state_basis(payload))
+        payload["decisions"][-1]["resulting_state_digest"] = payload["state_digest"]
+        return payload
+
     @staticmethod
     def _map_bound_legacy_fixture(root: Path, *, cover_node: bool = False):
         fixture = Path(__file__).parents[2] / "fixtures" / "project_state_v1_gate_adjudications.json"
@@ -297,6 +349,63 @@ class ProjectStateTests(unittest.TestCase):
                     legacy_evidence_maps=(record,),
                     legacy_analysis_admission_recoveries=(wrong_coverage,),
                 )
+
+    def test_previous_contract_1_1_state_requires_and_passes_non_overwriting_upgrade(self):
+        root, prior = self._contract_1_1_fixture()
+        prior_bytes = (root / "project_state_v2_migration_contract_1_1.json").read_bytes()
+        with self.assertRaisesRegex(ValueError, "upgrade-state-migration-1-1"):
+            ProjectState.from_dict(prior)
+
+        upgraded = upgrade_state_migration_contract_1_1(
+            prior,
+            evidence_map_root=root / "evidence-map-store",
+        )
+
+        migration = upgraded.state_migrations[0]
+        recovery = migration.legacy_analysis_admission_recoveries[0]
+        self.assertEqual(migration.contract_version, "1.2.0")
+        self.assertEqual(migration.contract_upgrade.from_contract_version, "1.1.0")
+        self.assertEqual(
+            migration.contract_upgrade.source_project_state_digest,
+            prior["state_digest"],
+        )
+        self.assertEqual(recovery.source_map_coverage_status, "not-covered")
+        self.assertEqual(ProjectState.from_dict(upgraded.to_dict()), upgraded)
+        self.assertEqual(
+            (root / "project_state_v2_migration_contract_1_1.json").read_bytes(),
+            prior_bytes,
+        )
+
+    def test_contract_1_1_upgrade_rejects_changed_map_unknown_map_and_unknown_node(self):
+        root, prior = self._contract_1_1_fixture()
+        with tempfile.TemporaryDirectory() as temporary:
+            copied_store = Path(temporary) / "evidence-map-store"
+            shutil.copytree(root / "evidence-map-store", copied_store)
+            map_path = copied_store / "versions" / "v1.0.0" / "scientific-evidence-map.json"
+            map_path.write_text(map_path.read_text(encoding="utf-8") + " ", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "missing or changed"):
+                upgrade_state_migration_contract_1_1(prior, evidence_map_root=copied_store)
+
+        unknown_map = copy.deepcopy(prior)
+        unknown_map["state_migrations"][0]["legacy_analysis_admission_recoveries"][0][
+            "source_map_digest"
+        ] = "f" * 64
+        with self.assertRaisesRegex(ValueError, "not a verified migration map"):
+            upgrade_state_migration_contract_1_1(
+                unknown_map,
+                evidence_map_root=root / "evidence-map-store",
+            )
+
+        unknown_node = copy.deepcopy(prior)
+        unknown_node["state_migrations"][0]["legacy_analysis_admission_recoveries"][0][
+            "plan_node_id"
+        ] = "node-unknown-historical-analysis"
+        self._rebase_contract_1_1_payload(unknown_node)
+        with self.assertRaisesRegex(ValueError, "unknown migrated plan node"):
+            upgrade_state_migration_contract_1_1(
+                unknown_node,
+                evidence_map_root=root / "evidence-map-store",
+            )
 
     def test_previous_release_v1_state_migrates_to_v2_with_exact_receipt_bindings(self):
         fixture = Path(__file__).parents[2] / "fixtures" / "project_state_v1_gate_adjudications.json"

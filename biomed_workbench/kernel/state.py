@@ -124,6 +124,56 @@ class LegacyEvidenceMapRecord:
 
 
 @dataclass(frozen=True)
+class StateMigrationContractUpgrade:
+    """Immutable provenance for a non-overwriting migration-contract upgrade."""
+
+    from_contract_version: str
+    to_contract_version: str
+    source_migration_digest: str
+    source_project_state_digest: str
+    reason: str
+    digest: str
+
+    def __post_init__(self) -> None:
+        if (self.from_contract_version, self.to_contract_version) != ("1.1.0", "1.2.0"):
+            raise ValueError("state migration contract upgrade transition is unsupported")
+        for field in ("source_migration_digest", "source_project_state_digest", "digest"):
+            value = getattr(self, field)
+            if not isinstance(value, str) or len(value) != 64 or set(value) - set("0123456789abcdef"):
+                raise ValueError(f"state migration contract upgrade {field} must be SHA-256")
+        if not isinstance(self.reason, str) or len(self.reason.strip()) < 24:
+            raise ValueError("state migration contract upgrade reason must be meaningful")
+        object.__setattr__(self, "reason", self.reason.strip())
+        basis = {field: getattr(self, field) for field in self.__dataclass_fields__ if field != "digest"}
+        if self.digest != digest_value(basis):
+            raise ValueError("state migration contract upgrade digest is invalid")
+
+    @classmethod
+    def create(
+        cls,
+        *,
+        source_migration_digest: str,
+        source_project_state_digest: str,
+        reason: str,
+    ) -> "StateMigrationContractUpgrade":
+        basis = {
+            "from_contract_version": "1.1.0",
+            "to_contract_version": "1.2.0",
+            "source_migration_digest": source_migration_digest,
+            "source_project_state_digest": source_project_state_digest,
+            "reason": reason.strip(),
+        }
+        return cls(**basis, digest=digest_value(basis))
+
+    def to_dict(self) -> dict[str, object]:
+        return {field: getattr(self, field) for field in self.__dataclass_fields__}
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "StateMigrationContractUpgrade":
+        return cls(**dict(payload))
+
+
+@dataclass(frozen=True)
 class StateMigrationRecord:
     id: str
     from_schema_version: int
@@ -135,6 +185,7 @@ class StateMigrationRecord:
     digest: str
     legacy_evidence_maps: tuple[LegacyEvidenceMapRecord, ...] = ()
     legacy_analysis_admission_recoveries: tuple[LegacyAnalysisAdmissionRecovery, ...] = ()
+    contract_upgrade: StateMigrationContractUpgrade | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "state_migration.id"))
@@ -176,6 +227,11 @@ class StateMigrationRecord:
             if covered != (recovery.source_map_coverage_status == "covered"):
                 raise ValueError("legacy admission recovery source map coverage status is inconsistent")
         object.__setattr__(self, "legacy_analysis_admission_recoveries", recoveries)
+        if self.contract_upgrade is not None:
+            if not isinstance(self.contract_upgrade, StateMigrationContractUpgrade):
+                raise ValueError("state migration contract upgrade provenance is invalid")
+            if self.contract_version != self.contract_upgrade.to_contract_version:
+                raise ValueError("state migration contract upgrade target differs from its migration")
         basis = {
             "id": self.id,
             "from_schema_version": self.from_schema_version,
@@ -189,6 +245,8 @@ class StateMigrationRecord:
             basis["legacy_evidence_maps"] = [item.to_dict() for item in legacy_maps]
         if recoveries:
             basis["legacy_analysis_admission_recoveries"] = [item.to_dict() for item in recoveries]
+        if self.contract_upgrade is not None:
+            basis["contract_upgrade"] = self.contract_upgrade.to_dict()
         if self.digest != digest_value(basis):
             raise ValueError("state migration digest does not match its source identity")
 
@@ -200,6 +258,7 @@ class StateMigrationRecord:
         source_revision: int,
         legacy_evidence_maps: tuple[LegacyEvidenceMapRecord, ...] = (),
         legacy_analysis_admission_recoveries: tuple[LegacyAnalysisAdmissionRecovery, ...] = (),
+        contract_upgrade: StateMigrationContractUpgrade | None = None,
     ) -> "StateMigrationRecord":
         identity = f"migration-v1-v2-{source_state_digest[:16]}"
         contract_version = "1.2.0" if legacy_analysis_admission_recoveries else "1.0.0"
@@ -218,17 +277,27 @@ class StateMigrationRecord:
             basis["legacy_analysis_admission_recoveries"] = [
                 item.to_dict() for item in legacy_analysis_admission_recoveries
             ]
+        if contract_upgrade is not None:
+            basis["contract_upgrade"] = contract_upgrade.to_dict()
         return cls(
-            identity, 1, 2, source_state_digest, source_revision, source_revision,
-            contract_version, digest_value(basis), tuple(legacy_evidence_maps),
-            tuple(legacy_analysis_admission_recoveries),
+            id=identity,
+            from_schema_version=1,
+            to_schema_version=2,
+            source_state_digest=source_state_digest,
+            source_revision=source_revision,
+            migrated_event_count=source_revision,
+            contract_version=contract_version,
+            digest=digest_value(basis),
+            legacy_evidence_maps=tuple(legacy_evidence_maps),
+            legacy_analysis_admission_recoveries=tuple(legacy_analysis_admission_recoveries),
+            contract_upgrade=contract_upgrade,
         )
 
     def to_dict(self) -> dict[str, object]:
         payload = {
             field: getattr(self, field)
             for field in self.__dataclass_fields__
-            if field not in {"legacy_evidence_maps", "legacy_analysis_admission_recoveries"}
+            if field not in {"legacy_evidence_maps", "legacy_analysis_admission_recoveries", "contract_upgrade"}
         }
         if self.legacy_evidence_maps:
             payload["legacy_evidence_maps"] = [item.to_dict() for item in self.legacy_evidence_maps]
@@ -236,6 +305,8 @@ class StateMigrationRecord:
             payload["legacy_analysis_admission_recoveries"] = [
                 item.to_dict() for item in self.legacy_analysis_admission_recoveries
             ]
+        if self.contract_upgrade is not None:
+            payload["contract_upgrade"] = self.contract_upgrade.to_dict()
         return payload
 
     @classmethod
@@ -248,6 +319,11 @@ class StateMigrationRecord:
         values["legacy_analysis_admission_recoveries"] = tuple(
             LegacyAnalysisAdmissionRecovery.from_dict(item)
             for item in values.get("legacy_analysis_admission_recoveries", ())
+        )
+        values["contract_upgrade"] = (
+            StateMigrationContractUpgrade.from_dict(values["contract_upgrade"])
+            if values.get("contract_upgrade") is not None
+            else None
         )
         return cls(**values)
 
@@ -568,6 +644,14 @@ class ProjectState:
     def from_dict(cls, payload: Mapping[str, Any]) -> "ProjectState":
         if payload.get("schema_version") == 1:
             return _migrate_v1_project_state(payload)
+        if any(
+            isinstance(item, Mapping) and item.get("contract_version") == "1.1.0"
+            for item in payload.get("state_migrations", ())
+        ):
+            raise ValueError(
+                "state migration contract 1.1.0 requires a non-overwriting upgrade with its "
+                "immutable evidence-map root; run project upgrade-state-migration-1-1"
+            )
         receipt_fields = {"execution_handoffs", "observed_executions", "artifact_reloads", "execution_reviews"}
         expected_fields = {"schema_version", "context", "artifacts", "hypotheses", "evidence", "gate_adjudications", "analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions", *receipt_fields, "state_migrations", "decisions", "plans", "active_plan_id", "revision", "state_digest"}
         pre_gate_fields = expected_fields - {"gate_adjudications"}

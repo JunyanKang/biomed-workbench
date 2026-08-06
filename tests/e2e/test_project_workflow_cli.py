@@ -57,7 +57,9 @@ class ProjectWorkflowCliTests(unittest.TestCase):
                 {"artifact-genes", "artifact-universe", "artifact-enrichment-result"},
             )
             self.assertTrue(summary["delivery_permanently_blocked_by_legacy_recovery"])
-            self.assertFalse(summary["delivery_prerequisites_currently_satisfied"])
+            self.assertEqual(summary["delivery_prerequisite_assessment_status"], "not-assessed")
+            self.assertIsNone(summary["delivery_prerequisites_currently_satisfied"])
+            self.assertEqual(summary["delivery_prerequisite_checks"], [])
             self.assertEqual(summary["required_next_map_revision"], 2)
             self.assertEqual(summary["required_parent_map_digest"], old_publication.map_digest)
             self.assertEqual(summary["verified_legacy_evidence_maps"], 1)
@@ -183,6 +185,52 @@ class ProjectWorkflowCliTests(unittest.TestCase):
             self.assertEqual(republished_state.evidence_map_versions[-1].version.parent_map_digest, old_publication.map_digest)
             self.assertTrue((publication_root / "versions" / "v1.0.1" / "scientific-evidence-map.json").is_file())
             self.assertEqual(legacy_path.read_bytes(), legacy_bytes)
+
+    def test_contract_1_1_upgrade_cli_preserves_source_and_reports_actual_delivery_assessment(self):
+        fixture_root = ROOT / "tests" / "fixtures" / "state-migration-contract-1-1"
+        prior_path = fixture_root / "project_state_v2_migration_contract_1_1.json"
+        prior_bytes = prior_path.read_bytes()
+        prior = json.loads(prior_bytes)
+        with tempfile.TemporaryDirectory() as temporary:
+            target = Path(temporary) / "project-state-contract-1-2.json"
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "tools/project_workflow.py",
+                    "upgrade-state-migration-1-1",
+                    "--prior-state",
+                    str(prior_path),
+                    "--state",
+                    str(target),
+                    "--evidence-map-root",
+                    str(fixture_root / "evidence-map-store"),
+                    "--delivery-node",
+                    "node-functional-enrichment",
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            summary = json.loads(completed.stdout)
+            self.assertEqual(summary["source_project_state_digest"], prior["state_digest"])
+            self.assertNotEqual(
+                summary["upgraded_project_state_digest"],
+                summary["source_project_state_digest"],
+            )
+            self.assertEqual(summary["delivery_prerequisite_assessment_status"], "blocked")
+            self.assertFalse(summary["delivery_prerequisites_currently_satisfied"])
+            self.assertEqual(
+                summary["delivery_prerequisite_checks"][0]["delivery_node_id"],
+                "node-functional-enrichment",
+            )
+            self.assertEqual(summary["delivery_prerequisite_checks"][0]["status"], "blocked")
+            upgraded = ProjectState.from_dict(json.loads(target.read_text(encoding="utf-8")))
+            migration = upgraded.state_migrations[0]
+            self.assertEqual(migration.contract_version, "1.2.0")
+            self.assertEqual(migration.contract_upgrade.source_project_state_digest, prior["state_digest"])
+            self.assertEqual(prior_path.read_bytes(), prior_bytes)
 
     def test_init_and_admit_persist_replayable_append_only_state(self):
         temporary_registry, _registry, _state, plan = serial_fixture()

@@ -384,7 +384,7 @@ report.write_text('<html><body>fastp QC-only report</body></html>')
                 "action": "switch-method",
                 "target_module_id": "read-quality-fastp",
                 "target_input_bindings": {},
-                "parameter_overrides": {"threads": 1},
+                "parameter_overrides": {},
                 "rationale": "Switch the reviewed FastQC node to the explicitly typed FastQC-to-fastp revision relation for an independent QC-only sensitivity check.",
             }
             switch_request_path = root / "switch-request.json"

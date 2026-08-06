@@ -1,0 +1,1226 @@
+{
+  "active_plan_id": "plan-functional-enrichment",
+  "analysis_admissions": [],
+  "artifact_reloads": [
+    {
+      "artifact_id": "artifact-enrichment-result",
+      "content_digest": "33bae0206fc9ff3f6f108a4735bf9a529b8cbe0f01c02fc649f7908de2d70ddc",
+      "id": "reload-422f43d3c47b8974cdd55731",
+      "observed_execution_receipt_id": "observed-3988becc991bf5c8f9d043de",
+      "observed_output_contract_digest": "2ad9e3a2dc44dabde776858c68de562fb029462fb26cc48cde547b4fef1040b5",
+      "output_schema_valid": true,
+      "payload_digests": {
+        "primary": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+        "semantic-metadata": "7c0b27bdca408a5b0688f52e32bd95a8fa51f06734c53dfbe3b768be3003ef98"
+      },
+      "reload_validator_id": "validator-ec64de36739a07d9dbddda9d"
+    }
+  ],
+  "artifact_reviews": [],
+  "artifacts": [
+    {
+      "annotation_release": null,
+      "artifact_type": "gene_list_or_ranking",
+      "compression": "none",
+      "content": {
+        "sample_id": "s1"
+      },
+      "content_digest": "07df554bf5d19ae54aee2544b1cf268665abe7dd09a33e2589b5abb99cb669c0",
+      "coordinate_system": null,
+      "denominator": "four-independent-lines",
+      "experimental_unit": "independent-organoid-line",
+      "format_name": "inline-json",
+      "format_version": "1",
+      "genome_build": null,
+      "id": "artifact-genes",
+      "identifier_namespace": null,
+      "indexes": [],
+      "orientation": "request-object",
+      "processing_level": "declared",
+      "producer_tool_versions": {},
+      "producing_module_id": null,
+      "producing_module_version": null,
+      "quality_status": "passed",
+      "schema_version": "1.0",
+      "scientific_scope": {
+        "sample_id": "s1",
+        "species": "human"
+      },
+      "source_artifact_ids": []
+    },
+    {
+      "annotation_release": null,
+      "artifact_type": "measured_gene_universe",
+      "compression": "none",
+      "content": {
+        "sample_id": "s1"
+      },
+      "content_digest": "07df554bf5d19ae54aee2544b1cf268665abe7dd09a33e2589b5abb99cb669c0",
+      "coordinate_system": null,
+      "denominator": "four-independent-lines",
+      "experimental_unit": "independent-organoid-line",
+      "format_name": "inline-json",
+      "format_version": "1",
+      "genome_build": null,
+      "id": "artifact-universe",
+      "identifier_namespace": null,
+      "indexes": [],
+      "orientation": "request-object",
+      "processing_level": "declared",
+      "producer_tool_versions": {},
+      "producing_module_id": null,
+      "producing_module_version": null,
+      "quality_status": "passed",
+      "schema_version": "1.0",
+      "scientific_scope": {
+        "sample_id": "s1",
+        "species": "human"
+      },
+      "source_artifact_ids": []
+    },
+    {
+      "annotation_release": null,
+      "artifact_type": "functional_enrichment_evidence",
+      "compression": "none",
+      "content": {
+        "artifact_type": "functional_enrichment_evidence",
+        "format": "tab-separated-values",
+        "processing_level": "tested",
+        "provenance": {
+          "compatibility_row_id": "clusterprofiler-410-fgsea-128-r43",
+          "parameters_digest": "7e3d9aed07ef193dd11febd0bac4fe4520ace543a23ed6138eb54b1aaad9bfe3",
+          "workflow": "clusterProfiler",
+          "workflow_version": "4.10.1"
+        },
+        "record_count": 1,
+        "result_summary": "A reloadable enrichment result was produced."
+      },
+      "content_digest": "33bae0206fc9ff3f6f108a4735bf9a529b8cbe0f01c02fc649f7908de2d70ddc",
+      "coordinate_system": null,
+      "denominator": "four-independent-lines",
+      "experimental_unit": "independent-organoid-line",
+      "format_name": "tab-separated-values",
+      "format_version": "1",
+      "genome_build": null,
+      "id": "artifact-enrichment-result",
+      "identifier_namespace": null,
+      "indexes": [],
+      "orientation": "term-by-enrichment-statistic",
+      "payloads": [
+        {
+          "byte_size": 150,
+          "media_type": "text/tab-separated-values",
+          "object_key": "sha256/27/27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd/payload",
+          "role": "primary",
+          "sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd"
+        },
+        {
+          "byte_size": 904,
+          "media_type": "application/json",
+          "object_key": "sha256/7c/7c0b27bdca408a5b0688f52e32bd95a8fa51f06734c53dfbe3b768be3003ef98/payload",
+          "role": "semantic-metadata",
+          "sha256": "7c0b27bdca408a5b0688f52e32bd95a8fa51f06734c53dfbe3b768be3003ef98"
+        }
+      ],
+      "processing_level": "tested",
+      "producer_tool_versions": {
+        "clusterProfiler": "4.10.1",
+        "fgsea": "1.28.0"
+      },
+      "producing_module_id": "functional-enrichment",
+      "producing_module_version": "1.0.0",
+      "quality_status": "passed",
+      "schema_version": "1.0",
+      "scientific_scope": {
+        "species": [
+          "human"
+        ],
+        "system": "organoid",
+        "tissue": "retina"
+      },
+      "source_artifact_ids": [
+        "artifact-genes",
+        "artifact-universe"
+      ]
+    }
+  ],
+  "context": {
+    "biological_scope": {
+      "system": "organoid",
+      "tissue": "retina"
+    },
+    "comparisons": [
+      {
+        "covariates": [
+          "batch"
+        ],
+        "denominator_group": "control",
+        "id": "perturbed-vs-control",
+        "numerator_group": "perturbed"
+      }
+    ],
+    "constraints": [
+      {
+        "description": "No direct participant identifiers may enter project state.",
+        "id": "privacy",
+        "kind": "privacy",
+        "required": true
+      }
+    ],
+    "experimental_unit": "independent-organoid-line",
+    "objective": "Determine how a perturbation changes retinal progenitor differentiation.",
+    "privacy_level": "controlled",
+    "project_id": "retina-development",
+    "required_deliverables": [
+      "claim_set",
+      "figure_specification"
+    ],
+    "required_evidence_types": [
+      "molecular_association",
+      "orthogonal_validation"
+    ],
+    "scientific_question": "Does the perturbation alter the transition from progenitor to neuronal states?",
+    "species": [
+      "human"
+    ],
+    "study_design": "paired-perturbation"
+  },
+  "decisions": [
+    {
+      "affected_artifact_ids": [],
+      "affected_hypothesis_ids": [],
+      "event_type": "hypothesis_added",
+      "id": "event-000001-b368b4092885",
+      "payload": {
+        "hypothesis": {
+          "alternative_explanations": [
+            "Differential survival changes apparent composition.",
+            "Batch-dependent maturation creates the association."
+          ],
+          "biological_scope": {
+            "species": "human",
+            "tissue": "retina"
+          },
+          "comparison_id": "perturbed-vs-control",
+          "conflicting_evidence_ids": [],
+          "disconfirming_observations": [
+            "No reproducible lineage difference after batch-aware analysis.",
+            "An increase in neuronal-state abundance."
+          ],
+          "expected_direction": "decrease",
+          "expected_observations": [
+            "Lower neuronal-state abundance across independent lines.",
+            "Reduced neuronal regulatory activity."
+          ],
+          "experimental_unit": "independent-organoid-line",
+          "id": "hypothesis-lineage-shift-v1",
+          "minimum_independent_evidence_groups": 2,
+          "missing_evidence_types": [
+            "cell-state-association",
+            "regulatory-association"
+          ],
+          "parent_hypothesis_id": null,
+          "permitted_claim_strength": "associational",
+          "required_evidence_types": [
+            "cell-state-association",
+            "regulatory-association"
+          ],
+          "revision": 1,
+          "statement": "The perturbation reduces the transition from progenitor to neuronal states.",
+          "status": "active",
+          "supporting_evidence_ids": []
+        }
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "0a09f01417b7e570e3f7cc86221b705851e0fc9195190d20e0faaa18d1c1a36d",
+      "rationale": "Register the planning hypothesis.",
+      "replacement_action_ids": [],
+      "resulting_state_digest": "d32d268bcbe194b55adf3ed97556360a8c6a00aa57c75d828508bb59b89e9990",
+      "sequence": 1,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [],
+      "affected_hypothesis_ids": [],
+      "event_type": "artifact_registered",
+      "id": "event-000002-eb7885ce208d",
+      "payload": {
+        "artifact": {
+          "annotation_release": null,
+          "artifact_type": "gene_list_or_ranking",
+          "compression": "none",
+          "content": {
+            "sample_id": "s1"
+          },
+          "content_digest": "07df554bf5d19ae54aee2544b1cf268665abe7dd09a33e2589b5abb99cb669c0",
+          "coordinate_system": null,
+          "denominator": "four-independent-lines",
+          "experimental_unit": "independent-organoid-line",
+          "format_name": "inline-json",
+          "format_version": "1",
+          "genome_build": null,
+          "id": "artifact-genes",
+          "identifier_namespace": null,
+          "indexes": [],
+          "orientation": "request-object",
+          "processing_level": "declared",
+          "producer_tool_versions": {},
+          "producing_module_id": null,
+          "producing_module_version": null,
+          "quality_status": "passed",
+          "schema_version": "1.0",
+          "scientific_scope": {
+            "sample_id": "s1",
+            "species": "human"
+          },
+          "source_artifact_ids": []
+        }
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "d32d268bcbe194b55adf3ed97556360a8c6a00aa57c75d828508bb59b89e9990",
+      "rationale": "Register a planning input artifact.",
+      "replacement_action_ids": [],
+      "resulting_state_digest": "197d2965bfbd26e2b372412d406c77b761750c03d151d4a674b675ecc317192a",
+      "sequence": 2,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [],
+      "affected_hypothesis_ids": [],
+      "event_type": "artifact_registered",
+      "id": "event-000003-0c4a281cf0ed",
+      "payload": {
+        "artifact": {
+          "annotation_release": null,
+          "artifact_type": "measured_gene_universe",
+          "compression": "none",
+          "content": {
+            "sample_id": "s1"
+          },
+          "content_digest": "07df554bf5d19ae54aee2544b1cf268665abe7dd09a33e2589b5abb99cb669c0",
+          "coordinate_system": null,
+          "denominator": "four-independent-lines",
+          "experimental_unit": "independent-organoid-line",
+          "format_name": "inline-json",
+          "format_version": "1",
+          "genome_build": null,
+          "id": "artifact-universe",
+          "identifier_namespace": null,
+          "indexes": [],
+          "orientation": "request-object",
+          "processing_level": "declared",
+          "producer_tool_versions": {},
+          "producing_module_id": null,
+          "producing_module_version": null,
+          "quality_status": "passed",
+          "schema_version": "1.0",
+          "scientific_scope": {
+            "sample_id": "s1",
+            "species": "human"
+          },
+          "source_artifact_ids": []
+        }
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "197d2965bfbd26e2b372412d406c77b761750c03d151d4a674b675ecc317192a",
+      "rationale": "Register a planning input artifact.",
+      "replacement_action_ids": [],
+      "resulting_state_digest": "4afaf1b3706715edf50a4bcc771a3954c96f57d449221c7fb4c6ebacc2ec0bf0",
+      "sequence": 3,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [],
+      "affected_hypothesis_ids": [],
+      "event_type": "plan_created",
+      "id": "event-000004-8dbe80c61192",
+      "payload": {
+        "activate": true,
+        "plan": {
+          "digest": "4e0c5b0bc7ecdc1ef3d28972313efa9286d056ed893c76b8bb13ad20772551aa",
+          "id": "plan-functional-enrichment",
+          "nodes": [
+            {
+              "attempt": 1,
+              "branch_id": "branch-enrichment",
+              "compatibility_row_candidates": [
+                "clusterprofiler-410-fgsea-128-r43"
+              ],
+              "dependencies": [],
+              "expected_evidence_types": [
+                "functional-enrichment"
+              ],
+              "expected_output_artifact_types": [
+                "functional_enrichment_evidence"
+              ],
+              "id": "node-functional-enrichment",
+              "input_bindings": {
+                "gene_evidence": "artifact-genes",
+                "tested_universe": "artifact-universe"
+              },
+              "module_id": "functional-enrichment",
+              "planned_output_artifact_ids": {
+                "functional_enrichment_evidence": "artifact-enrichment-result"
+              },
+              "status": "awaiting_observed_execution",
+              "target_hypothesis_ids": [
+                "hypothesis-lineage-shift-v1"
+              ]
+            }
+          ],
+          "objective": "Test the registered gene set against its measured universe.",
+          "parent_plan_id": null,
+          "plan_type": "single",
+          "rationale": [
+            "Exercise adversarial observed-result admission."
+          ],
+          "required_output_artifact_types": [
+            "functional_enrichment_evidence"
+          ],
+          "revision": 1
+        }
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "4afaf1b3706715edf50a4bcc771a3954c96f57d449221c7fb4c6ebacc2ec0bf0",
+      "rationale": "Register the test plan.",
+      "replacement_action_ids": [],
+      "resulting_state_digest": "4b61a4369e51f710d8ab1477015d34ed7f3e67f42630d96d5261e3bac1f54ee5",
+      "sequence": 4,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [],
+      "affected_hypothesis_ids": [],
+      "event_type": "execution_handoff_recorded",
+      "id": "event-000005-338695ebbf5c",
+      "payload": {
+        "handoff": {
+          "compatibility_row_id": "clusterprofiler-410-fgsea-128-r43",
+          "execution_state": "prepared-not-run",
+          "id": "handoff-9c8a5acd0fb3f6efe371eeba",
+          "module_id": "functional-enrichment",
+          "module_version": "1.0.0",
+          "observed_output_contract_digest": "2ad9e3a2dc44dabde776858c68de562fb029462fb26cc48cde547b4fef1040b5",
+          "plan_node_id": "node-functional-enrichment",
+          "planned_output_artifact_ids": {
+            "functional_enrichment_evidence": "artifact-enrichment-result"
+          },
+          "protocol": {
+            "compatibility_contract_digest": "469dfc80c2f77782097b19b20bcf56ebc41fe0a181d639dcf5a53bc327469e8a",
+            "execution_state": "prepared-not-run",
+            "observed_output_protocol_version": "2.1.0",
+            "required_postflight_gate_ids": [
+              "enrichment-input-semantics",
+              "enrichment-output-claim",
+              "enrichment-resource-provenance"
+            ],
+            "required_postflight_gate_set_digest": "0cc58fa01a1c577f4453ec0552bc45ab2e1bc6e3bee86ca65cbdaac64855c5e6",
+            "result_kind": "execution_handoff"
+          },
+          "request_digest": "7e3d9aed07ef193dd11febd0bac4fe4520ace543a23ed6138eb54b1aaad9bfe3"
+        }
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "4b61a4369e51f710d8ab1477015d34ed7f3e67f42630d96d5261e3bac1f54ee5",
+      "rationale": "Record the exact handoff.",
+      "replacement_action_ids": [],
+      "resulting_state_digest": "db818d2f4bc591f301387e5c8fc9eb9b74ab20934ed8e2e4939b6d1e5e0df8d9",
+      "sequence": 5,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [],
+      "affected_hypothesis_ids": [
+        "hypothesis-lineage-shift-v1"
+      ],
+      "event_type": "execution_observed",
+      "id": "event-000006-e63182b73467",
+      "payload": {
+        "receipt": {
+          "compatibility_row_id": "clusterprofiler-410-fgsea-128-r43",
+          "execution_request_digest": "5f3a6164807e4e6b05a53f4bc756f014ffc13e57fdb410849fa7a85ec04f05ae",
+          "execution_request_id": "handoff-9c8a5acd0fb3f6efe371eeba",
+          "execution_state": "observed-completed",
+          "handoff_id": "handoff-9c8a5acd0fb3f6efe371eeba",
+          "id": "observed-3988becc991bf5c8f9d043de",
+          "module_id": "functional-enrichment",
+          "module_version": "1.0.0",
+          "observed_output_contract_digest": "2ad9e3a2dc44dabde776858c68de562fb029462fb26cc48cde547b4fef1040b5",
+          "output_artifact_digests": {
+            "artifact-enrichment-result": "33bae0206fc9ff3f6f108a4735bf9a529b8cbe0f01c02fc649f7908de2d70ddc"
+          },
+          "parameters_digest": "7e3d9aed07ef193dd11febd0bac4fe4520ace543a23ed6138eb54b1aaad9bfe3",
+          "plan_node_id": "node-functional-enrichment",
+          "postflight_result_digests": {
+            "enrichment-input-semantics": "6f51d5361ef415ff57034cf5963ce182c4ec41bdacef162ebf88650a9e244a60",
+            "enrichment-output-claim": "0cb1ac80729b1c1e0c155fe0d060da14135b4c47b13bb97c7f30f91c604d450f",
+            "enrichment-resource-provenance": "ab36ed3498c410953f900757d6cba132aa6c9b74d67d60133a5a4482938ce7bc"
+          },
+          "postflight_results": {
+            "enrichment-input-semantics": {
+              "evaluations": [
+                {
+                  "evaluator_type": "provenance-design",
+                  "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+                  "observed_metric": "\"pending-independent-scientific-review\"",
+                  "port": "functional_enrichment_evidence",
+                  "reason": "enrichment-input-semantics requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+                  "status": "requires_review",
+                  "threshold": "{\"operator\":\"equals\",\"value\":\"accepted\"}"
+                }
+              ],
+              "gate_id": "enrichment-input-semantics",
+              "status": "requires_review"
+            },
+            "enrichment-output-claim": {
+              "evaluations": [
+                {
+                  "evaluator_type": "provenance-design",
+                  "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+                  "observed_metric": "\"pending-independent-scientific-review\"",
+                  "port": "functional_enrichment_evidence",
+                  "reason": "enrichment-output-claim requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+                  "status": "requires_review",
+                  "threshold": "{\"operator\":\"equals\",\"value\":\"accepted\"}"
+                }
+              ],
+              "gate_id": "enrichment-output-claim",
+              "status": "requires_review"
+            },
+            "enrichment-resource-provenance": {
+              "evaluations": [
+                {
+                  "evaluator_type": "provenance-design",
+                  "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+                  "observed_metric": "\"pending-independent-scientific-review\"",
+                  "port": "functional_enrichment_evidence",
+                  "reason": "enrichment-resource-provenance requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+                  "status": "requires_review",
+                  "threshold": "{\"operator\":\"equals\",\"value\":\"accepted\"}"
+                }
+              ],
+              "gate_id": "enrichment-resource-provenance",
+              "status": "requires_review"
+            }
+          },
+          "process_exit_code": 0,
+          "runtime_versions": {
+            "dependency:AnnotationDbi": "1.64.1",
+            "dependency:digest": "0.6.39",
+            "dependency:enrichplot": "1.22.0",
+            "dependency:ggplot2": "3.5.2",
+            "dependency:jsonlite": "2.0.0",
+            "dependency:r": "4.3.2",
+            "tool:clusterProfiler": "4.10.1",
+            "tool:fgsea": "1.28.0",
+            "workflow:clusterProfiler": "4.10.1"
+          },
+          "source_kind": "handoff"
+        }
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "db818d2f4bc591f301387e5c8fc9eb9b74ab20934ed8e2e4939b6d1e5e0df8d9",
+      "rationale": "Ingest observed completion for the exact packaged execution handoff.",
+      "replacement_action_ids": [
+        "node-functional-enrichment"
+      ],
+      "resulting_state_digest": "998cdb8043c4d7d4b4a79d85fff494d8de5821b803f9dbb05a19070f635541dd",
+      "sequence": 6,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [
+        "artifact-enrichment-result"
+      ],
+      "affected_hypothesis_ids": [
+        "hypothesis-lineage-shift-v1"
+      ],
+      "event_type": "artifact_reloaded",
+      "id": "event-000007-36a867302d84",
+      "payload": {
+        "artifact": {
+          "annotation_release": null,
+          "artifact_type": "functional_enrichment_evidence",
+          "compression": "none",
+          "content": {
+            "artifact_type": "functional_enrichment_evidence",
+            "format": "tab-separated-values",
+            "processing_level": "tested",
+            "provenance": {
+              "compatibility_row_id": "clusterprofiler-410-fgsea-128-r43",
+              "parameters_digest": "7e3d9aed07ef193dd11febd0bac4fe4520ace543a23ed6138eb54b1aaad9bfe3",
+              "workflow": "clusterProfiler",
+              "workflow_version": "4.10.1"
+            },
+            "record_count": 1,
+            "result_summary": "A reloadable enrichment result was produced."
+          },
+          "content_digest": "33bae0206fc9ff3f6f108a4735bf9a529b8cbe0f01c02fc649f7908de2d70ddc",
+          "coordinate_system": null,
+          "denominator": "four-independent-lines",
+          "experimental_unit": "independent-organoid-line",
+          "format_name": "tab-separated-values",
+          "format_version": "1",
+          "genome_build": null,
+          "id": "artifact-enrichment-result",
+          "identifier_namespace": null,
+          "indexes": [],
+          "orientation": "term-by-enrichment-statistic",
+          "payloads": [
+            {
+              "byte_size": 150,
+              "media_type": "text/tab-separated-values",
+              "object_key": "sha256/27/27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd/payload",
+              "role": "primary",
+              "sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd"
+            },
+            {
+              "byte_size": 904,
+              "media_type": "application/json",
+              "object_key": "sha256/7c/7c0b27bdca408a5b0688f52e32bd95a8fa51f06734c53dfbe3b768be3003ef98/payload",
+              "role": "semantic-metadata",
+              "sha256": "7c0b27bdca408a5b0688f52e32bd95a8fa51f06734c53dfbe3b768be3003ef98"
+            }
+          ],
+          "processing_level": "tested",
+          "producer_tool_versions": {
+            "clusterProfiler": "4.10.1",
+            "fgsea": "1.28.0"
+          },
+          "producing_module_id": "functional-enrichment",
+          "producing_module_version": "1.0.0",
+          "quality_status": "passed",
+          "schema_version": "1.0",
+          "scientific_scope": {
+            "species": [
+              "human"
+            ],
+            "system": "organoid",
+            "tissue": "retina"
+          },
+          "source_artifact_ids": [
+            "artifact-genes",
+            "artifact-universe"
+          ]
+        },
+        "receipt": {
+          "artifact_id": "artifact-enrichment-result",
+          "content_digest": "33bae0206fc9ff3f6f108a4735bf9a529b8cbe0f01c02fc649f7908de2d70ddc",
+          "id": "reload-422f43d3c47b8974cdd55731",
+          "observed_execution_receipt_id": "observed-3988becc991bf5c8f9d043de",
+          "observed_output_contract_digest": "2ad9e3a2dc44dabde776858c68de562fb029462fb26cc48cde547b4fef1040b5",
+          "output_schema_valid": true,
+          "payload_digests": {
+            "primary": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+            "semantic-metadata": "7c0b27bdca408a5b0688f52e32bd95a8fa51f06734c53dfbe3b768be3003ef98"
+          },
+          "reload_validator_id": "validator-ec64de36739a07d9dbddda9d"
+        }
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "998cdb8043c4d7d4b4a79d85fff494d8de5821b803f9dbb05a19070f635541dd",
+      "rationale": "Import and reload one observed packaged-workflow output before scientific review.",
+      "replacement_action_ids": [
+        "node-functional-enrichment"
+      ],
+      "resulting_state_digest": "63f65641059ca51f82a72822089fb2de2ec95eb5c0044b94163cfea982bd9cee",
+      "sequence": 7,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [
+        "artifact-enrichment-result"
+      ],
+      "affected_hypothesis_ids": [
+        "hypothesis-lineage-shift-v1"
+      ],
+      "event_type": "execution_reviewed",
+      "id": "event-000008-0d710e20cc18",
+      "payload": {
+        "receipt": {
+          "active_evidence_allowed": true,
+          "artifact_reload_receipt_ids": [
+            "reload-422f43d3c47b8974cdd55731"
+          ],
+          "finding_ids": [],
+          "id": "execution-review-04b03d6480b8bc532cf8d2b9",
+          "observed_execution_receipt_id": "observed-3988becc991bf5c8f9d043de",
+          "plan_node_id": "node-functional-enrichment",
+          "review_status": "accepted",
+          "reviewer_role": "execution-integrity-review"
+        }
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "63f65641059ca51f82a72822089fb2de2ec95eb5c0044b94163cfea982bd9cee",
+      "rationale": "Accept the complete packaged-workflow execution and reload chain for scientific artifact review.",
+      "replacement_action_ids": [
+        "node-functional-enrichment"
+      ],
+      "resulting_state_digest": "76d4e5be6399c7481fbe110a21636b2aa94c90c637772f39df5cc621fafae975",
+      "sequence": 8,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [],
+      "affected_hypothesis_ids": [],
+      "event_type": "node_status_changed",
+      "id": "event-000009-4961e8b7f6f6",
+      "payload": {
+        "attempt": 1,
+        "node_id": "node-functional-enrichment",
+        "plan_id": "plan-functional-enrichment",
+        "status": "awaiting_review"
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "76d4e5be6399c7481fbe110a21636b2aa94c90c637772f39df5cc621fafae975",
+      "rationale": "Release reloaded outputs to bilingual scientific artifact review.",
+      "replacement_action_ids": [
+        "node-functional-enrichment"
+      ],
+      "resulting_state_digest": "e71037efdcdcf88011bcc2edb4a072ccbd3a2ab744ff5153dcbf6cc982584336",
+      "sequence": 9,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [
+        "artifact-enrichment-result"
+      ],
+      "affected_hypothesis_ids": [],
+      "event_type": "scientific_gate_adjudicated",
+      "id": "event-000010-a3d4e031d90e",
+      "payload": {
+        "adjudication": {
+          "adjudication_mode": "manual",
+          "artifact_id": "artifact-enrichment-result",
+          "criterion": "{\"operator\":\"equals\",\"value\":\"accepted\"}",
+          "evaluator_identity": null,
+          "evaluator_sha256": null,
+          "evaluator_type": "provenance-design",
+          "evaluator_version": null,
+          "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+          "finding": "enrichment-input-semantics requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+          "gate_id": "enrichment-input-semantics",
+          "gate_result_digest": "6f51d5361ef415ff57034cf5963ce182c4ec41bdacef162ebf88650a9e244a60",
+          "id": "adjudication-enrichment-input-semantics",
+          "limitations_en": [
+            "This adjudication covers only the registered inputs, outputs, and method version and does not generalize to other data."
+          ],
+          "limitations_zh": [
+            "该审议只覆盖当前登记输入、输出与方法版本，不能外推到其他数据集。"
+          ],
+          "observed_execution_receipt_id": "observed-3988becc991bf5c8f9d043de",
+          "observed_value": "\"pending-independent-scientific-review\"",
+          "port": "functional_enrichment_evidence",
+          "rationale_en": "The reviewer independently checked the gate against the enrichment table, parameters, statistical semantics, and scope.",
+          "rationale_zh": "审议者逐项核对该门禁对应的富集主表、参数、统计语义与适用范围后作出独立判断。",
+          "reviewer_identity": "independent-scientific-reviewer",
+          "source_urls": [
+            "https://bioconductor.org/packages/clusterProfiler/"
+          ],
+          "status": "accepted"
+        }
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "e71037efdcdcf88011bcc2edb4a072ccbd3a2ab744ff5153dcbf6cc982584336",
+      "rationale": "Record one independently reviewed scientific gate result.",
+      "replacement_action_ids": [],
+      "resulting_state_digest": "94f56fae0e976276f6caa74fb68841f58ab096efccce0e72eeb5be103e9d6490",
+      "sequence": 10,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [
+        "artifact-enrichment-result"
+      ],
+      "affected_hypothesis_ids": [],
+      "event_type": "scientific_gate_adjudicated",
+      "id": "event-000011-1e65d6b55b44",
+      "payload": {
+        "adjudication": {
+          "adjudication_mode": "manual",
+          "artifact_id": "artifact-enrichment-result",
+          "criterion": "{\"operator\":\"equals\",\"value\":\"accepted\"}",
+          "evaluator_identity": null,
+          "evaluator_sha256": null,
+          "evaluator_type": "provenance-design",
+          "evaluator_version": null,
+          "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+          "finding": "enrichment-output-claim requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+          "gate_id": "enrichment-output-claim",
+          "gate_result_digest": "0cb1ac80729b1c1e0c155fe0d060da14135b4c47b13bb97c7f30f91c604d450f",
+          "id": "adjudication-enrichment-output-claim",
+          "limitations_en": [
+            "This adjudication covers only the registered inputs, outputs, and method version and does not generalize to other data."
+          ],
+          "limitations_zh": [
+            "该审议只覆盖当前登记输入、输出与方法版本，不能外推到其他数据集。"
+          ],
+          "observed_execution_receipt_id": "observed-3988becc991bf5c8f9d043de",
+          "observed_value": "\"pending-independent-scientific-review\"",
+          "port": "functional_enrichment_evidence",
+          "rationale_en": "The reviewer independently checked the gate against the enrichment table, parameters, statistical semantics, and scope.",
+          "rationale_zh": "审议者逐项核对该门禁对应的富集主表、参数、统计语义与适用范围后作出独立判断。",
+          "reviewer_identity": "independent-scientific-reviewer",
+          "source_urls": [
+            "https://bioconductor.org/packages/clusterProfiler/"
+          ],
+          "status": "accepted"
+        }
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "94f56fae0e976276f6caa74fb68841f58ab096efccce0e72eeb5be103e9d6490",
+      "rationale": "Record one independently reviewed scientific gate result.",
+      "replacement_action_ids": [],
+      "resulting_state_digest": "fba6a80a998fb4eff47d8463e2f7ca1cc46816f7713b699ffc1d47a1792152d6",
+      "sequence": 11,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [
+        "artifact-enrichment-result"
+      ],
+      "affected_hypothesis_ids": [],
+      "event_type": "scientific_gate_adjudicated",
+      "id": "event-000012-064270e0beca",
+      "payload": {
+        "adjudication": {
+          "adjudication_mode": "manual",
+          "artifact_id": "artifact-enrichment-result",
+          "criterion": "{\"operator\":\"equals\",\"value\":\"accepted\"}",
+          "evaluator_identity": null,
+          "evaluator_sha256": null,
+          "evaluator_type": "provenance-design",
+          "evaluator_version": null,
+          "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+          "finding": "enrichment-resource-provenance requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+          "gate_id": "enrichment-resource-provenance",
+          "gate_result_digest": "ab36ed3498c410953f900757d6cba132aa6c9b74d67d60133a5a4482938ce7bc",
+          "id": "adjudication-enrichment-resource-provenance",
+          "limitations_en": [
+            "This adjudication covers only the registered inputs, outputs, and method version and does not generalize to other data."
+          ],
+          "limitations_zh": [
+            "该审议只覆盖当前登记输入、输出与方法版本，不能外推到其他数据集。"
+          ],
+          "observed_execution_receipt_id": "observed-3988becc991bf5c8f9d043de",
+          "observed_value": "\"pending-independent-scientific-review\"",
+          "port": "functional_enrichment_evidence",
+          "rationale_en": "The reviewer independently checked the gate against the enrichment table, parameters, statistical semantics, and scope.",
+          "rationale_zh": "审议者逐项核对该门禁对应的富集主表、参数、统计语义与适用范围后作出独立判断。",
+          "reviewer_identity": "independent-scientific-reviewer",
+          "source_urls": [
+            "https://bioconductor.org/packages/clusterProfiler/"
+          ],
+          "status": "accepted"
+        }
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "fba6a80a998fb4eff47d8463e2f7ca1cc46816f7713b699ffc1d47a1792152d6",
+      "rationale": "Record one independently reviewed scientific gate result.",
+      "replacement_action_ids": [],
+      "resulting_state_digest": "137e7484c15ffdf4f6fefdf9a4eb6a1968b3cff3e3957562574ae86453cc1c76",
+      "sequence": 12,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    },
+    {
+      "affected_artifact_ids": [],
+      "affected_hypothesis_ids": [],
+      "event_type": "legacy_evidence_map_verified",
+      "id": "event-000013-52f66a16c5de",
+      "payload": {
+        "legacy_evidence_map_record_id": "legacy-map-1-41b48e14828fb1d4"
+      },
+      "prior_results_valid": true,
+      "prior_state_digest": "137e7484c15ffdf4f6fefdf9a4eb6a1968b3cff3e3957562574ae86453cc1c76",
+      "rationale": "Publish the verified legacy evidence map before schema migration.",
+      "replacement_action_ids": [],
+      "resulting_state_digest": "e2907931d7fd984cfd6f2e499efb01cafbdfb4c0e506840ec504b0bd8c43cb78",
+      "sequence": 13,
+      "superseded_action_ids": [],
+      "trigger_finding_ids": []
+    }
+  ],
+  "evidence": [],
+  "evidence_map_versions": [],
+  "execution_handoffs": [
+    {
+      "compatibility_row_id": "clusterprofiler-410-fgsea-128-r43",
+      "execution_state": "prepared-not-run",
+      "id": "handoff-9c8a5acd0fb3f6efe371eeba",
+      "module_id": "functional-enrichment",
+      "module_version": "1.0.0",
+      "observed_output_contract_digest": "2ad9e3a2dc44dabde776858c68de562fb029462fb26cc48cde547b4fef1040b5",
+      "plan_node_id": "node-functional-enrichment",
+      "planned_output_artifact_ids": {
+        "functional_enrichment_evidence": "artifact-enrichment-result"
+      },
+      "protocol": {
+        "compatibility_contract_digest": "469dfc80c2f77782097b19b20bcf56ebc41fe0a181d639dcf5a53bc327469e8a",
+        "execution_state": "prepared-not-run",
+        "observed_output_protocol_version": "2.1.0",
+        "required_postflight_gate_ids": [
+          "enrichment-input-semantics",
+          "enrichment-output-claim",
+          "enrichment-resource-provenance"
+        ],
+        "required_postflight_gate_set_digest": "0cc58fa01a1c577f4453ec0552bc45ab2e1bc6e3bee86ca65cbdaac64855c5e6",
+        "result_kind": "execution_handoff"
+      },
+      "request_digest": "7e3d9aed07ef193dd11febd0bac4fe4520ace543a23ed6138eb54b1aaad9bfe3"
+    }
+  ],
+  "execution_reviews": [
+    {
+      "active_evidence_allowed": true,
+      "artifact_reload_receipt_ids": [
+        "reload-422f43d3c47b8974cdd55731"
+      ],
+      "finding_ids": [],
+      "id": "execution-review-04b03d6480b8bc532cf8d2b9",
+      "observed_execution_receipt_id": "observed-3988becc991bf5c8f9d043de",
+      "plan_node_id": "node-functional-enrichment",
+      "review_status": "accepted",
+      "reviewer_role": "execution-integrity-review"
+    }
+  ],
+  "gate_adjudications": [
+    {
+      "adjudication_mode": "manual",
+      "artifact_id": "artifact-enrichment-result",
+      "criterion": "{\"operator\":\"equals\",\"value\":\"accepted\"}",
+      "evaluator_identity": null,
+      "evaluator_sha256": null,
+      "evaluator_type": "provenance-design",
+      "evaluator_version": null,
+      "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+      "finding": "enrichment-input-semantics requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+      "gate_id": "enrichment-input-semantics",
+      "gate_result_digest": "6f51d5361ef415ff57034cf5963ce182c4ec41bdacef162ebf88650a9e244a60",
+      "id": "adjudication-enrichment-input-semantics",
+      "limitations_en": [
+        "This adjudication covers only the registered inputs, outputs, and method version and does not generalize to other data."
+      ],
+      "limitations_zh": [
+        "该审议只覆盖当前登记输入、输出与方法版本，不能外推到其他数据集。"
+      ],
+      "observed_execution_receipt_id": "observed-3988becc991bf5c8f9d043de",
+      "observed_value": "\"pending-independent-scientific-review\"",
+      "port": "functional_enrichment_evidence",
+      "rationale_en": "The reviewer independently checked the gate against the enrichment table, parameters, statistical semantics, and scope.",
+      "rationale_zh": "审议者逐项核对该门禁对应的富集主表、参数、统计语义与适用范围后作出独立判断。",
+      "reviewer_identity": "independent-scientific-reviewer",
+      "source_urls": [
+        "https://bioconductor.org/packages/clusterProfiler/"
+      ],
+      "status": "accepted"
+    },
+    {
+      "adjudication_mode": "manual",
+      "artifact_id": "artifact-enrichment-result",
+      "criterion": "{\"operator\":\"equals\",\"value\":\"accepted\"}",
+      "evaluator_identity": null,
+      "evaluator_sha256": null,
+      "evaluator_type": "provenance-design",
+      "evaluator_version": null,
+      "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+      "finding": "enrichment-output-claim requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+      "gate_id": "enrichment-output-claim",
+      "gate_result_digest": "0cb1ac80729b1c1e0c155fe0d060da14135b4c47b13bb97c7f30f91c604d450f",
+      "id": "adjudication-enrichment-output-claim",
+      "limitations_en": [
+        "This adjudication covers only the registered inputs, outputs, and method version and does not generalize to other data."
+      ],
+      "limitations_zh": [
+        "该审议只覆盖当前登记输入、输出与方法版本，不能外推到其他数据集。"
+      ],
+      "observed_execution_receipt_id": "observed-3988becc991bf5c8f9d043de",
+      "observed_value": "\"pending-independent-scientific-review\"",
+      "port": "functional_enrichment_evidence",
+      "rationale_en": "The reviewer independently checked the gate against the enrichment table, parameters, statistical semantics, and scope.",
+      "rationale_zh": "审议者逐项核对该门禁对应的富集主表、参数、统计语义与适用范围后作出独立判断。",
+      "reviewer_identity": "independent-scientific-reviewer",
+      "source_urls": [
+        "https://bioconductor.org/packages/clusterProfiler/"
+      ],
+      "status": "accepted"
+    },
+    {
+      "adjudication_mode": "manual",
+      "artifact_id": "artifact-enrichment-result",
+      "criterion": "{\"operator\":\"equals\",\"value\":\"accepted\"}",
+      "evaluator_identity": null,
+      "evaluator_sha256": null,
+      "evaluator_type": "provenance-design",
+      "evaluator_version": null,
+      "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+      "finding": "enrichment-resource-provenance requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+      "gate_id": "enrichment-resource-provenance",
+      "gate_result_digest": "ab36ed3498c410953f900757d6cba132aa6c9b74d67d60133a5a4482938ce7bc",
+      "id": "adjudication-enrichment-resource-provenance",
+      "limitations_en": [
+        "This adjudication covers only the registered inputs, outputs, and method version and does not generalize to other data."
+      ],
+      "limitations_zh": [
+        "该审议只覆盖当前登记输入、输出与方法版本，不能外推到其他数据集。"
+      ],
+      "observed_execution_receipt_id": "observed-3988becc991bf5c8f9d043de",
+      "observed_value": "\"pending-independent-scientific-review\"",
+      "port": "functional_enrichment_evidence",
+      "rationale_en": "The reviewer independently checked the gate against the enrichment table, parameters, statistical semantics, and scope.",
+      "rationale_zh": "审议者逐项核对该门禁对应的富集主表、参数、统计语义与适用范围后作出独立判断。",
+      "reviewer_identity": "independent-scientific-reviewer",
+      "source_urls": [
+        "https://bioconductor.org/packages/clusterProfiler/"
+      ],
+      "status": "accepted"
+    }
+  ],
+  "hypotheses": [
+    {
+      "alternative_explanations": [
+        "Differential survival changes apparent composition.",
+        "Batch-dependent maturation creates the association."
+      ],
+      "biological_scope": {
+        "species": "human",
+        "tissue": "retina"
+      },
+      "comparison_id": "perturbed-vs-control",
+      "conflicting_evidence_ids": [],
+      "disconfirming_observations": [
+        "No reproducible lineage difference after batch-aware analysis.",
+        "An increase in neuronal-state abundance."
+      ],
+      "expected_direction": "decrease",
+      "expected_observations": [
+        "Lower neuronal-state abundance across independent lines.",
+        "Reduced neuronal regulatory activity."
+      ],
+      "experimental_unit": "independent-organoid-line",
+      "id": "hypothesis-lineage-shift-v1",
+      "minimum_independent_evidence_groups": 2,
+      "missing_evidence_types": [
+        "cell-state-association",
+        "regulatory-association"
+      ],
+      "parent_hypothesis_id": null,
+      "permitted_claim_strength": "associational",
+      "required_evidence_types": [
+        "cell-state-association",
+        "regulatory-association"
+      ],
+      "revision": 1,
+      "statement": "The perturbation reduces the transition from progenitor to neuronal states.",
+      "status": "active",
+      "supporting_evidence_ids": []
+    }
+  ],
+  "observed_executions": [
+    {
+      "compatibility_row_id": "clusterprofiler-410-fgsea-128-r43",
+      "execution_request_digest": "5f3a6164807e4e6b05a53f4bc756f014ffc13e57fdb410849fa7a85ec04f05ae",
+      "execution_request_id": "handoff-9c8a5acd0fb3f6efe371eeba",
+      "execution_state": "observed-completed",
+      "handoff_id": "handoff-9c8a5acd0fb3f6efe371eeba",
+      "id": "observed-3988becc991bf5c8f9d043de",
+      "module_id": "functional-enrichment",
+      "module_version": "1.0.0",
+      "observed_output_contract_digest": "2ad9e3a2dc44dabde776858c68de562fb029462fb26cc48cde547b4fef1040b5",
+      "output_artifact_digests": {
+        "artifact-enrichment-result": "33bae0206fc9ff3f6f108a4735bf9a529b8cbe0f01c02fc649f7908de2d70ddc"
+      },
+      "parameters_digest": "7e3d9aed07ef193dd11febd0bac4fe4520ace543a23ed6138eb54b1aaad9bfe3",
+      "plan_node_id": "node-functional-enrichment",
+      "postflight_result_digests": {
+        "enrichment-input-semantics": "6f51d5361ef415ff57034cf5963ce182c4ec41bdacef162ebf88650a9e244a60",
+        "enrichment-output-claim": "0cb1ac80729b1c1e0c155fe0d060da14135b4c47b13bb97c7f30f91c604d450f",
+        "enrichment-resource-provenance": "ab36ed3498c410953f900757d6cba132aa6c9b74d67d60133a5a4482938ce7bc"
+      },
+      "postflight_results": {
+        "enrichment-input-semantics": {
+          "evaluations": [
+            {
+              "evaluator_type": "provenance-design",
+              "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+              "observed_metric": "\"pending-independent-scientific-review\"",
+              "port": "functional_enrichment_evidence",
+              "reason": "enrichment-input-semantics requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+              "status": "requires_review",
+              "threshold": "{\"operator\":\"equals\",\"value\":\"accepted\"}"
+            }
+          ],
+          "gate_id": "enrichment-input-semantics",
+          "status": "requires_review"
+        },
+        "enrichment-output-claim": {
+          "evaluations": [
+            {
+              "evaluator_type": "provenance-design",
+              "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+              "observed_metric": "\"pending-independent-scientific-review\"",
+              "port": "functional_enrichment_evidence",
+              "reason": "enrichment-output-claim requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+              "status": "requires_review",
+              "threshold": "{\"operator\":\"equals\",\"value\":\"accepted\"}"
+            }
+          ],
+          "gate_id": "enrichment-output-claim",
+          "status": "requires_review"
+        },
+        "enrichment-resource-provenance": {
+          "evaluations": [
+            {
+              "evaluator_type": "provenance-design",
+              "evidence_payload_sha256": "27d9b76e4bede97712fa188fd76eb94714ab4bb9e1356b685542942bbb02d2cd",
+              "observed_metric": "\"pending-independent-scientific-review\"",
+              "port": "functional_enrichment_evidence",
+              "reason": "enrichment-resource-provenance requires gate-specific observations or independent scientific review; family-level file admission is not a manifest gate verdict",
+              "status": "requires_review",
+              "threshold": "{\"operator\":\"equals\",\"value\":\"accepted\"}"
+            }
+          ],
+          "gate_id": "enrichment-resource-provenance",
+          "status": "requires_review"
+        }
+      },
+      "process_exit_code": 0,
+      "runtime_versions": {
+        "dependency:AnnotationDbi": "1.64.1",
+        "dependency:digest": "0.6.39",
+        "dependency:enrichplot": "1.22.0",
+        "dependency:ggplot2": "3.5.2",
+        "dependency:jsonlite": "2.0.0",
+        "dependency:r": "4.3.2",
+        "tool:clusterProfiler": "4.10.1",
+        "tool:fgsea": "1.28.0",
+        "workflow:clusterProfiler": "4.10.1"
+      },
+      "source_kind": "handoff"
+    }
+  ],
+  "plans": [
+    {
+      "digest": "0dec98aa027ec609230c287555189f813130457c4c50608cddbf31d122881ca2",
+      "id": "plan-functional-enrichment",
+      "nodes": [
+        {
+          "attempt": 1,
+          "branch_id": "branch-enrichment",
+          "compatibility_row_candidates": [
+            "clusterprofiler-410-fgsea-128-r43"
+          ],
+          "dependencies": [],
+          "expected_evidence_types": [
+            "functional-enrichment"
+          ],
+          "expected_output_artifact_types": [
+            "functional_enrichment_evidence"
+          ],
+          "id": "node-functional-enrichment",
+          "input_bindings": {
+            "gene_evidence": "artifact-genes",
+            "tested_universe": "artifact-universe"
+          },
+          "module_id": "functional-enrichment",
+          "planned_output_artifact_ids": {
+            "functional_enrichment_evidence": "artifact-enrichment-result"
+          },
+          "status": "awaiting_review",
+          "target_hypothesis_ids": [
+            "hypothesis-lineage-shift-v1"
+          ]
+        }
+      ],
+      "objective": "Test the registered gene set against its measured universe.",
+      "parent_plan_id": null,
+      "plan_type": "single",
+      "rationale": [
+        "Exercise adversarial observed-result admission."
+      ],
+      "required_output_artifact_types": [
+        "functional_enrichment_evidence"
+      ],
+      "revision": 1
+    }
+  ],
+  "revision": 13,
+  "schema_version": 2,
+  "scientific_decisions": [],
+  "state_digest": "e2907931d7fd984cfd6f2e499efb01cafbdfb4c0e506840ec504b0bd8c43cb78",
+  "state_migrations": [
+    {
+      "contract_version": "1.1.0",
+      "digest": "5e7ec9dedb6d3a302458e30611f17e47163ff7522fb973c240239569f85ca0c5",
+      "from_schema_version": 1,
+      "id": "migration-v1-v2-9915abed4983bebc",
+      "legacy_analysis_admission_recoveries": [
+        {
+          "approved_before_execution": false,
+          "digest": "13c264200e6a126892a43634be3ae6cefcbf81338b951443b486c34c37db6982",
+          "evidence_scope": "project-snapshot-only",
+          "expected_artifact_types": [
+            "functional_enrichment_evidence"
+          ],
+          "hypothesis_ids": [
+            "hypothesis-lineage-shift-v1"
+          ],
+          "id": "legacy-admission-unavailable-node-functional-enrichment",
+          "plan_node_id": "node-functional-enrichment",
+          "rationale_en": "The legacy state did not serialize prior admission for this analysis; this record documents that historical gap and does not reconstruct approval.",
+          "rationale_zh": "旧版项目状态未序列化该分析的事前准入；本记录仅证明这一历史缺口，不补造事前批准。",
+          "record_type": "legacy-analysis-admission-recovery",
+          "recovery_status": "historical-unavailable",
+          "source_map_digest": "41b48e14828fb1d43c51c50aa4b44bb2be9b3811af95dba0b565be01fcbc59b9",
+          "source_state_digest": "9915abed4983bebc536f8be54939a1d30109b7805a42ac340270cfef63bea1ed"
+        }
+      ],
+      "legacy_evidence_maps": [
+        {
+          "digest": "f227dd5dab5c20fece0ccbdcb039f357d66e30ab3db3abf6f9d89a04a6b803cc",
+          "id": "legacy-map-1-41b48e14828fb1d4",
+          "publication": {
+            "active_artifact_ids": [],
+            "authorized_delivery_node_ids": [],
+            "covered_artifact_ids": [],
+            "covered_node_ids": [],
+            "covered_plan_id": null,
+            "delivery_scope_digest": "c91e0e621ef104d8f32f7c63e971291d459a02840a7a269a4dc3d04c3eb6fafc",
+            "delivery_slice_digest": "4d5ac032e642479b2602214658bcb59ec08e579e907e49a6744fec2855bd6588",
+            "dependency_bundle_digest": "f20f2a08a4d649c500561b737ec8f0594d0444c024553672b03298f82bc6e87d",
+            "edge_table_digest": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "id": "evidence-map-1-41b48e14828fb1d4",
+            "map_digest": "41b48e14828fb1d43c51c50aa4b44bb2be9b3811af95dba0b565be01fcbc59b9",
+            "map_kind": "project-snapshot",
+            "source_state_digest": "2330583d8533eb4f4385700d441f53171ffb0c183bb4998a51d7f90c27eac772",
+            "version": {
+              "change_summary_en": "Publish the first evidence-map version bound to the legacy project state.",
+              "change_summary_zh": "发布旧版项目状态绑定的首个证据地图版本。",
+              "change_type": "initial",
+              "map_kind": "project-snapshot",
+              "parent_map_digest": null,
+              "revision": 1,
+              "version": "1.0.0"
+            }
+          },
+          "store_entry_digest": "1cc7226f6795e5eef2fce81bd571843aa99ecd506a8d960e3e98a3ffaddd71a3"
+        }
+      ],
+      "migrated_event_count": 13,
+      "source_revision": 13,
+      "source_state_digest": "9915abed4983bebc536f8be54939a1d30109b7805a42ac340270cfef63bea1ed",
+      "to_schema_version": 2
+    }
+  ]
+}
