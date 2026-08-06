@@ -121,15 +121,19 @@ the current branch without deleting its history. After review selects rerun or
 method switch, the registry prepares an immutable child plan before the decision
 is recorded. Its node-level revision contract freezes the source and target
 nodes, action, both module manifests, declared alternative relation, typed ports,
-observed and planned request identities, structured parameter overrides, and
-scientific rationale. Every output from the same source execution must bind the
+observed and planned request identities, the complete mapped target-parameter
+object, scientific equivalence class, claim-scope transition, and rationale.
+Every output from the same source execution must bind the
 same contract, action, target, and request identity. The replacement preserves
 the registered branch, hypotheses, dependencies, inputs, outputs, and evidence
 scope; untouched downstream work is rebuilt against its new output identities.
 A same-method rerun preserves the observed request identity, an adjusted rerun
 freezes a different request identity, and a method switch must use a distinct
-compatible alternative declared by the source module. The replacement receives
-its own approved analysis admission before execution.
+compatible alternative declared by the source module. Contract-equivalent
+relations retain one gate set; method-specific decision-role alternatives reset
+the source gate conclusions and require independent target evidence; scope
+downgrades narrow the claim. The replacement receives its own approved analysis
+admission before execution.
 Additional-data decisions keep the branch blocked until new input is registered.
 Hypothesis and scope revisions request a new immutable plan revision rather than
 overwriting the original analysis.

@@ -88,7 +88,7 @@ class ModuleRegistryTests(unittest.TestCase):
                 "output_binding_map": {"profile": "profile"},
                 "required_additional_artifact_types": [],
                 "parameter_mapping": {"rows": "rows"},
-                "scientific_contract_equivalence": "equivalent",
+                "scientific_contract_equivalence": "contract-equivalent",
             }]
             write_manifest(root, source)
             write_manifest(root, target)
@@ -100,6 +100,15 @@ class ModuleRegistryTests(unittest.TestCase):
             invalid["revision_alternatives"][0]["output_binding_map"] = {"missing": "profile"}
             write_manifest(root, invalid)
             with self.assertRaisesRegex(ModuleRegistryError, "output mapping"):
+                ModuleRegistry.discover(root)
+
+            different_gates = copy.deepcopy(source)
+            different_gates["revision_alternatives"][0]["scientific_contract_equivalence"] = "contract-equivalent"
+            target_with_different_gates = copy.deepcopy(target)
+            target_with_different_gates["quality_gates"][0]["id"] = "different-target-gate"
+            write_manifest(root, different_gates)
+            write_manifest(root, target_with_different_gates)
+            with self.assertRaisesRegex(ModuleRegistryError, "different quality gates"):
                 ModuleRegistry.discover(root)
 
     def test_registry_rejects_directory_and_manifest_id_mismatch(self):

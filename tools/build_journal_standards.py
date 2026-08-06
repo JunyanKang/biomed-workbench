@@ -777,8 +777,6 @@ def main() -> None:
     )
     snapshot_path.write_text(payload, encoding="utf-8")
     digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-    _refresh_coverage_table(ROOT / "docs" / "journal-standards.md", profiles, zh=False)
-    _refresh_coverage_table(ROOT / "docs" / "journal-standards.zh-CN.md", profiles, zh=True)
     index = {
         "schema_version": 1,
         "active_catalog_version": VERSION,

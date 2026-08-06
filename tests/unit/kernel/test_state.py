@@ -6,11 +6,18 @@ import unittest
 from pathlib import Path
 
 from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
-from biomed_workbench.kernel.state import ProjectState, _legacy_v1_basis, _migrate_v1_adjudication, apply_event
+from biomed_workbench.kernel.state import (
+    LegacyEvidenceMapRecord,
+    ProjectState,
+    StateMigrationRecord,
+    _legacy_v1_basis,
+    _migrate_v1_adjudication,
+    apply_event,
+)
 from biomed_workbench.kernel.execution_chain import delivery_slice_digest
 from biomed_workbench.kernel.identity import digest_value
 from biomed_workbench.kernel.scientific_evidence_map import EvidenceMapPublication, EvidenceMapVersion
-from biomed_workbench.kernel.scientific_dependency import ScientificDependencyBundle
+from biomed_workbench.kernel.scientific_dependency import LegacyAnalysisAdmissionRecovery, ScientificDependencyBundle
 from biomed_workbench.orchestration.state_migration import migrate_map_bound_v1_state
 from biomed_workbench.kernel.hypotheses import revise_hypothesis
 from tests.unit.kernel.test_artifacts import artifact
@@ -69,10 +76,13 @@ def populated_state():
 
 class ProjectStateTests(unittest.TestCase):
     @staticmethod
-    def _map_bound_legacy_fixture(root: Path):
+    def _map_bound_legacy_fixture(root: Path, *, cover_node: bool = False):
         fixture = Path(__file__).parents[2] / "fixtures" / "project_state_v1_gate_adjudications.json"
         legacy = json.loads(fixture.read_text(encoding="utf-8"))
         edge_digest = digest_value([])
+        covered_plan_id = legacy["plans"][0]["id"] if cover_node else None
+        covered_node_ids = [legacy["plans"][0]["nodes"][0]["id"]] if cover_node else []
+        covered_artifact_ids = [item["id"] for item in legacy["artifacts"]] if cover_node else []
         map_basis = {
             "project_id": legacy["context"]["project_id"],
             "version": {
@@ -87,9 +97,9 @@ class ProjectStateTests(unittest.TestCase):
             "map_kind": "project-snapshot",
             "delivery_slice_digest": digest_value("legacy-delivery-slice"),
             "active_evidence_artifact_ids": [],
-            "covered_plan_id": None,
-            "covered_node_ids": [],
-            "covered_artifact_ids": [],
+            "covered_plan_id": covered_plan_id,
+            "covered_node_ids": covered_node_ids,
+            "covered_artifact_ids": covered_artifact_ids,
             "authorized_delivery_node_ids": [],
             "delivery_scope_digest": digest_value("legacy-delivery-scope"),
             "units": [],
@@ -107,9 +117,9 @@ class ProjectStateTests(unittest.TestCase):
             map_kind="project-snapshot",
             delivery_slice_digest=map_basis["delivery_slice_digest"],
             active_artifact_ids=(),
-            covered_plan_id=None,
-            covered_node_ids=(),
-            covered_artifact_ids=(),
+            covered_plan_id=covered_plan_id,
+            covered_node_ids=tuple(covered_node_ids),
+            covered_artifact_ids=tuple(covered_artifact_ids),
             authorized_delivery_node_ids=(),
             delivery_scope_digest=map_basis["delivery_scope_digest"],
         )
@@ -191,6 +201,7 @@ class ProjectStateTests(unittest.TestCase):
             self.assertEqual(ProjectState.from_dict(migrated.to_dict()), migrated)
             recovery = migrated.state_migrations[0].legacy_analysis_admission_recoveries[0]
             self.assertEqual(recovery.recovery_status, "historical-unavailable")
+            self.assertEqual(recovery.source_map_coverage_status, "not-covered")
             self.assertFalse(recovery.approved_before_execution)
             with self.assertRaisesRegex(ValueError, "project snapshots only"):
                 ScientificDependencyBundle.create(
@@ -234,6 +245,58 @@ class ProjectStateTests(unittest.TestCase):
             map_path.write_text(map_path.read_text(encoding="utf-8") + " ", encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "missing or changed"):
                 migrate_map_bound_v1_state(legacy, evidence_map_root=root)
+
+    def test_legacy_recovery_is_exactly_bound_to_migration_map_and_coverage(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            legacy, publication = self._map_bound_legacy_fixture(root, cover_node=True)
+            migrated = migrate_map_bound_v1_state(legacy, evidence_map_root=root)
+            migration = migrated.state_migrations[0]
+            recovery = migration.legacy_analysis_admission_recoveries[0]
+            self.assertEqual(recovery.source_map_coverage_status, "covered")
+            self.assertIn(recovery.plan_node_id, publication.covered_node_ids)
+
+            record = migration.legacy_evidence_maps[0]
+            common = {
+                "plan_node_id": recovery.plan_node_id,
+                "hypothesis_ids": recovery.hypothesis_ids,
+                "expected_artifact_types": recovery.expected_artifact_types,
+                "source_state_digest": migration.source_state_digest,
+                "source_map_digest": record.publication.map_digest,
+                "source_map_coverage_status": "covered",
+            }
+            wrong_state = LegacyAnalysisAdmissionRecovery.create(
+                **{**common, "source_state_digest": "e" * 64}
+            )
+            with self.assertRaisesRegex(ValueError, "source state differs"):
+                StateMigrationRecord.create(
+                    source_state_digest=migration.source_state_digest,
+                    source_revision=migration.source_revision,
+                    legacy_evidence_maps=(record,),
+                    legacy_analysis_admission_recoveries=(wrong_state,),
+                )
+
+            unknown_map = LegacyAnalysisAdmissionRecovery.create(
+                **{**common, "source_map_digest": "f" * 64}
+            )
+            with self.assertRaisesRegex(ValueError, "not a verified migration map"):
+                StateMigrationRecord.create(
+                    source_state_digest=migration.source_state_digest,
+                    source_revision=migration.source_revision,
+                    legacy_evidence_maps=(record,),
+                    legacy_analysis_admission_recoveries=(unknown_map,),
+                )
+
+            wrong_coverage = LegacyAnalysisAdmissionRecovery.create(
+                **{**common, "source_map_coverage_status": "not-covered"}
+            )
+            with self.assertRaisesRegex(ValueError, "coverage status is inconsistent"):
+                StateMigrationRecord.create(
+                    source_state_digest=migration.source_state_digest,
+                    source_revision=migration.source_revision,
+                    legacy_evidence_maps=(record,),
+                    legacy_analysis_admission_recoveries=(wrong_coverage,),
+                )
 
     def test_previous_release_v1_state_migrates_to_v2_with_exact_receipt_bindings(self):
         fixture = Path(__file__).parents[2] / "fixtures" / "project_state_v1_gate_adjudications.json"

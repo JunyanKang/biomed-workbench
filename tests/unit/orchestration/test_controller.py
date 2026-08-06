@@ -45,7 +45,8 @@ from biomed_workbench.orchestration.controller import ControllerPolicy, Research
 from biomed_workbench.orchestration.execution import NodeExecution, execute_node
 from biomed_workbench.orchestration.graph import build_capability_graph
 from biomed_workbench.orchestration.planner import PlanningRequest, plan_research
-from biomed_workbench.orchestration.revision import prepare_plan_revision
+from biomed_workbench.orchestration.revision import _mapped_target_parameters, prepare_plan_revision
+from biomed_workbench.modules.contract import RevisionAlternative
 from biomed_workbench.reporting import (
     publish_evidence_map_transaction,
     verify_evidence_map_version_index,
@@ -151,7 +152,7 @@ def revision_fixture(action):
                     "output_binding_map": {"profile": "profile"},
                     "required_additional_artifact_types": [],
                     "parameter_mapping": {"rows": "rows"},
-                    "scientific_contract_equivalence": "equivalent",
+                    "scientific_contract_equivalence": "contract-equivalent",
                 },),
             ),
             module_payload(alternative_module, "count_matrix", "normalized_matrix"),
@@ -213,6 +214,8 @@ def revision_fixture(action):
         source_request_digest=observed_request_digest,
         target_request_digest=planned_request_digest,
         rationale="Freeze the controlled replacement identity for revision state-machine tests.",
+        scientific_equivalence_class=("contract-equivalent" if action == "switch-method" else "same-method"),
+        claim_scope_transition=("preserve-claim-scope" if action == "switch-method" else "preserve-method-and-claim-scope"),
     )
     replacement = PlanNode(
         id=target_id,
@@ -246,6 +249,22 @@ def revision_fixture(action):
 
 
 class ResearchControllerTests(unittest.TestCase):
+    def test_revision_parameter_mapping_applies_source_values_before_explicit_overrides(self):
+        relation = RevisionAlternative(
+            target_module_id="alternative-normalizer",
+            input_binding_map={"records": "records"},
+            output_binding_map={"profile": "profile"},
+            required_additional_artifact_types=(),
+            parameter_mapping={"max_iter": "iterations", "seed": "seed"},
+            scientific_contract_equivalence="decision-role-alternative-with-method-specific-evidence",
+        )
+        mapped = _mapped_target_parameters(
+            {"iterations": 25, "seed": 7},
+            relation,
+            {"max_iter": 40},
+        )
+        self.assertEqual(mapped, {"max_iter": 40, "seed": 7})
+
     def test_multi_output_source_rejects_split_brain_revision_actions_and_targets(self):
         temporary, registry, state, plan = revision_fixture("rerun-same-method")
         self.addCleanup(temporary.cleanup)

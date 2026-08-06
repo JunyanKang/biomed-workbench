@@ -85,7 +85,7 @@ Within the data-analysis layer, capabilities are further organized by data scale
 | [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | STRING functional and physical interaction networks; HADDOCK3 complex docking with DockQ reference evaluation and PRODIGY affinity estimates; manual AlphaFold Server submission packages, multi-job/multi-model reload from real result archives, confidence and cross-chain-contact review, and replot-ready publication figures; resource- and permission-gated local official AlphaFold 3 entry; MSBio2/Metascape and Cytoscape network delivery; sequence, ORF, PCR, CRISPR, cloning, structure quality, comparison and validation design |
 | [Clinical and experimental research](docs/capabilities/clinical-and-experimental.md) | Cohort and survival analysis, biomarkers, flow cytometry, qPCR, dose response, western blot, biodistribution, xenograft, stability and quantitative assays |
 | [Imaging and scientific visualization](docs/capabilities/imaging-and-visualization.md) | Image profiling, segmentation, colocalization, tracking, tissue-image registration, unified figure specifications, multi-part figure composition and visual QA |
-| [Publication and translation](docs/capabilities/publication-and-translation.md) | Versioned standards for 100 journals, project-to-journal fit, article-structure and limit review, figure specifications, manuscript review, citation audit, reviewer simulation, response matrices, revision lineage, patent preparation and presentations |
+| [Publication and translation](docs/capabilities/publication-and-translation.md) | Journal positioning by remit, readership, article type and evidence maturity, followed by manuscript compliance review, figure specifications, citation audit, reviewer simulation, response matrices, revision lineage, patent preparation and presentations |
 
 <p align="center">
   <img src="assets/readme/multiscale-omics.png" width="100%" alt="Conceptual overview of multiscale omics, spatial analysis, trajectories and publication figures">
@@ -150,7 +150,7 @@ A researcher may ask Codex to configure an optional NCBI key or check AlphaFold 
 - Installation: [中文](docs/installation.zh-CN.md) · [English](docs/installation.md)
 - Optional interoperability adapters: [中文](docs/agent-integration.zh-CN.md) · [English](docs/agent-integration.md)
 - Data access and credentials: [中文](docs/data-access-and-credentials.zh-CN.md) · [English](docs/data-access-and-credentials.md)
-- Journal standards and manuscript review: [中文](docs/journal-standards.zh-CN.md) · [English](docs/journal-standards.md)
+- Journal positioning and manuscript requirements: [中文](docs/journal-standards.zh-CN.md) · [English](docs/journal-standards.md)
 - Reproducibility: [中文](docs/reproducibility.zh-CN.md) · [English](docs/reproducibility.md)
 - Public-data validation cases: [中文](docs/cases/README.zh-CN.md) · [English](docs/cases/README.md)
 - Maturity and evidence levels: [中文](docs/maturity.zh-CN.md) · [English](docs/maturity.md)

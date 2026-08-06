@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from ..kernel.identity import digest_value
+from ..kernel.execution_chain import validate_delivery_prerequisites
 from ..kernel.scientific_evidence_map import EvidenceMapPublication
 from ..kernel.state import (
     LegacyEvidenceMapRecord,
@@ -15,7 +16,11 @@ from ..kernel.state import (
 from ..reporting.evidence_map_versions import verify_evidence_map_publication_store
 
 
-def assess_republication_prerequisites(state: ProjectState) -> dict[str, object]:
+def assess_republication_prerequisites(
+    state: ProjectState,
+    *,
+    delivery_node_ids: tuple[str, ...] = (),
+) -> dict[str, object]:
     """Report exact recovery work before a migrated state can publish a new snapshot."""
     plan_node_ids = {node.id for plan in state.plans for node in plan.nodes}
     admitted_node_ids = {item.plan_node_id for item in state.analysis_admissions}
@@ -39,6 +44,14 @@ def assess_republication_prerequisites(state: ProjectState) -> dict[str, object]
         item.id for item in state.gate_adjudications if item.status == "unresolved"
     ))
     blockers = bool(missing_admissions or missing_reviews or missing_decisions)
+    delivery_checks = []
+    for node_id in delivery_node_ids:
+        try:
+            validate_delivery_prerequisites(state, node_id)
+        except ValueError:
+            delivery_checks.append(False)
+        else:
+            delivery_checks.append(True)
     return {
         "migration_status": (
             "awaiting-scientific-dependency-recovery"
@@ -56,7 +69,8 @@ def assess_republication_prerequisites(state: ProjectState) -> dict[str, object]
             if state.evidence_map_versions
             else (legacy_maps[-1].publication.map_digest if legacy_maps else None)
         ),
-        "delivery_authorization_available": not bool(recovered_node_ids),
+        "delivery_permanently_blocked_by_legacy_recovery": bool(recovered_node_ids),
+        "delivery_prerequisites_currently_satisfied": bool(delivery_checks) and all(delivery_checks),
     }
 
 

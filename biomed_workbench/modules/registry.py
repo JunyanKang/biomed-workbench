@@ -91,6 +91,15 @@ class ModuleRegistry:
                     raise ModuleRegistryError(
                         f"module {manifest.id} revision alternative output mapping is not contract-equivalent: {relation.target_module_id}"
                     )
+                source_gate_ids = {gate.id for gate in manifest.quality_gates}
+                target_gate_ids = {gate.id for gate in target.quality_gates}
+                if (
+                    relation.scientific_contract_equivalence == "contract-equivalent"
+                    and source_gate_ids != target_gate_ids
+                ):
+                    raise ModuleRegistryError(
+                        f"module {manifest.id} contract-equivalent revision has different quality gates: {relation.target_module_id}"
+                    )
                 if (
                     set(relation.parameter_mapping) != set(target_parameters)
                     or set(relation.parameter_mapping.values()) - source_parameters

@@ -35,6 +35,20 @@ def _merge_inputs(state: ProjectState, bindings: Mapping[str, str], overrides: M
     return merged
 
 
+def _mapped_target_parameters(
+    source_inputs: Mapping[str, Any],
+    relation: RevisionAlternative,
+    explicit_overrides: Mapping[str, Any],
+) -> dict[str, Any]:
+    mapped: dict[str, Any] = {}
+    for target_name, source_name in relation.parameter_mapping.items():
+        if source_name not in source_inputs:
+            raise ValueError(f"revision source parameter is unavailable for mapping: {source_name}")
+        mapped[target_name] = thaw(source_inputs[source_name])
+    mapped.update({str(key): thaw(value) for key, value in explicit_overrides.items()})
+    return mapped
+
+
 def _target_bindings(
     state: ProjectState,
     source: PlanNode,
@@ -133,16 +147,34 @@ def prepare_plan_revision(
             "kind": "same-method",
             "source_module_id": source.module_id,
         }
+        equivalence_class = "same-method"
+        claim_scope_transition = "preserve-method-and-claim-scope"
     else:
         assert relation is not None
         bindings = _target_bindings(state, source, target_manifest, relation, explicit_bindings)
         output_binding_map = dict(relation.output_binding_map)
         relation_payload = revision_alternative_to_dict(relation)
-    overrides = dict(parameter_overrides)
-    if action == "rerun-same-method" and overrides:
+        equivalence_class = relation.scientific_contract_equivalence
+        claim_scope_transition = {
+            "contract-equivalent": "preserve-claim-scope",
+            "decision-role-alternative-with-method-specific-evidence": "reset-to-target-method-specific-evidence",
+            "scope-downgrade": "narrow-to-target-scope",
+        }[equivalence_class]
+    explicit_overrides = dict(parameter_overrides)
+    if action == "rerun-same-method" and explicit_overrides:
         raise ValueError("same-method rerun cannot introduce parameter overrides")
-    if action == "rerun-adjusted-parameters" and not overrides:
+    if action == "rerun-adjusted-parameters" and not explicit_overrides:
         raise ValueError("adjusted-parameter rerun requires structured parameter overrides")
+    source_inputs = _merge_inputs(state, source.input_bindings, source.parameter_overrides)
+    if relation is None:
+        overrides = {
+            name: thaw(source_inputs[name])
+            for name in target_manifest.input_schema.get("properties", {})
+            if name in source_inputs
+        }
+        overrides.update({str(key): thaw(value) for key, value in explicit_overrides.items()})
+    else:
+        overrides = _mapped_target_parameters(source_inputs, relation, explicit_overrides)
     merged_inputs = _merge_inputs(state, bindings, overrides)
     validate_schema_value(target_manifest.input_schema, merged_inputs, "revision input")
     if target_manifest.execution.kind == "command":
@@ -203,6 +235,8 @@ def prepare_plan_revision(
         source_request_digest=source_request_digest,
         target_request_digest=target_request_digest,
         rationale=rationale,
+        scientific_equivalence_class=equivalence_class,
+        claim_scope_transition=claim_scope_transition,
     )
     target = PlanNode(
         id=target_id,

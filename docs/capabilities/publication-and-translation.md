@@ -6,26 +6,25 @@ This capability area turns the research record into a coherent, reviewable, and 
 
 ## Unified Publication Program
 
-For broad manuscript, response, patent, or presentation requests, the workbench compiles a staged publication program. Journal fit and article-type feasibility are assessed against a versioned standards catalog before the manuscript structure is frozen. Figure specification and manuscript structure are then established; citation, assertion, temporal, claim-evidence, manuscript, and reviewer audits challenge the package; response matrices and revision lineage organize required changes; patent and presentation modules only use the admitted evidence and unresolved-issue state.
+For broad manuscript, response, patent, or presentation requests, the workbench compiles a staged publication program. Journal fit and article-type feasibility are assessed before the manuscript structure is frozen. Figure specification and manuscript structure are then established; citation, assertion, temporal, claim-evidence, manuscript, and reviewer audits challenge the package; response matrices and revision lineage organize required changes; patent and presentation modules only use the admitted evidence and unresolved-issue state.
 
 This staged plan prevents a polished deliverable from bypassing evidence checks. It also keeps manuscript revision, reviewer response, patent readiness, and presentation delivery as separate outputs with different quality gates rather than treating them as one generic writing task.
 
-## Versioned Journal Standards
+## Journal Positioning And Manuscript Requirements
 
-The `journal-targeting-and-compliance` capability reads the versioned standards under `biomed_workbench/knowledge/journal_standards/`. Version `2026.08.03` contains 100 biomedical journals and records for every profile:
+`journal-targeting-and-compliance` evaluates each project against journal-specific profiles that cover:
 
 - audience and scientific remit;
 - preferred article families and project-fit terms;
 - expected manuscript sections and language style;
-- officially stated length, abstract, reference, display-item and related numeric constraints when the journal publishes an exact value;
+- stated length, abstract, reference, display-item and related numeric constraints when an exact value applies to the selected article type;
 - figure, reporting and policy requirements;
-- official author-instruction sources;
-- 2025 JIF plus every recorded JCR category and category-specific quartile, sorted for catalog presentation but excluded from recommendation scoring;
-- profile version, review date and catalog fingerprint.
+- the author instructions used for the assessment;
+- the profile version and review date bound to the result.
 
-Project-to-journal ranking uses scientific scope, audience, article type and evidentiary fit. It does not use journal impact factor or fabricate an acceptance probability. Compliance review checks field-level manuscript facts against the selected version. When an official page leaves a numeric requirement unspecified or delegates it to an article type, the result is a manual check that blocks a “submission-ready” conclusion rather than an invented number.
+Project-to-journal ranking uses scientific scope, audience, article type and evidentiary fit. Compliance review checks field-level manuscript facts against the selected profile. When a numeric requirement is unspecified or delegated to an article type, the result remains a manual check and cannot support a “submission-ready” conclusion.
 
-The catalog is append-only by release. Updating one journal creates a new profile version and new catalog fingerprint, while prior versions remain available to explain which rules governed an earlier manuscript decision. New journals use the same schema and validation gates. See [English](../journal-standards.md) or [中文](../journal-standards.zh-CN.md).
+The selected profile version is preserved with the recommendation and compliance result so that later revisions can be compared against the same requirements. See [English](../journal-standards.md) or [中文](../journal-standards.zh-CN.md).
 
 ## Scientific Figures And Manuscripts
 

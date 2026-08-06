@@ -56,7 +56,8 @@ class ProjectWorkflowCliTests(unittest.TestCase):
                 set(summary["missing_artifact_review_ids"]),
                 {"artifact-genes", "artifact-universe", "artifact-enrichment-result"},
             )
-            self.assertFalse(summary["delivery_authorization_available"])
+            self.assertTrue(summary["delivery_permanently_blocked_by_legacy_recovery"])
+            self.assertFalse(summary["delivery_prerequisites_currently_satisfied"])
             self.assertEqual(summary["required_next_map_revision"], 2)
             self.assertEqual(summary["required_parent_map_digest"], old_publication.map_digest)
             self.assertEqual(summary["verified_legacy_evidence_maps"], 1)
@@ -69,6 +70,7 @@ class ProjectWorkflowCliTests(unittest.TestCase):
             recovery = state.state_migrations[0].legacy_analysis_admission_recoveries[0]
             self.assertFalse(recovery.approved_before_execution)
             self.assertEqual(recovery.evidence_scope, "project-snapshot-only")
+            self.assertEqual(recovery.source_map_coverage_status, "not-covered")
             hypothesis_id = state.hypotheses[0].id
             for artifact in state.artifacts:
                 gate_ids = sorted(

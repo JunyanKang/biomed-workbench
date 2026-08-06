@@ -175,6 +175,7 @@ class LegacyAnalysisAdmissionRecovery:
     expected_artifact_types: tuple[str, ...]
     source_state_digest: str
     source_map_digest: str
+    source_map_coverage_status: str
     rationale_zh: str
     rationale_en: str
     recovery_status: str
@@ -201,6 +202,8 @@ class LegacyAnalysisAdmissionRecovery:
         )
         object.__setattr__(self, "source_state_digest", _sha256(self.source_state_digest, "legacy_admission_recovery.source_state_digest"))
         object.__setattr__(self, "source_map_digest", _sha256(self.source_map_digest, "legacy_admission_recovery.source_map_digest"))
+        if self.source_map_coverage_status not in {"covered", "not-covered"}:
+            raise ValueError("legacy admission recovery source map coverage status is unsupported")
         object.__setattr__(self, "rationale_zh", _text(self.rationale_zh, "legacy_admission_recovery.rationale_zh"))
         object.__setattr__(self, "rationale_en", _text(self.rationale_en, "legacy_admission_recovery.rationale_en"))
         if self.recovery_status != "historical-unavailable":
@@ -222,6 +225,7 @@ class LegacyAnalysisAdmissionRecovery:
         expected_artifact_types: tuple[str, ...],
         source_state_digest: str,
         source_map_digest: str,
+        source_map_coverage_status: str,
     ) -> "LegacyAnalysisAdmissionRecovery":
         values = {
             "id": f"legacy-admission-unavailable-{plan_node_id}",
@@ -230,6 +234,7 @@ class LegacyAnalysisAdmissionRecovery:
             "expected_artifact_types": tuple(expected_artifact_types),
             "source_state_digest": source_state_digest,
             "source_map_digest": source_map_digest,
+            "source_map_coverage_status": source_map_coverage_status,
             "rationale_zh": "旧版项目状态未序列化该分析的事前准入；本记录仅证明这一历史缺口，不补造事前批准。",
             "rationale_en": "The legacy state did not serialize prior admission for this analysis; this record documents that historical gap and does not reconstruct approval.",
             "recovery_status": "historical-unavailable",

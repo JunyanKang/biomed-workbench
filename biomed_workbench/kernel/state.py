@@ -71,8 +71,8 @@ EVENT_TYPES = frozenset(
 )
 
 PROJECT_STATE_SCHEMA_VERSION = 2
-STATE_MIGRATION_CONTRACT_VERSION = "1.1.0"
-SUPPORTED_STATE_MIGRATION_CONTRACT_VERSIONS = frozenset({"1.0.0", "1.1.0"})
+STATE_MIGRATION_CONTRACT_VERSION = "1.2.0"
+SUPPORTED_STATE_MIGRATION_CONTRACT_VERSIONS = frozenset({"1.0.0", "1.2.0"})
 
 
 @dataclass(frozen=True)
@@ -163,8 +163,18 @@ class StateMigrationRecord:
             raise ValueError("state migration legacy admission recoveries are invalid")
         if len({item.plan_node_id for item in recoveries}) != len(recoveries):
             raise ValueError("state migration legacy admission recoveries duplicate plan nodes")
-        if recoveries and (self.contract_version != "1.1.0" or not legacy_maps):
+        if recoveries and (self.contract_version != "1.2.0" or not legacy_maps):
             raise ValueError("legacy admission recovery requires a map-bound migration contract")
+        legacy_maps_by_digest = {item.publication.map_digest: item for item in legacy_maps}
+        for recovery in recoveries:
+            if recovery.source_state_digest != self.source_state_digest:
+                raise ValueError("legacy admission recovery source state differs from its migration")
+            source_map = legacy_maps_by_digest.get(recovery.source_map_digest)
+            if source_map is None:
+                raise ValueError("legacy admission recovery source map is not a verified migration map")
+            covered = recovery.plan_node_id in source_map.publication.covered_node_ids
+            if covered != (recovery.source_map_coverage_status == "covered"):
+                raise ValueError("legacy admission recovery source map coverage status is inconsistent")
         object.__setattr__(self, "legacy_analysis_admission_recoveries", recoveries)
         basis = {
             "id": self.id,
@@ -192,7 +202,7 @@ class StateMigrationRecord:
         legacy_analysis_admission_recoveries: tuple[LegacyAnalysisAdmissionRecovery, ...] = (),
     ) -> "StateMigrationRecord":
         identity = f"migration-v1-v2-{source_state_digest[:16]}"
-        contract_version = "1.1.0" if legacy_analysis_admission_recoveries else "1.0.0"
+        contract_version = "1.2.0" if legacy_analysis_admission_recoveries else "1.0.0"
         basis = {
             "id": identity,
             "from_schema_version": 1,
@@ -355,6 +365,18 @@ class ProjectState:
         hypothesis_ids = {item.id for item in self.hypotheses}
         plan_ids = {item.id for item in self.plans}
         plan_nodes = {node.id: node for plan in self.plans for node in plan.nodes}
+        for migration in self.state_migrations:
+            if self.revision < migration.source_revision:
+                continue
+            for recovery in migration.legacy_analysis_admission_recoveries:
+                node = plan_nodes.get(recovery.plan_node_id)
+                if node is None:
+                    raise ValueError("legacy admission recovery references an unknown migrated plan node")
+                if (
+                    recovery.hypothesis_ids != node.target_hypothesis_ids
+                    or recovery.expected_artifact_types != node.expected_output_artifact_types
+                ):
+                    raise ValueError("legacy admission recovery differs from its migrated plan-node contract")
         if any(not set(item.source_artifact_ids) <= artifact_ids for item in self.artifacts):
             raise ValueError("artifact lineage references unknown inputs")
         if any(item.parent_hypothesis_id is not None and item.parent_hypothesis_id not in hypothesis_ids for item in self.hypotheses):
@@ -754,6 +776,7 @@ def _migrate_v1_project_state(
     admission_recoveries: tuple[LegacyAnalysisAdmissionRecovery, ...] = ()
     if verified_legacy_maps:
         recovered: list[LegacyAnalysisAdmissionRecovery] = []
+        source_map = verified_legacy_maps[-1].publication
         for plan_payload in payload.get("plans", []):
             plan = ResearchDAG.from_dict(plan_payload)
             for node in plan.nodes:
@@ -764,7 +787,10 @@ def _migrate_v1_project_state(
                             hypothesis_ids=node.target_hypothesis_ids,
                             expected_artifact_types=node.expected_output_artifact_types,
                             source_state_digest=str(payload["state_digest"]),
-                            source_map_digest=verified_legacy_maps[-1].publication.map_digest,
+                            source_map_digest=source_map.map_digest,
+                            source_map_coverage_status=(
+                                "covered" if node.id in source_map.covered_node_ids else "not-covered"
+                            ),
                         )
                     )
         admission_recoveries = tuple(sorted(recovered, key=lambda item: item.plan_node_id))

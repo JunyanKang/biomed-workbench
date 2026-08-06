@@ -340,9 +340,17 @@ def validate_revision_target_contract(
                 raise ValueError("method-switch target is not a declared revision-compatible alternative")
             relation_payload = revision_alternative_to_dict(relation)
             output_binding_map = dict(relation.output_binding_map)
+            scientific_equivalence_class = relation.scientific_contract_equivalence
+            claim_scope_transition = {
+                "contract-equivalent": "preserve-claim-scope",
+                "decision-role-alternative-with-method-specific-evidence": "reset-to-target-method-specific-evidence",
+                "scope-downgrade": "narrow-to-target-scope",
+            }[scientific_equivalence_class]
         else:
             relation_payload = {"kind": "same-method", "source_module_id": source.module_id}
             output_binding_map = {port.name: port.name for port in source_manifest.output_artifacts}
+            scientific_equivalence_class = "same-method"
+            claim_scope_transition = "preserve-method-and-claim-scope"
         expected_contract_fields = {
             "source_manifest_digest": module_manifest_digest(source_manifest),
             "target_manifest_digest": module_manifest_digest(target_manifest),
@@ -356,6 +364,8 @@ def validate_revision_target_contract(
                 "target_ports": target_manifest_payload["output_artifacts"],
                 "output_binding_map": output_binding_map,
             }),
+            "scientific_equivalence_class": scientific_equivalence_class,
+            "claim_scope_transition": claim_scope_transition,
         }
         if any(getattr(contract, field) != value for field, value in expected_contract_fields.items()):
             raise ValueError("live module registry differs from the frozen revision contract")

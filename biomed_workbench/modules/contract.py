@@ -321,6 +321,11 @@ _OBSERVED_OUTPUT_FIELDS = frozenset(ObservedOutputContract.__dataclass_fields__)
 _OBSERVED_PAYLOAD_FIELDS = frozenset(ObservedPayloadContract.__dataclass_fields__)
 _GATE_EVALUATOR_FIELDS = frozenset(GateEvaluatorContract.__dataclass_fields__)
 _REVISION_ALTERNATIVE_FIELDS = frozenset(RevisionAlternative.__dataclass_fields__)
+REVISION_SCIENTIFIC_EQUIVALENCE_CLASSES = frozenset({
+    "contract-equivalent",
+    "decision-role-alternative-with-method-specific-evidence",
+    "scope-downgrade",
+})
 _OPTIONAL_MANIFEST_FIELDS = frozenset({
     "agent_protocol", "code_templates", "observed_output_contracts", "revision_alternatives"
 })
@@ -423,8 +428,8 @@ def _revision_alternative(value: Any, location: str) -> RevisionAlternative:
         payload["scientific_contract_equivalence"],
         f"{location}.scientific_contract_equivalence",
     )
-    if equivalence != "equivalent":
-        raise ValueError(f"{location} currently supports only equivalent scientific contracts")
+    if equivalence not in REVISION_SCIENTIFIC_EQUIVALENCE_CLASSES:
+        raise ValueError(f"{location}.scientific_contract_equivalence is unsupported")
     return RevisionAlternative(
         target_module_id=target,
         input_binding_map=_port_mapping(payload["input_binding_map"], f"{location}.input_binding_map"),

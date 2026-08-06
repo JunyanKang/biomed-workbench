@@ -398,6 +398,15 @@ report.write_text('<html><body>fastp QC-only report</body></html>')
             switch_plan = next(item for item in switch_state.plans if item.id == switch_state.active_plan_id)
             fastp_node = next(item for item in switch_plan.nodes if item.revision_of_node_id is not None)
             self.assertEqual(fastp_node.module_id, "read-quality-fastp")
+            self.assertEqual(dict(fastp_node.parameter_overrides), {"threads": 1})
+            self.assertEqual(
+                fastp_node.revision_contract.scientific_equivalence_class,
+                "decision-role-alternative-with-method-specific-evidence",
+            )
+            self.assertEqual(
+                fastp_node.revision_contract.claim_scope_transition,
+                "reset-to-target-method-specific-evidence",
+            )
             switch_decision = {
                 "id": "decision-fastqc-to-fastp-switch",
                 "review_id": switch_review["id"],

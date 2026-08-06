@@ -28,6 +28,18 @@ PLAN_TYPES = frozenset({"single", "serial", "parallel", "mixed"})
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+._-]*$")
 _DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
 REVISION_ACTIONS = frozenset({"rerun-same-method", "rerun-adjusted-parameters", "switch-method"})
+REVISION_EQUIVALENCE_CLASSES = frozenset({
+    "same-method",
+    "contract-equivalent",
+    "decision-role-alternative-with-method-specific-evidence",
+    "scope-downgrade",
+})
+CLAIM_SCOPE_TRANSITIONS = frozenset({
+    "preserve-method-and-claim-scope",
+    "preserve-claim-scope",
+    "reset-to-target-method-specific-evidence",
+    "narrow-to-target-scope",
+})
 
 
 def _ids(values: tuple[str, ...], location: str, *, allow_empty: bool = True) -> tuple[str, ...]:
@@ -73,6 +85,8 @@ class RevisionTargetContract:
     source_request_digest: str
     target_request_digest: str
     rationale: str
+    scientific_equivalence_class: str
+    claim_scope_transition: str
     digest: str
 
     def __post_init__(self) -> None:
@@ -90,6 +104,18 @@ class RevisionTargetContract:
             if not isinstance(getattr(self, field), str) or not _DIGEST_RE.fullmatch(getattr(self, field)):
                 raise ValueError(f"revision contract {field} must be SHA-256")
         object.__setattr__(self, "rationale", _meaningful(self.rationale, "revision_contract.rationale"))
+        if self.scientific_equivalence_class not in REVISION_EQUIVALENCE_CLASSES:
+            raise ValueError("revision contract scientific equivalence class is unsupported")
+        if self.claim_scope_transition not in CLAIM_SCOPE_TRANSITIONS:
+            raise ValueError("revision contract claim scope transition is unsupported")
+        expected_transition = {
+            "same-method": "preserve-method-and-claim-scope",
+            "contract-equivalent": "preserve-claim-scope",
+            "decision-role-alternative-with-method-specific-evidence": "reset-to-target-method-specific-evidence",
+            "scope-downgrade": "narrow-to-target-scope",
+        }[self.scientific_equivalence_class]
+        if self.claim_scope_transition != expected_transition:
+            raise ValueError("revision contract equivalence class and claim scope transition disagree")
         basis = {field: getattr(self, field) for field in self.__dataclass_fields__ if field != "digest"}
         if self.digest != digest_value(basis):
             raise ValueError("revision contract digest does not match its frozen content")
