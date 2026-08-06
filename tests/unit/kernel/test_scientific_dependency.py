@@ -156,6 +156,37 @@ def evidence_map(state, bundle, root: Path, version: EvidenceMapVersion):
 
 
 class ScientificDependencyTests(unittest.TestCase):
+    def test_negative_decision_remains_in_graph_without_becoming_active_evidence(self):
+        state = state_with_plan()
+        excluded_review = review(
+            technical_status="fatal",
+            statistical_status="major",
+            biological_status="major",
+            robustness_status="fatal",
+            recommended_action="exclude-invalid",
+            conclusion_zh="该产物未通过科学评审，失败结论需要保留，但不得进入有效证据集合。",
+            conclusion_en="The artifact failed scientific review and its negative conclusion must be retained without entering active evidence.",
+        )
+        excluded_decision = decision(
+            action="exclude-invalid",
+            active_evidence=False,
+            next_plan_node_ids=(),
+            rationale_zh="评审认定该产物无效，因此保留审计记录并从后续有效证据中排除。",
+            rationale_en="The review found the artifact invalid, so its audit history is retained while it is excluded from downstream active evidence.",
+        )
+        bundle = ScientificDependencyBundle.create(
+            state,
+            admissions=(admission(),),
+            reviews=(excluded_review,),
+            decisions=(excluded_decision,),
+        )
+        graph = build_scientific_dependency_graph(state, bundle)
+        self.assertEqual(graph.active_evidence_artifact_ids, ())
+        self.assertIn(
+            (excluded_decision.id, excluded_decision.artifact_id, "excludes"),
+            {(edge.source, edge.target, edge.relation) for edge in graph.edges},
+        )
+
     def test_complete_review_builds_graph_and_two_full_reports(self):
         state = state_with_plan()
         bundle = ScientificDependencyBundle.create(

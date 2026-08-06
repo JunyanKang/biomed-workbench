@@ -21,10 +21,9 @@ The `journal-targeting-and-compliance` capability reads the released catalog und
 - figure, reporting and policy requirements;
 - official author-instruction sources;
 - 2025 JIF plus every recorded JCR category and category-specific quartile, sorted for catalog presentation but excluded from recommendation scoring;
-- metric provenance level, source URL, retrieval date, and source-artifact digest;
 - profile version, review date and catalog fingerprint.
 
-Project-to-journal ranking uses scientific scope, audience, article type and evidentiary fit. It does not use journal impact factor or fabricate an acceptance probability. JCR-derived metrics prefer direct Clarivate access; an institutional repost or specialist index remains visibly labelled as secondary evidence and is rechecked directly when institutional access later becomes available. Compliance review checks field-level manuscript facts against the selected version. When an official page leaves a numeric requirement unspecified or delegates it to an article type, the result is a manual check that blocks a “submission-ready” conclusion rather than an invented number.
+Project-to-journal ranking uses scientific scope, audience, article type and evidentiary fit. It does not use journal impact factor or fabricate an acceptance probability. Compliance review checks field-level manuscript facts against the selected version. When an official page leaves a numeric requirement unspecified or delegates it to an article type, the result is a manual check that blocks a “submission-ready” conclusion rather than an invented number.
 
 The catalog is append-only by release. Updating one journal creates a new profile version and new catalog fingerprint, while prior versions remain available to explain which rules governed an earlier manuscript decision. New journals use the same schema and validation gates. See [English](../journal-standards.md) or [中文](../journal-standards.zh-CN.md).
 

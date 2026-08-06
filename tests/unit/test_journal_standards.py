@@ -94,11 +94,10 @@ class JournalStandardsTests(unittest.TestCase):
         self.assertIn("Developmental Cell", recommended_titles)
         self.assertFalse(any("Oncology" in title or "Cancer" in title for title in recommended_titles))
         self.assertTrue(all(row["journal_metrics"] for row in result["recommendations"]))
-        self.assertTrue(
-            all(row["journal_metrics"]["source"]["level"] for row in result["recommendations"])
-        )
+        self.assertTrue(all("source" not in row["journal_metrics"] for row in result["recommendations"]))
         self.assertFalse(result["policy"]["impact_factor_used"])
         self.assertFalse(result["policy"]["acceptance_probability_claimed"])
+        self.assertNotIn("metric_source_levels_are_explicit", result["policy"])
         rendered = json.dumps(result).lower()
         self.assertNotIn("acceptance probability\":", rendered)
         self.assertNotIn("impact factor\":", rendered)

@@ -28,7 +28,7 @@ from tests.unit.orchestration.test_planner import inline_artifact, state_with
 
 
 class ExecutionIngestTests(unittest.TestCase):
-    def _adjudicate_pending_gates(self, state):
+    def _adjudicate_pending_gates(self, state, *, forced_status=None):
         observed = state.observed_executions[-1]
         artifact_id = "artifact-enrichment-result"
         adjudications = []
@@ -45,7 +45,11 @@ class ExecutionIngestTests(unittest.TestCase):
                 evaluator_type=evaluation["evaluator_type"],
                 gate_result_digest=observed.postflight_result_digests[gate_id],
                 evidence_payload_sha256=evaluation["evidence_payload_sha256"],
-                status="accepted-with-caveat" if result["status"] == "not_evaluable" else "accepted",
+                adjudication_mode="manual",
+                observed_value=evaluation["observed_metric"],
+                criterion=evaluation["threshold"],
+                finding=evaluation["reason"],
+                status=forced_status or ("accepted-with-caveat" if result["status"] == "not_evaluable" else "accepted"),
                 reviewer_identity="independent-scientific-reviewer",
                 rationale_zh="审议者逐项核对该门禁对应的富集主表、参数、统计语义与适用范围后作出独立判断。",
                 rationale_en="The reviewer independently checked the gate against the enrichment table, parameters, statistical semantics, and scope.",
@@ -424,7 +428,9 @@ class ExecutionIngestTests(unittest.TestCase):
             id=f"adjudication-{gate_id}", artifact_id="artifact-enrichment-result",
             observed_execution_receipt_id=observed.id, gate_id=gate_id, port=evaluation["port"],
             evaluator_type=evaluation["evaluator_type"], gate_result_digest=observed.postflight_result_digests[gate_id],
-            evidence_payload_sha256=evaluation["evidence_payload_sha256"], status="accepted",
+            evidence_payload_sha256=evaluation["evidence_payload_sha256"],
+            adjudication_mode="manual", observed_value=evaluation["observed_metric"],
+            criterion=evaluation["threshold"], finding=evaluation["reason"], status="accepted",
             reviewer_identity="independent-scientific-reviewer",
             rationale_zh="审议者逐项核对门禁结果并记录与当前执行回执的精确对应关系。",
             rationale_en="The reviewer checked the gate result and recorded its exact relationship to the execution receipt.",
@@ -438,6 +444,9 @@ class ExecutionIngestTests(unittest.TestCase):
             "port": {"port": "wrong-output-port"},
             "result digest": {"gate_result_digest": "f" * 64},
             "evidence digest": {"evidence_payload_sha256": "f" * 64},
+            "observed value": {"observed_value": "forged-observation"},
+            "criterion": {"criterion": "forged-criterion"},
+            "finding": {"finding": "forged-finding"},
         }
         for label, mutation in mutations.items():
             with self.subTest(label=label):
@@ -480,6 +489,125 @@ class ExecutionIngestTests(unittest.TestCase):
                 {"receipt": shortened.to_dict()},
                 rationale="Reject a receipt that omits a frozen manifest gate.",
             )
+
+    def test_unknown_duplicate_and_digest_drift_protocols_fail_at_handoff_boundary(self):
+        _registry, state, _root, _bundle = self._prepared_case()
+        base = state.execution_handoffs[-1].to_dict()
+        mutations = {
+            "unknown": lambda value: value["protocol"].update(observed_output_protocol_version="9.9.0"),
+            "legacy": lambda value: value["protocol"].update(observed_output_protocol_version="2.0"),
+            "duplicate": lambda value: value["protocol"]["required_postflight_gate_ids"].append(
+                value["protocol"]["required_postflight_gate_ids"][0]
+            ),
+            "wrong digest": lambda value: value["protocol"].update(required_postflight_gate_set_digest="f" * 64),
+        }
+        for label, mutate in mutations.items():
+            with self.subTest(label=label):
+                payload = copy.deepcopy(base)
+                mutate(payload)
+                with self.assertRaisesRegex(ValueError, "protocol|gate"):
+                    ExecutionHandoff.from_dict(payload)
+
+    def test_rejected_gate_can_be_reviewed_and_excluded_but_never_retained(self):
+        registry, state, root, bundle = self._prepared_case()
+        state = ingest_execution_bundle(
+            state, bundle, registry=registry, artifact_store=ProjectArtifactStore(root / "objects")
+        )
+        state, adjudications = self._adjudicate_pending_gates(state, forced_status="rejected")
+        artifact_id = "artifact-enrichment-result"
+        artifact_review = review(
+            id="review-rejected-enrichment",
+            artifact_id=artifact_id,
+            technical_status="fatal",
+            statistical_status="major",
+            biological_status="major",
+            robustness_status="fatal",
+            recommended_action="exclude-invalid",
+            conclusion_zh="该产物未通过关键科学门禁，应保留失败记录并从有效证据中排除。",
+            conclusion_en="The artifact failed a critical scientific gate and must remain in the audit record while being excluded from active evidence.",
+            gate_adjudication_ids=tuple(item.id for item in adjudications),
+        )
+        state = apply_event(
+            state,
+            "artifact_review_recorded",
+            {"review": artifact_review.to_dict()},
+            rationale="Record the fatal review without erasing the rejected gate evidence.",
+        )
+        retain = decision(
+            id="decision-invalid-retain",
+            review_id=artifact_review.id,
+            artifact_id=artifact_id,
+            action="retain-as-evidence",
+            active_evidence=True,
+            next_plan_node_ids=(),
+            gate_adjudication_digest=gate_adjudication_bundle_digest(state, artifact_id),
+        )
+        with self.assertRaisesRegex(ValueError, "blocking|retention"):
+            apply_event(
+                state,
+                "scientific_decision_recorded",
+                {"decision": retain.to_dict()},
+                rationale="A rejected gate must not be retained.",
+            )
+        excluded = decision(
+            id="decision-exclude-invalid",
+            review_id=artifact_review.id,
+            artifact_id=artifact_id,
+            action="exclude-invalid",
+            active_evidence=False,
+            next_plan_node_ids=(),
+            gate_adjudication_digest=gate_adjudication_bundle_digest(state, artifact_id),
+        )
+        state = apply_event(
+            state,
+            "scientific_decision_recorded",
+            {"decision": excluded.to_dict()},
+            rationale="Exclude the rejected output while retaining its complete audit chain.",
+        )
+        result = ResearchController(
+            registry,
+            environment_provider=lambda _manifest: None,
+            artifact_store=ProjectArtifactStore(root / "objects"),
+        ).resume(state.to_dict())
+        self.assertEqual(result.stop_reason, "scientific_evidence_excluded")
+        self.assertEqual(result.active_plan.nodes[0].status, "skipped")
+        self.assertNotIn(artifact_id, {item.artifact_id for item in result.state.evidence})
+
+    def test_unresolved_gate_can_request_more_data_and_enters_blocked_state(self):
+        registry, state, root, bundle = self._prepared_case()
+        state = ingest_execution_bundle(
+            state, bundle, registry=registry, artifact_store=ProjectArtifactStore(root / "objects")
+        )
+        state, adjudications = self._adjudicate_pending_gates(state, forced_status="unresolved")
+        artifact_id = "artifact-enrichment-result"
+        artifact_review = review(
+            id="review-unresolved-enrichment",
+            artifact_id=artifact_id,
+            technical_status="major",
+            statistical_status="major",
+            biological_status="major",
+            robustness_status="major",
+            recommended_action="acquire-more-data",
+            gate_adjudication_ids=tuple(item.id for item in adjudications),
+        )
+        state = apply_event(state, "artifact_review_recorded", {"review": artifact_review.to_dict()}, rationale="Record an unresolved review.")
+        blocked = decision(
+            id="decision-acquire-more-data",
+            review_id=artifact_review.id,
+            artifact_id=artifact_id,
+            action="acquire-more-data",
+            active_evidence=False,
+            next_plan_node_ids=(),
+            gate_adjudication_digest=gate_adjudication_bundle_digest(state, artifact_id),
+        )
+        state = apply_event(state, "scientific_decision_recorded", {"decision": blocked.to_dict()}, rationale="Block until additional data resolve the gate.")
+        result = ResearchController(
+            registry,
+            environment_provider=lambda _manifest: None,
+            artifact_store=ProjectArtifactStore(root / "objects"),
+        ).resume(state.to_dict())
+        self.assertEqual(result.stop_reason, "awaiting_additional_data")
+        self.assertEqual(result.active_plan.nodes[0].status, "blocked")
 
 
 if __name__ == "__main__":

@@ -176,7 +176,15 @@ def _unit_section(
             rationale = adjudication.rationale_zh if zh else adjudication.rationale_en
             lines.append(
                 f"  - `{adjudication.gate_id}`: `{adjudication.status}`; "
+                f"{'审议方式' if zh else 'mode'} `{adjudication.adjudication_mode}`; "
                 f"{'结果摘要' if zh else 'result digest'} `{adjudication.gate_result_digest}`; {rationale}"
+            )
+            lines.extend(
+                [
+                    f"    - {'观测值' if zh else 'Observed value'}: `{adjudication.observed_value}`",
+                    f"    - {'判定标准' if zh else 'Criterion'}: `{adjudication.criterion}`",
+                    f"    - {'具体发现' if zh else 'Finding'}: {adjudication.finding}",
+                ]
             )
             limitations = adjudication.limitations_zh if zh else adjudication.limitations_en
             lines.extend(f"    - {'局限' if zh else 'Limitation'}: {value}" for value in limitations)

@@ -21,11 +21,17 @@ from .execution_chain import (
     validate_delivery_prerequisites,
     validate_gate_adjudication_binding,
     validate_gate_adjudication_chain,
+    validate_gate_adjudication_reviewability,
+    validate_gate_adjudication_retention,
     validate_node_execution_chain,
     validate_validated_delivery_state,
 )
 from .hypotheses import Hypothesis, add_hypothesis, attach_evidence
 from .identity import digest_value, freeze_mapping, thaw
+from .observed_output_protocol import (
+    validate_handoff_receipt_gate_coverage,
+    validate_observed_output_protocol,
+)
 from .plans import NODE_STATUSES, PlanNode, ResearchDAG
 from .scientific_dependency import (
     AnalysisAdmission,
@@ -194,12 +200,25 @@ class ProjectState:
             review = review_by_id.get(item.review_id)
             if review is None or review.artifact_id != item.artifact_id or not set(item.hypothesis_ids) <= hypothesis_ids:
                 raise ValueError("scientific decision references an unknown or mismatched review")
+            if not set(item.next_plan_node_ids) <= set(plan_nodes):
+                raise ValueError("scientific decision references an unknown next plan node")
+            if not set(item.next_hypothesis_ids) <= hypothesis_ids:
+                raise ValueError("scientific decision references an unknown revised hypothesis")
+            if item.action == "revise-hypothesis" and any(
+                next(
+                    value for value in self.hypotheses if value.id == revised_id
+                ).parent_hypothesis_id not in item.hypothesis_ids
+                for revised_id in item.next_hypothesis_ids
+            ):
+                raise ValueError("revise-hypothesis decision must bind a registered child hypothesis")
             if item.active_evidence and review.overall_status in {"major", "fatal", "unassessed"}:
                 raise ValueError("blocking or unassessed artifacts cannot become active evidence")
             validate_gate_adjudication_chain(self, item.artifact_id)
         if len({item.artifact_id for item in self.scientific_decisions}) != len(self.scientific_decisions):
             raise ValueError("each artifact may have only one scientific decision")
         handoffs = {item.id: item for item in self.execution_handoffs}
+        for item in self.execution_handoffs:
+            validate_observed_output_protocol(item.protocol)
         if any(
             item.plan_node_id not in plan_nodes
             or plan_nodes[item.plan_node_id].module_id != item.module_id
@@ -224,17 +243,7 @@ class ProjectState:
                     or set(handoff.planned_output_artifact_ids.values()) != set(item.output_artifact_digests)
                 ):
                     raise ValueError("observed execution receipt chain differs from its handoff")
-                if handoff.protocol.get("observed_output_protocol_version") == "2.1.0":
-                    required_gate_ids = tuple(handoff.protocol.get("required_postflight_gate_ids", ()))
-                    if (
-                        not required_gate_ids
-                        or len(set(required_gate_ids)) != len(required_gate_ids)
-                        or handoff.protocol.get("required_postflight_gate_set_digest")
-                        != digest_value(sorted(required_gate_ids))
-                        or set(required_gate_ids) != set(item.postflight_results)
-                        or set(required_gate_ids) != set(item.postflight_result_digests)
-                    ):
-                        raise ValueError("observed execution does not cover the frozen handoff gate set")
+                validate_handoff_receipt_gate_coverage(handoff, item)
         reloads = {item.id: item for item in self.artifact_reloads}
         for item in self.artifact_reloads:
             execution = observed.get(item.observed_execution_receipt_id)
@@ -455,7 +464,7 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
             "running": {"pending", "awaiting_observed_execution", "awaiting_review", "completed", "blocked", "failed"},
             "prepared": {"awaiting_observed_execution", "blocked", "failed"},
             "awaiting_observed_execution": {"awaiting_review", "blocked", "failed"},
-            "awaiting_review": {"completed", "pending", "skipped", "blocked", "failed"},
+            "awaiting_review": {"completed", "pending", "skipped", "blocked", "failed", "superseded"},
             "blocked": {"pending", "superseded", "skipped"},
             "failed": {"pending", "superseded", "skipped"},
             "completed": set(),
@@ -507,6 +516,7 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
         if set(payload) != {"handoff"}:
             raise ValueError("execution_handoff_recorded payload is invalid")
         item = ExecutionHandoff.from_dict(payload["handoff"])
+        validate_observed_output_protocol(item.protocol)
         plan_node = next((node for plan in plans for node in plan.nodes if node.id == item.plan_node_id), None)
         if (
             plan_node is None
@@ -534,18 +544,8 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
             or (item.source_kind == "handoff" and item.handoff_id not in {value.id for value in execution_handoffs})
         ):
             raise ValueError("observed execution is duplicate or differs from its plan and handoff")
-        if item.source_kind == "handoff" and handoff is not None and handoff.protocol.get(
-            "observed_output_protocol_version"
-        ) == "2.1.0":
-            required_gate_ids = tuple(handoff.protocol.get("required_postflight_gate_ids", ()))
-            if (
-                not required_gate_ids
-                or handoff.protocol.get("required_postflight_gate_set_digest")
-                != digest_value(sorted(required_gate_ids))
-                or set(required_gate_ids) != set(item.postflight_results)
-                or set(required_gate_ids) != set(item.postflight_result_digests)
-            ):
-                raise ValueError("observed execution does not cover the frozen handoff gate set")
+        if item.source_kind == "handoff" and handoff is not None:
+            validate_handoff_receipt_gate_coverage(handoff, item)
         observed_executions = (*observed_executions, item)
     elif event_type == "artifact_reloaded":
         if set(payload) != {"receipt", "artifact"}:
@@ -606,18 +606,18 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
         item = ArtifactReview.from_dict(payload["review"])
         if item.artifact_id not in {value.id for value in artifacts} or item.artifact_id in {value.artifact_id for value in reviews}:
             raise ValueError("artifact review requires one known, previously unreviewed artifact")
-        validate_gate_adjudication_chain(
-            state, item.artifact_id, require_review=False, require_decision=False
-        )
+        validate_gate_adjudication_reviewability(state, item.artifact_id)
         expected_gate_ids = tuple(sorted(
             value.id for value in gate_adjudications if value.artifact_id == item.artifact_id
         ))
         if tuple(sorted(item.gate_adjudication_ids)) != expected_gate_ids:
             # Input/direct artifacts have no gate adjudications; handoff artifacts must cover all pending gates.
             raise ValueError("artifact review does not name its exact gate adjudication set")
-        for value in gate_adjudications:
-            if value.artifact_id == item.artifact_id and value.status in {"rejected", "unresolved"}:
-                raise ValueError("artifact review cannot close rejected or unresolved scientific gates")
+        if any(
+            value.artifact_id == item.artifact_id and value.status in {"rejected", "unresolved"}
+            for value in gate_adjudications
+        ) and item.overall_status not in {"major", "fatal"}:
+            raise ValueError("rejected or unresolved gates require a major or fatal artifact review")
         reviews = (*reviews, item)
     elif event_type == "scientific_gate_adjudicated":
         if set(payload) != {"adjudication"}:
@@ -637,16 +637,26 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
         review = next((value for value in reviews if value.id == item.review_id), None)
         if review is None or review.artifact_id != item.artifact_id or item.artifact_id in {value.artifact_id for value in scientific_decisions}:
             raise ValueError("scientific decision requires the matching, previously undecided review")
+        active_plan = next((value for value in plans if value.id == active_plan_id), None)
+        if active_plan is None or not set(item.next_plan_node_ids) <= {value.id for value in active_plan.nodes}:
+            raise ValueError("scientific decision next nodes must belong to the active plan")
+        revised_hypotheses = {value.id: value for value in hypotheses if value.id in item.next_hypothesis_ids}
+        if item.action == "revise-hypothesis" and (
+            set(revised_hypotheses) != set(item.next_hypothesis_ids)
+            or any(value.parent_hypothesis_id not in item.hypothesis_ids for value in revised_hypotheses.values())
+        ):
+            raise ValueError("revise-hypothesis decision must bind a registered child hypothesis")
         if item.active_evidence and review.overall_status in {"major", "fatal", "unassessed"}:
             raise ValueError("blocking or unassessed review cannot release active evidence")
         expected_gate_digest = gate_adjudication_bundle_digest(state, item.artifact_id)
         if item.gate_adjudication_digest != expected_gate_digest:
             raise ValueError("scientific decision does not bind the exact gate adjudication set")
-        if any(
-            value.artifact_id == item.artifact_id and value.status == "accepted-with-caveat"
-            for value in gate_adjudications
-        ) and item.action != "retain-with-caveat":
-            raise ValueError("accepted-with-caveat gate adjudication requires a caveated retain decision")
+        if item.active_evidence:
+            validate_gate_adjudication_retention(
+                state,
+                item.artifact_id,
+                decision_action=item.action,
+            )
         scientific_decisions = (*scientific_decisions, item)
     elif event_type == "evidence_map_published":
         if set(payload) != {"publication"}:

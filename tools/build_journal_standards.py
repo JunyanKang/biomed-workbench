@@ -645,31 +645,16 @@ ZH_CATEGORIES = {
 }
 
 
-def _metric_source_label(level: str, *, zh: bool) -> str:
-    labels = {
-        "primary_clarivate": ("Clarivate JCR / Journals API", "Clarivate JCR / Journals API"),
-        "secondary_institutional_jcr_repost": (
-            "Institutional JCR repost (secondary)",
-            "高校公开转载的 JCR 数据（二级来源）",
-        ),
-        "secondary_specialist_jcr_index": (
-            "Specialist JCR index (secondary fallback)",
-            "专业期刊指标索引（二级后备来源）",
-        ),
-    }
-    return labels[level][1 if zh else 0]
-
-
 def _coverage_table(profiles: list[dict], *, zh: bool) -> str:
     if zh:
         lines = [
-            "| 期刊 | 出版机构 | JCR 学科类别 | JCR 2026 分区 | 2025 JIF | 指标来源 |",
-            "| --- | --- | --- | --- | ---: | --- |",
+            "| 期刊 | 出版机构 | JCR 学科类别 | JCR 2026 分区 | 2025 JIF |",
+            "| --- | --- | --- | --- | ---: |",
         ]
     else:
         lines = [
-            "| Journal | Publisher / publishing organization | JCR categories | JCR 2026 quartiles | 2025 JIF | Metric provenance |",
-            "| --- | --- | --- | --- | ---: | --- |",
+            "| Journal | Publisher / publishing organization | JCR categories | JCR 2026 quartiles | 2025 JIF |",
+            "| --- | --- | --- | --- | ---: |",
         ]
     for profile in profiles:
         metric = profile["journal_metrics"]
@@ -684,8 +669,6 @@ def _coverage_table(profiles: list[dict], *, zh: bool) -> str:
             categories.append(f"{category_name} ({category['edition']})")
             quartiles.append(f"{category_name}: {category['quartile']}")
         jif = "未获分配" if zh and metric["jif"] is None else ("Not assigned" if metric["jif"] is None else f"{metric['jif']:.1f}")
-        source = metric["source"]
-        source_label = _metric_source_label(source["level"], zh=zh)
         lines.append(
             "| "
             + " | ".join(
@@ -695,7 +678,6 @@ def _coverage_table(profiles: list[dict], *, zh: bool) -> str:
                     "<br>".join(categories),
                     "<br>".join(quartiles),
                     jif,
-                    f"[{source_label}]({source['url']})",
                 ]
             )
             + " |"
@@ -744,16 +726,6 @@ def main() -> None:
                 "Only publisher or journal author instructions, content definitions, scope pages, and reporting "
                 "standards may define submission rules. Unknown numerical limits remain null."
             ),
-            "journal_metrics": (
-                "JIF, JCR categories, editions, and quartiles prefer direct Clarivate JCR or Journals API records. "
-                "When access is unavailable, reviewed institutional reposts of the same annual JCR export may be "
-                "used as explicitly labelled secondary evidence; specialist indexes are allowed only as a "
-                "declared fallback. CiteScore and SJR must never be relabelled as JIF or JCR quartiles."
-            ),
-            "publisher_cross_check": (
-                "Publisher and journal sites verify title identity, publisher, scope, and author guidance; they "
-                "do not silently replace the recorded JCR provenance."
-            ),
         },
         "journal_count": len(profiles),
         "metric_source_manifest": {
@@ -784,7 +756,6 @@ def main() -> None:
             "one_journal_may_advance_independently": True,
             "source_change_requires_new_version": True,
             "unverified_required_field_blocks_submission_ready": True,
-            "metric_source_tiers_are_enforced": True,
             "active_catalog_is_sorted_by_descending_jif": True,
         },
         "journal_versions": {

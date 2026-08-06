@@ -78,6 +78,9 @@ def _artifact_gate_requirements(state: "ProjectState", artifact_id: str) -> tupl
                 "evaluator_type": str(evaluation.get("evaluator_type")),
                 "gate_result_digest": str(observed.postflight_result_digests[str(gate_id)]),
                 "evidence_payload_sha256": evaluation.get("evidence_payload_sha256"),
+                "observed_value": str(evaluation.get("observed_metric")),
+                "criterion": str(evaluation.get("threshold")),
+                "finding": str(evaluation.get("reason")),
             })
     return observed, port, tuple(sorted(requirements, key=lambda item: str(item["gate_id"])))
 
@@ -98,6 +101,9 @@ def validate_gate_adjudication_binding(state: "ProjectState", adjudication: obje
         "evaluator_type": requirement["evaluator_type"],
         "gate_result_digest": requirement["gate_result_digest"],
         "evidence_payload_sha256": requirement["evidence_payload_sha256"],
+        "observed_value": requirement["observed_value"],
+        "criterion": requirement["criterion"],
+        "finding": requirement["finding"],
     }
     actual = {key: getattr(adjudication, key) for key in expected}
     if actual != expected:
@@ -123,14 +129,11 @@ def gate_adjudication_bundle_digest(state: "ProjectState", artifact_id: str) -> 
     return digest_value([item.to_dict() for item in adjudications])
 
 
-def validate_gate_adjudication_chain(
+def validate_gate_adjudication_reviewability(
     state: "ProjectState",
     artifact_id: str,
-    *,
-    require_review: bool = True,
-    require_decision: bool = True,
 ) -> tuple[str, ...]:
-    """Require accepted gate-specific adjudication before review, retention, or completion."""
+    """Require complete, correctly bound adjudications without deciding retention."""
     _observed, _port, requirements = _artifact_gate_requirements(state, artifact_id)
     if not requirements:
         return ()
@@ -139,17 +142,48 @@ def validate_gate_adjudication_chain(
     }
     if set(by_gate) != {str(item["gate_id"]) for item in requirements}:
         raise ValueError("artifact has unresolved scientific gates")
+    for requirement in requirements:
+        validate_gate_adjudication_binding(state, by_gate[str(requirement["gate_id"])])
+    return tuple(sorted(item.id for item in by_gate.values()))
+
+
+def validate_gate_adjudication_retention(
+    state: "ProjectState",
+    artifact_id: str,
+    *,
+    decision_action: str,
+) -> None:
+    """Apply the stricter gate policy used only when evidence is retained."""
+    _observed, _port, requirements = _artifact_gate_requirements(state, artifact_id)
+    if not requirements:
+        return
+    by_gate = {
+        item.gate_id: item for item in state.gate_adjudications if item.artifact_id == artifact_id
+    }
     caveat_required = False
     for requirement in requirements:
         item = by_gate[str(requirement["gate_id"])]
-        validate_gate_adjudication_binding(state, item)
         if item.status in {"rejected", "unresolved"}:
-            raise ValueError("rejected or unresolved scientific gate blocks artifact completion")
+            raise ValueError("rejected or unresolved scientific gate blocks evidence retention")
         if requirement["status"] == "not_evaluable" and item.status != "accepted-with-caveat":
             raise ValueError("not-evaluable scientific gates require explicit accepted-with-caveat adjudication")
         if item.status == "accepted-with-caveat":
             caveat_required = True
-    ordered = tuple(sorted(item.id for item in by_gate.values()))
+    if caveat_required and decision_action != "retain-with-caveat":
+        raise ValueError("accepted-with-caveat gate adjudication requires a caveated retain decision")
+
+
+def validate_gate_adjudication_chain(
+    state: "ProjectState",
+    artifact_id: str,
+    *,
+    require_review: bool = True,
+    require_decision: bool = True,
+) -> tuple[str, ...]:
+    """Validate review/decision bindings and enforce retention only for retained evidence."""
+    ordered = validate_gate_adjudication_reviewability(state, artifact_id)
+    if not ordered:
+        return ()
     if require_review:
         review = next((item for item in state.artifact_reviews if item.artifact_id == artifact_id), None)
         if review is None or tuple(sorted(review.gate_adjudication_ids)) != ordered:
@@ -159,8 +193,12 @@ def validate_gate_adjudication_chain(
         expected_digest = gate_adjudication_bundle_digest(state, artifact_id)
         if decision is None or decision.gate_adjudication_digest != expected_digest:
             raise ValueError("scientific decision is not bound to the exact gate adjudication set")
-        if caveat_required and decision.action != "retain-with-caveat":
-            raise ValueError("accepted-with-caveat gate adjudication requires a caveated retain decision")
+        if decision.active_evidence:
+            validate_gate_adjudication_retention(
+                state,
+                artifact_id,
+                decision_action=decision.action,
+            )
     return ordered
 
 

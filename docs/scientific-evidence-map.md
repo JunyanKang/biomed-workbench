@@ -76,8 +76,11 @@ pending, review-pending, failed, skipped, or otherwise unfinished sibling.
 For a handoff-produced artifact, every pending manifest gate is resolved first
 through a `ScientificGateAdjudication` bound to the exact execution receipt,
 output port, structured gate-result digest, and evidence-payload digest. The
-review names the complete adjudication set; rejected or unresolved gates block
-review, while a not-evaluable gate can proceed only with an explicit caveat.
+review names the complete adjudication set. Rejected and unresolved gates remain
+reviewable so that a fatal or major review can support exclusion, rerun, method
+change, additional-data, plan-revision, or branch-stop decisions. They can never
+be retained as active evidence. A not-evaluable gate may be retained only after
+an explicit accepted-with-caveat adjudication and caveated retain decision.
 
 Every registered artifact, including negative, excluded, intermediate, data,
 table, model, report, and figure artifacts, requires one bilingual
@@ -111,6 +114,14 @@ unassessed reviews cannot be retained. Exclusion removes an artifact from active
 claim support but never deletes it, its review, or the decision from the audit
 chain. Revised hypotheses and plans receive new identities rather than mutating
 the historical node.
+
+Decision actions also have distinct execution semantics. Retention completes the
+reviewed node and releases active evidence. Exclusion and branch stop terminate
+the current branch without deleting its history. Rerun and method-switch actions
+supersede the reviewed node and activate a distinct predeclared revision node.
+Additional-data decisions keep the branch blocked until new input is registered.
+Hypothesis and scope revisions request a new immutable plan revision rather than
+overwriting the original analysis.
 
 ## Two Separate Bilingual Deliverables
 

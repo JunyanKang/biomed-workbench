@@ -10,6 +10,10 @@ from typing import Any, Mapping
 from ..kernel.artifact_store import ProjectArtifactStore
 from ..kernel.execution_receipts import ArtifactReloadReceipt, ObservedExecutionReceipt, ScientificReviewReceipt
 from ..kernel.identity import digest_value
+from ..kernel.observed_output_protocol import (
+    validate_handoff_receipt_gate_coverage,
+    validate_observed_output_protocol,
+)
 from ..kernel.state import ProjectState, apply_event
 from ..modules.registry import ModuleRegistry
 from ..modules.contract import (
@@ -159,6 +163,7 @@ def ingest_execution_bundle(
     handoff = next((item for item in state.execution_handoffs if item.id == bundle["handoff_id"]), None)
     if handoff is None:
         raise ValueError("execution receipt bundle references an unknown handoff")
+    validate_observed_output_protocol(handoff.protocol)
     if any(item.handoff_id == handoff.id for item in state.observed_executions):
         raise ValueError("execution handoff has already been observed")
     plan = next((item for item in state.plans if any(node.id == handoff.plan_node_id for node in item.nodes)), None)
@@ -390,6 +395,7 @@ def ingest_execution_bundle(
         execution_request_digest=digest_value(handoff.to_dict()),
         handoff=handoff,
     )
+    validate_handoff_receipt_gate_coverage(handoff, observed)
     state = apply_event(
         state,
         "execution_observed",

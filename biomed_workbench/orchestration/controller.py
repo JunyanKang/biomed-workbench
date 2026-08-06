@@ -14,6 +14,14 @@ from ..kernel.execution_chain import validate_node_execution_chain, validated_de
 from ..kernel.artifact_store import ProjectArtifactStore
 from ..kernel.identity import digest_value, thaw
 from ..kernel.plans import PlanNode, ResearchDAG
+from ..kernel.scientific_dependency import (
+    EXCLUDE_DECISION_ACTIONS,
+    INPUT_DECISION_ACTIONS,
+    REEXECUTE_DECISION_ACTIONS,
+    RETAIN_DECISION_ACTIONS,
+    REVISION_DECISION_ACTIONS,
+    STOP_DECISION_ACTIONS,
+)
 from ..kernel.state import ProjectState, apply_event
 from ..modules.compatibility import EnvironmentSnapshot
 from ..modules.contract import ModuleManifest, observed_output_contract_digest
@@ -361,7 +369,7 @@ class ResearchController:
         )
 
     def _release_reviewed_nodes(self, state: ProjectState, plan: ResearchDAG) -> ProjectState:
-        """Release downstream dependencies only after every output has a retained decision."""
+        """Dispatch reviewed outputs according to their explicit scientific decision family."""
         decisions = {item.artifact_id: item for item in state.scientific_decisions}
         evidence_ids = {item.id for item in state.evidence}
         for node in tuple(item for item in plan.nodes if item.status == "awaiting_review"):
@@ -369,8 +377,33 @@ class ResearchController:
             if not output_ids or not set(output_ids) <= set(decisions):
                 continue
             node_decisions = tuple(decisions[artifact_id] for artifact_id in output_ids)
-            if not all(item.active_evidence for item in node_decisions):
-                state = self._status(state, plan.id, node, "skipped", node.attempt)
+            families = {
+                "retain" if item.action in RETAIN_DECISION_ACTIONS
+                else "exclude" if item.action in EXCLUDE_DECISION_ACTIONS
+                else "reexecute" if item.action in REEXECUTE_DECISION_ACTIONS
+                else "input" if item.action in INPUT_DECISION_ACTIONS
+                else "revision" if item.action in REVISION_DECISION_ACTIONS
+                else "stop"
+                for item in node_decisions
+            }
+            if len(families) != 1:
+                raise ValueError("one plan node cannot resolve its outputs with conflicting decision families")
+            family = next(iter(families))
+            if family != "retain":
+                next_ids = {value for item in node_decisions for value in item.next_plan_node_ids}
+                plan_nodes = {item.id: item for item in plan.nodes}
+                if next_ids - set(plan_nodes) or node.id in next_ids:
+                    raise ValueError("scientific decision triggers an unknown or self-referential plan node")
+                if family == "reexecute" and any(plan_nodes[value].status not in {"pending", "ready"} for value in next_ids):
+                    raise ValueError("rerun or method-switch target must be a pending revision node")
+                status = {
+                    "exclude": "skipped",
+                    "reexecute": "superseded",
+                    "input": "blocked",
+                    "revision": "blocked",
+                    "stop": "skipped",
+                }[family]
+                state = self._status(state, plan.id, node, status, node.attempt)
                 plan = self._active_plan(state)
                 continue
             execution = self._resolved_completed_execution(state, node)
@@ -390,6 +423,33 @@ class ResearchController:
             state = self._status(state, plan.id, node, "completed", node.attempt)
             plan = self._active_plan(state)
         return state
+
+    @staticmethod
+    def _decision_triggered_node_is_ready(state: ProjectState, plan: ResearchDAG, node: PlanNode) -> bool:
+        """Allow a declared revision node to replace a reviewed, superseded dependency."""
+        decisions = tuple(
+            item
+            for item in state.scientific_decisions
+            if item.action in REEXECUTE_DECISION_ACTIONS and node.id in item.next_plan_node_ids
+        )
+        if not decisions:
+            return False
+        producer_by_artifact = {
+            artifact_id: candidate
+            for candidate in plan.nodes
+            for artifact_id in candidate.planned_output_artifact_ids.values()
+        }
+        source_nodes = {
+            producer_by_artifact[item.artifact_id].id
+            for item in decisions
+            if item.artifact_id in producer_by_artifact
+        }
+        by_id = {item.id: item for item in plan.nodes}
+        return all(
+            dependency in source_nodes and by_id[dependency].status == "superseded"
+            for dependency in node.dependencies
+            if by_id[dependency].status != "completed"
+        )
 
     def advance(self, state: ProjectState, plan: ResearchDAG) -> CycleResult:
         if plan.id not in {item.id for item in state.plans}:
@@ -414,7 +474,15 @@ class ResearchController:
                 state = self._release_reviewed_nodes(state, active)
             active = self._active_plan(state)
             completed_ids = {node.id for node in active.nodes if node.status == "completed"}
-            dependency_ready = tuple(node for node in active.nodes if node.status in {"pending", "ready"} and set(node.dependencies) <= completed_ids)
+            dependency_ready = tuple(
+                node
+                for node in active.nodes
+                if node.status in {"pending", "ready"}
+                and (
+                    set(node.dependencies) <= completed_ids
+                    or self._decision_triggered_node_is_ready(state, active, node)
+                )
+            )
             approved_nodes = {item.plan_node_id for item in state.analysis_admissions if item.approved}
             publication_blocked = {
                 node.id
@@ -431,6 +499,16 @@ class ResearchController:
             )
             if not pending:
                 statuses = {node.status for node in active.nodes}
+                active_output_artifact_ids = {
+                    artifact_id
+                    for node in active.nodes
+                    for artifact_id in node.planned_output_artifact_ids.values()
+                }
+                active_decisions = tuple(
+                    item
+                    for item in state.scientific_decisions
+                    if item.artifact_id in active_output_artifact_ids
+                )
                 if statuses == {"completed"}:
                     stop_reason = "plan_completed"
                 elif publication_blocked:
@@ -441,8 +519,28 @@ class ResearchController:
                     stop_reason = "awaiting_artifact_review"
                 elif "awaiting_observed_execution" in statuses or "prepared" in statuses:
                     stop_reason = "awaiting_observed_execution"
-                elif "skipped" in statuses:
-                    stop_reason = "scientific_decision_excluded"
+                elif any(
+                    item.action in INPUT_DECISION_ACTIONS
+                    for item in active_decisions
+                ) and "blocked" in statuses:
+                    stop_reason = "awaiting_additional_data"
+                elif any(
+                    item.action in REVISION_DECISION_ACTIONS
+                    for item in active_decisions
+                ) and "blocked" in statuses:
+                    stop_reason = "awaiting_plan_revision"
+                elif any(
+                    item.action in STOP_DECISION_ACTIONS
+                    for item in active_decisions
+                ) and "skipped" in statuses:
+                    stop_reason = "scientific_branch_stopped"
+                elif any(
+                    item.action in EXCLUDE_DECISION_ACTIONS
+                    for item in active_decisions
+                ) and "skipped" in statuses:
+                    stop_reason = "scientific_evidence_excluded"
+                elif "superseded" in statuses:
+                    stop_reason = "awaiting_revision_node"
                 elif "failed" in statuses:
                     stop_reason = "failed"
                 else:
@@ -521,8 +619,10 @@ class ResearchController:
                 break
 
         active = self._active_plan(state)
-        if stop_reason in {"blocked", "failed"} and active.revision < self._policy.max_plan_revisions:
-            replanner = self._replanner or self._declared_alternative_replan
+        if stop_reason in {"blocked", "failed", "awaiting_plan_revision"} and active.revision < self._policy.max_plan_revisions:
+            replanner = self._replanner if stop_reason == "awaiting_plan_revision" else (self._replanner or self._declared_alternative_replan)
+            if replanner is None:
+                return CycleResult(state, active, tuple(executions), (), stop_reason)
             revised = replanner(state, active, tuple(executions), tuple(findings))
             if revised is not None:
                 if revised.parent_plan_id != active.id or revised.revision != active.revision + 1:
@@ -550,7 +650,11 @@ class ResearchController:
             "awaiting_artifact_review",
             "awaiting_observed_execution",
             "awaiting_evidence_map",
-            "scientific_decision_excluded",
+            "awaiting_additional_data",
+            "awaiting_plan_revision",
+            "awaiting_revision_node",
+            "scientific_branch_stopped",
+            "scientific_evidence_excluded",
         }:
             return CycleResult(state, self._active_plan(state), tuple(executions), (), stop_reason)
 

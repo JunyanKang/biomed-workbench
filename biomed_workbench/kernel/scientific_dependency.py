@@ -26,6 +26,14 @@ DECISION_ACTIONS = frozenset(
         "stop-branch",
     }
 )
+RETAIN_DECISION_ACTIONS = frozenset({"retain-as-evidence", "retain-with-caveat"})
+EXCLUDE_DECISION_ACTIONS = frozenset({"exclude-invalid", "exclude-noninformative"})
+REEXECUTE_DECISION_ACTIONS = frozenset(
+    {"rerun-same-method", "rerun-adjusted-parameters", "switch-method"}
+)
+INPUT_DECISION_ACTIONS = frozenset({"acquire-more-data"})
+REVISION_DECISION_ACTIONS = frozenset({"revise-hypothesis", "revise-project-scope"})
+STOP_DECISION_ACTIONS = frozenset({"stop-branch"})
 REVIEW_STATUSES = frozenset({"passed", "warning", "major", "fatal", "unassessed"})
 ARTIFACT_KINDS = frozenset({"data", "table", "figure", "model", "report", "other"})
 EDGE_RELATIONS = (
@@ -42,6 +50,10 @@ EDGE_RELATIONS = (
     "inconclusive",
     "retains",
     "excludes",
+    "supersedes",
+    "blocks",
+    "revises",
+    "stops",
     "triggers",
 )
 EVIDENCE_MAP_KINDS = frozenset({"project-snapshot", "delivery-authorization", "validated-delivery"})
@@ -192,6 +204,10 @@ class ScientificGateAdjudication:
     evaluator_type: str
     gate_result_digest: str
     evidence_payload_sha256: str | None
+    adjudication_mode: str
+    observed_value: str
+    criterion: str
+    finding: str
     status: str
     reviewer_identity: str
     rationale_zh: str
@@ -199,6 +215,9 @@ class ScientificGateAdjudication:
     limitations_zh: tuple[str, ...]
     limitations_en: tuple[str, ...]
     source_urls: tuple[str, ...]
+    evaluator_identity: str | None = None
+    evaluator_version: str | None = None
+    evaluator_sha256: str | None = None
 
     def __post_init__(self) -> None:
         for field in ("id", "artifact_id", "observed_execution_receipt_id", "gate_id", "port"):
@@ -216,6 +235,10 @@ class ScientificGateAdjudication:
                 "evidence_payload_sha256",
                 _sha256(self.evidence_payload_sha256, "gate_adjudication.evidence_payload_sha256"),
             )
+        if self.adjudication_mode not in {"manual", "automatic"}:
+            raise ValueError("gate_adjudication.adjudication_mode is unsupported")
+        for field in ("observed_value", "criterion", "finding"):
+            object.__setattr__(self, field, _text(getattr(self, field), f"gate_adjudication.{field}", 1))
         if self.status not in GATE_ADJUDICATION_STATUSES:
             raise ValueError("gate_adjudication.status is unsupported")
         object.__setattr__(self, "reviewer_identity", _text(self.reviewer_identity, "gate_adjudication.reviewer_identity", 4))
@@ -227,6 +250,14 @@ class ScientificGateAdjudication:
                 raise ValueError(f"gate_adjudication.{field} must state limitations")
             object.__setattr__(self, field, values)
         object.__setattr__(self, "source_urls", _urls(tuple(self.source_urls), "gate_adjudication.source_urls"))
+        if self.adjudication_mode == "automatic":
+            if not self.evaluator_identity or not self.evaluator_version or not self.evaluator_sha256:
+                raise ValueError("automatic gate adjudication requires evaluator identity, version, and digest")
+            object.__setattr__(self, "evaluator_identity", _text(self.evaluator_identity, "gate_adjudication.evaluator_identity", 4))
+            object.__setattr__(self, "evaluator_version", _text(self.evaluator_version, "gate_adjudication.evaluator_version", 1))
+            object.__setattr__(self, "evaluator_sha256", _sha256(self.evaluator_sha256, "gate_adjudication.evaluator_sha256"))
+        elif any(value is not None for value in (self.evaluator_identity, self.evaluator_version, self.evaluator_sha256)):
+            raise ValueError("manual gate adjudication cannot claim an automatic evaluator identity")
 
     def to_dict(self) -> dict[str, object]:
         payload = {field: getattr(self, field) for field in self.__dataclass_fields__}
@@ -348,6 +379,7 @@ class ScientificDecision:
     active_evidence: bool
     next_plan_node_ids: tuple[str, ...]
     gate_adjudication_digest: str | None = None
+    next_hypothesis_ids: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "scientific_decision.id"))
@@ -359,9 +391,18 @@ class ScientificDecision:
         object.__setattr__(self, "rationale_zh", _text(self.rationale_zh, "scientific_decision.rationale_zh"))
         object.__setattr__(self, "rationale_en", _text(self.rationale_en, "scientific_decision.rationale_en"))
         object.__setattr__(self, "next_plan_node_ids", _ids(tuple(self.next_plan_node_ids), "scientific_decision.next_plan_node_ids", allow_empty=True))
-        retain = self.action in {"retain-as-evidence", "retain-with-caveat"}
+        object.__setattr__(self, "next_hypothesis_ids", _ids(tuple(self.next_hypothesis_ids), "scientific_decision.next_hypothesis_ids", allow_empty=True))
+        retain = self.action in RETAIN_DECISION_ACTIONS
         if self.active_evidence != retain:
             raise ValueError("active_evidence must be true exactly for retained decisions")
+        if self.action in REEXECUTE_DECISION_ACTIONS and not self.next_plan_node_ids:
+            raise ValueError("rerun and method-switch decisions require a distinct next plan node")
+        if self.action in EXCLUDE_DECISION_ACTIONS | STOP_DECISION_ACTIONS and self.next_plan_node_ids:
+            raise ValueError("exclude and stop decisions cannot trigger another plan node")
+        if self.action == "revise-hypothesis" and not self.next_hypothesis_ids:
+            raise ValueError("revise-hypothesis decisions require a distinct revised hypothesis identity")
+        if self.action != "revise-hypothesis" and self.next_hypothesis_ids:
+            raise ValueError("only revise-hypothesis decisions may name revised hypothesis identities")
         if self.gate_adjudication_digest is not None:
             object.__setattr__(
                 self,
@@ -383,6 +424,8 @@ class ScientificDecision:
         }
         if self.gate_adjudication_digest is not None:
             payload["gate_adjudication_digest"] = self.gate_adjudication_digest
+        if self.next_hypothesis_ids:
+            payload["next_hypothesis_ids"] = list(self.next_hypothesis_ids)
         return payload
 
     @classmethod
@@ -391,6 +434,7 @@ class ScientificDecision:
         values["hypothesis_ids"] = tuple(values["hypothesis_ids"])
         values["next_plan_node_ids"] = tuple(values["next_plan_node_ids"])
         values.setdefault("gate_adjudication_digest", None)
+        values["next_hypothesis_ids"] = tuple(values.get("next_hypothesis_ids", ()))
         return cls(**values)
 
 
@@ -481,7 +525,11 @@ class ScientificDependencyBundle:
             review = reviews.get(decision.review_id)
             if review is None or review.artifact_id != decision.artifact_id:
                 raise ValueError("scientific decision references the wrong review")
-            if not set(decision.hypothesis_ids) <= hypotheses or not set(decision.next_plan_node_ids) <= set(plan_nodes):
+            if (
+                not set(decision.hypothesis_ids) <= hypotheses
+                or not set(decision.next_hypothesis_ids) <= hypotheses
+                or not set(decision.next_plan_node_ids) <= set(plan_nodes)
+            ):
                 raise ValueError("scientific decision references unknown hypothesis or next analysis")
             if decision.active_evidence and review.overall_status in {"major", "fatal", "unassessed"}:
                 raise ValueError("blocking or unassessed artifacts cannot become active evidence")
@@ -575,9 +623,19 @@ def build_scientific_dependency_graph(
     for decision in bundle.decisions:
         node(decision.id, "scientific-decision", decision.action)
         edge(decision.id, decision.review_id, "adjudicates")
-        edge(decision.id, decision.artifact_id, "retains" if decision.active_evidence else "excludes")
+        relation = (
+            "retains" if decision.action in RETAIN_DECISION_ACTIONS
+            else "excludes" if decision.action in EXCLUDE_DECISION_ACTIONS
+            else "supersedes" if decision.action in REEXECUTE_DECISION_ACTIONS
+            else "blocks" if decision.action in INPUT_DECISION_ACTIONS
+            else "revises" if decision.action in REVISION_DECISION_ACTIONS
+            else "stops"
+        )
+        edge(decision.id, decision.artifact_id, relation)
         for next_node in decision.next_plan_node_ids:
             edge(decision.id, next_node, "triggers")
+        for next_hypothesis in decision.next_hypothesis_ids:
+            edge(decision.id, next_hypothesis, "revises")
         if decision.active_evidence:
             active.append(decision.artifact_id)
     ordered_nodes = tuple(sorted(nodes.values(), key=lambda item: item.id))

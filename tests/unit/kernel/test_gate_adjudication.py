@@ -24,6 +24,9 @@ class GateAdjudicationPolicyTests(unittest.TestCase):
                         "port": "result-port",
                         "evaluator_type": "tool-native",
                         "evidence_payload_sha256": evidence_digest,
+                        "observed_metric": "null",
+                        "threshold": "{\"operator\":\"equals\",\"value\":true}",
+                        "reason": "The required tool-native measurement is absent from the observed result.",
                     },),
                 }
             },
@@ -38,6 +41,10 @@ class GateAdjudicationPolicyTests(unittest.TestCase):
             evaluator_type="tool-native",
             gate_result_digest=result_digest,
             evidence_payload_sha256=evidence_digest,
+            adjudication_mode="manual",
+            observed_value="null",
+            criterion="{\"operator\":\"equals\",\"value\":true}",
+            finding="The required tool-native measurement is absent from the observed result.",
             status=adjudication_status,
             reviewer_identity="independent-scientific-reviewer",
             rationale_zh="当前证据不足以直接计算该门禁，因此独立记录审议结论和保留范围。",
@@ -62,7 +69,10 @@ class GateAdjudicationPolicyTests(unittest.TestCase):
         )
         digest = gate_adjudication_bundle_digest(state, "artifact-result")
         state.scientific_decisions = (SimpleNamespace(
-            artifact_id="artifact-result", gate_adjudication_digest=digest, action=decision_action,
+            artifact_id="artifact-result",
+            gate_adjudication_digest=digest,
+            action=decision_action,
+            active_evidence=decision_action in {"retain-as-evidence", "retain-with-caveat"},
         ),)
         return state
 
@@ -80,6 +90,36 @@ class GateAdjudicationPolicyTests(unittest.TestCase):
             validate_gate_adjudication_chain(state, "artifact-result"),
             ("adjudication-gate-not-evaluable",),
         )
+
+    def test_automatic_adjudication_requires_versioned_evaluator_identity(self):
+        payload = self._state(
+            adjudication_status="accepted-with-caveat",
+            decision_action="retain-with-caveat",
+        ).gate_adjudications[0].to_dict()
+        payload["adjudication_mode"] = "automatic"
+        with self.assertRaisesRegex(ValueError, "requires evaluator identity"):
+            ScientificGateAdjudication.from_dict(payload)
+        payload.update({
+            "evaluator_identity": "registered-tool-native-evaluator",
+            "evaluator_version": "1.0.0",
+            "evaluator_sha256": "c" * 64,
+        })
+        restored = ScientificGateAdjudication.from_dict(payload)
+        self.assertEqual(restored.adjudication_mode, "automatic")
+        self.assertEqual(restored.evaluator_identity, "registered-tool-native-evaluator")
+
+    def test_manual_adjudication_cannot_claim_automatic_evaluator_identity(self):
+        payload = self._state(
+            adjudication_status="accepted-with-caveat",
+            decision_action="retain-with-caveat",
+        ).gate_adjudications[0].to_dict()
+        payload.update({
+            "evaluator_identity": "unregistered-evaluator",
+            "evaluator_version": "1.0.0",
+            "evaluator_sha256": "d" * 64,
+        })
+        with self.assertRaisesRegex(ValueError, "manual gate adjudication"):
+            ScientificGateAdjudication.from_dict(payload)
 
 
 if __name__ == "__main__":

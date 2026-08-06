@@ -103,6 +103,21 @@ def _matched_terms(profile_terms: list[str], project_tokens: set[str]) -> list[s
     return matches
 
 
+def _public_journal_metrics(profile: dict[str, Any]) -> dict[str, Any] | None:
+    """Return reader-facing metrics without internal record-provenance fields."""
+    metric = profile.get("journal_metrics")
+    if not isinstance(metric, dict):
+        return None
+    return {key: value for key, value in metric.items() if key != "source"}
+
+
+def _public_profile(profile: dict[str, Any]) -> dict[str, Any]:
+    result = dict(profile)
+    if "journal_metrics" in result:
+        result["journal_metrics"] = _public_journal_metrics(profile)
+    return result
+
+
 def _fit_score(profile: dict[str, Any], project: dict[str, Any]) -> tuple[float, list[str], list[str]]:
     project_concepts = _tokens(
         [
@@ -274,7 +289,7 @@ def journal_targeting_and_compliance(
                 "standard_version": profile["standard_version"],
                 "reviewed_on": profile["reviewed_on"],
                 "official_sources": profile["official_sources"],
-                "journal_metrics": profile.get("journal_metrics"),
+                "journal_metrics": _public_journal_metrics(profile),
             }
         )
     ranked.sort(key=lambda row: (-row["fit_score_0_to_10"], row["title"]))
@@ -283,9 +298,9 @@ def journal_targeting_and_compliance(
     if target_journal_id is not None:
         if target_journal_id not in by_id:
             raise ValueError("target_journal_id is not present in the bound catalog")
-        target = by_id[target_journal_id]
+        target = _public_profile(by_id[target_journal_id])
         if manuscript is not None:
-            compliance = _compliance(target, manuscript)
+            compliance = _compliance(by_id[target_journal_id], manuscript)
     return {
         "catalog_version": catalog["catalog_version"],
         "catalog_sha256": digest,
@@ -297,8 +312,6 @@ def journal_targeting_and_compliance(
         "policy": {
             "impact_factor_used": False,
             "acceptance_probability_claimed": False,
-            "metric_source_levels_are_explicit": True,
-            "secondary_metrics_require_primary_recheck_when_available": True,
             "target_standard_version_is_mandatory_for_drafting": True,
             "live_source_recheck_required_before_submission": True,
         },

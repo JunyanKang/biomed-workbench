@@ -14,6 +14,8 @@ from biomed_workbench.kernel.execution_chain import (
     validate_delivery_prerequisites,
     validated_delivery_publication_is_current,
 )
+from biomed_workbench.kernel.identity import digest_value
+from biomed_workbench.kernel.hypotheses import revise_hypothesis
 from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
 from biomed_workbench.kernel.scientific_dependency import (
     AnalysisAdmission,
@@ -571,6 +573,7 @@ class ResearchControllerTests(unittest.TestCase):
 
         def executor(_state, _plan, node, active_registry, **_kwargs):
             manifest = active_registry.get(node.module_id)
+            gate_ids = sorted(gate.id for gate in manifest.quality_gates)
             handoff = ExecutionHandoff.create(
                 plan_node_id=node.id,
                 module_id=manifest.id,
@@ -582,6 +585,9 @@ class ResearchControllerTests(unittest.TestCase):
                 protocol={
                     "result_kind": "execution_handoff",
                     "execution_state": "prepared-not-run",
+                    "observed_output_protocol_version": "2.1.0",
+                    "required_postflight_gate_ids": gate_ids,
+                    "required_postflight_gate_set_digest": digest_value(gate_ids),
                 },
             )
             return NodeExecution(
@@ -612,6 +618,109 @@ class ResearchControllerTests(unittest.TestCase):
         self.assertNotIn(next(iter(first.planned_output_artifact_ids.values())), {item.id for item in result.state.artifacts})
         self.assertEqual(result.state.evidence, ())
         self.assertEqual(result.assessments, ())
+
+    def test_review_decision_families_have_distinct_controller_transitions(self):
+        cases = {
+            "retain-with-caveat": ("completed", "awaiting_artifact_review", True),
+            "exclude-invalid": ("skipped", "scientific_evidence_excluded", False),
+            "stop-branch": ("skipped", "scientific_branch_stopped", False),
+            "rerun-same-method": ("superseded", "awaiting_artifact_review", True),
+            "rerun-adjusted-parameters": ("superseded", "awaiting_artifact_review", True),
+            "switch-method": ("superseded", "awaiting_artifact_review", True),
+            "acquire-more-data": ("blocked", "awaiting_additional_data", False),
+            "revise-hypothesis": ("blocked", "awaiting_plan_revision", False),
+            "revise-project-scope": ("blocked", "awaiting_plan_revision", False),
+        }
+        for action, (expected_status, expected_stop, executes_revision) in cases.items():
+            with self.subTest(action=action):
+                temporary, registry, state, plan = serial_fixture()
+                self.addCleanup(temporary.cleanup)
+                executions = []
+
+                def executor(current_state, _plan, node, active_registry, **_kwargs):
+                    executions.append(node.id)
+                    return completed_execution(current_state, node, active_registry)
+
+                controller = _StrictResearchController(
+                    registry,
+                    environment_provider=lambda _manifest: None,
+                    node_executor=executor,
+                    policy=ControllerPolicy(require_approved_admission=False),
+                )
+                waiting = controller.advance(state, plan)
+                self.assertEqual(waiting.stop_reason, "awaiting_artifact_review")
+                first_node, revision_node = waiting.active_plan.nodes
+                artifact_id = waiting.executions[0].output_artifact_ids[0]
+                retained = action == "retain-with-caveat"
+                artifact_review = ArtifactReview(
+                    id=f"review-{artifact_id}",
+                    artifact_id=artifact_id,
+                    artifact_kind="data",
+                    rationale_zh="该产物依据预先登记的科学标准进行独立评审，并据此选择明确的后续动作。",
+                    rationale_en="The artifact is independently reviewed against preregistered scientific criteria to select an explicit next action.",
+                    methods_zh="重新读取产物，核对技术完整性、统计适用性、生物学边界与稳健性。",
+                    methods_en="The artifact was reloaded and checked for technical integrity, statistical fitness, biological scope, and robustness.",
+                    results_zh="轻量夹具记录了足以验证状态转换的评审结果，不代表真实生物效应。",
+                    results_en="The lightweight fixture records a review result sufficient for state-transition testing, not a biological effect.",
+                    conclusion_zh="该评审结论必须通过指定动作改变后续计划，且旧产物身份保持不可变。",
+                    conclusion_en="The review must change the downstream plan through its declared action while preserving the old artifact identity.",
+                    panels=(),
+                    technical_status="warning" if retained else "major",
+                    statistical_status="warning" if retained else "major",
+                    biological_status="warning" if retained else "major",
+                    robustness_status="warning" if retained else "major",
+                    limitations_zh=("该夹具仅验证控制器动作语义和恢复一致性。",),
+                    limitations_en=("This fixture validates only controller action semantics and resume consistency.",),
+                    recommended_action=action,
+                    source_urls=("https://www.w3.org/TR/prov-o/",),
+                )
+                state = apply_event(
+                    waiting.state,
+                    "artifact_review_recorded",
+                    {"review": artifact_review.to_dict()},
+                    rationale="Record a review before dispatching its action family.",
+                )
+                next_ids = (revision_node.id,) if action in {
+                    "rerun-same-method", "rerun-adjusted-parameters", "switch-method"
+                } else ()
+                next_hypothesis_ids = ()
+                if action == "revise-hypothesis":
+                    original = next(item for item in state.hypotheses if item.id == hypothesis().id)
+                    revised = revise_hypothesis(
+                        original,
+                        new_id=f"{original.id}-review-revision",
+                        statement="A revised, explicitly registered hypothesis follows the reviewed conflicting result.",
+                    )
+                    state = apply_event(
+                        state,
+                        "hypothesis_revised",
+                        {"hypothesis": revised.to_dict()},
+                        rationale="Register a distinct child hypothesis before binding the revision decision.",
+                    )
+                    next_hypothesis_ids = (revised.id,)
+                scientific_decision = ScientificDecision(
+                    id=f"decision-{artifact_id}",
+                    review_id=artifact_review.id,
+                    artifact_id=artifact_id,
+                    hypothesis_ids=(hypothesis().id,),
+                    action=action,
+                    rationale_zh="该动作依据评审结果执行，并保留原始产物、评审和决策的不可变历史。",
+                    rationale_en="The action follows the review while preserving immutable history for the original artifact, review, and decision.",
+                    active_evidence=retained,
+                    next_plan_node_ids=next_ids,
+                    next_hypothesis_ids=next_hypothesis_ids,
+                )
+                state = apply_event(
+                    state,
+                    "scientific_decision_recorded",
+                    {"decision": scientific_decision.to_dict()},
+                    rationale="Dispatch the explicit scientific decision family.",
+                )
+                result = controller.resume(state.to_dict())
+                by_id = {node.id: node for node in result.active_plan.nodes}
+                self.assertEqual(by_id[first_node.id].status, expected_status)
+                self.assertEqual(result.stop_reason, expected_stop)
+                self.assertEqual(revision_node.id in executions, executes_revision)
 
     def test_serial_nodes_materialize_artifacts_in_dependency_order_and_update_state(self):
         temporary, registry, state, plan = serial_fixture()

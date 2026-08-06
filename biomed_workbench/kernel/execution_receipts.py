@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 from .identity import digest_value, freeze_mapping, thaw, validate_identifier
+from .observed_output_protocol import validate_observed_output_protocol
 
 
 _DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -57,6 +58,7 @@ class ExecutionHandoff:
             validate_identifier(str(artifact_id), "execution_handoff.output_artifact_id")
         object.__setattr__(self, "planned_output_artifact_ids", outputs)
         object.__setattr__(self, "protocol", freeze_mapping(self.protocol))
+        validate_observed_output_protocol(self.protocol)
         if self.execution_state != "prepared-not-run":
             raise ValueError("execution handoff state must remain prepared-not-run")
 
