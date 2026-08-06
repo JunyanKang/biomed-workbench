@@ -436,8 +436,23 @@ report.write_text('<html><body>fastp QC-only report</body></html>')
                 cwd=ROOT, env=environment, capture_output=True, text=True, check=False,
             )
             self.assertEqual(resumed_fastp.returncode, 0, resumed_fastp.stderr)
-            self.assertEqual(json.loads(resumed_fastp.stdout)["stop_reason"], "awaiting_artifact_review")
+            resumed_fastp_payload = json.loads(resumed_fastp.stdout)
             final_switch_state = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
+            active_switch_plan = next(
+                item for item in final_switch_state.plans
+                if item.id == final_switch_state.active_plan_id
+            )
+            self.assertEqual(
+                resumed_fastp_payload["stop_reason"],
+                "awaiting_artifact_review",
+                {
+                    "result": resumed_fastp_payload,
+                    "node_statuses": {
+                        item.id: {"module_id": item.module_id, "status": item.status}
+                        for item in active_switch_plan.nodes
+                    },
+                },
+            )
             fastp_execution = next(item for item in final_switch_state.observed_executions if item.plan_node_id == fastp_node.id)
             self.assertEqual(fastp_execution.module_id, "read-quality-fastp")
             self.assertEqual(fastp_execution.parameters_digest, fastp_node.planned_request_digest)
