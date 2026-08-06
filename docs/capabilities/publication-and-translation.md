@@ -12,7 +12,7 @@ This staged plan prevents a polished deliverable from bypassing evidence checks.
 
 ## Versioned Journal Standards
 
-The `journal-targeting-and-compliance` capability reads the released catalog under `biomed_workbench/knowledge/journal_standards/`. The current release, `2026.08.03`, contains 100 biomedical journals and records for every profile:
+The `journal-targeting-and-compliance` capability reads the versioned standards under `biomed_workbench/knowledge/journal_standards/`. Version `2026.08.03` contains 100 biomedical journals and records for every profile:
 
 - audience and scientific remit;
 - preferred article families and project-fit terms;

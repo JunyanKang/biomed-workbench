@@ -13,6 +13,7 @@ from .execution_chain import delivery_slice_digest, validate_delivery_prerequisi
 from .scientific_dependency import (
     AnalysisAdmission,
     ArtifactReview,
+    LegacyAnalysisAdmissionRecovery,
     ScientificDecision,
     ScientificDependencyBundle,
     ScientificGateAdjudication,
@@ -346,7 +347,7 @@ class EvidenceUnitSpec:
 class EvidenceMapUnit:
     spec: EvidenceUnitSpec
     artifact_type: str
-    admissions: tuple[AnalysisAdmission, ...]
+    admissions: tuple[AnalysisAdmission | LegacyAnalysisAdmissionRecovery, ...]
     review: ArtifactReview
     decision: ScientificDecision
     gate_adjudications: tuple[ScientificGateAdjudication, ...]
@@ -544,7 +545,10 @@ def build_scientific_evidence_map(
     artifacts = {item.id: item for item in state.artifacts}
     reviews = {item.artifact_id: item for item in bundle.reviews}
     decisions = {item.artifact_id: item for item in bundle.decisions}
-    admissions = {item.id: item for item in bundle.admissions}
+    admissions = {
+        item.id: item
+        for item in (*bundle.admissions, *bundle.legacy_admission_recoveries)
+    }
     if {item.artifact_id for item in specs} != set(artifacts):
         raise ValueError("scientific evidence map must cover every registered artifact")
     units: list[EvidenceMapUnit] = []

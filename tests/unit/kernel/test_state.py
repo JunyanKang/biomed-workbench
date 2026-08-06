@@ -10,6 +10,7 @@ from biomed_workbench.kernel.state import ProjectState, _legacy_v1_basis, _migra
 from biomed_workbench.kernel.execution_chain import delivery_slice_digest
 from biomed_workbench.kernel.identity import digest_value
 from biomed_workbench.kernel.scientific_evidence_map import EvidenceMapPublication, EvidenceMapVersion
+from biomed_workbench.kernel.scientific_dependency import ScientificDependencyBundle
 from biomed_workbench.orchestration.state_migration import migrate_map_bound_v1_state
 from biomed_workbench.kernel.hypotheses import revise_hypothesis
 from tests.unit.kernel.test_artifacts import artifact
@@ -188,6 +189,17 @@ class ProjectStateTests(unittest.TestCase):
             )
             self.assertEqual(migrated.decisions[-1].event_type, "legacy_evidence_map_verified")
             self.assertEqual(ProjectState.from_dict(migrated.to_dict()), migrated)
+            recovery = migrated.state_migrations[0].legacy_analysis_admission_recoveries[0]
+            self.assertEqual(recovery.recovery_status, "historical-unavailable")
+            self.assertFalse(recovery.approved_before_execution)
+            with self.assertRaisesRegex(ValueError, "project snapshots only"):
+                ScientificDependencyBundle.create(
+                    migrated,
+                    admissions=(),
+                    reviews=(),
+                    decisions=(),
+                    map_kind="delivery-authorization",
+                )
 
             new_publication = EvidenceMapPublication(
                 id="evidence-map-2-republished",

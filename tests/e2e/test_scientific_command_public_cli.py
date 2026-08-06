@@ -39,6 +39,27 @@ with zipfile.ZipFile(outdir / f'{stem}_fastqc.zip', 'w') as archive:
             java = tools / "java"
             java.write_text("#!/bin/sh\nprintf '%s\\n' 'java version \"22\"' >&2\n", encoding="utf-8")
             java.chmod(0o755)
+            fastp = tools / "fastp"
+            fastp.write_text(
+                """#!/usr/bin/env python3
+import json, pathlib, sys
+if '--version' in sys.argv:
+    print('fastp 1.3.6')
+    raise SystemExit(0)
+data = pathlib.Path(sys.argv[sys.argv.index('--json') + 1])
+report = pathlib.Path(sys.argv[sys.argv.index('--html') + 1])
+data.write_text(json.dumps({'summary': {'fastp_version': '1.3.6', 'before_filtering': {'total_reads': 2}, 'after_filtering': {'total_reads': 2}}}))
+report.write_text('<html><body>fastp QC-only report</body></html>')
+""",
+                encoding="utf-8",
+            )
+            fastp.chmod(0o755)
+            conda_meta = root / "conda-meta"
+            conda_meta.mkdir()
+            (conda_meta / "fastp-1.3.6-ha1d0559_0.json").write_text(
+                json.dumps({"name": "fastp", "version": "1.3.6", "build": "ha1d0559_0"}),
+                encoding="utf-8",
+            )
             bindings = {
                 "project_context": {
                     "project_id": "fastqc-public-fixture",
@@ -340,6 +361,86 @@ with zipfile.ZipFile(outdir / f'{stem}_fastqc.zip', 'w') as archive:
             appended_result = json.loads(appended_run.stdout)
             self.assertEqual(appended_result["scientific_status"], "awaiting_review")
             self.assertNotEqual(appended_result["output_artifacts"][0]["id"], artifact_id)
+
+            switch_source_id = appended_result["output_artifacts"][0]["id"]
+            switch_review = {
+                **review,
+                "id": "review-fastqc-before-fastp-switch",
+                "artifact_id": switch_source_id,
+                "recommended_action": "switch-method",
+                "conclusion_zh": "该结果保留在历史中，并以登记为可替换关系的 fastp 独立质量报告进行方法敏感性复核。",
+                "conclusion_en": "Preserve this result in history and use the registered revision-compatible fastp quality report for a method-sensitivity check.",
+            }
+            switch_review_path = root / "switch-review.json"
+            switch_review_path.write_text(json.dumps(switch_review), encoding="utf-8")
+            reviewed_switch = subprocess.run(
+                [sys.executable, "tools/project_workflow.py", "review", "--state", str(state_path), "--input", str(switch_review_path)],
+                cwd=ROOT, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(reviewed_switch.returncode, 0, reviewed_switch.stderr)
+            switch_request = {
+                "source_artifact_id": switch_source_id,
+                "action": "switch-method",
+                "target_module_id": "read-quality-fastp",
+                "target_input_bindings": {},
+                "parameter_overrides": {"threads": 1},
+                "rationale": "Switch the reviewed FastQC node to the explicitly typed FastQC-to-fastp revision relation for an independent QC-only sensitivity check.",
+            }
+            switch_request_path = root / "switch-request.json"
+            switch_request_path.write_text(json.dumps(switch_request), encoding="utf-8")
+            prepared_switch = subprocess.run(
+                [sys.executable, "tools/project_workflow.py", "prepare-revision", "--state", str(state_path), "--input", str(switch_request_path)],
+                cwd=ROOT, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(prepared_switch.returncode, 0, prepared_switch.stderr)
+            switch_state = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
+            switch_plan = next(item for item in switch_state.plans if item.id == switch_state.active_plan_id)
+            fastp_node = next(item for item in switch_plan.nodes if item.revision_of_node_id is not None)
+            self.assertEqual(fastp_node.module_id, "read-quality-fastp")
+            switch_decision = {
+                "id": "decision-fastqc-to-fastp-switch",
+                "review_id": switch_review["id"],
+                "artifact_id": switch_source_id,
+                "hypothesis_ids": ["hypothesis-fastqc-technical-quality"],
+                "action": "switch-method",
+                "rationale_zh": "按照登记的端口和参数映射改用 fastp 质量报告进行独立敏感性检查。",
+                "rationale_en": "Use the registered port and parameter mapping to switch to fastp for an independent quality-sensitivity check.",
+                "active_evidence": False,
+                "next_plan_node_ids": [fastp_node.id],
+                "revision_contract_id": fastp_node.revision_contract.id,
+            }
+            switch_decision_path = root / "switch-decision.json"
+            switch_decision_path.write_text(json.dumps(switch_decision), encoding="utf-8")
+            decided_switch = subprocess.run(
+                [sys.executable, "tools/project_workflow.py", "decide", "--state", str(state_path), "--input", str(switch_decision_path)],
+                cwd=ROOT, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(decided_switch.returncode, 0, decided_switch.stderr)
+            fastp_admission = switch_state.analysis_admissions[-1].to_dict()
+            fastp_admission.update({
+                "id": "admission-fastp-public-switch",
+                "plan_node_id": fastp_node.id,
+                "method": "fastp 1.3.6 in non-filtering QC-only mode under the registered FastQC-to-fastp revision relation.",
+                "official_sources": ["https://github.com/OpenGene/fastp/releases/tag/v1.3.6"],
+                "parameter_justifications": {"threads": "One thread is sufficient for the bounded fastp method-switch fixture."},
+            })
+            fastp_admission_path = root / "fastp-admission.json"
+            fastp_admission_path.write_text(json.dumps(fastp_admission), encoding="utf-8")
+            admitted_fastp = subprocess.run(
+                [sys.executable, "tools/project_workflow.py", "admit", "--state", str(state_path), "--input", str(fastp_admission_path)],
+                cwd=ROOT, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(admitted_fastp.returncode, 0, admitted_fastp.stderr)
+            resumed_fastp = subprocess.run(
+                [sys.executable, "tools/project_workflow.py", "resume", "--state", str(state_path), "--project-root", str(root)],
+                cwd=ROOT, env=environment, capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(resumed_fastp.returncode, 0, resumed_fastp.stderr)
+            self.assertEqual(json.loads(resumed_fastp.stdout)["stop_reason"], "awaiting_artifact_review")
+            final_switch_state = ProjectState.from_dict(json.loads(state_path.read_text(encoding="utf-8")))
+            fastp_execution = next(item for item in final_switch_state.observed_executions if item.plan_node_id == fastp_node.id)
+            self.assertEqual(fastp_execution.module_id, "read-quality-fastp")
+            self.assertEqual(fastp_execution.parameters_digest, fastp_node.planned_request_digest)
 
     def test_command_without_project_bindings_returns_specific_error(self):
         completed = subprocess.run(

@@ -3,6 +3,22 @@
   "alternatives": [
     "read-quality-fastp"
   ],
+  "revision_alternatives": [
+    {
+      "target_module_id": "read-quality-fastp",
+      "input_binding_map": {
+        "reads": "reads"
+      },
+      "output_binding_map": {
+        "read_quality_report": "read_quality_report"
+      },
+      "required_additional_artifact_types": [],
+      "parameter_mapping": {
+        "threads": "threads"
+      },
+      "scientific_contract_equivalence": "equivalent"
+    }
+  ],
   "assumptions": [
     "FASTQ records are complete and the declared quality encoding and read layout match the payload."
   ],

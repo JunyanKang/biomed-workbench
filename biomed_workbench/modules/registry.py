@@ -45,6 +45,59 @@ class ModuleRegistry:
                     raise ModuleRegistryError(f"module {manifest.id} references unknown alternative: {alternative}")
                 if alternative == manifest.id:
                     raise ModuleRegistryError(f"module {manifest.id} cannot be its own alternative")
+            source_inputs = {port.name: port for port in manifest.input_artifacts}
+            source_outputs = {port.name: port for port in manifest.output_artifacts}
+            source_parameters = set(manifest.input_schema.get("properties", {}))
+            for relation in manifest.revision_alternatives:
+                if relation.target_module_id not in installed:
+                    raise ModuleRegistryError(
+                        f"module {manifest.id} references unknown revision alternative: {relation.target_module_id}"
+                    )
+                if relation.target_module_id not in manifest.alternatives:
+                    raise ModuleRegistryError(
+                        f"module {manifest.id} revision alternative must also be a routing alternative: {relation.target_module_id}"
+                    )
+                target = modules[relation.target_module_id]
+                target_inputs = {port.name: port for port in target.input_artifacts}
+                target_outputs = {port.name: port for port in target.output_artifacts}
+                target_parameters = set(target.input_schema.get("properties", {}))
+                if set(relation.input_binding_map) - set(target_inputs) or set(relation.input_binding_map.values()) - set(source_inputs):
+                    raise ModuleRegistryError(
+                        f"module {manifest.id} revision alternative has an unknown input port: {relation.target_module_id}"
+                    )
+                if any(
+                    target_inputs[target_port].artifact_type != source_inputs[source_port].artifact_type
+                    for target_port, source_port in relation.input_binding_map.items()
+                ):
+                    raise ModuleRegistryError(
+                        f"module {manifest.id} revision alternative input types differ: {relation.target_module_id}"
+                    )
+                unmapped_target_ports = set(target_inputs) - set(relation.input_binding_map)
+                required_additional_types = tuple(
+                    target_inputs[name].artifact_type for name in sorted(unmapped_target_ports)
+                )
+                if tuple(sorted(relation.required_additional_artifact_types)) != tuple(sorted(required_additional_types)):
+                    raise ModuleRegistryError(
+                        f"module {manifest.id} revision alternative additional inputs differ from target ports: {relation.target_module_id}"
+                    )
+                if (
+                    set(relation.output_binding_map) != set(source_outputs)
+                    or set(relation.output_binding_map.values()) != set(target_outputs)
+                    or any(
+                        source_outputs[source_port].artifact_type != target_outputs[target_port].artifact_type
+                        for source_port, target_port in relation.output_binding_map.items()
+                    )
+                ):
+                    raise ModuleRegistryError(
+                        f"module {manifest.id} revision alternative output mapping is not contract-equivalent: {relation.target_module_id}"
+                    )
+                if (
+                    set(relation.parameter_mapping) != set(target_parameters)
+                    or set(relation.parameter_mapping.values()) - source_parameters
+                ):
+                    raise ModuleRegistryError(
+                        f"module {manifest.id} revision alternative parameter mapping is incomplete: {relation.target_module_id}"
+                    )
             for complement in manifest.complements:
                 if complement not in installed:
                     raise ModuleRegistryError(f"module {manifest.id} references unknown complement: {complement}")

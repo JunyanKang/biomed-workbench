@@ -15,6 +15,51 @@ from ..kernel.state import (
 from ..reporting.evidence_map_versions import verify_evidence_map_publication_store
 
 
+def assess_republication_prerequisites(state: ProjectState) -> dict[str, object]:
+    """Report exact recovery work before a migrated state can publish a new snapshot."""
+    plan_node_ids = {node.id for plan in state.plans for node in plan.nodes}
+    admitted_node_ids = {item.plan_node_id for item in state.analysis_admissions}
+    recovered_node_ids = {
+        recovery.plan_node_id
+        for migration in state.state_migrations
+        for recovery in migration.legacy_analysis_admission_recoveries
+    }
+    artifact_ids = {item.id for item in state.artifacts}
+    reviewed_artifact_ids = {item.artifact_id for item in state.artifact_reviews}
+    decided_artifact_ids = {item.artifact_id for item in state.scientific_decisions}
+    legacy_maps = tuple(
+        record
+        for migration in state.state_migrations
+        for record in migration.legacy_evidence_maps
+    )
+    missing_admissions = tuple(sorted(plan_node_ids - admitted_node_ids - recovered_node_ids))
+    missing_reviews = tuple(sorted(artifact_ids - reviewed_artifact_ids))
+    missing_decisions = tuple(sorted(artifact_ids - decided_artifact_ids))
+    unresolved_gates = tuple(sorted(
+        item.id for item in state.gate_adjudications if item.status == "unresolved"
+    ))
+    blockers = bool(missing_admissions or missing_reviews or missing_decisions)
+    return {
+        "migration_status": (
+            "awaiting-scientific-dependency-recovery"
+            if blockers
+            else "ready-for-evidence-map-republication"
+        ),
+        "missing_analysis_admission_node_ids": list(missing_admissions),
+        "legacy_admission_recovery_node_ids": sorted(recovered_node_ids),
+        "missing_artifact_review_ids": list(missing_reviews),
+        "missing_scientific_decision_artifact_ids": list(missing_decisions),
+        "unresolved_gate_ids": list(unresolved_gates),
+        "required_next_map_revision": len(legacy_maps) + len(state.evidence_map_versions) + 1,
+        "required_parent_map_digest": (
+            state.evidence_map_versions[-1].map_digest
+            if state.evidence_map_versions
+            else (legacy_maps[-1].publication.map_digest if legacy_maps else None)
+        ),
+        "delivery_authorization_available": not bool(recovered_node_ids),
+    }
+
+
 def migrate_map_bound_v1_state(
     payload: Mapping[str, Any],
     *,

@@ -70,6 +70,38 @@ class ModuleRegistryTests(unittest.TestCase):
             with self.assertRaisesRegex(ModuleRegistryError, "unknown alternative"):
                 ModuleRegistry.discover(root)
 
+    def test_registry_separates_routing_alternatives_from_typed_revision_substitutes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = valid_manifest_payload()
+            target = copy.deepcopy(source)
+            target.update({
+                "id": "second-analysis",
+                "title": "Analyze a second fixture",
+                "intents": ["analyze second fixture"],
+                "questions": ["Does the second fixture reproduce the signal?"],
+            })
+            source["alternatives"] = [target["id"]]
+            source["revision_alternatives"] = [{
+                "target_module_id": target["id"],
+                "input_binding_map": {"records": "records"},
+                "output_binding_map": {"profile": "profile"},
+                "required_additional_artifact_types": [],
+                "parameter_mapping": {"rows": "rows"},
+                "scientific_contract_equivalence": "equivalent",
+            }]
+            write_manifest(root, source)
+            write_manifest(root, target)
+
+            registry = ModuleRegistry.discover(root)
+            self.assertEqual(registry.get(source["id"]).revision_alternatives[0].target_module_id, target["id"])
+
+            invalid = copy.deepcopy(source)
+            invalid["revision_alternatives"][0]["output_binding_map"] = {"missing": "profile"}
+            write_manifest(root, invalid)
+            with self.assertRaisesRegex(ModuleRegistryError, "output mapping"):
+                ModuleRegistry.discover(root)
+
     def test_registry_rejects_directory_and_manifest_id_mismatch(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

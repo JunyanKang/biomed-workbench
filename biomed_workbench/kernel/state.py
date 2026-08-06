@@ -37,6 +37,7 @@ from .plans import NODE_STATUSES, PlanNode, ResearchDAG
 from .scientific_dependency import (
     AnalysisAdmission,
     ArtifactReview,
+    LegacyAnalysisAdmissionRecovery,
     REEXECUTE_DECISION_ACTIONS,
     ScientificDecision,
     ScientificGateAdjudication,
@@ -70,7 +71,8 @@ EVENT_TYPES = frozenset(
 )
 
 PROJECT_STATE_SCHEMA_VERSION = 2
-STATE_MIGRATION_CONTRACT_VERSION = "1.0.0"
+STATE_MIGRATION_CONTRACT_VERSION = "1.1.0"
+SUPPORTED_STATE_MIGRATION_CONTRACT_VERSIONS = frozenset({"1.0.0", "1.1.0"})
 
 
 @dataclass(frozen=True)
@@ -132,6 +134,7 @@ class StateMigrationRecord:
     contract_version: str
     digest: str
     legacy_evidence_maps: tuple[LegacyEvidenceMapRecord, ...] = ()
+    legacy_analysis_admission_recoveries: tuple[LegacyAnalysisAdmissionRecovery, ...] = ()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "state_migration.id"))
@@ -147,7 +150,7 @@ class StateMigrationRecord:
             raise ValueError("state migration source digest must be SHA-256")
         if self.migrated_event_count != self.source_revision:
             raise ValueError("state migration event count must equal the source revision")
-        if self.contract_version != STATE_MIGRATION_CONTRACT_VERSION:
+        if self.contract_version not in SUPPORTED_STATE_MIGRATION_CONTRACT_VERSIONS:
             raise ValueError("state migration contract version is unsupported")
         legacy_maps = tuple(self.legacy_evidence_maps)
         if any(not isinstance(item, LegacyEvidenceMapRecord) for item in legacy_maps):
@@ -155,6 +158,14 @@ class StateMigrationRecord:
         if tuple(item.publication.version.revision for item in legacy_maps) != tuple(range(1, len(legacy_maps) + 1)):
             raise ValueError("state migration legacy evidence map revisions are not continuous")
         object.__setattr__(self, "legacy_evidence_maps", legacy_maps)
+        recoveries = tuple(self.legacy_analysis_admission_recoveries)
+        if any(not isinstance(item, LegacyAnalysisAdmissionRecovery) for item in recoveries):
+            raise ValueError("state migration legacy admission recoveries are invalid")
+        if len({item.plan_node_id for item in recoveries}) != len(recoveries):
+            raise ValueError("state migration legacy admission recoveries duplicate plan nodes")
+        if recoveries and (self.contract_version != "1.1.0" or not legacy_maps):
+            raise ValueError("legacy admission recovery requires a map-bound migration contract")
+        object.__setattr__(self, "legacy_analysis_admission_recoveries", recoveries)
         basis = {
             "id": self.id,
             "from_schema_version": self.from_schema_version,
@@ -166,6 +177,8 @@ class StateMigrationRecord:
         }
         if legacy_maps:
             basis["legacy_evidence_maps"] = [item.to_dict() for item in legacy_maps]
+        if recoveries:
+            basis["legacy_analysis_admission_recoveries"] = [item.to_dict() for item in recoveries]
         if self.digest != digest_value(basis):
             raise ValueError("state migration digest does not match its source identity")
 
@@ -176,8 +189,10 @@ class StateMigrationRecord:
         source_state_digest: str,
         source_revision: int,
         legacy_evidence_maps: tuple[LegacyEvidenceMapRecord, ...] = (),
+        legacy_analysis_admission_recoveries: tuple[LegacyAnalysisAdmissionRecovery, ...] = (),
     ) -> "StateMigrationRecord":
         identity = f"migration-v1-v2-{source_state_digest[:16]}"
+        contract_version = "1.1.0" if legacy_analysis_admission_recoveries else "1.0.0"
         basis = {
             "id": identity,
             "from_schema_version": 1,
@@ -185,23 +200,32 @@ class StateMigrationRecord:
             "source_state_digest": source_state_digest,
             "source_revision": source_revision,
             "migrated_event_count": source_revision,
-            "contract_version": STATE_MIGRATION_CONTRACT_VERSION,
+            "contract_version": contract_version,
         }
         if legacy_evidence_maps:
             basis["legacy_evidence_maps"] = [item.to_dict() for item in legacy_evidence_maps]
+        if legacy_analysis_admission_recoveries:
+            basis["legacy_analysis_admission_recoveries"] = [
+                item.to_dict() for item in legacy_analysis_admission_recoveries
+            ]
         return cls(
             identity, 1, 2, source_state_digest, source_revision, source_revision,
-            STATE_MIGRATION_CONTRACT_VERSION, digest_value(basis), tuple(legacy_evidence_maps),
+            contract_version, digest_value(basis), tuple(legacy_evidence_maps),
+            tuple(legacy_analysis_admission_recoveries),
         )
 
     def to_dict(self) -> dict[str, object]:
         payload = {
             field: getattr(self, field)
             for field in self.__dataclass_fields__
-            if field != "legacy_evidence_maps"
+            if field not in {"legacy_evidence_maps", "legacy_analysis_admission_recoveries"}
         }
         if self.legacy_evidence_maps:
             payload["legacy_evidence_maps"] = [item.to_dict() for item in self.legacy_evidence_maps]
+        if self.legacy_analysis_admission_recoveries:
+            payload["legacy_analysis_admission_recoveries"] = [
+                item.to_dict() for item in self.legacy_analysis_admission_recoveries
+            ]
         return payload
 
     @classmethod
@@ -210,6 +234,10 @@ class StateMigrationRecord:
         values["legacy_evidence_maps"] = tuple(
             LegacyEvidenceMapRecord.from_dict(item)
             for item in values.get("legacy_evidence_maps", ())
+        )
+        values["legacy_analysis_admission_recoveries"] = tuple(
+            LegacyAnalysisAdmissionRecovery.from_dict(item)
+            for item in values.get("legacy_analysis_admission_recoveries", ())
         )
         return cls(**values)
 
@@ -720,10 +748,31 @@ def _migrate_v1_project_state(
         str(item["id"]): _migrate_v1_adjudication(item, observed_by_id)
         for item in payload.get("gate_adjudications", [])
     }
+    legacy_admitted_node_ids = {
+        str(item["plan_node_id"]) for item in payload.get("analysis_admissions", [])
+    }
+    admission_recoveries: tuple[LegacyAnalysisAdmissionRecovery, ...] = ()
+    if verified_legacy_maps:
+        recovered: list[LegacyAnalysisAdmissionRecovery] = []
+        for plan_payload in payload.get("plans", []):
+            plan = ResearchDAG.from_dict(plan_payload)
+            for node in plan.nodes:
+                if node.id not in legacy_admitted_node_ids:
+                    recovered.append(
+                        LegacyAnalysisAdmissionRecovery.create(
+                            plan_node_id=node.id,
+                            hypothesis_ids=node.target_hypothesis_ids,
+                            expected_artifact_types=node.expected_output_artifact_types,
+                            source_state_digest=str(payload["state_digest"]),
+                            source_map_digest=verified_legacy_maps[-1].publication.map_digest,
+                        )
+                    )
+        admission_recoveries = tuple(sorted(recovered, key=lambda item: item.plan_node_id))
     migration = StateMigrationRecord.create(
         source_state_digest=str(payload["state_digest"]),
         source_revision=int(payload["revision"]),
         legacy_evidence_maps=verified_legacy_maps,
+        legacy_analysis_admission_recoveries=admission_recoveries,
     )
     state = ProjectState.create(
         ProjectContext.from_dict(payload["context"]),

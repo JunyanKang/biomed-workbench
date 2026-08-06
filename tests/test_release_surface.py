@@ -61,6 +61,24 @@ class ReleaseSurfaceTests(unittest.TestCase):
         self.assertNotIn("python3 ", readme)
         self.assertIn("python3 -m unittest discover -s tests -v", development)
 
+    def test_public_documents_do_not_expose_journal_catalog_maintenance_metadata(self):
+        public_paths = [ROOT / "README.md", ROOT / "README.en.md"]
+        public_paths.extend(sorted((ROOT / "docs").rglob("*.md")))
+        public_paths.append(ROOT / "skills" / "biomed-workbench" / "SKILL.md")
+        forbidden = (
+            "catalog_lifecycle",
+            "draft/released",
+            "draft and released",
+            "数据采用明确的来源层级",
+            "actual metric source",
+            "每一行都显示实际采用的指标来源",
+        )
+
+        for path in public_paths:
+            text = path.read_text(encoding="utf-8").lower()
+            for phrase in forbidden:
+                self.assertNotIn(phrase.lower(), text, f"{phrase!r} leaked into {path.relative_to(ROOT)}")
+
 
 if __name__ == "__main__":
     unittest.main()

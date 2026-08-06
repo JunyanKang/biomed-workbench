@@ -58597,6 +58597,22 @@
       "questions": [
         "Do independent fastp quality, GC, length, duplication, and read-accounting metrics support downstream use of the declared FASTQ?"
       ],
+      "revision_alternatives": [
+        {
+          "input_binding_map": {
+            "reads": "reads"
+          },
+          "output_binding_map": {
+            "read_quality_report": "read_quality_report"
+          },
+          "parameter_mapping": {
+            "threads": "threads"
+          },
+          "required_additional_artifact_types": [],
+          "scientific_contract_equivalence": "equivalent",
+          "target_module_id": "read-quality-fastqc"
+        }
+      ],
       "routing": {
         "exclusion_terms": [],
         "method_aliases": [
@@ -58957,6 +58973,22 @@
       ],
       "questions": [
         "Are read qualities, sequence composition, duplication, adapters, and overrepresented sequences suitable for downstream analysis?"
+      ],
+      "revision_alternatives": [
+        {
+          "input_binding_map": {
+            "reads": "reads"
+          },
+          "output_binding_map": {
+            "read_quality_report": "read_quality_report"
+          },
+          "parameter_mapping": {
+            "threads": "threads"
+          },
+          "required_additional_artifact_types": [],
+          "scientific_contract_equivalence": "equivalent",
+          "target_module_id": "read-quality-fastp"
+        }
       ],
       "routing": {
         "exclusion_terms": [],
@@ -109255,6 +109287,6 @@
     }
   ],
   "plugin_version": "0.2.0-dev",
-  "registry_digest": "ae474869d72950eb4f6fae4ec7165b135b4308f606f547b6fee72fb78a851daf",
+  "registry_digest": "74a92f40d0111adeea951c3d1c34ebe0c53f897b56ae46e27dcb8f5b69f733b4",
   "schema_version": 1
 }

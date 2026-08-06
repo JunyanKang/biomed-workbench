@@ -55,6 +55,7 @@ EDGE_RELATIONS = (
     "revises",
     "stops",
     "triggers",
+    "documents",
 )
 EVIDENCE_MAP_KINDS = frozenset({"project-snapshot", "delivery-authorization", "validated-delivery"})
 GATE_ADJUDICATION_STATUSES = frozenset({"accepted", "accepted-with-caveat", "rejected", "unresolved"})
@@ -161,6 +162,97 @@ class AnalysisAdmission:
             "expected_artifact_types",
         ):
             values[field] = tuple(values[field])
+        return cls(**values)
+
+
+@dataclass(frozen=True)
+class LegacyAnalysisAdmissionRecovery:
+    """Migration-only record that explicitly does not claim prior scientific approval."""
+
+    id: str
+    plan_node_id: str
+    hypothesis_ids: tuple[str, ...]
+    expected_artifact_types: tuple[str, ...]
+    source_state_digest: str
+    source_map_digest: str
+    rationale_zh: str
+    rationale_en: str
+    recovery_status: str
+    evidence_scope: str
+    approved_before_execution: bool
+    digest: str
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "id", validate_identifier(self.id, "legacy_admission_recovery.id"))
+        object.__setattr__(
+            self,
+            "plan_node_id",
+            validate_identifier(self.plan_node_id, "legacy_admission_recovery.plan_node_id"),
+        )
+        object.__setattr__(
+            self,
+            "hypothesis_ids",
+            _ids(tuple(self.hypothesis_ids), "legacy_admission_recovery.hypothesis_ids", allow_empty=True),
+        )
+        object.__setattr__(
+            self,
+            "expected_artifact_types",
+            _ids(tuple(self.expected_artifact_types), "legacy_admission_recovery.expected_artifact_types"),
+        )
+        object.__setattr__(self, "source_state_digest", _sha256(self.source_state_digest, "legacy_admission_recovery.source_state_digest"))
+        object.__setattr__(self, "source_map_digest", _sha256(self.source_map_digest, "legacy_admission_recovery.source_map_digest"))
+        object.__setattr__(self, "rationale_zh", _text(self.rationale_zh, "legacy_admission_recovery.rationale_zh"))
+        object.__setattr__(self, "rationale_en", _text(self.rationale_en, "legacy_admission_recovery.rationale_en"))
+        if self.recovery_status != "historical-unavailable":
+            raise ValueError("legacy admission recovery status is unsupported")
+        if self.evidence_scope != "project-snapshot-only":
+            raise ValueError("legacy admission recovery cannot authorize scientific delivery")
+        if self.approved_before_execution is not False:
+            raise ValueError("legacy admission recovery cannot claim approval before execution")
+        basis = {field: getattr(self, field) for field in self.__dataclass_fields__ if field != "digest"}
+        if self.digest != digest_value(basis):
+            raise ValueError("legacy admission recovery digest is invalid")
+
+    @classmethod
+    def create(
+        cls,
+        *,
+        plan_node_id: str,
+        hypothesis_ids: tuple[str, ...],
+        expected_artifact_types: tuple[str, ...],
+        source_state_digest: str,
+        source_map_digest: str,
+    ) -> "LegacyAnalysisAdmissionRecovery":
+        values = {
+            "id": f"legacy-admission-unavailable-{plan_node_id}",
+            "plan_node_id": plan_node_id,
+            "hypothesis_ids": tuple(hypothesis_ids),
+            "expected_artifact_types": tuple(expected_artifact_types),
+            "source_state_digest": source_state_digest,
+            "source_map_digest": source_map_digest,
+            "rationale_zh": "旧版项目状态未序列化该分析的事前准入；本记录仅证明这一历史缺口，不补造事前批准。",
+            "rationale_en": "The legacy state did not serialize prior admission for this analysis; this record documents that historical gap and does not reconstruct approval.",
+            "recovery_status": "historical-unavailable",
+            "evidence_scope": "project-snapshot-only",
+            "approved_before_execution": False,
+        }
+        return cls(**values, digest=digest_value(values))
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "record_type": "legacy-analysis-admission-recovery",
+            **{
+                field: list(getattr(self, field)) if field in {"hypothesis_ids", "expected_artifact_types"} else getattr(self, field)
+                for field in self.__dataclass_fields__
+            },
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "LegacyAnalysisAdmissionRecovery":
+        values = dict(payload)
+        values.pop("record_type", None)
+        values["hypothesis_ids"] = tuple(values["hypothesis_ids"])
+        values["expected_artifact_types"] = tuple(values["expected_artifact_types"])
         return cls(**values)
 
 
@@ -475,6 +567,7 @@ class DependencyEdge:
 @dataclass(frozen=True)
 class ScientificDependencyBundle:
     admissions: tuple[AnalysisAdmission, ...]
+    legacy_admission_recoveries: tuple[LegacyAnalysisAdmissionRecovery, ...]
     reviews: tuple[ArtifactReview, ...]
     decisions: tuple[ScientificDecision, ...]
     gate_adjudications: tuple[ScientificGateAdjudication, ...]
@@ -493,19 +586,27 @@ class ScientificDependencyBundle:
     ) -> "ScientificDependencyBundle":
         if map_kind not in EVIDENCE_MAP_KINDS:
             raise ValueError("scientific dependency bundle map kind is unsupported")
+        recoveries = tuple(
+            recovery
+            for migration in state.state_migrations
+            for recovery in migration.legacy_analysis_admission_recoveries
+        )
         values = cls(
-            tuple(admissions), tuple(reviews), tuple(decisions), tuple(state.gate_adjudications), map_kind, "0" * 64
+            tuple(admissions), recoveries, tuple(reviews), tuple(decisions),
+            tuple(state.gate_adjudications), map_kind, "0" * 64
         )
         values._validate(state)
         basis = {
             "admissions": [item.to_dict() for item in values.admissions],
+            "legacy_admission_recoveries": [item.to_dict() for item in values.legacy_admission_recoveries],
             "reviews": [item.to_dict() for item in values.reviews],
             "decisions": [item.to_dict() for item in values.decisions],
             "gate_adjudications": [item.to_dict() for item in values.gate_adjudications],
             "map_kind": values.map_kind,
         }
         return cls(
-            values.admissions, values.reviews, values.decisions, values.gate_adjudications,
+            values.admissions, values.legacy_admission_recoveries, values.reviews,
+            values.decisions, values.gate_adjudications,
             values.map_kind, digest_value(basis)
         )
 
@@ -517,8 +618,23 @@ class ScientificDependencyBundle:
             raise ValueError("scientific dependency bundle must include the exact project gate adjudications")
         if len({item.id for item in self.admissions}) != len(self.admissions):
             raise ValueError("analysis admissions contain duplicate IDs")
-        if set(item.plan_node_id for item in self.admissions) != set(plan_nodes):
-            raise ValueError("every plan node requires exactly one analysis admission")
+        native_node_ids = {item.plan_node_id for item in self.admissions}
+        recovery_node_ids = {item.plan_node_id for item in self.legacy_admission_recoveries}
+        if native_node_ids & recovery_node_ids:
+            raise ValueError("a plan node cannot have both native admission and legacy recovery")
+        if len(recovery_node_ids) != len(self.legacy_admission_recoveries):
+            raise ValueError("legacy analysis admission recoveries contain duplicate plan nodes")
+        if native_node_ids | recovery_node_ids != set(plan_nodes):
+            raise ValueError("every plan node requires a native admission or an explicit legacy recovery")
+        if self.legacy_admission_recoveries and self.map_kind != "project-snapshot":
+            raise ValueError("legacy admission recovery permits project snapshots only")
+        for recovery in self.legacy_admission_recoveries:
+            node = plan_nodes[recovery.plan_node_id]
+            if (
+                not set(recovery.hypothesis_ids) <= hypotheses
+                or tuple(recovery.expected_artifact_types) != tuple(node.expected_output_artifact_types)
+            ):
+                raise ValueError("legacy analysis admission recovery differs from its historical plan node")
         for item in self.admissions:
             if not set(item.hypothesis_ids) <= hypotheses:
                 raise ValueError("analysis admission references an unknown hypothesis")
@@ -600,13 +716,24 @@ def build_scientific_dependency_graph(
         node(hypothesis.id, "hypothesis", hypothesis.statement)
         edge(question_id, hypothesis.id, "motivates")
     admission_by_node = {item.plan_node_id: item for item in bundle.admissions}
+    recovery_by_node = {
+        item.plan_node_id: item for item in bundle.legacy_admission_recoveries
+    }
     for plan in state.plans:
         for action in plan.nodes:
             node(action.id, "analysis", action.module_id)
-            admission = admission_by_node[action.id]
-            node(admission.id, "analysis-admission", admission.method)
-            edge(admission.id, action.id, "triggers")
-            for hypothesis_id in admission.hypothesis_ids:
+            admission = admission_by_node.get(action.id)
+            recovery = recovery_by_node.get(action.id)
+            dependency = admission if admission is not None else recovery
+            if dependency is None:
+                raise ValueError("analysis node lacks a scientific dependency record")
+            if admission is not None:
+                node(admission.id, "analysis-admission", admission.method)
+                edge(admission.id, action.id, "triggers")
+            else:
+                node(recovery.id, "legacy-admission-recovery", recovery.recovery_status)
+                edge(recovery.id, action.id, "documents")
+            for hypothesis_id in dependency.hypothesis_ids:
                 edge(hypothesis_id, action.id, "tests")
             for artifact_id in action.input_bindings.values():
                 if artifact_id in {item.id for item in state.artifacts}:

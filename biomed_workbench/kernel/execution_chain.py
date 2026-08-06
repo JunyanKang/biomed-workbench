@@ -289,7 +289,6 @@ def validate_revision_target_contract(
         or source.target_hypothesis_ids != target.target_hypothesis_ids
         or source.expected_evidence_types != target.expected_evidence_types
         or source.expected_output_artifact_types != target.expected_output_artifact_types
-        or set(source.input_bindings.values()) != set(target.input_bindings.values())
     ):
         raise ValueError("revision target differs from the source branch, inputs, outputs, dependencies, or hypothesis scope")
     if target.planned_request_digest is None:
@@ -320,20 +319,34 @@ def validate_revision_target_contract(
     elif source.module_id == target.module_id:
         raise ValueError("method-switch target must use a distinct module")
     if registry is not None:
-        from ..modules.contract import manifest_to_dict, module_manifest_digest
+        from ..modules.contract import (
+            manifest_to_dict,
+            module_manifest_digest,
+            revision_alternative_to_dict,
+        )
 
         source_manifest = registry.get(source.module_id)
         target_manifest = registry.get(target.module_id)
-        source_manifest_payload = manifest_to_dict(source_manifest)
         target_manifest_payload = manifest_to_dict(target_manifest)
+        relation = next(
+            (
+                item for item in source_manifest.revision_alternatives
+                if item.target_module_id == target.module_id
+            ),
+            None,
+        )
+        if action == "switch-method":
+            if relation is None:
+                raise ValueError("method-switch target is not a declared revision-compatible alternative")
+            relation_payload = revision_alternative_to_dict(relation)
+            output_binding_map = dict(relation.output_binding_map)
+        else:
+            relation_payload = {"kind": "same-method", "source_module_id": source.module_id}
+            output_binding_map = {port.name: port.name for port in source_manifest.output_artifacts}
         expected_contract_fields = {
             "source_manifest_digest": module_manifest_digest(source_manifest),
             "target_manifest_digest": module_manifest_digest(target_manifest),
-            "alternative_relation_digest": digest_value({
-                "source_module_id": source.module_id,
-                "declared_alternatives": source_manifest_payload["alternatives"],
-                "target_module_id": target.module_id,
-            }),
+            "alternative_relation_digest": digest_value(relation_payload),
             "input_contract_digest": digest_value({
                 "target_ports": target_manifest_payload["input_artifacts"],
                 "bindings": dict(target.input_bindings),
@@ -341,12 +354,16 @@ def validate_revision_target_contract(
             "output_contract_digest": digest_value({
                 "source_types": list(source.expected_output_artifact_types),
                 "target_ports": target_manifest_payload["output_artifacts"],
+                "output_binding_map": output_binding_map,
             }),
         }
         if any(getattr(contract, field) != value for field, value in expected_contract_fields.items()):
             raise ValueError("live module registry differs from the frozen revision contract")
-        if action == "switch-method" and target.module_id not in source_manifest.alternatives:
-            raise ValueError("method-switch target is not a declared source-module alternative")
+        if action == "switch-method" and any(
+            target.input_bindings[target_port] != source.input_bindings[source_port]
+            for target_port, source_port in relation.input_binding_map.items()
+        ):
+            raise ValueError("method-switch input bindings differ from the frozen revision relation")
         artifacts = {item.id: item for item in state.artifacts}
         if set(target.input_bindings) != {port.name for port in target_manifest.input_artifacts}:
             raise ValueError("revision target input ports differ from its registered module")

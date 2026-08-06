@@ -7,7 +7,12 @@ from typing import Any, Mapping
 from ..kernel.identity import digest_value, thaw
 from ..kernel.plans import PlanNode, ResearchDAG, RevisionTargetContract
 from ..kernel.state import ProjectState
-from ..modules.contract import manifest_to_dict, module_manifest_digest
+from ..modules.contract import (
+    RevisionAlternative,
+    manifest_to_dict,
+    module_manifest_digest,
+    revision_alternative_to_dict,
+)
 from ..modules.registry import ModuleRegistry
 from ..modules.scientific_command import normalized_scientific_command_parameters
 from ..runner import validate_schema_value
@@ -30,21 +35,31 @@ def _merge_inputs(state: ProjectState, bindings: Mapping[str, str], overrides: M
     return merged
 
 
-def _target_bindings(state: ProjectState, source: PlanNode, target_manifest: object) -> dict[str, str]:
+def _target_bindings(
+    state: ProjectState,
+    source: PlanNode,
+    target_manifest: object,
+    relation: RevisionAlternative,
+    explicit_bindings: Mapping[str, str],
+) -> dict[str, str]:
     artifacts = {item.id: item for item in state.artifacts}
-    source_ids = tuple(source.input_bindings.values())
-    bindings: dict[str, str] = {}
+    target_ports = {port.name: port for port in target_manifest.input_artifacts}
+    if set(explicit_bindings) - set(target_ports):
+        raise ValueError("revision target input bindings contain an unknown target port")
+    if set(explicit_bindings) & set(relation.input_binding_map):
+        raise ValueError("revision target input bindings cannot override a frozen source-port mapping")
+    bindings: dict[str, str] = {
+        target_port: source.input_bindings[source_port]
+        for target_port, source_port in relation.input_binding_map.items()
+    }
+    bindings.update({str(port): str(artifact_id) for port, artifact_id in explicit_bindings.items()})
     for port in target_manifest.input_artifacts:
-        matches = tuple(
-            artifact_id for artifact_id in source_ids
-            if artifacts.get(artifact_id) is not None
-            and artifacts[artifact_id].artifact_type == port.artifact_type
-        )
-        if len(matches) != 1:
-            raise ValueError(
-                f"revision target input port {port.name} has no unique source-artifact type match"
-            )
-        bindings[port.name] = matches[0]
+        artifact_id = bindings.get(port.name)
+        artifact = artifacts.get(artifact_id or "")
+        if artifact is None:
+            raise ValueError(f"revision target input port {port.name} requires one registered artifact binding")
+        if artifact.artifact_type != port.artifact_type:
+            raise ValueError(f"revision target input port {port.name} has an incompatible artifact type")
     return bindings
 
 
@@ -69,6 +84,7 @@ def prepare_plan_revision(
     target_module_id: str | None,
     parameter_overrides: Mapping[str, Any],
     rationale: str,
+    target_input_bindings: Mapping[str, str] | None = None,
 ) -> ResearchDAG:
     """Create one child plan containing a frozen, dormant node-level replacement."""
     if action not in {"rerun-same-method", "rerun-adjusted-parameters", "switch-method"}:
@@ -97,14 +113,31 @@ def prepare_plan_revision(
     selected_module_id = target_module_id or source.module_id
     if action in {"rerun-same-method", "rerun-adjusted-parameters"} and selected_module_id != source.module_id:
         raise ValueError("same-method revision must retain the source module")
-    if action == "switch-method" and selected_module_id not in source_manifest.alternatives:
-        raise ValueError("method switch must select a declared source-module alternative")
-    target_manifest = registry.get(selected_module_id)
-    bindings = (
-        dict(source.input_bindings)
-        if selected_module_id == source.module_id
-        else _target_bindings(state, source, target_manifest)
+    relation = next(
+        (
+            item for item in source_manifest.revision_alternatives
+            if item.target_module_id == selected_module_id
+        ),
+        None,
     )
+    if action == "switch-method" and relation is None:
+        raise ValueError("method switch must select a declared revision-compatible alternative")
+    target_manifest = registry.get(selected_module_id)
+    explicit_bindings = dict(target_input_bindings or {})
+    if selected_module_id == source.module_id:
+        if explicit_bindings:
+            raise ValueError("same-method revision cannot replace input artifact bindings")
+        bindings = dict(source.input_bindings)
+        output_binding_map = {port.name: port.name for port in source_manifest.output_artifacts}
+        relation_payload: dict[str, object] = {
+            "kind": "same-method",
+            "source_module_id": source.module_id,
+        }
+    else:
+        assert relation is not None
+        bindings = _target_bindings(state, source, target_manifest, relation, explicit_bindings)
+        output_binding_map = dict(relation.output_binding_map)
+        relation_payload = revision_alternative_to_dict(relation)
     overrides = dict(parameter_overrides)
     if action == "rerun-same-method" and overrides:
         raise ValueError("same-method rerun cannot introduce parameter overrides")
@@ -147,7 +180,6 @@ def prepare_plan_revision(
         port.name: f"artifact-revision-{digest_value({'node': target_id, 'port': port.name})[:20]}"
         for port in target_manifest.output_artifacts
     }
-    source_manifest_payload = manifest_to_dict(source_manifest)
     target_manifest_payload = manifest_to_dict(target_manifest)
     contract = RevisionTargetContract.create(
         id=f"revision-contract-{digest_value(target_seed)[:20]}",
@@ -158,11 +190,7 @@ def prepare_plan_revision(
         target_module_id=selected_module_id,
         source_manifest_digest=module_manifest_digest(source_manifest),
         target_manifest_digest=module_manifest_digest(target_manifest),
-        alternative_relation_digest=digest_value({
-            "source_module_id": source.module_id,
-            "declared_alternatives": source_manifest_payload["alternatives"],
-            "target_module_id": selected_module_id,
-        }),
+        alternative_relation_digest=digest_value(relation_payload),
         input_contract_digest=digest_value({
             "target_ports": target_manifest_payload["input_artifacts"],
             "bindings": bindings,
@@ -170,6 +198,7 @@ def prepare_plan_revision(
         output_contract_digest=digest_value({
             "source_types": list(source.expected_output_artifact_types),
             "target_ports": target_manifest_payload["output_artifacts"],
+            "output_binding_map": output_binding_map,
         }),
         source_request_digest=source_request_digest,
         target_request_digest=target_request_digest,
@@ -199,8 +228,8 @@ def prepare_plan_revision(
         raise ValueError("a plan revision cannot rewrite a downstream node that already started")
     node_id_map = {source.id: target.id}
     artifact_id_map = {
-        source.planned_output_artifact_ids[source_port.name]: target_outputs[target_port.name]
-        for source_port, target_port in zip(source_manifest.output_artifacts, target_manifest.output_artifacts)
+        source.planned_output_artifact_ids[source_port]: target_outputs[target_port]
+        for source_port, target_port in output_binding_map.items()
     }
     revised_nodes: list[PlanNode] = [node for node in active.nodes if node.id not in descendants]
     revised_nodes.append(target)

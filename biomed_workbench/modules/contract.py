@@ -213,6 +213,18 @@ class OrchestrationContract:
 
 
 @dataclass(frozen=True)
+class RevisionAlternative:
+    """Typed method substitution that can replace one reviewed plan node."""
+
+    target_module_id: str
+    input_binding_map: dict[str, str]
+    output_binding_map: dict[str, str]
+    required_additional_artifact_types: tuple[str, ...]
+    parameter_mapping: dict[str, str]
+    scientific_contract_equivalence: str
+
+
+@dataclass(frozen=True)
 class ObservedPayloadContract:
     role: str
     media_types: tuple[str, ...]
@@ -284,6 +296,7 @@ class ModuleManifest:
     code_templates: tuple[CodeTemplate, ...] = ()
     agent_protocol: AgentProtocol | None = None
     observed_output_contracts: tuple[ObservedOutputContract, ...] = ()
+    revision_alternatives: tuple[RevisionAlternative, ...] = ()
 
 
 _MANIFEST_FIELDS = frozenset(ModuleManifest.__dataclass_fields__)
@@ -307,7 +320,10 @@ _ORCHESTRATION_FIELDS = frozenset(OrchestrationContract.__dataclass_fields__)
 _OBSERVED_OUTPUT_FIELDS = frozenset(ObservedOutputContract.__dataclass_fields__)
 _OBSERVED_PAYLOAD_FIELDS = frozenset(ObservedPayloadContract.__dataclass_fields__)
 _GATE_EVALUATOR_FIELDS = frozenset(GateEvaluatorContract.__dataclass_fields__)
-_OPTIONAL_MANIFEST_FIELDS = frozenset({"agent_protocol", "code_templates", "observed_output_contracts"})
+_REVISION_ALTERNATIVE_FIELDS = frozenset(RevisionAlternative.__dataclass_fields__)
+_OPTIONAL_MANIFEST_FIELDS = frozenset({
+    "agent_protocol", "code_templates", "observed_output_contracts", "revision_alternatives"
+})
 
 
 def _object(value: Any, location: str) -> dict[str, Any]:
@@ -379,6 +395,47 @@ def _orchestration(value: Any) -> OrchestrationContract:
             "manifest.orchestration.requires_reviewed_upstream_types",
             allow_empty=True,
         ),
+    )
+
+
+def _port_mapping(value: Any, location: str) -> dict[str, str]:
+    payload = _object(value, location)
+    if any(
+        not isinstance(key, str)
+        or not _NAME_RE.fullmatch(key)
+        or not isinstance(mapped, str)
+        or not _NAME_RE.fullmatch(mapped)
+        for key, mapped in payload.items()
+    ):
+        raise ValueError(f"{location} must map valid port or parameter names")
+    if len(set(payload.values())) != len(payload):
+        raise ValueError(f"{location} cannot map more than one target to the same source")
+    return {str(key): str(mapped) for key, mapped in sorted(payload.items())}
+
+
+def _revision_alternative(value: Any, location: str) -> RevisionAlternative:
+    payload = _object(value, location)
+    _exact_fields(payload, _REVISION_ALTERNATIVE_FIELDS, location)
+    target = _text(payload["target_module_id"], f"{location}.target_module_id")
+    if not _ID_RE.fullmatch(target):
+        raise ValueError(f"{location}.target_module_id is invalid")
+    equivalence = _text(
+        payload["scientific_contract_equivalence"],
+        f"{location}.scientific_contract_equivalence",
+    )
+    if equivalence != "equivalent":
+        raise ValueError(f"{location} currently supports only equivalent scientific contracts")
+    return RevisionAlternative(
+        target_module_id=target,
+        input_binding_map=_port_mapping(payload["input_binding_map"], f"{location}.input_binding_map"),
+        output_binding_map=_port_mapping(payload["output_binding_map"], f"{location}.output_binding_map"),
+        required_additional_artifact_types=_strings(
+            payload["required_additional_artifact_types"],
+            f"{location}.required_additional_artifact_types",
+            allow_empty=True,
+        ),
+        parameter_mapping=_port_mapping(payload["parameter_mapping"], f"{location}.parameter_mapping"),
+        scientific_contract_equivalence=equivalence,
     )
 
 
@@ -1075,6 +1132,9 @@ def parse_manifest(value: Any) -> ModuleManifest:
     observed_output_values = payload.get("observed_output_contracts", [])
     if not isinstance(observed_output_values, list):
         raise ValueError("manifest.observed_output_contracts must be a list")
+    revision_alternative_values = payload.get("revision_alternatives", [])
+    if not isinstance(revision_alternative_values, list):
+        raise ValueError("manifest.revision_alternatives must be a list")
     manifest = ModuleManifest(
         schema_version=1,
         id=identifier,
@@ -1118,9 +1178,15 @@ def parse_manifest(value: Any) -> ModuleManifest:
             _observed_output(item, f"manifest.observed_output_contracts[{index}]")
             for index, item in enumerate(observed_output_values)
         ),
+        revision_alternatives=tuple(
+            _revision_alternative(item, f"manifest.revision_alternatives[{index}]")
+            for index, item in enumerate(revision_alternative_values)
+        ),
     )
     if len({item.path for item in manifest.code_templates}) != len(manifest.code_templates):
         raise ValueError("manifest.code_templates contains duplicate paths")
+    if len({item.target_module_id for item in manifest.revision_alternatives}) != len(manifest.revision_alternatives):
+        raise ValueError("manifest.revision_alternatives contains duplicate targets")
     input_types = {port.artifact_type for port in manifest.input_artifacts}
     unknown_reviewed_types = set(manifest.orchestration.requires_reviewed_upstream_types) - input_types
     if unknown_reviewed_types:
@@ -1475,7 +1541,31 @@ def manifest_to_dict(value: ModuleManifest) -> dict[str, object]:
         payload["observed_output_contracts"] = [
             _observed_output_dict(item) for item in value.observed_output_contracts
         ]
+    if value.revision_alternatives:
+        payload["revision_alternatives"] = [
+            {
+                "target_module_id": item.target_module_id,
+                "input_binding_map": dict(item.input_binding_map),
+                "output_binding_map": dict(item.output_binding_map),
+                "required_additional_artifact_types": list(item.required_additional_artifact_types),
+                "parameter_mapping": dict(item.parameter_mapping),
+                "scientific_contract_equivalence": item.scientific_contract_equivalence,
+            }
+            for item in value.revision_alternatives
+        ]
     return payload
+
+
+def revision_alternative_to_dict(value: RevisionAlternative) -> dict[str, object]:
+    """Return the exact selected substitution relation used by a revision contract."""
+    return {
+        "target_module_id": value.target_module_id,
+        "input_binding_map": dict(value.input_binding_map),
+        "output_binding_map": dict(value.output_binding_map),
+        "required_additional_artifact_types": list(value.required_additional_artifact_types),
+        "parameter_mapping": dict(value.parameter_mapping),
+        "scientific_contract_equivalence": value.scientific_contract_equivalence,
+    }
 
 
 def module_manifest_digest(value: ModuleManifest) -> str:

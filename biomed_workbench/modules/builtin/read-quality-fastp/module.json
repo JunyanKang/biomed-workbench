@@ -3,6 +3,22 @@
   "alternatives": [
     "read-quality-fastqc"
   ],
+  "revision_alternatives": [
+    {
+      "target_module_id": "read-quality-fastqc",
+      "input_binding_map": {
+        "reads": "reads"
+      },
+      "output_binding_map": {
+        "read_quality_report": "read_quality_report"
+      },
+      "required_additional_artifact_types": [],
+      "parameter_mapping": {
+        "threads": "threads"
+      },
+      "scientific_contract_equivalence": "equivalent"
+    }
+  ],
   "assumptions": [
     "The FASTQ quality encoding and read layout are correctly declared and QC-only mode must not alter read or base counts."
   ],

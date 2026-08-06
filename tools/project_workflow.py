@@ -40,7 +40,10 @@ from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
 from biomed_workbench.orchestration.controller import ResearchController  # noqa: E402
 from biomed_workbench.orchestration.execution_ingest import ingest_execution_bundle  # noqa: E402
 from biomed_workbench.orchestration.revision import prepare_plan_revision  # noqa: E402
-from biomed_workbench.orchestration.state_migration import migrate_map_bound_v1_state  # noqa: E402
+from biomed_workbench.orchestration.state_migration import (  # noqa: E402
+    assess_republication_prerequisites,
+    migrate_map_bound_v1_state,
+)
 from biomed_workbench.reporting.evidence_map_versions import (  # noqa: E402
     abort_prepared_evidence_map_publication,
     complete_evidence_map_publication_recovery,
@@ -191,7 +194,7 @@ def main() -> int:
         _write(args.state, state.to_dict())
         summary = {
             **_summary(state),
-            "migration_status": "awaiting-evidence-map-republication",
+            **assess_republication_prerequisites(state),
             "legacy_state_preserved": True,
             "verified_legacy_evidence_maps": sum(
                 len(item.legacy_evidence_maps) for item in state.state_migrations
@@ -268,7 +271,14 @@ def main() -> int:
         required = {
             "source_artifact_id", "action", "target_module_id", "parameter_overrides", "rationale"
         }
-        if set(payload) != required or not isinstance(payload["parameter_overrides"], dict):
+        allowed = required | {"target_input_bindings"}
+        target_input_bindings = payload.get("target_input_bindings", {})
+        if (
+            not required <= set(payload)
+            or set(payload) - allowed
+            or not isinstance(payload["parameter_overrides"], dict)
+            or not isinstance(target_input_bindings, dict)
+        ):
             raise ValueError("prepare-revision input fields are incomplete or unsupported")
         revised = prepare_plan_revision(
             state,
@@ -278,6 +288,7 @@ def main() -> int:
             target_module_id=(str(payload["target_module_id"]) if payload["target_module_id"] is not None else None),
             parameter_overrides=payload["parameter_overrides"],
             rationale=str(payload["rationale"]),
+            target_input_bindings=target_input_bindings,
         )
         state = apply_event(
             state,

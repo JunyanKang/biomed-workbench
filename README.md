@@ -85,7 +85,7 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 | [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | STRING 功能/物理互作网络；HADDOCK3 复合物对接、DockQ 参考评价与 PRODIGY 亲和力估计；AlphaFold Server 人工提交包、真实结果档案的多任务/多模型重读、置信度与跨链接触审查、可复绘发表图件；资源与许可门禁下的本地官方 AlphaFold 3 入口；MSBio2/Metascape 与 Cytoscape 网络交付；序列、ORF、PCR、CRISPR、克隆、结构质量、结构比较与实验验证设计 |
 | [临床与实验研究](docs/capabilities/clinical-and-experimental.md) | 队列与生存、biomarker、流式、qPCR、剂量反应、Western blot、biodistribution、xenograft、稳定性与实验定量 |
 | [成像与科学可视化](docs/capabilities/imaging-and-visualization.md) | 图像 profiling、分割、共定位、追踪、组织图像配准、统一绘图规格、图组编排与视觉质量审查 |
-| [论文与转化交付](docs/capabilities/publication-and-translation.md) | 100 本生命医学高水平期刊的版本化规范、分级 JIF/JCR 来源、期刊推荐、逐项稿件审查、图表规格、引用审计、审稿模拟、回复矩阵、修订谱系、专利准备与展示材料 |
+| [论文与转化交付](docs/capabilities/publication-and-translation.md) | 100 本生命医学高水平期刊的版本化规范、期刊推荐、逐项稿件审查、图表规格、引用审计、审稿模拟、回复矩阵、修订谱系、专利准备与展示材料 |
 
 <p align="center">
   <img src="assets/readme/multiscale-omics.png" width="100%" alt="跨尺度多组学、空间、轨迹和出版图组的概念图">

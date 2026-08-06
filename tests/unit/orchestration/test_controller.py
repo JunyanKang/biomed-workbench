@@ -35,7 +35,11 @@ from biomed_workbench.kernel.scientific_evidence_map import (
 )
 from biomed_workbench.kernel.state import ProjectState, apply_event
 from biomed_workbench.modules.index import BUILTIN_ROOT
-from biomed_workbench.modules.contract import manifest_to_dict, module_manifest_digest
+from biomed_workbench.modules.contract import (
+    manifest_to_dict,
+    module_manifest_digest,
+    revision_alternative_to_dict,
+)
 from biomed_workbench.modules.registry import ModuleRegistry
 from biomed_workbench.orchestration.controller import ControllerPolicy, ResearchController
 from biomed_workbench.orchestration.execution import NodeExecution, execute_node
@@ -141,6 +145,14 @@ def revision_fixture(action):
                 "count_matrix",
                 "normalized_matrix",
                 alternatives=(alternative_module,),
+                revision_alternatives=({
+                    "target_module_id": alternative_module,
+                    "input_binding_map": {"records": "records"},
+                    "output_binding_map": {"profile": "profile"},
+                    "required_additional_artifact_types": [],
+                    "parameter_mapping": {"rows": "rows"},
+                    "scientific_contract_equivalence": "equivalent",
+                },),
             ),
             module_payload(alternative_module, "count_matrix", "normalized_matrix"),
         )
@@ -174,7 +186,6 @@ def revision_fixture(action):
         else observed_request_digest
     )
     target_id = "node-revision-normalizer"
-    source_manifest_payload = manifest_to_dict(registry.get(source_module))
     target_manifest_payload = manifest_to_dict(registry.get(target_module))
     contract = RevisionTargetContract.create(
         id=f"revision-contract-{action}",
@@ -185,11 +196,11 @@ def revision_fixture(action):
         target_module_id=target_module,
         source_manifest_digest=module_manifest_digest(registry.get(source_module)),
         target_manifest_digest=module_manifest_digest(registry.get(target_module)),
-        alternative_relation_digest=digest_value({
-            "source_module_id": source_module,
-            "declared_alternatives": source_manifest_payload["alternatives"],
-            "target_module_id": target_module,
-        }),
+        alternative_relation_digest=digest_value(
+            revision_alternative_to_dict(registry.get(source_module).revision_alternatives[0])
+            if action == "switch-method"
+            else {"kind": "same-method", "source_module_id": source_module}
+        ),
         input_contract_digest=digest_value({
             "target_ports": target_manifest_payload["input_artifacts"],
             "bindings": {"records": "artifact-counts"},
@@ -197,6 +208,7 @@ def revision_fixture(action):
         output_contract_digest=digest_value({
             "source_types": list(source.expected_output_artifact_types),
             "target_ports": target_manifest_payload["output_artifacts"],
+            "output_binding_map": {"profile": "profile"},
         }),
         source_request_digest=observed_request_digest,
         target_request_digest=planned_request_digest,
@@ -457,7 +469,7 @@ class ResearchControllerTests(unittest.TestCase):
         base_registry = registry
         undeclared_registry = SimpleNamespace(
             get=lambda module_id, base=base_registry: (
-                replace(base.get(module_id), alternatives=())
+                replace(base.get(module_id), alternatives=(), revision_alternatives=())
                 if module_id == source.module_id
                 else base.get(module_id)
             )
@@ -467,7 +479,7 @@ class ResearchControllerTests(unittest.TestCase):
             undeclared_registry,
             contract_state(plan, state, source),
             target.id,
-            "live module registry differs",
+            "revision-compatible alternative",
         ))
 
         for action, registry, state, target_id, message in cases:

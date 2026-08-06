@@ -10,7 +10,23 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class ModuleManifestCoverageTests(unittest.TestCase):
-    pass
+    def test_only_explicit_typed_relations_are_revision_compatible(self):
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
+        relations = {
+            (manifest.id, relation.target_module_id)
+            for manifest in registry.all()
+            for relation in manifest.revision_alternatives
+        }
+        self.assertEqual(relations, {
+            ("read-quality-fastqc", "read-quality-fastp"),
+            ("read-quality-fastp", "read-quality-fastqc"),
+        })
+        ordinary_alternatives = {
+            (manifest.id, alternative)
+            for manifest in registry.all()
+            for alternative in manifest.alternatives
+        }
+        self.assertGreater(len(ordinary_alternatives), len(relations))
 
 
 def _sanitize(module_id: str) -> str:

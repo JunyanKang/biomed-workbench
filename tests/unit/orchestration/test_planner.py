@@ -48,7 +48,16 @@ def state_with(*artifacts):
     return state
 
 
-def module_payload(module_id, input_type, output_type, *, alternatives=(), maturity="validated", credentials=()):
+def module_payload(
+    module_id,
+    input_type,
+    output_type,
+    *,
+    alternatives=(),
+    revision_alternatives=(),
+    maturity="validated",
+    credentials=(),
+):
     payload = valid_manifest_payload()
     payload.update(
         {
@@ -59,6 +68,7 @@ def module_payload(module_id, input_type, output_type, *, alternatives=(), matur
             "questions": [f"What validated result does {module_id} produce?"],
             "maturity": maturity,
             "alternatives": list(alternatives),
+            "revision_alternatives": list(revision_alternatives),
             "credentials": list(credentials),
         }
     )

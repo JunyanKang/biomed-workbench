@@ -42,6 +42,10 @@ class SkillEntrypointE2ETests(unittest.TestCase):
         self.assertIn("access: codex_native", self.text)
         self.assertIn("tool: image_gen", self.text)
         self.assertIn("The handoff is not proof that a bitmap exists", self.text)
+        self.assertIn('project prepare-revision --state PROJECT_STATE.json --input REVISION_REQUEST.json', self.text)
+        self.assertIn('project migrate-state-v1 --legacy-state LEGACY_STATE.json', self.text)
+        self.assertIn('"target_input_bindings": {}', self.text)
+        self.assertIn('"migration_status": "awaiting-scientific-dependency-recovery"', self.text)
 
     def test_entrypoint_does_not_claim_compute_infrastructure_ownership(self):
         for term in ("local scientific reasoning model", "runtime-status"):

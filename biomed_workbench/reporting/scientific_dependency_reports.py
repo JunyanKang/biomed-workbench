@@ -8,6 +8,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+from ..kernel.scientific_dependency import AnalysisAdmission
 from ..kernel.scientific_evidence_map import (
     EvidenceMapUnit,
     ScientificEvidenceMap,
@@ -95,6 +96,15 @@ def _unit_section(
             [
                 f"- {'已批准方法' if zh else 'Approved method'} `{admission.id}`: {admission.method}"
                 for admission in unit.admissions
+                if isinstance(admission, AnalysisAdmission)
+            ]
+        ),
+        *(
+            [
+                f"- {'历史准入状态' if zh else 'Historical admission status'} `{admission.id}`: "
+                f"{'无法证明事前批准；仅限项目快照' if zh else 'prior approval unavailable; project snapshot only'}"
+                for admission in unit.admissions
+                if not isinstance(admission, AnalysisAdmission)
             ]
         ),
         *(
@@ -102,6 +112,7 @@ def _unit_section(
                 f"- {'参数依据' if zh else 'Parameter justification'} "
                 f"`{parameter}`: {justification}"
                 for admission in unit.admissions
+                if isinstance(admission, AnalysisAdmission)
                 for parameter, justification in sorted(admission.parameter_justifications.items())
             ]
         ),
@@ -109,6 +120,7 @@ def _unit_section(
             [
                 f"- {'备选方法' if zh else 'Alternative considered'}: {alternative}"
                 for admission in unit.admissions
+                if isinstance(admission, AnalysisAdmission)
                 for alternative in admission.alternatives_considered
             ]
         ),
@@ -116,6 +128,7 @@ def _unit_section(
             [
                 f"- {'关键假设' if zh else 'Assumption'}: {assumption}"
                 for admission in unit.admissions
+                if isinstance(admission, AnalysisAdmission)
                 for assumption in admission.assumptions
             ]
         ),
@@ -123,6 +136,7 @@ def _unit_section(
             [
                 f"- {'接受标准' if zh else 'Acceptance criterion'}: {criterion}"
                 for admission in unit.admissions
+                if isinstance(admission, AnalysisAdmission)
                 for criterion in admission.acceptance_criteria
             ]
         ),
@@ -130,6 +144,7 @@ def _unit_section(
             [
                 f"- {'证伪标准' if zh else 'Falsification criterion'}: {criterion}"
                 for admission in unit.admissions
+                if isinstance(admission, AnalysisAdmission)
                 for criterion in admission.falsification_criteria
             ]
         ),
@@ -137,6 +152,7 @@ def _unit_section(
             [
                 f"- {'官方方法来源' if zh else 'Official method source'}: [{source}]({source})"
                 for admission in unit.admissions
+                if isinstance(admission, AnalysisAdmission)
                 for source in admission.official_sources
             ]
         ),
