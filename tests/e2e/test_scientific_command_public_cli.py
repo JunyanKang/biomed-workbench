@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 import subprocess
 import sys
 import tempfile
@@ -442,6 +443,20 @@ report.write_text('<html><body>fastp QC-only report</body></html>')
                 item for item in final_switch_state.plans
                 if item.id == final_switch_state.active_plan_id
             )
+            validated_fastp_host = (
+                sys.platform == "darwin"
+                and platform.machine().lower().replace("aarch64", "arm64") == "arm64"
+            )
+            if not validated_fastp_host:
+                self.assertEqual(resumed_fastp_payload["stop_reason"], "awaiting_revision_node")
+                blocked_execution = resumed_fastp_payload["executions"][-1]
+                self.assertEqual(blocked_execution["module_id"], "read-quality-fastp")
+                self.assertEqual(blocked_execution["status"], "blocked")
+                self.assertEqual(blocked_execution["compatibility_finding_codes"], ["UNSUPPORTED_PLATFORM"])
+                self.assertFalse(
+                    any(item.plan_node_id == fastp_node.id for item in final_switch_state.observed_executions)
+                )
+                return
             self.assertEqual(
                 resumed_fastp_payload["stop_reason"],
                 "awaiting_artifact_review",
