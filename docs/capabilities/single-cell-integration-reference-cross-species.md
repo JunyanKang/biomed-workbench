@@ -1,97 +1,99 @@
-# 单细胞整合、参考投射与跨物种分析规范
+# Single-Cell Integration, Reference Mapping, And Cross-Species Analysis
 
-更新时间：2026-07-31
+Languages: [English](single-cell-integration-reference-cross-species.md) · [中文](single-cell-integration-reference-cross-species.zh-CN.md)
 
-本规范不把所有“整合”混成一个任务。实际分析先区分四个目标：
+Updated: 2026-07-31
 
-1. **同一模态跨批次整合**：获得用于邻域、聚类和可视化的共同表示。
-2. **冻结参考图谱投射**：把 query 映射到 reference，尽量不重训或改变 reference。
-3. **多模态/镶嵌整合**：整合 RNA、蛋白或 ATAC，并明确哪些细胞缺失哪些模态。
-4. **跨物种整合**：比较保守状态、转移标签和同源模块，同时保留物种特异状态。
+This contract does not collapse every form of integration into one task. An analysis first distinguishes four objectives:
 
-这些表示服务于邻域、注释、轨迹或可视化，不替代原始计数。差异表达、差异可及性或跨条件统计必须回到未校正的原始计数，以 sample/donor/species 为统计单位。
+1. **Within-modality batch integration:** construct a common representation for neighbourhoods, clustering, and visualization.
+2. **Frozen-reference mapping:** map a query into a reference while avoiding retraining or alteration of the reference where possible.
+3. **Multimodal or mosaic integration:** integrate RNA, protein, or ATAC measurements while declaring which cells lack which modality.
+4. **Cross-species integration:** compare conserved states, transfer labels, and identify homologous modules while preserving species-specific states.
 
-## 同一模态跨批次整合
+These representations support neighbourhood analysis, annotation, trajectories, and visualization; they do not replace raw counts. Differential expression, differential accessibility, and cross-condition inference return to uncorrected counts and use sample, donor, or species as the statistical unit.
 
-| 方法 | 优先适用场景 | 关键可调参数 | 主要边界 |
+## Within-Modality Batch Integration
+
+| Method | Preferred use | Main tunable parameters | Principal boundary |
 |---|---|---|---|
-| Seurat v5 CCA | 平台差异较明显，但预期共享细胞状态充分；需要成熟的 anchor 工作流 | `nfeatures`、`dims`、`k.anchor`、reference layers、`k.weight` | 共享状态不足时可能强制对齐；labels 不能参与无监督调参 |
-| Seurat v5 RPCA | 数据较相近、规模较大、希望更保守和更快 | PCA 特征、`dims`、anchor 参数、reference layers | 对强非线性系统差异可能不足；仍须与未整合数据比较 |
-| FastMNN | 批次之间存在可互相连接的共享群体；需要经典 MNN 基线 | HVG、PCA 维数、`k`、merge order、cosine normalization | merge order 和共享群体覆盖会影响结果；稀有批次特异群不能被当作批次效应 |
-| Harmony | 已有 PCA/LSI，批次变量清晰，需要快速迭代 | `theta`、`lambda`、`sigma`、迭代次数、多个协变量 | 只能校正声明的协变量；不能修复完美混杂 |
-| scVI/scANVI | 有原始 UMI 计数、多批次、非线性效应和较大样本；scANVI 仅在有可信部分标签时使用 | latent 维数、网络层数、dispersion、batch/covariates、epochs、seed | 标签不得泄漏到待评估 query；生成模型不等于自动正确 |
-| sysVI | 跨系统、跨组织、跨物种或类器官—组织的强 system effect 候选 | system covariates、cycle weight、latent 维数、HVG、epochs、seed | 目前作为候选而非默认主流程；必须与成熟基线和多个 seed 比较 |
+| Seurat v5 CCA | Platform differences are substantial but shared cell states are expected; a mature anchor workflow is needed | `nfeatures`, `dims`, `k.anchor`, reference layers, `k.weight` | May force alignment when shared states are insufficient; labels cannot guide unsupervised tuning |
+| Seurat v5 RPCA | Datasets are relatively similar and large; conservative, faster integration is preferred | PCA features, `dims`, anchor parameters, reference layers | May be insufficient for strong nonlinear system differences; must be compared with unintegrated data |
+| FastMNN | Batches contain mutually connectable shared populations; a classical MNN baseline is needed | HVGs, PCA dimensions, `k`, merge order, cosine normalization | Merge order and shared-population coverage affect results; rare batch-specific populations must not be erased as batch effects |
+| Harmony | PCA or LSI already exists, batch variables are explicit, and rapid iteration is needed | `theta`, `lambda`, `sigma`, iteration count, multiple covariates | Corrects only declared covariates and cannot repair perfect confounding |
+| scVI/scANVI | Raw UMI counts, multiple batches, nonlinear effects, and larger datasets; scANVI only when trustworthy partial labels exist | latent dimensions, network depth, dispersion, batch/covariates, epochs, seed | Labels cannot leak into the query used for evaluation; a generative model is not automatically correct |
+| sysVI | Candidate for strong system effects across tissues, species, or organoid–tissue comparisons | system covariates, cycle weight, latent dimensions, HVGs, epochs, seed | Candidate rather than default workflow; requires comparison with mature baselines and multiple seeds |
 
-完整评估使用 scIB 的批次与生物保留两大类指标：batch ASW、graph connectivity、iLISI、kBET、PCR；ARI、NMI、cLISI、label ASW、isolated-label、HVG、cell-cycle 和 trajectory conservation。无法计算的指标必须给出数据驱动的 N/A 原因，不能静默删除。UMAP 外观不参与“赢家”选择。
+A complete evaluation uses both batch-removal and biological-conservation scIB metrics: batch ASW, graph connectivity, iLISI, kBET, and PCR; plus ARI, NMI, cLISI, label ASW, isolated-label, HVG, cell-cycle, and trajectory conservation. Metrics that cannot be computed retain a data-grounded N/A reason and are never silently removed. UMAP appearance does not select the winner.
 
-依据：[Seurat v5 integration](https://satijalab.org/seurat/articles/seurat5_integration)；[batchelor/FastMNN](https://bioconductor.org/packages/release/bioc/html/batchelor.html)；[Harmony](https://portals.broadinstitute.org/harmony/)；[scVI](https://docs.scvi-tools.org/en/stable/user_guide/models/scvi.html)；[scANVI](https://docs.scvi-tools.org/en/stable/user_guide/models/scanvi.html)；[sysVI](https://docs.scvi-tools.org/en/1.3.3/user_guide/models/sysvi.html)；[scIB, Nature Methods](https://www.nature.com/articles/s41592-021-01336-8)。
+Authorities: [Seurat v5 integration](https://satijalab.org/seurat/articles/seurat5_integration); [batchelor/FastMNN](https://bioconductor.org/packages/release/bioc/html/batchelor.html); [Harmony](https://portals.broadinstitute.org/harmony/); [scVI](https://docs.scvi-tools.org/en/stable/user_guide/models/scvi.html); [scANVI](https://docs.scvi-tools.org/en/stable/user_guide/models/scanvi.html); [sysVI](https://docs.scvi-tools.org/en/1.3.3/user_guide/models/sysvi.html); [scIB, Nature Methods](https://www.nature.com/articles/s41592-021-01336-8).
 
-## 冻结参考投射与标签建议
+## Frozen-Reference Mapping And Label Proposals
 
-| 方法 | 优先适用场景 | 输出语义 | 关键边界 |
+| Method | Preferred use | Output meaning | Main boundary |
 |---|---|---|---|
-| scArches | scVI/scANVI/totalVI 等生成式参考；需要把 query 投到冻结潜在空间 | query latent、posterior、可选标签概率 | reference 模型、基因顺序和 registry 必须冻结；query 未知群必须保留 |
-| Symphony | 大型参考图谱的快速、轻量、可重复 query 映射 | reference coordinates、query embedding、标签建议 | reference centroids、loadings、标准化参数和版本必须同时保存 |
-| RCTD | 参考 scRNA 到空间 spot 的细胞类型权重/丰度 | 位置×细胞类型组成 | 这是空间混合解卷积，不是普通 query 单细胞标签迁移 |
-| Tangram | 单细胞/簇到空间位置的映射 | cell/cluster×location 映射概率 | 映射概率不是细胞比例；组织区域不匹配会造成强制映射 |
+| scArches | A generative scVI, scANVI, or totalVI reference; query mapping into a frozen latent space | query latent representation, posterior, optional label probabilities | Reference model, gene order, and registry must remain frozen; unknown query groups must be retained |
+| Symphony | Fast, lightweight, reproducible mapping to a large reference atlas | reference coordinates, query embedding, label proposals | Reference centroids, loadings, normalization parameters, and versions must be preserved together |
+| RCTD | Cell-type weights or abundances for spatial spots from an scRNA-seq reference | location-by-cell-type composition | Spatial-mixture deconvolution, not ordinary single-cell query label transfer |
+| Tangram | Mapping cells or clusters to spatial positions | cell/cluster-by-location mapping probability | Mapping probability is not a cell proportion; mismatched tissue regions can force spurious mappings |
 
-query 标签是预测，不是事实。强制输出 maximum probability、margin/entropy、unknown/unsupported 状态及 held-out 验证；不能把 query 真值标签用于模型选择后再把同一标签称为独立验证。
+Query labels are predictions, not facts. Outputs must include maximum probability, margin or entropy, unknown or unsupported states, and held-out validation. Query truth labels cannot first guide model selection and then be presented as independent validation.
 
-依据：[scArches, Nature Biotechnology](https://www.nature.com/articles/s41587-021-01001-7)；[scArches 官方文档](https://docs.scvi-tools.org/en/stable/user_guide/models/scarches.html)；[Symphony, Nature Communications](https://www.nature.com/articles/s41467-021-25991-3)；[Symphony 官方代码](https://github.com/immunogenomics/symphony)。
+Authorities: [scArches, Nature Biotechnology](https://www.nature.com/articles/s41587-021-01001-7); [scArches documentation](https://docs.scvi-tools.org/en/stable/user_guide/models/scarches.html); [Symphony, Nature Communications](https://www.nature.com/articles/s41467-021-25991-3); [Symphony code](https://github.com/immunogenomics/symphony).
 
-## 多模态与镶嵌整合
+## Multimodal And Mosaic Integration
 
-| 方法 | 模态与设计 | 优先适用场景 | 主要边界 |
+| Method | Modalities and design | Preferred use | Principal boundary |
 |---|---|---|---|
-| WNN | 同一细胞的配对多模态 | 10x Multiome、CITE-seq 等完全配对数据的邻域融合 | 不适用于大规模未配对数据；模态权重需要逐细胞审查 |
-| MOFA+ | bulk 或 single-cell 的多视图因子模型；允许缺失视图 | 发现跨模态共享/特异因子和样本层级变异 | 因子是统计表示，不自动等于机制 |
-| totalVI | RNA+protein 计数 | CITE-seq，需建模蛋白背景和 batch | 蛋白 panel QC 仍需独立完成；不能把去噪蛋白作为真实观测 |
-| MultiVI | RNA+ATAC，配对或含单模态细胞的 mosaic | 有配对 anchors、共享 peak universe 的 RNA–ATAC | scvi-tools ≥1.4 使用 `setup_mudata`；缺失模态必须显式保留，不能伪造 |
-| GLUE | 图先验连接的配对或未配对 RNA+ATAC | 有可信 promoter/peak/gene guidance graph 的未配对整合 | 结果依赖图的 genome build、注释 release 和边定义 |
+| WNN | Paired multimodal measurements from the same cells | Neighbourhood fusion for fully paired 10x Multiome or CITE-seq data | Not suitable for extensively unpaired data; per-cell modality weights require review |
+| MOFA+ | Multi-view factor model for bulk or single-cell data; missing views allowed | Discover shared and view-specific factors and sample-level variation | Factors are statistical representations, not mechanisms by default |
+| totalVI | RNA and protein counts | CITE-seq with protein-background and batch modelling | Protein-panel QC remains independent; denoised protein is not an observed measurement |
+| MultiVI | RNA and ATAC, paired or mosaic with single-modality cells | RNA–ATAC data with paired anchors and a shared peak universe | scvi-tools 1.4 or later uses `setup_mudata`; missing modalities must be explicit and cannot be fabricated |
+| GLUE | Paired or unpaired RNA and ATAC linked by a graph prior | Unpaired integration with a credible promoter/peak/gene guidance graph | Results depend on graph genome build, annotation release, and edge definitions |
 
-评估至少包括 modality/batch mixing、label preservation、跨模态 label transfer、配对 anchor FOSCTTM、rare-state 保留、donor 重复性，以及“在拟合前隐藏已观测模态”的 held-out reconstruction。不能用拟合后随机遮盖冒充独立重建。
+Evaluation includes modality and batch mixing, label preservation, cross-modal label transfer, paired-anchor FOSCTTM, rare-state preservation, donor reproducibility, and held-out reconstruction in which an observed modality is hidden before fitting. Random masking after fitting is not independent reconstruction evidence.
 
-依据：[totalVI, Nature Methods](https://www.nature.com/articles/s41592-020-01050-x)；[MultiVI 官方 API](https://docs.scvi-tools.org/en/stable/api/reference/scvi.model.MULTIVI.html)；[MultiVI, Nature Methods](https://www.nature.com/articles/s41592-023-01909-9)；[GLUE, Nature Biotechnology](https://www.nature.com/articles/s41587-022-01284-4)；[GLUE 官方文档](https://scglue.readthedocs.io/en/latest/)。
+Authorities: [totalVI, Nature Methods](https://www.nature.com/articles/s41592-020-01050-x); [MultiVI API](https://docs.scvi-tools.org/en/stable/api/reference/scvi.model.MULTIVI.html); [MultiVI, Nature Methods](https://www.nature.com/articles/s41592-023-01909-9); [GLUE, Nature Biotechnology](https://www.nature.com/articles/s41587-022-01284-4); [GLUE documentation](https://scglue.readthedocs.io/en/latest/).
 
-## 跨物种整合
+## Cross-Species Integration
 
-跨物种分析必须先建立可审计同源基因账本，逐行保留 source/target species、gene、orthogroup、一对一/一对多/多对多关系、confidence、resource 和 release。禁止用“第一个命中基因”静默压平复杂同源关系。
+Cross-species analysis first constructs an auditable homolog ledger. Every row retains source and target species, gene, orthogroup, one-to-one, one-to-many, or many-to-many relation, confidence, resource, and release. The first hit must never silently flatten a complex homology relation.
 
-| 方法 | 使用的同源信息 | 优先适用场景 | 局限与可调参数 |
+| Method | Homology information | Preferred use | Limits and tunable parameters |
 |---|---|---|---|
-| 一对一共享基因 + scVI/scANVI、Harmony、CCA/RPCA | 高置信、所有物种共有的一对一 orthogroup | 保守、易解释的必备基线；进化距离较近或共享基因充分 | 会丢失 paralog 和多对多信息；HVG、latent/dims、批次变量、seed 必须统一比较 |
-| SAMap | 双向蛋白序列相似度 + 表达邻域 | 两个或多个进化距离较远物种；研究细胞类型进化和 paralog 替代 | 需要 NCBI BLAST 与审核后的 map；调整物种短 ID、map、邻域与迭代；相似性仍不是同源证明 |
-| SATURN | 每个物种的蛋白语言模型嵌入 + 学习的 macrogenes | 多物种、同源关系复杂或一对一基因不足；有 GPU 和版本化蛋白嵌入 | 计算量大；`hv_genes`、`num_macrogenes`、pretrain/metric epochs、embedding model、batch size、seed 影响结果 |
-| CAME | 细胞—基因异质图 + 一对一/一对多/多对多关系 | 成对 reference→query 标签转移、需要保留复杂基因关系和联合基因模块 | 原始流程是 pairwise；`ntop_deg`、`ntop_deg_nodes`、non-1v1 features、epochs、batch size 可调 |
+| Shared one-to-one genes with scVI/scANVI, Harmony, or CCA/RPCA | High-confidence one-to-one orthogroups shared by all species | Conservative, interpretable baseline for closer species or sufficient shared genes | Loses paralog and many-to-many information; HVGs, latent dimensions, batch variables, and seeds require matched comparison |
+| SAMap | Bidirectional protein-sequence similarity and expression neighbourhoods | Two or more evolutionarily distant species; cell-type evolution and paralog substitution | Requires NCBI BLAST and a reviewed map; species short IDs, map, neighbourhoods, and iterations are tunable; similarity is not proof of homology |
+| SATURN | Protein-language-model embeddings for each species and learned macrogenes | Multiple species, complex homology, or insufficient one-to-one genes; GPU and versioned protein embeddings available | Computationally intensive; `hv_genes`, `num_macrogenes`, pretraining/metric epochs, embedding model, batch size, and seed affect results |
+| CAME | Heterogeneous cell–gene graph with one-to-one, one-to-many, and many-to-many relations | Pairwise reference-to-query label transfer retaining complex gene relations and joint gene modules | Original workflow is pairwise; `ntop_deg`, `ntop_deg_nodes`, non-1v1 features, epochs, and batch size are tunable |
 
-标准比较至少包括：
+The standard comparison includes:
 
-1. 同一细胞集合上的未整合基线、一对一经典基线和至少一种专用跨物种方法。
-2. leave-one-species-out 标签转移；训练物种不存在的真值标签列为 unsupported，不计作普通错误后强制重命名。
-3. species mixing、label/cell-state preservation、species predictability 分开报告；不要求物种信号降为零。
-4. 物种特异群在未整合与整合空间中的保留，及其独立 marker/功能证据。
-5. 匹配细胞类型的保守模块一致性；模块比较和细胞标签转移不能只依赖同一套 marker。
-6. 差异分析回到每个物种的原始计数，使用 sample/donor/species 层级模型或分物种分析后 meta-analysis。
+1. An unintegrated baseline, a one-to-one classical baseline, and at least one dedicated cross-species method on the same cell set.
+2. Leave-one-species-out label transfer; truth classes absent from training species are unsupported rather than forced into ordinary errors and renamed.
+3. Separate reports for species mixing, label or cell-state preservation, and species predictability; species signal is not required to become zero.
+4. Preservation of species-specific populations in unintegrated and integrated spaces, with independent marker or functional evidence.
+5. Conserved-module concordance for matched cell types; module comparison and label transfer cannot rely only on the same markers.
+6. Differential analysis on raw counts for each species using sample, donor, or species-level models, or species-stratified analyses followed by meta-analysis.
 
-依据：[SAMap 官方代码与 v3 API](https://github.com/atarashansky/SAMap)；[SAMap, eLife](https://elifesciences.org/articles/66747)；[SATURN, Nature Methods](https://www.nature.com/articles/s41592-024-02191-z)；[SATURN 官方代码](https://github.com/snap-stanford/SATURN)；[CAME 官方教程](https://xingyanliu.github.io/CAME/tut_notebooks/getting_started_pipeline_un.html)；[CAME, Genome Research](https://genome.cshlp.org/content/early/2022/12/16/gr.276868.122)；[跨物种方法 benchmark, Nature Communications](https://www.nature.com/articles/s41467-023-41855-w)。
+Authorities: [SAMap code and v3 API](https://github.com/atarashansky/SAMap); [SAMap, eLife](https://elifesciences.org/articles/66747); [SATURN, Nature Methods](https://www.nature.com/articles/s41592-024-02191-z); [SATURN code](https://github.com/snap-stanford/SATURN); [CAME tutorial](https://xingyanliu.github.io/CAME/tut_notebooks/getting_started_pipeline_un.html); [CAME, Genome Research](https://genome.cshlp.org/content/early/2022/12/16/gr.276868.122); [cross-species benchmark, Nature Communications](https://www.nature.com/articles/s41467-023-41855-w).
 
-## JSD 在单细胞和空间投射中的位置
+## Role Of JSD In Single-Cell And Spatial Mapping
 
-Jensen–Shannon divergence（JSD）是两个非负、归一化分布之间的对称差异度，不是投射或解卷积算法。
+Jensen–Shannon divergence (JSD) is a symmetric difference measure between two nonnegative normalized distributions. It is not a mapping or deconvolution algorithm.
 
-- 有独立真值或拟合前保留的模拟混合时，prediction-vs-truth JSD 可以作为准确度指标，范围为 0–1，越低越好。
-- RCTD-vs-cell2location、scArches-vs-Symphony 等 method-vs-method JSD 只能描述一致性，不能称为准确度。
-- 必须同时按 spot/cell 和 cell type/label 两个方向报告；先核对行列身份并对每个分布归一化。
-- 若真值来自同一模型、同一 marker 或拟合后的 imputation，就不构成独立验证。
+- With independent truth or a mixture withheld before fitting, prediction-versus-truth JSD can measure accuracy on a 0–1 scale, where lower is better.
+- Method-versus-method JSD, such as RCTD versus cell2location or scArches versus Symphony, describes agreement only and cannot be called accuracy.
+- JSD is reported both by spot or cell and by cell type or label, after verifying row and column identities and normalizing every distribution.
+- Truth derived from the same model, markers, or post-fit imputation is not independent validation.
 
-## 统一准入规则
+## Unified Admission Rules
 
-任何整合方法只有同时满足以下条件才可进入解释：
+An integration result enters interpretation only when all conditions are met:
 
-1. 输入计数、细胞、特征、样本、批次、物种、模态缺失和 reference 版本可追溯。
-2. target biology 与技术批次没有完美混杂；无法被设计识别的效应不靠算法“修复”。
-3. 所有候选使用相同基础细胞和预先冻结的评估集合，原生输出分别保存。
-4. mixing 与 biology preservation 分开评价，不构造掩盖失败项的单一总分。
-5. unknown、unsupported、rare 和 species-specific 状态完整保留。
-6. 输出可重载，细胞数、顺序、feature namespace、参数、版本、seed 和 digest 一致。
-7. confirmatory inference 明确回到 raw counts 与生物学重复。
+1. Input counts, cells, features, samples, batches, species, modality missingness, and reference version are traceable.
+2. Target biology is not perfectly confounded with technical batch; algorithms do not repair an effect that the design cannot identify.
+3. All candidates use the same foundational cells and a pre-frozen evaluation set; native outputs are retained separately.
+4. Mixing and biological preservation are evaluated separately rather than collapsed into a score that conceals failure.
+5. Unknown, unsupported, rare, and species-specific states remain intact.
+6. Outputs can be reloaded with consistent cell count, order, feature namespace, parameters, versions, seed, and digest.
+7. Confirmatory inference explicitly returns to raw counts and biological replicates.

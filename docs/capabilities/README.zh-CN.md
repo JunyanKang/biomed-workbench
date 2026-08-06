@@ -8,15 +8,15 @@ Biomed Workbench 按科研决策组织能力，而不是按脚本目录展示能
 
 | 方向 | 科学角色 | 详细文档 |
 | --- | --- | --- |
-| 证据与文献 | 建立“已知、争议、缺失、是否过时”的证据底座 | [查看](evidence-and-literature.md) |
+| 证据与文献 | 建立“已知、争议、缺失、是否过时”的证据底座 | [查看](evidence-and-literature.zh-CN.md) |
 | Bulk 测量 | 分析混合样本中的 RNA、染色质、蛋白结合、翻译、新生转录和基因组三维结构，同时严格区分实验方法、靶标、对照与归一化策略 | [Bulk 测序方法](bulk-sequencing-assays.zh-CN.md)；[染色质 peak 分析](bulk-chromatin-peak-calling.md) |
-| 单细胞测量 | 在保留细胞层级结构的同时处理样本设计、整合、注释、轨迹、多组学与跨物种投射 | [通用与单细胞分析](omics-and-single-cell.md)；[整合、参考映射与跨物种规范](single-cell-integration-reference-cross-species.md) |
-| 空间测量 | 连接分子状态、物理坐标、组织图像、参考映射、空间区域、通讯、多切片对齐与三维结构 | [轨迹与空间完整分析规范](trajectory-spatial-complete-analysis.md)；[空间解卷积与投射方法](spatial-deconvolution-projection-methods.md) |
-| 通用分析与项目方法 | 为适用的研究尺度提供格式核查、实验设计、统计、富集、网络、作图规范与科学评审 | [查看](omics-and-single-cell.md) |
+| 单细胞测量 | 在保留细胞层级结构的同时处理样本设计、整合、注释、轨迹、多组学与跨物种投射 | [通用与单细胞分析](omics-and-single-cell.zh-CN.md)；[整合、参考映射与跨物种规范](single-cell-integration-reference-cross-species.zh-CN.md) |
+| 空间测量 | 连接分子状态、物理坐标、组织图像、参考映射、空间区域、通讯、多切片对齐与三维结构 | [轨迹与空间完整分析规范](trajectory-spatial-complete-analysis.zh-CN.md)；[空间解卷积与投射方法](spatial-deconvolution-projection-methods.md) |
+| 通用分析与项目方法 | 为适用的研究尺度提供格式核查、实验设计、统计、富集、网络、作图规范与科学评审 | [查看](omics-and-single-cell.zh-CN.md) |
 | 分子与结构生物学 | 连接序列、互作网络、化学、对接和结构证据，形成可实验检验的分子假设 | [中文指南](molecular-and-structural.zh-CN.md) · [English](molecular-and-structural.md)；STRING PPI；HADDOCK3/DockQ/PRODIGY；AlphaFold 3；MSBio2/Metascape/Cytoscape |
-| 成像与可视化 | 对图像进行定量分析，并产出忠实、可审查的科学视觉材料 | [查看](imaging-and-visualization.md) |
-| 临床与实验研究 | 将队列、实验测量和统计解释连接为可判断的研究证据 | [查看](clinical-and-experimental.md) |
-| 论文与转化交付 | 根据项目证据推荐期刊，并将证据链转化为符合目标期刊规范的稿件、回复、专利、图表和展示材料 | [查看](publication-and-translation.md)；[版本化期刊规范](../journal-standards.zh-CN.md) |
+| 成像与可视化 | 对图像进行定量分析，并产出忠实、可审查的科学视觉材料 | [查看](imaging-and-visualization.zh-CN.md) |
+| 临床与实验研究 | 将队列、实验测量和统计解释连接为可判断的研究证据 | [查看](clinical-and-experimental.zh-CN.md) |
+| 论文与转化交付 | 根据项目证据推荐期刊，并将证据链转化为符合目标期刊规范的稿件、回复、专利、图表和展示材料 | [查看](publication-and-translation.zh-CN.md)；[版本化期刊规范](../journal-standards.zh-CN.md) |
 
 ## 编排模型
 

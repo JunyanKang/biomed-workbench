@@ -1,0 +1,58 @@
+# 临床与实验研究
+
+语言：[中文](clinical-and-experimental.zh-CN.md) · [English](clinical-and-experimental.md)
+
+## 科学角色
+
+这一能力方向支持结构化临床分析、转化证据、实验计算、测定解读和报告质量。它服务于科研流程，不取代临床判断、受监管系统或实验室验证。
+
+## 统一统计与临床方案
+
+对于广义的统计、建模和转化请求，工作台从队列或矩阵 profiling 开始，依次安排推断分析、模型评估、不良事件汇总以及临床或报告边界审查。生存分析、biomarker 性能、分类金标准评估、cosinor 建模、差异表达、剂量反应、生长曲线和 qPCR 保持为拥有独立输入契约与质量门控的模块。
+
+方案保留实验单位、分母、删失、阈值依赖性、缺失情况和模型限制。临床转化模块可以汇总和审查科研证据，但会阻止患者特异的诊断、治疗、分诊、预后或受监管临床决策支持。
+
+## 临床与转化分析
+
+- 使用明确分母和变量可用性汇总科研队列。
+- 在事件与删失背景下估计 Kaplan–Meier 生存。
+- 评估二分 biomarker 性能，并保留阈值依赖性。
+- 在不隐藏严重程度或分母差异的前提下汇总科研不良事件。
+- 在明确字段规则下对结构化临床记录去识别化。
+- 审查临床报告结构，并获取感知研究设计的 ClinicalTrials.gov 证据。
+- 在解读前阻止患者特异的诊断、治疗、分诊和预后请求，同时保留安全的科研汇总操作。
+
+代表性模块包括 `cohort-summary`、`survival-analysis`、`biomarker-performance`、`adverse-event-summary`、`clinical-deidentify`、`clinical-report-audit`、`clinical-trial-evidence` 和 `clinical-decision-boundary-audit`。
+
+## 实验计划与定量
+
+- 计算 PCR master mix 和梯度稀释计划。
+- 在声明内参和校准样选择下定量相对 qPCR 表达。
+- 使用保留重复的细菌生长曲线、声明的空白校正、logistic 与修正 Gompertz 比较、残差诊断和明确生物学重复边界进行拟合。
+- 从已观察的梯度稀释平板估计 CFU/mL，保留 TNTC、低计数和无效平板，并提供感知暴露的汇总、不确定性和一致性诊断。
+- 从明确的空白、对照和重复层测量汇总结晶紫生物膜测定，不把单次读数转换为显著性主张。
+- 探索明确声明的细菌生长与清除情景，并保留模拟与实测证据之间的边界。
+- 导入完整 FCS 2.0、3.0 或 3.1 事件表，保留通道身份，再应用顺序流式门控计划。
+- 从已复核的染料稀释代次计算 CFSE 或 CellTrace 前体等价频率、division index、proliferation index 和 percent divided。
+- 汇总已复核的 Annexin 与活性染料象限，不以默认阈值替代补偿和对照证据。
+- 仅在受约束峰分离、收敛与残差诊断支持解读时，拟合已复核的 DNA 含量分布。
+- 定量免疫测定校准曲线，并保留模型与量程限制。
+- 拟合稳态酶动力学，并保留不确定性和模型假设。
+- 拟合预先声明周期的 cosinor 模型，保留采样覆盖、残差诊断以及描述性节律与因果性昼夜推断之间的边界。
+- 汇总一条导出的电生理 trace，给出基线、采样、峰值和阈值穿越指标，同时阻止对 spike 类型、细胞状态和疾病状态的过度解读。
+- 用背景、可选匹配上样对照和声明参考泳道归一化已复核的 Western blot ROI 测量，并保留技术重复与生物学重复的边界。
+- 将已校准且声明衰变校正的放射性示踪剂器官测量汇总为每克百分比注射剂量、已观察区间 AUC 和匹配时间的肿瘤/血液比，不声称药代动力学或辐射剂量学。
+- 保留动物层异种移植瘤体积轨迹，仅在明确对照和终点契约下计算描述性终点 TGI。
+- 比较零级与一级加速稳定性拟合，仅当某一动力学模型在多个温度下获得支持时，进行边界明确的 Arrhenius 外推。
+
+代表性模块包括 `pcr-plan`、`dilution-plan`、`qpcr-relative-expression`、`dose-response`、`growth-curve`、`cfu-enumeration`、`biofilm-crystal-violet`、`bacterial-population-scenario`、`fcs-event-import`、`flow-cytometry-summary`、`dye-dilution-proliferation`、`annexin-viability-summary`、`dna-content-phase-fit`、`immunoassay-quantification`、`enzyme-kinetics`、`fixed-period-cosinor`、`electrophysiology-trace-summary`、`western-blot-densitometry`、`radiotracer-biodistribution`、`xenograft-tumor-growth` 和 `accelerated-stability`。
+
+## 质量门控
+
+工作台保留独立实验单位、分母、删失、测定量程、对照、门控顺序、校准假设和缺失情况。它会阻止超出研究设计的临床或因果解读，也不会把计算计划当作实验已成功完成的证据。
+
+对流式细胞术，工作台可以保留未抽样的 FCS 事件、应用声明的顺序门控，并在保留的父门事件集中定量明确的 marker 规则模式。除非补偿、变换、阈值依据、panel 身份、样本身份、独立证据和考虑重复的设计支持更强主张，marker 模式保持为描述性。
+
+## 典型交付物
+
+队列表、生存汇总、biomarker 报告、不良事件表、去识别化产物、测定计算、校准结果、门控汇总、实验计划、方法文本与明确的后续验证标准。

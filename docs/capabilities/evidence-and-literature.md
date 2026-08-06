@@ -1,5 +1,7 @@
 # Evidence And Literature
 
+Languages: [English](evidence-and-literature.md) · [中文](evidence-and-literature.zh-CN.md)
+
 ## Scientific Role
 
 - NCBI Gene ortholog records can provide a bounded source-to-target mapping for declared Gene IDs and taxa; they remain database evidence rather than functional-equivalence evidence.

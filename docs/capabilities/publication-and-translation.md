@@ -1,5 +1,7 @@
 # Publication And Translation
 
+Languages: [English](publication-and-translation.md) · [中文](publication-and-translation.zh-CN.md)
+
 ## Scientific Role
 
 This capability area turns the research record into a coherent, reviewable, and traceable scientific package. It links claims to evidence and analysis artifacts, preserves negative and unresolved findings, and treats revision as a verifiable transformation rather than a prose promise.

@@ -77,15 +77,15 @@ Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中
 
 | 研究层级 | 已发布的代表性能力 |
 | --- | --- |
-| [证据、数据库与文献](docs/capabilities/evidence-and-literature.md) | NCBI、UniProt、Ensembl、gnomAD、HPO、GO、Reactome、Open Targets、Europe PMC、Crossref、bioRxiv、ClinicalTrials.gov、证据新鲜度、引用与主张审查 |
-| [Bulk 测序与分子测量](docs/capabilities/bulk-sequencing-assays.zh-CN.md) | bulk RNA-seq；ChIP-seq、CUT&RUN、CUT&Tag；DRIP-seq/DRIPc-seq、qDRIP-seq、R-ChIP、MapR 等 R-loop 测量；ATAC-seq、DNase-seq；RIP-seq、eCLIP/iCLIP/HITS-CLIP/PAR-CLIP、LACE-seq；Ribo-seq；GRO-seq、PRO-seq、TT-seq、NET-seq；WGBS/RRBS/EM-seq；Hi-C/Micro-C；MeRIP/m6A-seq |
-| [单细胞、轨迹与跨系统整合](docs/capabilities/single-cell-integration-reference-cross-species.md) | Scanpy/Seurat、scVI/scANVI、Harmony、CCA/RPCA、FastMNN、scIB、WNN、MOFA+；公共 PBMC 多组学数据验收的 MultiVI；Hydra–涡虫跨物种数据验收的 SAMap |
-| [空间组学](docs/capabilities/trajectory-spatial-complete-analysis.md) | Visium 与 Xenium 数据结构；Xenium–SpatialData–Squidpy 图像/分割流程；Slide-seq 上验收的 RCTD、公共数据验收的 Tangram；PASTE 多切片对齐与三维坐标重建 |
-| [跨尺度通用分析](docs/capabilities/omics-and-single-cell.md) | 文件与读段质控、差异表达和差异可及性、DEqMS、GO/KEGG、GSEA、WGCNA、NMF、motif、网络分析、JSD、统一统计审查与作图规范 |
+| [证据、数据库与文献](docs/capabilities/evidence-and-literature.zh-CN.md) | NCBI、UniProt、Ensembl、gnomAD、HPO、GO、Reactome、Open Targets、Europe PMC、Crossref、bioRxiv、ClinicalTrials.gov、证据新鲜度、引用与主张审查 |
+| [Bulk 测序](docs/capabilities/bulk-sequencing-assays.zh-CN.md) | bulk RNA-seq；ChIP-seq、CUT&RUN、CUT&Tag；DRIP-seq/DRIPc-seq、qDRIP-seq、R-ChIP、MapR 等 R-loop 测量；ATAC-seq、DNase-seq；RIP-seq、eCLIP/iCLIP/HITS-CLIP/PAR-CLIP、LACE-seq；Ribo-seq；GRO-seq、PRO-seq、TT-seq、NET-seq；WGBS/RRBS/EM-seq；Hi-C/Micro-C；MeRIP/m6A-seq |
+| [单细胞、轨迹与跨系统整合](docs/capabilities/single-cell-integration-reference-cross-species.zh-CN.md) | Scanpy/Seurat、scVI/scANVI、Harmony、CCA/RPCA、FastMNN、scIB、WNN、MOFA+、MultiVI、SAMap |
+| [空间组学](docs/capabilities/trajectory-spatial-complete-analysis.zh-CN.md) | Visium 与 Xenium 数据结构；Xenium–SpatialData–Squidpy 图像/分割流程；Slide-seq 上验收的 RCTD、公共数据验收的 Tangram；PASTE 多切片对齐与三维坐标重建 |
+| [跨尺度通用分析](docs/capabilities/omics-and-single-cell.zh-CN.md) | 文件与读段质控、差异表达和差异可及性、DEqMS、GO/KEGG、GSEA、WGCNA、NMF、motif、网络分析、JSD、统一统计审查与作图规范 |
 | [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | STRING 功能/物理互作网络；HADDOCK3 复合物对接、DockQ 参考评价与 PRODIGY 亲和力估计；AlphaFold Server 人工提交包、真实结果档案的多任务/多模型重读、置信度与跨链接触审查、可复绘发表图件；资源与许可门禁下的本地官方 AlphaFold 3 入口；MSBio2/Metascape 与 Cytoscape 网络交付；序列、ORF、PCR、CRISPR、克隆、结构质量、结构比较与实验验证设计 |
-| [临床与实验研究](docs/capabilities/clinical-and-experimental.md) | 队列与生存、biomarker、流式、qPCR、剂量反应、Western blot、biodistribution、xenograft、稳定性与实验定量 |
-| [成像与科学可视化](docs/capabilities/imaging-and-visualization.md) | 图像 profiling、分割、共定位、追踪、组织图像配准、统一绘图规格、图组编排与视觉质量审查 |
-| [论文与转化交付](docs/capabilities/publication-and-translation.md) | 基于研究范围、读者、文章类型和证据成熟度的期刊定位，以及稿件规范审查、图表规格、引用审计、审稿模拟、回复矩阵、修订谱系、专利准备与展示材料 |
+| [临床与实验研究](docs/capabilities/clinical-and-experimental.zh-CN.md) | 队列与生存、biomarker、流式、qPCR、剂量反应、Western blot、biodistribution、xenograft、稳定性与实验定量 |
+| [成像与科学可视化](docs/capabilities/imaging-and-visualization.zh-CN.md) | 图像 profiling、分割、共定位、追踪、组织图像配准、统一绘图规格、图组编排与视觉质量审查 |
+| [论文与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) | 基于研究范围、读者、文章类型和证据成熟度的期刊定位，以及稿件规范审查、图表规格、引用审计、审稿模拟、回复矩阵、修订谱系、专利准备与展示材料 |
 
 <p align="center">
   <img src="assets/readme/multiscale-omics.png" width="100%" alt="跨尺度多组学、空间、轨迹和出版图组的概念图">

@@ -1,5 +1,7 @@
 # Trajectory and spatial analysis capability contract
 
+Languages: [English](trajectory-spatial-complete-analysis.md) · [中文](trajectory-spatial-complete-analysis.zh-CN.md)
+
 ## Scope and evidence levels
 
 The workbench separates a registered method, an executable project template,

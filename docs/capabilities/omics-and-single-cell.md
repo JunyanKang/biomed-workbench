@@ -1,5 +1,7 @@
 # Cross-Scale And Single-Cell Analysis
 
+Languages: [English](omics-and-single-cell.md) · [中文](omics-and-single-cell.zh-CN.md)
+
 ## Scientific Role
 
 This capability area coordinates sequencing data from input and design validation through statistical analysis, biological interpretation, hypothesis revision, and publication delivery. The workbench treats biological replication, immutable raw measurements, reference identity, and observed output checks as first-class requirements.

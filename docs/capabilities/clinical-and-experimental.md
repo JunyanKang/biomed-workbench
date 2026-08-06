@@ -1,5 +1,7 @@
 # Clinical And Experimental Research
 
+Languages: [English](clinical-and-experimental.md) · [中文](clinical-and-experimental.zh-CN.md)
+
 ## Scientific Role
 
 This capability area supports structured clinical analysis, translational evidence, experimental calculations, assay interpretation, and report quality. It is intended for research workflows and does not replace clinical judgment, regulated systems, or laboratory validation.

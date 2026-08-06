@@ -1,5 +1,7 @@
 # Imaging And Visualization
 
+Languages: [English](imaging-and-visualization.md) · [中文](imaging-and-visualization.zh-CN.md)
+
 ## Scientific Role
 
 - Register equal-shape 2D images by a bounded integer translation with explicit overlap and MSE diagnostics; this is a baseline alignment check, not affine or deformable registration.
