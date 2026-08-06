@@ -7,7 +7,7 @@ from .evidence import EVIDENCE_RELATIONS, EvidenceRecord, add_evidence, evidence
 from .hypotheses import CLAIM_STRENGTHS, EXPECTED_DIRECTIONS, HYPOTHESIS_STATUSES, Hypothesis, add_hypothesis, attach_evidence, revise_hypothesis
 from .decisions import DecisionEvent
 from .plans import NODE_STATUSES, PLAN_TYPES, PlanNode, ResearchDAG
-from .state import EVENT_TYPES, ProjectState, apply_event, replay
+from .state import EVENT_TYPES, ProjectState, StateMigrationRecord, apply_event, replay
 from .identity import FrozenMapping, canonical_json, digest_value, freeze_mapping, redact_sensitive, thaw, validate_identifier
 from .scientific_dependency import (
     ARTIFACT_KINDS,
@@ -77,6 +77,7 @@ __all__ = [
     "Hypothesis",
     "PlanNode",
     "ProjectState",
+    "StateMigrationRecord",
     "ResearchDAG",
     "ScientificArtifact",
     "canonical_json",

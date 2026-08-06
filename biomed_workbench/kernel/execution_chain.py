@@ -65,12 +65,10 @@ def _artifact_gate_requirements(state: "ProjectState", artifact_id: str) -> tupl
         if len(assigned) != 1:
             raise ValueError("observed execution gate is assigned more than once to an output port")
         evaluation = assigned[0]
-        status = str(result.get("status"))
-        if status == "failed":
-            raise ValueError(f"failed scientific gate blocks artifact completion: {gate_id}")
-        if status not in {"passed", "requires_review", "not_evaluable"}:
+        status = str(evaluation.get("status"))
+        if status not in {"passed", "failed", "requires_review", "not_evaluable"}:
             raise ValueError(f"observed execution gate has an unsupported status: {gate_id}")
-        if status in {"requires_review", "not_evaluable"}:
+        if status in {"failed", "requires_review", "not_evaluable"}:
             requirements.append({
                 "gate_id": str(gate_id),
                 "port": port,
@@ -81,6 +79,9 @@ def _artifact_gate_requirements(state: "ProjectState", artifact_id: str) -> tupl
                 "observed_value": str(evaluation.get("observed_metric")),
                 "criterion": str(evaluation.get("threshold")),
                 "finding": str(evaluation.get("reason")),
+                "evaluator_identity": evaluation.get("evaluator_identity"),
+                "evaluator_version": evaluation.get("evaluator_version"),
+                "evaluator_sha256": evaluation.get("evaluator_sha256"),
             })
     return observed, port, tuple(sorted(requirements, key=lambda item: str(item["gate_id"])))
 
@@ -108,6 +109,167 @@ def validate_gate_adjudication_binding(state: "ProjectState", adjudication: obje
     actual = {key: getattr(adjudication, key) for key in expected}
     if actual != expected:
         raise ValueError("gate adjudication differs from its exact receipt result or evidence binding")
+    observed_status = str(requirement["status"])
+    mode = str(getattr(adjudication, "adjudication_mode"))
+    status = str(getattr(adjudication, "status"))
+    if observed_status == "failed":
+        automatic_expected = {
+            "adjudication_mode": "automatic",
+            "status": "rejected",
+            "evaluator_identity": requirement["evaluator_identity"],
+            "evaluator_version": requirement["evaluator_version"],
+            "evaluator_sha256": requirement["evaluator_sha256"],
+        }
+        if {key: getattr(adjudication, key) for key in automatic_expected} != automatic_expected:
+            raise ValueError("failed gate requires its exact plugin-owned automatic rejection")
+    elif mode != "manual":
+        raise ValueError("requires-review and not-evaluable gates require manual adjudication")
+    elif observed_status == "not_evaluable" and status == "accepted":
+        raise ValueError("not-evaluable scientific gates cannot receive unqualified acceptance")
+
+
+def automatic_failed_gate_adjudication(
+    state: "ProjectState",
+    artifact_id: str,
+    gate_id: str,
+    *,
+    source_urls: tuple[str, ...],
+) -> object:
+    """Create the only automatic terminal adjudication currently admitted by the kernel."""
+    from .scientific_dependency import ScientificGateAdjudication
+
+    observed, _port, requirements = _artifact_gate_requirements(state, artifact_id)
+    requirement = next((item for item in requirements if item["gate_id"] == gate_id), None)
+    if requirement is None or requirement["status"] != "failed":
+        raise ValueError("automatic adjudication requires an observed failed gate")
+    identity = digest_value({
+        "artifact_id": artifact_id,
+        "observed_execution_receipt_id": getattr(observed, "id"),
+        "gate_id": gate_id,
+        "gate_result_digest": requirement["gate_result_digest"],
+    })
+    return ScientificGateAdjudication(
+        id=f"adjudication-automatic-{identity[:24]}",
+        artifact_id=artifact_id,
+        observed_execution_receipt_id=getattr(observed, "id"),
+        gate_id=gate_id,
+        port=str(requirement["port"]),
+        evaluator_type=str(requirement["evaluator_type"]),
+        gate_result_digest=str(requirement["gate_result_digest"]),
+        evidence_payload_sha256=requirement["evidence_payload_sha256"],
+        adjudication_mode="automatic",
+        observed_value=str(requirement["observed_value"]),
+        criterion=str(requirement["criterion"]),
+        finding=str(requirement["finding"]),
+        status="rejected",
+        reviewer_identity="packaged-gate-evaluator",
+        rationale_zh="插件登记的评定器依据冻结标准检测到失败结果，因此自动形成拒绝审议并等待人工科学评审。",
+        rationale_en="The registered packaged evaluator detected failure against the frozen criterion, so an automatic rejection is recorded for human scientific review.",
+        limitations_zh=("自动拒绝仅确认当前门禁失败，不替代对失败原因、研究影响和后续方案的人工评审。",),
+        limitations_en=("Automatic rejection establishes only that this gate failed; human review must still assess cause, scientific impact, and next action.",),
+        source_urls=source_urls,
+        evaluator_identity=str(requirement["evaluator_identity"]),
+        evaluator_version=str(requirement["evaluator_version"]),
+        evaluator_sha256=str(requirement["evaluator_sha256"]),
+    )
+
+
+def validate_revision_target_contract(
+    state: "ProjectState",
+    decision: object,
+    *,
+    registry: object | None = None,
+    require_pending: bool = False,
+) -> tuple[object, object]:
+    """Validate one immutable rerun or method-switch replacement contract."""
+    from .scientific_dependency import REEXECUTE_DECISION_ACTIONS
+
+    action = str(getattr(decision, "action"))
+    if action not in REEXECUTE_DECISION_ACTIONS:
+        raise ValueError("revision target validation requires a rerun or method-switch decision")
+    target_ids = tuple(getattr(decision, "next_plan_node_ids"))
+    if len(target_ids) != 1:
+        raise ValueError("rerun and method-switch decisions require exactly one revision target")
+    active_plan = next((item for item in state.plans if item.id == state.active_plan_id), None)
+    if active_plan is None:
+        raise ValueError("revision target requires one active research plan")
+    producer_by_artifact = {
+        artifact_id: node
+        for node in active_plan.nodes
+        for artifact_id in node.planned_output_artifact_ids.values()
+    }
+    source = producer_by_artifact.get(str(getattr(decision, "artifact_id")))
+    target = next((node for node in active_plan.nodes if node.id == target_ids[0]), None)
+    if source is None or target is None or source.id == target.id:
+        raise ValueError("revision target must replace the active source node with a distinct node")
+    if require_pending and target.status not in {"pending", "ready"}:
+        raise ValueError("revision target must remain pending until its source decision is recorded")
+    if target.revision_of_node_id != source.id:
+        raise ValueError("revision target must explicitly name the source node it replaces")
+    ordinary_dependents = tuple(
+        node.id
+        for node in active_plan.nodes
+        if source.id in node.dependencies and node.revision_of_node_id is None
+    )
+    if ordinary_dependents:
+        raise ValueError(
+            "a nonterminal source with ordinary downstream nodes requires a new plan revision"
+        )
+    if (
+        source.branch_id != target.branch_id
+        or source.dependencies != target.dependencies
+        or source.target_hypothesis_ids != target.target_hypothesis_ids
+        or source.expected_evidence_types != target.expected_evidence_types
+        or source.expected_output_artifact_types != target.expected_output_artifact_types
+        or set(source.input_bindings.values()) != set(target.input_bindings.values())
+    ):
+        raise ValueError("revision target differs from the source branch, inputs, outputs, dependencies, or hypothesis scope")
+    if target.planned_request_digest is None:
+        raise ValueError("revision target must freeze its planned request digest")
+    reload_receipt = next(
+        (item for item in state.artifact_reloads if item.artifact_id == getattr(decision, "artifact_id")),
+        None,
+    )
+    observed = next(
+        (
+            item for item in state.observed_executions
+            if reload_receipt is not None and item.id == reload_receipt.observed_execution_receipt_id
+        ),
+        None,
+    )
+    if observed is None:
+        raise ValueError("revision source lacks an observed parameter identity")
+    source_request_digest = observed.parameters_digest
+    if action in {"rerun-same-method", "rerun-adjusted-parameters"}:
+        if source.module_id != target.module_id or source.input_bindings != target.input_bindings:
+            raise ValueError("same-method reruns require the same module and input-port bindings")
+        if action == "rerun-same-method" and target.planned_request_digest != source_request_digest:
+            raise ValueError("same-method rerun must preserve the observed request identity")
+        if action == "rerun-adjusted-parameters" and target.planned_request_digest == source_request_digest:
+            raise ValueError("adjusted-parameter rerun must freeze a distinct request identity")
+    elif source.module_id == target.module_id:
+        raise ValueError("method-switch target must use a distinct module")
+    if registry is not None:
+        source_manifest = registry.get(source.module_id)
+        target_manifest = registry.get(target.module_id)
+        if action == "switch-method" and target.module_id not in source_manifest.alternatives:
+            raise ValueError("method-switch target is not a declared source-module alternative")
+        artifacts = {item.id: item for item in state.artifacts}
+        if set(target.input_bindings) != {port.name for port in target_manifest.input_artifacts}:
+            raise ValueError("revision target input ports differ from its registered module")
+        if any(
+            artifacts.get(target.input_bindings[port.name]) is None
+            or artifacts[target.input_bindings[port.name]].artifact_type != port.artifact_type
+            for port in target_manifest.input_artifacts
+        ):
+            raise ValueError("revision target inputs are incompatible with its registered module")
+        if (
+            set(target.planned_output_artifact_ids) != {port.name for port in target_manifest.output_artifacts}
+            or tuple(port.artifact_type for port in target_manifest.output_artifacts)
+            != target.expected_output_artifact_types
+        ):
+            raise ValueError("revision target outputs are incompatible with its registered module")
+    return source, target
 
 
 def gate_adjudication_bundle_digest(state: "ProjectState", artifact_id: str) -> str | None:
@@ -288,10 +450,41 @@ def validate_node_execution_chain(
 def validate_validated_delivery_state(state: "ProjectState") -> tuple[str, ...]:
     """Require a terminal active plan and identity-level retained leaf deliverables."""
     active_plan = next((item for item in state.plans if item.id == state.active_plan_id), None)
-    if active_plan is None or any(node.status != "completed" for node in active_plan.nodes):
+    if active_plan is None:
         raise ValueError("validated-delivery requires every active plan node to be completed")
-    dependency_ids = {dependency for node in active_plan.nodes for dependency in node.dependencies}
-    leaf_nodes = tuple(node for node in active_plan.nodes if node.id not in dependency_ids)
+    selected_revision_ids = {
+        node_id
+        for decision in state.scientific_decisions
+        if decision.action in REEXECUTE_DECISION_ACTIONS
+        for node_id in decision.next_plan_node_ids
+    }
+    producer_by_artifact = {
+        artifact_id: node.id
+        for node in active_plan.nodes
+        for artifact_id in node.planned_output_artifact_ids.values()
+    }
+    valid_superseded_ids = {
+        producer_by_artifact[decision.artifact_id]
+        for decision in state.scientific_decisions
+        if decision.action in REEXECUTE_DECISION_ACTIONS
+        and decision.artifact_id in producer_by_artifact
+        and set(decision.next_plan_node_ids) <= selected_revision_ids
+    }
+    inactive_ids = {
+        node.id
+        for node in active_plan.nodes
+        if (node.status == "superseded" and node.id in valid_superseded_ids)
+        or (
+            node.revision_of_node_id is not None
+            and node.id not in selected_revision_ids
+            and node.status == "skipped"
+        )
+    }
+    active_nodes = tuple(node for node in active_plan.nodes if node.id not in inactive_ids)
+    if not active_nodes or any(node.status != "completed" for node in active_nodes):
+        raise ValueError("validated-delivery requires every active plan node to be completed")
+    dependency_ids = {dependency for node in active_nodes for dependency in node.dependencies}
+    leaf_nodes = tuple(node for node in active_nodes if node.id not in dependency_ids)
     required_ids = tuple(
         artifact_id
         for node in leaf_nodes

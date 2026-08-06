@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import importlib
-import hashlib
 from pathlib import Path
 from typing import Any, Mapping
 
 from ..kernel.artifact_store import ProjectArtifactStore
+from ..kernel.execution_chain import automatic_failed_gate_adjudication
 from ..kernel.execution_receipts import ArtifactReloadReceipt, ObservedExecutionReceipt, ScientificReviewReceipt
 from ..kernel.identity import digest_value
 from ..kernel.observed_output_protocol import (
@@ -21,8 +21,10 @@ from ..modules.contract import (
     ObservedOutputContract,
     CompatibilityRow,
     compatibility_contract_digest,
+    GATE_EVALUATOR_CONTRACT_VERSION,
     observed_output_contract_digest,
     observed_output_protocol_version,
+    packaged_callable_source_sha256,
     version_is_allowed,
 )
 from ..runner import validate_schema_value
@@ -117,15 +119,6 @@ def _reload_validator(identifier: str):
     return function
 
 
-def _validator_source_sha256(identifier: str) -> str:
-    module_name, _ = identifier.split(":", 1)
-    module = importlib.import_module(module_name)
-    source_path = Path(str(getattr(module, "__file__", "")))
-    if not source_path.is_file() or source_path.suffix != ".py":
-        raise ValueError("semantic validator must resolve to packaged Python source")
-    return hashlib.sha256(source_path.read_bytes()).hexdigest()
-
-
 def _validate_payload_contract(
     contract: ObservedOutputContract,
     payload_files: object,
@@ -158,6 +151,23 @@ def ingest_execution_bundle(
     artifact_store: ProjectArtifactStore,
 ) -> ProjectState:
     """Create all receipt identities from one handoff and imported observed outputs."""
+    with artifact_store.transaction() as transaction:
+        return _ingest_execution_bundle(
+            state,
+            bundle,
+            registry=registry,
+            artifact_store=transaction,
+        )
+
+
+def _ingest_execution_bundle(
+    state: ProjectState,
+    bundle: Mapping[str, Any],
+    *,
+    registry: ModuleRegistry,
+    artifact_store: object,
+) -> ProjectState:
+    """Implement one atomic external-result admission transaction."""
     if set(bundle) != _BUNDLE_FIELDS:
         raise ValueError("execution receipt bundle fields are incomplete or unsupported")
     handoff = next((item for item in state.execution_handoffs if item.id == bundle["handoff_id"]), None)
@@ -267,7 +277,7 @@ def ingest_execution_bundle(
         )
         if accepted is not True:
             raise ValueError(f"observed output container reload validator rejected port {port.name}")
-        if _validator_source_sha256(contract.semantic_validator) != contract.semantic_validator_sha256:
+        if packaged_callable_source_sha256(contract.semantic_validator) != contract.semantic_validator_sha256:
             raise ValueError(f"semantic validator source digest differs from the frozen contract for port {port.name}")
         semantic_result = _reload_validator(contract.semantic_validator)(
             content=content,
@@ -341,9 +351,13 @@ def ingest_execution_bundle(
                     raise ValueError(f"gate evaluator did not honor its absent evidence payload role: {gate_id}")
             elif result["evidence_payload_sha256"] != evidence["sha256"]:
                 raise ValueError(f"gate evaluator evidence digest differs from its declared payload role: {gate_id}")
-            if result["status"] == "failed":
-                raise ValueError(f"required postflight gate did not pass: {gate_id}")
-            evaluations.append({"port": contract.port, **dict(result)})
+            evaluations.append({
+                "port": contract.port,
+                **dict(result),
+                "evaluator_identity": evaluator.evaluator,
+                "evaluator_version": GATE_EVALUATOR_CONTRACT_VERSION,
+                "evaluator_sha256": packaged_callable_source_sha256(evaluator.evaluator),
+            })
         if not evaluations:
             raise ValueError(f"required postflight gate has no assigned output port: {gate_id}")
         statuses = {str(item["status"]) for item in evaluations}
@@ -378,6 +392,13 @@ def ingest_execution_bundle(
         provenance,
         (),
         payloads_by_port,
+        quality_status_by_port={
+            str(evaluation["port"]): "major"
+            for result in evaluated_results.values()
+            if result["status"] == "failed"
+            for evaluation in result["evaluations"]
+            if evaluation["status"] == "failed"
+        },
     )
     observed = ObservedExecutionReceipt.create(
         plan_node_id=node.id,
@@ -437,6 +458,43 @@ def ingest_execution_bundle(
             replacement_action_ids=(node.id,),
         )
         reloads.append(receipt)
+    source_urls = tuple(
+        value
+        for value in manifest.provenance.concept_sources
+        if value.startswith(("https://", "http://"))
+    ) or (
+        "https://github.com/JunyanKang/biomed-workbench",
+    )
+    for artifact in artifacts:
+        port = next(
+            name for name, artifact_id in node.planned_output_artifact_ids.items()
+            if artifact_id == artifact.id
+        )
+        failed_gate_ids = tuple(
+            gate_id
+            for gate_id, result in evaluated_results.items()
+            if result["status"] == "failed"
+            and any(
+                evaluation["port"] == port and evaluation["status"] == "failed"
+                for evaluation in result["evaluations"]
+            )
+        )
+        for gate_id in failed_gate_ids:
+            adjudication = automatic_failed_gate_adjudication(
+                state,
+                artifact.id,
+                gate_id,
+                source_urls=source_urls,
+            )
+            state = apply_event(
+                state,
+                "scientific_gate_adjudicated",
+                {"adjudication": adjudication.to_dict()},
+                rationale="Record the registered evaluator's automatic rejection of one failed scientific gate.",
+                affected_artifact_ids=(artifact.id,),
+                affected_hypothesis_ids=node.target_hypothesis_ids,
+                replacement_action_ids=(node.id,),
+            )
     integrity = ScientificReviewReceipt.create(
         observed_execution=observed,
         reload_receipts=tuple(reloads),

@@ -6,6 +6,7 @@ This directory preserves capability changes, observed execution acceptance, comp
 
 ## Versions
 
+- [0.2.0-dev · 2026-08-06](2026-08-06.md): registered-evaluator identity closure, preserved failed-gate evidence, transactional artifact import, exact rerun and method-switch replacement contracts, project-state v2 migration, and draft/released journal-catalog lifecycle.
 - [0.2.0-dev · 2026-08-05](2026-08-05.md): protocol 2.1.0 gate-result closure, reviewable negative evidence, action-specific scientific decisions, compatibility-bound runtime evidence, and store-verified delivery resume.
 - [0.2.0-dev · 2026-08-04](2026-08-04.md): plugin-owned semantic output validation, exact-slice delivery authorization, recoverable evidence-map publication, and complete controlled-fixture receipts.
 - [0.2.0-dev · 2026-08-03](2026-08-03.md): 100-journal catalog, tiered JIF/JCR provenance, category-specific quartiles, and bilingual JIF-sorted documentation.

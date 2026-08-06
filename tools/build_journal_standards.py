@@ -20,6 +20,7 @@ OUT_ROOT = ROOT / "biomed_workbench" / "knowledge" / "journal_standards"
 METRICS_PATH = OUT_ROOT / "sources" / "jcr-2026-secondary-selected.tsv"
 VERSION = "2026.08.03"
 REVIEWED_ON = "2026-08-03"
+CATALOG_LIFECYCLE = "draft"
 
 
 FAMILY_RULES = {
@@ -697,6 +698,34 @@ def _refresh_coverage_table(path: Path, profiles: list[dict], *, zh: bool) -> No
     path.write_text(rendered, encoding="utf-8")
 
 
+def _assert_snapshot_write_allowed(
+    snapshot_path: Path,
+    index_path: Path,
+    payload: str,
+    *,
+    version: str,
+    lifecycle: str,
+) -> None:
+    """Allow draft replacement but make a released version byte-immutable."""
+    if lifecycle not in {"draft", "released"}:
+        raise RuntimeError("catalog lifecycle must be draft or released")
+    index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else {}
+    active_version = index.get("active_catalog_version")
+    active_lifecycle = index.get("catalog_lifecycle", "draft")
+    if active_version == version and active_lifecycle == "released" and lifecycle != "released":
+        raise RuntimeError("a released journal catalog cannot be downgraded to draft")
+    if not snapshot_path.exists() or snapshot_path.read_text(encoding="utf-8") == payload:
+        return
+    if active_version != version or active_lifecycle == "released":
+        raise RuntimeError(
+            "a released or historical journal catalog version is immutable; create a new catalog version"
+        )
+    if lifecycle == "released":
+        raise RuntimeError(
+            "release promotion cannot change catalog bytes; rebuild the draft first, then promote unchanged bytes"
+        )
+
+
 def main() -> None:
     if len(JOURNALS) != 100:
         raise RuntimeError("active journal catalog must contain exactly 100 journals")
@@ -737,7 +766,15 @@ def main() -> None:
     }
     OUT_ROOT.mkdir(parents=True, exist_ok=True)
     snapshot_path = OUT_ROOT / f"v{VERSION}.json"
+    index_path = OUT_ROOT / "index.json"
     payload = json.dumps(snapshot, indent=2, ensure_ascii=False, sort_keys=True) + "\n"
+    _assert_snapshot_write_allowed(
+        snapshot_path,
+        index_path,
+        payload,
+        version=VERSION,
+        lifecycle=CATALOG_LIFECYCLE,
+    )
     snapshot_path.write_text(payload, encoding="utf-8")
     digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()
     _refresh_coverage_table(ROOT / "docs" / "journal-standards.md", profiles, zh=False)
@@ -747,14 +784,16 @@ def main() -> None:
         "active_catalog_version": VERSION,
         "active_catalog_file": snapshot_path.name,
         "active_catalog_sha256": digest,
+        "catalog_lifecycle": CATALOG_LIFECYCLE,
         "reviewed_on": REVIEWED_ON,
         "journal_count": len(profiles),
         "metric_source_file": str(METRICS_PATH.relative_to(ROOT)),
         "metric_source_sha256": metrics_source_sha256,
         "update_policy": {
-            "history_is_immutable": True,
+            "released_history_is_immutable": True,
+            "draft_same_version_updates_are_allowed": True,
             "one_journal_may_advance_independently": True,
-            "source_change_requires_new_version": True,
+            "released_source_change_requires_new_version": True,
             "unverified_required_field_blocks_submission_ready": True,
             "active_catalog_is_sorted_by_descending_jif": True,
         },
@@ -767,7 +806,7 @@ def main() -> None:
             for row in profiles
         },
     }
-    (OUT_ROOT / "index.json").write_text(
+    index_path.write_text(
         json.dumps(index, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
         encoding="utf-8",
     )

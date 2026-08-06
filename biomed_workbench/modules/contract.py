@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
+import importlib
 import re
 from dataclasses import dataclass
 from datetime import date
+from pathlib import Path
 from typing import Any, Mapping
 
 from ..kernel.identity import digest_value
@@ -24,6 +27,7 @@ GENOME_BUILD_POLICIES = frozenset({"not_applicable", "required", "declared", "an
 REPRESENTATIONS = frozenset({"structured", "text", "binary", "sparse", "container"})
 INPUT_SOURCE_POLICIES = frozenset({"project_input", "project_or_upstream", "upstream_required"})
 ALLOWED_CREDENTIALS = frozenset({"NCBI_API_KEY"})
+GATE_EVALUATOR_CONTRACT_VERSION = "1.0.0"
 
 _ID_RE = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
 _NAME_RE = re.compile(r"^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$")
@@ -1265,7 +1269,41 @@ def _observed_output_dict(value: ObservedOutputContract) -> dict[str, object]:
 
 def observed_output_contract_digest(value: ModuleManifest) -> str:
     """Return the immutable digest used to bind a workflow handoff to result admission."""
-    return digest_value([_observed_output_dict(item) for item in value.observed_output_contracts])
+    return digest_value([
+        {
+            "contract": _observed_output_dict(item),
+            "gate_evaluator_sources": [
+                {
+                    "identity": evaluator.evaluator,
+                    "contract_version": GATE_EVALUATOR_CONTRACT_VERSION,
+                    "sha256": packaged_callable_source_sha256(evaluator.evaluator),
+                }
+                for evaluator in item.gate_evaluators
+            ],
+        }
+        for item in value.observed_output_contracts
+    ])
+
+
+def packaged_callable_source_sha256(identifier: str) -> str:
+    """Return the source identity of one packaged validator or evaluator callable."""
+    if not isinstance(identifier, str) or not _CALLABLE_RE.fullmatch(identifier):
+        raise ValueError("packaged callable identity is invalid")
+    module_name, function_name = identifier.split(":", 1)
+    if not module_name.startswith("biomed_workbench."):
+        raise ValueError("validator or evaluator must be packaged inside biomed_workbench")
+    module = importlib.import_module(module_name)
+    function = getattr(module, function_name, None)
+    source_path = Path(str(getattr(module, "__file__", ""))).resolve()
+    package_root = Path(__file__).resolve().parents[1]
+    if (
+        not callable(function)
+        or not source_path.is_file()
+        or source_path.suffix != ".py"
+        or not source_path.is_relative_to(package_root)
+    ):
+        raise ValueError("packaged validator or evaluator must resolve to Python source")
+    return hashlib.sha256(source_path.read_bytes()).hexdigest()
 
 
 def observed_output_protocol_version(value: ModuleManifest) -> str:

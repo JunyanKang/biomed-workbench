@@ -1,7 +1,10 @@
+import copy
+import json
 import unittest
+from pathlib import Path
 
 from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
-from biomed_workbench.kernel.state import ProjectState, apply_event
+from biomed_workbench.kernel.state import ProjectState, _migrate_v1_adjudication, apply_event
 from biomed_workbench.kernel.hypotheses import revise_hypothesis
 from tests.unit.kernel.test_artifacts import artifact
 from tests.unit.kernel.test_context import project_context
@@ -58,6 +61,32 @@ def populated_state():
 
 
 class ProjectStateTests(unittest.TestCase):
+    def test_previous_release_v1_state_migrates_to_v2_with_exact_receipt_bindings(self):
+        fixture = Path(__file__).parents[2] / "fixtures" / "project_state_v1_gate_adjudications.json"
+        legacy = json.loads(fixture.read_text(encoding="utf-8"))
+
+        state = ProjectState.from_dict(legacy)
+
+        self.assertEqual(state.schema_version, 2)
+        self.assertEqual(state.revision, legacy["revision"])
+        self.assertEqual(len(state.gate_adjudications), 3)
+        self.assertTrue(all(item.adjudication_mode == "manual" for item in state.gate_adjudications))
+        self.assertTrue(all(item.observed_value and item.criterion and item.finding for item in state.gate_adjudications))
+        self.assertEqual(len(state.state_migrations), 1)
+        self.assertEqual(state.state_migrations[0].source_state_digest, legacy["state_digest"])
+        self.assertEqual(state.state_migrations[0].source_revision, legacy["revision"])
+        self.assertEqual(ProjectState.from_dict(state.to_dict()), state)
+
+    def test_v1_migration_rejects_tampering_and_unrecoverable_gate_bindings(self):
+        fixture = Path(__file__).parents[2] / "fixtures" / "project_state_v1_gate_adjudications.json"
+        legacy = json.loads(fixture.read_text(encoding="utf-8"))
+        tampered = copy.deepcopy(legacy)
+        tampered["gate_adjudications"][0]["gate_result_digest"] = "f" * 64
+        with self.assertRaisesRegex(ValueError, "state digest is invalid"):
+            ProjectState.from_dict(tampered)
+        with self.assertRaisesRegex(ValueError, "cannot recover an exact observed binding"):
+            _migrate_v1_adjudication(legacy["gate_adjudications"][0], {})
+
     def test_events_are_append_only_digest_linked_and_update_ledgers(self):
         state = populated_state()
         prior_digest = state.state_digest

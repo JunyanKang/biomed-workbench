@@ -11,7 +11,7 @@ from biomed_workbench.kernel.execution_receipts import ExecutionHandoff, Observe
 from biomed_workbench.kernel.execution_chain import gate_adjudication_bundle_digest
 from biomed_workbench.kernel.identity import digest_value
 from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
-from biomed_workbench.kernel.state import ProjectState, apply_event
+from biomed_workbench.kernel.state import ProjectState, apply_event, replay
 from biomed_workbench.kernel.scientific_dependency import ScientificGateAdjudication
 from biomed_workbench.orchestration.controller import ResearchController
 from biomed_workbench.modules.index import BUILTIN_ROOT
@@ -340,6 +340,160 @@ class ExecutionIngestTests(unittest.TestCase):
                 state, bundle, registry=registry,
                 artifact_store=ProjectArtifactStore(root / "objects"),
             )
+
+    def test_failed_semantic_admission_rolls_back_new_content_addressed_objects(self):
+        registry, state, root, bundle = self._prepared_case()
+        store = ProjectArtifactStore(root / "objects")
+        with patch(
+            "biomed_workbench.modules.semantic_output_validation.validate_observed_output_semantics",
+            return_value={"family_admission_status": "failed"},
+        ), self.assertRaisesRegex(ValueError, "semantic validator rejected"):
+            ingest_execution_bundle(state, bundle, registry=registry, artifact_store=store)
+        self.assertEqual(tuple(store.root.rglob("payload")), ())
+
+    def test_requires_review_gate_rejects_forged_automatic_acceptance_immediately(self):
+        registry, state, root, bundle = self._prepared_case()
+        state = ingest_execution_bundle(
+            state, bundle, registry=registry, artifact_store=ProjectArtifactStore(root / "objects")
+        )
+        observed = state.observed_executions[-1]
+        gate_id, result = next(
+            (gate_id, result)
+            for gate_id, result in observed.postflight_results.items()
+            if result["status"] == "requires_review"
+        )
+        evaluation = result["evaluations"][0]
+        forged = ScientificGateAdjudication(
+            id=f"adjudication-forged-{gate_id}",
+            artifact_id="artifact-enrichment-result",
+            observed_execution_receipt_id=observed.id,
+            gate_id=gate_id,
+            port=evaluation["port"],
+            evaluator_type=evaluation["evaluator_type"],
+            gate_result_digest=observed.postflight_result_digests[gate_id],
+            evidence_payload_sha256=evaluation["evidence_payload_sha256"],
+            adjudication_mode="automatic",
+            observed_value=evaluation["observed_metric"],
+            criterion=evaluation["threshold"],
+            finding=evaluation["reason"],
+            status="accepted",
+            reviewer_identity="invented-automatic-reviewer",
+            rationale_zh="伪造自动评定器身份不应释放需要人工复核的科学门禁。",
+            rationale_en="A fabricated automatic evaluator must not release a gate that requires human review.",
+            limitations_zh=("该对象仅用于验证自动裁决信任边界。",),
+            limitations_en=("This object tests only the automatic-adjudication trust boundary.",),
+            source_urls=("https://bioconductor.org/packages/clusterProfiler/",),
+            evaluator_identity="made-up-evaluator",
+            evaluator_version="999.0",
+            evaluator_sha256="f" * 64,
+        )
+        with self.assertRaisesRegex(ValueError, "require manual adjudication"):
+            apply_event(
+                state,
+                "scientific_gate_adjudicated",
+                {"adjudication": forged.to_dict()},
+                rationale="Reject forged automatic acceptance at the first adjudication event.",
+            )
+
+    def test_failed_packaged_gate_is_reloaded_and_automatically_rejected(self):
+        from biomed_workbench.modules.semantic_output_validation import evaluate_structured_gate
+
+        registry, prepared, root, bundle = self._prepared_case()
+        failed_gate_id = registry.get("functional-enrichment").quality_gates[0].id
+
+        def fail_one_registered_gate(**kwargs):
+            result = dict(evaluate_structured_gate(**kwargs))
+            if kwargs["gate_id"] == failed_gate_id:
+                result.update(
+                    status="failed",
+                    reason="The registered lightweight fixture deliberately fails this scientific criterion.",
+                )
+            return result
+
+        with patch(
+            "biomed_workbench.modules.semantic_output_validation.evaluate_structured_gate",
+            side_effect=fail_one_registered_gate,
+        ):
+            state = ingest_execution_bundle(
+                prepared,
+                bundle,
+                registry=registry,
+                artifact_store=ProjectArtifactStore(root / "objects"),
+            )
+        self.assertEqual(len(state.observed_executions), 1)
+        self.assertEqual(len(state.artifact_reloads), 1)
+        self.assertEqual(len(state.execution_reviews), 1)
+        self.assertEqual(state.artifacts[-1].quality_status, "major")
+        automatic = next(item for item in state.gate_adjudications if item.gate_id == failed_gate_id)
+        evaluation = state.observed_executions[-1].postflight_results[failed_gate_id]["evaluations"][0]
+        self.assertEqual((automatic.adjudication_mode, automatic.status), ("automatic", "rejected"))
+        self.assertEqual(automatic.evaluator_identity, evaluation["evaluator_identity"])
+        self.assertEqual(automatic.evaluator_version, evaluation["evaluator_version"])
+        self.assertEqual(automatic.evaluator_sha256, evaluation["evaluator_sha256"])
+        self.assertEqual(state.plans[-1].nodes[0].status, "awaiting_review")
+
+        automatic_event_index = next(
+            index for index, event in enumerate(state.decisions)
+            if event.event_type == "scientific_gate_adjudicated"
+        )
+        before_automatic = replay(state.context, state.decisions[:automatic_event_index])
+        for field, value in {
+            "evaluator_identity": "made-up-evaluator",
+            "evaluator_version": "999.0",
+            "evaluator_sha256": "f" * 64,
+        }.items():
+            with self.subTest(field=field):
+                payload = automatic.to_dict()
+                payload[field] = value
+                with self.assertRaisesRegex(ValueError, "exact plugin-owned automatic rejection"):
+                    apply_event(
+                        before_automatic,
+                        "scientific_gate_adjudicated",
+                        {"adjudication": payload},
+                        rationale="Reject an automatic adjudication with forged evaluator provenance.",
+                    )
+
+        state, _manual = self._adjudicate_pending_gates(state)
+        artifact_review = review(
+            id="review-failed-enrichment",
+            artifact_id="artifact-enrichment-result",
+            technical_status="major",
+            statistical_status="major",
+            biological_status="major",
+            robustness_status="major",
+            recommended_action="exclude-invalid",
+            gate_adjudication_ids=tuple(item.id for item in state.gate_adjudications),
+        )
+        state = apply_event(
+            state,
+            "artifact_review_recorded",
+            {"review": artifact_review.to_dict()},
+            rationale="Review the preserved failed gate before excluding its artifact.",
+        )
+        excluded = decision(
+            id="decision-exclude-failed-enrichment",
+            review_id=artifact_review.id,
+            artifact_id="artifact-enrichment-result",
+            action="exclude-invalid",
+            active_evidence=False,
+            next_plan_node_ids=(),
+            gate_adjudication_digest=gate_adjudication_bundle_digest(
+                state, "artifact-enrichment-result"
+            ),
+        )
+        state = apply_event(
+            state,
+            "scientific_decision_recorded",
+            {"decision": excluded.to_dict()},
+            rationale="Exclude the failed artifact without deleting its negative evidence chain.",
+        )
+        result = ResearchController(
+            registry,
+            environment_provider=lambda _manifest: None,
+            artifact_store=ProjectArtifactStore(root / "objects"),
+        ).resume(state.to_dict())
+        self.assertEqual(result.stop_reason, "scientific_evidence_excluded")
+        self.assertEqual(result.active_plan.nodes[0].status, "skipped")
 
     def test_handoff_rejects_observed_contract_digest_drift(self):
         registry, state, root, bundle = self._prepared_case(contract_digest="f" * 64)

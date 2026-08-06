@@ -22,6 +22,7 @@ class GateAdjudicationPolicyTests(unittest.TestCase):
                     "status": "not_evaluable",
                     "evaluations": ({
                         "port": "result-port",
+                        "status": "not_evaluable",
                         "evaluator_type": "tool-native",
                         "evidence_payload_sha256": evidence_digest,
                         "observed_metric": "null",
@@ -77,9 +78,8 @@ class GateAdjudicationPolicyTests(unittest.TestCase):
         return state
 
     def test_not_evaluable_gate_rejects_unqualified_acceptance(self):
-        state = self._state(adjudication_status="accepted", decision_action="retain-as-evidence")
-        with self.assertRaisesRegex(ValueError, "accepted-with-caveat"):
-            validate_gate_adjudication_chain(state, "artifact-result")
+        with self.assertRaisesRegex(ValueError, "cannot receive unqualified acceptance"):
+            self._state(adjudication_status="accepted", decision_action="retain-as-evidence")
 
     def test_not_evaluable_gate_requires_caveated_adjudication_and_decision(self):
         state = self._state(adjudication_status="accepted-with-caveat", decision_action="retain-as-evidence")

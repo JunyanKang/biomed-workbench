@@ -26,6 +26,7 @@ NODE_STATUSES = frozenset(
 )
 PLAN_TYPES = frozenset({"single", "serial", "parallel", "mixed"})
 _TOKEN_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9+._-]*$")
+_DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 def _ids(values: tuple[str, ...], location: str, *, allow_empty: bool = True) -> tuple[str, ...]:
@@ -67,6 +68,8 @@ class PlanNode:
     compatibility_row_candidates: tuple[str, ...]
     status: str
     attempt: int
+    planned_request_digest: str | None = None
+    revision_of_node_id: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "plan_node.id"))
@@ -98,9 +101,22 @@ class PlanNode:
             raise ValueError("plan node status is unsupported")
         if not isinstance(self.attempt, int) or isinstance(self.attempt, bool) or self.attempt < 0:
             raise ValueError("plan node attempt must be nonnegative")
+        if self.planned_request_digest is not None and (
+            not isinstance(self.planned_request_digest, str)
+            or not _DIGEST_RE.fullmatch(self.planned_request_digest)
+        ):
+            raise ValueError("plan node planned request digest must be SHA-256")
+        if self.revision_of_node_id is not None:
+            object.__setattr__(
+                self,
+                "revision_of_node_id",
+                validate_identifier(self.revision_of_node_id, "plan_node.revision_of_node_id"),
+            )
+            if self.revision_of_node_id == self.id:
+                raise ValueError("plan node cannot be its own revision target")
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload = {
             "id": self.id,
             "module_id": self.module_id,
             "input_bindings": thaw(self.input_bindings),
@@ -114,10 +130,17 @@ class PlanNode:
             "status": self.status,
             "attempt": self.attempt,
         }
+        if self.planned_request_digest is not None:
+            payload["planned_request_digest"] = self.planned_request_digest
+        if self.revision_of_node_id is not None:
+            payload["revision_of_node_id"] = self.revision_of_node_id
+        return payload
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "PlanNode":
         values = dict(payload)
+        values.setdefault("planned_request_digest", None)
+        values.setdefault("revision_of_node_id", None)
         for field in (
             "dependencies",
             "target_hypothesis_ids",
@@ -163,6 +186,18 @@ class ResearchDAG:
         node_ids = {node.id for node in nodes}
         if any(not set(node.dependencies) <= node_ids for node in nodes):
             raise ValueError("plan node references an unknown dependency")
+        if any(
+            node.revision_of_node_id is not None
+            and node.revision_of_node_id not in node_ids
+            for node in nodes
+        ):
+            raise ValueError("plan node references an unknown revision source")
+        if any(
+            node.revision_of_node_id is not None
+            and next(value for value in nodes if value.id == node.revision_of_node_id).revision_of_node_id is not None
+            for node in nodes
+        ):
+            raise ValueError("revision targets cannot form a chained replacement hierarchy")
         _validate_acyclic(nodes)
         planned_ids = [artifact_id for node in nodes for artifact_id in node.planned_output_artifact_ids.values()]
         if len(set(planned_ids)) != len(planned_ids):

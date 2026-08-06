@@ -119,6 +119,11 @@ Decision actions also have distinct execution semantics. Retention completes the
 reviewed node and releases active evidence. Exclusion and branch stop terminate
 the current branch without deleting its history. Rerun and method-switch actions
 supersede the reviewed node and activate a distinct predeclared revision node.
+That node explicitly names the source it replaces and preserves the registered
+branch, hypotheses, dependencies, inputs, outputs, and evidence scope. A
+same-method rerun preserves the observed request identity, an adjusted rerun
+freezes a different request identity, and a method switch must use a distinct
+compatible alternative declared by the source module.
 Additional-data decisions keep the branch blocked until new input is registered.
 Hypothesis and scope revisions request a new immutable plan revision rather than
 overwriting the original analysis.

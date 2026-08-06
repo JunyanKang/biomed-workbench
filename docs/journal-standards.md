@@ -143,4 +143,4 @@ Before structured drafting, an agent must bind the journal ID, article type, sta
 
 ## Updating and extending the catalog
 
-History is immutable. A journal update creates a new version, changes only fields supported by current official evidence, regenerates the digest, and reruns completeness, recommendation, and compliance regression tests. Previous manuscripts therefore retain the standard that governed their preparation. A newly added journal must provide the same structured record and tests; a name and URL alone are insufficient.
+Catalog `2026.08.03` remains a development draft until it is promoted to released status. A draft may be corrected without implying that an earlier draft governed a manuscript. Once released, its file and digest are immutable: later journal changes create a new catalog version, and previous manuscripts retain the released standard that governed their preparation. A newly added journal must provide the same complete structured record; a name and URL alone are insufficient.

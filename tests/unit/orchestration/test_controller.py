@@ -5,12 +5,14 @@ import json
 import tempfile
 from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
 
 from biomed_workbench.kernel.artifacts import ScientificArtifact
 from biomed_workbench.kernel.evidence import EvidenceRecord
 from biomed_workbench.kernel.execution_receipts import ExecutionHandoff
 from biomed_workbench.kernel.execution_chain import (
     delivery_slice_digest,
+    validate_revision_target_contract,
     validate_delivery_prerequisites,
     validated_delivery_publication_is_current,
 )
@@ -124,7 +126,189 @@ def serial_fixture():
     return temporary, registry, state, plan
 
 
+def revision_fixture(action):
+    source_module = "primary-normalizer"
+    alternative_module = "alternative-normalizer"
+    temporary, registry = workflow_registry(
+        (
+            module_payload(
+                source_module,
+                "count_matrix",
+                "normalized_matrix",
+                alternatives=(alternative_module,),
+            ),
+            module_payload(alternative_module, "count_matrix", "normalized_matrix"),
+        )
+    )
+    state = state_with(inline_artifact("artifact-counts", "count_matrix"))
+    row_id = registry.get(source_module).compatibility_matrix[0].id
+    source = PlanNode(
+        id="node-primary-normalizer",
+        module_id=source_module,
+        input_bindings={"records": "artifact-counts"},
+        dependencies=(),
+        branch_id="branch-normalization",
+        target_hypothesis_ids=(hypothesis().id,),
+        expected_evidence_types=("cell-state-association",),
+        expected_output_artifact_types=("normalized_matrix",),
+        planned_output_artifact_ids={"profile": "artifact-primary-normalized"},
+        compatibility_row_candidates=(row_id,),
+        status="pending",
+        attempt=0,
+    )
+    observed_request_digest = digest_value({
+        "module_id": source_module,
+        "module_version": "1.0.0",
+        "compatibility_row_id": row_id,
+    })
+    target_module = alternative_module if action == "switch-method" else source_module
+    target_row_id = registry.get(target_module).compatibility_matrix[0].id
+    planned_request_digest = (
+        digest_value({"source": observed_request_digest, "adjustment": "registered-change"})
+        if action == "rerun-adjusted-parameters"
+        else observed_request_digest
+    )
+    replacement = PlanNode(
+        id="node-revision-normalizer",
+        module_id=target_module,
+        input_bindings={"records": "artifact-counts"},
+        dependencies=(),
+        branch_id=source.branch_id,
+        target_hypothesis_ids=source.target_hypothesis_ids,
+        expected_evidence_types=source.expected_evidence_types,
+        expected_output_artifact_types=source.expected_output_artifact_types,
+        planned_output_artifact_ids={"profile": "artifact-revision-normalized"},
+        compatibility_row_candidates=(target_row_id,),
+        status="pending",
+        attempt=0,
+        planned_request_digest=planned_request_digest,
+        revision_of_node_id=source.id,
+    )
+    plan = ResearchDAG.create(
+        id=f"plan-{action}",
+        objective="Evaluate one registered normalization result and activate only its contracted revision when required.",
+        nodes=(source, replacement),
+        required_output_artifact_types=("normalized_matrix",),
+        plan_type="parallel",
+        revision=1,
+        parent_plan_id=None,
+        rationale=("Keep the replacement dormant until a bound scientific review selects its exact revision action.",),
+    )
+    return temporary, registry, state, plan
+
+
 class ResearchControllerTests(unittest.TestCase):
+    def test_revision_target_contract_rejects_wrong_method_parameter_and_scope_semantics(self):
+        def contract_state(plan, state, source):
+            return SimpleNamespace(
+                plans=(plan,),
+                active_plan_id=plan.id,
+                artifact_reloads=(SimpleNamespace(
+                    artifact_id=next(iter(source.planned_output_artifact_ids.values())),
+                    observed_execution_receipt_id="observed-source",
+                ),),
+                observed_executions=(SimpleNamespace(
+                    id="observed-source",
+                    parameters_digest=digest_value({
+                        "module_id": source.module_id,
+                        "module_version": "1.0.0",
+                        "compatibility_row_id": source.compatibility_row_candidates[0],
+                    }),
+                ),),
+                artifacts=state.artifacts,
+            )
+
+        def rebuilt(plan, source, target):
+            return ResearchDAG.create(
+                id=plan.id,
+                objective=plan.objective,
+                nodes=(source, target),
+                required_output_artifact_types=plan.required_output_artifact_types,
+                plan_type=plan.plan_type,
+                revision=plan.revision,
+                parent_plan_id=plan.parent_plan_id,
+                rationale=plan.rationale,
+            )
+
+        cases = []
+        for action in ("rerun-same-method", "rerun-adjusted-parameters", "switch-method"):
+            temporary, registry, state, plan = revision_fixture(action)
+            self.addCleanup(temporary.cleanup)
+            source, target = plan.nodes
+            observed_digest = contract_state(plan, state, source).observed_executions[0].parameters_digest
+            if action == "rerun-same-method":
+                invalid = replace(target, module_id="alternative-normalizer")
+                message = "same module"
+            elif action == "rerun-adjusted-parameters":
+                invalid = replace(target, planned_request_digest=observed_digest)
+                message = "distinct request identity"
+            else:
+                invalid = replace(
+                    target,
+                    module_id=source.module_id,
+                    compatibility_row_candidates=source.compatibility_row_candidates,
+                )
+                message = "distinct module"
+            invalid_plan = rebuilt(plan, source, invalid)
+            cases.append((action, registry, contract_state(invalid_plan, state, source), invalid.id, message))
+
+        temporary, registry, state, plan = revision_fixture("rerun-same-method")
+        self.addCleanup(temporary.cleanup)
+        source, target = plan.nodes
+        invalid = replace(target, branch_id="branch-unrelated")
+        invalid_plan = rebuilt(plan, source, invalid)
+        cases.append((
+            "rerun-same-method",
+            registry,
+            contract_state(invalid_plan, state, source),
+            invalid.id,
+            "branch, inputs, outputs",
+        ))
+
+        invalid = replace(target, revision_of_node_id=None)
+        invalid_plan = rebuilt(plan, source, invalid)
+        cases.append((
+            "rerun-same-method",
+            registry,
+            contract_state(invalid_plan, state, source),
+            invalid.id,
+            "explicitly name",
+        ))
+
+        temporary, registry, state, plan = revision_fixture("switch-method")
+        self.addCleanup(temporary.cleanup)
+        source, target = plan.nodes
+        base_registry = registry
+        undeclared_registry = SimpleNamespace(
+            get=lambda module_id, base=base_registry: (
+                replace(base.get(module_id), alternatives=())
+                if module_id == source.module_id
+                else base.get(module_id)
+            )
+        )
+        cases.append((
+            "switch-method",
+            undeclared_registry,
+            contract_state(plan, state, source),
+            target.id,
+            "declared source-module alternative",
+        ))
+
+        for action, registry, state, target_id, message in cases:
+            with self.subTest(action=action, message=message):
+                decision = SimpleNamespace(
+                    action=action,
+                    next_plan_node_ids=(target_id,),
+                    artifact_id=state.artifact_reloads[0].artifact_id,
+                )
+                with self.assertRaisesRegex(ValueError, message):
+                    validate_revision_target_contract(
+                        state,
+                        decision,
+                        registry=registry,
+                        require_pending=True,
+                    )
+
     def test_state_only_delivery_authorization_cannot_replace_the_immutable_store(self):
         payload = module_payload("publication-delivery", "analysis_result", "publication_package")
         payload["module_type"] = "delivery"
@@ -633,13 +817,25 @@ class ResearchControllerTests(unittest.TestCase):
         }
         for action, (expected_status, expected_stop, executes_revision) in cases.items():
             with self.subTest(action=action):
-                temporary, registry, state, plan = serial_fixture()
+                if action in {"rerun-same-method", "rerun-adjusted-parameters", "switch-method"}:
+                    temporary, registry, state, plan = revision_fixture(action)
+                else:
+                    temporary, registry, state, plan = serial_fixture()
                 self.addCleanup(temporary.cleanup)
                 executions = []
 
                 def executor(current_state, _plan, node, active_registry, **_kwargs):
                     executions.append(node.id)
-                    return completed_execution(current_state, node, active_registry)
+                    execution = completed_execution(current_state, node, active_registry)
+                    if node.planned_request_digest is not None:
+                        execution = replace(
+                            execution,
+                            provenance={
+                                **execution.provenance,
+                                "parameters_digest": node.planned_request_digest,
+                            },
+                        )
+                    return execution
 
                 controller = _StrictResearchController(
                     registry,
@@ -721,6 +917,104 @@ class ResearchControllerTests(unittest.TestCase):
                 self.assertEqual(by_id[first_node.id].status, expected_status)
                 self.assertEqual(result.stop_reason, expected_stop)
                 self.assertEqual(revision_node.id in executions, executes_revision)
+
+    def test_retained_revision_target_resolves_superseded_source_plan(self):
+        temporary, registry, state, plan = revision_fixture("rerun-same-method")
+        self.addCleanup(temporary.cleanup)
+
+        def executor(current_state, _plan, node, active_registry, **_kwargs):
+            execution = completed_execution(current_state, node, active_registry)
+            if node.planned_request_digest is not None:
+                execution = replace(
+                    execution,
+                    provenance={
+                        **execution.provenance,
+                        "parameters_digest": node.planned_request_digest,
+                    },
+                )
+            return execution
+
+        controller = _StrictResearchController(
+            registry,
+            environment_provider=lambda _manifest: None,
+            node_executor=executor,
+            policy=ControllerPolicy(require_approved_admission=False),
+        )
+        first = controller.advance(state, plan)
+        source, replacement = first.active_plan.nodes
+        source_artifact_id = next(iter(source.planned_output_artifact_ids.values()))
+
+        def reviewed(current, artifact_id, review_id, action, *, active_evidence):
+            artifact_review = ArtifactReview(
+                id=review_id,
+                artifact_id=artifact_id,
+                artifact_kind="data",
+                rationale_zh="依据登记标准复核该替代流程产物及其适用范围。",
+                rationale_en="Review the replacement workflow artifact and its scope against registered criteria.",
+                methods_zh="核对执行身份、输入输出、统计边界和结果重读。",
+                methods_en="Check execution identity, inputs, outputs, statistical scope, and output reload.",
+                results_zh="轻量夹具提供状态转换所需的完整身份与评审记录。",
+                results_en="The lightweight fixture provides complete identities and review records for the transition.",
+                conclusion_zh="按登记动作处理该产物并保留不可变历史。",
+                conclusion_en="Apply the registered action while preserving immutable history.",
+                panels=(),
+                technical_status="passed" if active_evidence else "major",
+                statistical_status="passed" if active_evidence else "major",
+                biological_status="passed" if active_evidence else "major",
+                robustness_status="passed" if active_evidence else "major",
+                limitations_zh=("该夹具只验证修订节点的生命周期。",),
+                limitations_en=("This fixture validates only the revision-node lifecycle.",),
+                recommended_action=action,
+                source_urls=("https://www.w3.org/TR/prov-o/",),
+            )
+            current = apply_event(
+                current,
+                "artifact_review_recorded",
+                {"review": artifact_review.to_dict()},
+                rationale="Record the revision lifecycle review.",
+            )
+            scientific_decision = ScientificDecision(
+                id=f"decision-{artifact_id}",
+                review_id=review_id,
+                artifact_id=artifact_id,
+                hypothesis_ids=(hypothesis().id,),
+                action=action,
+                rationale_zh="根据科学评审执行登记动作。",
+                rationale_en="Apply the registered action from the scientific review.",
+                active_evidence=active_evidence,
+                next_plan_node_ids=(replacement.id,) if action == "rerun-same-method" else (),
+                next_hypothesis_ids=(),
+            )
+            return apply_event(
+                current,
+                "scientific_decision_recorded",
+                {"decision": scientific_decision.to_dict()},
+                rationale="Bind the exact revision lifecycle decision.",
+            )
+
+        state = reviewed(
+            first.state,
+            source_artifact_id,
+            "review-revision-source",
+            "rerun-same-method",
+            active_evidence=False,
+        )
+        second = controller.resume(state.to_dict())
+        self.assertEqual(second.stop_reason, "awaiting_artifact_review")
+        replacement_artifact_id = next(iter(replacement.planned_output_artifact_ids.values()))
+        state = reviewed(
+            second.state,
+            replacement_artifact_id,
+            "review-revision-result",
+            "retain-as-evidence",
+            active_evidence=True,
+        )
+        final = controller.resume(state.to_dict())
+        self.assertEqual(final.stop_reason, "plan_completed")
+        self.assertEqual(
+            {node.id: node.status for node in final.active_plan.nodes},
+            {source.id: "superseded", replacement.id: "completed"},
+        )
 
     def test_serial_nodes_materialize_artifacts_in_dependency_order_and_update_state(self):
         temporary, registry, state, plan = serial_fixture()

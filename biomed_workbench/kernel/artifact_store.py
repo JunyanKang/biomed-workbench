@@ -9,7 +9,9 @@ from pathlib import Path, PurePosixPath
 import re
 import stat
 import tempfile
-from typing import Mapping
+import threading
+from contextlib import contextmanager
+from typing import Iterator, Mapping
 
 from .identity import validate_identifier
 
@@ -17,6 +19,8 @@ from .identity import validate_identifier
 _DIGEST_RE = re.compile(r"^[0-9a-f]{64}$")
 _MEDIA_TYPE_RE = re.compile(r"^[a-z0-9][a-z0-9.+-]*/[a-z0-9][a-z0-9.+-]*$")
 _OBJECT_KEY_RE = re.compile(r"^sha256/([0-9a-f]{2})/([0-9a-f]{64})/payload$")
+_STORE_LOCKS: dict[str, threading.RLock] = {}
+_STORE_LOCKS_GUARD = threading.Lock()
 
 
 @dataclass(frozen=True)
@@ -73,6 +77,8 @@ class ProjectArtifactStore:
         self.root.mkdir(parents=True, exist_ok=True)
         if self.root.is_symlink() or not self.root.is_dir():
             raise ValueError("artifact store root must be a real directory")
+        with _STORE_LOCKS_GUARD:
+            self._transaction_lock = _STORE_LOCKS.setdefault(str(self.root), threading.RLock())
 
     @staticmethod
     def _copy_and_digest(source_fd: int, target: Path) -> tuple[str, int]:
@@ -87,7 +93,23 @@ class ProjectArtifactStore:
             os.fsync(writer.fileno())
         return digest.hexdigest(), size
 
-    def import_file(self, source: str | os.PathLike[str], *, role: str, media_type: str) -> ArtifactPayload:
+    def _import_file(
+        self,
+        source: str | os.PathLike[str],
+        *,
+        role: str,
+        media_type: str,
+    ) -> tuple[ArtifactPayload, bool]:
+        with self._transaction_lock:
+            return self._import_file_unlocked(source, role=role, media_type=media_type)
+
+    def _import_file_unlocked(
+        self,
+        source: str | os.PathLike[str],
+        *,
+        role: str,
+        media_type: str,
+    ) -> tuple[ArtifactPayload, bool]:
         source_path = Path(source).expanduser()
         try:
             source_lstat = source_path.lstat()
@@ -108,6 +130,8 @@ class ProjectArtifactStore:
         staging = self.root / ".staging"
         staging.mkdir(exist_ok=True)
         temporary_path: Path | None = None
+        destination: Path | None = None
+        created = False
         try:
             with tempfile.NamedTemporaryFile(prefix="import-", dir=staging, delete=False) as temporary:
                 temporary_path = Path(temporary.name)
@@ -124,14 +148,36 @@ class ProjectArtifactStore:
                 temporary_path.unlink()
             else:
                 os.replace(temporary_path, destination)
+                created = True
             temporary_path = None
             self.resolve(payload)
-            return payload
+            return payload, created
+        except Exception:
+            if created and destination is not None:
+                destination.unlink(missing_ok=True)
+            raise
         finally:
             if source_fd >= 0:
                 os.close(source_fd)
             if temporary_path is not None:
                 temporary_path.unlink(missing_ok=True)
+
+    def import_file(self, source: str | os.PathLike[str], *, role: str, media_type: str) -> ArtifactPayload:
+        payload, _created = self._import_file(source, role=role, media_type=media_type)
+        return payload
+
+    @contextmanager
+    def transaction(self) -> Iterator["ArtifactStoreTransaction"]:
+        """Rollback only objects created by one failed import transaction."""
+        with self._transaction_lock:
+            transaction = ArtifactStoreTransaction(self)
+            try:
+                yield transaction
+            except Exception:
+                transaction.rollback()
+                raise
+            else:
+                transaction.commit()
 
     def resolve(self, payload: ArtifactPayload) -> Path:
         if not isinstance(payload, ArtifactPayload):
@@ -184,3 +230,44 @@ class ProjectArtifactStore:
                 os.close(source_fd)
             if temporary_path is not None:
                 temporary_path.unlink(missing_ok=True)
+
+
+class ArtifactStoreTransaction:
+    """Bounded content-addressed import transaction for one state transition."""
+
+    def __init__(self, store: ProjectArtifactStore):
+        self.store = store
+        self._created_object_keys: set[str] = set()
+        self._closed = False
+
+    def import_file(self, source: str | os.PathLike[str], *, role: str, media_type: str) -> ArtifactPayload:
+        if self._closed:
+            raise RuntimeError("artifact-store transaction is already closed")
+        payload, created = self.store._import_file(source, role=role, media_type=media_type)
+        if created:
+            self._created_object_keys.add(payload.object_key)
+        return payload
+
+    def resolve(self, payload: ArtifactPayload) -> Path:
+        return self.store.resolve(payload)
+
+    def commit(self) -> None:
+        if self._closed:
+            raise RuntimeError("artifact-store transaction is already closed")
+        self._created_object_keys.clear()
+        self._closed = True
+
+    def rollback(self) -> None:
+        if self._closed:
+            return
+        for object_key in sorted(self._created_object_keys, reverse=True):
+            path = self.store.root / PurePosixPath(object_key)
+            if path.is_file() and not path.is_symlink() and path.resolve().is_relative_to(self.store.root):
+                path.unlink()
+                for parent in (path.parent, path.parent.parent):
+                    try:
+                        parent.rmdir()
+                    except OSError:
+                        pass
+        self._created_object_keys.clear()
+        self._closed = True

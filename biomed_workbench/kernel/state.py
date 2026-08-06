@@ -24,10 +24,11 @@ from .execution_chain import (
     validate_gate_adjudication_reviewability,
     validate_gate_adjudication_retention,
     validate_node_execution_chain,
+    validate_revision_target_contract,
     validate_validated_delivery_state,
 )
 from .hypotheses import Hypothesis, add_hypothesis, attach_evidence
-from .identity import digest_value, freeze_mapping, thaw
+from .identity import digest_value, freeze_mapping, thaw, validate_identifier
 from .observed_output_protocol import (
     validate_handoff_receipt_gate_coverage,
     validate_observed_output_protocol,
@@ -36,6 +37,7 @@ from .plans import NODE_STATUSES, PlanNode, ResearchDAG
 from .scientific_dependency import (
     AnalysisAdmission,
     ArtifactReview,
+    REEXECUTE_DECISION_ACTIONS,
     ScientificDecision,
     ScientificGateAdjudication,
 )
@@ -66,6 +68,70 @@ EVENT_TYPES = frozenset(
     }
 )
 
+PROJECT_STATE_SCHEMA_VERSION = 2
+STATE_MIGRATION_CONTRACT_VERSION = "1.0.0"
+
+
+@dataclass(frozen=True)
+class StateMigrationRecord:
+    id: str
+    from_schema_version: int
+    to_schema_version: int
+    source_state_digest: str
+    source_revision: int
+    migrated_event_count: int
+    contract_version: str
+    digest: str
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "id", validate_identifier(self.id, "state_migration.id"))
+        if (self.from_schema_version, self.to_schema_version) != (1, 2):
+            raise ValueError("state migration schema transition is unsupported")
+        if not isinstance(self.source_revision, int) or self.source_revision < 0:
+            raise ValueError("state migration source revision is invalid")
+        if (
+            not isinstance(self.source_state_digest, str)
+            or len(self.source_state_digest) != 64
+            or set(self.source_state_digest) - set("0123456789abcdef")
+        ):
+            raise ValueError("state migration source digest must be SHA-256")
+        if self.migrated_event_count != self.source_revision:
+            raise ValueError("state migration event count must equal the source revision")
+        if self.contract_version != STATE_MIGRATION_CONTRACT_VERSION:
+            raise ValueError("state migration contract version is unsupported")
+        basis = {
+            "id": self.id,
+            "from_schema_version": self.from_schema_version,
+            "to_schema_version": self.to_schema_version,
+            "source_state_digest": self.source_state_digest,
+            "source_revision": self.source_revision,
+            "migrated_event_count": self.migrated_event_count,
+            "contract_version": self.contract_version,
+        }
+        if self.digest != digest_value(basis):
+            raise ValueError("state migration digest does not match its source identity")
+
+    @classmethod
+    def create(cls, *, source_state_digest: str, source_revision: int) -> "StateMigrationRecord":
+        identity = f"migration-v1-v2-{source_state_digest[:16]}"
+        basis = {
+            "id": identity,
+            "from_schema_version": 1,
+            "to_schema_version": 2,
+            "source_state_digest": source_state_digest,
+            "source_revision": source_revision,
+            "migrated_event_count": source_revision,
+            "contract_version": STATE_MIGRATION_CONTRACT_VERSION,
+        }
+        return cls(**basis, digest=digest_value(basis))
+
+    def to_dict(self) -> dict[str, object]:
+        return {field: getattr(self, field) for field in self.__dataclass_fields__}
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> "StateMigrationRecord":
+        return cls(**dict(payload))
+
 
 def _state_basis(
     context: ProjectContext,
@@ -85,9 +151,12 @@ def _state_basis(
     plans: tuple[ResearchDAG, ...],
     active_plan_id: str | None,
     revision: int,
+    *,
+    schema_version: int = PROJECT_STATE_SCHEMA_VERSION,
+    state_migrations: tuple[StateMigrationRecord, ...] = (),
 ) -> dict[str, object]:
     basis = {
-        "schema_version": 1,
+        "schema_version": schema_version,
         "context": context.to_dict(),
         "artifacts": [item.to_dict() for item in artifacts],
         "hypotheses": [item.to_dict() for item in hypotheses],
@@ -97,6 +166,8 @@ def _state_basis(
         "active_plan_id": active_plan_id,
         "revision": revision,
     }
+    if state_migrations:
+        basis["state_migrations"] = [item.to_dict() for item in state_migrations]
     if gate_adjudications:
         basis["gate_adjudications"] = [item.to_dict() for item in gate_adjudications]
     if admissions or artifact_reviews or scientific_decisions or evidence_map_versions:
@@ -136,6 +207,7 @@ class ProjectState:
     observed_executions: tuple[ObservedExecutionReceipt, ...]
     artifact_reloads: tuple[ArtifactReloadReceipt, ...]
     execution_reviews: tuple[ScientificReviewReceipt, ...]
+    state_migrations: tuple[StateMigrationRecord, ...]
     decisions: tuple[DecisionEvent, ...]
     plans: tuple[ResearchDAG, ...]
     active_plan_id: str | None
@@ -143,7 +215,7 @@ class ProjectState:
     state_digest: str
 
     def __post_init__(self) -> None:
-        if self.schema_version != 1 or not isinstance(self.context, ProjectContext):
+        if self.schema_version != PROJECT_STATE_SCHEMA_VERSION or not isinstance(self.context, ProjectContext):
             raise ValueError("project state schema or context is invalid")
         for field, expected in (
             ("artifacts", ScientificArtifact),
@@ -158,6 +230,7 @@ class ProjectState:
             ("observed_executions", ObservedExecutionReceipt),
             ("artifact_reloads", ArtifactReloadReceipt),
             ("execution_reviews", ScientificReviewReceipt),
+            ("state_migrations", StateMigrationRecord),
             ("decisions", DecisionEvent),
             ("plans", ResearchDAG),
         ):
@@ -211,6 +284,8 @@ class ProjectState:
                 for revised_id in item.next_hypothesis_ids
             ):
                 raise ValueError("revise-hypothesis decision must bind a registered child hypothesis")
+            if item.action in REEXECUTE_DECISION_ACTIONS:
+                validate_revision_target_contract(self, item)
             if item.active_evidence and review.overall_status in {"major", "fatal", "unassessed"}:
                 raise ValueError("blocking or unassessed artifacts cannot become active evidence")
             validate_gate_adjudication_chain(self, item.artifact_id)
@@ -290,6 +365,8 @@ class ProjectState:
                 self.plans,
                 self.active_plan_id,
                 self.revision,
+                schema_version=self.schema_version,
+                state_migrations=self.state_migrations,
             )
         )
         if self.state_digest != expected:
@@ -298,13 +375,22 @@ class ProjectState:
             raise ValueError("latest decision does not resolve to the project state digest")
 
     @classmethod
-    def create(cls, context: ProjectContext) -> "ProjectState":
-        basis = _state_basis(context, (), (), (), (), (), (), (), (), (), (), (), (), (), (), None, 0)
+    def create(
+        cls,
+        context: ProjectContext,
+        *,
+        state_migrations: tuple[StateMigrationRecord, ...] = (),
+    ) -> "ProjectState":
+        basis = _state_basis(
+            context, (), (), (), (), (), (), (), (), (), (), (), (), (), (), None, 0,
+            state_migrations=state_migrations,
+        )
         return cls(
-            schema_version=1, context=context, artifacts=(), hypotheses=(), evidence=(),
+            schema_version=PROJECT_STATE_SCHEMA_VERSION, context=context, artifacts=(), hypotheses=(), evidence=(),
             gate_adjudications=(), analysis_admissions=(), artifact_reviews=(),
             scientific_decisions=(), evidence_map_versions=(), execution_handoffs=(),
-            observed_executions=(), artifact_reloads=(), execution_reviews=(), decisions=(),
+            observed_executions=(), artifact_reloads=(), execution_reviews=(),
+            state_migrations=state_migrations, decisions=(),
             plans=(), active_plan_id=None, revision=0, state_digest=digest_value(basis),
         )
 
@@ -323,6 +409,7 @@ class ProjectState:
             "observed_executions": [item.to_dict() for item in self.observed_executions],
             "artifact_reloads": [item.to_dict() for item in self.artifact_reloads],
             "execution_reviews": [item.to_dict() for item in self.execution_reviews],
+            "state_migrations": [item.to_dict() for item in self.state_migrations],
             "decisions": [item.to_dict() for item in self.decisions],
             "plans": [item.to_dict() for item in self.plans],
             "active_plan_id": self.active_plan_id,
@@ -335,8 +422,10 @@ class ProjectState:
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "ProjectState":
+        if payload.get("schema_version") == 1:
+            return _migrate_v1_project_state(payload)
         receipt_fields = {"execution_handoffs", "observed_executions", "artifact_reloads", "execution_reviews"}
-        expected_fields = {"schema_version", "context", "artifacts", "hypotheses", "evidence", "gate_adjudications", "analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions", *receipt_fields, "decisions", "plans", "active_plan_id", "revision", "state_digest"}
+        expected_fields = {"schema_version", "context", "artifacts", "hypotheses", "evidence", "gate_adjudications", "analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions", *receipt_fields, "state_migrations", "decisions", "plans", "active_plan_id", "revision", "state_digest"}
         pre_gate_fields = expected_fields - {"gate_adjudications"}
         pre_receipt_fields = pre_gate_fields - receipt_fields
         legacy_fields = pre_receipt_fields - {"analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions"}
@@ -360,15 +449,230 @@ class ProjectState:
             observed_executions=tuple(ObservedExecutionReceipt.from_dict(item) for item in normalized["observed_executions"]),
             artifact_reloads=tuple(ArtifactReloadReceipt.from_dict(item) for item in normalized["artifact_reloads"]),
             execution_reviews=tuple(ScientificReviewReceipt.from_dict(item) for item in normalized["execution_reviews"]),
+            state_migrations=tuple(StateMigrationRecord.from_dict(item) for item in normalized["state_migrations"]),
             decisions=tuple(DecisionEvent.from_dict(item) for item in normalized["decisions"]),
             plans=tuple(ResearchDAG.from_dict(item) for item in normalized["plans"]),
             active_plan_id=normalized["active_plan_id"],
             revision=normalized["revision"],
             state_digest=normalized["state_digest"],
         )
-        if replay(state.context, state.decisions).to_dict() != state.to_dict():
+        if replay(state.context, state.decisions, state_migrations=state.state_migrations).to_dict() != state.to_dict():
             raise ValueError("serialized project state does not match event replay")
         return state
+
+
+def _legacy_v1_basis(payload: Mapping[str, Any]) -> dict[str, object]:
+    decisions = []
+    for event in payload.get("decisions", []):
+        basis = dict(event)
+        basis.pop("resulting_state_digest", None)
+        decisions.append(basis)
+    basis: dict[str, object] = {
+        "schema_version": 1,
+        "context": payload["context"],
+        "artifacts": payload.get("artifacts", []),
+        "hypotheses": payload.get("hypotheses", []),
+        "evidence": payload.get("evidence", []),
+        "decisions": decisions,
+        "plans": payload.get("plans", []),
+        "active_plan_id": payload.get("active_plan_id"),
+        "revision": payload.get("revision", 0),
+    }
+    if payload.get("gate_adjudications"):
+        basis["gate_adjudications"] = payload["gate_adjudications"]
+    if any(payload.get(field) for field in (
+        "analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions"
+    )):
+        basis.update({
+            "analysis_admissions": payload.get("analysis_admissions", []),
+            "artifact_reviews": payload.get("artifact_reviews", []),
+            "scientific_decisions": payload.get("scientific_decisions", []),
+            "evidence_map_versions": payload.get("evidence_map_versions", []),
+        })
+    if any(payload.get(field) for field in (
+        "execution_handoffs", "observed_executions", "artifact_reloads", "execution_reviews"
+    )):
+        basis.update({
+            "execution_handoffs": payload.get("execution_handoffs", []),
+            "observed_executions": payload.get("observed_executions", []),
+            "artifact_reloads": payload.get("artifact_reloads", []),
+            "execution_reviews": payload.get("execution_reviews", []),
+        })
+    return basis
+
+
+def _validate_legacy_v1_envelope(payload: Mapping[str, Any]) -> None:
+    if payload.get("schema_version") != 1:
+        raise ValueError("legacy migration requires project state schema v1")
+    receipt_fields = {"execution_handoffs", "observed_executions", "artifact_reloads", "execution_reviews"}
+    expected_fields = {
+        "schema_version", "context", "artifacts", "hypotheses", "evidence",
+        "gate_adjudications", "analysis_admissions", "artifact_reviews",
+        "scientific_decisions", "evidence_map_versions", *receipt_fields,
+        "decisions", "plans", "active_plan_id", "revision", "state_digest",
+    }
+    supported = {
+        frozenset(expected_fields),
+        frozenset(expected_fields - {"gate_adjudications"}),
+        frozenset(expected_fields - {"gate_adjudications"} - receipt_fields),
+        frozenset(
+            expected_fields
+            - {"gate_adjudications"}
+            - receipt_fields
+            - {"analysis_admissions", "artifact_reviews", "scientific_decisions", "evidence_map_versions"}
+        ),
+    }
+    if frozenset(payload) not in supported:
+        raise ValueError("legacy v1 project state uses an unsupported serialized field set")
+    source_digest = payload.get("state_digest")
+    if source_digest != digest_value(_legacy_v1_basis(payload)):
+        raise ValueError("legacy v1 project state digest is invalid")
+    decisions = payload.get("decisions", [])
+    revision = payload.get("revision")
+    if not isinstance(decisions, list) or revision != len(decisions):
+        raise ValueError("legacy v1 event count is inconsistent")
+    empty = {
+        "schema_version": 1,
+        "context": payload["context"],
+        "artifacts": [],
+        "hypotheses": [],
+        "evidence": [],
+        "decisions": [],
+        "plans": [],
+        "active_plan_id": None,
+        "revision": 0,
+    }
+    expected_prior = digest_value(empty)
+    for sequence, event in enumerate(decisions, start=1):
+        if event.get("sequence") != sequence or event.get("prior_state_digest") != expected_prior:
+            raise ValueError("legacy v1 event chain is broken")
+        identity_basis = {
+            "sequence": sequence,
+            "event_type": event.get("event_type"),
+            "payload": event.get("payload"),
+            "prior_state_digest": expected_prior,
+        }
+        expected_id = f"event-{sequence:06d}-{digest_value(identity_basis)[:12]}"
+        if event.get("id") != expected_id:
+            raise ValueError("legacy v1 event identity is invalid")
+        expected_prior = event.get("resulting_state_digest")
+    if expected_prior != source_digest:
+        raise ValueError("legacy v1 event chain does not terminate at its state digest")
+
+
+def _migrate_v1_adjudication(
+    payload: Mapping[str, Any],
+    observed_by_id: Mapping[str, Mapping[str, Any]],
+) -> dict[str, object]:
+    values = dict(payload)
+    structured_fields = {"adjudication_mode", "observed_value", "criterion", "finding"}
+    present = structured_fields & set(values)
+    if present and present != structured_fields:
+        raise ValueError("legacy v1 gate adjudication has only a partial structured binding")
+    if not present:
+        observed = observed_by_id.get(str(values.get("observed_execution_receipt_id")))
+        gate_id = str(values.get("gate_id"))
+        result = (observed or {}).get("postflight_results", {}).get(gate_id)
+        evaluations = result.get("evaluations", []) if isinstance(result, Mapping) else []
+        evaluation = next(
+            (
+                item for item in evaluations
+                if isinstance(item, Mapping) and item.get("port") == values.get("port")
+            ),
+            None,
+        )
+        result_digest = (observed or {}).get("postflight_result_digests", {}).get(gate_id)
+        if (
+            evaluation is None
+            or result_digest != values.get("gate_result_digest")
+            or evaluation.get("evaluator_type") != values.get("evaluator_type")
+            or evaluation.get("evidence_payload_sha256") != values.get("evidence_payload_sha256")
+        ):
+            raise ValueError(
+                f"legacy v1 gate adjudication cannot recover an exact observed binding: {values.get('id')}"
+            )
+        values.update({
+            "adjudication_mode": "manual",
+            "observed_value": str(evaluation.get("observed_metric")),
+            "criterion": str(evaluation.get("threshold")),
+            "finding": str(evaluation.get("reason")),
+        })
+    values.setdefault("evaluator_identity", None)
+    values.setdefault("evaluator_version", None)
+    values.setdefault("evaluator_sha256", None)
+    return values
+
+
+def _migrate_v1_project_state(payload: Mapping[str, Any]) -> ProjectState:
+    """Migrate a digest-valid v1 event log and recover exact gate bindings from its receipt."""
+    _validate_legacy_v1_envelope(payload)
+    if payload.get("evidence_map_versions"):
+        raise ValueError(
+            "legacy v1 state with a published evidence map requires explicit map republication after migration"
+        )
+    observed_by_id = {
+        str(item["id"]): item for item in payload.get("observed_executions", [])
+    }
+    migrated_adjudications = {
+        str(item["id"]): _migrate_v1_adjudication(item, observed_by_id)
+        for item in payload.get("gate_adjudications", [])
+    }
+    migration = StateMigrationRecord.create(
+        source_state_digest=str(payload["state_digest"]),
+        source_revision=int(payload["revision"]),
+    )
+    state = ProjectState.create(
+        ProjectContext.from_dict(payload["context"]),
+        state_migrations=(migration,),
+    )
+    migrated_decisions: dict[str, dict[str, object]] = {}
+    for raw_event in payload.get("decisions", []):
+        event = DecisionEvent.from_dict(raw_event)
+        event_payload = thaw(event.payload)
+        if event.event_type == "scientific_gate_adjudicated":
+            adjudication_id = str(event_payload.get("adjudication", {}).get("id"))
+            if adjudication_id not in migrated_adjudications:
+                raise ValueError("legacy v1 adjudication event has no matching top-level record")
+            event_payload = {"adjudication": migrated_adjudications[adjudication_id]}
+        elif event.event_type == "scientific_decision_recorded":
+            decision_payload = dict(event_payload["decision"])
+            if decision_payload.get("gate_adjudication_digest") is not None:
+                decision_payload["gate_adjudication_digest"] = gate_adjudication_bundle_digest(
+                    state,
+                    str(decision_payload["artifact_id"]),
+                )
+            event_payload = {"decision": decision_payload}
+            migrated_decisions[str(decision_payload["id"])] = decision_payload
+        elif event.event_type == "evidence_map_published":
+            raise ValueError("legacy v1 evidence-map events require explicit republication")
+        state = apply_event(
+            state,
+            event.event_type,
+            event_payload,
+            rationale=event.rationale,
+            trigger_finding_ids=event.trigger_finding_ids,
+            affected_artifact_ids=event.affected_artifact_ids,
+            affected_hypothesis_ids=event.affected_hypothesis_ids,
+            superseded_action_ids=event.superseded_action_ids,
+            replacement_action_ids=event.replacement_action_ids,
+            prior_results_valid=event.prior_results_valid,
+        )
+    expected = dict(payload)
+    expected["gate_adjudications"] = list(migrated_adjudications.values())
+    expected["scientific_decisions"] = [
+        migrated_decisions.get(str(item["id"]), dict(item))
+        for item in payload.get("scientific_decisions", [])
+    ]
+    actual = state.to_dict()
+    for field in (
+        "context", "artifacts", "hypotheses", "evidence", "gate_adjudications",
+        "analysis_admissions", "artifact_reviews", "scientific_decisions",
+        "execution_handoffs", "observed_executions", "artifact_reloads",
+        "execution_reviews", "plans", "active_plan_id", "revision",
+    ):
+        if actual.get(field, []) != expected.get(field, []):
+            raise ValueError(f"legacy v1 migration replay differs from serialized state field: {field}")
+    return state
 
 
 def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, Any]):
@@ -657,6 +961,8 @@ def _apply_payload(state: ProjectState, event_type: str, payload: Mapping[str, A
                 item.artifact_id,
                 decision_action=item.action,
             )
+        if item.action in REEXECUTE_DECISION_ACTIONS:
+            validate_revision_target_contract(state, item, require_pending=True)
         scientific_decisions = (*scientific_decisions, item)
     elif event_type == "evidence_map_published":
         if set(payload) != {"publication"}:
@@ -787,34 +1093,42 @@ def apply_event(
             plans,
             active_plan_id,
             sequence,
+            schema_version=state.schema_version,
+            state_migrations=state.state_migrations,
         )
     )
     final_event = replace(provisional, resulting_state_digest=resulting_digest)
     return ProjectState(
-        1,
-        state.context,
-        artifacts,
-        hypotheses,
-        evidence,
-        gate_adjudications,
-        admissions,
-        reviews,
-        scientific_decisions,
-        evidence_map_versions,
-        execution_handoffs,
-        observed_executions,
-        artifact_reloads,
-        execution_reviews,
-        (*state.decisions, final_event),
-        plans,
-        active_plan_id,
-        sequence,
-        resulting_digest,
+        schema_version=state.schema_version,
+        context=state.context,
+        artifacts=artifacts,
+        hypotheses=hypotheses,
+        evidence=evidence,
+        gate_adjudications=gate_adjudications,
+        analysis_admissions=admissions,
+        artifact_reviews=reviews,
+        scientific_decisions=scientific_decisions,
+        evidence_map_versions=evidence_map_versions,
+        execution_handoffs=execution_handoffs,
+        observed_executions=observed_executions,
+        artifact_reloads=artifact_reloads,
+        execution_reviews=execution_reviews,
+        state_migrations=state.state_migrations,
+        decisions=(*state.decisions, final_event),
+        plans=plans,
+        active_plan_id=active_plan_id,
+        revision=sequence,
+        state_digest=resulting_digest,
     )
 
 
-def replay(context: ProjectContext, decisions: tuple[DecisionEvent, ...]) -> ProjectState:
-    state = ProjectState.create(context)
+def replay(
+    context: ProjectContext,
+    decisions: tuple[DecisionEvent, ...],
+    *,
+    state_migrations: tuple[StateMigrationRecord, ...] = (),
+) -> ProjectState:
+    state = ProjectState.create(context, state_migrations=state_migrations)
     for expected in decisions:
         if expected.sequence != state.revision + 1 or expected.prior_state_digest != state.state_digest:
             raise ValueError("decision sequence or prior-state chain is broken")

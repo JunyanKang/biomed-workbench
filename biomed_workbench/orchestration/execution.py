@@ -245,6 +245,7 @@ def _output_artifacts(
     provenance: Mapping[str, Any],
     quality_findings: tuple[QualityFinding, ...],
     payloads_by_port: Mapping[str, tuple[ArtifactPayload, ...]] | None = None,
+    quality_status_by_port: Mapping[str, str] | None = None,
 ) -> tuple[ScientificArtifact, ...]:
     row = next(item for item in manifest.compatibility_matrix if item.id == provenance["compatibility_row_id"])
     source_ids = tuple(node.input_bindings[port.name] for port in manifest.input_artifacts)
@@ -280,7 +281,9 @@ def _output_artifacts(
                 experimental_unit=state.context.experimental_unit,
                 denominator=next(iter(denominators)),
                 processing_level=port.processing_levels[0],
-                quality_status="warning" if any(item.severity == "warning" for item in quality_findings) else "passed",
+                quality_status=(quality_status_by_port or {}).get(port.name) or (
+                    "warning" if any(item.severity == "warning" for item in quality_findings) else "passed"
+                ),
                 coordinate_system=contract.coordinate_systems[0] if contract.coordinate_systems else None,
                 genome_build=contract.genome_builds[0] if contract.genome_builds else None,
                 annotation_release=contract.annotation_releases[0] if contract.annotation_releases else None,
@@ -398,6 +401,11 @@ def execute_node(
                 "input_payloads": thaw(command_result.provenance["inputs"]),
                 "output_payloads": thaw(command_result.provenance["outputs"]),
             }
+            if (
+                node.planned_request_digest is not None
+                and provenance["parameters_digest"] != node.planned_request_digest
+            ):
+                raise ValueError("observed command parameters differ from the plan node request identity")
             output_artifacts = _output_artifacts(
                 state,
                 node,
@@ -420,6 +428,11 @@ def execute_node(
             )
             if manifest.access == "agent_generated":
                 compatibility_row_id = str(invocation.provenance["compatibility_row_id"])
+                if (
+                    node.planned_request_digest is not None
+                    and str(invocation.output["request_digest"]) != node.planned_request_digest
+                ):
+                    raise ValueError("prepared workflow request differs from the plan node request identity")
                 required_gate_ids = sorted(gate.id for gate in manifest.quality_gates)
                 handoff_protocol = {
                     **dict(invocation.output),
@@ -455,6 +468,9 @@ def execute_node(
                     safe_error_class=None,
                     execution_handoff=handoff,
                 )
+            direct_request_digest = digest_value(thaw(invocation.provenance.get("parameters", {})))
+            if node.planned_request_digest is not None and direct_request_digest != node.planned_request_digest:
+                raise ValueError("observed module parameters differ from the plan node request identity")
             output_artifacts = _output_artifacts(state, node, manifest, invocation.output, invocation.provenance, quality)
             invocation_provenance = invocation.provenance
     except CompatibilityError as exc:

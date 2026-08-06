@@ -395,8 +395,8 @@ class ScientificDecision:
         retain = self.action in RETAIN_DECISION_ACTIONS
         if self.active_evidence != retain:
             raise ValueError("active_evidence must be true exactly for retained decisions")
-        if self.action in REEXECUTE_DECISION_ACTIONS and not self.next_plan_node_ids:
-            raise ValueError("rerun and method-switch decisions require a distinct next plan node")
+        if self.action in REEXECUTE_DECISION_ACTIONS and len(self.next_plan_node_ids) != 1:
+            raise ValueError("rerun and method-switch decisions require exactly one distinct next plan node")
         if self.action in EXCLUDE_DECISION_ACTIONS | STOP_DECISION_ACTIONS and self.next_plan_node_ids:
             raise ValueError("exclude and stop decisions cannot trigger another plan node")
         if self.action == "revise-hypothesis" and not self.next_hypothesis_ids:

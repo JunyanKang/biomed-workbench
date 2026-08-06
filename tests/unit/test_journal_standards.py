@@ -71,6 +71,9 @@ class JournalStandardsTests(unittest.TestCase):
         index = json.loads((Path(CATALOG_ROOT) / "index.json").read_text(encoding="utf-8"))
         self.assertEqual(index["active_catalog_version"], catalog["catalog_version"])
         self.assertEqual(index["active_catalog_sha256"], digest)
+        self.assertEqual(index["catalog_lifecycle"], "draft")
+        self.assertTrue(index["update_policy"]["draft_same_version_updates_are_allowed"])
+        self.assertTrue(index["update_policy"]["released_history_is_immutable"])
         source_path = repository_root / catalog["metric_source_manifest"]["file"]
         self.assertTrue(source_path.is_file())
         self.assertEqual(

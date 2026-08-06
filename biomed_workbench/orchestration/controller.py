@@ -10,7 +10,11 @@ from typing import Callable
 
 from ..kernel.evidence import EvidenceRecord
 from ..kernel.execution_receipts import ArtifactReloadReceipt, ObservedExecutionReceipt, ScientificReviewReceipt
-from ..kernel.execution_chain import validate_node_execution_chain, validated_delivery_publication_is_current
+from ..kernel.execution_chain import (
+    validate_node_execution_chain,
+    validate_revision_target_contract,
+    validated_delivery_publication_is_current,
+)
 from ..kernel.artifact_store import ProjectArtifactStore
 from ..kernel.identity import digest_value, thaw
 from ..kernel.plans import PlanNode, ResearchDAG
@@ -295,6 +299,8 @@ class ResearchController:
         manifest = self._registry.get(execution.module_id)
         provenance = thaw(execution.provenance)
         parameters_digest = str(provenance.get("parameters_digest") or digest_value(provenance))
+        if node.planned_request_digest is not None and parameters_digest != node.planned_request_digest:
+            raise ValueError("completed revision execution differs from its frozen planned request identity")
         runtime_versions = {
             **{str(key): str(value) for key, value in dict(provenance.get("tools", {})).items()},
             **{str(key): str(value) for key, value in dict(provenance.get("dependencies", {})).items()},
@@ -389,6 +395,28 @@ class ResearchController:
             if len(families) != 1:
                 raise ValueError("one plan node cannot resolve its outputs with conflicting decision families")
             family = next(iter(families))
+            selected_revision_ids = {
+                value
+                for item in node_decisions
+                if item.action in REEXECUTE_DECISION_ACTIONS
+                for value in item.next_plan_node_ids
+            }
+            for replacement in tuple(
+                item
+                for item in plan.nodes
+                if item.revision_of_node_id == node.id
+                and item.id not in selected_revision_ids
+                and item.status in {"pending", "ready"}
+            ):
+                state = self._status(
+                    state,
+                    plan.id,
+                    replacement,
+                    "skipped",
+                    replacement.attempt,
+                )
+                plan = self._active_plan(state)
+            node = next(item for item in plan.nodes if item.id == node.id)
             if family != "retain":
                 next_ids = {value for item in node_decisions for value in item.next_plan_node_ids}
                 plan_nodes = {item.id: item for item in plan.nodes}
@@ -396,6 +424,14 @@ class ResearchController:
                     raise ValueError("scientific decision triggers an unknown or self-referential plan node")
                 if family == "reexecute" and any(plan_nodes[value].status not in {"pending", "ready"} for value in next_ids):
                     raise ValueError("rerun or method-switch target must be a pending revision node")
+                if family == "reexecute":
+                    for decision in node_decisions:
+                        validate_revision_target_contract(
+                            state,
+                            decision,
+                            registry=self._registry,
+                            require_pending=True,
+                        )
                 status = {
                     "exclude": "skipped",
                     "reexecute": "superseded",
@@ -423,6 +459,33 @@ class ResearchController:
             state = self._status(state, plan.id, node, "completed", node.attempt)
             plan = self._active_plan(state)
         return state
+
+    @staticmethod
+    def _plan_is_resolved(state: ProjectState, plan: ResearchDAG) -> bool:
+        selected_revision_ids = {
+            node_id
+            for decision in state.scientific_decisions
+            if decision.action in REEXECUTE_DECISION_ACTIONS
+            for node_id in decision.next_plan_node_ids
+        }
+        for node in plan.nodes:
+            if node.status == "completed":
+                continue
+            if (
+                node.revision_of_node_id is not None
+                and node.id not in selected_revision_ids
+                and node.status == "skipped"
+            ):
+                continue
+            if node.status == "superseded" and any(
+                decision.action in REEXECUTE_DECISION_ACTIONS
+                and decision.artifact_id in node.planned_output_artifact_ids.values()
+                and set(decision.next_plan_node_ids) <= selected_revision_ids
+                for decision in state.scientific_decisions
+            ):
+                continue
+            return False
+        return True
 
     @staticmethod
     def _decision_triggered_node_is_ready(state: ProjectState, plan: ResearchDAG, node: PlanNode) -> bool:
@@ -479,6 +542,10 @@ class ResearchController:
                 for node in active.nodes
                 if node.status in {"pending", "ready"}
                 and (
+                    node.revision_of_node_id is None
+                    or self._decision_triggered_node_is_ready(state, active, node)
+                )
+                and (
                     set(node.dependencies) <= completed_ids
                     or self._decision_triggered_node_is_ready(state, active, node)
                 )
@@ -509,7 +576,7 @@ class ResearchController:
                     for item in state.scientific_decisions
                     if item.artifact_id in active_output_artifact_ids
                 )
-                if statuses == {"completed"}:
+                if self._plan_is_resolved(state, active):
                     stop_reason = "plan_completed"
                 elif publication_blocked:
                     stop_reason = "awaiting_evidence_map"
@@ -594,6 +661,12 @@ class ResearchController:
                             )
                         state = self._status(state, current_plan.id, node, "completed", node.attempt)
                 elif execution.status == "awaiting_observed_execution":
+                    if (
+                        node.planned_request_digest is not None
+                        and execution.execution_handoff is not None
+                        and execution.execution_handoff.request_digest != node.planned_request_digest
+                    ):
+                        raise ValueError("prepared revision execution differs from its frozen planned request identity")
                     state = apply_event(
                         state,
                         "execution_handoff_recorded",
@@ -676,7 +749,7 @@ class ResearchController:
     def resume(self, serialized_state: dict[str, object]) -> CycleResult:
         state = ProjectState.from_dict(serialized_state)
         plan = self._active_plan(state)
-        if all(node.status == "completed" for node in plan.nodes):
+        if self._plan_is_resolved(state, plan):
             assessments = tuple(assess_hypothesis(item, state.evidence, ()) for item in state.hypotheses)
             return CycleResult(state, plan, (), assessments, "already_complete")
         return self.advance(state, plan)
