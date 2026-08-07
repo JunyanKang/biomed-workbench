@@ -24,11 +24,17 @@ class ReleaseNoteHistoryTests(unittest.TestCase):
     def test_release_index_states_the_editorial_correction_policy(self):
         english = (ROOT / "docs/releases/README.md").read_text(encoding="utf-8")
         chinese = (ROOT / "docs/releases/README.zh-CN.md").read_text(encoding="utf-8")
+        current_english = (ROOT / "docs/releases/2026-08-07.md").read_text(encoding="utf-8")
+        current_chinese = (ROOT / "docs/releases/2026-08-07.zh-CN.md").read_text(encoding="utf-8")
 
         self.assertIn("Scientific behavior and evidence are not silently rewritten", english)
         self.assertIn("editorial corrections to public wording are dated", english)
         self.assertIn("科学行为和证据不会被静默改写", chinese)
         self.assertIn("公开措辞的编辑性修订", chinese)
+        self.assertIn("# 0.2.0 · 2026-08-07", current_english)
+        self.assertIn("1,234 tests run; 1,232 passed and 2 runtime-conditional tests skipped", current_english)
+        self.assertIn("# 0.2.0 · 2026-08-07", current_chinese)
+        self.assertIn("共运行 1,234 项，其中 1,232 项通过，2 项按运行条件跳过", current_chinese)
 
     def test_historical_notes_changed_after_policy_disclose_the_latest_correction(self):
         baseline = _git("cat-file", "-e", f"{POLICY_BASELINE}^{{commit}}", check=False)

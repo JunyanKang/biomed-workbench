@@ -32,6 +32,7 @@ class ReleaseSurfaceTests(unittest.TestCase):
 
         self.assertTrue((ROOT / "LICENSE").exists())
         self.assertEqual(plugin["license"], "Apache-2.0")
+        self.assertEqual(plugin["version"], "0.2.0")
         self.assertEqual(plugin["version"], catalog["version"])
 
     def test_top_level_help_discovers_the_complete_project_command_surface(self):
