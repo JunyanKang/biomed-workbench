@@ -8,7 +8,7 @@ This capability area supports structured clinical analysis, translational eviden
 
 ## Unified Statistics And Clinical Program
 
-For broad statistics, modelling, and translational requests, the workbench stages the plan from cohort or matrix profiling to inferential analyses, model evaluation, adverse-event summaries, and clinical or report-boundary audits. Survival analysis, biomarker performance, classification gold-set evaluation, cosinor modelling, differential expression, dose response, growth curves, and qPCR remain separate modules with their own input contracts and quality gates.
+For broad statistics, modelling, and translational requests, the workbench first examines the cohort or data matrix and then organises inferential analyses, model evaluation, adverse-event summaries, and clinical and reporting-boundary review. Survival analysis, biomarker performance, classification gold-set evaluation, cosinor modelling, differential expression, dose response, growth curves, and qPCR retain their own input requirements and quality checks.
 
 The plan preserves experimental units, denominators, censoring, threshold dependence, missingness, and model limitations. Clinical translation modules can summarize and audit research evidence, but they block patient-specific diagnosis, treatment, triage, prognosis, or regulated clinical decision support.
 
@@ -21,8 +21,6 @@ The plan preserves experimental units, denominators, censoring, threshold depend
 - De-identify structured clinical records under explicit field rules.
 - Audit clinical report structure and retrieve design-aware ClinicalTrials.gov evidence.
 - Block patient-specific diagnosis, treatment, triage, and prognosis requests before interpretation, while preserving safe research-summary actions.
-
-Representative modules include `cohort-summary`, `survival-analysis`, `biomarker-performance`, `adverse-event-summary`, `clinical-deidentify`, `clinical-report-audit`, `clinical-trial-evidence`, and `clinical-decision-boundary-audit`.
 
 ## Experimental Planning And Quantification
 
@@ -42,12 +40,10 @@ Representative modules include `cohort-summary`, `survival-analysis`, `biomarker
 - Summarize one exported electrophysiology trace with baseline, sampling, peak, and threshold-crossing metrics while blocking spike-class, cell-state, and disease-state overinterpretation.
 - Normalize reviewed Western blot ROI measurements by background, optional matched loading control, and declared reference lanes while retaining the technical versus biological repeat boundary.
 - Summarize calibrated and decay-correction-declared radiotracer organ measurements as percent injected dose per gram, observed-interval AUC, and matching-time tumor-to-blood ratios without claiming pharmacokinetics or dosimetry.
-- Preserve animal-level xenograft tumor-volume trajectories and calculate descriptive endpoint TGI only under an explicit control and endpoint contract.
+- Preserve animal-level xenograft tumour-volume trajectories and calculate descriptive endpoint TGI only when the control and analysis endpoint are explicit.
 - Compare zero- and first-order accelerated-stability fits and perform explicitly bounded Arrhenius extrapolation only when one kinetic model is supported across temperatures.
 
-Representative modules include `pcr-plan`, `dilution-plan`, `qpcr-relative-expression`, `dose-response`, `growth-curve`, `cfu-enumeration`, `biofilm-crystal-violet`, `bacterial-population-scenario`, `fcs-event-import`, `flow-cytometry-summary`, `dye-dilution-proliferation`, `annexin-viability-summary`, `dna-content-phase-fit`, `immunoassay-quantification`, `enzyme-kinetics`, `fixed-period-cosinor`, `electrophysiology-trace-summary`, `western-blot-densitometry`, `radiotracer-biodistribution`, `xenograft-tumor-growth`, and `accelerated-stability`.
-
-## Quality Gates
+## Requirements For Interpretation
 
 The workbench preserves independent experimental units, denominators, censoring, assay range, controls, gating order, calibration assumptions, and missingness. It blocks clinical or causal interpretations that exceed the research design, and it does not treat a computational plan as evidence that an experiment was performed successfully.
 

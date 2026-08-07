@@ -8,7 +8,7 @@
 
 ## 统一统计与临床方案
 
-对于广义的统计、建模和转化请求，工作台从队列或矩阵 profiling 开始，依次安排推断分析、模型评估、不良事件汇总以及临床或报告边界审查。生存分析、biomarker 性能、分类金标准评估、cosinor 建模、差异表达、剂量反应、生长曲线和 qPCR 保持为拥有独立输入契约与质量门控的模块。
+对于广义的统计、建模和转化请求，工作台先检查队列或数据矩阵，再安排推断分析、模型评估、不良事件汇总以及临床和报告边界审查。生存分析、biomarker 性能、分类金标准评估、cosinor 建模、差异表达、剂量反应、生长曲线和 qPCR 各自保留相应的输入要求和质量检查。
 
 方案保留实验单位、分母、删失、阈值依赖性、缺失情况和模型限制。临床转化模块可以汇总和审查科研证据，但会阻止患者特异的诊断、治疗、分诊、预后或受监管临床决策支持。
 
@@ -21,8 +21,6 @@
 - 在明确字段规则下对结构化临床记录去识别化。
 - 审查临床报告结构，并获取感知研究设计的 ClinicalTrials.gov 证据。
 - 在解读前阻止患者特异的诊断、治疗、分诊和预后请求，同时保留安全的科研汇总操作。
-
-代表性模块包括 `cohort-summary`、`survival-analysis`、`biomarker-performance`、`adverse-event-summary`、`clinical-deidentify`、`clinical-report-audit`、`clinical-trial-evidence` 和 `clinical-decision-boundary-audit`。
 
 ## 实验计划与定量
 
@@ -42,12 +40,10 @@
 - 汇总一条导出的电生理 trace，给出基线、采样、峰值和阈值穿越指标，同时阻止对 spike 类型、细胞状态和疾病状态的过度解读。
 - 用背景、可选匹配上样对照和声明参考泳道归一化已复核的 Western blot ROI 测量，并保留技术重复与生物学重复的边界。
 - 将已校准且声明衰变校正的放射性示踪剂器官测量汇总为每克百分比注射剂量、已观察区间 AUC 和匹配时间的肿瘤/血液比，不声称药代动力学或辐射剂量学。
-- 保留动物层异种移植瘤体积轨迹，仅在明确对照和终点契约下计算描述性终点 TGI。
+- 保留动物层异种移植瘤体积轨迹，仅在对照和分析终点明确时计算描述性终点 TGI。
 - 比较零级与一级加速稳定性拟合，仅当某一动力学模型在多个温度下获得支持时，进行边界明确的 Arrhenius 外推。
 
-代表性模块包括 `pcr-plan`、`dilution-plan`、`qpcr-relative-expression`、`dose-response`、`growth-curve`、`cfu-enumeration`、`biofilm-crystal-violet`、`bacterial-population-scenario`、`fcs-event-import`、`flow-cytometry-summary`、`dye-dilution-proliferation`、`annexin-viability-summary`、`dna-content-phase-fit`、`immunoassay-quantification`、`enzyme-kinetics`、`fixed-period-cosinor`、`electrophysiology-trace-summary`、`western-blot-densitometry`、`radiotracer-biodistribution`、`xenograft-tumor-growth` 和 `accelerated-stability`。
-
-## 质量门控
+## 结果解释要求
 
 工作台保留独立实验单位、分母、删失、测定量程、对照、门控顺序、校准假设和缺失情况。它会阻止超出研究设计的临床或因果解读，也不会把计算计划当作实验已成功完成的证据。
 

@@ -1,67 +1,30 @@
-# Capability Maturity And Evidence
+# Capability Maturity And Project Evidence
 
-Biomed Workbench separates module maturity from the strength of evidence
-available for a particular scientific use. A module marked `validated` has a
-valid package, executable contract, compatibility row, regression case, and
-representative end-to-end evidence. It is not automatically validated for every
-organism, assay, cohort, chemistry, endpoint, or user dataset.
+Languages: [English](maturity.md) · [中文](maturity.zh-CN.md)
 
-## Evidence Levels
+A validated module is not automatically suitable for every organism, assay, study design, or data scale. Biomed Workbench reports separately how far a capability has been validated and what the evidence from the current project can support.
 
-| Level | What has been demonstrated | What remains unproven |
+## Four Evidence Levels
+
+| Level | What has been confirmed | What still requires confirmation |
 | --- | --- | --- |
-| Contract | Manifest, schemas, artifacts, quality gates, entrypoint, and extension rules are structurally valid | Scientific runtime and outputs |
-| Compatibility | A declared tool/dependency/input/output combination passes regression and representative execution | Other versions, platforms, formats, and study designs |
-| Live acceptance | A current external tool, database, or stable public dataset passes the recorded quality gates | Generalization beyond the recorded source and parameters |
-| Project validation | The user's actual inputs execute, reload, reconcile, and pass project-specific scientific gates | Claims beyond the sampled units, design, and observed evidence |
+| Method definition complete | Inputs, outputs, parameters, quality checks, and conditions of use are defined | Whether external software ran and produced reliable results |
+| Compatible setup tested | A named combination of software versions, dependencies, platform, and file formats works together | Untested versions, platforms, and study designs |
+| Representative case passed | Public data or a stable service produced results that could be reopened under recorded conditions | Generalisation to other data and parameters |
+| Current project validated | The user's data ran, the outputs were reopened, and scientific review was completed | Claims beyond the study design and observed evidence |
 
-These levels are cumulative for a specific compatibility row. Evidence from one
-row must not be transferred to another row merely because its version appears
-inside an allowed range.
+## How To Read Capability Labels
 
-Eight independent axes are reported for every released capability: contract validity, static adapter reachability, fixture declaration, receipt-bound controlled fixture execution and reload, process-JSON round trip, serialized artifact-payload reload, representative or public-case acceptance, and current-project review. They are never collapsed into one maturity count. A case file proves only declaration. An isolated execution receipt records module/version/compatibility identity, case digest, complete normalized output digest, validated projection digest, actual runtime versions, reload method, and round-trip kind. The checked cross-host readiness catalog derives a separate portable identity from the case, module, compatibility row, validated projection, reload method, and round-trip kind; host-specific full-output and runtime digests remain in the observed run receipt and never become deterministic release metadata. A process result decoded from JSON is reported separately from a serialized scientific artifact that was independently reopened. Reachable code is not proof of execution, and a representative case is not proof that the current project produced and reviewed a result. Generic entry surfaces therefore never declare scientific completion before the project review and decision events exist.
+- **Validated:** the released implementation and recorded compatible setup passed representative checks. Project-specific quality control is still required for new data.
+- **Experimental:** the workflow and parameter interface are usable, but coverage of public data, external software, or real projects is not yet broad enough for a default workflow.
+- **Plannable:** the workbench can explain the method's role and prepare an analysis plan, but it cannot describe the analysis as completed.
 
-Externally returned outputs first pass one of 18 explicitly implemented semantic families. This establishes container readability, identity, accounting and family-level invariants only. Protocol `2.1.0` records a complete structured result and digest for every manifest gate, while the handoff contract binds the registered evaluator identity, evaluator-contract version, and packaged source digest. Family admission is never copied into assay, design, robustness, reload-scope or claim gates, and gate names never imply an automatic evaluator. A real evaluator failure remains a reloaded negative result and receives a plugin-owned automatic rejection with the exact registered identity. A `requires_review` or `not_evaluable` result always requires manual adjudication; `not_evaluable` additionally requires an explicit caveat before retention. Artifact review, scientific decision, node completion and evidence-map identity all require the complete adjudication set; caller-supplied verdicts or invented evaluator metadata are not accepted.
+Access method, browser interaction, or agent-managed execution does not determine scientific maturity.
 
-For an externally executed workflow, runtime evidence is a structured object containing the observed workflow, the complete tool set, the complete dependency set, a tested-or-compatible policy, and the digest of the selected compatibility contract. Every identity must exactly cover the frozen row, every version must satisfy its rule, and a `tested` claim must equal a declared tested baseline. The handoff and return must carry the same compatibility-contract digest. Missing dependencies, substitute workflow names, out-of-range versions, and unbound runtime objects are rejected.
+## What Counts For A User Project
 
-## Operational Labels
+For a user project, the decisive evidence is the observed run, not the module name or release label. The workbench checks the actual inputs, software versions, parameters, output files, and quality results, then reopens the outputs for statistical and biological review.
 
-- `validated`: the checked package and its declared compatibility evidence pass.
-- `experimental`: the module contract and templates are usable, but the
-  scientific surface still needs broader backend, public-data, or project
-  acceptance before routine use.
-- `agent_generated`: Codex binds project artifacts and reviewed parameters to
-  packaged command-line adapters, executes them without editing source code,
-  inspects every output, and records observed versions and gates. A prepared
-  execution plan is not evidence; only an observed, reloaded run can contribute
-  evidence. Any module whose adapter still requires source editing is
-  `scaffolded` and is blocked from the released capability surface.
-- `offline`, `public_api`, and `codex_native`: these describe access and
-  execution boundaries, not scientific maturity.
+A successful process exit shows only that computation ended. A result enters the project's [scientific evidence map](scientific-evidence-map.md) only after its relevant quality checks and scientific review pass. Failed, unrun, and indeterminate checks remain visible.
 
-## Release Evidence
-
-The release validator binds the registry to compatibility execution evidence,
-live tool and database reports, public-data cases, template coverage, and the
-research-state engine. The [public-data acceptance
-case index](cases/README.md) shows the strongest current live examples. The
-generated [experimental-module evidence matrix](../reports/experimental-module-maturity.json)
-separately records contract, template, compatibility, representative execution,
-public-data acceptance, and project-validation status for every experimental
-module. A deterministic fixture can therefore never silently promote itself to
-public-data evidence.
-
-The deterministic readiness file remains portable across supported hosts. Every
-CI run additionally uploads a timestamped, run-specific receipt archive that
-retains the full controlled-fixture output digests, observed runtime versions,
-executor identity, and an archive digest for 30 days. This operational archive
-is intentionally separate from the checked registry and cannot change module
-maturity by itself.
-
-For a user project, the final maturity decision is always made at project
-validation level. Project validation requires an approved analysis admission,
-observed execution, content-addressed output import, result reload, scientific
-review, an explicit decision, and evidence-map registration. Failed or unrun
-gates remain visible, experimental modules are not promoted by prose, and a
-successful process exit is never sufficient.
+See [public-data cases](cases/README.md) for representative acceptance examples and [release notes](releases/README.md) for capability changes between versions.

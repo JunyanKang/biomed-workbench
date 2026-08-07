@@ -4,7 +4,7 @@ Languages: [English](single-cell-integration-reference-cross-species.md) · [中
 
 Updated: 2026-07-31
 
-This contract does not collapse every form of integration into one task. An analysis first distinguishes four objectives:
+Integration is not a single task. An analysis first distinguishes four objectives:
 
 1. **Within-modality batch integration:** construct a common representation for neighbourhoods, clustering, and visualization.
 2. **Frozen-reference mapping:** map a query into a reference while avoiding retraining or alteration of the reference where possible.
@@ -32,7 +32,7 @@ Authorities: [Seurat v5 integration](https://satijalab.org/seurat/articles/seura
 
 | Method | Preferred use | Output meaning | Main boundary |
 |---|---|---|---|
-| scArches | A generative scVI, scANVI, or totalVI reference; query mapping into a frozen latent space | query latent representation, posterior, optional label probabilities | Reference model, gene order, and registry must remain frozen; unknown query groups must be retained |
+| scArches | A generative scVI, scANVI, or totalVI reference; query mapping into a frozen latent space | query latent representation, posterior, optional label probabilities | Reference model, gene order, and model settings must remain frozen; unknown query groups must be retained |
 | Symphony | Fast, lightweight, reproducible mapping to a large reference atlas | reference coordinates, query embedding, label proposals | Reference centroids, loadings, normalization parameters, and versions must be preserved together |
 | RCTD | Cell-type weights or abundances for spatial spots from an scRNA-seq reference | location-by-cell-type composition | Spatial-mixture deconvolution, not ordinary single-cell query label transfer |
 | Tangram | Mapping cells or clusters to spatial positions | cell/cluster-by-location mapping probability | Mapping probability is not a cell proportion; mismatched tissue regions can force spurious mappings |
@@ -95,5 +95,5 @@ An integration result enters interpretation only when all conditions are met:
 3. All candidates use the same foundational cells and a pre-frozen evaluation set; native outputs are retained separately.
 4. Mixing and biological preservation are evaluated separately rather than collapsed into a score that conceals failure.
 5. Unknown, unsupported, rare, and species-specific states remain intact.
-6. Outputs can be reloaded with consistent cell count, order, feature namespace, parameters, versions, seed, and digest.
+6. Outputs can be reopened with consistent cell count, order, feature identifiers, parameters, versions, random seed, and file content.
 7. Confirmatory inference explicitly returns to raw counts and biological replicates.

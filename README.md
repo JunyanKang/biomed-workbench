@@ -1,14 +1,9 @@
-<p align="center">
-  <img src="assets/biomed-workbench-mark.svg" width="104" alt="Biomed Workbench 标志">
-</p>
-
 <h1 align="center">Biomed Workbench</h1>
 
-<p align="center"><strong>将生物医学问题编译为可执行、可审查、可演进的科学证据链</strong></p>
+<p align="center"><strong>让生物医学研究从问题出发，以可复核的证据收束</strong></p>
 
 <p align="center">
-  智能体驱动的生物医学研究工作台<br>
-  Evidence · Analysis · Scientific Review · Publication
+  研究设计 · 数据分析 · 科学评审 · 证据追溯 · 论文交付
 </p>
 
 <p align="center">
@@ -16,159 +11,107 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/JunyanKang/biomed-workbench/actions"><img alt="Quality" src="https://img.shields.io/github/actions/workflow/status/JunyanKang/biomed-workbench/quality.yml?branch=main&amp;label=quality"></a>
-  <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-4388C7"></a>
-  <img alt="198 scientific modules" src="https://img.shields.io/badge/scientific%20modules-198-36A58B">
-  <img alt="Codex first" src="https://img.shields.io/badge/Codex-first-E05A47">
-  <img alt="Versioned evidence maps" src="https://img.shields.io/badge/evidence%20maps-versioned-C7953E">
+  <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-365B73"></a>
+  <img alt="198 registered scientific modules" src="https://img.shields.io/badge/registered%20modules-198-4E8B86">
 </p>
 
 <p align="center">
-  <img src="assets/readme/biomed-workbench-hero.png" width="100%" alt="从多源生物医学数据到证据网络和论文交付的概念图">
+  <a href="#开始使用">开始使用</a> ·
+  <a href="docs/capabilities/README.zh-CN.md">能力地图</a> ·
+  <a href="docs/scientific-evidence-map.zh-CN.md">证据地图</a> ·
+  <a href="docs/releases/README.zh-CN.md">发布记录</a>
 </p>
-
-<p align="center"><sub>概念图：多源研究输入经科学编排、质量审查与证据追踪，形成可复核的研究交付；图中元素不代表实验观测。</sub></p>
-
-复杂研究真正稀缺的，从来不只是某一个分析工具，而是贯穿整个项目的科学秩序：问题如何被拆解，方法为什么被选择，数据能否进入推断，结果是否经得起统计与生物学审查，以及每一项结论将把研究带向何处。
-
-Biomed Workbench 把这种秩序带入智能体协作环境。用户以自然语言描述研究目标，工作台据此组织证据检索、组学分析、单细胞与空间研究、分子设计、实验定量、图表与论文交付，并以显式依赖、质量门控和版本化证据地图维持项目的连续性。Codex 是当前首要且完整通过发布流程验证的参考宿主；支持标准技能目录或 MCP 的其他智能体可以复用同一科学注册表，但其执行、权限、运行环境和证据交付仍需在对应宿主中独立实现并验收。
-
-它所交付的不是一串运行记录，而是一套能够回答四个问题的研究系统：
-
-- **为什么做：** 科学依据、竞争性假设、实验单位与决策标准；
-- **如何做：** 官方方法来源、输入输出契约、参数依据、适用条件与兼容组合；
-- **结果意味着什么：** 技术、统计、生物学和稳健性四层评审；
-- **下一步做什么：** 保留、带条件保留、重跑、换方法、补数据、调整假设或终止分支。
-
-## 一个项目，而不是一串命令
-
-Biomed Workbench 以统一入口理解完整研究目标，再从注册能力中选择科学上充分、范围上克制的模块集合。独立问题可以并行验证，存在数据依赖的步骤按序执行；每条分析路线及其评审结论都进入项目历史，持续为后续决策提供依据。
 
 <p align="center">
-  <img src="assets/readme/research-decision-loop.png" width="100%" alt="从科学问题、分析准入、执行和评审，到证据保留、方案修订和研究交付的闭环概念图">
+  <img src="assets/readme/biomed-workbench-editorial-hero.png" width="100%" alt="生物医学研究输入经分析、科学评审和证据组织形成图表与论文交付的概念图">
 </p>
 
-<p align="center"><sub>概念图：青色路径表示通过评审后进入证据体系的结果，珊瑚色路径表示修订、补充或重新分析；所有分支都保留在项目历史中。</sub></p>
+<p align="center"><sub>概念图：展示研究输入、分析、评审、证据组织与交付之间的关系；图中数据与图形均为示意，不代表实验结果。</sub></p>
 
-每个分析节点在执行前都需要说明方法适配性、可调参数、备选方案和证伪条件；每项产物在进入结论前都需要完成科学评审。运行成功只是计算状态，证据能支持多强的结论还取决于研究设计、数据质量和多方法稳健性。
+Biomed Workbench 把生物医学研究设计、数据分析和科研交付连接起来。它将研究问题、真实数据、方法选择、分析结果、科学评审和后续决策放在同一套可追溯记录中，使一次分析能够成为下一步研究判断的可靠依据。
+
+用户以自然语言描述目标、研究设计与已有数据；工作台检查输入和方法适用条件，选择相应能力，执行可用流程，重新打开结果文件，并把结论限定在实际证据能够支持的范围内。
+
+| 研究设计 | 证据追溯 | 科研交付 |
+| --- | --- | --- |
+| 先界定问题、实验单位、假设与决策标准，再组织方法。 | 把数据、参数、程序、图件、图注、引用和评审连接起来。 | 从分析表格和图组延伸到双语报告、稿件、回复与演示材料。 |
+
+## 一个项目如何推进
+
+| 01 · 定义 | 02 · 分析 | 03 · 评审 | 04 · 决策 |
+| --- | --- | --- | --- |
+| 明确生物学问题、实验单位、已有证据、竞争性假设与成功标准。 | 按输入要求和软件条件组合方法，记录版本、参数、环境与输出。 | 分别检查技术质量、统计稳健性、生物学解释和结论边界。 | 保留、带条件保留、重跑、换方法、补数据、调整假设或停止分支。 |
+
+计算结束不等于分析完成。只有通过质量检查、结果重读和科学评审的内容，才会成为当前项目的有效证据；冲突、失败和被排除的路线仍保留在项目历史中，供后续判断复核。
 
 ## 科学证据地图
 
-研究项目会随着新数据、新方法和新判断持续演进。Biomed Workbench 用两层结构保存这段演进史：
+证据地图采用两层结构，避免把完整文件关系压缩成一张难以阅读的大图：
 
-1. **项目主线图** 只呈现图组和关键数据之间的支持、削弱、冲突与依赖，让读者先看懂完整研究故事；
-2. **单项证据展开图** 对每份数据或每个图组追踪前置结论、登记数据、作图数据、分析程序、排图程序、最终数据与图文件、图注、叙述来源和原始研究 DOI。
+1. **项目主线**只呈现关键数据和图组之间的支持、削弱、冲突与依赖；
+2. **单项证据**再展开前置结论、当前数据、作图数据、分析程序、排版程序、最终文件、图注、解释来源与 DOI。
 
-每个文件均绑定工作区内可跳转路径、媒体类型、大小和文件校验指纹；供系统核对的关系记录与阅读版地图同时生成。项目快照如实展示待执行、失败和排除分支；正式排图或交付前，系统先冻结该交付所依赖的全部上游结果、评审与保留决策，只放行明确登记的交付任务；交付产物完成重读和评审后，再形成覆盖完整研究计划的终版证据地图。中英文报告只能读取同一张已经通过验证的地图；独立版本、父版本记录、可恢复发布事务和不可覆盖的历史目录共同保存科学解释的修订过程。
+文件身份、版本关系和内容指纹随同保存。双语解读报告读取同一张经过核对的证据地图，因此图、表、正文与引用共享同一来源，而不是在报告阶段重新拼接。完整设计见[科学证据地图](docs/scientific-evidence-map.zh-CN.md)。
 
-<p align="center">
-  <img src="assets/readme/scientific-evidence-map.png" width="100%" alt="项目主线与单项文件来源追踪组成的两层科学证据地图概念图">
-</p>
+## 覆盖的研究层级
 
-<p align="center"><sub>概念图：上层聚焦项目论证主线，下层追踪一份数据或一个图组的完整来源；正式关系由通过验证的项目证据地图定义。</sub></p>
+当前包含 **198 个可独立识别的科学模块**。这一数字表示方法用途、输入输出和使用条件已经登记，不等同于每个模块已在所有数据类型、物种或运行环境中完成验收；精确的执行范围与代表性案例以对应版本的[发布记录](docs/releases/README.zh-CN.md)、[成熟度说明](docs/maturity.zh-CN.md)和[`reports/`](reports/)为准。
 
-详细设计：[中文](docs/scientific-evidence-map.zh-CN.md) · [English](docs/scientific-evidence-map.md)。
-
-## 从分子到组织，从数据到论证
-
-当前注册表包含 **198 个科学模块**，覆盖研究从知识建构到成果交付的主要层级：证据、数据库与文献用于界定已知、争议和知识缺口；数据分析连接 bulk、single-cell、spatial 与跨尺度研究；分子与结构、临床与实验、成像与可视化分别承载机制推演、实验测量和形态空间证据；论文与转化交付则把经过审查的结果组织成面向特定读者、期刊与应用场景的研究叙事。
-
-其中，数据分析层再按数据尺度、测量家族和工具角色细分。靶标、抗体、内部参照、特异性处理和归一化属于具体实验或分析设计，不会被误列为独立的组学门类。模块注册表示相应科学契约已经建立；能够据此主张的实际能力，仍由公共数据案例中登记的后端、版本、研究设计以及重新读取的产物共同界定。
-
-| 研究层级 | 已发布的代表性能力 |
+| 研究层级 | 代表性能力 |
 | --- | --- |
-| [证据、数据库与文献](docs/capabilities/evidence-and-literature.zh-CN.md) | NCBI、UniProt、Ensembl、gnomAD、HPO、GO、Reactome、Open Targets、Europe PMC、Crossref、bioRxiv、ClinicalTrials.gov、证据新鲜度、引用与主张审查 |
-| [Bulk 测序](docs/capabilities/bulk-sequencing-assays.zh-CN.md) | bulk RNA-seq；ChIP-seq、CUT&RUN、CUT&Tag；DRIP-seq/DRIPc-seq、qDRIP-seq、R-ChIP、MapR 等 R-loop 测量；ATAC-seq、DNase-seq；RIP-seq、eCLIP/iCLIP/HITS-CLIP/PAR-CLIP、LACE-seq；Ribo-seq；GRO-seq、PRO-seq、TT-seq、NET-seq；WGBS/RRBS/EM-seq；Hi-C/Micro-C；MeRIP/m6A-seq |
-| [单细胞、轨迹与跨系统整合](docs/capabilities/single-cell-integration-reference-cross-species.zh-CN.md) | Scanpy/Seurat、scVI/scANVI、Harmony、CCA/RPCA、FastMNN、scIB、WNN、MOFA+、MultiVI、SAMap |
-| [空间组学](docs/capabilities/trajectory-spatial-complete-analysis.zh-CN.md) | Visium 与 Xenium 数据结构；Xenium–SpatialData–Squidpy 图像/分割流程；Slide-seq 上验收的 RCTD、公共数据验收的 Tangram；PASTE 多切片对齐与三维坐标重建 |
-| [跨尺度通用分析](docs/capabilities/omics-and-single-cell.zh-CN.md) | 文件与读段质控、差异表达和差异可及性、DEqMS、GO/KEGG、GSEA、WGCNA、NMF、motif、网络分析、JSD、统一统计审查与作图规范 |
-| [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | STRING 功能/物理互作网络；HADDOCK3 复合物对接、DockQ 参考评价与 PRODIGY 亲和力估计；AlphaFold Server 人工提交包、真实结果档案的多任务/多模型重读、置信度与跨链接触审查、可复绘发表图件；资源与许可门禁下的本地官方 AlphaFold 3 入口；MSBio2/Metascape 与 Cytoscape 网络交付；序列、ORF、PCR、CRISPR、克隆、结构质量、结构比较与实验验证设计 |
-| [临床与实验研究](docs/capabilities/clinical-and-experimental.zh-CN.md) | 队列与生存、biomarker、流式、qPCR、剂量反应、Western blot、biodistribution、xenograft、稳定性与实验定量 |
-| [成像与科学可视化](docs/capabilities/imaging-and-visualization.zh-CN.md) | 图像 profiling、分割、共定位、追踪、组织图像配准、统一绘图规格、图组编排与视觉质量审查 |
-| [论文与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) | 基于研究范围、读者、文章类型和证据成熟度的期刊定位，以及稿件规范审查、图表规格、引用审计、审稿模拟、回复矩阵、修订谱系、专利准备与展示材料 |
+| [证据与公共数据库](docs/capabilities/evidence-and-literature.zh-CN.md) | 文献与引用核查，基因、变异、通路、结构和临床试验证据，多来源时效性与主张审查 |
+| [Bulk 测序](docs/capabilities/bulk-sequencing-assays.zh-CN.md) | bulk RNA-seq，ChIP-seq、CUT&RUN、CUT&Tag，R-loop mapping，RIP/eCLIP/LACE-seq，Ribo-seq，GRO/PRO/TT/NET-seq，ATAC-seq，甲基化与三维基因组 |
+| [Single-cell](docs/capabilities/single-cell-integration-reference-cross-species.zh-CN.md) | 质控与注释，批次和参考整合，多组学整合，轨迹、velocity、调控分析，以及跨物种映射与评估 |
+| [Spatial](docs/capabilities/trajectory-spatial-complete-analysis.zh-CN.md) | 平台数据结构与质控，组织图像和分割，空间域、解卷积与参考投射，多切片对齐、三维坐标和空间通讯 |
+| [跨尺度通用方法](docs/capabilities/omics-and-single-cell.zh-CN.md) | 实验设计与格式检查，差异检验、DEqMS、GO/KEGG、GSEA、WGCNA、motif、网络分析和统一作图规范 |
+| [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | 蛋白互作网络，AlphaFold 结果接收与质量评审，HADDOCK3 对接，结构比较、结合评估和网络交付 |
+| [临床与实验研究](docs/capabilities/clinical-and-experimental.zh-CN.md) | 队列、生存、标志物和定量实验；流式、qPCR、剂量反应、蛋白定量、微生物学和动物实验 |
+| [成像与科学可视化](docs/capabilities/imaging-and-visualization.zh-CN.md) | 图像检查、分割、共定位、目标追踪、迁移定量、科学图件设计和结构交互视图 |
+| [论文与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) | 期刊定位与规范审查，统一图件，双语报告，论文写作，引用审计，审稿模拟、回复矩阵、专利和汇报 |
 
-<p align="center">
-  <img src="assets/readme/multiscale-omics.png" width="100%" alt="跨尺度多组学、空间、轨迹和出版图组的概念图">
-</p>
+完整能力索引：[中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)
 
-<p align="center"><sub>概念图：样本感知的多模态数据围绕组织与细胞层级被协调分析；图中分布、结构和组织形态均为示意。</sub></p>
+## 可信度如何进入流程
 
-完整能力地图：[中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)。
+- **实验单位优先：** 条件比较回到 donor、sample、animal、organoid 或独立制备样本，避免把细胞或技术重复误作生物学重复。
+- **方法有使用条件：** 输入、适用场景、可调参数、兼容软件、质量检查和替代方法都有明确说明。
+- **原始证据与整合表示分离：** 整合结果服务于表示、映射和可视化；差异推断回到适合研究设计的原始计数与统计单位。
+- **结果必须重新读取：** 运行版本、参数、程序和文件核对信息随结果保存，正式交付前重新打开并检查实际文件。
+- **结论强度随证据而定：** 探索性结果保持探索性；公共案例、真实服务结果和当前用户项目的科学完成分别记录。
+- **图、表和文字同源：** 作图数据、图件、图注、结果段和 DOI 从同一版本的证据地图派生。
 
-## 严谨性进入运行时
+## 开始使用
 
-科学质量并非交付前的附加检查，而是模块契约的一部分。
+在 Codex 中直接说：
 
-- **实验单位优先：** 条件推断回到 donor、sample、animal、organoid 或独立制备样本；单个细胞不被提升为生物学重复。
-- **原始证据保全：** 单细胞与多组学整合保留原始计数；差异推断在与设计匹配的统计层级完成。
-- **参数有据可查：** 默认值只是候选值，关键参数需要结合数据特征、官方 API、方法论文和敏感性结果作出选择。
-- **质量门控驱动交付：** 只有满足预先声明的输入、执行、统计与生物学标准，结果才会进入正式结论和下游分析。
-- **完整研究轨迹：** 支持、削弱、冲突与待验证结果均进入事件账本，保证每次方法调整都有可复核的科学依据。
-- **产物可重验：** 实际软件版本、随机种子、参数、代码和文件校验指纹随结果登记，序列化对象在交付前重新读取。
-- **图与文字同源：** 图中各部分、图注、结果段落和 DOI 从同一张证据地图派生，降低不同交付物之间的叙述漂移。
+> 安装 [JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench) 这个仓库的当前发布版本；核对插件身份、统一研究入口、科学模块注册表和实际版本；保护现有本地修改；完成安装后运行发布完整性检查并重新加载插件。
 
-## 开始一个研究项目
+安装完成后，开启一个新的研究任务，直接描述研究目标、实验设计、已有数据和期望交付物。例如：
 
-安装后，直接向智能体描述项目目标。用户无需记忆模块名称，也无需手工拼接内部技能。下列交互以当前完整验证的 Codex 路径为参考；其他宿主只有在承担相同的文件访问、权限确认、科学执行、产物重读和证据登记职责时，才能完成等价节点。
+> 根据原始数据和样本设计，建立 donor-aware 的单细胞与空间研究方案；比较整合、注释、解卷积、轨迹和通讯策略，并为每一步给出方法依据、质量标准、图表计划和下一步决策条件。
 
-> 从原始数据和样本设计开始，建立 donor-aware 的单细胞与空间组学研究程序。比较整合、注释、解卷积、轨迹和通讯方案；每一步给出方法依据、质量门控、图组计划和进入下一步的判定标准。
+> 为 CUT&Tag 研究建立完整流程，把靶标、抗体、内部参照、特异性处理和归一化作为设计参数；完成 peak、差异、富集、网络和转录关联分析，并保留可复核的证据链。
 
-> 对这批 bulk CUT&Tag 数据进行分析：靶标/抗体为 S9.6，先核实内部参照材料及加入阶段，再决定是否进行外源参照校正；把 RNase H 作为特异性验证，完成峰、差异和转录证据联动，并把每个图组登记到版本化科学证据地图。
+> 围绕一个候选机制整合文献、公共数据库、组学、蛋白互作与结构证据；区分直接证据、关联、冲突和缺口，再提出最能改变当前判断的后续实验。
 
-> 对 Ribo-seq 与配对 RNA-seq 建立翻译研究流程：检查读长、P-site 和三核苷酸周期性，分别运行并比较 Ribo-TISH、Ribotricer 与适用的额外 ORF caller，保留方法分歧，再进行翻译效率和功能解释。
+详见[使用指南](docs/using-biomed-workbench.zh-CN.md)和[安装说明](docs/installation.zh-CN.md)。
 
-> 为 TP53 建立跨文献、基因、变异、通路、结构和临床试验的证据地图，区分直接证据、关联、冲突与缺口，并提出最能改变当前判断的验证实验。
+## 在不同智能体中使用
 
-工作台会先检查真实项目文件和研究设计，再编译计划、执行适用模块、审查产物并形成下一步决策。使用指南：[中文](docs/using-biomed-workbench.zh-CN.md) · [English](docs/using-biomed-workbench.md)。
+目前，Codex 是经过完整发布流程验证的使用环境。其他支持 Agent Skills 或本地标准输入输出 MCP 的智能体，也可以读取同一个科学入口和模块注册表；但文件访问、运行环境、外部软件调用、结果重读和证据交付仍需由相应智能体分别实现并验证。详见[其他智能体接入说明](docs/agent-integration.zh-CN.md)。
 
-## 安装
-
-在 Codex 中可以直接说：
-
-> 安装 [JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench) 这个仓库的当前发布版本；核对统一研究入口、科学模块注册表、实际版本和依赖状态，保护已有本地修改，并在完成发布完整性检查后重新加载。
-
-安装完成后，开启一个新的研究任务并直接描述科学目标。更新时，用同样的自然语言要求 Codex 更新到该仓库的当前发布版本、保护本地修改、完成发布完整性检查并重新加载。
-
-Biomed Workbench 采用 **Codex 优先、开放互操作** 的宿主策略：Codex 是当前完整验证的参考实现；支持 Agent Skills 约定的智能体可以读取统一研究入口，支持本地标准输入输出 MCP 的宿主可以使用受限的发现、路由、契约查询和只读执行接口。这些入口共享科学注册表，却不自动提供 Codex 的文件操作、权限交互、运行环境、网页认证、原生图像生成或项目证据交付。因此，“其他智能体可接入”表示具备明确的互操作路径，不表示已经获得与 Codex 等价的全流程认证。
-
-其他智能体不要照搬上面的 Codex 插件安装提示，可以改为：
-
-> 获取 [JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench) 的当前发布版本作为本地研究能力包。若当前宿主支持 Agent Skills，请加载统一研究入口；若支持本地标准输入输出 MCP，请配置受限互操作接口。不要把仓库中的 Codex 插件元数据当作当前宿主已经完成安装或全流程验证，并报告本宿主实际能够承担的文件访问、权限、运行环境、产物重读和证据交付能力。
-
-完整获取仓库时仍会包含 `.codex-plugin` 和 `.agents/plugins`；它们只是很小的 Codex 发布元数据，其他宿主可以保留但不加载。科学模块、注册表和验证记录仍需与这些文件保持同一版本，因此不建议从仓库中手工删除。
-
-面向不同智能体的支持环境、更新与验证说明：[中文](docs/installation.zh-CN.md) · [English](docs/installation.md)；接口说明：[中文](docs/agent-integration.zh-CN.md) · [English](docs/agent-integration.md)。
-
-## 公共数据库访问
-
-当前实现的数据库 API 均可匿名访问；`NCBI_API_KEY` 可选用于提高 NCBI E-utilities 与 NCBI Datasets 的请求容量。AlphaFold Server 不属于匿名数据库 API：它使用 Google 账号在官方网页交互登录，提交由用户检查后手动完成。工作台只记录访问状态，不保存账号密码、令牌或浏览器会话，并按结果来源限制后续用途。
-
-用户可以直接要求 Codex 检查项目需要哪些数据库、配置可选 NCBI 密钥，或检查 AlphaFold Server 登录状态。敏感值不会进入项目文件、Git、日志、报告或证据地图；Google 登录必须在官方页面完成。完整服务清单与配置方式：[中文](docs/data-access-and-credentials.zh-CN.md) · [English](docs/data-access-and-credentials.md)。
+其他智能体不要照搬上面的 Codex 插件安装提示。完整仓库中的 Codex 发布信息可以保留但不加载；使用时应按照该智能体支持的技能或 MCP 方式接入，并说明它实际能够完成哪些步骤。
 
 ## 文档索引
 
-- 发布说明与版本验收：[中文](docs/releases/README.zh-CN.md) · [English](docs/releases/README.md)
-- 科学证据地图与双语报告：[中文](docs/scientific-evidence-map.zh-CN.md) · [English](docs/scientific-evidence-map.md)
-- 能力地图：[中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)
-- Bulk 测序分类与流程：[中文](docs/capabilities/bulk-sequencing-assays.zh-CN.md) · [English](docs/capabilities/bulk-sequencing-assays.md)
-- 期刊定位与稿件规范：[中文](docs/journal-standards.zh-CN.md) · [English](docs/journal-standards.md)
-- 公共数据库访问与凭据：[中文](docs/data-access-and-credentials.zh-CN.md) · [English](docs/data-access-and-credentials.md)
-- 使用指南：[中文](docs/using-biomed-workbench.zh-CN.md) · [English](docs/using-biomed-workbench.md)
-- 安装与更新：[中文](docs/installation.zh-CN.md) · [English](docs/installation.md)
-- 可选互操作适配器：[中文](docs/agent-integration.zh-CN.md) · [English](docs/agent-integration.md)
-- 可重复性：[中文](docs/reproducibility.zh-CN.md) · [English](docs/reproducibility.md)
-- 公共数据验证案例：[中文](docs/cases/README.zh-CN.md) · [English](docs/cases/README.md)
-- 成熟度与证据等级：[中文](docs/maturity.zh-CN.md) · [English](docs/maturity.md)
-- 架构与模块扩展：[中文](docs/architecture.zh-CN.md) · [English](docs/architecture.md)
-- 格式契约：[中文](docs/format-contracts.zh-CN.md) · [English](docs/format-contracts.md)
-- 开发与发布：[中文](docs/development.zh-CN.md) · [English](docs/development.md)
+| 主题 | 中文 | English |
+| --- | --- | --- |
+| 使用与安装 | [使用指南](docs/using-biomed-workbench.zh-CN.md) · [安装](docs/installation.zh-CN.md) | [Using the workbench](docs/using-biomed-workbench.md) · [Installation](docs/installation.md) |
+| 科学能力 | [能力地图](docs/capabilities/README.zh-CN.md) · [公共案例](docs/cases/README.zh-CN.md) | [Capability map](docs/capabilities/README.md) · [Public cases](docs/cases/README.md) |
+| 证据与复现 | [证据地图](docs/scientific-evidence-map.zh-CN.md) · [成熟度](docs/maturity.zh-CN.md) · [可复现性](docs/reproducibility.zh-CN.md) | [Evidence map](docs/scientific-evidence-map.md) · [Maturity](docs/maturity.md) · [Reproducibility](docs/reproducibility.md) |
+| 数据访问 | [公共数据库与凭据](docs/data-access-and-credentials.zh-CN.md) | [Data access and credentials](docs/data-access-and-credentials.md) |
+| 写作与期刊 | [期刊定位与稿件规范](docs/journal-standards.zh-CN.md) | [Journal positioning and manuscript requirements](docs/journal-standards.md) |
+| 项目结构与扩展 | [架构](docs/architecture.zh-CN.md) · [格式与数据要求](docs/format-contracts.zh-CN.md) · [开发](docs/development.zh-CN.md) | [Architecture](docs/architecture.md) · [File and data requirements](docs/format-contracts.md) · [Development](docs/development.md) |
+| 版本 | [发布记录](docs/releases/README.zh-CN.md) | [Release notes](docs/releases/README.md) |
 
-## 研究可信度
-
-Biomed Workbench 以证据等级约束结论强度，以项目状态保存研究语境，以版本谱系记录解释变化。探索性结果保持探索性标记；涉及临床、伦理、专利与法规的判断进入相应专业审查环节；对外发布的材料只携带复现所需且适宜公开的科学信息。
-
-新增方法通过独立模块进入系统，并声明输入输出 artifact、工具与格式兼容性、参数空间、质量门控、验证证据和成熟度。统一入口由此保持稳定，研究能力则可以持续扩展而不牺牲可追溯性。
-
-发布安全的兼容性证据、执行就绪审计和公共数据案例见 [`reports/`](reports/)。
-
-许可证：[Apache-2.0](LICENSE)。
+Biomed Workbench 采用 [Apache-2.0](LICENSE) 许可。科学模块、证据模型和发布记录随版本持续演进；新增能力只有在方法定义、实际实现、验证证据和文档保持一致后，才会列入公开能力清单。

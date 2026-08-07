@@ -1,21 +1,19 @@
-# Trajectory and spatial analysis capability contract
+# Trajectory And Spatial Analysis
 
 Languages: [English](trajectory-spatial-complete-analysis.md) · [中文](trajectory-spatial-complete-analysis.zh-CN.md)
 
-## Scope and evidence levels
+## Platform And Method Coverage
 
-The workbench separates a registered method, an executable project template,
-and an observed end-to-end execution.  A backend is not called validated merely
-because its command, parameters, or output schema exists.
+The workbench distinguishes a method listed in the capability range, a runnable workflow, and representative data that have actually run and passed review. A command or parameter description alone does not establish validation.
 
 | Capability | Registered implementation | Required evidence before biological use |
 |---|---|---|
 | Visium / Visium HD | official SpatialData-IO reader; Space Ranger geometry and image provenance | representative vendor bundle, spot/bin accounting, tissue assignment, image-transform reload |
 | Stereo-seq | official SpatialData-IO `stereoseq` reader | representative vendor bundle, bin size/unit, matrix and coordinate reconciliation |
-| Slide-seq | coordinate-explicit AnnData adapter | bead-location provenance, physical unit, bead/matrix identifier reconciliation |
+| Slide-seq | AnnData import with explicit coordinates | bead-location source, physical unit, and bead/matrix identifier reconciliation |
 | Xenium | official SpatialData-IO `xenium` reader | cell/transcript/boundary reconciliation, negative controls, unassigned transcripts and image transforms |
 | CosMx | official SpatialData-IO `cosmx` reader | cell/transcript/boundary reconciliation, negative controls, panel detection and image transforms |
-| MERFISH / MERSCOPE | official SpatialData-IO `merscope` reader or coordinate-explicit adapter | cell/transcript/boundary reconciliation, blank/negative controls and panel detection |
+| MERFISH / MERSCOPE | official SpatialData-IO `merscope` reader or data import with explicit coordinates | cell, transcript, and boundary reconciliation; blank or negative controls; detection-panel review |
 | Image segmentation | existing boundaries, Squidpy watershed or explicit Cellpose | overlay review, boundary validity, morphology and transcript assignment |
 | Image registration | SpatialData named transforms/landmarks or VALIS | pre/post overlay, target registration error, round-trip and deformation diagnostics |
 | Deconvolution / mapping | cell2location, RCTD, Tangram and SPOTlight as separate native arms | reference signatures, shared genes, uncertainty/residuals, held-out genes, reference subsampling and method discordance |
@@ -29,11 +27,9 @@ reviewed anatomical labels.  Method-native outputs remain separate.  A
 consensus, when scientifically justified, must be labelled as a derived
 sensitivity summary and cannot replace discordance reporting.
 
-## Unified trajectory and spatial figure inventories
+## Unified Trajectory And Spatial Figures
 
-`biomed_workbench.visualization` version 1.2.0 defines final-size typography,
-strokes, symbols, axes, legends, colors and export rules plus mandatory plot
-inventories for:
+The workbench defines final-size typography, strokes, symbols, axes, legends, colours, and export formats and prepares appropriate standard figure sets for:
 
 - trajectory topology;
 - velocity;
@@ -47,9 +43,7 @@ inventories for:
 - image/segmentation/registration analysis;
 - multislice and 3D analysis.
 
-The R renderer refuses complete-profile status when a mandatory plot ID lacks
-source data.  It exports individual and combined PDF/SVG and a 600-dpi LZW TIFF,
-and records style version, input manifest digest and every output digest.
+A figure set is not marked complete when required plot data are missing. A complete set includes individual and combined PDF/SVG files and a 600-dpi LZW TIFF, with the style version and relationship between plot data and output files retained.
 
 ## Primary implementation authorities
 
@@ -75,16 +69,6 @@ and records style version, input manifest digest and every output digest.
 - GPSA: <https://www.nature.com/articles/s41592-023-01972-2>
 - Nature figure construction guide: <https://research-figure-guide.nature.com/figures/building-and-exporting-figure-panels/>
 
-## Current observed execution boundary
+## Representative Acceptance
 
-On 2026-08-02 Tangram 1.0.4 cluster-mode reference mapping was executed on the
-complete official repository test pair: 26,431 reference cells, 18 reference
-classes, 9,852 spatial locations, and 249 shared genes. The current template,
-RNA-count-based density prior, fixed seed, normalized projection and native
-mapping object are checksum-bound and were reloaded before acceptance. The
-generic coordinate-explicit H5AD platform path, the complete R spatial
-figure package, the missing-panel blocking gate, and a nonsingular cross-sample
-hierarchical model were executed and reloaded.  The selected machine runtime
-also executed spacexr/RCTD 2.2.1 on its official Slide-seq vignette data. Other
-native backends retain their own compatibility and public-data evidence status;
-Tangram or RCTD acceptance is not transferred to a different method.
+Tangram has completed reference mapping on its full official test data, and RCTD has completed execution and output review on the official Slide-seq example. Coordinate-explicit H5AD import, standard spatial figure sets, and cross-sample hierarchical modelling also have representative execution records. Acceptance of one method does not transfer to another. Exact versions, data scale, and observed results are recorded in [Public-Data Cases](../cases/README.md) and [Release Notes](../releases/README.md).

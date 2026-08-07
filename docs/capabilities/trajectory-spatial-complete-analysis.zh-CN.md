@@ -1,19 +1,19 @@
-# 轨迹与空间分析能力契约
+# 轨迹与空间分析
 
 语言：[中文](trajectory-spatial-complete-analysis.zh-CN.md) · [English](trajectory-spatial-complete-analysis.md)
 
-## 范围与证据层级
+## 平台与方法覆盖
 
-工作台严格区分已注册方法、可执行项目模板和已观察的端到端执行。仅有命令、参数或输出 schema，不足以将某个后端标记为已验证。
+工作台区分“方法已经列入能力范围”“流程可以运行”和“代表性数据已经实际运行并通过检查”。只有命令或参数说明，不足以证明某种方法已经完成验证。
 
 | 能力 | 已注册实现 | 进入生物学解读前必需的证据 |
 |---|---|---|
 | Visium / Visium HD | 官方 SpatialData-IO reader；Space Ranger 几何与图像溯源 | 代表性厂商 bundle、spot/bin 计数、组织分配、图像变换重载 |
 | Stereo-seq | 官方 SpatialData-IO `stereoseq` reader | 代表性厂商 bundle、bin 尺寸/单位、矩阵与坐标对账 |
-| Slide-seq | 坐标显式的 AnnData adapter | bead 位置溯源、物理单位、bead/矩阵标识符对账 |
+| Slide-seq | 带明确坐标的 AnnData 导入 | bead 位置来源、物理单位、bead 与矩阵标识符核对 |
 | Xenium | 官方 SpatialData-IO `xenium` reader | 细胞/转录本/边界对账、阴性对照、未分配转录本和图像变换 |
 | CosMx | 官方 SpatialData-IO `cosmx` reader | 细胞/转录本/边界对账、阴性对照、panel 检出和图像变换 |
-| MERFISH / MERSCOPE | 官方 SpatialData-IO `merscope` reader 或坐标显式 adapter | 细胞/转录本/边界对账、blank/阴性对照和 panel 检出 |
+| MERFISH / MERSCOPE | 官方 SpatialData-IO `merscope` reader 或带明确坐标的数据导入 | 细胞、转录本和边界核对，blank/阴性对照和检测基因集合 |
 | 图像分割 | 已有边界、Squidpy watershed 或显式 Cellpose | overlay 复核、边界有效性、形态与转录本分配 |
 | 图像配准 | SpatialData 命名变换/标志点或 VALIS | 配准前后 overlay、目标配准误差、往返和形变诊断 |
 | 解卷积/映射 | cell2location、RCTD、Tangram 和 SPOTlight 作为相互独立的原生分支 | 参考 signature、共享基因、不确定性/残差、held-out 基因、参考下采样和方法不一致 |
@@ -24,9 +24,9 @@
 
 任何解卷积或空间区域方法都不会因为与已复核解剖标签一致而被自动选中。方法原生输出分别保存。当科学上有充分理由构建 consensus 时，必须将其标记为派生的敏感性汇总，且不得取代方法间不一致性报告。
 
-## 统一轨迹与空间图件清单
+## 统一的轨迹与空间图件
 
-`biomed_workbench.visualization` 1.2.0 版定义最终尺寸下的字体、线条、符号、坐标轴、图例、色彩与导出规则，并为以下分析声明必需图件清单：
+工作台统一规定终稿尺寸下的字体、线条、符号、坐标轴、图例、色彩和导出格式，并为以下分析准备相应的标准图组：
 
 - 轨迹拓扑；
 - velocity；
@@ -40,7 +40,7 @@
 - 图像/分割/配准分析；
 - 多切片与三维分析。
 
-当任一必需 plot ID 缺少源数据时，R renderer 会拒绝将 profile 标记为完整。它会导出单图和组合 PDF/SVG，以及 600-dpi LZW TIFF，同时记录样式版本、输入 manifest digest 和每个输出 digest。
+缺少必要作图数据时，相应图组不会被标记为完整。完整图组会输出单图和组合版 PDF/SVG，以及 600-dpi LZW TIFF，并保留样式版本、作图数据和输出文件的对应关系。
 
 ## 主要实现依据
 
@@ -66,6 +66,6 @@
 - GPSA：<https://www.nature.com/articles/s41592-023-01972-2>
 - Nature figure construction guide：<https://research-figure-guide.nature.com/figures/building-and-exporting-figure-panels/>
 
-## 当前已观察执行边界
+## 代表性验收
 
-2026-08-02，Tangram 1.0.4 以 cluster mode 在官方仓库完整测试对上执行参考映射：26,431 个参考细胞、18 个参考类别、9,852 个空间位置和 249 个共享基因。当前模板、基于 RNA count 的 density prior、固定 seed、归一化 projection 和原生 mapping object 均与校验值绑定，并在验收前重新读取。通用坐标显式 H5AD 平台路径、完整 R 空间图件包、缺失图件阻断门控和非奇异跨样本层级模型均已执行并重新读取。所选机器运行时还在官方 Slide-seq vignette 数据上执行了 spacexr/RCTD 2.2.1。其他原生后端保留各自的兼容性和公共数据证据状态；Tangram 或 RCTD 的验收不会转移给其他方法。
+Tangram 已使用官方完整测试数据完成参考映射，RCTD 已使用官方 Slide-seq 示例数据完成运行与结果重读。坐标明确的 H5AD 导入、标准空间图组和跨样本层级模型也有代表性执行记录。一次方法的验收不会转移给另一种方法；各平台和算法的准确版本、数据规模与结果见[公共数据案例](../cases/README.zh-CN.md)和[发行说明](../releases/README.zh-CN.md)。

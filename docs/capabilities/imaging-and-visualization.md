@@ -1,38 +1,33 @@
-# Imaging And Visualization
+# Imaging And Scientific Visualisation
 
 Languages: [English](imaging-and-visualization.md) · [中文](imaging-and-visualization.zh-CN.md)
 
 ## Scientific Role
 
-- Register equal-shape 2D images by a bounded integer translation with explicit overlap and MSE diagnostics; this is a baseline alignment check, not affine or deformable registration.
-
-This capability area supports quantitative image analysis and faithful scientific communication. Analytical image outputs remain tied to source arrays and declared measurement semantics; communication assets are explicitly separated from evidence-generating analysis.
+This area covers two distinct kinds of work: quantitative measurement from images and scientific figures made from existing data and conclusions. Illustrations created for communication do not replace source images or quantitative results.
 
 ## Quantitative Imaging
 
-- Profile scientific image arrays and summarize dimensions, channels, and intensity behaviour.
-- Segment image components using explicit parameters and return measurable component outputs.
-- Measure two-channel colocalization while retaining the assumptions and channel pairing.
-- Track declared points across frames and preserve trajectory-level results.
-- Convert calibrated trajectories into path length, net displacement, speed, and directionality while retaining track-length exclusions and claim boundaries.
+- inspect image dimensions, channels, bit depth, and intensity distributions;
+- segment objects with explicit parameters and return masks, component tables, and quality-review images;
+- measure two-channel colocalisation while retaining channel pairing, thresholds, and method assumptions;
+- track declared objects across frames and preserve object-level trajectories;
+- calculate path length, net displacement, speed, and directionality from pixel size and time interval;
+- align equal-sized two-dimensional images by a bounded integer translation and report overlap and error. This is a baseline check, not affine or deformable registration.
 
-Representative modules include `image-profile`, `image-segment`, `image-colocalization`, `point-tracking`, and `cell-migration-metrics`.
+## Scientific Visualisation
 
-## Scientific Visualization
+- define a figure from the scientific conclusion, data source, uncertainty, and purpose of each figure part;
+- use image generation for illustrations when appropriate and review both scientific content and layout before delivery;
+- create provenance-linked interactive protein-structure views;
+- perform bounded edits such as background removal on purpose-made communication images while preserving the original and the limits of the edit.
 
-- Define a scientific figure from claims, panels, data sources, visual encodings, and validation needs.
-- Generate or edit bounded scientific illustrations through Codex-native image generation with a machine-readable brief and observed-output check.
-- Create provenance-bound interactive protein structure views.
-- Remove a deliberately uniform chroma-key background from a static communication asset with format and matte-quality validation.
+Tissue images, cell boundaries, and registration in spatial transcriptomics are handled by the dedicated [spatial analysis workflow](trajectory-spatial-complete-analysis.md). Current general imaging coverage focuses on image inspection, masks, colocalisation, trajectories, and figures; it does not claim complete support for every microscopy vendor's native format.
 
-Representative modules include `figure-specification`, `scientific-illustration-generation`, `structure-interactive-visualization`, and `image-chroma-key-remove`.
+## Interpretation Boundaries
 
-## Quality Gates
-
-Rendered communication assets cannot replace primary measurements. Chroma-key output is not accepted as evidence for segmentation, morphology, localization, intensity, or colocalization. Image generation cannot invent scientific observations. Figure specifications must preserve the direction, uncertainty, statistical unit, and source of each plotted claim.
-
-The current registry provides general image analysis and scientific visualization modules; for spatial transcriptomics analysis, see the dedicated omics workflow in `single-cell-spatial-analysis` (documented under [spatial-analysis.md](spatial-analysis.md)). The microscopy-file workflow itself remains scoped: we focus on robust assay-specific evidence pipelines (profiles, masks, co-localization, trajectories, and figures) and do not claim to fully own native microscopy-reader vendor ecosystems.
+A rendered or edited communication image cannot replace a primary measurement. Background-removed output is not evidence for segmentation, morphology, localisation, intensity, or colocalisation. A generated illustration must not invent an experimental observation. Each scientific figure should preserve the statistical unit, data source, uncertainty, and direction of the conclusion it communicates.
 
 ## Typical Deliverables
 
-Image profiles, masks and component tables, colocalization statistics, point trajectories, molecular viewers, figure specifications, illustration briefs, validated communication assets, and figure-to-claim audit records.
+Image-inspection reports, masks and component tables, colocalisation statistics, object trajectories, migration measurements, interactive structure views, scientific-figure plans, illustrations, and figure-to-conclusion consistency review.

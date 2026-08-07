@@ -12,25 +12,25 @@
 
 ## 结构质量与比较
 
-`structure-quality-assessment` 检查坐标完整性、替代构象、占有率以及 B-factor 或 pLDDT 的正确语义；`structure-chain-comparison` 记录链对应、序列覆盖、刚体变换和独立核对的 RMSD；`protein-secondary-structure` 通过实际 DSSP 运行分配二级结构；`structure-interactive-visualization` 生成带来源记录的交互视图。结构相似性用于形成假设，不直接等于功能等价。
+结构分析会检查坐标完整性、替代构象、占有率以及 B-factor 或 pLDDT 的正确含义；比较不同结构时记录链对应、序列覆盖、刚体变换和独立核对的 RMSD；二级结构通过 DSSP 分配，并可生成带来源记录的交互视图。结构相似性用于形成假设，不直接等于功能等价。
 
 ## 蛋白互作网络
 
-`protein-interaction-network-evidence` 通过 STRING 12.0 进行标识符映射，明确区分功能关联网络和物理互作子网络，记录映射损失、各证据通道得分以及提交蛋白集合的互作富集。交付包含节点表、边表、Cytoscape 样式、PDF/SVG/600-dpi PNG 和带文件指纹的复绘清单。STRING 网络适合候选优先级和系统背景分析，不能单独证明直接结合。
+蛋白互作网络通过 STRING 进行标识符映射，明确区分功能关联网络和物理互作子网络，并记录未能映射的蛋白、各证据来源得分和提交蛋白集合的互作富集。交付包含节点表、边表、Cytoscape 样式、PDF/SVG/600-dpi PNG 和复绘所需数据。STRING 网络适合候选优先级和系统背景分析，不能单独证明直接结合。
 
 ## 复合物预测与分子对接
 
-- `protein-complex-docking` 使用 HADDOCK3 执行闭合的约束驱动复合物对接流程，严格区分小型集成测试和研究级采样。完整保留模型、簇、HADDOCK score、需要参考结构的 DockQ 指标和 PRODIGY 亲和力估计，并输出界面接触、残基坐标、标准化模型评分、PyMOL 可编辑场景与发表级图件。
-- `alphafold3-complex-prediction` 默认生成 AlphaFold Server 官方导入格式的提交包、链映射与人工提交说明。智能体可以检查访问状态并把用户带到官方页面；Google 登录、实体核对和最终提交始终由用户完成。工作台不保存密码、令牌、cookie 或浏览器会话，也不调用未公开的提交接口。
-- 下载后的完整 Server 档案采用流式方式核验：每个任务的请求文件、结构文件、摘要置信度和完整置信度必须形成编号一致的模型集合。所有模型进入排序与置信度表，排名最高的模型按确定规则进入结构坐标、残基 pLDDT、PAE 分箱、跨链残基轮廓和候选接触表；只提取正式交付需要的文件，不展开体积较大的 MSA 或模板目录。随后由独立 R renderer 生成 PDF、SVG 和 600-dpi PNG，并保留完整复绘表。
-- 当前模块版本 `1.2.0` 已对一个真实完成的 Server 下载档案进行代表性导入验收：档案包含两个任务，每个任务均完整匹配五个模型，输出重新读取成功，且没有保存任何凭据。该记录证明真实 Server 结果导入与作图链路可执行，不属于公共数据验收，也不把单次预测提升为生物学互作证据。正式记录见 [`alphafold3-server-live-verification.json`](../../reports/alphafold3-server-live-verification.json)。
-- 所有 Server 结果保留来源标记，并按官方输出条款阻止进入被限制的自动化下游用途。可选的本地官方 AlphaFold 3 入口只有在 Linux/NVIDIA、模型权重、完整数据库、CPU、可用内存、磁盘和空闲显存均满足要求、至少保留当前可用资源的一半，并得到用户明确许可后才会启用。当前 Apple 芯片主机没有兼容 NVIDIA GPU，因此本机没有下载模型或数据库，也没有执行本地 AlphaFold 3 推理。
+- HADDOCK3 执行受约束的复合物对接，并严格区分小型集成测试和研究级采样。模型、簇、HADDOCK score、需要参考结构的 DockQ 指标和 PRODIGY 亲和力估计分别保存，同时输出界面接触、残基坐标、标准化模型评分、PyMOL 可编辑场景和发表级图件。
+- AlphaFold 3 能力默认生成 AlphaFold Server 官方导入格式的提交包、链映射和人工提交说明。智能体可以检查访问状态并打开官方页面；Google 登录、实体核对和最终提交始终由用户完成。工作台不保存密码、令牌、cookie 或浏览器会话，也不调用未公开的提交接口。
+- 下载后的完整 Server 结果会核对请求、结构和置信度文件是否属于同一组模型。所有模型进入排序与置信度表，排名最高的模型用于生成结构坐标、残基 pLDDT、PAE、跨链轮廓和候选接触表，并输出 PDF、SVG、600-dpi PNG 及复绘数据。
+- AlphaFold Server 结果导入和作图已经完成代表性验收，但这不把单次预测提升为生物学互作证据。准确版本和验收范围见[发行说明](../releases/README.zh-CN.md)。
+- Server 结果保留来源标记，并遵守官方输出条款。只有兼容的 Linux/NVIDIA 环境、模型权重、数据库和充足资源都具备，且用户明确同意时，才考虑部署本地官方 AlphaFold 3。
 
 AlphaFold 3 更适合提出共同折叠的复合物构象并评价模型置信度；HADDOCK3 更适合在明确的物理或实验约束下采样结合模式。二者一致可提高验证优先级，但仍需生化、生物物理或细胞实验确认互作、亲和力和功能。
 
 ## MSBio2、Metascape 与 Cytoscape
 
-`metascape-msbio-network-analysis` 可以调用用户合规持有的本地 MSBio2 包装程序，也可以核查已有的完整 Metascape 结果目录。模块统一核对富集工作簿、GO/PPI 网络、MCODE 组分、报告和图件；配套 Cytoscape renderer 通过 CyREST 导入通过核查的 XGMML，应用固定样式和布局，输出可编辑 `.cys` 会话以及 PDF/SVG/PNG。许可证、私有路径和用户结果不会进入公开仓库。若 Cytoscape 由本次任务启动，任务在保存会话并核验全部导出后必须正常退出该进程并确认其消失；用户原本已经打开的 Cytoscape 会话不会被关闭。
+工作台可以调用用户合规持有的本地 MSBio2，也可以检查已有的完整 Metascape 结果目录。它会核对富集工作簿、GO/PPI 网络、MCODE 组分、报告和图件；随后使用 Cytoscape 导入 XGMML，应用统一样式和布局，输出可编辑 `.cys` 会话以及 PDF/SVG/PNG。工作台启动的 Cytoscape 会在文件保存并核对后正常退出；用户原本已经打开的会话不会被关闭。
 
 ## 发表级结构图与自主复绘
 

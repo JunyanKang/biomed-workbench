@@ -41,31 +41,31 @@
 
 官方入口包括：[NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25497/)、[NCBI Datasets API keys](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/)、[Crossref access and authentication](https://crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/)、[Europe PMC REST](https://europepmc.org/RestfulWebService)、[ClinicalTrials.gov API](https://clinicaltrials.gov/data-api/api)、[UniProt programmatic access](https://www.uniprot.org/help/programmatic_access)、[Reactome Content Service](https://reactome.org/dev/content-service)、[Open Targets GraphQL](https://platform-docs.opentargets.org/data-access/graphql-api)、[cBioPortal public API](https://www.cbioportal.org/api/swagger-ui/index.html)、[cBioPortal private token authentication](https://docs.cbioportal.org/deployment/authorization-and-authentication/authenticating-users-via-tokens/)、[PubChem PUG REST](https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest)、[AlphaFold Server](https://alphafoldserver.com/)、[输出使用条款](https://alphafoldserver.com/output-terms) 和 [隐私说明](https://alphafoldserver.com/privacy)。
 
-## 面向 Agent 的配置方式
+## 如何配置
 
-推荐直接对 Codex 或其他受信任的 Agent 说：
+推荐直接对 Codex 或其他受信任的智能体说：
 
 > 检查这个项目要访问的公共数据库及当前凭据状态。如果 NCBI 任务需要更高请求容量，请在隐藏输入中引导我配置 NCBI API key；不要让我把密钥贴进聊天、项目文件或报告，并在配置后只告诉我凭据来源和是否生效。
 
 > 检查 AlphaFold Server 访问状态。若未登录、登录错误、会话过期、无权限、额度用尽或尚未确认条款，请告诉我具体状态并打开官方登录页面；不要保存或复述我的 Google 密码。先生成提交包，待我逐项核对后再手动提交。
 
-Agent 应先说明是否真的需要凭据，再打开隐藏输入。AlphaFold Server 的 Google 登录必须在官方网页完成；Agent 只记录可用、登录错误、会话过期、无权限、额度用尽或条款未确认等状态和检查时间。用户不需要编写命令。
+智能体应先说明是否真的需要凭据，再打开隐藏输入。AlphaFold Server 的 Google 登录必须在官方网页完成；智能体只记录可用、登录错误、会话过期、无权限、额度用尽或条款未确认等状态和检查时间。用户不需要编写命令。
 
 ### 可选择的保存方式
 
 1. **本次任务临时使用**：适合集群、自动化和短期任务，由安全的环境变量或作业密钥注入；任务结束后失效。
-2. **本机用户级保存**：适合个人工作站。Agent 通过隐藏输入把密钥保存到项目目录之外的用户配置文件，并限制文件权限。
-3. **机构密钥管理器**：适合服务器或团队环境。Agent 读取机构已批准的 secret 注入，不复制密钥到项目。
+2. **本机用户级保存**：适合个人工作站。智能体通过隐藏输入把密钥保存到项目目录之外的用户配置文件，并限制文件权限。
+3. **机构密钥管理器**：适合服务器或团队环境。智能体读取机构批准的安全凭据，不复制密钥到项目。
 
 本机用户级文件位于操作系统的用户配置目录，优先级低于本次任务的安全环境变量。状态检查只显示“已配置／未配置”和来源，不显示值。
 
 ## 轮换、删除与审计
 
-可以直接告诉 Agent：
+可以直接告诉智能体：
 
 - “检查 NCBI key 是否生效，但不要显示它。”
 - “把 NCBI key 换成新的，确认旧值不再被读取。”
 - “删除本机保存的 NCBI key，保留项目数据。”
 - “审计仓库、报告和证据地图，确认没有凭据残留。”
 
-密钥不得进入聊天文本、Git、项目 JSON、样本表、运行日志、图表、报告或科学证据地图。账号密码、OAuth 令牌、浏览器 cookie 与恢复信息也不得进入工作台的访问状态记录。公共服务新增认证要求时，必须先更新允许清单、双语文档、模块清单和泄露防护测试，再允许 Agent 使用。
+密钥不得进入聊天文本、版本库、项目文件、样本表、运行日志、图表、报告或科学证据地图。账号密码、OAuth 令牌、浏览器 cookie 与恢复信息也不得进入工作台的访问状态记录。

@@ -1,10 +1,10 @@
-# 单细胞整合、参考投射与跨物种分析规范
+# 单细胞整合、参考投射与跨物种分析
 
 语言：[中文](single-cell-integration-reference-cross-species.zh-CN.md) · [English](single-cell-integration-reference-cross-species.md)
 
 更新时间：2026-07-31
 
-本规范不把所有“整合”混成一个任务。实际分析先区分四个目标：
+“整合”并不是一个单一任务。实际分析需要先区分四个目标：
 
 1. **同一模态跨批次整合**：获得用于邻域、聚类和可视化的共同表示。
 2. **冻结参考图谱投射**：把 query 映射到 reference，尽量不重训或改变 reference。
@@ -32,7 +32,7 @@
 
 | 方法 | 优先适用场景 | 输出语义 | 关键边界 |
 |---|---|---|---|
-| scArches | scVI/scANVI/totalVI 等生成式参考；需要把 query 投到冻结潜在空间 | query latent、posterior、可选标签概率 | reference 模型、基因顺序和 registry 必须冻结；query 未知群必须保留 |
+| scArches | scVI/scANVI/totalVI 等生成式参考；需要把 query 投到冻结潜在空间 | query latent、posterior、可选标签概率 | reference 模型、基因顺序和模型设置必须冻结；query 未知群必须保留 |
 | Symphony | 大型参考图谱的快速、轻量、可重复 query 映射 | reference coordinates、query embedding、标签建议 | reference centroids、loadings、标准化参数和版本必须同时保存 |
 | RCTD | 参考 scRNA 到空间 spot 的细胞类型权重/丰度 | 位置×细胞类型组成 | 这是空间混合解卷积，不是普通 query 单细胞标签迁移 |
 | Tangram | 单细胞/簇到空间位置的映射 | cell/cluster×location 映射概率 | 映射概率不是细胞比例；组织区域不匹配会造成强制映射 |
@@ -95,5 +95,5 @@ Jensen–Shannon divergence（JSD）是两个非负、归一化分布之间的�
 3. 所有候选使用相同基础细胞和预先冻结的评估集合，原生输出分别保存。
 4. mixing 与 biology preservation 分开评价，不构造掩盖失败项的单一总分。
 5. unknown、unsupported、rare 和 species-specific 状态完整保留。
-6. 输出可重载，细胞数、顺序、feature namespace、参数、版本、seed 和 digest 一致。
+6. 输出可以重新打开，细胞数、顺序、特征标识、参数、版本、随机种子和文件内容保持一致。
 7. confirmatory inference 明确回到 raw counts 与生物学重复。

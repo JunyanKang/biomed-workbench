@@ -1,23 +1,25 @@
-# Scientific Format Contracts
+# File And Data Requirements
 
-Biomed Workbench format profiles separate file-format truth from tool-specific module manifests. External profiles use the exact version named by their governing specification. Formats without a formal universal semantic schema use a project-owned profile instead of pretending that a file extension is sufficient.
+Languages: [English](format-contracts.md) · [中文](format-contracts.zh-CN.md)
 
-## Project-Owned Profiles
+Biomed Workbench does not infer data content from a filename extension alone. Before analysis, it checks the file format, reference version, and required metadata for the relevant data type.
 
-### `count-matrix@1.0.0`
+## Common Checks
 
-A count matrix is accepted only with explicit feature and observation axes, value semantics, identifier namespace, sample-manifest digest, processing level, and orientation. The matrix, feature table, and observation table are separate required payload roles so axis identity can be audited independently of storage representation.
+- representation and compression;
+- required indices and sorting;
+- coordinate system, reference sequence, and genome build;
+- annotation release and gene or variant identifier system;
+- sample information, orientation, processing level, and the file's role in the analysis.
 
-### `tabular@1.0.0`
+BAM/CRAM, VCF, BED, GTF/GFF3, single-cell fragments, expression matrices, and general tables have different requirements. A general table cannot replace a specialised format with genomic-coordinate meaning.
 
-A scientific table is accepted only with an explicit delimiter, header policy, column schema, missing-value policy, row-order policy, processing level, and sample-manifest digest. Coordinate-bearing tables must use a specialized BED, GTF, GFF3, VCF, fragments, or other coordinate-aware profile rather than this generic profile.
+An expression matrix must identify its feature and observation axes, state whether values are raw counts or processed measurements, name the feature-identifier system, and provide matching feature and sample information.
 
-## Static Raster Profiles
+PNG, JPEG, and WebP are suitable for ordinary static-image exchange. Images used for quantitative analysis also require bit depth, pixel size, colour space, channels, and measurement meaning; a display-processed image alone is insufficient.
 
-`png@3.0`, `jpeg@T.81`, and `webp@riff-container-2025` identify the governing W3C, ITU-T, and WebP container specifications. A raster artifact must also declare its decoded pixel dimensions, color space, frame count, purpose, compression family, top-left raster orientation, processing level, and image payload role. The profile does not infer these properties from a filename extension.
+## Problems That Stop Analysis
 
-The chroma-key module narrows these broad interchange profiles further to one static 8-bit image, canonical orientation, explicit sRGB handling, bounded dimensions, and a communication-only purpose. Animated PNG/WebP, embedded profiles requiring color management, and quantitative scientific images do not silently enter that narrower compatibility row.
+An unknown or unsupported format version, missing required index, coordinate or reference mismatch, incomplete sample information, unclear matrix axes, or an undefined file role is reported before scientific software runs. The workbench does not choose a nearest version or proceed merely because a filename extension matches.
 
-## Validation Rule
-
-Profiles are exact contracts, not extension detectors. Unknown profile versions, incompatible compression, missing companion indexes, undeclared sorting, coordinate mismatches, absent reference digests, missing annotation or identifier metadata, absent sample manifests, and incomplete payload roles block execution before a scientific tool is invoked.
+Individual methods may require additional fields or companion files. These are checked against the user's project before the analysis begins.

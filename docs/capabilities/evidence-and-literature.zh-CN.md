@@ -4,10 +4,9 @@
 
 ## 科学角色
 
-- NCBI Gene 同源记录可以在指定 Gene ID 和物种范围内提供有边界的源物种到目标物种映射；它仍属于数据库证据，不等同于功能等价性证据。
-- 稳定 Gene ID 只在基因符号与物种精确匹配后解析；存在歧义的候选项保持未解决，不会被静默传入下游数据库调用。
+这一能力方向在分析前、分析中和分析后持续建立证据全景。它把资料检索、标识符核对、来源解读、矛盾追踪、引用支持度检查和时效性复核结合起来。检索到的记录保持为来源证据，不会被自动提升为生物学结论。
 
-这一能力方向在分析前、分析中和分析后持续建立证据全景。它把资料检索与标识符对齐、来源特异的解读、矛盾追踪、引用支持度检查和时效性复核结合起来。检索到的记录保持为来源证据，不会被自动提升为生物学结论。
+例如，NCBI Gene 可以提供指定基因和物种之间的同源记录，但数据库映射本身不能证明功能等价。基因符号只有在物种和候选项能够明确区分时才会转换为稳定 Gene ID；歧义会保留并阻止错误结果继续传入下游分析。
 
 ## 已支持的能力
 
@@ -15,7 +14,7 @@
 
 对于范围较广的证据请求，工作台会先解析标识符和引用记录，再安排特定来源检索、派生证据、时效性检查和面向发表的引用审查。这可避免下游模块把基因符号、题名、DOI、rsID、通路 ID、研究 ID 或蛋白质 accession 默认为已经准确解析。
 
-统一方案可组合 NCBI Entrez 与 Gene、UniProt 与 Ensembl 身份信息、dbSNP、gnomAD、HPO、GO、Reactome、cBioPortal、Open Targets、Crossref、Europe PMC、bioRxiv 或 medRxiv、PubChem、ClinicalTrials.gov、RCSB PDB、AlphaFold 以及蛋白质无序倾向证据。每个被选模块分别报告其输入契约、输出字段、兼容性行、质量门控、可选凭据和未解决状态。标识符未命中、候选歧义、上游中断、检索截断、记录过期和跨来源不一致都会保持可见。
+统一方案可组合 NCBI Entrez 与 Gene、UniProt 与 Ensembl、dbSNP、gnomAD、HPO、GO、Reactome、cBioPortal、Open Targets、Crossref、Europe PMC、bioRxiv 或 medRxiv、PubChem、ClinicalTrials.gov、RCSB PDB、AlphaFold 以及蛋白质无序倾向证据。每个来源分别说明所需输入、返回内容、适用条件、可选凭据和未解决问题。标识符未命中、候选歧义、服务中断、检索不完整、记录过期和跨来源不一致都会保持可见。
 
 ### 文献与引用证据
 
@@ -31,8 +30,6 @@
 - 根据声明的合格分母审查离散拷贝数队列覆盖；只有完整、未截断的来源证据才能进入串行的适配与审查路径，而结果仍是描述性的，不推断纯度、倍体、局灶性或临床意义。
 - 区分以标识符为键的未命中、仅题名覆盖缺口、上游中断和真正的未解决记录。
 
-代表性模块包括 `literature-evidence`、`citation-record-resolution`、`preprint-evidence`、`citation-audit`、`citation-resolution-adjudication` 和 `assertion-citation-coverage-audit`。
-
 ### 公共生物医学数据库
 
 - 检索、汇总、获取并连接 NCBI Entrez 记录。
@@ -43,8 +40,6 @@
 - 获取 AlphaFold DB 模型覆盖与置信度元数据，同时区分预测与实验。
 - 获取与 accession 绑定的 IUPred2A 无序倾向 profile，保留残基对齐、阈值策略以及预测与验证之间的严格边界。
 
-代表性模块包括 `ncbi-search`、`ncbi-fetch`、`ncbi-link`、`gene-identifier-resolution`、`gene-evidence`、`gene-ortholog-evidence`、`variant-evidence`、`chemical-evidence`、`clinical-trial-evidence`、`structure-search`、`structure-evidence`、`alphafold-structure-evidence` 和 `protein-disorder-evidence`。
-
 ### 证据治理
 
 - 评估一个来源是否仍处于声明的复核时间窗内，不把记录年龄误写成当前性证明。
@@ -52,9 +47,7 @@
 - 裁定支持、反驳、阴性、不合格和未解决证据。
 - 使用溯源、逐类指标、支持门控和基线回归检查来评估分类金标准集。
 
-代表性模块包括 `source-freshness-audit`、`temporal-integrity-audit`、`claim-evidence-integrity-audit` 和 `classification-gold-set-evaluation`。
-
-## 质量门控
+## 解释边界
 
 证据流程保留原始标识符、来源溯源、查询边界、分页状态、日期和未解决的歧义。检索被截断时禁止穷尽性主张；未评估上游漂移时禁止当前性主张；关联性证据不得推导因果主张；仅有引用标记不足以支持“文献支持该主张”。
 

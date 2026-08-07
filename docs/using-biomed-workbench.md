@@ -2,64 +2,54 @@
 
 Languages: [English](using-biomed-workbench.md) · [中文](using-biomed-workbench.zh-CN.md)
 
-## Start With A Scientific Goal
+## Start With The Research Question
 
-Invoke `biomed-workbench` and describe the biological question, the available data, the experimental units, and the intended decision or deliverable. Natural-language requests are preferred; users do not need to know module names or manually chain skills.
+Describe the biological question, available data, study design, and intended outcome. Users do not need to know module names or assemble a chain of tools themselves.
 
-A useful request identifies:
+A clear request usually includes:
 
-- the scientific question or competing hypotheses;
-- the samples, cohorts, organisms, assays, or molecular targets;
-- available files and important metadata;
-- known controls, batches, donors, conditions, and time points;
-- the expected decision, figure, manuscript section, or translational output;
-- constraints such as species, genome build, review date, or reporting standard.
+- the scientific question or hypotheses to compare;
+- the samples, organisms, experimental system, platform, or molecular target;
+- available files and essential metadata;
+- controls, batches, donors, conditions, time points, and reference versions;
+- the figures, tables, conclusions, manuscript content, or decision required.
 
-When essential context can be recovered from the project files, the workbench inspects it directly. It asks the user only for information that cannot be inferred safely and materially changes the analysis.
+When essential information can be established safely from project files, the workbench inspects those files first. It asks for clarification only when missing information would materially change the analysis.
 
-## What The Agent Does
+## What A Complete Analysis Includes
 
-The unified skill selects a single, serial, parallel, or mixed workflow. It should then:
+The workbench selects methods that fit the question and then:
 
-1. validate the project context and input contracts;
-2. state the working hypotheses and decision criteria;
-3. identify the scientific modules and artifact dependencies;
-4. check tool compatibility and available evidence before execution;
-5. bind real project data through the declared parameter interface and execute the packaged workflow;
-6. inspect outputs against module-specific quality gates;
-7. revise the plan when results contradict the hypothesis or fail quality checks;
-8. assemble interpretable artifacts and a claim-evidence trail;
-9. review the result from statistical, biological, and publication perspectives;
-10. deliver the requested research package with unresolved limitations visible.
+1. checks the study design, experimental units, input files, and metadata;
+2. states the working hypothesis, alternative explanations, and decision criteria;
+3. confirms method scope, software compatibility, and key parameters;
+4. runs the packaged workflow with the project's real data;
+5. reopens the outputs and reviews technical quality, statistical design, and biological plausibility;
+6. decides whether to retain, qualify, reanalyse, replace, or extend the result;
+7. assembles traceable figures, tables, methods, conclusions, and bilingual reports.
 
-After execution, register every data, table, model, Figure, and panel in the scientific evidence map together with its prerequisite conclusion, producing script, renderer, final file, caption, narrative source, DOI, path, and checksum. Chinese and English interpretation reports are rendered from the same validated map version.
-
-The public single-module entry atomically persists replayable project state and reports computational execution separately from scientific-review status. An unfinished active plan must continue through execution ingestion, review, decision, or resume; a completed plan may admit a later analysis on the same append-only ledger. An external packaged workflow becomes reviewable only when its module, version, compatibility row, runtime versions, exit status, planned output identities, and content-addressed payloads match the recorded handoff.
-
-If review calls for a rerun or method change, the agent prepares a new plan version before recording that decision. The replacement is checked against the live method registry, carries the exact changed parameters and rationale, and receives a new analysis admission before execution. All outputs from the original analysis move together to the same replacement; a table and figure from one execution cannot be sent to conflicting reruns. Method switching is available only when the source method declares an explicit revision-compatible relation with typed input, output, and parameter mappings; a method listed only as a related alternative cannot be substituted in place.
-
-Older projects that already published an evidence map migrate to a new state file only after the old map files verify. Migration reports every missing review, decision, admission, and unresolved gate. A state created with migration contract 1.1.0 is upgraded non-destructively: the workbench validates that state, its event chain, and the original immutable map store before writing a separate 1.2.0 successor with explicit map-coverage provenance. Delivery readiness remains unassessed unless an exact delivery node is requested and passed through the normal validator. When the old format cannot prove prior analysis approval, the new state records that historical gap without reconstructing approval. After explicit artifact review and decisions, the agent may publish a new project snapshot that continues the verified parent map; that historical recovery does not authorize scientific delivery or increase the evidence strength.
+The end of a computation is not automatically the end of an analysis. A result supports a project conclusion only after the relevant checks and scientific review. Failed analyses, negative findings, and conflicting evidence remain part of the record.
 
 ## Project Checkpoints
 
-For broad projects, the workbench maintains explicit checkpoints rather than treating the first successful run as completion:
+- **Data intake:** study design, files, metadata, references, and formats agree.
+- **Analysis readiness:** statistical units, confounders, method choice, and expected outputs are clear.
+- **Result review:** technical quality, effect size, robustness, negative findings, and competing explanations are considered.
+- **Scientific conclusion:** the support, counter-evidence, and limits of each important claim are explicit.
+- **Delivery:** figures, tables, methods, citations, and prose agree with one another.
 
-- **Intake:** data inventory, sample design, metadata completeness, format and reference compatibility.
-- **Analysis readiness:** executable plan, module contracts, confounders, statistical unit, and expected artifacts.
-- **Result validity:** technical QC, biological plausibility, sensitivity analyses, negative findings, and competing explanations.
-- **Interpretation:** support and refutation for each consequential claim, with causal limits preserved.
-- **Delivery:** figures, methods, tables, citations, review findings, and reproducibility records agree with one another.
+Important results enter the [scientific evidence map](scientific-evidence-map.md), which connects preceding evidence, analysis code, plot data, final files, captions, sources, and research decisions. Chinese and English reports use the same evidence version.
 
 ## Example Requests
 
-> Build an evidence map for this target across PubMed, UniProt, ClinVar, clinical trials, PDB, and AlphaFold DB. Reconcile conflicting identifiers and separate established findings from hypotheses.
+> Analyse this bulk RNA-seq project with donor- and batch-aware statistics, pathway and network interpretation, sensitivity checks, and publication figures. Reassess the hypothesis if the main comparison is not supported.
 
-> Analyze this bulk RNA-seq project with donor-aware statistics, pathway and network interpretation, sensitivity checks, and a figure-to-claim plan. Revise the hypothesis if the main contrast is not supported.
+> Design and run a single-cell analysis for these H5AD files, compare integration and annotation methods, preserve unknown cell states, and turn reviewed results into a manuscript-ready Results section.
 
-> Design and audit a single-cell workflow for these H5AD files, preserve unknown cell states, compare integration and annotation evidence, and carry validated conclusions into a manuscript-ready results section.
+> Summarise evidence for this target across PubMed, UniProt, ClinVar, clinical trials, PDB, and AlphaFold DB. Reconcile identifiers and separate established findings from testable hypotheses.
 
-> Review this molecular design package from sequence and structure quality through docking-pose checks and experimental validation planning. Do not treat prediction confidence as binding evidence.
+> Review these protein-structure and molecular-docking results, assess structural quality, interface confidence, and docking poses, and propose experiments that could test the model.
 
-## Deliverables
+## Possible Deliverables
 
-Depending on the task, outputs may include validated data inventories, workflow plans, analysis artifacts, quality reports, evidence tables, figures, methods, manuscripts, reviewer reports, response matrices, patent disclosures, or presentation plans. Every deliverable should state what was executed, what was inferred, what failed, and what remains unresolved.
+Depending on the task, outputs may include a data inventory, analysis plan, quality report, statistical tables, figures, methods, interpretation, manuscript text, reviewer responses, patent material, or a presentation. Each deliverable distinguishes observed results, evidence-based inference, failed checks, and unresolved questions.

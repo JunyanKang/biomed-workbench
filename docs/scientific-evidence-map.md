@@ -1,243 +1,60 @@
-# Scientific Evidence Map, Scientific Review, Versioning, And Bilingual Reporting
+# Scientific Evidence Maps And Bilingual Reports
 
-Biomed Workbench represents a project as an append-only scientific argument,
-not as a folder of successful outputs. The project-level scientific evidence
-map complements the module capability graph:
+Languages: [English](scientific-evidence-map.md) · [中文](scientific-evidence-map.zh-CN.md)
 
-- the capability graph answers which registered tools can consume and produce
-  artifact types;
-- the evidence map answers why an analysis was admitted, which exact artifacts
-  it used and produced, how each result was reviewed, whether the result became
-  active evidence, and what decision it triggered.
+A scientific evidence map explains how a project's conclusions were reached. It retains not only the final successful figures and tables, but also the rationale, source data, quality checks, conflicting findings, excluded branches, and decisions that shaped the project.
 
-The design specializes the W3C PROV entity/activity/derivation model and its
-explicit revision and invalidation semantics. It follows FAIR requirements for
-rich metadata and provenance, and the Nature Methods reproducibility principle
-that complete automation and retained intermediate outputs are stronger than a
-written recipe alone.
+## Two Levels Of Detail
 
-## Two Readable Layers
+The first level shows the project narrative: the relationships among key datasets and figure groups. It lets a reader grasp the research question, principal findings, and remaining evidence gaps without implementation detail.
 
-Layer 1 is a global cross-panel story DAG. It contains panel nodes and explicit
-panel-to-panel dependencies only. Scripts, files, captions, and databases do not
-clutter the top-level scientific story.
+The second level expands each dataset or figure group and links:
 
-Layer 2 expands every data or Figure group into evidence mind maps. Each unit
-records and links:
+- the preceding data and conclusions that support the analysis;
+- the current dataset, statistical result, or figure group;
+- the analysis code and plot-ready data;
+- the layout code and final data, PDF, and PNG files;
+- the caption, interpretive source, and original-study DOI.
 
-1. prerequisite data/panel and its prerequisite conclusion;
-2. current registered data or panel;
-3. plot-ready data;
-4. analysis script;
-5. layout or plotting renderer;
-6. final data, PDF, or PNG;
-7. caption;
-8. narrative source and canonical original-study DOI.
+Each file is recorded with a clickable project path and a content fingerprint. Files are checked again before a report is generated. A missing or changed file stops the report so that an outdated result cannot be cited accidentally.
 
-Every file uses a normalized workspace-relative clickable path, media type, and
-SHA-256. Reports re-read every path and checksum immediately before rendering;
-a changed or missing file blocks report generation.
+## Why An Analysis May Begin
 
-The same edge set is written as `scientific-evidence-map.edges.tsv`. Its digest
-is embedded in the map and both reports. Modifying an edge without rebuilding
-the map breaks the report gate.
+Before an important analysis starts, the project records:
 
-Map-bound legacy states are migrated without overwriting their source files. A
-schema-v2 state created under migration contract 1.1.0 is likewise upgraded to
-a separate 1.2.0 successor only after its prior state digest, migration and
-recovery digests, event chain, immutable map files, plan-node contracts, and map
-coverage all verify. The successor records both prior digests and the upgrade
-reason. Delivery readiness is reported as unassessed unless an exact delivery
-node was evaluated by the normal delivery validator.
+- the scientific rationale and a hypothesis that the data could refute;
+- the selected method, primary sources, and reasonable alternatives;
+- the experimental unit, statistical design, and reasons for key parameters;
+- the expected outputs and the conditions for accepting, questioning, or stopping the branch.
 
-## Admission Before Execution
+An incomplete analysis may remain in the plan, but it is not described as executed or supported.
 
-Every planned analysis node requires one `AnalysisAdmission`. Approval requires:
+## How Results Enter The Project Conclusion
 
-1. a target hypothesis and scientific rationale in Chinese and English;
-2. the method and official API or primary-method sources;
-3. alternatives considered and why the selected method fits the design;
-4. explicit assumptions and parameter-by-parameter justification;
-5. expected artifact types;
-6. acceptance criteria and observations that would falsify or block the branch.
+Datasets, tables, models, and figures are reviewed for technical validity, statistical design, biological interpretation, and robustness. Multi-part figures are interpreted part by part rather than through a single montage-level paragraph.
 
-Missing fields do not receive an inferred default. An unapproved node may remain
-in the audit graph but cannot be treated as an authorized scientific analysis.
+After review, a result may be retained, retained with limitations, excluded, reanalysed, replaced by another method, held for more data, used to revise the hypothesis, or used to stop a branch. Only retained results support the current conclusion. Excluded results, failed analyses, and conflicting evidence remain visible so that the reasoning can be reconstructed and mistakes are not repeated.
 
-Maps have three explicit purposes. A `project-snapshot` may truthfully show
-qualified inputs, pending branches, failures, conflicts, and exclusions, but it
-never releases a publication or other formal-delivery node. Before one formal
-delivery node runs, a `delivery-authorization` map covers that node's exact
-transitive ancestors and bound input artifacts. Every ancestor must be complete,
-every input must be retained, and the plan bindings, execution receipts, reloads,
-reviews, and decisions must match the frozen upstream-slice digest. It authorizes
-only the named delivery node and does not require that not-yet-executed node to
-be complete. After its output is reloaded, reviewed, and retained, a terminal
-`validated-delivery` map requires retained produced results to carry the exact
-plan-node, observed-execution, artifact-reload, bilingual-review, and decision
-chain. Every node in the active plan must be completed, and every exact leaf
-output identity must be retained. Artifact-type coverage cannot conceal a
-pending, review-pending, failed, skipped, or otherwise unfinished sibling.
+A rerun or method change creates a new analysis branch and records what changed, why it changed, and whether the claim became narrower or different. Historical results are never overwritten.
 
-## Review Every Result
+## Versions And Reports
 
-For a handoff-produced artifact, every pending manifest gate is resolved first
-through a `ScientificGateAdjudication` bound to the exact execution receipt,
-output port, structured gate-result digest, and evidence-payload digest. The
-review names the complete adjudication set. Rejected and unresolved gates remain
-reviewable so that a fatal or major review can support exclusion, rerun, method
-change, additional-data, plan-revision, or branch-stop decisions. They can never
-be retained as active evidence. A not-evaluable gate may be retained only after
-an explicit accepted-with-caveat adjudication and caveated retain decision.
+Each formal update creates a new version that identifies its predecessor, the reason for the change, and the evidence it contains. Earlier versions remain unchanged, allowing a reader to recover the basis of any conclusion at the time it was made.
 
-Every registered artifact, including negative, excluded, intermediate, data,
-table, model, report, and figure artifacts, requires one bilingual
-`ArtifactReview`. The review separates:
+Chinese and English reports are generated from the same validated map version. Both cover:
 
-- technical validity;
-- statistical validity and experimental-unit correctness;
-- biological validity and claim scope;
-- robustness, sensitivity, and conflicts;
-- limitations and source support.
+- scientific rationale and hypothesis;
+- methods;
+- results and scientific conclusions;
+- interpretation of each figure part;
+- limitations, conflicting evidence, and the reason for retaining or excluding a result;
+- implications for the next stage of the project.
 
-Figures require explicit panel records. An artifact-declared `panel_ids` set and
-the review panel set must match exactly. A montage-level paragraph cannot stand
-in for panel-level interpretation.
+This keeps the two reports aligned to the same data, figures, citations, and decisions instead of reconstructing their sources independently.
 
-## Decide Without Deleting History
+## Reference Frameworks
 
-Every review requires one `ScientificDecision`. Supported actions are:
-
-- retain as evidence;
-- retain with caveat;
-- exclude as invalid or noninformative;
-- rerun the same method or adjusted parameters;
-- switch method;
-- acquire more data;
-- revise the hypothesis or project scope;
-- stop the branch.
-
-Only the two retain actions enter the active evidence set, and major, fatal, or
-unassessed reviews cannot be retained. Exclusion removes an artifact from active
-claim support but never deletes it, its review, or the decision from the audit
-chain. Revised hypotheses and plans receive new identities rather than mutating
-the historical node.
-
-Decision actions also have distinct execution semantics. Retention completes the
-reviewed node and releases active evidence. Exclusion and branch stop terminate
-the current branch without deleting its history. After review selects rerun or
-method switch, the registry prepares an immutable child plan before the decision
-is recorded. Its node-level revision contract freezes the source and target
-nodes, action, both module manifests, declared alternative relation, typed ports,
-observed and planned request identities, the complete mapped target-parameter
-object, scientific equivalence class, claim-scope transition, and rationale.
-Every output from the same source execution must bind the
-same contract, action, target, and request identity. The replacement preserves
-the registered branch, hypotheses, dependencies, inputs, outputs, and evidence
-scope; untouched downstream work is rebuilt against its new output identities.
-A same-method rerun preserves the observed request identity, an adjusted rerun
-freezes a different request identity, and a method switch must use a distinct
-compatible alternative declared by the source module. Contract-equivalent
-relations retain one gate set; method-specific decision-role alternatives reset
-the source gate conclusions and require independent target evidence; scope
-downgrades narrow the claim. The replacement receives its own approved analysis
-admission before execution.
-Additional-data decisions keep the branch blocked until new input is registered.
-Hypothesis and scope revisions request a new immutable plan revision rather than
-overwriting the original analysis.
-
-## Two Separate Bilingual Deliverables
-
-`write_bilingual_reports` accepts only a validated `ScientificEvidenceMap` and
-the workspace root. It emits:
-
-- `scientific-evidence-report.zh-CN.md`;
-- `scientific-evidence-report.en.md`;
-- `scientific-evidence-map.json`;
-- `scientific-evidence-map.edges.tsv`;
-- `scientific-evidence-map.md`, with a global Mermaid story DAG and grouped
-  evidence mind maps.
-
-Both language reports cover every project artifact and contain:
-
-- Scientific rationale and hypothesis | 科学依据与假设;
-- Methods | 分析方法;
-- Results and scientific conclusion | 结果与科学结论;
-- panel-level interpretation for figures;
-- objective technical, statistical, biological, and robustness review;
-- limitations, graph lineage, decision, and impact on the next analysis.
-
-The English and Chinese documents are rendered from the same versioned evidence
-map, preventing one language from silently omitting an artifact, panel,
-limitation, file, checksum, caption, DOI, or decision. The report generator does
-not independently reconstruct source relationships. The map also freezes the
-complete hypothesis snapshot and the explicitly linked analysis-admission
-records, including alternatives, assumptions, adjustable-parameter
-justifications, acceptance criteria, falsification criteria, and official
-method sources. Reports read these records directly from the map.
-
-## Append-Only Version Management
-
-Every map contains:
-
-- semantic version;
-- monotonically increasing revision;
-- parent-map SHA-256;
-- `initial`, `major`, `minor`, or `patch` change type;
-- Chinese and English change summaries.
-
-`publish_evidence_map_version` writes immutable releases under
-`versions/v<semver>/`. It refuses to overwrite a version directory, requires
-revision increments of exactly one, verifies the parent digest against the
-latest version, and checks that semantic-version movement matches the declared
-change type. The append-only `evidence-map-version-index.json` records map,
-edge-table, and deliverable checksums. A compact
-`scientific-evidence-map.current.json` pointer records only the current version
-and digests. `verify_evidence_map_version_index` rechecks the complete parent
-chain, project identity, semantic-version transitions, every published file,
-the map digest recalculated from map content, and the edge-table digest
-recalculated from the machine-readable edges. Updating an index checksum cannot
-hide a scientifically altered map. Publication is serialized by a
-project-scoped exclusive lock. An immutable version directory that is missing
-from the append-only index, or an indexed directory that is missing from disk,
-is treated as an interrupted/corrupt publication and blocks the next release
-until it is audited. The project command publishes the immutable files, version
-index, current pointer, and project-state registration through one recoverable
-transaction journal. Its read-only recovery inspection distinguishes staged,
-unindexed, and state-unregistered interruptions and never silently deletes an
-immutable result. The prepared journal stores a content-addressed pending
-project state, its pre-state digest, the exact publication record, and target
-identities. Explicit completion is allowed only when the current state still
-matches the pre-state and the pending state, immutable index, current pointer,
-and publication digests all verify. A transaction interrupted in `prepared`
-may be explicitly abandoned only when the current project state is unchanged,
-the pending state and publication identity verify, and no staged, unindexed,
-indexed, current-pointer, or immutable version evidence exists. Inspection lists
-the only safe actions; ambiguous published evidence always requires manual review.
-
-A map-bound schema-v1 project is recovered through a separate, non-overwriting
-migration path. The legacy state is read without first treating it as current;
-its digest and event chain are checked, and every referenced immutable map is
-re-read through the version index, recorded file hashes, map content, and exact
-publication identity. The new schema-v2 file records those publications as
-verified legacy history but exposes no active evidence-map version. Formal
-delivery therefore remains blocked until an explicit new publication continues
-the last verified legacy map as its parent and binds the migrated state. The old
-state and old map bytes are never rewritten.
-
-Recommended classification:
-
-- `patch`: caption, link, or metadata clarification without changing evidence
-  state or scientific interpretation;
-- `minor`: new data, panel, analysis branch, or non-breaking evidence addition;
-- `major`: hypothesis/story restructuring, removal or reversal of active
-  evidence, or a change that invalidates downstream interpretation.
-
-## Sources
-
-- [W3C PROV-O Recommendation](https://www.w3.org/TR/prov-o/)
-- [FAIR Guiding Principles, Scientific Data](https://www.nature.com/articles/sdata201618)
-- [RO-Crate specification](https://www.researchobject.org/ro-crate/1.1/)
-- [Reproducibility standards for machine learning in the life sciences, Nature Methods](https://www.nature.com/articles/s41592-021-01256-7)
-- [AiiDA automated provenance, Scientific Data](https://www.nature.com/articles/s41597-020-00638-4)
-- [Nature Portfolio reporting summary](https://www.nature.com/documents/nr-reporting-summary-flat.pdf)
+- [W3C PROV-O](https://www.w3.org/TR/prov-o/)
+- [FAIR Guiding Principles](https://www.nature.com/articles/sdata201618)
+- [RO-Crate](https://www.researchobject.org/ro-crate/1.1/)
+- [Nature Methods: reproducibility standards for machine learning in the life sciences](https://www.nature.com/articles/s41592-021-01256-7)

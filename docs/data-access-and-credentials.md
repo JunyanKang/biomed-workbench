@@ -25,7 +25,7 @@ Notable endpoint rules:
 
 Official references: [NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25497/), [NCBI Datasets API keys](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/), [Crossref access and authentication](https://crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/), [Europe PMC REST](https://europepmc.org/RestfulWebService), [ClinicalTrials.gov API](https://clinicaltrials.gov/data-api/api), [UniProt programmatic access](https://www.uniprot.org/help/programmatic_access), [Reactome Content Service](https://reactome.org/dev/content-service), [Open Targets GraphQL](https://platform-docs.opentargets.org/data-access/graphql-api), [public cBioPortal API](https://www.cbioportal.org/api/swagger-ui/index.html), [private cBioPortal token authentication](https://docs.cbioportal.org/deployment/authorization-and-authentication/authenticating-users-via-tokens/), [PubChem PUG REST](https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest), [AlphaFold Server](https://alphafoldserver.com/), [Server output terms](https://alphafoldserver.com/output-terms), and [Server privacy notice](https://alphafoldserver.com/privacy).
 
-## Agent-guided configuration
+## How To Configure Access
 
 The preferred interface is a natural-language request:
 
@@ -43,4 +43,4 @@ Supported operating modes are:
 
 Task-scoped injection takes precedence over local storage. Status output reports presence and source, never the value. Rotation, removal, and repository-leak audits can also be requested in natural language.
 
-Credentials must never enter chat text, Git, project JSON, sample sheets, run logs, figures, reports, or scientific evidence maps. Passwords, OAuth tokens, browser cookies, and recovery data must also remain outside interactive-access records. A newly authenticated service requires an allow-list change, bilingual documentation, module declarations, and leak-prevention tests before use.
+Credentials must never enter chat text, Git, project files, sample sheets, run logs, figures, reports, or scientific evidence maps. Passwords, OAuth tokens, browser cookies, and recovery data must also remain outside access records.

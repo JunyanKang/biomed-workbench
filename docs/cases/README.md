@@ -1,18 +1,14 @@
 # Public-Data Acceptance Cases
 
-Public-data cases complement deterministic fixtures by executing packaged
-workflows against stable, independently published scientific datasets. Each case
-binds the source identity and digest to a module, compatibility row, code
-template, detected runtime, parameters, quality gates, observed results, reload
-checks, and explicit inferential boundaries.
+Public-data cases use stable, independently available datasets to test real analysis workflows. Each case records the data source, method and software versions, runtime, parameters, quality checks, observed results, output review, and the conclusions that the case can and cannot support.
 
 | Case | Scientific surface | Current evidence |
 | --- | --- | --- |
-| [PDF evidence extraction](pdf-evidence-extraction.md) | Local PDF parsing, page accounting, bounded page text, provenance, and untrusted-document boundary | Minimal readable PDF fixture; 1 page; deterministic SHA-256; no remote or developer-machine source required |
+| [PDF evidence extraction](pdf-evidence-extraction.md) | Local PDF parsing, page accounting, bounded page text, source tracking, and untrusted-document boundary | Minimal readable PDF; one page; no remote or developer-machine source required |
 | [PBMC3k single-cell foundation](pbmc3k-foundation.md) | 10x matrix validation, cell accounting, raw-count preservation, normalization, HVG, PCA, neighbors, UMAP, Leiden sensitivity, and H5AD reload | 2700 source cells; 2638 retained cells; 13656 retained genes; all declared gates passed |
 | [UCSC hg19-to-hg38 coordinate liftover](ucsc-coordinate-liftover.md) | Immutable chain validation, zero-based BED conversion, mapped/unmapped record accounting, and output reload | Public UCSC chain header and mapping block; 2 source intervals; 1 mapped and 1 explicitly unmapped |
 | [NCBI J01673.1 assembly alignment](ncbi-assembly-alignment.md) | Declared FASTA identity, minimap2 assembly preset, PAF reload, and query-target record accounting | Public NCBI nucleotide record; 1 query and 1 target record aligned; no variant or orthology claim |
-| [PBMC3k atlas annotation](pbmc3k-atlas-annotation.md) | Official CellTypist immune-model mapping, full probability evidence, frozen Unknown policy, count preservation, reload, and posthoc broad marker coherence | 2700 source cells; 98 model classes; exact query/model digests; all declared gates passed |
+| [PBMC3k atlas annotation](pbmc3k-atlas-annotation.md) | Official CellTypist immune-model mapping, full probability evidence, frozen Unknown policy, count preservation, reload, and posthoc broad marker coherence | 2700 source cells; 98 model classes; query and reference identities checked; all declared quality checks passed |
 | [PBMC3k droplet calling and ambient RNA](pbmc3k-droplet-decontamination.md) | Full unfiltered-droplet emptyDrops accounting, Cell Ranger disagreement retention, automatic SoupX, ambient profile, and element-wise count validation | 737280 droplets; 2182 emptyDrops calls; 518 preserved caller disagreements; 5.7% SoupX contamination |
 | [GSE96583 paired donor pseudobulk](gse96583-donor-pseudobulk.md) | Published singlet filtering, raw-count pseudobulk aggregation, eight-donor paired edgeR design, result reload, and independent IFN-response recovery | 29065 published cells; 24673 retained singlets with labels; 8 paired donors; all declared gates passed |
 | [GSE96583 held-out-donor markers](gse96583-marker-discovery.md) | Discovery-only Scanpy ranking, per-donor raw-count direction, two-donor independent validation, exact repeat, and bounded canonical-marker recovery | 11990 control singlets; 6 discovery and 2 validation donors; 606 independently validated markers across 6 PBMC classes |
@@ -32,19 +28,17 @@ checks, and explicit inferential boundaries.
 | Tangram official repository data | Current Tangram template, cluster-mode RNA-density mapping, native model reload and independently checked normalized projection | 26,431 reference cells; 18 cell classes; 9,852 spatial locations; 249 shared genes |
 | [GSE96583 regulatory programs](gse96583-regulatory-program.md) | Label-withheld GRNBoost2 and AUCell, complete adjacency and program reload, and postfit paired-donor interferon controls | 480 cells; 31 TF programs; IRF1, IRF7 and STAT1 increase in 8/8 donors |
 | [SeqFISH embryo spatial analysis](seqfish-spatial.md) | Integer counts and coordinates, sample-isolated graph, neighborhood and co-occurrence statistics, Moran tests, exploratory domains, and single-sample boundary | 2000 cells; 5968 edges; 20 Moran candidates tested; nine domains |
-| [Zebrafish neural-crest RegVelo](zebrafish-regvelo.md) | Official continuous-layer preprocessing, target-regulator GRN alignment, hard/soft RegVelo fitting, model reload, withheld-stage direction, and explicit mode sensitivity | 697 cells; 1008 modeled genes; 81 TFs; 4309 edges; exact source/GRN digests |
+| [Zebrafish neural-crest RegVelo](zebrafish-regvelo.md) | Official continuous-layer preprocessing, target-regulator GRN alignment, hard/soft RegVelo fitting, model reload, withheld-stage direction, and explicit mode sensitivity | 697 cells; 1008 modelled genes; 81 TFs; 4309 edges; source data and GRN identity checked |
 | [Zebrafish RegVelo-to-CellRank fate](zebrafish-cellrank-fate.md) | CellRank 2.3.2 velocity kernel, exact repeat, withheld-stage direction, GPCCA fate probabilities, lineage drivers, and connectivity-weight sensitivity | 697 cells; 4 annotation-defined terminal states; 467 transient cells; pure-versus-blended fate Pearson 0.9981 |
-| [Multi-database live evidence](public-database-contracts.md) | Citation, preprint, compound, trial, experimental structure, structure search, polymer, ligand, and predicted-structure records | Nine current module/service checks across seven public database families; all declared gates passed |
+| [Multi-database live evidence](public-database-contracts.md) | Citation, preprint, compound, trial, experimental structure, structure search, polymer, ligand, and predicted-structure records | Nine current method and service checks across seven public-database families; all declared quality checks passed |
 | [NCBI TP53 human-to-mouse ortholog](ncbi-gene-ortholog.md) | Bounded Gene API ortholog retrieval, source/target taxon identity, Ensembl ID retention, and claim boundary | Human TP53 Gene 7157 maps to mouse Trp53 Gene 22059 in the observed response |
 | [NCBI TP53 identifier resolution](ncbi-gene-identifier-resolution.md) | Exact-symbol resolution, candidate retention, stable Gene ID, and ambiguity block | Human TP53 resolves to NCBI Gene 7157; ambiguous candidate sets emit no reusable identifier |
 | [TP53 protein disorder tendency](protein-disorder-evidence.md) | Accession-bound IUPred2A disorder profile, score-to-sequence reconciliation, threshold-span policy, and retrieval provenance | Human TP53 `P04637`; 393 residue-aligned scores; no structural or functional conclusion |
 
 | [Bacterial growth-curve model selection](bacterial-growth-curve.md) | Blank correction, replicate retention, logistic and modified Gompertz fitting, AICc comparison, residual diagnostics, and biological-replication boundary | Synthetic two-culture OD series; seven timepoints; empirical fit accepted; no strain or treatment claim |
 
-| [Dilution-plate CFU enumeration](cfu-enumeration.md) | Observed-count contract, countable-range selection, exposure-aware pooling, exact Poisson uncertainty, and plate heterogeneity diagnostics | Two countable plates; one low-count and one TNTC plate retained as exclusions; no fitness claim |
+| [Dilution-plate CFU enumeration](cfu-enumeration.md) | Observed-count requirements, countable-range selection, exposure-aware pooling, exact Poisson uncertainty, and plate heterogeneity diagnostics | Two countable plates; one low-count and one TNTC plate retained as exclusions; no fitness claim |
 | [Crystal-violet biofilm summary](biofilm-crystal-violet.md) | Blank and control preservation, replicate summaries, control-normalized effects, and no-single-value-inference boundary | Two blanks, two controls, and two treated measurements; no treatment significance claim |
 | [Bacterial population scenario](bacterial-population-scenario.md) | Explicit logistic growth plus clearance assumptions, RK4 integration, equilibrium calculation, and simulation-only labeling | Declared positive-equilibrium scenario; every trajectory value is simulated |
 
-A checked report is evidence only for the source, module version, template,
-runtime, parameters, and gates recorded in that report. It is not a claim that
-the same workflow or thresholds are valid for another dataset.
+A checked report supports only the data, method version, runtime, parameters, and quality checks recorded in that case. It does not establish that the same workflow or thresholds are valid for another dataset.

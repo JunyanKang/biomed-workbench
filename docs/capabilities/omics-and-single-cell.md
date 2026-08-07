@@ -19,11 +19,11 @@ on universal foundations and the single-cell program.
 
 For broad sequencing, expression, variant, motif, NMF, or multi-measurement requests, the workbench stages reusable work from data profiling and read-level QC to alignment, sorting, alignment qualification, variant or interval handling, secondary synthesis, and publication-facing interpretation. Assay-specific inference remains in its assay module. Independent branches can run in parallel, but downstream modules receive explicit dependencies when they rely on QC, aligned records, filtered intervals, peak calls, expression matrices, or admitted statistical outputs.
 
-This keeps FASTQ, BAM/CRAM, VCF, BED, count matrices, peak sets, motif resources, NMF programs, and gene-set outputs under one interface without pretending that all formats or tools are interchangeable. Each selected module declares the accepted artifact formats, version boundaries, required metadata, templates, quality gates, and unresolved project inputs.
+This keeps FASTQ, BAM/CRAM, VCF, BED, count matrices, peak sets, motif resources, NMF programs, and gene-set outputs under one interface without pretending that their formats or tools are interchangeable. Each method states its accepted files, version range, required metadata, quality checks, and unresolved project inputs.
 
 ## Unified Single-Cell Research Program
 
-For broad single-cell or single-cell multi-omics questions, Biomed Workbench does not expose a menu of separate skills. The single `biomed-workbench` entrypoint routes the objective into a staged research plan with declared module contracts, input and output artifacts, compatibility rows, templates, quality gates, unresolved project inputs, and an explicit boundary between planning and observed evidence.
+For broad single-cell or single-cell multi-omics questions, Biomed Workbench does not require users to select from a menu of tools. It turns the objective into a staged research plan that states the inputs, outputs, software conditions, quality checks, unresolved questions, and the boundary between planning and observed evidence.
 
 The staged plan is organized as a scientific program rather than a flat script list:
 
@@ -36,15 +36,13 @@ The staged plan is organized as a scientific program rather than a flat script l
 7. Communication, trajectory, RNA velocity, topology, regulatory-network, and spatial evidence with sample-level and directionality gates.
 8. Fate mapping, RegVelo regulatory velocity, hypothesis revision, and manuscript or response-oriented delivery modules when publication work is part of the objective.
 
-The v1.0 single-cell core is represented by the following modules in the unified route and plan: `single-cell-atac-regulatory`, `single-cell-atlas-annotation`, `single-cell-batch-integration`, `single-cell-communication`, `single-cell-complex-inference`, `single-cell-donor-inference`, `single-cell-doublet-detection`, `single-cell-droplet-decontamination`, `single-cell-fate-mapping`, `single-cell-marker-discovery`, `single-cell-multimodal-integration`, `single-cell-qc`, `single-cell-reference-annotation`, `single-cell-regulatory-network`, `single-cell-regulatory-velocity`, `single-cell-spatial-analysis`, `single-cell-trajectory-topology`, and `single-cell-trajectory-velocity`.
-
-Each module contributes a manifest contract, an executable parameter surface, typed inputs and outputs, failure and limitation boundaries, compatibility evidence, quality gates, tests, and a documentation entry. A plan remains non-evidentiary until Codex inspects the user's real artifacts, binds the declared inputs and parameters without editing released source templates, records observed tool and dependency versions, reloads outputs, and admits only quality-controlled results.
+A plan becomes project evidence only after the workbench inspects the user's real files, records the software and parameters used, runs the analysis, reopens the outputs, and completes quality review.
 
 ## Sequencing And Genomic Foundations
 
 - Read-level quality assessment with FastQC and fastp, cross-sample aggregation with MultiQC, and declared-reference contamination screening.
 - BWA-MEM alignment, samtools alignment qualification, coordinate sorting and indexing.
-- Chain-bound genomic coordinate liftover with declared source/target assemblies, immutable chain digest verification, and mapped, split, and unmapped record accounting; followed by build-matched BED interval overlap where appropriate.
+- Genomic coordinate conversion with declared source and target assemblies and explicit accounting of mapped, split, and unmapped records; followed by build-matched BED interval overlap where appropriate.
 - Assembly-to-reference alignment with a declared minimap2 preset, FASTA and PAF reload, and record-level coverage accounting; alignment is kept separate from variant, haplotype, synteny, or orthology inference.
 - BGZF and tabix VCF handling, explicit variant filtering, multi-sample concordance, and callable-territory-aware tumour mutation burden.
 - Bulk ChIP-seq, CUT&RUN, and CUT&Tag MACS3 peak calling with assay-specific control policy, peak-shape declaration, output reload, and no fallback peak set; independent known-PWM enrichment with a declared background and FDR adjustment.
@@ -54,7 +52,7 @@ Each module contributes a manifest contract, an executable parameter surface, ty
 - `msprime` coalescent simulation of a predeclared one-population constant, bottleneck, or expansion scenario for calibration and design, with parameter, seed, tree-sequence, VCF, and version provenance; simulation remains separate from empirical demographic inference.
 - ARCHS4 public tissue or cell-line expression context with field-level CSV validation, hierarchy-row accounting, ordering by median, and explicit separation from project-specific differential expression or specificity claims.
 
-These steps are represented by independently routable modules such as `read-quality-fastqc`, `read-quality-fastp`, `quality-report-multiqc`, `read-contamination-screen`, `dna-align-bwa-mem-single`, `alignment-quality-samtools`, `assembly-reference-alignment`, `genome-coordinate-liftover`, `interval-overlap-bedtools`, `variant-filter-vcf`, `tumor-mutation-burden-vcf`, `bulk-chromatin-peak-calling`, `sequence-motif-enrichment`, `cool-contact-evidence`, `gwas-susie-fine-mapping`, `rrblup-genomic-prediction`, `msprime-demographic-simulation`, and `archs4-expression-evidence`. See the [coordinate liftover guide](genome-coordinate-liftover.md) for assembly and chain requirements, [bulk chromatin peak calling](bulk-chromatin-peak-calling.md), [known motif enrichment](sequence-motif-enrichment.md), [chromatin contact evidence](cool-contact-evidence.md), [GWAS fine-mapping](gwas-susie-fine-mapping.md), [genomic prediction](rrblup-genomic-prediction.md), [demographic simulation](msprime-demographic-simulation.md), [ARCHS4 expression context](archs4-expression-evidence.md), and the [public UCSC case](../cases/ucsc-coordinate-liftover.md) for bounded acceptance evidence.
+Detailed guidance is available for [coordinate conversion](genome-coordinate-liftover.md), [bulk chromatin peak calling](bulk-chromatin-peak-calling.md), [known motif enrichment](sequence-motif-enrichment.md), [chromatin contact evidence](cool-contact-evidence.md), [GWAS fine-mapping](gwas-susie-fine-mapping.md), [genomic prediction](rrblup-genomic-prediction.md), [demographic simulation](msprime-demographic-simulation.md), and [ARCHS4 expression context](archs4-expression-evidence.md).
 
 ## Bulk Expression And Systems Analysis
 
@@ -62,8 +60,6 @@ These steps are represented by independently routable modules such as `read-qual
 - Differential expression with explicit design and statistical outputs.
 - Gene-set overrepresentation, biological network summaries, FDR-controlled coexpression hypotheses, and stable multi-start NMF metagene programs.
 - Separation of exploratory patterns from inferential claims and preservation of the biological sampling unit.
-
-Representative modules include `expression-qc`, `differential-expression`, `enrichment-analysis`, `network-analysis`, `ddr-coexpression-hypothesis-network`, and `metagene-factorization-nmf`.
 
 ## Single-Cell Foundations
 
@@ -75,7 +71,7 @@ Representative modules include `expression-qc`, `differential-expression`, `enri
   disagreement retained for review.
 - Transparent per-cell count, detected-gene, mitochondrial-fraction, and threshold flags.
 
-The principal modules are `single-cell-foundation-workflow`, `single-cell-qc`, `single-cell-droplet-decontamination`, and `single-cell-doublet-detection`. See the [droplet calling and ambient-RNA guide](droplet-decontamination.md) for emptyDrops, SoupX, CellBender, public-data evidence, and method-disagreement boundaries.
+See the [droplet calling and ambient-RNA guide](droplet-decontamination.md) for the use of emptyDrops, SoupX, and CellBender and for handling disagreement among methods.
 
 ## Donor-Aware Inference And Integration
 
@@ -85,7 +81,7 @@ The principal modules are `single-cell-foundation-workflow`, `single-cell-qc`, `
 - Harmony, Scanorama, and BBKNN benchmarking against an unchanged baseline, with batch mixing balanced against biological-label preservation.
 - scVI and scANVI modelling with baseline comparison, held-out-label validation, unknown-label retention, and model reload checks.
 
-These capabilities are implemented by `single-cell-donor-inference`, `single-cell-complex-inference`, `single-cell-batch-integration`, and `single-cell-generative-modeling`. See the [donor-aware complex-inference guide](complex-inference.md), [classical batch-integration guide](batch-integration.md), and [gated scVI/scANVI guide](generative-modeling.md) for executable models, method comparison, label isolation, public-data evidence, and valid no-selection decisions.
+See [donor-aware complex inference](complex-inference.md), [classical batch integration](batch-integration.md), and [scVI/scANVI generative modelling](generative-modeling.md) for method comparison, label isolation, and cases where no method should be selected.
 
 ## Annotation, Communication, And Dynamics
 
@@ -94,7 +90,7 @@ These capabilities are implemented by `single-cell-donor-inference`, `single-cel
 - LIANA, CellPhoneDB, CellChat, and NicheNet workflows that analyze samples independently, retain method-native significance, and require predeclared independently significant sample support before replication.
 - scVelo dynamical modelling; RegVelo 0.4.2 GRN-informed velocity, gene-resolved latent time, regulatory-constraint comparison, and perturbation hypotheses; CellRank 2.3.2 velocity, connectivity-weight, pseudotime, and real-time GPCCA fate mapping; moscot optimal transport; Slingshot and Monocle3 topology; and tradeSeq lineage tests validated against independent time, root, branch, and terminal anchors.
 
-These capabilities are implemented by `single-cell-marker-discovery`, `single-cell-atlas-annotation`, `single-cell-reference-annotation`, `single-cell-communication`, `single-cell-trajectory-velocity`, `single-cell-regulatory-velocity`, `single-cell-fate-mapping`, and `single-cell-trajectory-topology`. See the [marker-discovery guide](marker-discovery.md), [conservative reference-annotation guide](reference-annotation.md), [sample-aware communication guide](cell-communication.md), [direction-validated RNA-velocity guide](trajectory-velocity.md), [RegVelo regulatory-velocity guide](regulatory-velocity.md), [fate-mapping guide](fate-mapping.md), and [lineage-topology guide](trajectory-topology.md) for their executable scope and compatibility boundaries.
+See [marker discovery](marker-discovery.md), [conservative reference annotation](reference-annotation.md), [sample-aware communication](cell-communication.md), [direction-validated RNA velocity](trajectory-velocity.md), [RegVelo](regulatory-velocity.md), [fate mapping](fate-mapping.md), and [lineage topology](trajectory-topology.md).
 
 ## Multimodal, Regulatory, And Spatial Analysis
 
@@ -104,10 +100,7 @@ These capabilities are implemented by `single-cell-marker-discovery`, `single-ce
 - pySCENIC GRNBoost2, cisTarget motif pruning, regulon construction, and AUCell activity; SCENIC+ gene- and region-based eRegulon scoring with explicit motif and region-gene evidence.
 - H5AD and SpatialData Zarr input, image and shape provenance, sample-isolated spatial graphs, neighbourhood enrichment, per-sample co-occurrence, global and sample-level Moran tests, replicated spatial genes, and exploratory expression-spatial domains.
 
-These capabilities are implemented by `single-cell-multimodal-integration`, `single-cell-atac-regulatory`, `single-cell-regulatory-network`, and `single-cell-spatial-analysis`.
-See the [multimodal integration guide](multimodal-integration.md) for exact
-paired-cell contracts, backend-specific evidence, and the public 10x PBMC
-Multiome execution case.
+See the [multimodal integration guide](multimodal-integration.md) for paired-cell requirements, method-specific evidence, and the public 10x PBMC Multiome case.
 See the [single-cell ATAC regulatory guide](atac-regulatory.md) for fragment
 accounting, MACS3, motifmatchr, chromVAR, LinkPeaks, and their separate evidence
 boundaries.

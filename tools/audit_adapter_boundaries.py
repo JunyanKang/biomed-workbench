@@ -61,16 +61,16 @@ def build() -> dict[str, object]:
     chinese = (ROOT / "docs" / "agent-integration.zh-CN.md").read_text(encoding="utf-8") if not missing_optional else ""
     documentation_markers = {
         "english": {
-            "reference_host": "primary reference host",
-            "not_exclusive": "does not make the scientific registry exclusive to Codex",
-            "not_equivalent_certification": "entry compatibility rather than end-to-end certification",
-            "codex_native_boundary": "`access: codex_native`",
+            "primary_environment": "primary release and validation environment",
+            "shared_research_capability": "other agents that support skills directories or local MCP can read part of the same research capability",
+            "runtime_not_implied": "does not mean that the agent already has a complete scientific runtime",
+            "codex_provided_tools": "Another agent can complete them only after providing and validating equivalent capabilities",
         },
         "chinese": {
-            "reference_host": "首要参考宿主",
-            "not_exclusive": "并不表示科学注册表只能由 Codex 使用",
-            "not_equivalent_certification": "入口兼容，而非全流程认证",
-            "codex_native_boundary": "`access: codex_native`",
+            "primary_environment": "主要发布和验证环境",
+            "shared_research_capability": "其他支持技能目录或本地 MCP 的智能体也可以读取其中一部分能力",
+            "runtime_not_implied": "不表示它已经具备完整的执行环境",
+            "codex_provided_tools": "其他智能体只有在提供并验证等价能力后才能完成这些步骤",
         },
     }
     documented = {"english": english, "chinese": chinese}

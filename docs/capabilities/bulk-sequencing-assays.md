@@ -1,21 +1,36 @@
-# Scientific taxonomy and executable capabilities for bulk sequencing
+# Bulk Sequencing Analysis
 
-Bulk, single-cell, and spatial describe observational scale. They are not peers of labels such as epigenomics or transcriptomics. Biomed Workbench classifies capabilities along three orthogonal facets:
+Languages: [English](bulk-sequencing-assays.md) · [中文](bulk-sequencing-assays.zh-CN.md)
 
-1. data scale: bulk, single-cell, spatial, or cross-scale universal;
-2. measurement family and exact assay;
-3. method role: assay-specific, reusable within a family, cross-scale statistical, or research infrastructure.
+Bulk, single-cell, and spatial describe the scale of observation. Labels such as transcriptomics and epigenomics describe what is measured and therefore belong at a different level. Biomed Workbench records three aspects separately:
 
-Antibody, target, spike-in/internal reference, RNase H treatment, peak recall, and normalization remain design or analysis parameters. They never become omics classes. For example:
+1. **Data scale:** bulk, single-cell, spatial, or a method that applies across scales;
+2. **Measurement family and assay:** for example, chromatin accessibility measured by ATAC-seq;
+3. **Method role:** assay-specific analysis, a method shared within a measurement family, or a general statistical and research method.
 
-`bulk → protein- or mark-associated chromatin enrichment → CUT&Tag → S9.6 target/antibody → optional internal-reference scaling → RNase H specificity evidence`
+The antibody, target, spike-in or internal reference, RNase H treatment, peak recall, and normalisation strategy are experimental or analytical choices rather than new assay classes. For example:
 
-The current bulk families cover steady-state RNA expression; ChIP-seq, CUT&RUN and CUT&Tag; R-loop mapping by DRIP-seq/DRIPc-seq, sDRIP/ssDRIP-seq, qDRIP-seq, R-ChIP, MapR and sensor-declared CUT&Tag; ATAC-seq and DNase-seq; RIP-seq and CLIP/LACE variants; Ribo-seq; GRO-seq, PRO-seq, TT-seq and NET-seq; WGBS, RRBS and EM-seq; Hi-C and related chromosome-conformation assays; and MeRIP/m6A enrichment.
+`bulk → protein- or mark-associated chromatin enrichment → CUT&Tag → S9.6 target/antibody → optional internal-reference normalisation → RNase H specificity evidence`
 
-Ribo-seq retains Ribo-TISH and Ribotricer ORF calls separately after P-site and triplet-periodicity quality control; optional callers such as RiboCode are sensitivity branches, not votes that create a true ORF by union. LACE-seq binds the primary paper, GSE137925 metadata, and public analysis code at commit `b8d1193638190c50c8553847ad3a1653544dbe14`. Its released FASTQ path runs Cutadapt 1.15 and Bowtie 1.2.3 in immutable images, performs the paper's sequential adapter and poly(A) trimming, pre-rRNA depletion, mapping with two mismatches and at most ten multihits, strand-aware BED generation, matched IgG subtraction, and cluster calling. All consequential trimming, mapping, RPM, merging, and strand-support parameters are exposed through the request rather than source edits.
+## Current Bulk Assay Families
 
-The RIP-seq path executes RIPSeeker 1.28.0 in a pinned Bioconductor 3.11 container on explicitly paired RIP and input/IgG BAM files. Binning, strand policy, multihit assignment, HMM models, significance thresholds, region tables, and native R model objects are preserved without requiring a legacy host R installation or template editing.
+| Measurement family | Assays | Main analysis | Important design and interpretation points |
+| --- | --- | --- | --- |
+| Steady-state transcription and expression | bulk RNA-seq | RNA quantification, expression QC, differential expression, and downstream statistics | Expression is not transcription rate; the replicate unit is the sample |
+| Protein- or mark-associated chromatin enrichment | ChIP-seq, CUT&RUN, CUT&Tag | Alignment, quality control, peak detection, differential analysis, and annotation | Assay, target or antibody, control, internal reference, and specificity treatment are recorded separately |
+| RNA:DNA hybrids and R-loops | DRIP-seq, DRIPc-seq, sDRIP/ssDRIP-seq, qDRIP-seq, R-ChIP, MapR, and sensor-declared CUT&Tag | Assay-specific preprocessing, signal detection, specificity review, and cross-method comparison | R-loop is the measured object, not the assay; sensor, sample treatment, strandedness, internal reference, and RNase H control affect interpretation |
+| Chromatin accessibility | ATAC-seq, DNase-seq | Alignment, quality control, accessible regions, and footprinting | Accessibility is not transcription-factor occupancy; footprinting requires enzyme-bias correction |
+| RNA–protein association or binding sites | RIP-seq, eCLIP, iCLIP, HITS-CLIP, PAR-CLIP, LACE-seq | Enrichment or binding-region detection, control comparison, and annotation | RIP supports transcript enrichment; UMI, crosslinking, and reverse-transcription-stop models differ among CLIP and LACE assays |
+| Translation | Ribo-seq | P-site placement, periodicity, translation efficiency, and ORF detection | P-site placement and triplet periodicity are checked before ORF inference; results from different callers remain separate |
+| Nascent transcription | GRO-seq, PRO-seq, TT-seq, NET-seq | Assay-specific preprocessing, quantification, and kinetic interpretation | Strand, run-on design, pulse labelling, or polymerase position determines the signal model |
+| Cytosine modification | WGBS, RRBS, EM-seq | Conversion, coverage, methylation quantification, and regional comparison | Conversion efficiency and coverage are prerequisites; conventional bisulfite data generally do not distinguish 5mC from 5hmC |
+| Three-dimensional genome organisation | Hi-C, Micro-C, Capture-C, HiChIP, PLAC-seq, ChIA-PET | Contact matrices, quality control, compartments, domains, and interaction analysis | Resolution, background, and anchoring vary by assay; contact frequency is not direct binding |
+| RNA modification enrichment | MeRIP-seq, m6A-seq | Enriched-region detection, differential analysis, and functional annotation | Antibody enrichment gives a regional signal, not a single-base site or modification fraction |
 
-R-loop is registered as a measurement family and biological object, not an assay. The `bulk-r-loop-mapping` module therefore keeps sensor, ex vivo versus in situ context, fragmentation or cleavage, sequenced moiety, strandedness, internal reference and RNase H control distinct. Cross-method disagreement is expected evidence because DRIP-family, R-ChIP, MapR and CUT&Tag do not observe identical molecular or spatial contexts.
+Ribo-seq checks P-site placement and triplet periodicity before retaining the outputs of Ribo-TISH, Ribotricer, or other ORF callers separately. Additional tools such as RiboCode can provide sensitivity analyses; their union is not automatically a set of true ORFs.
 
-Public-data end-to-end acceptance covers nf-core/riboseq, nf-core/nascent, nf-core/clipseq, nf-core/methylseq, nf-core/hic, ENCODE ATAC-seq, RLPipes, exomePeak2, and assay-specific TT-seq, NET-seq, RIPSeeker, and LACE-seq executors. Every released path records actual versions, parameters, input and output fingerprints, and reloads its native objects, intervals, matrices, tracks, and quality reports. The generated taxonomy and `reports/public-case-*.json` records are the current release inventory.
+LACE-seq starts from FASTQ and handles adapters, poly(A), pre-rRNA, strand information, and multimapping according to the experimental design, then uses the matched IgG control to identify binding regions. RIP-seq uses explicitly paired RIP and input or IgG controls and preserves binning, strand policy, multimapping treatment, model choice, and significance settings. Both workflows expose meaningful parameters without requiring users to edit analysis templates.
+
+Disagreement among R-loop assays is expected. DRIP-family methods, R-ChIP, MapR, and CUT&Tag differ in sensor, sample context, sequenced material, resolution, and bias. Shared signal, method-specific signal, and RNase H sensitivity are therefore reported separately and interpreted within the scope of each assay.
+
+Representative acceptance includes nf-core/riboseq, nf-core/nascent, nf-core/clipseq, nf-core/methylseq, nf-core/hic, ENCODE ATAC-seq, RLPipes, exomePeak2, and dedicated TT-seq, NET-seq, RIPSeeker, and LACE-seq workflows. Every project still records the observed software versions, parameters, and inputs and reopens the resulting intervals, matrices, tracks, models, and quality reports. See [Public-Data Cases](../cases/README.md) and [Release Notes](../releases/README.md) for the current acceptance scope.

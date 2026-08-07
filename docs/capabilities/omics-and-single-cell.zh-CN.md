@@ -14,11 +14,11 @@
 
 对于广义的测序、表达、变异、motif、NMF 或多测量请求，工作台从数据 profiling 和读段级 QC 开始，组织可复用的比对、排序、比对质量判定、变异或区间处理、次级综合和面向发表的解读。实验特异推断保留在相应实验模块中。独立分支可以并行；当下游依赖 QC、比对记录、过滤区间、peak、表达矩阵或已准入的统计结果时，必须显式声明依赖。
 
-这使 FASTQ、BAM/CRAM、VCF、BED、count matrix、peak set、motif 资源、NMF program 和 gene-set 输出可在同一入口下管理，但不会把它们的格式或工具误当为可互换。每个模块都声明可接受产物格式、版本边界、必需元数据、可执行模板、质量门控和尚未解决的项目输入。
+这使 FASTQ、BAM/CRAM、VCF、BED、count matrix、peak set、motif 资源、NMF program 和 gene-set 输出可在同一入口下管理，但不会把它们的格式或工具误当为可互换。每种方法都会说明可接受的文件、版本范围、必要元数据、质量检查和尚未解决的项目输入。
 
 ## 统一单细胞研究方案
 
-对于广义单细胞或单细胞多组学问题，Biomed Workbench 不向用户展示一串互不相干的 skill。统一入口 `biomed-workbench` 将研究目标编译为分阶段计划，其中声明模块契约、输入与输出产物、兼容性行、模板、质量门控、未解决输入以及计划与实际证据之间的明确边界。
+对于广义单细胞或单细胞多组学问题，Biomed Workbench 不要求用户从一串工具中自行选择。工作台会把研究目标整理为分阶段计划，说明每一步的输入、输出、软件条件、质量检查、未解决问题，以及哪些内容仍停留在计划阶段。
 
 该计划按科学方案而非脚本列表组织：
 
@@ -31,15 +31,13 @@
 7. 在样本层和方向性门控下开展通讯、轨迹、RNA velocity、拓扑、调控网络和空间证据分析。
 8. 当项目包含发表工作时，连接命运映射、RegVelo 调控 velocity、假设修订与稿件/回复交付。
 
-v1.0 单细胞核心由以下统一路由模块构成：`single-cell-atac-regulatory`、`single-cell-atlas-annotation`、`single-cell-batch-integration`、`single-cell-communication`、`single-cell-complex-inference`、`single-cell-donor-inference`、`single-cell-doublet-detection`、`single-cell-droplet-decontamination`、`single-cell-fate-mapping`、`single-cell-marker-discovery`、`single-cell-multimodal-integration`、`single-cell-qc`、`single-cell-reference-annotation`、`single-cell-regulatory-network`、`single-cell-regulatory-velocity`、`single-cell-spatial-analysis`、`single-cell-trajectory-topology` 和 `single-cell-trajectory-velocity`。
-
-每个模块都提供 manifest 契约、可执行参数面、类型化输入输出、失败与限制边界、兼容性证据、质量门控、测试和文档入口。只有 Codex 检查用户真实产物、不修改已发布源模板地绑定输入与参数、记录实际工具和依赖版本、重新读取输出并仅准入通过质量控制的结果后，计划才会产生证据效力。
+只有在检查用户的真实文件、记录实际软件和参数、运行分析、重新打开输出并完成质量评审后，计划才会转化为项目证据。
 
 ## 测序与基因组基础
 
 - FastQC 与 fastp 读段级质量检查、MultiQC 跨样本汇总和声明参考的污染筛查。
 - BWA-MEM 比对、samtools 比对质量判定、坐标排序与索引。
-- 在声明源/目标 assembly 下进行与 chain 绑定的坐标 liftover，验证不可变 chain digest，并对 mapped、split 和 unmapped 记录对账；适用时再进行基因组版本匹配的 BED 区间重叠。
+- 在明确源和目标基因组版本的前提下进行坐标转换，核对转换成功、拆分和未转换记录；适用时再进行基因组版本一致的 BED 区间重叠。
 - 使用声明 minimap2 preset 开展 assembly-to-reference 比对，重载 FASTA/PAF 并完成记录级覆盖对账；与变异、单倍型、共线性和同源推断分开。
 - BGZF/tabix VCF 处理、显式变异过滤、多样本一致性和考虑 callable territory 的肿瘤突变负荷。
 - Bulk ChIP-seq、CUT&RUN 与 CUT&Tag 的 MACS3 peak calling，包含实验特异对照策略、peak 形状声明、输出重载与禁止替代 peak set；独立的已知 PWM 富集使用声明背景和 FDR 校正。
@@ -49,7 +47,7 @@ v1.0 单细胞核心由以下统一路由模块构成：`single-cell-atac-regula
 - 使用 `msprime` 在预声明单群体恒定、瓶颈或扩张情景下进行共祖模拟，保留参数、seed、tree sequence、VCF 和版本溯源；模拟与经验人口历史推断分开。
 - 获取 ARCHS4 公开组织或细胞系表达背景，进行字段级 CSV 验证、层级行对账和按中位数排序，同时与项目特异差异表达或特异性主张分开。
 
-这些步骤由 `read-quality-fastqc`、`read-quality-fastp`、`quality-report-multiqc`、`read-contamination-screen`、`dna-align-bwa-mem-single`、`alignment-quality-samtools`、`assembly-reference-alignment`、`genome-coordinate-liftover`、`interval-overlap-bedtools`、`variant-filter-vcf`、`tumor-mutation-burden-vcf`、`bulk-chromatin-peak-calling`、`sequence-motif-enrichment`、`cool-contact-evidence`、`gwas-susie-fine-mapping`、`rrblup-genomic-prediction`、`msprime-demographic-simulation` 和 `archs4-expression-evidence` 等可独立路由模块支持。相关契约见 [坐标 liftover](genome-coordinate-liftover.md)、[Bulk 染色质 peak calling](bulk-chromatin-peak-calling.md)、[已知 motif 富集](sequence-motif-enrichment.md)、[染色质接触证据](cool-contact-evidence.md)、[GWAS fine-mapping](gwas-susie-fine-mapping.md)、[基因组预测](rrblup-genomic-prediction.md)、[人口历史模拟](msprime-demographic-simulation.md)、[ARCHS4 表达背景](archs4-expression-evidence.md) 和 [UCSC 公开案例](../cases/ucsc-coordinate-liftover.md)。
+详细方法见[坐标转换](genome-coordinate-liftover.md)、[Bulk 染色质 peak calling](bulk-chromatin-peak-calling.md)、[已知 motif 富集](sequence-motif-enrichment.md)、[染色质接触证据](cool-contact-evidence.md)、[GWAS fine-mapping](gwas-susie-fine-mapping.md)、[基因组预测](rrblup-genomic-prediction.md)、[人口历史模拟](msprime-demographic-simulation.md)和[ARCHS4 表达背景](archs4-expression-evidence.md)。
 
 ## Bulk 表达与系统分析
 
@@ -68,7 +66,7 @@ v1.0 单细胞核心由以下统一路由模块构成：`single-cell-atac-regula
 - 按 capture library 执行 [Scrublet 与 scDblFinder 双细胞检测](doublet-detection.md)，保留源数据、withheld-label 评估和方法不一致性。
 - 透明输出逐细胞 count、检出基因数、线粒体比例和阈值标记。
 
-核心模块为 `single-cell-foundation-workflow`、`single-cell-qc`、`single-cell-droplet-decontamination` 和 `single-cell-doublet-detection`。EmptyDrops、SoupX、CellBender 的执行与方法不一致边界见 [droplet 与 ambient RNA 指南](droplet-decontamination.md)。
+EmptyDrops、SoupX、CellBender 的使用条件和方法不一致处理见[droplet 与环境 RNA 指南](droplet-decontamination.md)。
 
 ## 考虑 Donor 的推断与整合
 
@@ -78,7 +76,7 @@ v1.0 单细胞核心由以下统一路由模块构成：`single-cell-atac-regula
 - Harmony、Scanorama 和 BBKNN 与不变基线比较，在批次混合和生物学标签保留之间平衡。
 - scVI/scANVI 与基线比较，并使用 held-out label、未知标签保留和模型重载检查。
 
-对应模块为 `single-cell-donor-inference`、`single-cell-complex-inference`、`single-cell-batch-integration` 和 `single-cell-generative-modeling`。详见 [复杂推断](complex-inference.md)、[经典批次整合](batch-integration.md) 和 [经门控的 scVI/scANVI](generative-modeling.md)。
+详见[复杂实验设计推断](complex-inference.md)、[经典批次整合](batch-integration.md)和[scVI/scANVI 生成模型](generative-modeling.md)。
 
 ## 注释、通讯与动力学
 
@@ -87,7 +85,7 @@ v1.0 单细胞核心由以下统一路由模块构成：`single-cell-atac-regula
 - LIANA、CellPhoneDB、CellChat 和 NicheNet 逐样本分析，保留方法原生显著性，并要求预声明的独立显著样本支持才能声称重现。
 - scVelo dynamical model；RegVelo 0.4.2 GRN-informed velocity、基因分辨 latent time、调控约束比较与扰动假设；CellRank 2.3.2 的 velocity、connectivity-weight、pseudotime 和真实时间 GPCCA 命运映射；moscot optimal transport；Slingshot/Monocle3 拓扑；以及通过独立时间、root、branch 和 terminal anchor 验证的 tradeSeq lineage test。
 
-相关模块为 `single-cell-marker-discovery`、`single-cell-atlas-annotation`、`single-cell-reference-annotation`、`single-cell-communication`、`single-cell-trajectory-velocity`、`single-cell-regulatory-velocity`、`single-cell-fate-mapping` 和 `single-cell-trajectory-topology`。详见 [marker 发现](marker-discovery.md)、[保守参考注释](reference-annotation.md)、[感知样本的通讯](cell-communication.md)、[方向验证 RNA velocity](trajectory-velocity.md)、[RegVelo](regulatory-velocity.md)、[命运映射](fate-mapping.md) 和 [lineage 拓扑](trajectory-topology.md)。
+详见[marker 发现](marker-discovery.md)、[保守参考注释](reference-annotation.md)、[考虑样本的细胞通讯](cell-communication.md)、[方向验证 RNA velocity](trajectory-velocity.md)、[RegVelo](regulatory-velocity.md)、[命运映射](fate-mapping.md)和[谱系拓扑](trajectory-topology.md)。
 
 ## 多模态、调控与空间分析
 
@@ -97,7 +95,7 @@ v1.0 单细胞核心由以下统一路由模块构成：`single-cell-atac-regula
 - pySCENIC GRNBoost2、cisTarget motif pruning、regulon 构建和 AUCell activity；SCENIC+ 基因/区域 eRegulon scoring，包含显式 motif 与 region–gene 证据。
 - H5AD 与 SpatialData Zarr 输入，保留图像和 shape 溯源；使用样本隔离空间图、邻域富集、逐样本 co-occurrence、全局与样本层 Moran test、重现空间基因和探索性表达—空间区域。
 
-相关模块为 `single-cell-multimodal-integration`、`single-cell-atac-regulatory`、`single-cell-regulatory-network` 和 `single-cell-spatial-analysis`。详见 [多模态整合](multimodal-integration.md)、[单细胞 ATAC 调控](atac-regulatory.md)、[调控网络](regulatory-network.md) 和 [空间分析](spatial-analysis.md)。
+详见[多模态整合](multimodal-integration.md)、[单细胞 ATAC 调控](atac-regulatory.md)、[调控网络](regulatory-network.md)和[空间分析](spatial-analysis.md)。
 
 ## 质量门控与限制
 
