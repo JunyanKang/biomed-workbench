@@ -216,10 +216,36 @@ def test_mosaic_and_cross_species_manifests_expose_native_methods_and_templates(
         assert all((directory / path).is_file() for path in template_paths)
 
 
-def test_integration_guide_declares_method_scenes_and_count_inference_boundary():
+def test_english_integration_guide_declares_method_scenes_and_count_inference_boundary():
     guide = (
         ROOT
         / "docs/capabilities/single-cell-integration-reference-cross-species.md"
+    ).read_text()
+    for method in (
+        "Seurat v5 CCA",
+        "FastMNN",
+        "scIB",
+        "sysVI",
+        "scArches",
+        "Symphony",
+        "totalVI",
+        "MultiVI",
+        "GLUE",
+        "SAMap",
+        "SATURN",
+        "CAME",
+        "JSD",
+    ):
+        assert method in guide
+    assert "one-to-one, one-to-many, or many-to-many" in guide
+    assert "sample, donor, or species-level" in guide
+    assert "Method-versus-method JSD" in guide
+
+
+def test_chinese_integration_guide_declares_method_scenes_and_count_inference_boundary():
+    guide = (
+        ROOT
+        / "docs/capabilities/single-cell-integration-reference-cross-species.zh-CN.md"
     ).read_text()
     for method in (
         "Seurat v5 CCA",

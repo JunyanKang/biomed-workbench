@@ -103,12 +103,26 @@ class ReleaseSurfaceTests(unittest.TestCase):
             "数据采用明确的来源层级",
             "actual metric source",
             "每一行都显示实际采用的指标来源",
+            "bibliometric fields",
+            "期刊指标",
+            "catalogue currently covers",
+            "catalog currently covers",
+            "规范库当前覆盖",
+        )
+        forbidden_patterns = (
+            r"\b\d+\s+(?:biomedical|life[- ]science)\s+journals?\b",
+            r"\d+\s*本[\u4e00-\u9fff]{0,12}期刊",
         )
 
         for path in public_paths:
             text = path.read_text(encoding="utf-8").lower()
             for phrase in forbidden:
                 self.assertNotIn(phrase.lower(), text, f"{phrase!r} leaked into {path.relative_to(ROOT)}")
+            for pattern in forbidden_patterns:
+                self.assertIsNone(
+                    re.search(pattern, text, flags=re.IGNORECASE),
+                    f"journal catalogue metadata matching {pattern!r} leaked into {path.relative_to(ROOT)}",
+                )
 
 
 if __name__ == "__main__":
