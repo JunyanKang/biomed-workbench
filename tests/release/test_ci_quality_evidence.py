@@ -28,8 +28,19 @@ class CIQualityEvidenceTests(unittest.TestCase):
             {"packaging": "26.2", "pytest": "9.1.1"},
         )
         self.assertTrue(report["compatibility_requirements"]["scientific_dependencies_excluded"])
+        self.assertTrue(report["quality_gates"]["pytest_scientific_and_documentation_contracts"])
+        self.assertTrue(report["quality_gates"]["full_history_release_note_provenance"])
         self.assertTrue(all(report["quality_gates"].values()))
         self.assertGreaterEqual(len(report["excluded_claims"]), 3)
+
+        workflow_text = WORKFLOW.read_text(encoding="utf-8")
+        for marker in (
+            "python -m pytest -q",
+            "tests/unit/test_single_cell_advanced_integration.py",
+            "tests/unit/test_spatial_deconvolution_expansion.py",
+            "tests/unit/test_trajectory_spatial_visualization.py",
+        ):
+            self.assertIn(marker, workflow_text)
 
     def test_report_is_path_and_secret_free(self):
         text = REPORT.read_text(encoding="utf-8")

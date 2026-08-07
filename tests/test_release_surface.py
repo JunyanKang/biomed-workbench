@@ -108,10 +108,13 @@ class ReleaseSurfaceTests(unittest.TestCase):
             "catalogue currently covers",
             "catalog currently covers",
             "规范库当前覆盖",
+            "期刊规范库",
         )
         forbidden_patterns = (
             r"\b\d+\s+(?:biomedical|life[- ]science)\s+journals?\b",
             r"\d+\s*本[\u4e00-\u9fff]{0,12}期刊",
+            r"\bjournal[- ]standards catalog(?:ue)?\b",
+            r"\bjournal catalog(?:ue)?\b",
         )
 
         for path in public_paths:
@@ -123,6 +126,10 @@ class ReleaseSurfaceTests(unittest.TestCase):
                     re.search(pattern, text, flags=re.IGNORECASE),
                     f"journal catalogue metadata matching {pattern!r} leaked into {path.relative_to(ROOT)}",
                 )
+
+        skill_text = (ROOT / "skills" / "biomed-workbench" / "SKILL.md").read_text(encoding="utf-8").lower()
+        for phrase in ("versioned catalog", "catalog version"):
+            self.assertNotIn(phrase, skill_text)
 
 
 if __name__ == "__main__":

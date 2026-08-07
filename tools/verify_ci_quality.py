@@ -55,6 +55,7 @@ def verify() -> dict[str, object]:
         (step for step in compatibility_steps if str(step.get("uses", "")).startswith("actions/setup-python@")),
         None,
     )
+    verify_checkout = next((step for step in verify_steps if step.get("uses") == "actions/checkout@v4"), None)
     if (
         compatibility_setup is None
         or compatibility_setup.get("with", {}).get("cache-dependency-path") != "requirements-compat.txt"
@@ -62,8 +63,14 @@ def verify() -> dict[str, object]:
         or "requirements-ci.txt" in compatibility_script
     ):
         raise RuntimeError("cross-version tests must use the minimal compatibility dependency baseline")
+    if verify_checkout is None or verify_checkout.get("with", {}).get("fetch-depth") != "0":
+        raise RuntimeError("full verification must retain Git history for release-note provenance checks")
     required_verify = (
         "python -m unittest discover -s tests",
+        "python -m pytest -q",
+        "tests/unit/test_single_cell_advanced_integration.py",
+        "tests/unit/test_spatial_deconvolution_expansion.py",
+        "tests/unit/test_trajectory_spatial_visualization.py",
         "python tools/validate_workbench.py --release",
         "sudo apt-get install --yes mafft minimap2",
         "iqtree-${IQTREE3_VERSION}-Linux.tar.gz",
@@ -168,6 +175,8 @@ def verify() -> dict[str, object]:
             "secret_findings_redacted": True,
             "python_310_and_314_contract_matrix": True,
             "cross_version_dependencies_are_minimal": True,
+            "pytest_scientific_and_documentation_contracts": True,
+            "full_history_release_note_provenance": True,
         },
         "excluded_claims": [
             "CI does not prove scientific source-union completeness.",

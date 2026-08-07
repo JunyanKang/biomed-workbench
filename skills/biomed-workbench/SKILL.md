@@ -166,13 +166,13 @@ For bulk sequencing, select assay-native evidence and quality gates. CUT&Tag req
 
 ## Journal Targeting And Manuscript Compliance
 
-Before recommending a journal or drafting to its format, run `journal-targeting-and-compliance` against the versioned catalog. Bind the project scope, audience, evidence maturity, article type and manuscript facts to one catalog version and record the selected profile version and official sources.
+Before recommending a journal or drafting to its format, run `journal-targeting-and-compliance` against the versioned journal requirements. Bind the project scope, audience, evidence maturity, article type and manuscript facts to one requirements version, and record the selected guidance version and official sources.
 
 - Use audience, scientific remit, article family and evidentiary fit for recommendations; do not rank by invented acceptance probabilities or unsupported prestige scores.
 - Enforce exact numeric constraints only when the selected official source publishes an exact value for that article type.
 - Convert missing, conditional or article-type-dependent official values into explicit manual checks that block submission-ready status.
 - Audit required sections, language style, figure/reporting expectations and policy fields individually; keep scope fit separate from format compliance.
-- When instructions change, publish a new catalog version and retain the prior profile and fingerprint so an earlier drafting decision remains reproducible.
+- When instructions change, publish a new requirements-profile version and retain the prior profile and fingerprint so an earlier drafting decision remains reproducible.
 - Generate manuscript text from the project's validated evidence map; journal standards control form and audience calibration, not scientific facts.
 
 ## Codex-Native Handoffs
