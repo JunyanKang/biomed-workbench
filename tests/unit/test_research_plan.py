@@ -72,9 +72,10 @@ class ResearchPlanTests(unittest.TestCase):
         self.assertEqual(len(plan["execution_layers"]), 2)
         self.assertTrue(SINGLE_CELL_P1_MODULES <= set(plan["execution_layers"][0]["module_ids"]))
         self.assertTrue(
-            {"response-matrix", "trajectory-spatial-figure-package", "manuscript-revision-base"}
+            {"trajectory-spatial-figure-package", "manuscript-revision-base"}
             <= set(plan["execution_layers"][1]["module_ids"])
         )
+        self.assertNotIn("response-matrix", plan["selected_module_ids"])
 
         modules = {item["id"]: item for item in plan["modules"]}
         for module_id in SINGLE_CELL_P1_MODULES:
@@ -84,8 +85,6 @@ class ResearchPlanTests(unittest.TestCase):
             self.assertTrue(module["execution_templates"], module_id)
             self.assertEqual(module["evidence_contract"]["module_version"], module["version"])
             self.assertEqual(module["evidence_contract"]["compatibility_row_ids"], module["compatibility_row_ids"])
-
-        self.assertIn("single-cell-regulatory-velocity", modules["response-matrix"]["depends_on"])
 
     def test_publication_program_is_staged_from_figures_to_response_and_delivery(self):
         plan = compile_research_plan(

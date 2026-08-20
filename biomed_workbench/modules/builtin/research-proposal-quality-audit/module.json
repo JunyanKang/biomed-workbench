@@ -1,0 +1,347 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Every canon fact, feasibility record, prior result, collaborator, and agency criterion is supplied by the user or a verified source."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "research-proposal-quality-audit-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "proposal_foundation": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "0.1.0",
+      "output_formats": {
+        "proposal_audit": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "research-proposal-quality-audit-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    }
+  ],
+  "complements": [
+    "academic-prose-revision-audit",
+    "claim-evidence-integrity-audit",
+    "journal-targeting-and-compliance"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic scholarly-package validation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-20",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Validate a proposal scope, research canon, claim-evidence table, argument map, section contracts, aims, agency criteria, feasibility records, and bounded revision stopping rules before prose is promoted.",
+  "domains": [
+    "publication",
+    "experimental-design",
+    "research-quality"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.academic_writing:audit_research_proposal",
+  "evidence_effects": [
+    "validates_scholarly_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 50000000,
+    "timeout_seconds": 30
+  },
+  "id": "research-proposal-quality-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "research_proposal_foundation",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "proposal_foundation",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "agency": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "aims": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "argument_map": {
+        "type": "object"
+      },
+      "evidence_table": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "iteration_scores": {
+        "items": {
+          "type": "number"
+        },
+        "type": "array"
+      },
+      "mode": {
+        "enum": [
+          "compose",
+          "revise",
+          "hybrid",
+          "qa"
+        ],
+        "type": "string"
+      },
+      "research_canon": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "review_criteria": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "scope": {
+        "type": "object"
+      },
+      "section_contracts": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "mode",
+      "agency",
+      "scope",
+      "research_canon",
+      "evidence_table",
+      "argument_map",
+      "section_contracts",
+      "aims",
+      "review_criteria"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "research proposal audit",
+    "grant proposal writing",
+    "specific aims review",
+    "NIH Specific Aims",
+    "基金申请审查",
+    "科研计划书写作",
+    "基金申请可行性审查"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This gate does not predict funding, replace agency instructions, or supply missing preliminary evidence, collaborators, or institutional commitments."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 1
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "research_proposal_quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "proposal_audit",
+      "processing_levels": [
+        "derived",
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "agency": {
+        "type": "string"
+      },
+      "findings": {
+        "type": "array"
+      },
+      "foundation": {
+        "type": "object"
+      },
+      "major_finding_count": {
+        "type": "integer"
+      },
+      "mode": {
+        "type": "string"
+      },
+      "next_step": {
+        "type": "string"
+      },
+      "ready_for_scientific_drafting": {
+        "type": "boolean"
+      },
+      "stop_iteration": {
+        "type": "boolean"
+      },
+      "stop_reasons": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "mode",
+      "agency",
+      "foundation",
+      "findings",
+      "major_finding_count",
+      "ready_for_scientific_drafting",
+      "stop_iteration",
+      "stop_reasons",
+      "next_step"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The declared scholarly source material and project context are available without invented facts."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Academic Humanizer 0.3.3, MIT-licensed source skill, adapted into deterministic project-owned preservation gates.",
+      "Nature-skills writing and delivery contracts available under their declared source licenses, adapted without copying host-specific runtime assumptions."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Scope, canon, evidence table, argument map, and section contracts are complete before drafting.",
+      "id": "proposal-foundation-complete",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every aim has an independently useful objective, approach, expected outcome, feasibility evidence, and fallback.",
+      "id": "proposal-aim-feasibility",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Agency-specific review criteria and first-page commitments are explicit and reviewable.",
+      "id": "proposal-agency-criteria",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Are the proposal argument, aims, feasibility, evidence, and agency-specific review criteria complete enough for scientific drafting?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "research-proposal-quality-audit",
+      "Audit research proposal foundations and feasibility",
+      "research proposal audit",
+      "grant proposal writing",
+      "specific aims review",
+      "NIH Specific Aims",
+      "基金申请审查",
+      "科研计划书写作",
+      "基金申请可行性审查"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Audit research proposal foundations and feasibility",
+  "tool_requirements": [],
+  "version": "0.1.0"
+}

@@ -1,9 +1,124 @@
 {
-  "compatibility_complete": 198,
-  "compatibility_row_count": 199,
-  "end_to_end_passed": 199,
-  "module_count": 198,
+  "compatibility_complete": 207,
+  "compatibility_row_count": 208,
+  "end_to_end_passed": 208,
+  "module_count": 207,
   "modules": [
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "academic-prose-revision-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "module_version": "0.1.0",
+          "regression_evidence_ids": [
+            "academic-prose-revision-audit-regression-v1"
+          ],
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "academic-prose-revision-audit",
+      "input_formats": [
+        {
+          "artifact_type": "academic_revision_pair",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "academic_revision",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "0.1.0",
+      "output_formats": [
+        {
+          "artifact_type": "academic_revision_audit",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "revision_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
     {
       "compatibility_rows": [
         {
@@ -7560,6 +7675,121 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "data-availability-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "module_version": "0.1.0",
+          "regression_evidence_ids": [
+            "data-availability-audit-regression-v1"
+          ],
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "data-availability-audit",
+      "input_formats": [
+        {
+          "artifact_type": "data_availability_package",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "availability_package",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "0.1.0",
+      "output_formats": [
+        {
+          "artifact_type": "data_availability_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "availability_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "data-profile-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -9728,6 +9958,121 @@
           "name": "kinetic_model",
           "processing_levels": [
             "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "experiment-log-standardization-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "module_version": "0.1.0",
+          "regression_evidence_ids": [
+            "experiment-log-standardization-regression-v1"
+          ],
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "experiment-log-standardization",
+      "input_formats": [
+        {
+          "artifact_type": "raw_experiment_record",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "experiment_record",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "0.1.0",
+      "output_formats": [
+        {
+          "artifact_type": "standardized_experiment_log",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "standardized_log",
+          "processing_levels": [
+            "derived",
+            "validated"
           ],
           "required_metadata": [
             "module_version",
@@ -14627,6 +14972,121 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "literature-acquisition-manifest-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "module_version": "0.1.0",
+          "regression_evidence_ids": [
+            "literature-acquisition-manifest-audit-regression-v1"
+          ],
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "literature-acquisition-manifest-audit",
+      "input_formats": [
+        {
+          "artifact_type": "literature_acquisition_manifest",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "acquisition_manifest",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "0.1.0",
+      "output_formats": [
+        {
+          "artifact_type": "literature_acquisition_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "acquisition_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "literature-evidence-e2e-v1"
           ],
           "id": "eutils-contract-2026-03-04-python-3.14.3",
@@ -14784,6 +15244,121 @@
           "version_source": "https://www.ncbi.nlm.nih.gov/books/NBK25499/"
         }
       ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "literature-landscape-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "module_version": "0.1.0",
+          "regression_evidence_ids": [
+            "literature-landscape-audit-regression-v1"
+          ],
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "literature-landscape-audit",
+      "input_formats": [
+        {
+          "artifact_type": "literature_landscape_records",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "literature_landscape",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "0.1.0",
+      "output_formats": [
+        {
+          "artifact_type": "literature_landscape_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "landscape_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
       "validation_status": "complete"
     },
     {
@@ -17778,6 +18353,121 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "paper-reader-package-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "module_version": "0.1.0",
+          "regression_evidence_ids": [
+            "paper-reader-package-audit-regression-v1"
+          ],
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "paper-reader-package-audit",
+      "input_formats": [
+        {
+          "artifact_type": "bilingual_paper_reader_package",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "reader_package",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "0.1.0",
+      "output_formats": [
+        {
+          "artifact_type": "paper_reader_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "reader_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "patent-claim-structure-audit-e2e-v1"
           ],
           "id": "patent-claim-structure-python-3143-inline-json-1",
@@ -19277,6 +19967,121 @@
           ],
           "required_metadata": [
             "module-version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "presentation-package-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "module_version": "0.1.0",
+          "regression_evidence_ids": [
+            "presentation-package-audit-regression-v1"
+          ],
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "presentation-package-audit",
+      "input_formats": [
+        {
+          "artifact_type": "scientific_presentation_package",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "presentation_package",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "0.1.0",
+      "output_formats": [
+        {
+          "artifact_type": "presentation_package_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "presentation_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
             "compatibility_row_id"
           ]
         }
@@ -22806,6 +23611,121 @@
             "compatibility_row_id",
             "contract_version",
             "contract_digest"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "research-proposal-quality-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "module_version": "0.1.0",
+          "regression_evidence_ids": [
+            "research-proposal-quality-audit-regression-v1"
+          ],
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "research-proposal-quality-audit",
+      "input_formats": [
+        {
+          "artifact_type": "research_proposal_foundation",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal_foundation",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "0.1.0",
+      "output_formats": [
+        {
+          "artifact_type": "research_proposal_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
           ]
         }
       ],
@@ -37693,6 +38613,121 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "statistical-reporting-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "module_version": "0.1.0",
+          "regression_evidence_ids": [
+            "statistical-reporting-audit-regression-v1"
+          ],
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "statistical-reporting-audit",
+      "input_formats": [
+        {
+          "artifact_type": "statistical_reporting_records",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "statistical_report",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "0.1.0",
+      "output_formats": [
+        {
+          "artifact_type": "statistical_reporting_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "statistics_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "structure-chain-comparison-e2e-v1"
           ],
           "id": "structure-analysis-2026-07-15-structure-chain-comparison",
@@ -41664,6 +42699,40 @@
   "records": [
     {
       "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "cd5457e3384386d64a8355a3967f03af04f804f8a9c00ff0104a4639c6749ef2",
+        "id": "academic-prose-revision-audit-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "49a75cb0483c259295823ef90a153cdcd5401b1996d806cb59a8e289f0f839b6",
+      "input_formats": {
+        "academic_revision": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "academic-prose-revision-audit",
+      "module_version": "0.1.0",
+      "output_formats": {
+        "revision_audit": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "ea2603bb6c3bfd14928493f0f14f6403c879ced39059d179359210dc622d83e4",
+        "id": "academic-prose-revision-audit-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14.3-inline-json-1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    },
+    {
+      "dependency_versions": {
         "numpy": [
           ">=2.4,<2.5"
         ]
@@ -42877,11 +43946,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "39d98b9294e4717a96a8f2d4d7e0667f1b82f1acdb5e6d513b865d69c7e4d076",
+        "digest": "4950d36ffd7c2da0dfe4e0e1e9eeb84cbcb70053f43350ca55b15f695e9af155",
         "id": "citation-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "4170e8e8cfd271a2aa161a1d4b7008456ae1edeeaa778aeb058336ae62d57ff7",
+      "implementation_sha256": "33ce03798e973cd5566e068303d8d76ac45bafacf102e73228d51bdef3d79202",
       "input_formats": {
         "references": [
           "inline-json@1"
@@ -42895,7 +43964,7 @@
         ]
       },
       "regression": {
-        "digest": "f59d1abc9386d398e0aff75ff6c58910b7e57d644e1d6cc8370027ad55c25303",
+        "digest": "4009043e3037fbe3fb5615d8687c062afa179688a9ebdea3c4ebd57867bf3990",
         "id": "citation-audit-regression-v1",
         "passed": true
       },
@@ -43380,6 +44449,40 @@
       "supplemental_end_to_end": [],
       "tool_versions": {},
       "verified_at": "2026-07-12"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "801bf9591f3f6c5ce47121f7801fe3395574763847deb758cc9b8e4ed1c36754",
+        "id": "data-availability-audit-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "0e820fe63d07188b31eb06056afcc8c9a03d784599e20f95126aff369e63cfe4",
+      "input_formats": {
+        "availability_package": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "data-availability-audit",
+      "module_version": "0.1.0",
+      "output_formats": {
+        "availability_audit": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "a5239a36f4ca5dabd5de391f09caede139683de68898845e478f6dff95cbb4f6",
+        "id": "data-availability-audit-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14.3-inline-json-1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
     },
     {
       "dependency_versions": {
@@ -43909,6 +45012,40 @@
         ]
       },
       "end_to_end": {
+        "digest": "40f0f5967456dcec7e661e7b05770dcddc20ec2ef0a51d4fb76096135109fc62",
+        "id": "experiment-log-standardization-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "0e820fe63d07188b31eb06056afcc8c9a03d784599e20f95126aff369e63cfe4",
+      "input_formats": {
+        "experiment_record": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "experiment-log-standardization",
+      "module_version": "0.1.0",
+      "output_formats": {
+        "standardized_log": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "d1ad3842fa1ac61d33e048052f7bc923f7aab1b583e94cab1e7720105decf2e1",
+        "id": "experiment-log-standardization-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14.3-inline-json-1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
         "digest": "eecaeba9ec8bf11611d193ff2602e10bd18b023d4bc051b7d4c3ec9ae8ad35c5",
         "id": "expression-qc-e2e-v1",
         "passed": true
@@ -43983,11 +45120,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "e837cb07dee4d228dd9c8a13ea98f9a506a22b064f0811abe7c90f78f72497bb",
+        "digest": "a88e1ddb4ea3871e0caf7e42420a5d8750cde3583a514dc6bd77e832a26a8613",
         "id": "figure-specification-e2e-v2",
         "passed": true
       },
-      "implementation_sha256": "4170e8e8cfd271a2aa161a1d4b7008456ae1edeeaa778aeb058336ae62d57ff7",
+      "implementation_sha256": "33ce03798e973cd5566e068303d8d76ac45bafacf102e73228d51bdef3d79202",
       "input_formats": {
         "panel_requests": [
           "inline-json@1"
@@ -44001,7 +45138,7 @@
         ]
       },
       "regression": {
-        "digest": "c4c66afdfe9b5e8e24c36094c6bf0dd48ca31a99d20b222c9f2c99d3ab36ce71",
+        "digest": "5bda5540bb1b6a5b5197ec10fb9370de92e415cca7d905d7f6d17952c4633d36",
         "id": "figure-specification-regression-v2",
         "passed": true
       },
@@ -45022,6 +46159,40 @@
         ]
       },
       "end_to_end": {
+        "digest": "56fae1557763ab6ebf5700758fa324e8ab7dcb3bdf8068196a29495007dd17d2",
+        "id": "literature-acquisition-manifest-audit-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "0e820fe63d07188b31eb06056afcc8c9a03d784599e20f95126aff369e63cfe4",
+      "input_formats": {
+        "acquisition_manifest": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "literature-acquisition-manifest-audit",
+      "module_version": "0.1.0",
+      "output_formats": {
+        "acquisition_audit": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "6bf961de4e6e203ccae8576125606b3b876317ff0629a306b438d8d6feb48a31",
+        "id": "literature-acquisition-manifest-audit-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14.3-inline-json-1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
         "digest": "cab4f5459e4b3a481fef1e3d6b445a86a6ae48014622c321d000353c5f689580",
         "id": "literature-evidence-e2e-v1",
         "passed": true
@@ -45060,11 +46231,45 @@
         ]
       },
       "end_to_end": {
-        "digest": "7a140d8ba07d0e695b4111ba93f790abf3cb9b6be577be3129210e18227d2ad6",
+        "digest": "88c3390a15475229f900fe7ae86dc6e266ec8e6468eb9082a638ad860b6f126f",
+        "id": "literature-landscape-audit-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "0e820fe63d07188b31eb06056afcc8c9a03d784599e20f95126aff369e63cfe4",
+      "input_formats": {
+        "literature_landscape": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "literature-landscape-audit",
+      "module_version": "0.1.0",
+      "output_formats": {
+        "landscape_audit": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "4a1692115b0f2334c46da56742c2e35623588f1bdcc7b72ed8e9bfb8ae30f92c",
+        "id": "literature-landscape-audit-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14.3-inline-json-1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "0f417b8d2fe71876722f48c74dae1e8dfe391b7fc9d7add70aab7926dc45af4e",
         "id": "manuscript-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "4170e8e8cfd271a2aa161a1d4b7008456ae1edeeaa778aeb058336ae62d57ff7",
+      "implementation_sha256": "33ce03798e973cd5566e068303d8d76ac45bafacf102e73228d51bdef3d79202",
       "input_formats": {
         "manuscript": [
           "inline-json@1"
@@ -45078,7 +46283,7 @@
         ]
       },
       "regression": {
-        "digest": "df1ccdb2499ebfe79eabb85ae89c0c157c1607060dcb07170b5ad9d78b06a813",
+        "digest": "fa9269d3ca558f68c130b5134e8281dbd864ee3e99bc5745127bd5f54fa60573",
         "id": "manuscript-audit-regression-v1",
         "passed": true
       },
@@ -45742,11 +46947,45 @@
         ]
       },
       "end_to_end": {
-        "digest": "58274f0066c69a11271701adff76544ced7a7c3b35b7e10b4572b18a265c2b5d",
+        "digest": "f3cb7dd80e83ddb4573c82792ed52136acbc697ebbf50152019e1a629a40d6a9",
+        "id": "paper-reader-package-audit-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "0e820fe63d07188b31eb06056afcc8c9a03d784599e20f95126aff369e63cfe4",
+      "input_formats": {
+        "reader_package": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "paper-reader-package-audit",
+      "module_version": "0.1.0",
+      "output_formats": {
+        "reader_audit": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "56d02fa4fa5fcaea6339518611ff677ffc78008b2c422055bd3c8a2f895b3527",
+        "id": "paper-reader-package-audit-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14.3-inline-json-1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "687bd93484b84405a7d668dcc1dc8fcd2d2d6b906e80d2c867bfd255e739cf19",
         "id": "patent-claim-structure-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "4170e8e8cfd271a2aa161a1d4b7008456ae1edeeaa778aeb058336ae62d57ff7",
+      "implementation_sha256": "33ce03798e973cd5566e068303d8d76ac45bafacf102e73228d51bdef3d79202",
       "input_formats": {
         "chinese_patent_claims": [
           "inline-json@1"
@@ -45760,7 +46999,7 @@
         ]
       },
       "regression": {
-        "digest": "8c74358ad695a971c46e0ce293bfa014b55720171b8de6e8d7620b5cd82620b9",
+        "digest": "f004fb50d7a4925f05576dab2a5421609546a40221e9cf1be1005f71c58f4533",
         "id": "patent-claim-structure-audit-regression-v1",
         "passed": true
       },
@@ -45776,11 +47015,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "ec07a2a194551d4a86149680fb4100ffae1271350da90a0fae00f043b54d2e3d",
+        "digest": "11859160a04043cf9ab937c893d3d44967d445a6739fe5c3dbe1e8d639f458e7",
         "id": "patent-claim-support-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "4170e8e8cfd271a2aa161a1d4b7008456ae1edeeaa778aeb058336ae62d57ff7",
+      "implementation_sha256": "33ce03798e973cd5566e068303d8d76ac45bafacf102e73228d51bdef3d79202",
       "input_formats": {
         "claim_support_map": [
           "inline-json@1"
@@ -45794,7 +47033,7 @@
         ]
       },
       "regression": {
-        "digest": "6c4ee99b113a7de098a6dd8464200fc4d3548be9b6b0c93aae08e85bccfb8487",
+        "digest": "d47dcfdf1109a900df5faf8cc1e4520cc52f903150a9c52d42a75d84f89e1d3d",
         "id": "patent-claim-support-audit-regression-v1",
         "passed": true
       },
@@ -45810,11 +47049,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "ebc4eb27dd86e89ab7799301874e65259449d63e358815e42cc5ec5171f71c7e",
+        "digest": "481423a1b2c7f4d3b2e7382f64167200043f1a5607abc771a9df032e057f2b0c",
         "id": "patent-disclosure-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "4170e8e8cfd271a2aa161a1d4b7008456ae1edeeaa778aeb058336ae62d57ff7",
+      "implementation_sha256": "33ce03798e973cd5566e068303d8d76ac45bafacf102e73228d51bdef3d79202",
       "input_formats": {
         "disclosure": [
           "inline-json@1"
@@ -45828,7 +47067,7 @@
         ]
       },
       "regression": {
-        "digest": "512c7549d90cf40d877d481b6072f5f1284bc41a218a1a56db6a58747ec4ee83",
+        "digest": "efac6b7c85695f08044f5f0df3db9092ddabb5fc133e7c33a09ab21466646237",
         "id": "patent-disclosure-audit-regression-v1",
         "passed": true
       },
@@ -45844,11 +47083,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "862062b2acda73e187f12466502d86bd2b6ae35078ca8e9c67650754adc2cf90",
+        "digest": "f587f1be54782adf2a9f61992551db20f5322066deb752a1bfff7dff0765d1bb",
         "id": "patent-draft-readiness-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "4170e8e8cfd271a2aa161a1d4b7008456ae1edeeaa778aeb058336ae62d57ff7",
+      "implementation_sha256": "33ce03798e973cd5566e068303d8d76ac45bafacf102e73228d51bdef3d79202",
       "input_formats": {
         "structured_patent_draft": [
           "inline-json@1"
@@ -45862,7 +47101,7 @@
         ]
       },
       "regression": {
-        "digest": "63fe61638727e86798863515060d6b3ad92dab69410cf587faa1c3a7c84813fd",
+        "digest": "85a42b70195088f875bee06cf73fed64804dbba1fde60ce603e8d0909d008189",
         "id": "patent-draft-readiness-audit-regression-v1",
         "passed": true
       },
@@ -45878,11 +47117,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "2569310ee6957c225511b2ca38d1b1d0d2d43718e15337f8a513f934e3534902",
+        "digest": "c3a32bfc5d532806317f015e9809eed42bed8cd5967daedb7c8c2bef18656ac9",
         "id": "patent-flowchart-svg-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "4170e8e8cfd271a2aa161a1d4b7008456ae1edeeaa778aeb058336ae62d57ff7",
+      "implementation_sha256": "33ce03798e973cd5566e068303d8d76ac45bafacf102e73228d51bdef3d79202",
       "input_formats": {
         "patent_flowchart": [
           "inline-json@1"
@@ -45896,7 +47135,7 @@
         ]
       },
       "regression": {
-        "digest": "1c0e64e40b01adf5d3832406e0ac0b2bdd51d31dacc5cd5dd042dd14e606d252",
+        "digest": "2dc5554d560883dd640cec5380312c5362a7513f9337517f6137ee2f933d07ea",
         "id": "patent-flowchart-svg-regression-v1",
         "passed": true
       },
@@ -46017,11 +47256,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "fcda8ca09b811404dc827c33ec1d31713a5982d79d9db10d447927c65dc28b72",
+        "digest": "0c72e114cea7d66bca085d0a4bd2a374aa1c6d8066d505acf2444242feac4b6d",
         "id": "pdf-evidence-extraction-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "4170e8e8cfd271a2aa161a1d4b7008456ae1edeeaa778aeb058336ae62d57ff7",
+      "implementation_sha256": "33ce03798e973cd5566e068303d8d76ac45bafacf102e73228d51bdef3d79202",
       "input_formats": {
         "source_pdf": [
           "application-pdf@1.4",
@@ -46039,7 +47278,7 @@
         ]
       },
       "regression": {
-        "digest": "761a4d25f642b21a46d49d2b0dd5cf5847a2e6792abb2f0a1ff59ced16f8824a",
+        "digest": "34297fbb69257695e639578eb078c4d3e77ac562cf70bc1aa5070fa49db61af4",
         "id": "pdf-evidence-extraction-regression-v1",
         "passed": true
       },
@@ -46131,11 +47370,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "033a59b85a5e499d39f77720dcbed2900ad01e137da3312eae0a137df39d3a44",
+        "digest": "dabedd55da1e56c4ff873819cbb194bb28897dc3719f7e57348a44f7a994aad2",
         "id": "presentation-delivery-plan-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "4170e8e8cfd271a2aa161a1d4b7008456ae1edeeaa778aeb058336ae62d57ff7",
+      "implementation_sha256": "33ce03798e973cd5566e068303d8d76ac45bafacf102e73228d51bdef3d79202",
       "input_formats": {
         "presentation_request": [
           "inline-json@1"
@@ -46149,7 +47388,7 @@
         ]
       },
       "regression": {
-        "digest": "8e130b0ee741793ac7b545e00f56b511e9db9cdd0600be7a98989d6bf229345d",
+        "digest": "29b9e77687dd47260f620da36c874856429866a349b96c9c66f0ac84b3a7ede8",
         "id": "presentation-delivery-plan-regression-v1",
         "passed": true
       },
@@ -46157,6 +47396,40 @@
       "supplemental_end_to_end": [],
       "tool_versions": {},
       "verified_at": "2026-07-26"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "45fd4965ee016d6c5ff610ea27cf9e73cc71b1a01f3cf0f1940bb20a63766354",
+        "id": "presentation-package-audit-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "0e820fe63d07188b31eb06056afcc8c9a03d784599e20f95126aff369e63cfe4",
+      "input_formats": {
+        "presentation_package": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "presentation-package-audit",
+      "module_version": "0.1.0",
+      "output_formats": {
+        "presentation_audit": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "0e2c969b0683f960b12a6ae73d17754437da1f6e2810b6e138e9f91565082353",
+        "id": "presentation-package-audit-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14.3-inline-json-1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
     },
     {
       "dependency_versions": {
@@ -46880,11 +48153,45 @@
         ]
       },
       "end_to_end": {
-        "digest": "d593a331bb0837483232e46ad8721234098ece783a66b12cd170cbb197b34100",
+        "digest": "16ee75937f7c15996e74ad560cb0730ade6b6ca1e91d16d0888e5c1d2f83ab6d",
+        "id": "research-proposal-quality-audit-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "49a75cb0483c259295823ef90a153cdcd5401b1996d806cb59a8e289f0f839b6",
+      "input_formats": {
+        "proposal_foundation": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "research-proposal-quality-audit",
+      "module_version": "0.1.0",
+      "output_formats": {
+        "proposal_audit": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "7fe6277efcf73a329f00fd29e9d9129e90b8bf0ae6e8af78a11ac3718b5f2e33",
+        "id": "research-proposal-quality-audit-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14.3-inline-json-1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "71662853c71d9ad1c4165454d9a84b9b0bd29834758f95b7e0e9172350cc5f84",
         "id": "response-matrix-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "4170e8e8cfd271a2aa161a1d4b7008456ae1edeeaa778aeb058336ae62d57ff7",
+      "implementation_sha256": "33ce03798e973cd5566e068303d8d76ac45bafacf102e73228d51bdef3d79202",
       "input_formats": {
         "review_comments": [
           "inline-json@1"
@@ -46898,7 +48205,7 @@
         ]
       },
       "regression": {
-        "digest": "9306f94442824f1a5001a08e7a531efd9bbd8b4f62a62ff6cf8ef79eb696eb16",
+        "digest": "3db95a9d0cd99f108728e2d6f4b8c17ac054a8c82a6d9f6e42dfcf2887154886",
         "id": "response-matrix-regression-v1",
         "passed": true
       },
@@ -47522,7 +48829,7 @@
         ]
       },
       "regression": {
-        "digest": "d0d9289fa9416e52de634136f78e3232c0e5d968100893f6e4208f12ebfe54b9",
+        "digest": "5ea9bfae2aa00ec1789b234f8dceb9897b0cca5173fcacc31e7150d995812ae4",
         "id": "single-cell-batch-integration-regression-v1",
         "passed": true
       },
@@ -47840,7 +49147,7 @@
         ]
       },
       "regression": {
-        "digest": "6408426a7feea64b1ac0120a7691ab11bab8e2a5fbafa3214ee07e45ee5b5a32",
+        "digest": "32e73ea71cde7fada44a01c14e39cb50772796430c0598dde05b338359f6b77c",
         "id": "single-cell-donor-inference-regression-v1",
         "passed": true
       },
@@ -48108,7 +49415,7 @@
         ]
       },
       "regression": {
-        "digest": "ecc04397edbbd6b6befd5ccc8350103d49ea4bb472f07c804ebe5086139325df",
+        "digest": "3d216f4c0ce851ad51097551c70a21ea2978b5371dcd92a2bb34bfec6979d171",
         "id": "single-cell-foundation-workflow-regression-v1",
         "passed": true
       },
@@ -48176,7 +49483,7 @@
         ]
       },
       "regression": {
-        "digest": "f0b093158959b2f3f00c92f6bebf121086d7e606e0b8fdfc6135c482b4815520",
+        "digest": "dd1a1178366ea506b726ec68e21522e1ba4dd3f80243db67e0cc6609382446ba",
         "id": "single-cell-generative-modeling-regression-v1",
         "passed": true
       },
@@ -48534,7 +49841,7 @@
         ]
       },
       "regression": {
-        "digest": "6b2e2b667bf0a19bfb808c1d5d23a95a323e20b8455301bcc31d2b67ea8acd65",
+        "digest": "bc7b52525570938dfe27673ee1c122b12c52d8922a05305e047d05d2830bc956",
         "id": "single-cell-reference-annotation-regression-v2",
         "passed": true
       },
@@ -48965,7 +50272,7 @@
         ]
       },
       "regression": {
-        "digest": "6c0343f6c9cab3d1d6d42e2e64a7b8a7471d36fe1dbd364cc63296d46d95cada",
+        "digest": "bd29a4ba8b559698519d532375f13490f3329dbf1541fd86ee6486eb60ad9a2d",
         "id": "single-cell-trajectory-velocity-regression-v1",
         "passed": true
       },
@@ -49219,6 +50526,40 @@
         ]
       },
       "verified_at": "2026-08-01"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "93f0d77763210493adb4d8a24aa89a26c81812bcb9c265fc1005ab24dcf1061d",
+        "id": "statistical-reporting-audit-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "49a75cb0483c259295823ef90a153cdcd5401b1996d806cb59a8e289f0f839b6",
+      "input_formats": {
+        "statistical_report": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "statistical-reporting-audit",
+      "module_version": "0.1.0",
+      "output_formats": {
+        "statistics_audit": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "7c716f876c8ff14504e0c6b84f5b04be6498bf91fe63a88392f5e86fe638cfb0",
+        "id": "statistical-reporting-audit-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14.3-inline-json-1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
     },
     {
       "dependency_versions": {
@@ -50072,8 +51413,8 @@
       "verified_at": "2026-07-24"
     }
   ],
-  "registry_digest": "fcd2ef5bf001de5bc57b40cfe9c2eba4db66e8bdc756ecb58b4852c6f04203fc",
-  "regression_passed": 199,
+  "registry_digest": "8c250de48ad4f036b9981b660004471e698868d8bad09a600040e45f5aa8e768",
+  "regression_passed": 208,
   "schema_version": 1,
   "supplemental_end_to_end_passed": 14
 }

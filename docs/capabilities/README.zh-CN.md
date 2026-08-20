@@ -16,7 +16,7 @@ Biomed Workbench 按研究问题组织能力。用户提供科学目标和数据
 | 分子与结构生物学 | 连接序列、蛋白互作、化学信息、结构预测和分子对接，形成可实验检验的假设 | [分子与结构生物学](molecular-and-structural.zh-CN.md) |
 | 成像与科学可视化 | 定量检查、分割、共定位和追踪图像，并制作忠实于数据的科学图件 | [成像与科学可视化](imaging-and-visualization.zh-CN.md) |
 | 临床与实验研究 | 分析队列、实验测量、时间过程、存活结局和药理或微生物学数据 | [临床与实验研究](clinical-and-experimental.zh-CN.md) |
-| 论文与转化 | 根据证据成熟度推荐期刊，并准备稿件、审稿回复、专利、图表和汇报材料 | [论文与转化交付](publication-and-translation.zh-CN.md) · [期刊规范](../journal-standards.zh-CN.md) |
+| 论文与转化 | 精读论文，组织科研写作与基金论证，审查统计和数据可用性，并准备审稿回复、专利、图表和汇报材料 | [论文与转化交付](publication-and-translation.zh-CN.md) · [期刊规范](../journal-standards.zh-CN.md) |
 
 ## 工作台怎样组合这些能力
 
@@ -26,7 +26,7 @@ Biomed Workbench 按研究问题组织能力。用户提供科学目标和数据
 
 ## 当前覆盖范围
 
-当前注册表包含 **198 个可独立识别的模块**。注册表示方法用途、输入输出和使用条件已经登记，并不表示每个模块都在所有数据上完成过真实验收。具体执行状态和代表性案例见[能力成熟度](../maturity.zh-CN.md)和[公共数据案例](../cases/README.zh-CN.md)。
+当前注册表包含 **207 个可独立识别的模块**。注册表示方法用途、输入输出和使用条件已经登记，并不表示每个模块都在所有数据上完成过真实验收。具体执行状态和代表性案例见[能力成熟度](../maturity.zh-CN.md)和[公共数据案例](../cases/README.zh-CN.md)。
 
 Bulk 层覆盖 RNA-seq；ChIP-seq、CUT&RUN 与 CUT&Tag；多种 R-loop 测量；RIP-seq、CLIP 系列与 LACE-seq；Ribo-seq；GRO-seq、PRO-seq、TT-seq 与 NET-seq；ATAC-seq 与 DNase-seq；WGBS、RRBS 与 EM-seq；多种三维基因组方法；以及 MeRIP-seq/m6A-seq。
 

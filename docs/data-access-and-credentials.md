@@ -1,6 +1,6 @@
 # Public data access and credentials
 
-Version: `2026.08.02`
+Version: `2026.08.20`
 Scope: public service endpoints currently implemented and allow-listed by Biomed Workbench.
 
 Credential requirements belong to a service endpoint, not to an entire database brand. A resource may combine anonymous retrieval, signed-in personal features, paid APIs, and private deployments. The workbench therefore documents only the endpoints it actually calls.
@@ -10,10 +10,13 @@ Credential requirements belong to a service endpoint, not to an entire database 
 - No current public-database module requires an API key to reach its implemented endpoint.
 - `NCBI_API_KEY` is optional for both NCBI E-utilities and NCBI Datasets. Anonymous access remains available; the key raises official request capacity.
 - AlphaFold Server is a browser-authenticated analysis service, not an anonymous database API. It uses interactive Google sign-in and documents no public submission API. The workbench prepares official JSON for user-reviewed manual upload and stores only an access state—never a password, OAuth token, cookie, or browser session.
+- Publisher and institutional-library full-text routes may require the user to sign in on an official or institutional page. The workbench records only whether PDF, HTML, abstract or metadata access was obtained and whether the file passed verification; it does not receive credentials or browser-session data.
 - Crossref Metadata Plus tokens and private cBioPortal OAuth/tokens are outside the current public clients and are not silently accepted.
 - Other implemented clients use anonymous official endpoints and remain subject to service terms, rate limits, schema changes, and data licenses.
 
 The service inventory covers NCBI E-utilities and Datasets, Crossref, Europe PMC, bioRxiv, ClinicalTrials.gov, UniProt, Ensembl, Reactome, Open Targets, gnomAD, public cBioPortal, PubChem, RCSB PDB, AlphaFold DB, QuickGO, Enrichr, ARCHS4, HPO, and IUPred2A.
+
+Publisher and institutional-library portals are interactive access routes rather than workbench APIs. When a paper requires such access, the user completes login, CAPTCHA and security checks, while the workbench retains the access outcome and verified file identity only.
 
 Notable endpoint rules:
 

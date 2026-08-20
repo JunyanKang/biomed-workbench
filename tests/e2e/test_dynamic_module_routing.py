@@ -171,6 +171,22 @@ class DynamicModuleRoutingTests(unittest.TestCase):
             <= selected
         )
 
+    def test_scholarly_workflows_route_to_their_specific_validated_gates(self):
+        cases = {
+            "润色这段论文并确保数字引用不变": "academic-prose-revision-audit",
+            "审查 NIH Specific Aims 的可行性": "research-proposal-quality-audit",
+            "检查论文统计报告和图注中的 n": "statistical-reporting-audit",
+            "写数据可用性声明和仓储计划": "data-availability-audit",
+            "生成全文中英对照精读": "paper-reader-package-audit",
+            "建立定期文献追踪并核验独立他引": "literature-landscape-audit",
+            "标准化实验日志": "experiment-log-standardization",
+            "核对机构授权下载文献清单": "literature-acquisition-manifest-audit",
+            "审查论文汇报 PPTX": "presentation-package-audit",
+        }
+        for query, module_id in cases.items():
+            with self.subTest(query=query):
+                self.assertIn(module_id, route(query)["selected_module_ids"])
+
     def test_donor_aware_single_cell_inference_routes_from_manifest(self):
         plan = route("Run donor-aware single-cell pseudobulk differential expression with edgeR")
         routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}

@@ -1,0 +1,302 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The structured design and analysis records faithfully represent the analysis that was actually executed."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "statistical-reporting-audit-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "statistical_report": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "0.1.0",
+      "output_formats": {
+        "statistics_audit": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "statistical-reporting-audit-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    }
+  ],
+  "complements": [
+    "manuscript-audit",
+    "figure-specification",
+    "claim-evidence-integrity-audit"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic scholarly-package validation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-20",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Check experimental units, biological and technical replication, randomization, blinding, exclusions, missingness, model definitions, assumptions, multiplicity, effect sizes, uncertainty, software versions, result wording, and figure statistics.",
+  "domains": [
+    "publication",
+    "statistics",
+    "research-quality"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.academic_writing:audit_statistical_reporting",
+  "evidence_effects": [
+    "validates_scholarly_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 50000000,
+    "timeout_seconds": 30
+  },
+  "id": "statistical-reporting-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "statistical_reporting_records",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "statistical_report",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "analyses": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "design": {
+        "type": "object"
+      },
+      "figure_statistics": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "result_statements": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "design",
+      "analyses",
+      "result_statements"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "statistical reporting audit",
+    "statistics methods review",
+    "figure statistics review",
+    "统计报告审查",
+    "图注统计审查"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "The module reviews declared reporting records and does not replace a raw-data reanalysis or specialist statistical review."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 5
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "statistical_reporting_quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "statistics_audit",
+      "processing_levels": [
+        "derived",
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "analysis_count": {
+        "type": "integer"
+      },
+      "author_input_needed": {
+        "type": "array"
+      },
+      "design_readout": {
+        "type": "object"
+      },
+      "figure_panel_count": {
+        "type": "integer"
+      },
+      "findings": {
+        "type": "array"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "major_finding_count": {
+        "type": "integer"
+      },
+      "ready_for_manuscript_reporting": {
+        "type": "boolean"
+      },
+      "result_statement_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "design_readout",
+      "analysis_count",
+      "result_statement_count",
+      "figure_panel_count",
+      "findings",
+      "major_finding_count",
+      "ready_for_manuscript_reporting",
+      "author_input_needed",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The declared scholarly source material and project context are available without invented facts."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Nature Statistics reporting skill source basis and project-owned deterministic reporting checks."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "The independent unit and biological, technical, nested, and repeated measurements are distinguished.",
+      "id": "statistics-unit-and-replication",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every reported comparison declares its model, assumptions, multiplicity, effect estimate, uncertainty, and software version.",
+      "id": "statistics-model-reporting",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Figure panels define n, tests, comparisons, error bars, and exact p-value policy.",
+      "id": "statistics-figure-alignment",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Does the manuscript report the design and statistical inference transparently without pseudoreplication or overclaiming?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "statistical-reporting-audit",
+      "Audit manuscript statistical reporting",
+      "statistical reporting audit",
+      "statistics methods review",
+      "figure statistics review",
+      "统计报告审查",
+      "图注统计审查"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Audit manuscript statistical reporting",
+  "tool_requirements": [],
+  "version": "0.1.0"
+}

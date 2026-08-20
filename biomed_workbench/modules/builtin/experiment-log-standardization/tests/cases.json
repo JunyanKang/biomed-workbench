@@ -1,0 +1,50 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "experiment_id": "RT-B-260820-001",
+        "major_issue_count": 0,
+        "ready_to_write": true
+      },
+      "input": {
+        "anomalies": [],
+        "daily_sequence": 1,
+        "device_code": "B",
+        "experiment_date": "2026-08-20",
+        "experiment_type": "qPCR",
+        "objective": "Measure target expression",
+        "observations": [
+          {
+            "text": "Amplification completed."
+          }
+        ],
+        "raw_materials": [
+          {
+            "path": "raw/run.csv",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "sample_batches": [
+          {
+            "description": "retina samples",
+            "sample_batch": "RT-1-B1"
+          }
+        ],
+        "steps": [
+          {
+            "action": "Run qPCR",
+            "conditions": {
+              "cycles": 40
+            },
+            "sample_batches": [
+              "RT-1-B1"
+            ]
+          }
+        ],
+        "system_code": "RT"
+      },
+      "name": "complete-bounded-experiment-log"
+    }
+  ],
+  "schema_version": 1
+}

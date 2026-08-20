@@ -355,6 +355,36 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
         output = execute("figure-specification", {"title":"F","panels":[{"label":"a","claim":"C","data_source":"D","plot":"scatter"}]})
         self.assertTrue(output["ready"])
 
+    def test_academic_prose_revision_audit(self):
+        self.assertTrue(execute_first_module_case("academic-prose-revision-audit")["ready_for_delivery"])
+
+    def test_research_proposal_quality_audit(self):
+        self.assertTrue(execute_first_module_case("research-proposal-quality-audit")["ready_for_scientific_drafting"])
+
+    def test_statistical_reporting_audit(self):
+        self.assertTrue(execute_first_module_case("statistical-reporting-audit")["ready_for_manuscript_reporting"])
+
+    def test_data_availability_audit(self):
+        self.assertTrue(execute_first_module_case("data-availability-audit")["ready_for_manuscript"])
+
+    def test_paper_reader_package_audit(self):
+        self.assertTrue(execute_first_module_case("paper-reader-package-audit")["ready_for_reading"])
+
+    def test_literature_landscape_audit(self):
+        self.assertTrue(execute_first_module_case("literature-landscape-audit")["ready_for_synthesis"])
+
+    def test_experiment_log_standardization(self):
+        self.assertTrue(execute_first_module_case("experiment-log-standardization")["ready_to_write"])
+
+    def test_literature_acquisition_manifest_audit(self):
+        self.assertTrue(execute_first_module_case("literature-acquisition-manifest-audit")["manifest_valid"])
+
+    def test_presentation_package_audit(self):
+        self.assertTrue(execute_first_module_case("presentation-package-audit")["ready_for_visual_review"])
+
+    def test_presentation_delivery_plan(self):
+        self.assertTrue(execute_first_module_case("presentation-delivery-plan")["readiness"]["ready_for_delivery"])
+
     def test_patent_disclosure_audit(self):
         output = execute("patent-disclosure-audit", {"problem":"P","solution":"S","essential_features":["E"],"examples":["X"],"alternatives":["A"],"prior_art":["R"]})
         self.assertTrue(output["ready_for_claim_drafting"])

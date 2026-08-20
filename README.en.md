@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-365B73"></a>
-  <img alt="198 registered scientific modules" src="https://img.shields.io/badge/registered%20modules-198-4E8B86">
+  <img alt="207 registered scientific modules" src="https://img.shields.io/badge/registered%20modules-207-4E8B86">
 </p>
 
 <p align="center">
@@ -55,7 +55,7 @@ File identity, version relationships, and content fingerprints travel with the m
 
 ## Research layers
 
-The workbench currently contains **198 independently discoverable scientific modules**. This means that their purpose, inputs, outputs, and conditions of use are recorded; it does not mean that every module has been accepted across every dataset, species, or runtime. Exact execution scope and representative cases are recorded in the versioned [release notes](docs/releases/README.md), [maturity guide](docs/maturity.md), and [`reports/`](reports/).
+The workbench currently contains **207 independently discoverable scientific modules**. This means that their purpose, inputs, outputs, and conditions of use are recorded; it does not mean that every module has been accepted across every dataset, species, or runtime. Exact execution scope and representative cases are recorded in the versioned [release notes](docs/releases/README.md), [maturity guide](docs/maturity.md), and [`reports/`](reports/).
 
 | Research layer | Representative capabilities |
 | --- | --- |
@@ -67,7 +67,7 @@ The workbench currently contains **198 independently discoverable scientific mod
 | [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | Protein interaction networks, AlphaFold result intake and quality review, HADDOCK3 docking, structure comparison, binding assessment and network delivery |
 | [Clinical and experimental research](docs/capabilities/clinical-and-experimental.md) | Cohorts, survival, biomarkers and quantitative assays; flow cytometry, qPCR, dose response, protein quantification, microbiology and animal studies |
 | [Imaging and scientific visualisation](docs/capabilities/imaging-and-visualization.md) | Image inspection, segmentation, colocalisation, point tracking, migration measurements, scientific-figure design and interactive structure views |
-| [Publication and translation](docs/capabilities/publication-and-translation.md) | Journal positioning and compliance review, unified figures, bilingual reports, manuscript writing, citation audit, reviewer simulation, response matrices, patents and presentations |
+| [Publication and translation](docs/capabilities/publication-and-translation.md) | Full-paper bilingual reading, academic and proposal writing, statistics and data-availability review, journal positioning, citation verification, peer-review response, patents, figures and presentations |
 
 Explore the complete capability index: [中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)
 
@@ -110,8 +110,8 @@ Another agent should not copy the Codex plugin-install request verbatim. Codex r
 | Scientific capabilities | [能力地图](docs/capabilities/README.zh-CN.md) · [公共案例](docs/cases/README.zh-CN.md) | [Capability map](docs/capabilities/README.md) · [Public cases](docs/cases/README.md) |
 | Evidence and reproducibility | [证据地图](docs/scientific-evidence-map.zh-CN.md) · [成熟度](docs/maturity.zh-CN.md) · [可复现性](docs/reproducibility.zh-CN.md) | [Evidence map](docs/scientific-evidence-map.md) · [Maturity](docs/maturity.md) · [Reproducibility](docs/reproducibility.md) |
 | Data access | [公共数据库与凭据](docs/data-access-and-credentials.zh-CN.md) | [Data access and credentials](docs/data-access-and-credentials.md) |
-| Writing and journals | [期刊定位与稿件规范](docs/journal-standards.zh-CN.md) | [Journal positioning and manuscript requirements](docs/journal-standards.md) |
+| Writing and journals | [论文与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) · [期刊定位与稿件规范](docs/journal-standards.zh-CN.md) | [Publication and translation](docs/capabilities/publication-and-translation.md) · [Journal positioning and manuscript requirements](docs/journal-standards.md) |
 | Project structure and extension | [架构](docs/architecture.zh-CN.md) · [格式与数据要求](docs/format-contracts.zh-CN.md) · [开发](docs/development.zh-CN.md) | [Architecture](docs/architecture.md) · [File and data requirements](docs/format-contracts.md) · [Development](docs/development.md) |
 | Versions | [发布记录](docs/releases/README.zh-CN.md) | [Release notes](docs/releases/README.md) |
 
-Biomed Workbench is licensed under [Apache-2.0](LICENSE). Scientific modules, the evidence model, and release records evolve together; a new capability enters the public list only when its method definition, implementation, validation evidence, and documentation remain aligned.
+Biomed Workbench is licensed under [Apache-2.0](LICENSE); acknowledgements appear in [Third-Party Notices](THIRD_PARTY_NOTICES.md). Scientific modules, the evidence model, and release records evolve together; a new capability enters the public list only when its method definition, implementation, validation evidence, and documentation remain aligned.

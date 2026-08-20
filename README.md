@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-365B73"></a>
-  <img alt="198 registered scientific modules" src="https://img.shields.io/badge/registered%20modules-198-4E8B86">
+  <img alt="207 registered scientific modules" src="https://img.shields.io/badge/registered%20modules-207-4E8B86">
 </p>
 
 <p align="center">
@@ -55,7 +55,7 @@ Biomed Workbench 把生物医学研究设计、数据分析和科研交付连接
 
 ## 覆盖的研究层级
 
-当前包含 **198 个可独立识别的科学模块**。这一数字表示方法用途、输入输出和使用条件已经登记，不等同于每个模块已在所有数据类型、物种或运行环境中完成验收；精确的执行范围与代表性案例以对应版本的[发布记录](docs/releases/README.zh-CN.md)、[成熟度说明](docs/maturity.zh-CN.md)和[`reports/`](reports/)为准。
+当前包含 **207 个可独立识别的科学模块**。这一数字表示方法用途、输入输出和使用条件已经登记，不等同于每个模块已在所有数据类型、物种或运行环境中完成验收；精确的执行范围与代表性案例以对应版本的[发布记录](docs/releases/README.zh-CN.md)、[成熟度说明](docs/maturity.zh-CN.md)和[`reports/`](reports/)为准。
 
 | 研究层级 | 代表性能力 |
 | --- | --- |
@@ -67,7 +67,7 @@ Biomed Workbench 把生物医学研究设计、数据分析和科研交付连接
 | [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | 蛋白互作网络，AlphaFold 结果接收与质量评审，HADDOCK3 对接，结构比较、结合评估和网络交付 |
 | [临床与实验研究](docs/capabilities/clinical-and-experimental.zh-CN.md) | 队列、生存、标志物和定量实验；流式、qPCR、剂量反应、蛋白定量、微生物学和动物实验 |
 | [成像与科学可视化](docs/capabilities/imaging-and-visualization.zh-CN.md) | 图像检查、分割、共定位、目标追踪、迁移定量、科学图件设计和结构交互视图 |
-| [论文与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) | 期刊定位与规范审查，统一图件，双语报告，论文写作，引用审计，审稿模拟、回复矩阵、专利和汇报 |
+| [论文与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) | 全文双语精读，科研写作与基金论证，统计和数据可用性审查，期刊定位、引用核查、审稿回复、专利、图件与汇报交付 |
 
 完整能力索引：[中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)
 
@@ -110,8 +110,8 @@ Biomed Workbench 把生物医学研究设计、数据分析和科研交付连接
 | 科学能力 | [能力地图](docs/capabilities/README.zh-CN.md) · [公共案例](docs/cases/README.zh-CN.md) | [Capability map](docs/capabilities/README.md) · [Public cases](docs/cases/README.md) |
 | 证据与复现 | [证据地图](docs/scientific-evidence-map.zh-CN.md) · [成熟度](docs/maturity.zh-CN.md) · [可复现性](docs/reproducibility.zh-CN.md) | [Evidence map](docs/scientific-evidence-map.md) · [Maturity](docs/maturity.md) · [Reproducibility](docs/reproducibility.md) |
 | 数据访问 | [公共数据库与凭据](docs/data-access-and-credentials.zh-CN.md) | [Data access and credentials](docs/data-access-and-credentials.md) |
-| 写作与期刊 | [期刊定位与稿件规范](docs/journal-standards.zh-CN.md) | [Journal positioning and manuscript requirements](docs/journal-standards.md) |
+| 写作与期刊 | [论文与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) · [期刊定位与稿件规范](docs/journal-standards.zh-CN.md) | [Publication and translation](docs/capabilities/publication-and-translation.md) · [Journal positioning and manuscript requirements](docs/journal-standards.md) |
 | 项目结构与扩展 | [架构](docs/architecture.zh-CN.md) · [格式与数据要求](docs/format-contracts.zh-CN.md) · [开发](docs/development.zh-CN.md) | [Architecture](docs/architecture.md) · [File and data requirements](docs/format-contracts.md) · [Development](docs/development.md) |
 | 版本 | [发布记录](docs/releases/README.zh-CN.md) | [Release notes](docs/releases/README.md) |
 
-Biomed Workbench 采用 [Apache-2.0](LICENSE) 许可。科学模块、证据模型和发布记录随版本持续演进；新增能力只有在方法定义、实际实现、验证证据和文档保持一致后，才会列入公开能力清单。
+Biomed Workbench 采用 [Apache-2.0](LICENSE) 许可，相关来源说明见[第三方声明](THIRD_PARTY_NOTICES.md)。科学模块、证据模型和发布记录随版本持续演进；新增能力只有在方法定义、实际实现、验证证据和文档保持一致后，才会列入公开能力清单。

@@ -49,6 +49,10 @@ The workbench preserves independent experimental units, denominators, censoring,
 
 For flow cytometry, the workbench can preserve unsampled FCS events, apply declared sequential gates, and quantify explicit marker-rule patterns within retained parent-gate event sets. Marker patterns remain descriptive unless compensation, transformation, threshold basis, panel identity, sample identity, independent evidence, and replicate-aware design support a stronger claim.
 
+## Experiment Records And Archiving
+
+Experiment logs assign stable experiment and sample-batch identities and record the objective, instrument, steps, conditions, sample relationships, observations, anomalies and raw-file digests. The workbench produces a Markdown record and archive plan suitable for a local knowledge base. Unclear temperatures, sample identities, instrument settings or observations remain confirmation questions rather than guessed values. Writing to an external vault or moving source files requires confirmation of the destination, and source material remains unchanged.
+
 ## Typical Deliverables
 
-Cohort tables, survival summaries, biomarker reports, adverse-event tables, de-identification outputs, assay calculations, calibration results, gating summaries, experimental plans, methods text, and explicit next-step validation criteria.
+Cohort tables, survival summaries, biomarker reports, adverse-event tables, de-identification outputs, assay calculations, calibration results, gating summaries, experimental plans, standardised experiment logs, methods text, and explicit next-step validation criteria.

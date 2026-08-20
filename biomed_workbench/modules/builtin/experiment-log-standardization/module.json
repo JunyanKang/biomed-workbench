@@ -1,0 +1,331 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Dates, device codes, sample batches, steps, observations, anomalies, and raw-file digests are factual user or instrument records."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "experiment-log-standardization-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "experiment_record": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "0.1.0",
+      "output_formats": {
+        "standardized_log": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "experiment-log-standardization-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    }
+  ],
+  "complements": [
+    "claim-evidence-integrity-audit"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic scholarly-package validation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-20",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Create a deterministic experiment identity, structured record, Markdown log, raw-material archive plan, anomaly routing, and unresolved-field gate from declared samples, steps, observations, and source digests.",
+  "domains": [
+    "wetlab",
+    "research-quality"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:standardize_experiment_log",
+  "evidence_effects": [
+    "validates_scholarly_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 50000000,
+    "timeout_seconds": 30
+  },
+  "id": "experiment-log-standardization",
+  "input_artifacts": [
+    {
+      "artifact_type": "raw_experiment_record",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "experiment_record",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "anomalies": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "daily_sequence": {
+        "type": "integer"
+      },
+      "device_code": {
+        "type": "string"
+      },
+      "experiment_date": {
+        "type": "string"
+      },
+      "experiment_type": {
+        "type": "string"
+      },
+      "objective": {
+        "type": "string"
+      },
+      "observations": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "raw_materials": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "sample_batches": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "steps": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "system_code": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "experiment_date",
+      "system_code",
+      "device_code",
+      "daily_sequence",
+      "experiment_type",
+      "objective",
+      "sample_batches",
+      "steps",
+      "observations",
+      "raw_materials"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "experiment log",
+    "laboratory record",
+    "实验日志标准化",
+    "实验记录归档"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Writing into an external vault and archiving raw files require explicit destination permission and byte-preserving file operations."
+  ],
+  "maturity": "validated",
+  "module_type": "transform",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 0
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "standardized_experiment_log",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "standardized_log",
+      "processing_levels": [
+        "derived",
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "archive_plan": {
+        "type": "object"
+      },
+      "experiment_id": {
+        "type": "string"
+      },
+      "issues": {
+        "type": "array"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "log_markdown": {
+        "type": "string"
+      },
+      "major_issue_count": {
+        "type": "integer"
+      },
+      "ready_to_write": {
+        "type": "boolean"
+      },
+      "record": {
+        "type": "object"
+      },
+      "record_digest": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "experiment_id",
+      "record",
+      "log_markdown",
+      "archive_plan",
+      "issues",
+      "major_issue_count",
+      "ready_to_write",
+      "record_digest",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The declared scholarly source material and project context are available without invented facts."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Nature Experiment Log 1.0.0, MIT-licensed source skill, adapted to biomedical experiment and sample identities."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Experiment and sample-batch identities are stable and unique.",
+      "id": "experiment-log-identity",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every step has an action, conditions, and valid sample bindings.",
+      "id": "experiment-log-procedure",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Raw materials have paths and digests; uncertain fields and anomalies remain explicit.",
+      "id": "experiment-log-source-and-anomaly",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Can this experiment be recorded with stable sample identities, complete procedural context, source files, and explicit anomalies?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "experiment-log-standardization",
+      "Standardize a traceable experiment log",
+      "experiment log",
+      "laboratory record",
+      "实验日志标准化",
+      "实验记录归档"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Standardize a traceable experiment log",
+  "tool_requirements": [],
+  "version": "0.1.0"
+}

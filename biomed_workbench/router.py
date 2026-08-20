@@ -178,8 +178,18 @@ def _is_omics_assay_query(normalized_query: str) -> bool:
 
 def _is_publication_query(normalized_query: str) -> bool:
     return bool(
-        re.search(r"\b(manuscript|paper|publication|publish|citation|reviewer|response|patent|presentation|figure|claim[- ]?evidence)\b", normalized_query)
-        or any(term in normalized_query for term in ("论文", "稿件", "审稿", "返修", "引用", "专利", "发表", "图表"))
+        re.search(
+            r"\b(manuscript|paper|publication|publish|citation|reviewer|response|patent|presentation|figure|"
+            r"claim[- ]?evidence|grant|proposal|specific aims?|data availability|paper reader|full[- ]?paper reading)\b",
+            normalized_query,
+        )
+        or any(
+            term in normalized_query
+            for term in (
+                "论文", "稿件", "审稿", "返修", "引用", "专利", "发表", "图表", "基金申请", "申请书",
+                "研究计划书", "全文精读", "中英对照", "数据可用性", "演示文稿", "学术写作", "语言修订",
+            )
+        )
     )
 
 

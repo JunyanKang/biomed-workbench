@@ -1,0 +1,307 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Every dataset needed for main and supplementary claims is included in the inventory."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "data-availability-audit-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "availability_package": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "0.1.0",
+      "output_formats": {
+        "availability_audit": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "data-availability-audit-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    }
+  ],
+  "complements": [
+    "manuscript-audit",
+    "citation-audit",
+    "journal-targeting-and-compliance"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic scholarly-package validation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-20",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Inventory claim-supporting datasets, classify each access route, validate repository and stable-identifier fields, record justified restrictions and access processes, and check explicit dataset-to-statement mapping.",
+  "domains": [
+    "publication",
+    "evidence",
+    "research-quality"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_data_availability",
+  "evidence_effects": [
+    "validates_scholarly_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 50000000,
+    "timeout_seconds": 30
+  },
+  "id": "data-availability-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "data_availability_package",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "availability_package",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_availability": {
+        "type": "object"
+      },
+      "datasets": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "materials_availability": {
+        "type": "object"
+      },
+      "statement": {
+        "type": "string"
+      },
+      "target_journal": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "target_journal",
+      "datasets",
+      "statement"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "data availability statement",
+    "repository plan",
+    "FAIR data audit",
+    "数据可用性声明",
+    "数据仓储计划"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Current journal policy, consent, governance, repository acceptance, embargo, and identifier activation require authoritative verification."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 5
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "data_availability_quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "availability_audit",
+      "processing_levels": [
+        "derived",
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_availability": {
+        "type": "object"
+      },
+      "dataset_count": {
+        "type": "integer"
+      },
+      "dataset_inventory": {
+        "type": "array"
+      },
+      "findings": {
+        "type": "array"
+      },
+      "inventory_digest": {
+        "type": "string"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "major_finding_count": {
+        "type": "integer"
+      },
+      "materials_availability": {
+        "type": "object"
+      },
+      "ready_for_manuscript": {
+        "type": "boolean"
+      },
+      "statement": {
+        "type": "string"
+      },
+      "target_journal": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "target_journal",
+      "dataset_inventory",
+      "dataset_count",
+      "statement",
+      "code_availability",
+      "materials_availability",
+      "findings",
+      "major_finding_count",
+      "ready_for_manuscript",
+      "inventory_digest",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The declared scholarly source material and project context are available without invented facts."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Nature Data Availability 2.0.0 workflow and FAIR/DataCite-aligned source hierarchy, adapted into a project-owned audit."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Every claim-supporting raw, processed, source-data, model, image, table, and reused dataset has one declared access route.",
+      "id": "availability-dataset-inventory",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Public and controlled datasets have a repository and stable identifier; restrictions have a reason and access process.",
+      "id": "availability-repository-identity",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "The manuscript statement maps every dataset to its location or governed access route.",
+      "id": "availability-statement-coverage",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Can readers locate or request every dataset needed to inspect the manuscript's claims?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "data-availability-audit",
+      "Audit data availability and repository mapping",
+      "data availability statement",
+      "repository plan",
+      "FAIR data audit",
+      "数据可用性声明",
+      "数据仓储计划"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Audit data availability and repository mapping",
+  "tool_requirements": [],
+  "version": "0.1.0"
+}

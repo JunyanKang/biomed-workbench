@@ -46,6 +46,15 @@ DOWNSTREAM_UNIVERSAL = frozenset(
         "journal-targeting-and-compliance",
         "manuscript-audit",
         "citation-audit",
+        "academic-prose-revision-audit",
+        "research-proposal-quality-audit",
+        "statistical-reporting-audit",
+        "data-availability-audit",
+        "paper-reader-package-audit",
+        "literature-landscape-audit",
+        "literature-acquisition-manifest-audit",
+        "experiment-log-standardization",
+        "presentation-package-audit",
     }
 )
 

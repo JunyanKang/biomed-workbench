@@ -1,0 +1,290 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The PPTX binary and asset manifest belong to the same presentation revision."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "presentation-package-audit-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "presentation_package": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "0.1.0",
+      "output_formats": {
+        "presentation_audit": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "presentation-package-audit-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    }
+  ],
+  "complements": [
+    "presentation-delivery-plan",
+    "figure-specification",
+    "claim-evidence-integrity-audit"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic scholarly-package validation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-20",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Reload a PPTX binary package, verify its core parts and slide count, inspect visible text density, bind external assets to source digests and slide locations, and block unresolved high-severity quality findings before rendered visual review.",
+  "domains": [
+    "publication",
+    "visualization"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_presentation_package",
+  "evidence_effects": [
+    "validates_scholarly_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 50000000,
+    "timeout_seconds": 30
+  },
+  "id": "presentation-package-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "scientific_presentation_package",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "presentation_package",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "asset_manifest": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "expected_slide_count": {
+        "minimum": 1,
+        "type": "integer"
+      },
+      "pptx_base64": {
+        "minLength": 8,
+        "type": "string"
+      },
+      "qa_findings": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "pptx_base64",
+      "expected_slide_count",
+      "asset_manifest"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "PPTX audit",
+    "paper presentation quality",
+    "论文汇报PPT审查",
+    "学术幻灯片交付"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Structural package checks do not replace rendered visual inspection, source-figure review, or scientific claim validation."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 6
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "presentation_package_quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "presentation_audit",
+      "processing_levels": [
+        "derived",
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "asset_count": {
+        "type": "integer"
+      },
+      "blocking_finding_count": {
+        "type": "integer"
+      },
+      "findings": {
+        "type": "array"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "package": {
+        "type": "object"
+      },
+      "ready_for_visual_review": {
+        "type": "boolean"
+      },
+      "visible_text_character_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "package",
+      "visible_text_character_count",
+      "asset_count",
+      "findings",
+      "blocking_finding_count",
+      "ready_for_visual_review",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The declared scholarly source material and project context are available without invented facts."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Nature Paper-to-PPTX evidence-led narrative, asset traceability, real-PPTX, and corrective-QA contract, adapted into a project-owned package audit."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "The PPTX reloads as a valid package with the declared slide count.",
+      "id": "presentation-package-reload",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every external figure or table has a source, digest, and slide placement.",
+      "id": "presentation-asset-traceability",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "No high-severity crop, overflow, overlap, legibility, or scientific-context defect remains unresolved.",
+      "id": "presentation-qa-resolution",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Is this real PPTX package structurally valid, traceable, and ready for rendered scientific and visual review?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "presentation-package-audit",
+      "Reload and audit a scientific presentation package",
+      "PPTX audit",
+      "paper presentation quality",
+      "论文汇报PPT审查",
+      "学术幻灯片交付"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Reload and audit a scientific presentation package",
+  "tool_requirements": [],
+  "version": "0.1.0"
+}

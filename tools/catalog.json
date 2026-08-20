@@ -2,6 +2,78 @@
   "entries": [
     {
       "access": "offline",
+      "description": "Audit academic prose before editing and compare a supplied revision against exact number, citation, equation, protected-term, structure, claim-strength, voice, venue, and disclosure boundaries.",
+      "entrypoint": "biomed_workbench.capabilities.academic_writing:audit_academic_prose_revision",
+      "id": "academic-prose-revision-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "ai_disclosure_evasion": {
+            "type": "boolean"
+          },
+          "author_voice_sample": {
+            "type": "string"
+          },
+          "claim_bindings": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "document_type": {
+            "enum": [
+              "research-article",
+              "review-article",
+              "thesis",
+              "rebuttal",
+              "grant-proposal"
+            ],
+            "type": "string"
+          },
+          "original_text": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "protected_spans": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "revised_text": {
+            "type": "string"
+          },
+          "section_kind": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "structure_policy": {
+            "enum": [
+              "preserve",
+              "allow-declared-change"
+            ],
+            "type": "string"
+          },
+          "target_venue": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "original_text",
+          "document_type",
+          "section_kind",
+          "target_venue"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit evidence-bound academic prose revisions",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
       "description": "Compare zero- and first-order potency-loss fits at multiple temperatures and predict time to a declared specification only when one kinetic model is supported across temperatures.",
       "entrypoint": "biomed_workbench.capabilities.quantitative_assays:fit_accelerated_stability",
       "id": "accelerated-stability",
@@ -3410,6 +3482,46 @@
     },
     {
       "access": "offline",
+      "description": "Inventory claim-supporting datasets, classify each access route, validate repository and stable-identifier fields, record justified restrictions and access processes, and check explicit dataset-to-statement mapping.",
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_data_availability",
+      "id": "data-availability-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "code_availability": {
+            "type": "object"
+          },
+          "datasets": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "materials_availability": {
+            "type": "object"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "target_journal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_journal",
+          "datasets",
+          "statement"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit data availability and repository mapping",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
       "description": "Report table shape, inferred column types, missingness, uniqueness, and numeric ranges.",
       "entrypoint": "biomed_workbench.capabilities.data:profile_table",
       "id": "data-profile",
@@ -4011,6 +4123,83 @@
       "requirements": [],
       "title": "Fit steady-state enzyme kinetics",
       "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Create a deterministic experiment identity, structured record, Markdown log, raw-material archive plan, anomaly routing, and unresolved-field gate from declared samples, steps, observations, and source digests.",
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:standardize_experiment_log",
+      "id": "experiment-log-standardization",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "anomalies": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "daily_sequence": {
+            "type": "integer"
+          },
+          "device_code": {
+            "type": "string"
+          },
+          "experiment_date": {
+            "type": "string"
+          },
+          "experiment_type": {
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "observations": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "raw_materials": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "sample_batches": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "steps": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "system_code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "experiment_date",
+          "system_code",
+          "device_code",
+          "daily_sequence",
+          "experiment_type",
+          "objective",
+          "sample_batches",
+          "steps",
+          "observations",
+          "raw_materials"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Standardize a traceable experiment log",
+      "workflow": "wetlab"
     },
     {
       "access": "offline",
@@ -5436,6 +5625,32 @@
       "workflow": "publication"
     },
     {
+      "access": "offline",
+      "description": "Validate per-paper access status, source level, lawful route, user handoff, PDF identity, page count, file digest, and credential boundary for open-access or institution-authorized literature retrieval.",
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_literature_acquisition_manifest",
+      "id": "literature-acquisition-manifest-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit authorized literature acquisition records",
+      "workflow": "evidence"
+    },
+    {
       "access": "public_api",
       "description": "Search PubMed or PMC and return normalized summaries with query provenance.",
       "entrypoint": "biomed_workbench.capabilities.evidence:literature_evidence",
@@ -5469,6 +5684,57 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Retrieve literature evidence",
+      "workflow": "evidence"
+    },
+    {
+      "access": "offline",
+      "description": "Audit a bounded or recurring literature search plan, exact source coverage, identifier-based deduplication, six declared prioritisation dimensions, strict journal scope, retraction states, citation contexts, and author or affiliation overlap for candidate independent citing works.",
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_literature_landscape",
+      "id": "literature-landscape-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "focal_affiliations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "focal_authors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "query_plan": {
+            "type": "object"
+          },
+          "records": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "scoring_weights": {
+            "type": "object"
+          },
+          "strict_journal_scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "query_plan",
+          "records"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit a multi-source literature landscape",
       "workflow": "evidence"
     },
     {
@@ -6193,6 +6459,49 @@
     },
     {
       "access": "offline",
+      "description": "Validate paragraph-level original and Chinese pairs, stable page-addressable source blocks, figure and table assets, source links, translation notes, and complete-package digests without replacing the paper with a summary.",
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_paper_reader_package",
+      "id": "paper-reader-package-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "assets": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "paper_markdown": {
+            "type": "string"
+          },
+          "source_complete": {
+            "type": "boolean"
+          },
+          "source_map": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "translation_notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_markdown",
+          "source_map",
+          "translation_notes"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit a bilingual full-paper reader package",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
       "description": "Perform deterministic structural checks on bounded Chinese patent-claim text, including claim numbering, references, placeholders, transition phrasing, short claims, antecedent-basis cues, and result-oriented wording.",
       "entrypoint": "biomed_workbench.capabilities.publication:patent_claim_structure_audit",
       "id": "patent-claim-structure-audit",
@@ -6711,6 +7020,48 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Build a presentation delivery plan",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Reload a PPTX binary package, verify its core parts and slide count, inspect visible text density, bind external assets to source digests and slide locations, and block unresolved high-severity quality findings before rendered visual review.",
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_presentation_package",
+      "id": "presentation-package-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_manifest": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "expected_slide_count": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "pptx_base64": {
+            "minLength": 8,
+            "type": "string"
+          },
+          "qa_findings": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "pptx_base64",
+          "expected_slide_count",
+          "asset_manifest"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Reload and audit a scientific presentation package",
       "workflow": "publication"
     },
     {
@@ -7558,6 +7909,89 @@
       "requirements": [],
       "title": "Audit declared consistency contracts across research artifacts",
       "workflow": "evidence"
+    },
+    {
+      "access": "offline",
+      "description": "Validate a proposal scope, research canon, claim-evidence table, argument map, section contracts, aims, agency criteria, feasibility records, and bounded revision stopping rules before prose is promoted.",
+      "entrypoint": "biomed_workbench.capabilities.academic_writing:audit_research_proposal",
+      "id": "research-proposal-quality-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "agency": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "aims": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "argument_map": {
+            "type": "object"
+          },
+          "evidence_table": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "iteration_scores": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "compose",
+              "revise",
+              "hybrid",
+              "qa"
+            ],
+            "type": "string"
+          },
+          "research_canon": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "review_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scope": {
+            "type": "object"
+          },
+          "section_contracts": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "mode",
+          "agency",
+          "scope",
+          "research_canon",
+          "evidence_table",
+          "argument_map",
+          "section_contracts",
+          "aims",
+          "review_criteria"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit research proposal foundations and feasibility",
+      "workflow": "publication"
     },
     {
       "access": "offline",
@@ -10671,6 +11105,49 @@
       "workflow": "omics"
     },
     {
+      "access": "offline",
+      "description": "Check experimental units, biological and technical replication, randomization, blinding, exclusions, missingness, model definitions, assumptions, multiplicity, effect sizes, uncertainty, software versions, result wording, and figure statistics.",
+      "entrypoint": "biomed_workbench.capabilities.academic_writing:audit_statistical_reporting",
+      "id": "statistical-reporting-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "analyses": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "design": {
+            "type": "object"
+          },
+          "figure_statistics": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "result_statements": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "design",
+          "analyses",
+          "result_statements"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit manuscript statistical reporting",
+      "workflow": "publication"
+    },
+    {
       "access": "agent_generated",
       "description": "Align declared chain pairs by sequence, map residue correspondence, superpose matched C-alpha coordinates, report identity, coverage and RMSD, and leave TM-score explicitly uncomputed unless an independently validated TM-align result is supplied.",
       "entrypoint": "agent-generated-analysis",
@@ -12315,7 +12792,7 @@
       "workflow": "wetlab"
     }
   ],
-  "entry_count": 198,
+  "entry_count": 207,
   "schema_version": 2,
-  "version": "0.2.0"
+  "version": "0.2.1"
 }

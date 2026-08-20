@@ -1,0 +1,309 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Source blocks and page numbers are extracted from the exact user-supplied or lawfully accessible paper artifact."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "paper-reader-package-audit-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "reader_package": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "0.1.0",
+      "output_formats": {
+        "reader_audit": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "paper-reader-package-audit-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    }
+  ],
+  "complements": [
+    "pdf-evidence-extraction",
+    "citation-record-resolution",
+    "figure-specification"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic scholarly-package validation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-20",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Validate paragraph-level original and Chinese pairs, stable page-addressable source blocks, figure and table assets, source links, translation notes, and complete-package digests without replacing the paper with a summary.",
+  "domains": [
+    "publication",
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_paper_reader_package",
+  "evidence_effects": [
+    "validates_scholarly_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 50000000,
+    "timeout_seconds": 30
+  },
+  "id": "paper-reader-package-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "bilingual_paper_reader_package",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "reader_package",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "assets": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "paper_markdown": {
+        "type": "string"
+      },
+      "source_complete": {
+        "type": "boolean"
+      },
+      "source_map": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "translation_notes": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "paper_markdown",
+      "source_map",
+      "translation_notes"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "bilingual paper reader",
+    "full paper translation audit",
+    "full-paper bilingual reading",
+    "中英文论文精读",
+    "全文中英对照精读",
+    "全文翻译解读",
+    "论文阅读包审查"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Translation accuracy, OCR quality, and scientific crop fidelity still require source-aware human and visual review."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 2
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "paper_reader_quality_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "reader_audit",
+      "processing_levels": [
+        "derived",
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "asset_count": {
+        "type": "integer"
+      },
+      "findings": {
+        "type": "array"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "major_finding_count": {
+        "type": "integer"
+      },
+      "package_digest": {
+        "type": "string"
+      },
+      "ready_for_reading": {
+        "type": "boolean"
+      },
+      "source_block_count": {
+        "type": "integer"
+      },
+      "source_complete": {
+        "type": "boolean"
+      },
+      "source_map_digest": {
+        "type": "string"
+      },
+      "text_block_count": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "source_block_count",
+      "text_block_count",
+      "asset_count",
+      "source_complete",
+      "findings",
+      "major_finding_count",
+      "ready_for_reading",
+      "source_map_digest",
+      "package_digest",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The declared scholarly source material and project context are available without invented facts."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Nature Reader 2.0.0 full-paper source-map and bilingual output contract, adapted into a project-owned package audit."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Every substantive text, caption, figure, and table block has a stable ID and page location.",
+      "id": "reader-source-map-complete",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every extractable substantive text and caption block retains original and Chinese text without changing numbers, citations, equations, or terminology.",
+      "id": "reader-bilingual-pairs",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every figure and table asset has a source pointer, digest, and visible placement in the reading file.",
+      "id": "reader-assets-traceable",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Is the paper reader complete, bilingual, figure-aware, and traceable to stable source blocks?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "paper-reader-package-audit",
+      "Audit a bilingual full-paper reader package",
+      "bilingual paper reader",
+      "full paper translation audit",
+      "full-paper bilingual reading",
+      "中英文论文精读",
+      "全文中英对照精读",
+      "全文翻译解读",
+      "论文阅读包审查"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Audit a bilingual full-paper reader package",
+  "tool_requirements": [],
+  "version": "0.1.0"
+}

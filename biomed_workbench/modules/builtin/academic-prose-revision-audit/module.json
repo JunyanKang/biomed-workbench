@@ -1,0 +1,345 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The caller supplies the exact original and revised text and declares any intended structural change."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "academic-prose-revision-audit-e2e-v1"
+      ],
+      "id": "python-3.14.3-inline-json-1",
+      "input_formats": {
+        "academic_revision": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "0.1.0",
+      "output_formats": {
+        "revision_audit": [
+          "inline-json@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "academic-prose-revision-audit-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-20"
+    }
+  ],
+  "complements": [
+    "manuscript-revision-base",
+    "manuscript-revision-lineage",
+    "claim-evidence-integrity-audit",
+    "journal-targeting-and-compliance"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute deterministic scholarly-package validation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-20",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Audit academic prose before editing and compare a supplied revision against exact number, citation, equation, protected-term, structure, claim-strength, voice, venue, and disclosure boundaries.",
+  "domains": [
+    "publication",
+    "research-quality"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.academic_writing:audit_academic_prose_revision",
+  "evidence_effects": [
+    "validates_scholarly_delivery_readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 50000000,
+    "timeout_seconds": 30
+  },
+  "id": "academic-prose-revision-audit",
+  "input_artifacts": [
+    {
+      "artifact_type": "academic_revision_pair",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "academic_revision",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "ai_disclosure_evasion": {
+        "type": "boolean"
+      },
+      "author_voice_sample": {
+        "type": "string"
+      },
+      "claim_bindings": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "document_type": {
+        "enum": [
+          "research-article",
+          "review-article",
+          "thesis",
+          "rebuttal",
+          "grant-proposal"
+        ],
+        "type": "string"
+      },
+      "original_text": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "protected_spans": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "revised_text": {
+        "type": "string"
+      },
+      "section_kind": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "structure_policy": {
+        "enum": [
+          "preserve",
+          "allow-declared-change"
+        ],
+        "type": "string"
+      },
+      "target_venue": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "original_text",
+      "document_type",
+      "section_kind",
+      "target_venue"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "academic prose revision",
+    "manuscript polishing audit",
+    "学术语言修订",
+    "论文润色审查",
+    "基金文本语言审查"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "The deterministic gate cannot by itself judge whether prose genuinely matches an author's voice or whether a scientific interpretation is correct."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 5
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "academic_revision_audit",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "revision_audit",
+      "processing_levels": [
+        "derived",
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "claim_findings": {
+        "type": "array"
+      },
+      "document": {
+        "type": "object"
+      },
+      "findings": {
+        "type": "array"
+      },
+      "invariant_report": {
+        "type": "object"
+      },
+      "major_or_fatal_count": {
+        "type": "integer"
+      },
+      "next_step": {
+        "type": "string"
+      },
+      "phase": {
+        "type": "string"
+      },
+      "ready_for_delivery": {
+        "type": "boolean"
+      },
+      "required_output": {
+        "type": "object"
+      },
+      "revision_digest": {
+        "nullable": true,
+        "type": "string"
+      },
+      "source_audit": {
+        "type": "object"
+      },
+      "source_digest": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "phase",
+      "document",
+      "source_digest",
+      "revision_digest",
+      "source_audit",
+      "invariant_report",
+      "claim_findings",
+      "findings",
+      "major_or_fatal_count",
+      "ready_for_delivery",
+      "required_output",
+      "next_step"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The declared scholarly source material and project context are available without invented facts."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Academic Humanizer 0.3.3, MIT-licensed source skill, adapted into deterministic project-owned preservation gates.",
+      "Nature-skills writing and delivery contracts available under their declared source licenses, adapted without copying host-specific runtime assumptions."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Numbers, equations, citations, results, and protected terminology remain unchanged.",
+      "id": "academic-prose-content-preservation",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Every revised empirical claim remains within its declared evidence strength and preserves required uncertainty.",
+      "id": "academic-prose-claim-evidence",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "The revision follows the supplied author voice and target venue without promotional or formulaic language.",
+      "id": "academic-prose-voice-and-venue",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Does this academic revision improve clarity without changing scientific content or exceeding the evidence?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "academic-prose-revision-audit",
+      "Audit evidence-bound academic prose revisions",
+      "academic prose revision",
+      "manuscript polishing audit",
+      "学术语言修订",
+      "论文润色审查",
+      "基金文本语言审查"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Audit evidence-bound academic prose revisions",
+  "tool_requirements": [],
+  "version": "0.1.0"
+}

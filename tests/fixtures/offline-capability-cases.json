@@ -1,4 +1,103 @@
 {
+  "academic-prose-revision-audit": {
+    "input": {
+      "ai_disclosure_evasion": false,
+      "claim_bindings": [
+        {
+          "claim": "The association was observed in 3 cohorts.",
+          "claim_id": "C1",
+          "claim_level": "associational",
+          "evidence_ids": [
+            "E1"
+          ],
+          "evidence_level": "associational",
+          "hedging_preserved": true,
+          "hedging_required": false
+        }
+      ],
+      "document_type": "research-article",
+      "original_text": "In 3 cohorts, the association was observed [1].",
+      "protected_spans": [
+        {
+          "kind": "result",
+          "text": "association"
+        }
+      ],
+      "revised_text": "The association was observed in 3 cohorts [1].",
+      "section_kind": "results",
+      "structure_policy": "preserve",
+      "target_venue": "Nature Communications"
+    },
+    "output": {
+      "claim_findings": [],
+      "document": {
+        "author_voice_sample_provided": false,
+        "proposal_mode": false,
+        "section": "results",
+        "target_venue": "Nature Communications",
+        "type": "research-article"
+      },
+      "findings": [],
+      "invariant_report": {
+        "citations": {
+          "delta": {
+            "added": [],
+            "removed": []
+          },
+          "original_count": 1,
+          "preserved": true,
+          "revised_count": 1
+        },
+        "equations": {
+          "delta": {
+            "added": [],
+            "removed": []
+          },
+          "original_count": 0,
+          "preserved": true,
+          "revised_count": 0
+        },
+        "evaluated": true,
+        "numbers": {
+          "delta": {
+            "added": [],
+            "removed": []
+          },
+          "original_count": 2,
+          "preserved": true,
+          "revised_count": 2
+        },
+        "protected_spans": {
+          "missing": [],
+          "preserved": true
+        },
+        "structure": {
+          "original_headings": [],
+          "original_paragraphs": 1,
+          "policy": "preserve",
+          "preserved": true,
+          "revised_headings": [],
+          "revised_paragraphs": 1
+        }
+      },
+      "major_or_fatal_count": 0,
+      "next_step": "Deliver the revised text with its change report.",
+      "phase": "post-revision",
+      "ready_for_delivery": true,
+      "required_output": {
+        "change_report": true,
+        "cleaned_text": true,
+        "confirm_numbers_equations_citations_unchanged": true,
+        "voice_and_venue_notes": true
+      },
+      "revision_digest": "75a7ff5bc04ed95da7478b1ba249b14e1d733d9870d780360e91268915372f88",
+      "source_audit": {
+        "finding_count": 0,
+        "findings": []
+      },
+      "source_digest": "fdb0971a768a84173dd8fa268ba4078c5ab11933ba9b8c541c90ccdd63d87765"
+    }
+  },
   "accelerated-stability": {
     "input": {
       "observations": [
@@ -989,6 +1088,47 @@
       "pam_rule": "NGG"
     }
   },
+  "data-availability-audit": {
+    "input": {
+      "datasets": [
+        {
+          "access_route": "within-paper-or-supplement",
+          "claim_support_role": "Figure 1",
+          "id": "D1",
+          "title": "Figure 1 source data"
+        }
+      ],
+      "statement": "Source data for D1 are provided with this paper.",
+      "target_journal": "Nature"
+    },
+    "output": {
+      "code_availability": {},
+      "dataset_count": 1,
+      "dataset_inventory": [
+        {
+          "access_process": null,
+          "access_route": "within-paper-or-supplement",
+          "claim_support_role": "Figure 1",
+          "id": "D1",
+          "repository": null,
+          "restriction_reason": null,
+          "stable_identifier": null,
+          "title": "Figure 1 source data"
+        }
+      ],
+      "findings": [],
+      "inventory_digest": "f04d00df3162090a233e16301ce2a6541a3da93dc1288cfe42029d0e17feb8da",
+      "limitations": [
+        "Repository suitability, embargo, consent, governance, and journal policy must be verified against the current authoritative instructions before submission.",
+        "This audit does not invent or register repository identifiers and does not upload data."
+      ],
+      "major_finding_count": 0,
+      "materials_availability": {},
+      "ready_for_manuscript": true,
+      "statement": "Source data for D1 are provided with this paper.",
+      "target_journal": "Nature"
+    }
+  },
   "data-profile": {
     "input": {
       "rows": [
@@ -1429,6 +1569,93 @@
       ]
     }
   },
+  "experiment-log-standardization": {
+    "input": {
+      "anomalies": [],
+      "daily_sequence": 1,
+      "device_code": "B",
+      "experiment_date": "2026-08-20",
+      "experiment_type": "qPCR",
+      "objective": "Measure target expression",
+      "observations": [
+        {
+          "text": "Amplification completed."
+        }
+      ],
+      "raw_materials": [
+        {
+          "path": "raw/run.csv",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ],
+      "sample_batches": [
+        {
+          "description": "retina samples",
+          "sample_batch": "RT-1-B1"
+        }
+      ],
+      "steps": [
+        {
+          "action": "Run qPCR",
+          "conditions": {
+            "cycles": 40
+          },
+          "sample_batches": [
+            "RT-1-B1"
+          ]
+        }
+      ],
+      "system_code": "RT"
+    },
+    "output": {
+      "archive_plan": {
+        "log_path": "wiki/\u5b9e\u9a8c\u65e5\u5fd7/RT/qPCR/RT-B-260820-001.md",
+        "raw_folder": "raw/experiments/2026.08.20_qPCR_RT-B-260820-001",
+        "update_anomaly_register": false,
+        "update_index": true
+      },
+      "experiment_id": "RT-B-260820-001",
+      "issues": [],
+      "limitations": [
+        "The caller must obtain permission for the destination vault and archive source files without altering their bytes."
+      ],
+      "log_markdown": "---\nexperiment_id: \"RT-B-260820-001\"\ndate: \"2026-08-20\"\nsystem: \"RT\"\ndevice: \"B\"\nexperiment_type: \"qPCR\"\nsample_batches: [\"RT-1-B1\"]\nstatus: \"recorded\"\n---\n\n# qPCR (RT-B-260820-001)\n\n## Objective\nMeasure target expression\n\n## Samples\n- RT-1-B1: retina samples\n\n## Procedure\n1. Run qPCR\n\n## Observations\n- Amplification completed.\n\n## Anomalies\n- None recorded\n\n## Raw materials\n- raw/run.csv (aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)\n",
+      "major_issue_count": 0,
+      "ready_to_write": true,
+      "record": {
+        "anomalies": [],
+        "frontmatter": {
+          "date": "2026-08-20",
+          "device": "B",
+          "experiment_id": "RT-B-260820-001",
+          "experiment_type": "qPCR",
+          "sample_batches": [
+            "RT-1-B1"
+          ],
+          "status": "recorded",
+          "system": "RT"
+        },
+        "observations": [
+          {
+            "text": "Amplification completed."
+          }
+        ],
+        "steps": [
+          {
+            "action": "Run qPCR",
+            "conditions": {
+              "cycles": 40
+            },
+            "index": 1,
+            "sample_batches": [
+              "RT-1-B1"
+            ]
+          }
+        ]
+      },
+      "record_digest": "e4516ea4b60be8ed15aa30aadd54546af8484bcee5d97f8eda9f75f52fac176b"
+    }
+  },
   "expression-qc": {
     "input": {
       "genes": [
@@ -1495,6 +1722,18 @@
         }
       ],
       "plot_contracts": {
+        "docking_quality": {
+          "layout": "show score distributions and cluster summaries before highlighting selected models; mark the official integration-test profile as non-production",
+          "legend": "outside; separate producer scores, reference-agreement metrics and predicted affinity",
+          "required_elements": [
+            "complete model inventory",
+            "docking score",
+            "cluster identity",
+            "reference-dependent metrics only when a reference exists",
+            "sampling profile",
+            "rejected-model accounting"
+          ]
+        },
         "embedding_trajectory": {
           "layout": "use the same embedding and limits across comparable panels; show direction explicitly and do not imply physical distance",
           "legend": "right; direct labels for a small number of lineages",
@@ -1516,6 +1755,18 @@
             "adjusted-p encoding",
             "gene-set size encoding",
             "database and release"
+          ]
+        },
+        "enrichment_similarity_network": {
+          "layout": "label only representative terms in dense networks; preserve full term table and editable Cytoscape session",
+          "legend": "outside; show term significance, size, cluster and edge-similarity encodings separately",
+          "required_elements": [
+            "database categories and release",
+            "background universe",
+            "term-similarity threshold",
+            "multiplicity method",
+            "representative-term rule",
+            "cluster identity"
           ]
         },
         "genome_track": {
@@ -1585,6 +1836,19 @@
             "batch or sample shape"
           ]
         },
+        "ppi_network": {
+          "layout": "fixed seed or recorded Cytoscape layout; retain node and edge tables; proximity has no biological meaning unless explicitly encoded",
+          "legend": "outside; separate node size, node color, edge width and edge evidence semantics",
+          "required_elements": [
+            "database and release",
+            "organism",
+            "identifier mapping losses",
+            "functional or physical edge semantics",
+            "score threshold",
+            "added-node policy",
+            "edge evidence channels"
+          ]
+        },
         "qc_distribution": {
           "layout": "facets share scales when quantities are comparable",
           "legend": "top for condition; suppress when direct labels are clearer",
@@ -1630,6 +1894,33 @@
             "edge or vector scale",
             "sample identity",
             "tested interaction and FDR"
+          ]
+        },
+        "structure_complex": {
+          "layout": "pair an uncluttered complex overview with a zoomed interface or residue-contact panel; use the same chain colors across all views",
+          "legend": "outside the molecular view; identify every chain, ligand, confidence color and interface encoding",
+          "required_elements": [
+            "molecular identities",
+            "chain identities",
+            "model or experimental provenance",
+            "coordinate units",
+            "interface definition",
+            "confidence or quality semantics",
+            "orientation statement"
+          ]
+        },
+        "structure_confidence": {
+          "layout": "pair the complex with confidence summaries and PAE; use chain-pair metrics for interaction-specific questions",
+          "legend": "outside; confidence measures must never be labelled as binding probability or affinity",
+          "required_elements": [
+            "model version",
+            "seed and sample",
+            "ranking score",
+            "pTM",
+            "ipTM",
+            "chain or chain-pair confidence",
+            "clash status",
+            "PAE when available"
           ]
         },
         "three_dimensional_spatial": {
@@ -2596,6 +2887,229 @@
       }
     }
   },
+  "literature-acquisition-manifest-audit": {
+    "input": {
+      "items": [
+        {
+          "access_boundary_violation": false,
+          "access_route": "publisher-open-access",
+          "file_name": "paper.pdf",
+          "id": "P1",
+          "page_count": 8,
+          "pdf_signature_verified": true,
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "source_level": "full-text",
+          "status": "open_access_downloaded",
+          "title": "Open paper"
+        }
+      ]
+    },
+    "output": {
+      "blocking_finding_count": 0,
+      "findings": [],
+      "item_count": 1,
+      "items": [
+        {
+          "access_boundary_passed": true,
+          "access_route": "publisher-open-access",
+          "file_name": "paper.pdf",
+          "id": "P1",
+          "page_count": 8,
+          "pdf_signature_verified": true,
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "source_level": "full-text",
+          "status": "open_access_downloaded",
+          "title": "Open paper"
+        }
+      ],
+      "manifest_digest": "f01896369d4b31d8ba6a4231932b274766f9aea39850f780e8fd257559236fdf",
+      "manifest_valid": true,
+      "safety_boundary": [
+        "Use only open-access or user-authorized institutional routes.",
+        "Never request, read, store, export, or type passwords, one-time codes, cookies, tokens, or browser-session data.",
+        "Stop for CAPTCHA, bot checks, security warnings, or other verification challenges."
+      ],
+      "status_counts": {
+        "open_access_downloaded": 1
+      }
+    }
+  },
+  "literature-landscape-audit": {
+    "input": {
+      "focal_affiliations": [
+        "Institute A"
+      ],
+      "focal_authors": [
+        "A. One"
+      ],
+      "query_plan": {
+        "coverage_mode": "comprehensive",
+        "objective": "Map regulators of retinal maturation",
+        "queries": [
+          "retinal maturation regulator"
+        ],
+        "sources": [
+          "PubMed",
+          "Crossref"
+        ]
+      },
+      "records": [
+        {
+          "affiliations": [
+            "Institute A"
+          ],
+          "authors": [
+            "A. One"
+          ],
+          "citation_contexts": [],
+          "doi": "10.1000/example.1",
+          "id": "P1",
+          "journal": "Development",
+          "record_role": "candidate",
+          "retraction_status": "not-retracted",
+          "scores": {
+            "claim_directness": 4,
+            "evidence_depth": 4,
+            "methodological_fit": 4,
+            "novelty_value": 3,
+            "recency_value": 3,
+            "topic_relevance": 5
+          },
+          "source": "PubMed",
+          "source_level": "full-text",
+          "title": "Regulator study"
+        },
+        {
+          "affiliations": [
+            "Institute B"
+          ],
+          "authors": [
+            "B. Two"
+          ],
+          "citation_contexts": [
+            "Supports the developmental timing result."
+          ],
+          "doi": "10.1000/example.2",
+          "id": "P2",
+          "journal": "Cell Reports",
+          "record_role": "citing-work",
+          "retraction_status": "not-retracted",
+          "scores": {
+            "claim_directness": 3,
+            "evidence_depth": 2,
+            "methodological_fit": 3,
+            "novelty_value": 3,
+            "recency_value": 4,
+            "topic_relevance": 4
+          },
+          "source": "Crossref",
+          "source_level": "abstract-only",
+          "title": "Independent citing study"
+        }
+      ]
+    },
+    "output": {
+      "blocking_finding_count": 0,
+      "duplicates": [],
+      "findings": [],
+      "independent_citing_work_ids": [
+        "P2"
+      ],
+      "landscape_digest": "1c6ace97c09c1b46645d1b14e9fc8e6fa947b437c635921f1e807bc78adb0007",
+      "limitations": [
+        "Scores prioritize review and do not measure scientific truth, citation support, or journal quality.",
+        "Independence is bounded to the supplied author and affiliation identities; scientific independence still requires expert review.",
+        "Retrieval, retraction status, citation contexts, and journal scope must come from current authoritative or declared sources."
+      ],
+      "query_plan": {
+        "coverage_mode": "comprehensive",
+        "objective": "Map regulators of retinal maturation",
+        "queries": [
+          "retinal maturation regulator"
+        ],
+        "sources": [
+          "PubMed",
+          "Crossref"
+        ]
+      },
+      "ranked_records": [
+        {
+          "affiliation_overlap": [
+            "Institute A"
+          ],
+          "author_overlap": [
+            "A. One"
+          ],
+          "citation_contexts": [],
+          "doi": "10.1000/example.1",
+          "id": "P1",
+          "independent_citing_work": false,
+          "journal": "Development",
+          "record_role": "candidate",
+          "retraction_status": "not-retracted",
+          "scores": {
+            "claim_directness": 4.0,
+            "evidence_depth": 4.0,
+            "methodological_fit": 4.0,
+            "novelty_value": 3.0,
+            "recency_value": 3.0,
+            "topic_relevance": 5.0
+          },
+          "source": "PubMed",
+          "source_level": "full-text",
+          "title": "Regulator study",
+          "weighted_score": 3.833333
+        },
+        {
+          "affiliation_overlap": [],
+          "author_overlap": [],
+          "citation_contexts": [
+            "Supports the developmental timing result."
+          ],
+          "doi": "10.1000/example.2",
+          "id": "P2",
+          "independent_citing_work": true,
+          "journal": "Cell Reports",
+          "record_role": "citing-work",
+          "retraction_status": "not-retracted",
+          "scores": {
+            "claim_directness": 3.0,
+            "evidence_depth": 2.0,
+            "methodological_fit": 3.0,
+            "novelty_value": 3.0,
+            "recency_value": 4.0,
+            "topic_relevance": 4.0
+          },
+          "source": "Crossref",
+          "source_level": "abstract-only",
+          "title": "Independent citing study",
+          "weighted_score": 3.166667
+        }
+      ],
+      "ready_for_synthesis": true,
+      "record_count": 2,
+      "scoring_weights": {
+        "claim_directness": 1.0,
+        "evidence_depth": 1.0,
+        "methodological_fit": 1.0,
+        "novelty_value": 1.0,
+        "recency_value": 1.0,
+        "topic_relevance": 1.0
+      },
+      "source_coverage": {
+        "declared": [
+          "Crossref",
+          "PubMed"
+        ],
+        "missing": [],
+        "observed": [
+          "Crossref",
+          "PubMed"
+        ]
+      },
+      "strict_journal_scope": []
+    }
+  },
   "manuscript-audit": {
     "input": {
       "claims": [
@@ -3271,6 +3785,37 @@
       "translation_table": 1
     }
   },
+  "paper-reader-package-audit": {
+    "input": {
+      "assets": [],
+      "paper_markdown": "<a id=\"S001\"></a>\n**Source:** p.1 S001\n\n**Original:** Cells changed.\n\n**\u4e2d\u6587:** \u7ec6\u80de\u53d1\u751f\u53d8\u5316\u3002",
+      "source_complete": true,
+      "source_map": [
+        {
+          "id": "S001",
+          "original": "Cells changed.",
+          "page": 1,
+          "translation": "\u7ec6\u80de\u53d1\u751f\u53d8\u5316\u3002",
+          "type": "text"
+        }
+      ],
+      "translation_notes": "Terminology checked."
+    },
+    "output": {
+      "asset_count": 0,
+      "findings": [],
+      "limitations": [
+        "This gate validates the supplied reader package structure and traceability; it does not prove translation accuracy or figure-crop fidelity without expert visual review."
+      ],
+      "major_finding_count": 0,
+      "package_digest": "9772b172fd410a7e126d64c899b440528778ce0fa3e77cd51873bc88171eb964",
+      "ready_for_reading": true,
+      "source_block_count": 1,
+      "source_complete": true,
+      "source_map_digest": "3ee03338902d936361f9778617d951ba025dcac00d53e95273f13a409dd7f43e",
+      "text_block_count": 1
+    }
+  },
   "patent-claim-structure-audit": {
     "input": {
       "claims_text": "1. \u4e00\u79cd\u65b9\u6cd5\uff0c\u5176\u7279\u5f81\u5728\u4e8e\uff0c\u5305\u62ec\u6b65\u9aa4A\u3002\n2. \u6839\u636e\u6743\u5229\u8981\u6c423\u6240\u8ff0\u7684\u65b9\u6cd5\uff0c\u5176\u7279\u5f81\u5728\u4e8e\uff0c\u6b65\u9aa4B[\u5f85\u786e\u8ba4\uff1a\u6761\u4ef6]\u3002\n3. \u6839\u636e\u6743\u5229\u8981\u6c421\u6240\u8ff0\u7684\u65b9\u6cd5\uff0c\u5176\u7279\u5f81\u5728\u4e8e\uff0c\u83b7\u5f97\u66f4\u4f18\u7ed3\u679c\u3002"
@@ -3588,20 +4133,12 @@
         {
           "title": "Figure 1",
           "type": "UMAP"
-        },
-        {
-          "title": "Figure 2",
-          "type": "trajectory"
         }
       ],
       "key_findings": [
         {
           "claim": "Treatment shifted HSC fate toward myeloid lineage.",
           "evidence": "Cell counts and marker expression from independent donors."
-        },
-        {
-          "claim": "Pseudotime and velocity support progression order.",
-          "evidence": "Velocity-derived latent time and known marker switching."
         }
       ],
       "manuscript_inputs": {
@@ -3613,7 +4150,7 @@
       "reviewer_feedback": [
         {
           "action": "insert controls slide",
-          "comment": "Add a controls slide.",
+          "comment": "Add controls slide.",
           "status": "completed"
         }
       ],
@@ -3628,13 +4165,6 @@
           "claim": "Treatment shifted HSC fate toward myeloid lineage.",
           "evidence": "Cell counts and marker expression from independent donors.",
           "index": 1,
-          "status": "valid"
-        },
-        {
-          "audience_value": "",
-          "claim": "Pseudotime and velocity support progression order.",
-          "evidence": "Velocity-derived latent time and known marker switching.",
-          "index": 2,
           "status": "valid"
         }
       ],
@@ -3674,7 +4204,8 @@
         {
           "depends_on": [
             "citation-audit",
-            "manuscript-audit"
+            "manuscript-audit",
+            "statistical-reporting-audit"
           ],
           "missing_input": null,
           "mode": "parallel",
@@ -3685,7 +4216,8 @@
         {
           "depends_on": [
             "manuscript-audit",
-            "claim-evidence-integrity-audit"
+            "claim-evidence-integrity-audit",
+            "academic-prose-revision-audit"
           ],
           "missing_input": null,
           "mode": "serial",
@@ -3717,14 +4249,18 @@
       ],
       "next_steps": [
         "run figure-specification with valid figure/claim bindings",
-        "run manuscript-audit, citation-audit, and claim-evidence-integrity-audit",
+        "run manuscript-audit, citation-audit, statistical-reporting-audit, data-availability-audit, and claim-evidence-integrity-audit",
+        "run academic-prose-revision-audit on the exact original and revised text",
         "if feedback exists, run response-matrix then manuscript-revision-lineage",
-        "compile delivery package with explicit limitations and reproducibility ledger"
+        "compile the real presentation, reload it with presentation-package-audit, and complete rendered visual review",
+        "deliver with explicit limitations and the reproducibility ledger"
       ],
       "project_goal": "Prepare a publication-grade slide package.",
       "quality_gates": [
         "Every slide claim must map to one finding and one evidence-anchored conclusion.",
         "Review gates and unresolved comments cannot be silently closed; unresolved items remain explicit.",
+        "Every reported n, model, interval, p-value policy, repository route, and presentation asset must remain traceable to the source revision.",
+        "Language revision must preserve all numerical, citation, equation, terminology, and evidence-strength invariants.",
         "All publication-critical outputs must carry compatibility_row_id in provenance.",
         "No causal claim may be claimed without explicit evidence mapping or explicit uncertainty tags."
       ],
@@ -3740,16 +4276,36 @@
           "linked_artifact": "Figure 1",
           "recommended_module": "figure-specification",
           "slide": "S1"
-        },
-        {
-          "focus": "Pseudotime and velocity support progression order.",
-          "linked_artifact": "Figure 2",
-          "recommended_module": "figure-specification",
-          "slide": "S2"
         }
       ],
       "storyline": "From evidence trace to translational implication.",
       "target_audience": "Developmental biology and immunology collaborators"
+    }
+  },
+  "presentation-package-audit": {
+    "input": {
+      "asset_manifest": [],
+      "expected_slide_count": 1,
+      "pptx_base64": "UEsDBBQAAAAIAK6eFF38Ngg2XQAAAGIAAAATAAAAW0NvbnRlbnRfVHlwZXNdLnhtbBXMPQ6AIAxA4au4MUnRwcEoXMILEFJ/ohRCG6O3F8eXL3mTe+LV3Fj4SDSrThvl7LS8GbmpQjyrXSSPABx2jJ51ykhV1lSil5plg+zD6TeE3pgBQiJBklb+hwL7AVBLAwQUAAAACACunhRd3fb1o1oAAABrAAAAFAAAAHBwdC9wcmVzZW50YXRpb24ueG1sTYtLDoAgDAWv4o6dRRcuiJ+zEFOFhJaGNsbjy9Llm5m3Hi+V4cGmufLmptG7Y18lSENFtmgdDz1hDbK5ZCYBQM+EFHWsgtzdVRtF67Pd8P9Rgdn7BShmdrB/UEsDBBQAAAAIAK6eFF3JXJD3qwAAACQBAAAVAAAAcHB0L3NsaWRlcy9zbGlkZTEueG1sjZBBDsIgEEWv0h0rO9WFC0JpYuIJ9AKkjC0JUAKTWm8vtJrGnZsXmGHe/CC6xdlqxpjM5Ft2rBvWSRF4srrKHZ94aNlIFDhA6kd0KtVTQJ97jyk6RfkaBwgRE3pSlC3OwqlpzuCU8ewjUf9IdFRP44ef+ZKlv1m9Zgr3iLidCmm5TPolheKhIBaQvM5Go+/xYFFXZMiigFIvjCvza9inYdPB7ofvSlj/Qb4BUEsBAhQDFAAAAAgArp4UXfw2CDZdAAAAYgAAABMAAAAAAAAAAAAAAIABAAAAAFtDb250ZW50X1R5cGVzXS54bWxQSwECFAMUAAAACACunhRd3fb1o1oAAABrAAAAFAAAAAAAAAAAAAAAgAGOAAAAcHB0L3ByZXNlbnRhdGlvbi54bWxQSwECFAMUAAAACACunhRdyVyQ96sAAAAkAQAAFQAAAAAAAAAAAAAAgAEaAQAAcHB0L3NsaWRlcy9zbGlkZTEueG1sUEsFBgAAAAADAAMAxgAAAPgBAAAAAA==",
+      "qa_findings": []
+    },
+    "output": {
+      "asset_count": 0,
+      "blocking_finding_count": 0,
+      "findings": [],
+      "limitations": [
+        "Package reload and XML checks do not prove that crops, alignment, typography, color, or scientific legibility are acceptable; rendered visual review remains required.",
+        "A valid presentation package does not validate the scientific claims presented on its slides."
+      ],
+      "package": {
+        "byte_count": 724,
+        "media_count": 0,
+        "notes_slide_count": 0,
+        "sha256": "943da26430db444a166ff8e59fb451950a7f41278b3f5c26ab3292a0a4dc5641",
+        "slide_count": 1
+      },
+      "ready_for_visual_review": true,
+      "visible_text_character_count": 18
     }
   },
   "primer-design": {
@@ -4126,6 +4682,100 @@
       "provenance_gate_ids": [],
       "rule_count": 3,
       "semantic_validity_assessed": false
+    }
+  },
+  "research-proposal-quality-audit": {
+    "input": {
+      "agency": "Foundation",
+      "aims": [
+        {
+          "approach": "Perturb and measure",
+          "expected_outcome": "Bounded regulator estimate",
+          "fallback": "Use orthogonal readout",
+          "feasibility_evidence": [
+            "F1"
+          ],
+          "id": "A1",
+          "independence": "Interpretable alone",
+          "objective": "Determine the regulator of the signal",
+          "rationale": "The regulator is unresolved"
+        }
+      ],
+      "argument_map": {
+        "central_question": "What controls the signal?",
+        "central_thesis": "A bounded perturbation tests the model.",
+        "limitations": [
+          "One model system"
+        ],
+        "scientific_tension": "Signal is unresolved."
+      },
+      "evidence_table": [
+        {
+          "claim": "The assay is feasible.",
+          "claim_id": "C1",
+          "source_ids": [
+            "F1"
+          ],
+          "status": "evidence-backed"
+        }
+      ],
+      "iteration_scores": [],
+      "mode": "compose",
+      "research_canon": [
+        {
+          "fact": "Preliminary assay is feasible.",
+          "id": "F1"
+        }
+      ],
+      "review_criteria": [
+        "scientific merit"
+      ],
+      "scope": {
+        "constraints": "10 pages",
+        "deliverable": "proposal",
+        "language": "English",
+        "target_reader": "scientific panel",
+        "version_target": "v1"
+      },
+      "section_contracts": [
+        {
+          "allowed_claims": [
+            "C1"
+          ],
+          "forbidden_claims": [
+            "causality"
+          ],
+          "id": "S1",
+          "inputs": [
+            "F1"
+          ],
+          "purpose": "State the rationale",
+          "required_evidence": [
+            "F1"
+          ],
+          "validation": [
+            "claim mapped"
+          ]
+        }
+      ]
+    },
+    "output": {
+      "agency": "Foundation",
+      "findings": [],
+      "foundation": {
+        "aim_count": 1,
+        "canon_count": 1,
+        "digest": "30c0c03015973627bb58c822a8f449677fe9f8a82147c5e608cea3cb9a56e399",
+        "evidence_claim_count": 1,
+        "scope_complete": true,
+        "section_contract_count": 1
+      },
+      "major_finding_count": 0,
+      "mode": "compose",
+      "next_step": "Draft or revise under the frozen section contracts, then run academic prose validation.",
+      "ready_for_scientific_drafting": true,
+      "stop_iteration": false,
+      "stop_reasons": []
     }
   },
   "response-matrix": {
@@ -4727,6 +5377,7 @@
         "planned_output_is_not_evidence": true,
         "use_packaged_parameterized_templates": true
       },
+      "execution_state": "prepared-not-run",
       "forbidden_actions": [
         "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
         "Do not integrate a perfectly confounded design or treat integration as a repair for missing biological replication.",
@@ -4885,6 +5536,7 @@
         "requested_methods",
         "unknown_label"
       ],
+      "result_kind": "execution_handoff",
       "tool_profiles": [
         {
           "allowed_versions": [
@@ -5188,6 +5840,7 @@
         "planned_output_is_not_evidence": true,
         "use_packaged_parameterized_templates": true
       },
+      "execution_state": "prepared-not-run",
       "forbidden_actions": [
         "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
         "Do not guess raw-count layers, transpose matrices, repair identifiers, impute design metadata, relabel cell types, merge technical libraries, or convert unsupported formats silently.",
@@ -5376,6 +6029,7 @@
         "requested_engines",
         "subject_key"
       ],
+      "result_kind": "execution_handoff",
       "tool_profiles": [
         {
           "allowed_versions": [
@@ -5595,6 +6249,7 @@
         "planned_output_is_not_evidence": true,
         "use_packaged_parameterized_templates": true
       },
+      "execution_state": "prepared-not-run",
       "forbidden_actions": [
         "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
         "Do not silently convert formats, transpose matrices, guess raw-count layers, merge feature namespaces, rename cells, or join Seurat layers with different sample semantics.",
@@ -5749,6 +6404,7 @@
         "requested_backend",
         "species"
       ],
+      "result_kind": "execution_handoff",
       "tool_profiles": [
         {
           "allowed_versions": [
@@ -6000,6 +6656,7 @@
         "planned_output_is_not_evidence": true,
         "use_packaged_parameterized_templates": true
       },
+      "execution_state": "prepared-not-run",
       "forbidden_actions": [
         "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
         "Do not train on normalized values when the declared model requires raw counts.",
@@ -6152,6 +6809,7 @@
         "reviewed_label_key",
         "unknown_label"
       ],
+      "result_kind": "execution_handoff",
       "tool_profiles": [
         {
           "allowed_versions": [
@@ -6458,6 +7116,7 @@
         "planned_output_is_not_evidence": true,
         "use_packaged_parameterized_templates": true
       },
+      "execution_state": "prepared-not-run",
       "forbidden_actions": [
         "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
         "Do not guess gene identifier mappings, ontology edges, reference scope, marker evidence, missing labels, or annotation releases.",
@@ -6595,6 +7254,7 @@
         "reference_raw_count_location",
         "unknown_label"
       ],
+      "result_kind": "execution_handoff",
       "tool_profiles": [
         {
           "allowed_versions": [
@@ -6828,6 +7488,7 @@
         "planned_output_is_not_evidence": true,
         "use_packaged_parameterized_templates": true
       },
+      "execution_state": "prepared-not-run",
       "forbidden_actions": [
         "Use only already available, project-approved scientific runtimes; do not change the user's execution environment from this module.",
         "Do not fabricate, infer, or silently convert spliced and unspliced counts from total expression.",
@@ -6954,6 +7615,7 @@
         "terminal_score_key",
         "unspliced_layer"
       ],
+      "result_kind": "execution_handoff",
       "tool_profiles": [
         {
           "allowed_versions": [
@@ -7040,6 +7702,69 @@
         "within_review_window": 1
       },
       "upstream_drift_assessed": false
+    }
+  },
+  "statistical-reporting-audit": {
+    "input": {
+      "analyses": [
+        {
+          "assumptions": [
+            "residual review"
+          ],
+          "comparison_or_model": "treated vs control",
+          "effect_size": "mean difference",
+          "id": "A1",
+          "multiple_comparison_policy": "BH",
+          "software_version": "R 4.5.1",
+          "test_or_model": "linear model",
+          "uncertainty": "95% CI",
+          "unit_of_analysis": "mouse"
+        }
+      ],
+      "design": {
+        "biological_replicates": 6,
+        "blinding": "analysis blinded",
+        "exclusion_rules": "predefined",
+        "experimental_unit": "mouse",
+        "missing_data": "none",
+        "randomization": "blocked",
+        "technical_replicates": 2
+      },
+      "figure_statistics": [
+        {
+          "comparison": "treated vs control",
+          "error_bar_definition": "95% CI",
+          "exact_p_value_policy": "exact values",
+          "n_definition": "six mice per group",
+          "panel": "1a",
+          "test_or_model": "linear model"
+        }
+      ],
+      "result_statements": [
+        {
+          "analysis_id": "A1",
+          "causal_design": false,
+          "text": "The estimated mean difference was reported with a 95% CI."
+        }
+      ]
+    },
+    "output": {
+      "analysis_count": 1,
+      "author_input_needed": [],
+      "design_readout": {
+        "biological_replicates": 6,
+        "experimental_unit": "mouse",
+        "technical_replicates": 2
+      },
+      "figure_panel_count": 1,
+      "findings": [],
+      "limitations": [
+        "This audit checks declared design and reporting records; it does not reanalyse raw data or establish that a selected model is scientifically correct.",
+        "A domain statistician or study-design expert must review analyses whose design, dependence structure, missingness, or estimand remains ambiguous."
+      ],
+      "major_finding_count": 0,
+      "ready_for_manuscript_reporting": true,
+      "result_statement_count": 1
     }
   },
   "survival-analysis": {

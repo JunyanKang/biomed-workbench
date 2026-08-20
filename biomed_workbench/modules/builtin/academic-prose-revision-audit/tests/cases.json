@@ -1,0 +1,41 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "major_or_fatal_count": 0,
+        "phase": "post-revision",
+        "ready_for_delivery": true
+      },
+      "input": {
+        "ai_disclosure_evasion": false,
+        "claim_bindings": [
+          {
+            "claim": "The association was observed in 3 cohorts.",
+            "claim_id": "C1",
+            "claim_level": "associational",
+            "evidence_ids": [
+              "E1"
+            ],
+            "evidence_level": "associational",
+            "hedging_preserved": true,
+            "hedging_required": false
+          }
+        ],
+        "document_type": "research-article",
+        "original_text": "In 3 cohorts, the association was observed [1].",
+        "protected_spans": [
+          {
+            "kind": "result",
+            "text": "association"
+          }
+        ],
+        "revised_text": "The association was observed in 3 cohorts [1].",
+        "section_kind": "results",
+        "structure_policy": "preserve",
+        "target_venue": "Nature Communications"
+      },
+      "name": "preserve-number-citation-and-claim-scope"
+    }
+  ],
+  "schema_version": 1
+}

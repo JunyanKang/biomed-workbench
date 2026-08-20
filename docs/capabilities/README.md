@@ -16,7 +16,7 @@ Biomed Workbench organises capabilities around research questions. Once a user p
 | Molecular and structural biology | Connect sequence, protein interaction, chemistry, structure prediction, and molecular docking to testable hypotheses | [Molecular And Structural Biology](molecular-and-structural.md) |
 | Imaging and scientific visualisation | Quantify, segment, colocalise, and track image data and create figures that remain faithful to the measurements | [Imaging And Scientific Visualisation](imaging-and-visualization.md) |
 | Clinical and experimental research | Analyse cohorts, experimental measurements, time courses, survival outcomes, pharmacology, and microbiology data | [Clinical And Experimental Research](clinical-and-experimental.md) |
-| Publication and translation | Recommend journals according to evidence maturity and prepare manuscripts, reviewer responses, patents, figures, and presentations | [Publication And Translation](publication-and-translation.md) · [Journal Standards](../journal-standards.md) |
+| Publication and translation | Read papers, structure academic and proposal writing, review statistics and data availability, and prepare reviewer responses, patents, figures, and presentations | [Publication And Translation](publication-and-translation.md) · [Journal Standards](../journal-standards.md) |
 
 ## How Capabilities Are Combined
 
@@ -26,7 +26,7 @@ Independent work can proceed in parallel, while analyses that depend on upstream
 
 ## Current Coverage
 
-The registry currently contains **198 independently discoverable modules**. Registration means that a method's purpose, inputs, outputs, and conditions of use are defined; it does not mean that every module has completed real-world acceptance on every kind of data. See [Capability Maturity](../maturity.md) and [Public-Data Cases](../cases/README.md) for observed status.
+The registry currently contains **207 independently discoverable modules**. Registration means that a method's purpose, inputs, outputs, and conditions of use are defined; it does not mean that every module has completed real-world acceptance on every kind of data. See [Capability Maturity](../maturity.md) and [Public-Data Cases](../cases/README.md) for observed status.
 
 Bulk coverage includes RNA-seq; ChIP-seq, CUT&RUN, and CUT&Tag; several R-loop assays; RIP-seq, CLIP-family methods, and LACE-seq; Ribo-seq; GRO-seq, PRO-seq, TT-seq, and NET-seq; ATAC-seq and DNase-seq; WGBS, RRBS, and EM-seq; several three-dimensional genome assays; and MeRIP-seq/m6A-seq.
 

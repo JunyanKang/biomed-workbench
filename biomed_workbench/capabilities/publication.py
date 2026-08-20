@@ -867,15 +867,30 @@ def presentation_delivery_plan(
             "mode": "parallel",
             "dependencies": ["figure-specification"],
         },
+        "statistical-reporting-audit": {
+            "description": "Check experimental units, models, multiplicity, effect estimates, uncertainty, and panel-level statistical reporting.",
+            "mode": "parallel",
+            "dependencies": ["figure-specification", "manuscript-audit"],
+        },
+        "data-availability-audit": {
+            "description": "Map each claim-supporting dataset, code package, and material to a declared repository or governed access route.",
+            "mode": "parallel",
+            "dependencies": ["manuscript-audit"],
+        },
         "claim-evidence-integrity-audit": {
             "description": "Bind claims to declared evidence and keep unresolved claims marked.",
             "mode": "parallel",
-            "dependencies": ["citation-audit", "manuscript-audit"],
+            "dependencies": ["citation-audit", "manuscript-audit", "statistical-reporting-audit"],
+        },
+        "academic-prose-revision-audit": {
+            "description": "Verify that language revision preserves numbers, citations, equations, terminology, structure, uncertainty, and evidence strength.",
+            "mode": "serial",
+            "dependencies": ["claim-evidence-integrity-audit", "data-availability-audit"],
         },
         "manuscript-revision-base": {
             "description": "Create an immutable revision baseline before presentation assembly.",
             "mode": "serial",
-            "dependencies": ["manuscript-audit", "claim-evidence-integrity-audit"],
+            "dependencies": ["manuscript-audit", "claim-evidence-integrity-audit", "academic-prose-revision-audit"],
         },
         "response-matrix": {
             "description": "Convert reviewer comments into explicit action records and unresolved items.",
@@ -886,6 +901,11 @@ def presentation_delivery_plan(
             "description": "Produce a replayable revision chain from draft through response loops.",
             "mode": "serial",
             "dependencies": ["manuscript-revision-base", "response-matrix"],
+        },
+        "presentation-package-audit": {
+            "description": "Reload the actual presentation package, verify asset traceability, and retain unresolved visual-quality findings for rendered review.",
+            "mode": "serial",
+            "dependencies": ["figure-specification", "manuscript-revision-lineage"],
         },
     }
     enabled_modules = set(allowed_modules)
@@ -963,6 +983,8 @@ def presentation_delivery_plan(
     quality_gates = [
         "Every slide claim must map to one finding and one evidence-anchored conclusion.",
         "Review gates and unresolved comments cannot be silently closed; unresolved items remain explicit.",
+        "Every reported n, model, interval, p-value policy, repository route, and presentation asset must remain traceable to the source revision.",
+        "Language revision must preserve all numerical, citation, equation, terminology, and evidence-strength invariants.",
         "All publication-critical outputs must carry compatibility_row_id in provenance.",
         "No causal claim may be claimed without explicit evidence mapping or explicit uncertainty tags.",
     ]
@@ -985,9 +1007,11 @@ def presentation_delivery_plan(
         },
         "next_steps": [
             "run figure-specification with valid figure/claim bindings",
-            "run manuscript-audit, citation-audit, and claim-evidence-integrity-audit",
+            "run manuscript-audit, citation-audit, statistical-reporting-audit, data-availability-audit, and claim-evidence-integrity-audit",
+            "run academic-prose-revision-audit on the exact original and revised text",
             "if feedback exists, run response-matrix then manuscript-revision-lineage",
-            "compile delivery package with explicit limitations and reproducibility ledger",
+            "compile the real presentation, reload it with presentation-package-audit, and complete rendered visual review",
+            "deliver with explicit limitations and the reproducibility ledger",
         ],
         "limitations": [
             "This is a delivery-control planner and does not validate scientific conclusions.",

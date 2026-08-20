@@ -1,6 +1,353 @@
 {
-  "module_count": 198,
+  "module_count": 207,
   "modules": [
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The caller supplies the exact original and revised text and declares any intended structural change."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "academic-prose-revision-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "input_formats": {
+            "academic_revision": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "0.1.0",
+          "output_formats": {
+            "revision_audit": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "academic-prose-revision-audit-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "complements": [
+        "manuscript-revision-base",
+        "manuscript-revision-lineage",
+        "claim-evidence-integrity-audit",
+        "journal-targeting-and-compliance"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Audit academic prose before editing and compare a supplied revision against exact number, citation, equation, protected-term, structure, claim-strength, voice, venue, and disclosure boundaries.",
+      "domains": [
+        "publication",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.academic_writing:audit_academic_prose_revision",
+      "evidence_effects": [
+        "validates_scholarly_delivery_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 30
+      },
+      "id": "academic-prose-revision-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "academic_revision_pair",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "academic_revision",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "ai_disclosure_evasion": {
+            "type": "boolean"
+          },
+          "author_voice_sample": {
+            "type": "string"
+          },
+          "claim_bindings": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "document_type": {
+            "enum": [
+              "research-article",
+              "review-article",
+              "thesis",
+              "rebuttal",
+              "grant-proposal"
+            ],
+            "type": "string"
+          },
+          "original_text": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "protected_spans": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "revised_text": {
+            "type": "string"
+          },
+          "section_kind": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "structure_policy": {
+            "enum": [
+              "preserve",
+              "allow-declared-change"
+            ],
+            "type": "string"
+          },
+          "target_venue": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "original_text",
+          "document_type",
+          "section_kind",
+          "target_venue"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "academic prose revision",
+        "manuscript polishing audit",
+        "\u5b66\u672f\u8bed\u8a00\u4fee\u8ba2",
+        "\u8bba\u6587\u6da6\u8272\u5ba1\u67e5",
+        "\u57fa\u91d1\u6587\u672c\u8bed\u8a00\u5ba1\u67e5"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The deterministic gate cannot by itself judge whether prose genuinely matches an author's voice or whether a scientific interpretation is correct."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 5
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "academic_revision_audit",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "revision_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "claim_findings": {
+            "type": "array"
+          },
+          "document": {
+            "type": "object"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "invariant_report": {
+            "type": "object"
+          },
+          "major_or_fatal_count": {
+            "type": "integer"
+          },
+          "next_step": {
+            "type": "string"
+          },
+          "phase": {
+            "type": "string"
+          },
+          "ready_for_delivery": {
+            "type": "boolean"
+          },
+          "required_output": {
+            "type": "object"
+          },
+          "revision_digest": {
+            "nullable": true,
+            "type": "string"
+          },
+          "source_audit": {
+            "type": "object"
+          },
+          "source_digest": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "phase",
+          "document",
+          "source_digest",
+          "revision_digest",
+          "source_audit",
+          "invariant_report",
+          "claim_findings",
+          "findings",
+          "major_or_fatal_count",
+          "ready_for_delivery",
+          "required_output",
+          "next_step"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The declared scholarly source material and project context are available without invented facts."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Academic Humanizer 0.3.3, MIT-licensed source skill, adapted into deterministic project-owned preservation gates.",
+          "Nature-skills writing and delivery contracts available under their declared source licenses, adapted without copying host-specific runtime assumptions."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Numbers, equations, citations, results, and protected terminology remain unchanged.",
+          "id": "academic-prose-content-preservation",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every revised empirical claim remains within its declared evidence strength and preserves required uncertainty.",
+          "id": "academic-prose-claim-evidence",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The revision follows the supplied author voice and target venue without promotional or formulaic language.",
+          "id": "academic-prose-voice-and-venue",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Does this academic revision improve clarity without changing scientific content or exceeding the evidence?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "academic-prose-revision-audit",
+          "Audit evidence-bound academic prose revisions",
+          "academic prose revision",
+          "manuscript polishing audit",
+          "\u5b66\u672f\u8bed\u8a00\u4fee\u8ba2",
+          "\u8bba\u6587\u6da6\u8272\u5ba1\u67e5",
+          "\u57fa\u91d1\u6587\u672c\u8bed\u8a00\u5ba1\u67e5"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Audit evidence-bound academic prose revisions",
+      "tool_requirements": [],
+      "version": "0.1.0"
+    },
     {
       "access": "offline",
       "alternatives": [],
@@ -22796,6 +23143,315 @@
       "access": "offline",
       "alternatives": [],
       "assumptions": [
+        "Every dataset needed for main and supplementary claims is included in the inventory."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "data-availability-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "input_formats": {
+            "availability_package": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "0.1.0",
+          "output_formats": {
+            "availability_audit": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "data-availability-audit-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "complements": [
+        "manuscript-audit",
+        "citation-audit",
+        "journal-targeting-and-compliance"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Inventory claim-supporting datasets, classify each access route, validate repository and stable-identifier fields, record justified restrictions and access processes, and check explicit dataset-to-statement mapping.",
+      "domains": [
+        "publication",
+        "evidence",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_data_availability",
+      "evidence_effects": [
+        "validates_scholarly_delivery_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 30
+      },
+      "id": "data-availability-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "data_availability_package",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "availability_package",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "code_availability": {
+            "type": "object"
+          },
+          "datasets": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "materials_availability": {
+            "type": "object"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "target_journal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_journal",
+          "datasets",
+          "statement"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "data availability statement",
+        "repository plan",
+        "FAIR data audit",
+        "\u6570\u636e\u53ef\u7528\u6027\u58f0\u660e",
+        "\u6570\u636e\u4ed3\u50a8\u8ba1\u5212"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Current journal policy, consent, governance, repository acceptance, embargo, and identifier activation require authoritative verification."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 5
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "data_availability_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "availability_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "code_availability": {
+            "type": "object"
+          },
+          "dataset_count": {
+            "type": "integer"
+          },
+          "dataset_inventory": {
+            "type": "array"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "inventory_digest": {
+            "type": "string"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "major_finding_count": {
+            "type": "integer"
+          },
+          "materials_availability": {
+            "type": "object"
+          },
+          "ready_for_manuscript": {
+            "type": "boolean"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "target_journal": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_journal",
+          "dataset_inventory",
+          "dataset_count",
+          "statement",
+          "code_availability",
+          "materials_availability",
+          "findings",
+          "major_finding_count",
+          "ready_for_manuscript",
+          "inventory_digest",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The declared scholarly source material and project context are available without invented facts."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Nature Data Availability 2.0.0 workflow and FAIR/DataCite-aligned source hierarchy, adapted into a project-owned audit."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Every claim-supporting raw, processed, source-data, model, image, table, and reused dataset has one declared access route.",
+          "id": "availability-dataset-inventory",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Public and controlled datasets have a repository and stable identifier; restrictions have a reason and access process.",
+          "id": "availability-repository-identity",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The manuscript statement maps every dataset to its location or governed access route.",
+          "id": "availability-statement-coverage",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Can readers locate or request every dataset needed to inspect the manuscript's claims?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "data-availability-audit",
+          "Audit data availability and repository mapping",
+          "data availability statement",
+          "repository plan",
+          "FAIR data audit",
+          "\u6570\u636e\u53ef\u7528\u6027\u58f0\u660e",
+          "\u6570\u636e\u4ed3\u50a8\u8ba1\u5212"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Audit data availability and repository mapping",
+      "tool_requirements": [],
+      "version": "0.1.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
         "Rows are comparable observations and each column has a consistent scientific meaning."
       ],
       "code_templates": [
@@ -28379,6 +29035,339 @@
       "title": "Fit steady-state enzyme kinetics",
       "tool_requirements": [],
       "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "Dates, device codes, sample batches, steps, observations, anomalies, and raw-file digests are factual user or instrument records."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "experiment-log-standardization-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "input_formats": {
+            "experiment_record": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "0.1.0",
+          "output_formats": {
+            "standardized_log": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "experiment-log-standardization-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "complements": [
+        "claim-evidence-integrity-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Create a deterministic experiment identity, structured record, Markdown log, raw-material archive plan, anomaly routing, and unresolved-field gate from declared samples, steps, observations, and source digests.",
+      "domains": [
+        "wetlab",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:standardize_experiment_log",
+      "evidence_effects": [
+        "validates_scholarly_delivery_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 30
+      },
+      "id": "experiment-log-standardization",
+      "input_artifacts": [
+        {
+          "artifact_type": "raw_experiment_record",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "experiment_record",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "anomalies": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "daily_sequence": {
+            "type": "integer"
+          },
+          "device_code": {
+            "type": "string"
+          },
+          "experiment_date": {
+            "type": "string"
+          },
+          "experiment_type": {
+            "type": "string"
+          },
+          "objective": {
+            "type": "string"
+          },
+          "observations": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "raw_materials": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "sample_batches": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "steps": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "system_code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "experiment_date",
+          "system_code",
+          "device_code",
+          "daily_sequence",
+          "experiment_type",
+          "objective",
+          "sample_batches",
+          "steps",
+          "observations",
+          "raw_materials"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "experiment log",
+        "laboratory record",
+        "\u5b9e\u9a8c\u65e5\u5fd7\u6807\u51c6\u5316",
+        "\u5b9e\u9a8c\u8bb0\u5f55\u5f52\u6863"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Writing into an external vault and archiving raw files require explicit destination permission and byte-preserving file operations."
+      ],
+      "maturity": "validated",
+      "module_type": "transform",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 0
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "standardized_experiment_log",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "standardized_log",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "archive_plan": {
+            "type": "object"
+          },
+          "experiment_id": {
+            "type": "string"
+          },
+          "issues": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "log_markdown": {
+            "type": "string"
+          },
+          "major_issue_count": {
+            "type": "integer"
+          },
+          "ready_to_write": {
+            "type": "boolean"
+          },
+          "record": {
+            "type": "object"
+          },
+          "record_digest": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "experiment_id",
+          "record",
+          "log_markdown",
+          "archive_plan",
+          "issues",
+          "major_issue_count",
+          "ready_to_write",
+          "record_digest",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The declared scholarly source material and project context are available without invented facts."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Nature Experiment Log 1.0.0, MIT-licensed source skill, adapted to biomedical experiment and sample identities."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Experiment and sample-batch identities are stable and unique.",
+          "id": "experiment-log-identity",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every step has an action, conditions, and valid sample bindings.",
+          "id": "experiment-log-procedure",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Raw materials have paths and digests; uncertain fields and anomalies remain explicit.",
+          "id": "experiment-log-source-and-anomaly",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Can this experiment be recorded with stable sample identities, complete procedural context, source files, and explicit anomalies?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "experiment-log-standardization",
+          "Standardize a traceable experiment log",
+          "experiment log",
+          "laboratory record",
+          "\u5b9e\u9a8c\u65e5\u5fd7\u6807\u51c6\u5316",
+          "\u5b9e\u9a8c\u8bb0\u5f55\u5f52\u6863"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Standardize a traceable experiment log",
+      "tool_requirements": [],
+      "version": "0.1.0"
     },
     {
       "access": "offline",
@@ -40044,6 +41033,286 @@
       "version": "1.0.0"
     },
     {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The caller used only lawful open-access or user-authorized institutional routes and did not export browser secrets."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "literature-acquisition-manifest-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "input_formats": {
+            "acquisition_manifest": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "0.1.0",
+          "output_formats": {
+            "acquisition_audit": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "literature-acquisition-manifest-audit-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "complements": [
+        "literature-evidence",
+        "citation-record-resolution",
+        "paper-reader-package-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Validate per-paper access status, source level, lawful route, user handoff, PDF identity, page count, file digest, and credential boundary for open-access or institution-authorized literature retrieval.",
+      "domains": [
+        "evidence",
+        "publication"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_literature_acquisition_manifest",
+      "evidence_effects": [
+        "validates_scholarly_delivery_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 30
+      },
+      "id": "literature-acquisition-manifest-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "literature_acquisition_manifest",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "acquisition_manifest",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "literature download manifest",
+        "authorized full text retrieval",
+        "\u6587\u732e\u4e0b\u8f7d\u6e05\u5355\u5ba1\u67e5",
+        "\u673a\u6784\u6388\u6743\u6587\u732e\u83b7\u53d6"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "This module audits a retrieval manifest and does not itself authenticate, browse, download, or establish institutional entitlement."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 1
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "literature_acquisition_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "acquisition_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "blocking_finding_count": {
+            "type": "integer"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "item_count": {
+            "type": "integer"
+          },
+          "items": {
+            "type": "array"
+          },
+          "manifest_digest": {
+            "type": "string"
+          },
+          "manifest_valid": {
+            "type": "boolean"
+          },
+          "safety_boundary": {
+            "type": "array"
+          },
+          "status_counts": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "item_count",
+          "status_counts",
+          "items",
+          "findings",
+          "blocking_finding_count",
+          "manifest_valid",
+          "manifest_digest",
+          "safety_boundary"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The declared scholarly source material and project context are available without invented facts."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Nature Literature Downloader authorized-access and verification contract, adapted into a non-authenticating project-owned audit."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Every item uses an open-access or user-authorized route without bypassing access or verification controls.",
+          "id": "literature-access-route",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Downloaded PDFs have a real PDF signature, nonzero page count, file identity, and digest.",
+          "id": "literature-file-verification",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Login and publisher verification states identify the exact user action without requesting credentials.",
+          "id": "literature-handoff-status",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Does each literature item have an honest access outcome and a verified, lawful full-text artifact when one was obtained?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "literature-acquisition-manifest-audit",
+          "Audit authorized literature acquisition records",
+          "literature download manifest",
+          "authorized full text retrieval",
+          "\u6587\u732e\u4e0b\u8f7d\u6e05\u5355\u5ba1\u67e5",
+          "\u673a\u6784\u6388\u6743\u6587\u732e\u83b7\u53d6"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Audit authorized literature acquisition records",
+      "tool_requirements": [],
+      "version": "0.1.0"
+    },
+    {
       "access": "public_api",
       "alternatives": [],
       "assumptions": [
@@ -40368,6 +41637,339 @@
         }
       ],
       "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "Every record, score, source level, citation context, author identity, affiliation, and retraction status comes from a declared current source or explicit expert review."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "literature-landscape-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "input_formats": {
+            "literature_landscape": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "0.1.0",
+          "output_formats": {
+            "landscape_audit": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "literature-landscape-audit-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "complements": [
+        "literature-evidence",
+        "citation-record-resolution",
+        "citation-resolution-adjudication",
+        "literature-acquisition-manifest-audit",
+        "paper-reader-package-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Audit a bounded or recurring literature search plan, exact source coverage, identifier-based deduplication, six declared prioritisation dimensions, strict journal scope, retraction states, citation contexts, and author or affiliation overlap for candidate independent citing works.",
+      "domains": [
+        "evidence",
+        "publication"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_literature_landscape",
+      "evidence_effects": [
+        "validates_scholarly_delivery_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 30
+      },
+      "id": "literature-landscape-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "literature_landscape_records",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "literature_landscape",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "focal_affiliations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "focal_authors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "query_plan": {
+            "type": "object"
+          },
+          "records": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "scoring_weights": {
+            "type": "object"
+          },
+          "strict_journal_scope": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "query_plan",
+          "records"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "multi-source literature landscape",
+        "recurring literature monitoring",
+        "independent citing work audit",
+        "\u591a\u6765\u6e90\u6587\u732e\u68c0\u7d22\u5ba1\u67e5",
+        "\u5b9a\u671f\u6587\u732e\u8ffd\u8e2a",
+        "\u72ec\u7acb\u4ed6\u5f15\u5ba1\u67e5",
+        "\u9ad8\u5f71\u54cd\u529b\u4ed6\u5f15\u6838\u9a8c"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The module audits supplied records and rankings; it does not retrieve literature, calculate citation counts, or infer scientific support from venue or score."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 1
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "literature_landscape_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "landscape_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "blocking_finding_count": {
+            "type": "integer"
+          },
+          "duplicates": {
+            "type": "array"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "independent_citing_work_ids": {
+            "type": "array"
+          },
+          "landscape_digest": {
+            "type": "string"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "query_plan": {
+            "type": "object"
+          },
+          "ranked_records": {
+            "type": "array"
+          },
+          "ready_for_synthesis": {
+            "type": "boolean"
+          },
+          "record_count": {
+            "type": "integer"
+          },
+          "scoring_weights": {
+            "type": "object"
+          },
+          "source_coverage": {
+            "type": "object"
+          },
+          "strict_journal_scope": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "query_plan",
+          "scoring_weights",
+          "record_count",
+          "source_coverage",
+          "strict_journal_scope",
+          "ranked_records",
+          "duplicates",
+          "independent_citing_work_ids",
+          "findings",
+          "blocking_finding_count",
+          "ready_for_synthesis",
+          "landscape_digest",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The declared scholarly source material and project context are available without invented facts."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Nature Academic Search and Nature Literature Pipeline workflow concepts, adapted into a project-owned selection and independence audit."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Comprehensive and recurring searches declare at least two appropriate sources and account for every declared source.",
+          "id": "literature-landscape-source-coverage",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every record has stable identity, source level, six bounded prioritisation scores, deduplication, and an explicit retraction state.",
+          "id": "literature-landscape-selection",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Citing works retain citation context and explicit author or affiliation overlap rather than being labelled independent from citation count alone.",
+          "id": "literature-landscape-citation-independence",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Is this literature landscape broad enough for its declared scope, transparently prioritized, deduplicated, and explicit about independent citation context?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "literature-landscape-audit",
+          "Audit a multi-source literature landscape",
+          "multi-source literature landscape",
+          "recurring literature monitoring",
+          "independent citing work audit",
+          "\u591a\u6765\u6e90\u6587\u732e\u68c0\u7d22\u5ba1\u67e5",
+          "\u5b9a\u671f\u6587\u732e\u8ffd\u8e2a",
+          "\u72ec\u7acb\u4ed6\u5f15\u5ba1\u67e5",
+          "\u9ad8\u5f71\u54cd\u529b\u4ed6\u5f15\u6838\u9a8c"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Audit a multi-source literature landscape",
+      "tool_requirements": [],
+      "version": "0.1.0"
     },
     {
       "access": "offline",
@@ -47416,6 +49018,317 @@
       "access": "offline",
       "alternatives": [],
       "assumptions": [
+        "Source blocks and page numbers are extracted from the exact user-supplied or lawfully accessible paper artifact."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "paper-reader-package-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "input_formats": {
+            "reader_package": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "0.1.0",
+          "output_formats": {
+            "reader_audit": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "paper-reader-package-audit-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "complements": [
+        "pdf-evidence-extraction",
+        "citation-record-resolution",
+        "figure-specification"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Validate paragraph-level original and Chinese pairs, stable page-addressable source blocks, figure and table assets, source links, translation notes, and complete-package digests without replacing the paper with a summary.",
+      "domains": [
+        "publication",
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_paper_reader_package",
+      "evidence_effects": [
+        "validates_scholarly_delivery_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 30
+      },
+      "id": "paper-reader-package-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "bilingual_paper_reader_package",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "reader_package",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "assets": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "paper_markdown": {
+            "type": "string"
+          },
+          "source_complete": {
+            "type": "boolean"
+          },
+          "source_map": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "translation_notes": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "paper_markdown",
+          "source_map",
+          "translation_notes"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "bilingual paper reader",
+        "full paper translation audit",
+        "full-paper bilingual reading",
+        "\u4e2d\u82f1\u6587\u8bba\u6587\u7cbe\u8bfb",
+        "\u5168\u6587\u4e2d\u82f1\u5bf9\u7167\u7cbe\u8bfb",
+        "\u5168\u6587\u7ffb\u8bd1\u89e3\u8bfb",
+        "\u8bba\u6587\u9605\u8bfb\u5305\u5ba1\u67e5"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Translation accuracy, OCR quality, and scientific crop fidelity still require source-aware human and visual review."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 2
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "paper_reader_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "reader_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_count": {
+            "type": "integer"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "major_finding_count": {
+            "type": "integer"
+          },
+          "package_digest": {
+            "type": "string"
+          },
+          "ready_for_reading": {
+            "type": "boolean"
+          },
+          "source_block_count": {
+            "type": "integer"
+          },
+          "source_complete": {
+            "type": "boolean"
+          },
+          "source_map_digest": {
+            "type": "string"
+          },
+          "text_block_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "source_block_count",
+          "text_block_count",
+          "asset_count",
+          "source_complete",
+          "findings",
+          "major_finding_count",
+          "ready_for_reading",
+          "source_map_digest",
+          "package_digest",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The declared scholarly source material and project context are available without invented facts."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Nature Reader 2.0.0 full-paper source-map and bilingual output contract, adapted into a project-owned package audit."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Every substantive text, caption, figure, and table block has a stable ID and page location.",
+          "id": "reader-source-map-complete",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every extractable substantive text and caption block retains original and Chinese text without changing numbers, citations, equations, or terminology.",
+          "id": "reader-bilingual-pairs",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every figure and table asset has a source pointer, digest, and visible placement in the reading file.",
+          "id": "reader-assets-traceable",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Is the paper reader complete, bilingual, figure-aware, and traceable to stable source blocks?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "paper-reader-package-audit",
+          "Audit a bilingual full-paper reader package",
+          "bilingual paper reader",
+          "full paper translation audit",
+          "full-paper bilingual reading",
+          "\u4e2d\u82f1\u6587\u8bba\u6587\u7cbe\u8bfb",
+          "\u5168\u6587\u4e2d\u82f1\u5bf9\u7167\u7cbe\u8bfb",
+          "\u5168\u6587\u7ffb\u8bd1\u89e3\u8bfb",
+          "\u8bba\u6587\u9605\u8bfb\u5305\u5ba1\u67e5"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Audit a bilingual full-paper reader package",
+      "tool_requirements": [],
+      "version": "0.1.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
         "Numbered claims use an Arabic numeral followed by a period, Chinese enumeration comma, or full-width period."
       ],
       "compatibility_matrix": [
@@ -50728,10 +52641,14 @@
         "figure-specification",
         "manuscript-audit",
         "citation-audit",
+        "statistical-reporting-audit",
+        "data-availability-audit",
         "claim-evidence-integrity-audit",
+        "academic-prose-revision-audit",
         "response-matrix",
         "manuscript-revision-base",
-        "manuscript-revision-lineage"
+        "manuscript-revision-lineage",
+        "presentation-package-audit"
       ],
       "credentials": [],
       "dependencies": [
@@ -51017,6 +52934,298 @@
       "title": "Build a presentation delivery plan",
       "tool_requirements": [],
       "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The PPTX binary and asset manifest belong to the same presentation revision."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "presentation-package-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "input_formats": {
+            "presentation_package": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "0.1.0",
+          "output_formats": {
+            "presentation_audit": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "presentation-package-audit-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "complements": [
+        "presentation-delivery-plan",
+        "figure-specification",
+        "claim-evidence-integrity-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Reload a PPTX binary package, verify its core parts and slide count, inspect visible text density, bind external assets to source digests and slide locations, and block unresolved high-severity quality findings before rendered visual review.",
+      "domains": [
+        "publication",
+        "visualization"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.scholarly_delivery:audit_presentation_package",
+      "evidence_effects": [
+        "validates_scholarly_delivery_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 30
+      },
+      "id": "presentation-package-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "scientific_presentation_package",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "presentation_package",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_manifest": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "expected_slide_count": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "pptx_base64": {
+            "minLength": 8,
+            "type": "string"
+          },
+          "qa_findings": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "pptx_base64",
+          "expected_slide_count",
+          "asset_manifest"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "PPTX audit",
+        "paper presentation quality",
+        "\u8bba\u6587\u6c47\u62a5PPT\u5ba1\u67e5",
+        "\u5b66\u672f\u5e7b\u706f\u7247\u4ea4\u4ed8"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Structural package checks do not replace rendered visual inspection, source-figure review, or scientific claim validation."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 6
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "presentation_package_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "presentation_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "asset_count": {
+            "type": "integer"
+          },
+          "blocking_finding_count": {
+            "type": "integer"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "package": {
+            "type": "object"
+          },
+          "ready_for_visual_review": {
+            "type": "boolean"
+          },
+          "visible_text_character_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "package",
+          "visible_text_character_count",
+          "asset_count",
+          "findings",
+          "blocking_finding_count",
+          "ready_for_visual_review",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The declared scholarly source material and project context are available without invented facts."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Nature Paper-to-PPTX evidence-led narrative, asset traceability, real-PPTX, and corrective-QA contract, adapted into a project-owned package audit."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "The PPTX reloads as a valid package with the declared slide count.",
+          "id": "presentation-package-reload",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every external figure or table has a source, digest, and slide placement.",
+          "id": "presentation-asset-traceability",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "No high-severity crop, overflow, overlap, legibility, or scientific-context defect remains unresolved.",
+          "id": "presentation-qa-resolution",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Is this real PPTX package structurally valid, traceable, and ready for rendered scientific and visual review?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "presentation-package-audit",
+          "Reload and audit a scientific presentation package",
+          "PPTX audit",
+          "paper presentation quality",
+          "\u8bba\u6587\u6c47\u62a5PPT\u5ba1\u67e5",
+          "\u5b66\u672f\u5e7b\u706f\u7247\u4ea4\u4ed8"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Reload and audit a scientific presentation package",
+      "tool_requirements": [],
+      "version": "0.1.0"
     },
     {
       "access": "offline",
@@ -59609,6 +61818,355 @@
       "access": "offline",
       "alternatives": [],
       "assumptions": [
+        "Every canon fact, feasibility record, prior result, collaborator, and agency criterion is supplied by the user or a verified source."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "research-proposal-quality-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "input_formats": {
+            "proposal_foundation": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "0.1.0",
+          "output_formats": {
+            "proposal_audit": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "research-proposal-quality-audit-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "complements": [
+        "academic-prose-revision-audit",
+        "claim-evidence-integrity-audit",
+        "journal-targeting-and-compliance"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Validate a proposal scope, research canon, claim-evidence table, argument map, section contracts, aims, agency criteria, feasibility records, and bounded revision stopping rules before prose is promoted.",
+      "domains": [
+        "publication",
+        "experimental-design",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.academic_writing:audit_research_proposal",
+      "evidence_effects": [
+        "validates_scholarly_delivery_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 30
+      },
+      "id": "research-proposal-quality-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "research_proposal_foundation",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal_foundation",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "agency": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "aims": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "argument_map": {
+            "type": "object"
+          },
+          "evidence_table": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "iteration_scores": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array"
+          },
+          "mode": {
+            "enum": [
+              "compose",
+              "revise",
+              "hybrid",
+              "qa"
+            ],
+            "type": "string"
+          },
+          "research_canon": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "review_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scope": {
+            "type": "object"
+          },
+          "section_contracts": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "mode",
+          "agency",
+          "scope",
+          "research_canon",
+          "evidence_table",
+          "argument_map",
+          "section_contracts",
+          "aims",
+          "review_criteria"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "research proposal audit",
+        "grant proposal writing",
+        "specific aims review",
+        "NIH Specific Aims",
+        "\u57fa\u91d1\u7533\u8bf7\u5ba1\u67e5",
+        "\u79d1\u7814\u8ba1\u5212\u4e66\u5199\u4f5c",
+        "\u57fa\u91d1\u7533\u8bf7\u53ef\u884c\u6027\u5ba1\u67e5"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "This gate does not predict funding, replace agency instructions, or supply missing preliminary evidence, collaborators, or institutional commitments."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 1
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "research_proposal_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "agency": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "foundation": {
+            "type": "object"
+          },
+          "major_finding_count": {
+            "type": "integer"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "next_step": {
+            "type": "string"
+          },
+          "ready_for_scientific_drafting": {
+            "type": "boolean"
+          },
+          "stop_iteration": {
+            "type": "boolean"
+          },
+          "stop_reasons": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "mode",
+          "agency",
+          "foundation",
+          "findings",
+          "major_finding_count",
+          "ready_for_scientific_drafting",
+          "stop_iteration",
+          "stop_reasons",
+          "next_step"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The declared scholarly source material and project context are available without invented facts."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Academic Humanizer 0.3.3, MIT-licensed source skill, adapted into deterministic project-owned preservation gates.",
+          "Nature-skills writing and delivery contracts available under their declared source licenses, adapted without copying host-specific runtime assumptions."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Scope, canon, evidence table, argument map, and section contracts are complete before drafting.",
+          "id": "proposal-foundation-complete",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every aim has an independently useful objective, approach, expected outcome, feasibility evidence, and fallback.",
+          "id": "proposal-aim-feasibility",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Agency-specific review criteria and first-page commitments are explicit and reviewable.",
+          "id": "proposal-agency-criteria",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Are the proposal argument, aims, feasibility, evidence, and agency-specific review criteria complete enough for scientific drafting?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "research-proposal-quality-audit",
+          "Audit research proposal foundations and feasibility",
+          "research proposal audit",
+          "grant proposal writing",
+          "specific aims review",
+          "NIH Specific Aims",
+          "\u57fa\u91d1\u7533\u8bf7\u5ba1\u67e5",
+          "\u79d1\u7814\u8ba1\u5212\u4e66\u5199\u4f5c",
+          "\u57fa\u91d1\u7533\u8bf7\u53ef\u884c\u6027\u5ba1\u67e5"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Audit research proposal foundations and feasibility",
+      "tool_requirements": [],
+      "version": "0.1.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
         "Every supplied reviewer comment requires one traceable response and manuscript action."
       ],
       "compatibility_matrix": [
@@ -59845,7 +62403,14 @@
           "\u5efa\u7acb\u5ba1\u7a3f\u610f\u89c1\u56de\u590d\u77e9\u9635"
         ],
         "named_method_priority": 100,
-        "required_any_terms": []
+        "required_any_terms": [
+          "response",
+          "reviewer",
+          "rebuttal",
+          "\u5ba1\u7a3f",
+          "\u56de\u590d",
+          "\u8fd4\u4fee"
+        ]
       },
       "schema_version": 1,
       "title": "Build a reviewer response matrix",
@@ -98311,6 +100876,310 @@
       "version": "1.0.0"
     },
     {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The structured design and analysis records faithfully represent the analysis that was actually executed."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "statistical-reporting-audit-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "input_formats": {
+            "statistical_report": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "0.1.0",
+          "output_formats": {
+            "statistics_audit": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "statistical-reporting-audit-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-20"
+        }
+      ],
+      "complements": [
+        "manuscript-audit",
+        "figure-specification",
+        "claim-evidence-integrity-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-20",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Check experimental units, biological and technical replication, randomization, blinding, exclusions, missingness, model definitions, assumptions, multiplicity, effect sizes, uncertainty, software versions, result wording, and figure statistics.",
+      "domains": [
+        "publication",
+        "statistics",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.academic_writing:audit_statistical_reporting",
+      "evidence_effects": [
+        "validates_scholarly_delivery_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 30
+      },
+      "id": "statistical-reporting-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "statistical_reporting_records",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "statistical_report",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "analyses": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "design": {
+            "type": "object"
+          },
+          "figure_statistics": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "result_statements": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "design",
+          "analyses",
+          "result_statements"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "statistical reporting audit",
+        "statistics methods review",
+        "figure statistics review",
+        "\u7edf\u8ba1\u62a5\u544a\u5ba1\u67e5",
+        "\u56fe\u6ce8\u7edf\u8ba1\u5ba1\u67e5"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The module reviews declared reporting records and does not replace a raw-data reanalysis or specialist statistical review."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 5
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "statistical_reporting_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "statistics_audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_count": {
+            "type": "integer"
+          },
+          "author_input_needed": {
+            "type": "array"
+          },
+          "design_readout": {
+            "type": "object"
+          },
+          "figure_panel_count": {
+            "type": "integer"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "major_finding_count": {
+            "type": "integer"
+          },
+          "ready_for_manuscript_reporting": {
+            "type": "boolean"
+          },
+          "result_statement_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "design_readout",
+          "analysis_count",
+          "result_statement_count",
+          "figure_panel_count",
+          "findings",
+          "major_finding_count",
+          "ready_for_manuscript_reporting",
+          "author_input_needed",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The declared scholarly source material and project context are available without invented facts."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Nature Statistics reporting skill source basis and project-owned deterministic reporting checks."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "The independent unit and biological, technical, nested, and repeated measurements are distinguished.",
+          "id": "statistics-unit-and-replication",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every reported comparison declares its model, assumptions, multiplicity, effect estimate, uncertainty, and software version.",
+          "id": "statistics-model-reporting",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Figure panels define n, tests, comparisons, error bars, and exact p-value policy.",
+          "id": "statistics-figure-alignment",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Does the manuscript report the design and statistical inference transparently without pseudoreplication or overclaiming?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "statistical-reporting-audit",
+          "Audit manuscript statistical reporting",
+          "statistical reporting audit",
+          "statistics methods review",
+          "figure statistics review",
+          "\u7edf\u8ba1\u62a5\u544a\u5ba1\u67e5",
+          "\u56fe\u6ce8\u7edf\u8ba1\u5ba1\u67e5"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Audit manuscript statistical reporting",
+      "tool_requirements": [],
+      "version": "0.1.0"
+    },
+    {
       "access": "agent_generated",
       "agent_protocol": {
         "forbidden_actions": [
@@ -109286,7 +112155,7 @@
       "version": "1.0.0"
     }
   ],
-  "plugin_version": "0.2.0",
-  "registry_digest": "fcd2ef5bf001de5bc57b40cfe9c2eba4db66e8bdc756ecb58b4852c6f04203fc",
+  "plugin_version": "0.2.1",
+  "registry_digest": "8c250de48ad4f036b9981b660004471e698868d8bad09a600040e45f5aa8e768",
   "schema_version": 1
 }

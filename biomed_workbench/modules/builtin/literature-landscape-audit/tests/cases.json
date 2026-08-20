@@ -1,0 +1,89 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "blocking_finding_count": 0,
+        "independent_citing_work_ids": [
+          "P2"
+        ],
+        "ready_for_synthesis": true,
+        "record_count": 2
+      },
+      "input": {
+        "focal_affiliations": [
+          "Institute A"
+        ],
+        "focal_authors": [
+          "A. One"
+        ],
+        "query_plan": {
+          "coverage_mode": "comprehensive",
+          "objective": "Map regulators of retinal maturation",
+          "queries": [
+            "retinal maturation regulator"
+          ],
+          "sources": [
+            "PubMed",
+            "Crossref"
+          ]
+        },
+        "records": [
+          {
+            "affiliations": [
+              "Institute A"
+            ],
+            "authors": [
+              "A. One"
+            ],
+            "citation_contexts": [],
+            "doi": "10.1000/example.1",
+            "id": "P1",
+            "journal": "Development",
+            "record_role": "candidate",
+            "retraction_status": "not-retracted",
+            "scores": {
+              "claim_directness": 4,
+              "evidence_depth": 4,
+              "methodological_fit": 4,
+              "novelty_value": 3,
+              "recency_value": 3,
+              "topic_relevance": 5
+            },
+            "source": "PubMed",
+            "source_level": "full-text",
+            "title": "Regulator study"
+          },
+          {
+            "affiliations": [
+              "Institute B"
+            ],
+            "authors": [
+              "B. Two"
+            ],
+            "citation_contexts": [
+              "Supports the developmental timing result."
+            ],
+            "doi": "10.1000/example.2",
+            "id": "P2",
+            "journal": "Cell Reports",
+            "record_role": "citing-work",
+            "retraction_status": "not-retracted",
+            "scores": {
+              "claim_directness": 3,
+              "evidence_depth": 2,
+              "methodological_fit": 3,
+              "novelty_value": 3,
+              "recency_value": 4,
+              "topic_relevance": 4
+            },
+            "source": "Crossref",
+            "source_level": "abstract-only",
+            "title": "Independent citing study"
+          }
+        ]
+      },
+      "name": "two-source-bounded-landscape"
+    }
+  ],
+  "schema_version": 1
+}
