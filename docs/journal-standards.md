@@ -2,6 +2,8 @@
 
 Biomed Workbench matches a project to journals by scientific remit, intended readership, article type, study design, evidence maturity and translational reach. The result is a reasoned shortlist: each recommendation states why the project fits, where it is weaker, and which evidence or manuscript changes would materially improve the match.
 
+Journal positioning is one part of the complete writing workflow. See [Academic Writing, Publication, And Translation](capabilities/publication-and-translation.md) for full-paper reading, manuscript and proposal writing, scholarly language revision, statistical reporting, data availability, paper figures, peer-review response, and presentation delivery.
+
 ## What The Assessment Covers
 
 - journal audience, scientific scope and preferred article families;
@@ -18,4 +20,4 @@ Provide the project question, study design, principal findings, validation layer
 
 Requirements are bound to the selected journal profile and its review date. A new assessment is required when the target journal, article type or author instructions change. Missing or ambiguous requirements remain explicit checks and prevent a submission-ready conclusion until resolved.
 
-[中文说明](journal-standards.zh-CN.md)
+[Academic Writing, Publication, And Translation](capabilities/publication-and-translation.md) · [中文说明](journal-standards.zh-CN.md)

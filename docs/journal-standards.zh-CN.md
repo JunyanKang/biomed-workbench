@@ -2,6 +2,8 @@
 
 Biomed Workbench 根据研究范围、目标读者、文章类型、研究设计、证据成熟度和转化价值评估期刊适配性。输出不是简单列出刊名，而是形成有依据的候选方案：逐项说明项目为何适合、当前短板在哪里，以及哪些证据补充或稿件调整能够实质改善匹配度。
 
+期刊定位是完整写作流程中的一个环节。文献精读、论文与基金写作、学术语言修订、统计报告、数据可用性、论文图、审稿回复和演示交付见[科研写作、发表与转化交付](capabilities/publication-and-translation.zh-CN.md)。
+
 ## 评估内容
 
 - 期刊读者、研究范围与主要文章类型；
@@ -18,4 +20,4 @@ Biomed Workbench 根据研究范围、目标读者、文章类型、研究设计
 
 每次评估都会绑定所采用的期刊规范版本和复核日期。更换目标期刊、文章类型或作者指南发生更新时，需要重新评估。未明确或存在歧义的要求会保留为待核实项，在解决前不会给出“可直接投稿”的结论。
 
-[English guide](journal-standards.md)
+[科研写作、发表与转化交付](capabilities/publication-and-translation.zh-CN.md) · [English guide](journal-standards.md)

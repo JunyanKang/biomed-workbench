@@ -32,7 +32,7 @@ class ReleaseSurfaceTests(unittest.TestCase):
 
         self.assertTrue((ROOT / "LICENSE").exists())
         self.assertEqual(plugin["license"], "Apache-2.0")
-        self.assertEqual(plugin["version"], "0.2.1")
+        self.assertEqual(plugin["version"], "0.2.2")
         self.assertEqual(plugin["version"], catalog["version"])
 
     def test_top_level_help_discovers_the_complete_project_command_surface(self):
@@ -131,6 +131,26 @@ class ReleaseSurfaceTests(unittest.TestCase):
         skill_text = (ROOT / "skills" / "biomed-workbench" / "SKILL.md").read_text(encoding="utf-8").lower()
         for phrase in ("versioned catalog", "catalog version"):
             self.assertNotIn(phrase, skill_text)
+
+    def test_bilingual_public_entrypoints_expose_complete_writing_capabilities(self):
+        chinese_readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        english_readme = (ROOT / "README.en.md").read_text(encoding="utf-8")
+        chinese_usage = (ROOT / "docs" / "using-biomed-workbench.zh-CN.md").read_text(encoding="utf-8")
+        english_usage = (ROOT / "docs" / "using-biomed-workbench.md").read_text(encoding="utf-8")
+
+        self.assertIn("## 论文写作与科研交付", chinese_readme)
+        self.assertIn("## Academic Writing And Research Delivery", english_readme)
+        self.assertIn("## 论文、基金和投稿任务怎样提出", chinese_usage)
+        self.assertIn("## How To Request Manuscript, Proposal, And Submission Work", english_usage)
+
+        for term in ("全文中英对照精读", "基金", "学术表达", "统计报告", "数据可用性", "审稿", "专利"):
+            self.assertIn(term, chinese_readme)
+        for term in ("full-paper bilingual reading", "proposal", "scholarly prose", "statistical reporting", "data and code availability", "peer review", "patent"):
+            self.assertIn(term, english_readme)
+
+        capability_link = "docs/capabilities/publication-and-translation"
+        self.assertIn(f"{capability_link}.zh-CN.md", chinese_readme)
+        self.assertIn(f"{capability_link}.md", english_readme)
 
 
 if __name__ == "__main__":

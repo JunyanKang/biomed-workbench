@@ -1,4 +1,4 @@
-# Publication And Translation
+# Academic Writing, Publication, And Translation
 
 Languages: [English](publication-and-translation.md) · [中文](publication-and-translation.zh-CN.md)
 
@@ -6,9 +6,25 @@ Languages: [English](publication-and-translation.md) · [中文](publication-and
 
 This capability area turns the research record into coherent, reviewable, and traceable scientific material. It connects conclusions, evidence, and analysis results, preserves negative and unresolved findings, and ensures that manuscript changes correspond to the data, figures, and citations.
 
+It covers the complete path from literature and project facts to formal research delivery while preserving the boundaries among different tasks.
+
+| Task | What the workbench does | Main material required |
+| --- | --- | --- |
+| Literature landscape and monitoring | Organises multi-source searches, merges duplicate records, verifies versions and citation contexts, and separates support, limitation, and conflict | Scientific question, scope, date conditions, inclusion and exclusion criteria |
+| Full-paper reading | Establishes page and stable text locations and produces paragraph-level bilingual text, terminology, and figure locations | Lawfully accessible full text, reading purpose, priority questions |
+| Manuscript planning and writing | Freezes the research canon, central argument, evidence boundary, and section roles before drafting titles, abstracts, main text, Methods, or Results | Project data, figures, analysis records, references, article type |
+| Scholarly language revision | Identifies structural, evidentiary, and prose problems before rewriting and checking scientific-content preservation | Original text, permitted revision scope, author sample or target register |
+| Funding and research proposals | Reviews the question, overall argument, aims, feasibility evidence, independent value, and fallback strategy | Current instructions, authentic preliminary foundation, resources, and applicant material |
+| Statistics and data availability | Checks experimental units, replication, statistical reporting, and figure legends, then maps data, code, materials, and access routes | Study design, statistical output, legends, data and code inventory |
+| Journals and submission requirements | Recommends journals by scope, audience, article type, and evidence maturity and audits the manuscript field by field | Project summary or manuscript, intended readership, publication constraints |
+| Figures, peer review, and revision | Plans figures and captions, simulates review, builds point-by-point responses, and tracks real revision locations | Source data, current figures, editor and reviewer text, manuscript versions |
+| Presentations and patent-related material | Builds and reviews a real presentation or organises source-grounded technical disclosure and patent-drafting packages | Audience and duration plus source figures, or a complete disclosure and evidence set |
+
+The unified research entry uses the actual evidence for prose generation, scientific judgment, and project narrative. Deterministic audit modules check content preservation, statistical reporting, data availability, manuscript revision, and delivered files. Passing a generic module does not make a particular manuscript submission-ready; that decision remains bound to the manuscript, target journal, and current delivery review.
+
 ## Unified Publication Program
 
-For manuscript, response, patent, or presentation requests, the workbench first assesses journal fit and article type, then establishes the figure and manuscript structure. It reviews citations, statements, temporal relationships, and support for conclusions, and uses response matrices and revision records to organise required changes. Patent and presentation material uses only reviewed evidence while retaining unresolved questions.
+The workbench first identifies whether the task is manuscript writing, a funding proposal, peer review, a presentation, or patent-related preparation, then checks whether the available evidence can support that delivery. Submission work includes journal and article-type assessment; writing begins from the central argument, section roles, and figure relationships; revision checks citations, statements, temporal relationships, and support for conclusions and uses response matrices and revision records to organise required changes. Patent and presentation material uses only reviewed evidence while retaining unresolved questions.
 
 Manuscript revision, reviewer response, patent preparation, and presentation material are reviewed separately because they have different audiences, purposes, and quality requirements.
 

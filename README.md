@@ -18,6 +18,7 @@
 <p align="center">
   <a href="#开始使用">开始使用</a> ·
   <a href="docs/capabilities/README.zh-CN.md">能力地图</a> ·
+  <a href="#论文写作与科研交付">论文写作与科研交付</a> ·
   <a href="docs/scientific-evidence-map.zh-CN.md">证据地图</a> ·
   <a href="docs/releases/README.zh-CN.md">发布记录</a>
 </p>
@@ -67,9 +68,24 @@ Biomed Workbench 把生物医学研究设计、数据分析和科研交付连接
 | [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | 蛋白互作网络，AlphaFold 结果接收与质量评审，HADDOCK3 对接，结构比较、结合评估和网络交付 |
 | [临床与实验研究](docs/capabilities/clinical-and-experimental.zh-CN.md) | 队列、生存、标志物和定量实验；流式、qPCR、剂量反应、蛋白定量、微生物学和动物实验 |
 | [成像与科学可视化](docs/capabilities/imaging-and-visualization.zh-CN.md) | 图像检查、分割、共定位、目标追踪、迁移定量、科学图件设计和结构交互视图 |
-| [论文与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) | 全文双语精读，科研写作与基金论证，统计和数据可用性审查，期刊定位、引用核查、审稿回复、专利、图件与汇报交付 |
+| [科研写作、发表与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) | 全文双语精读，科研写作与基金论证，统计和数据可用性审查，期刊定位、引用核查、审稿回复、专利、图件与汇报交付 |
 
 完整能力索引：[中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)
+
+## 论文写作与科研交付
+
+写作能力贯穿研究全过程，而不是在分析结束后单独进行文字润色。工作台先核对研究事实、数据、图表和引用，再根据论文、基金申请、审稿回复、汇报或专利材料的实际用途组织内容；证据不足的地方保留为待补信息、限制或假设。
+
+| 阶段 | 能够完成的工作 | 主要交付物 |
+| --- | --- | --- |
+| 文献与阅读 | 多来源检索、文献身份与引用语境核查、全文中英对照精读、术语与图表定位 | 文献版图、全文阅读文件、来源定位表、术语表 |
+| 论证与初稿 | 建立研究事实和主张—证据关系，规划论文结构与各章节任务，撰写论文或基金申请 | 论文各章节、基金论证、方法与结果文字、待补信息清单 |
+| 语言与内容修订 | 改善学术表达，同时复核数字、结果、公式、引用、术语、结构和结论强度是否保持一致 | 修订稿、修改说明、内容保持检查 |
+| 统计与投稿规范 | 审查实验单位、重复结构、统计报告、数据与代码可用性，并按目标期刊和文章类型核对要求 | 统计审查、数据可用性声明、期刊建议、稿件规范检查 |
+| 图件与同行评议 | 规划论文图和图注，模拟审稿，组织逐条回复、稿件修改及其证据位置 | 图件方案、审稿意见、回复信、回复矩阵、修订记录 |
+| 汇报与转化 | 组织真实演示文件并复查页面，准备有来源支撑的技术披露和专利草稿材料 | 演示文件与质量报告、技术披露、专利证据与草稿包 |
+
+这些能力既可用于已有稿件的局部修订，也可以从文献和项目证据开始组织整篇论文。详细范围、输入要求和交付边界见[科研写作、发表与转化交付](docs/capabilities/publication-and-translation.zh-CN.md)；具体期刊要求见[期刊定位与稿件规范](docs/journal-standards.zh-CN.md)。
 
 ## 可信度如何进入流程
 
@@ -94,6 +110,8 @@ Biomed Workbench 把生物医学研究设计、数据分析和科研交付连接
 
 > 围绕一个候选机制整合文献、公共数据库、组学、蛋白互作与结构证据；区分直接证据、关联、冲突和缺口，再提出最能改变当前判断的后续实验。
 
+> 根据项目数据、图表、分析记录和参考文献，先建立主张—证据关系，再完成论文结构、Results 和 Discussion 初稿；随后审查统计报告、引用、数据可用性和目标期刊要求，并交付修订说明与未解决问题清单。
+
 详见[使用指南](docs/using-biomed-workbench.zh-CN.md)和[安装说明](docs/installation.zh-CN.md)。
 
 ## 在不同智能体中使用
@@ -110,7 +128,7 @@ Biomed Workbench 把生物医学研究设计、数据分析和科研交付连接
 | 科学能力 | [能力地图](docs/capabilities/README.zh-CN.md) · [公共案例](docs/cases/README.zh-CN.md) | [Capability map](docs/capabilities/README.md) · [Public cases](docs/cases/README.md) |
 | 证据与复现 | [证据地图](docs/scientific-evidence-map.zh-CN.md) · [成熟度](docs/maturity.zh-CN.md) · [可复现性](docs/reproducibility.zh-CN.md) | [Evidence map](docs/scientific-evidence-map.md) · [Maturity](docs/maturity.md) · [Reproducibility](docs/reproducibility.md) |
 | 数据访问 | [公共数据库与凭据](docs/data-access-and-credentials.zh-CN.md) | [Data access and credentials](docs/data-access-and-credentials.md) |
-| 写作与期刊 | [论文与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) · [期刊定位与稿件规范](docs/journal-standards.zh-CN.md) | [Publication and translation](docs/capabilities/publication-and-translation.md) · [Journal positioning and manuscript requirements](docs/journal-standards.md) |
+| 写作与期刊 | [科研写作、发表与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) · [期刊定位与稿件规范](docs/journal-standards.zh-CN.md) | [Academic writing, publication, and translation](docs/capabilities/publication-and-translation.md) · [Journal positioning and manuscript requirements](docs/journal-standards.md) |
 | 项目结构与扩展 | [架构](docs/architecture.zh-CN.md) · [格式与数据要求](docs/format-contracts.zh-CN.md) · [开发](docs/development.zh-CN.md) | [Architecture](docs/architecture.md) · [File and data requirements](docs/format-contracts.md) · [Development](docs/development.md) |
 | 版本 | [发布记录](docs/releases/README.zh-CN.md) | [Release notes](docs/releases/README.md) |
 

@@ -16,7 +16,13 @@ Biomed Workbench organises capabilities around research questions. Once a user p
 | Molecular and structural biology | Connect sequence, protein interaction, chemistry, structure prediction, and molecular docking to testable hypotheses | [Molecular And Structural Biology](molecular-and-structural.md) |
 | Imaging and scientific visualisation | Quantify, segment, colocalise, and track image data and create figures that remain faithful to the measurements | [Imaging And Scientific Visualisation](imaging-and-visualization.md) |
 | Clinical and experimental research | Analyse cohorts, experimental measurements, time courses, survival outcomes, pharmacology, and microbiology data | [Clinical And Experimental Research](clinical-and-experimental.md) |
-| Publication and translation | Read papers, structure academic and proposal writing, review statistics and data availability, and prepare reviewer responses, patents, figures, and presentations | [Publication And Translation](publication-and-translation.md) · [Journal Standards](../journal-standards.md) |
+| Academic writing and research delivery | Perform literature discovery and full-paper reading, manuscript and proposal writing, scholarly prose revision, statistics and data-availability review, journal positioning, citation verification, paper figures, peer-review response, presentations, and patent-related preparation | [Academic Writing, Publication, And Translation](publication-and-translation.md) · [Journal Standards](../journal-standards.md) |
+
+## How Writing Connects To The Research
+
+The workbench does not reduce writing to final-stage polishing. Publication identity, full-text locations, project facts, analysis results, figures, and citations first become a reviewable writing basis. Manuscript structure, paragraphs, and proposal arguments are built from that record. Revision then checks scholarly expression, content preservation, statistical reporting, data availability, and target-journal requirements separately. Peer review connects each editor or reviewer point to the response, real revision, and manuscript location. Figures, presentations, and patent-related material reuse reviewed project evidence while retaining their distinct delivery requirements.
+
+Users may request one part of this process or ask the workbench to progress from literature and project data to a complete manuscript. See [Academic Writing, Publication, And Translation](publication-and-translation.md) for tasks, inputs, and deliverables, and [Using Biomed Workbench](../using-biomed-workbench.md) for natural-language examples.
 
 ## How Capabilities Are Combined
 
@@ -32,7 +38,7 @@ Bulk coverage includes RNA-seq; ChIP-seq, CUT&RUN, and CUT&Tag; several R-loop a
 
 The assay, target, antibody, control, specificity treatment, and normalisation strategy are recorded separately. For example, CUT&Tag is the assay, S9.6 describes the target or antibody, an exogenous reference is a normalisation option, and RNase H treatment provides specificity evidence. They are not presented as peer assay classes.
 
-Single-cell and spatial capabilities retain platform- and method-specific requirements. General methods provide study design, statistics, enrichment, networks, figure production, and result review across appropriate data scales. Journal-specific guidance records the version and review date of the requirements used and treats official journal and publisher pages as authoritative for scope, article types, and submission requirements.
+Single-cell and spatial capabilities retain platform- and method-specific requirements. General methods provide study design, statistics, enrichment, networks, figure production, and result review across appropriate data scales. Publication and translation capabilities connect reviewed evidence, figures, citations, and prose while preserving the relationship among manuscript revisions and reviewer responses. Journal-specific guidance records the version and review date of the requirements used and treats official journal and publisher pages as authoritative for scope, article types, and submission requirements.
 
 ## Interpreting Result Boundaries
 

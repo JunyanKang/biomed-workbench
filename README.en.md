@@ -18,6 +18,7 @@
 <p align="center">
   <a href="#start-a-project">Start a project</a> ·
   <a href="docs/capabilities/README.md">Capability map</a> ·
+  <a href="#academic-writing-and-research-delivery">Academic writing and research delivery</a> ·
   <a href="docs/scientific-evidence-map.md">Evidence map</a> ·
   <a href="docs/releases/README.md">Release notes</a>
 </p>
@@ -67,9 +68,24 @@ The workbench currently contains **207 independently discoverable scientific mod
 | [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | Protein interaction networks, AlphaFold result intake and quality review, HADDOCK3 docking, structure comparison, binding assessment and network delivery |
 | [Clinical and experimental research](docs/capabilities/clinical-and-experimental.md) | Cohorts, survival, biomarkers and quantitative assays; flow cytometry, qPCR, dose response, protein quantification, microbiology and animal studies |
 | [Imaging and scientific visualisation](docs/capabilities/imaging-and-visualization.md) | Image inspection, segmentation, colocalisation, point tracking, migration measurements, scientific-figure design and interactive structure views |
-| [Publication and translation](docs/capabilities/publication-and-translation.md) | Full-paper bilingual reading, academic and proposal writing, statistics and data-availability review, journal positioning, citation verification, peer-review response, patents, figures and presentations |
+| [Academic writing, publication, and translation](docs/capabilities/publication-and-translation.md) | Full-paper bilingual reading, academic and proposal writing, statistics and data-availability review, journal positioning, citation verification, peer-review response, patents, figures and presentations |
 
 Explore the complete capability index: [中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)
+
+## Academic Writing And Research Delivery
+
+Writing is part of the research process, not a separate polishing step after analysis. The workbench first checks the research record, data, figures, and citations, then organises material for a manuscript, funding proposal, peer-review response, presentation, or patent-related technical package. Unsupported content remains an explicit gap, limitation, or hypothesis.
+
+| Stage | Supported work | Typical deliverables |
+| --- | --- | --- |
+| Literature and reading | Multi-source discovery, publication and citation-context verification, full-paper bilingual reading, terminology and figure location | Literature landscape, full-paper reader, source map, terminology ledger |
+| Argument and first draft | Establish the research canon and claim–evidence relationships, plan the manuscript and section roles, draft papers or proposals | Manuscript sections, proposal rationale, Methods and Results text, author-input list |
+| Language and content revision | Improve scholarly prose while checking preservation of numbers, results, equations, citations, terminology, structure, and claim strength | Revised text, change report, content-preservation review |
+| Statistics and submission requirements | Review experimental units, replication, statistical reporting, data and code availability, journal fit, and article-type requirements | Statistical review, availability statement, journal recommendation, manuscript compliance review |
+| Figures and peer review | Plan paper figures and captions, simulate review, and organise point-by-point responses and traceable revisions | Figure plan, reviewer report, response letter, response matrix, revision record |
+| Presentations and translational delivery | Build and reopen real presentation files, and prepare source-grounded technical disclosures and patent-drafting materials | Presentation and QA report, technical disclosure, patent evidence and drafting package |
+
+These capabilities can revise one passage in an existing manuscript or organise a full paper from literature and project evidence. See [Academic Writing, Publication, And Translation](docs/capabilities/publication-and-translation.md) for scope, inputs, and delivery boundaries, and [Journal Positioning And Manuscript Requirements](docs/journal-standards.md) for journal-specific guidance.
 
 ## How rigor enters the workflow
 
@@ -94,6 +110,8 @@ After installation, open a new task and describe the research objective, study d
 
 > Integrate literature, public databases, omics, protein-interaction and structural evidence around a candidate mechanism. Separate direct evidence, association, conflict and knowledge gaps, then propose the experiment most likely to change the current judgment.
 
+> Use the project data, figures, analysis records, and references to establish claim–evidence relationships, then draft the manuscript structure, Results, and Discussion. Review the statistical reporting, citations, data availability, and target-journal requirements, and deliver a change report with unresolved author questions.
+
 See [Using Biomed Workbench](docs/using-biomed-workbench.md) and [Installation](docs/installation.md).
 
 ## Using Biomed Workbench with other agents
@@ -110,7 +128,7 @@ Another agent should not copy the Codex plugin-install request verbatim. Codex r
 | Scientific capabilities | [能力地图](docs/capabilities/README.zh-CN.md) · [公共案例](docs/cases/README.zh-CN.md) | [Capability map](docs/capabilities/README.md) · [Public cases](docs/cases/README.md) |
 | Evidence and reproducibility | [证据地图](docs/scientific-evidence-map.zh-CN.md) · [成熟度](docs/maturity.zh-CN.md) · [可复现性](docs/reproducibility.zh-CN.md) | [Evidence map](docs/scientific-evidence-map.md) · [Maturity](docs/maturity.md) · [Reproducibility](docs/reproducibility.md) |
 | Data access | [公共数据库与凭据](docs/data-access-and-credentials.zh-CN.md) | [Data access and credentials](docs/data-access-and-credentials.md) |
-| Writing and journals | [论文与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) · [期刊定位与稿件规范](docs/journal-standards.zh-CN.md) | [Publication and translation](docs/capabilities/publication-and-translation.md) · [Journal positioning and manuscript requirements](docs/journal-standards.md) |
+| Writing and journals | [科研写作、发表与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) · [期刊定位与稿件规范](docs/journal-standards.zh-CN.md) | [Academic writing, publication, and translation](docs/capabilities/publication-and-translation.md) · [Journal positioning and manuscript requirements](docs/journal-standards.md) |
 | Project structure and extension | [架构](docs/architecture.zh-CN.md) · [格式与数据要求](docs/format-contracts.zh-CN.md) · [开发](docs/development.zh-CN.md) | [Architecture](docs/architecture.md) · [File and data requirements](docs/format-contracts.md) · [Development](docs/development.md) |
 | Versions | [发布记录](docs/releases/README.zh-CN.md) | [Release notes](docs/releases/README.md) |
 

@@ -40,6 +40,21 @@ The end of a computation is not automatically the end of an analysis. A result s
 
 Important results enter the [scientific evidence map](scientific-evidence-map.md), which connects preceding evidence, analysis code, plot data, final files, captions, sources, and research decisions. Chinese and English reports use the same evidence version.
 
+## How To Request Manuscript, Proposal, And Submission Work
+
+A writing task may begin with one passage, an existing manuscript, or a complete project. Provide the available data and figures, study design, established findings, references, intended audience, and requested article type or section whenever possible. For an existing manuscript, also state what may be rewritten, what structure must remain, and whether a target journal or reviewer comments already exist.
+
+The workbench combines the following work as the task requires:
+
+1. verify literature, project facts, figures, and citations, and define which claims may enter the text;
+2. plan the central argument, section roles, and figure placement for a paper or proposal before drafting or revision;
+3. check that numbers, results, equations, technical terms, and citations remain consistent through revision;
+4. review experimental units, statistical reporting, data and code availability, and target-journal and article-type requirements;
+5. organise point-by-point responses, revision locations, and author input from the actual editor and reviewer comments;
+6. reopen the final manuscript, figures, or presentation rather than delivering only an outline.
+
+When only manuscript prose is supplied, the workbench reviews and revises that content but does not turn absent data, experiments, citations, contributions, or journal requirements into facts. See [Academic Writing, Publication, And Translation](capabilities/publication-and-translation.md) for the complete capability area.
+
 ## Example Requests
 
 > Analyse this bulk RNA-seq project with donor- and batch-aware statistics, pathway and network interpretation, sensitivity checks, and publication figures. Reassess the hypothesis if the main comparison is not supported.
@@ -49,6 +64,12 @@ Important results enter the [scientific evidence map](scientific-evidence-map.md
 > Summarise evidence for this target across PubMed, UniProt, ClinVar, clinical trials, PDB, and AlphaFold DB. Reconcile identifiers and separate established findings from testable hypotheses.
 
 > Review these protein-structure and molecular-docking results, assess structural quality, interface confidence, and docking poses, and propose experiments that could test the model.
+
+> Use these result tables, paper figures, method records, and verified references to establish the manuscript's central argument and section structure. Draft the Results and Discussion while linking each claim to its figure, citation, and evidence boundary.
+
+> Review this funding proposal's scientific question, aims, feasibility evidence, and fallback strategy, then improve the scholarly prose without inventing preliminary results, collaborations, or funding requirements.
+
+> Build a point-by-point response from the editor and reviewer text, linking each answer to the real analysis, experiment, figure, citation, and manuscript location. Retain unfinished work as author actions.
 
 ## Possible Deliverables
 

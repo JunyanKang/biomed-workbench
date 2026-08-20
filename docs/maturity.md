@@ -21,6 +21,12 @@ A validated module is not automatically suitable for every organism, assay, stud
 
 Access method, browser interaction, or agent-managed execution does not determine scientific maturity.
 
+## Maturity Of Writing And Research Delivery
+
+A validated writing capability means that its registered structure, input checks, and review rules can be executed. It does not mean that arbitrary prose has become a suitable manuscript. A paper, proposal, reviewer response, presentation, or patent-related technical package receives a project-level delivery judgment only after its research facts and citations are traceable, numbers agree with figures, claims remain within the evidence, statistical and data-availability reporting fits the study design, current journal or funder requirements have been checked, and the final files have been reopened.
+
+Passing a content-preservation review means that the revision contains no detected undeclared change to numbers, results, equations, citations, terminology, or structure. It does not establish the correctness of the science or replace author confirmation. Mock review, journal recommendation, and generic manuscript checks are likewise decision support and cannot independently establish submission readiness or acceptance likelihood. See [Academic Writing, Publication, And Translation](capabilities/publication-and-translation.md) for the detailed capability area.
+
 ## What Counts For A User Project
 
 For a user project, the decisive evidence is the observed run, not the module name or release label. The workbench checks the actual inputs, software versions, parameters, output files, and quality results, then reopens the outputs for statistical and biological review.
