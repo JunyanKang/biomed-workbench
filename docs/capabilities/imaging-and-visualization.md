@@ -18,6 +18,7 @@ This area covers two distinct kinds of work: quantitative measurement from image
 ## Scientific Visualisation
 
 - define a figure from the scientific conclusion, data source, uncertainty, and purpose of each figure part;
+- for scatter, line, precomputed bar, box, violin, heatmap, and volcano panels, render a delivery package directly from explicitly registered CSV/TSV data and a closed figure specification. The package contains final-size PDF, editable SVG, 600-dpi PNG, panel source data, the complete specification, file digests, and a reload quality report; column meanings are never guessed and negative results are not rejected for weak visual signal;
 - use image generation for illustrations when appropriate and review both scientific content and layout before delivery;
 - create provenance-linked interactive protein-structure views;
 - perform bounded edits such as background removal on purpose-made communication images while preserving the original and the limits of the edit.
@@ -30,4 +31,4 @@ A rendered or edited communication image cannot replace a primary measurement. B
 
 ## Typical Deliverables
 
-Image-inspection reports, masks and component tables, colocalisation statistics, object trajectories, migration measurements, interactive structure views, scientific-figure plans, illustrations, and figure-to-conclusion consistency review.
+Image-inspection reports, masks and component tables, colocalisation statistics, object trajectories, migration measurements, interactive structure views, scientific-figure plans, figure packages with panel source data and quality reports, illustrations, and figure-to-conclusion consistency review.

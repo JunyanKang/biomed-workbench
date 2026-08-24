@@ -32,7 +32,7 @@ Independent work can proceed in parallel, while analyses that depend on upstream
 
 ## Current Coverage
 
-The registry currently contains **207 independently discoverable modules**. Registration means that a method's purpose, inputs, outputs, and conditions of use are defined; it does not mean that every module has completed real-world acceptance on every kind of data. See [Capability Maturity](../maturity.md) and [Public-Data Cases](../cases/README.md) for observed status.
+The registry currently contains **208 independently discoverable modules**. Registration means that a method's purpose, inputs, outputs, and conditions of use are defined; it does not mean that every module has completed real-world acceptance on every kind of data. See [Capability Maturity](../maturity.md) and [Public-Data Cases](../cases/README.md) for observed status.
 
 Bulk coverage includes RNA-seq; ChIP-seq, CUT&RUN, and CUT&Tag; several R-loop assays; RIP-seq, CLIP-family methods, and LACE-seq; Ribo-seq; GRO-seq, PRO-seq, TT-seq, and NET-seq; ATAC-seq and DNase-seq; WGBS, RRBS, and EM-seq; several three-dimensional genome assays; and MeRIP-seq/m6A-seq.
 

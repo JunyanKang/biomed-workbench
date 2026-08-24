@@ -11,9 +11,9 @@
     "cross-scale": 19,
     "cross-scale delivery": 2,
     "multi-assay": 38,
-    "research-infrastructure-or-other-domain": 113
+    "research-infrastructure-or-other-domain": 114
   },
-  "module_count": 207,
+  "module_count": 208,
   "modules": [
     {
       "domains": [
@@ -2328,6 +2328,25 @@
     },
     {
       "domains": [
+        "publication",
+        "scientific-communication",
+        "visualization"
+      ],
+      "invariants": {
+        "assay_is_not_target_or_antibody": true,
+        "normalization_is_not_assay": true,
+        "scale_is_not_measurement_family": true,
+        "specificity_control_is_not_biological_replicate": true
+      },
+      "measurement_family": "not assay-scoped",
+      "method_role": "research-infrastructure-or-other-domain",
+      "module_id": "publication-figure-package",
+      "module_type": "delivery",
+      "module_version": "1.0.0",
+      "primary_scale": "universal"
+    },
+    {
+      "domains": [
         "wetlab"
       ],
       "invariants": {
@@ -3633,13 +3652,13 @@
       "primary_scale": "universal"
     }
   ],
-  "registry_digest": "8c250de48ad4f036b9981b660004471e698868d8bad09a600040e45f5aa8e768",
-  "report_sha256_without_self_field": "02206b80e629033841bdc3a09a816926e15b85d8f841022bdf2f9a19d4c6252a",
+  "registry_digest": "3b82b0a3fa26039e88ab8dba28e2cf324b19c6c2193cde9074b5b2d9f1da683d",
+  "report_sha256_without_self_field": "a0a39b09ec75f186fa775bbdb7e8c06f047ad6c46186807cb57bdf77a7a31f97",
   "scale_counts": {
     "bulk": 9,
     "single-cell": 23,
     "spatial": 5,
-    "universal": 170
+    "universal": 171
   },
   "schema_version": 1
 }

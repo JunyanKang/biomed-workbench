@@ -32,8 +32,28 @@ class ReleaseSurfaceTests(unittest.TestCase):
 
         self.assertTrue((ROOT / "LICENSE").exists())
         self.assertEqual(plugin["license"], "Apache-2.0")
-        self.assertEqual(plugin["version"], "0.2.2")
+        self.assertEqual(plugin["version"], "0.2.3")
         self.assertEqual(plugin["version"], catalog["version"])
+
+        chinese_readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        english_readme = (ROOT / "README.en.md").read_text(encoding="utf-8")
+        self.assertIn(f"当前包含 **{catalog['entry_count']} 个可独立识别的科学模块**", chinese_readme)
+        self.assertIn(f"contains **{catalog['entry_count']} independently discoverable scientific modules**", english_readme)
+
+    def test_public_figure_delivery_is_visible_in_both_languages(self):
+        chinese = (ROOT / "docs" / "capabilities" / "imaging-and-visualization.zh-CN.md").read_text(encoding="utf-8")
+        english = (ROOT / "docs" / "capabilities" / "imaging-and-visualization.md").read_text(encoding="utf-8")
+        chinese_release = (ROOT / "docs" / "releases" / "2026-08-24-0.2.3.zh-CN.md").read_text(encoding="utf-8")
+        english_release = (ROOT / "docs" / "releases" / "2026-08-24-0.2.3.md").read_text(encoding="utf-8")
+
+        for text in (chinese, chinese_release):
+            self.assertIn("600-dpi PNG", text)
+            self.assertIn("作图数据", text)
+        for text in (english, english_release):
+            self.assertIn("600-dpi PNG", text)
+            self.assertIn("source data", text)
+        self.assertIn("1,228", chinese_release)
+        self.assertIn("1,228", english_release)
 
     def test_top_level_help_discovers_the_complete_project_command_surface(self):
         completed = subprocess.run(

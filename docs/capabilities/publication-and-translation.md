@@ -75,7 +75,7 @@ The standards version is preserved with the recommendation and review so that la
 - Establish a manuscript revision baseline and record each review-driven change.
 - Keep untouched manuscript blocks unchanged and verify claimed analysis, experiment, figure, citation, and response locations.
 
-Paper figures begin with the conclusion, the evidentiary role of each part, statistics, source data, final dimensions and export formats before chart and layout choices are made. Mechanism schematics and graphical abstracts explain existing evidence and cannot add unsupported mechanisms, directions or values.
+Paper figures begin with the conclusion, the evidentiary role of each part, statistics, source data, final dimensions and export formats before chart and layout choices are made. When the supported general quantitative grammar is appropriate, registered data can be rendered directly into a package containing PDF, SVG, PNG, panel source data, the complete specification, digests and a reload report; complex method-native diagnostics continue to use their analysis-specific modules. Mechanism schematics and graphical abstracts explain existing evidence and cannot add unsupported mechanisms, directions or values.
 
 When the target journal is unknown or its author-guidance version has not been confirmed, journal targeting is completed before manuscript review.
 

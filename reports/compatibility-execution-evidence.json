@@ -1,8 +1,8 @@
 {
-  "compatibility_complete": 207,
-  "compatibility_row_count": 208,
-  "end_to_end_passed": 208,
-  "module_count": 207,
+  "compatibility_complete": 208,
+  "compatibility_row_count": 209,
+  "end_to_end_passed": 209,
+  "module_count": 208,
   "modules": [
     {
       "compatibility_rows": [
@@ -21880,6 +21880,391 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "publication-figure-uci-wdbc-information-dense-v1"
+          ],
+          "id": "python314-matplotlib310-publication-figure-v1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "publication-figure-regression-v1"
+          ],
+          "verified_at": "2026-08-24"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.10,<3.11"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "matplotlib",
+          "name": "matplotlib",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Render exact-size PDF, editable SVG, and high-resolution PNG panels.",
+          "required": true,
+          "tested_versions": [
+            "3.10.8"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import matplotlib; print(matplotlib.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://matplotlib.org/stable/api/index.html"
+        },
+        {
+          "allowed_versions": [
+            ">=2.3,<3.1"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "pandas",
+          "name": "pandas",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Read, subset by explicit equality contracts, validate, and export panel source tables.",
+          "required": true,
+          "tested_versions": [
+            "2.3.3",
+            "3.0.5"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import pandas; print(pandas.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://pandas.pydata.org/docs/"
+        },
+        {
+          "allowed_versions": [
+            ">=2.4,<2.5"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "numpy",
+          "name": "numpy",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Validate finite numeric vectors and construct deterministic plotting coordinates.",
+          "required": true,
+          "tested_versions": [
+            "2.4.4"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import numpy; print(numpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://numpy.org/doc/stable/"
+        },
+        {
+          "allowed_versions": [
+            ">=10.4,<13"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "PIL",
+          "name": "Pillow",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Reload and verify PNG dimensions, mode, and raster delivery.",
+          "required": true,
+          "tested_versions": [
+            "10.4.0",
+            "12.1.1"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import PIL; print(PIL.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://pillow.readthedocs.io/en/stable/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.27,<1.29"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "fitz",
+          "name": "PyMuPDF",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Reload PDF pages, final dimensions, editable text, and font records.",
+          "required": true,
+          "tested_versions": [
+            "1.27.2",
+            "1.28.0"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import fitz; print(fitz.VersionBind)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://pymupdf.readthedocs.io/en/latest/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "publication-figure-package",
+      "input_formats": [
+        {
+          "artifact_type": "scientific_figure_source_table",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "csv",
+              "orientations": [
+                "header-row-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "rfc4180"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tab-separated-values",
+              "orientations": [
+                "header-row-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "figure_data",
+          "processing_levels": [
+            "tested",
+            "reviewed",
+            "panel-mapped"
+          ],
+          "required_metadata": [
+            "source-artifact",
+            "source-sha256",
+            "row-count",
+            "column-semantics",
+            "units",
+            "missing-data-policy"
+          ]
+        },
+        {
+          "artifact_type": "figure_specification",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "json",
+              "orientations": [
+                "closed-panel-contract"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "figure_specification",
+          "processing_levels": [
+            "declared",
+            "reviewed"
+          ],
+          "required_metadata": [
+            "claim-per-panel",
+            "explicit-column-mapping",
+            "final-size",
+            "journal-profile"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "publication_figure_package",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "deflate"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "zip",
+              "orientations": [
+                "figure-source-data-manifest"
+              ],
+              "representations": [
+                "binary",
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "6.3.10"
+              ]
+            }
+          ],
+          "name": "figure_package",
+          "processing_levels": [
+            "rendered",
+            "reloaded",
+            "digest-bound"
+          ],
+          "required_metadata": [
+            "module-version",
+            "style-version",
+            "input-digests",
+            "panel-source-digests",
+            "pdf-svg-png-digests",
+            "final-dimensions"
+          ]
+        },
+        {
+          "artifact_type": "quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "json",
+              "orientations": [
+                "rendering-quality-report"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "figure_quality_report",
+          "processing_levels": [
+            "derived",
+            "reloaded",
+            "review-required"
+          ],
+          "required_metadata": [
+            "module-version",
+            "package-sha256",
+            "row-coverage",
+            "container-reload",
+            "runtime-versions",
+            "limitations"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "ecosystem": "system",
+          "identity": "python3",
+          "mismatch_policy": "block",
+          "name": "python3",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-24",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.14,<3.15"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated command, deterministic serialization, and package construction execute under Python 3.14 semantics.",
+              "id": "python-314-publication-figure-command",
+              "required_action": "Re-run the information-dense rendering acceptance before changing the Python compatibility line.",
+              "source": "https://docs.python.org/3.14/"
+            }
+          ],
+          "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "qpcr-relative-expression-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -42840,7 +43225,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "de8fcc238f0112510b8e78cf79b687943dafa1bfd97a158663a980ca1835a596",
+        "digest": "2bf811c8e484aaf68e9f31c3ba94f949e814c7bc7796460441d741aecf4872be",
         "id": "alignment-quality-samtools-e2e-v1",
         "passed": true
       },
@@ -42878,7 +43263,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "e6547377e1d2ca1b7a3e524277a2a6e79498f51d4af6ec4428184523bf02c618",
+        "digest": "2b06bf7baee51de196a11b8fe1de8c4d53e085f68130b9a90859c0cc12504a90",
         "id": "alignment-sort-index-samtools-e2e-v1",
         "passed": true
       },
@@ -44665,7 +45050,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "4189e16f477f068da65a0e2548c125215b9fc05d6d6179ef75588d44d15fd7db",
+        "digest": "b7bc1e40be96b276e69481aa0f1179543ec300a21a7f13adb36ece0da899f813",
         "id": "dna-align-bwa-mem-single-e2e-v1",
         "passed": true
       },
@@ -45825,7 +46210,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "4483d387d37969d6d8883757e4884ea70ea4025a27cc646220b3fe6b73a51ebd",
+        "digest": "6f8e640bedae481bdfce7a205cf7ec7967870e7d03106e986932532b3a00f580",
         "id": "image-chroma-key-remove-e2e-v2",
         "passed": true
       },
@@ -46041,7 +46426,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "277cbdb8491b3e3600b5e8979488a03fa0900c1b45ad910b24e822cb17579098",
+        "digest": "ec355ad08cdafede71da9d90ceaf4df0dbc882f7f2f386e975ebc586b5a9c12e",
         "id": "interval-overlap-bedtools-e2e-v2",
         "passed": true
       },
@@ -46448,7 +46833,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "6b42fe64ce8d393c32034e85c7cf3faa526c980f37a3fed1ed2a807e99d8f546",
+        "digest": "4fd89d60908aa026f2b4fddb14f9bde14c61fa7d662821498fcea03e928bf919",
         "id": "metagene-factorization-nmf-e2e-v1",
         "passed": true
       },
@@ -47753,6 +48138,63 @@
     },
     {
       "dependency_versions": {
+        "Pillow": [
+          ">=10.4,<13"
+        ],
+        "PyMuPDF": [
+          ">=1.27,<1.29"
+        ],
+        "matplotlib": [
+          ">=3.10,<3.11"
+        ],
+        "numpy": [
+          ">=2.4,<2.5"
+        ],
+        "pandas": [
+          ">=2.3,<3.1"
+        ]
+      },
+      "end_to_end": {
+        "digest": "e7f1a3a6be726726f5cca61262f32e6546c742b52af7be6ae323fd008fbeed68",
+        "id": "publication-figure-uci-wdbc-information-dense-v1",
+        "passed": true
+      },
+      "implementation_sha256": "759a667eba739b8f3cda1627cd1f35f3548e3453694b0e367757b2b21fea778b",
+      "input_formats": {
+        "figure_data": [
+          "csv@rfc4180",
+          "tab-separated-values@1"
+        ],
+        "figure_specification": [
+          "json@1"
+        ]
+      },
+      "module_id": "publication-figure-package",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "figure_package": [
+          "zip@6.3.10"
+        ],
+        "figure_quality_report": [
+          "json@1"
+        ]
+      },
+      "regression": {
+        "digest": "2200df23ec4dbe802666b641c2008263f224e2ec0449988ed90769bbeb3318ce",
+        "id": "publication-figure-regression-v1",
+        "passed": true
+      },
+      "row_id": "python314-matplotlib310-publication-figure-v1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {
+        "python3": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "verified_at": "2026-08-24"
+    },
+    {
+      "dependency_versions": {
         "python": [
           ">=3.14,<3.15"
         ]
@@ -47810,7 +48252,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "738f707030313e2a5a9937af263355ba6df9cb6bb5446dc15955a194d81aeba0",
+        "digest": "cdac9a14b1d8e5a543ebadb6969008b5c7d19c9a411b606ff04cc22730d7ddd8",
         "id": "quality-report-multiqc-e2e-v1",
         "passed": true
       },
@@ -48002,7 +48444,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "5aaf69d2b6103f66ed404809b8d6659f3c7772ace62909b063bb8b37bd164244",
+        "digest": "1e0643007df7d9b849a49ada9d4d6ba7b94e76af0bd8a7088e8453d149f9840d",
         "id": "read-contamination-screen-e2e-v1",
         "passed": true
       },
@@ -48043,7 +48485,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "726ffa2cebcdbb37e50ad469ddfbd6d3ecc6b1f807ee5d064ff21744a05257fc",
+        "digest": "066e42b37341462c8dbfd3e529fdcfd0ff11e9c2f6f9f6c3ba23508a7b00dafb",
         "id": "read-quality-fastp-e2e-v1",
         "passed": true
       },
@@ -48081,7 +48523,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "10cc723e2f3244d8ea09cc60ece21cb505ca5cc1901f987783ac1e241ecc0537",
+        "digest": "71a6f735e01911366796233b81a7eb51e5d4d0f94d03adc3e7f60acb11f130b8",
         "id": "read-quality-fastqc-e2e-v1",
         "passed": true
       },
@@ -50995,7 +51437,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "305ee5cd1fd02f40a6660cfa23db9e1be50f59c92205e23da5bb32c01a81d185",
+        "digest": "d423cb96745c35afb37b82c3cd9092d7e5052ee9df8d1998e1d6fa7070302bf3",
         "id": "tumor-mutation-burden-vcf-e2e-v1",
         "passed": true
       },
@@ -51112,7 +51554,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "569b1c853572e55256d63d4cc5216f8bcc640569df91ecd7066753579c0e7531",
+        "digest": "d4e5b8b1a47ce9adcddf71aa21a9d3946811376e4d61d927d15903338eb60d13",
         "id": "variant-decompress-bgzip-e2e-v1",
         "passed": true
       },
@@ -51188,7 +51630,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "e1d95b6a795b521d86bd333bc646157e5851d9faa47871afeb641acc3a2db250",
+        "digest": "0217926f0ba29fb6c0ad5104b3629b40cfea14e05f60393b425ba99c30b8dc1e",
         "id": "variant-filter-vcf-e2e-v1",
         "passed": true
       },
@@ -51229,7 +51671,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "cd9ae2208edd24318fdb698b76594dfe2a499f556b5872e020062fd74d8fd8fe",
+        "digest": "8c4369ae76131b94cb1701c2219f20d87dc9b543759deeacfd3d1d627ed74f97",
         "id": "variant-region-query-tabix-e2e-v1",
         "passed": true
       },
@@ -51413,8 +51855,8 @@
       "verified_at": "2026-07-24"
     }
   ],
-  "registry_digest": "8c250de48ad4f036b9981b660004471e698868d8bad09a600040e45f5aa8e768",
-  "regression_passed": 208,
+  "registry_digest": "3b82b0a3fa26039e88ab8dba28e2cf324b19c6c2193cde9074b5b2d9f1da683d",
+  "regression_passed": 209,
   "schema_version": 1,
   "supplemental_end_to_end_passed": 14
 }

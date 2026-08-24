@@ -13,7 +13,7 @@ class ScientificCommandEntrySurfaceTests(unittest.TestCase):
         cls.commands = tuple(module for module in cls.registry.all() if module.execution.kind == "command")
 
     def test_all_command_contracts_dry_bind_every_port_parameter_and_output(self):
-        self.assertEqual(len(self.commands), 14)
+        self.assertEqual(len(self.commands), 15)
         for module in self.commands:
             with self.subTest(module=module.id):
                 command = module.execution.command

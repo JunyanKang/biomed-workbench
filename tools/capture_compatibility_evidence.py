@@ -57,6 +57,7 @@ COMMAND_EVIDENCE = {
     "image-chroma-key-remove": ("reports/chroma-key-live-verification.json", "tests.unit.quality.test_chroma_key"),
     "metagene-factorization-nmf": ("reports/nmf-live-verification.json", "tests.unit.quality.test_nmf"),
     "quality-report-multiqc": ("reports/multiqc-live-verification.json", "tests.unit.quality.test_multiqc"),
+    "publication-figure-package": ("reports/publication-figure-complex-acceptance.json", "tests.test_publication_figure_complex"),
     "read-contamination-screen": ("reports/fastq-screen-live-verification.json", "tests.unit.quality.test_fastq_screen"),
     "read-quality-fastqc": ("reports/fastqc-live-verification.json", "tests.unit.quality.test_fastqc"),
     "read-quality-fastp": ("reports/fastp-live-verification.json", "tests.unit.quality.test_fastp"),
@@ -457,6 +458,9 @@ def capture() -> dict[str, object]:
             except KeyError:
                 raise RuntimeError(f"command execution evidence is not configured: {manifest.id}") from None
             live_report = json.loads((ROOT / report_path).read_text(encoding="utf-8"))
+            output_validation = live_report.get("html_report_validated")
+            if output_validation is None:
+                output_validation = live_report.get("output_package_validated")
             if (
                 live_report.get("passed") is not True
                 or live_report.get("module_id") != manifest.id
@@ -484,7 +488,7 @@ def capture() -> dict[str, object]:
                 {**context, "kind": "regression", "source": source_digest, "fixture": live_report["fixture"], "summary": live_report["scientific_summary"]}
             )
             e2e_digest = digest_value(
-                {**context, "kind": "end-to-end", "source": source_digest, "execution": live_report["execution"], "html_validated": live_report["html_report_validated"]}
+                {**context, "kind": "end-to-end", "source": source_digest, "execution": live_report["execution"], "output_validated": output_validation}
             )
         elif manifest.agent_protocol is not None:
             case = fixtures.get(manifest.id)

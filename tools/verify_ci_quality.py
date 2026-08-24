@@ -114,6 +114,7 @@ def verify() -> dict[str, object]:
         "numpy": "2.4.4",
         "scipy": "1.17.1",
         "scikit-learn": "1.8.0",
+        "matplotlib": "3.10.8",
         "Pillow": "12.1.1",
         "PyYAML": "6.0.3",
         "packaging": "26.2",

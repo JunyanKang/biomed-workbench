@@ -1,0 +1,57 @@
+{
+  "title": "Controlled biomedical rendering benchmark",
+  "journal_profile": "nature",
+  "analysis_type": "generic-quantitative-figure",
+  "width_mm": 183,
+  "height_mm": 140,
+  "dpi": 600,
+  "layout": {"rows": 2, "columns": 2},
+  "panels": [
+    {
+      "id": "a",
+      "plot_type": "scatter",
+      "claim": "Response is displayed against dose without inferring a treatment effect.",
+      "title": "Dose and response",
+      "x": "dose",
+      "y": "response",
+      "group": "condition",
+      "x_label": "Dose (a.u.)",
+      "y_label": "Response (a.u.)",
+      "legend": "outside"
+    },
+    {
+      "id": "b",
+      "plot_type": "box",
+      "claim": "All observed response values are displayed by declared condition.",
+      "title": "Observed distributions",
+      "x": "condition",
+      "y": "response",
+      "x_label": "Condition",
+      "y_label": "Response (a.u.)",
+      "legend": "none",
+      "category_order": ["control", "treated"]
+    },
+    {
+      "id": "c",
+      "plot_type": "volcano",
+      "claim": "The complete no-hit differential-result fixture is preserved without a signal-strength gate.",
+      "title": "Negative-result preservation",
+      "x": "log2fc",
+      "adjusted_p": "padj",
+      "x_label": "log2 fold change",
+      "y_label": "-log10(adjusted P)",
+      "legend": "none",
+      "effect_threshold": 1.0,
+      "adjusted_p_threshold": 0.05
+    },
+    {
+      "id": "d",
+      "plot_type": "heatmap",
+      "claim": "Two declared measurements are displayed for every registered sample.",
+      "title": "Declared measurement matrix",
+      "row_label": "sample",
+      "value_columns": ["heat_a", "heat_b"],
+      "legend": "none"
+    }
+  ]
+}

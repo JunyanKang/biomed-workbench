@@ -1,5 +1,5 @@
 {
-  "module_count": 207,
+  "module_count": 208,
   "modules": [
     {
       "access": "offline",
@@ -30033,7 +30033,9 @@
           "verified_at": "2026-07-30"
         }
       ],
-      "complements": [],
+      "complements": [
+        "publication-figure-package"
+      ],
       "credentials": [],
       "dependencies": [
         {
@@ -30120,7 +30122,22 @@
               "proteomics-deqms",
               "go-kegg-overrepresentation",
               "preranked-gsea",
-              "wgcna"
+              "wgcna",
+              "protein-interaction-network",
+              "protein-complex-docking",
+              "alphafold3-complex",
+              "metascape-msbio",
+              "trajectory-topology",
+              "trajectory-velocity",
+              "fate-mapping",
+              "regulatory-velocity",
+              "spatial-platform-qc",
+              "spatial-core-analysis",
+              "spatial-deconvolution",
+              "spatial-domain-benchmark",
+              "spatial-communication",
+              "spatial-image-analysis",
+              "spatial-multislice"
             ],
             "type": "string"
           },
@@ -57926,6 +57943,648 @@
           "version_probe_kind": "command",
           "version_probe_timeout_seconds": 30,
           "version_source": "https://bioconductor.org/packages/release/bioc/html/DEqMS.html"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The registered table contains the exact data intended for display; the renderer preserves and validates those rows but does not repair, reinterpret, or scientifically validate upstream analysis."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "Pillow": [
+              ">=10.4,<13"
+            ],
+            "PyMuPDF": [
+              ">=1.27,<1.29"
+            ],
+            "matplotlib": [
+              ">=3.10,<3.11"
+            ],
+            "numpy": [
+              ">=2.4,<2.5"
+            ],
+            "pandas": [
+              ">=2.3,<3.1"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "publication-figure-uci-wdbc-information-dense-v1"
+          ],
+          "id": "python314-matplotlib310-publication-figure-v1",
+          "input_formats": {
+            "figure_data": [
+              "csv@rfc4180",
+              "tab-separated-values@1"
+            ],
+            "figure_specification": [
+              "json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "figure_package": [
+              "zip@6.3.10"
+            ],
+            "figure_quality_report": [
+              "json@1"
+            ]
+          },
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "regression_evidence_ids": [
+            "publication-figure-regression-v1"
+          ],
+          "tool_versions": {
+            "python3": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "verified_at": "2026-08-24"
+        }
+      ],
+      "complements": [
+        "figure-specification",
+        "statistical-reporting-audit",
+        "manuscript-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.10,<3.11"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "matplotlib",
+          "name": "matplotlib",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Render exact-size PDF, editable SVG, and high-resolution PNG panels.",
+          "required": true,
+          "tested_versions": [
+            "3.10.8"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import matplotlib; print(matplotlib.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://matplotlib.org/stable/api/index.html"
+        },
+        {
+          "allowed_versions": [
+            ">=2.3,<3.1"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "pandas",
+          "name": "pandas",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Read, subset by explicit equality contracts, validate, and export panel source tables.",
+          "required": true,
+          "tested_versions": [
+            "2.3.3",
+            "3.0.5"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import pandas; print(pandas.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://pandas.pydata.org/docs/"
+        },
+        {
+          "allowed_versions": [
+            ">=2.4,<2.5"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "numpy",
+          "name": "numpy",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Validate finite numeric vectors and construct deterministic plotting coordinates.",
+          "required": true,
+          "tested_versions": [
+            "2.4.4"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import numpy; print(numpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://numpy.org/doc/stable/"
+        },
+        {
+          "allowed_versions": [
+            ">=10.4,<13"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "PIL",
+          "name": "Pillow",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Reload and verify PNG dimensions, mode, and raster delivery.",
+          "required": true,
+          "tested_versions": [
+            "10.4.0",
+            "12.1.1"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import PIL; print(PIL.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://pillow.readthedocs.io/en/stable/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.27,<1.29"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "fitz",
+          "name": "PyMuPDF",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Reload PDF pages, final dimensions, editable text, and font records.",
+          "required": true,
+          "tested_versions": [
+            "1.27.2",
+            "1.28.0"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import fitz; print(fitz.VersionBind)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://pymupdf.readthedocs.io/en/latest/"
+        }
+      ],
+      "description": "Render an explicit multi-panel scientific figure specification against registered CSV or TSV data without guessing column roles, silently discarding rows, running undeclared statistics, or reusing example pixels; deliver exact-size PDF, editable SVG, high-resolution PNG, panel source tables, a frozen specification, digests, and an independently reloaded quality report.",
+      "domains": [
+        "publication",
+        "scientific-communication",
+        "visualization"
+      ],
+      "entrypoint": "scientific-command",
+      "evidence_effects": [
+        "produces-source-data-bound-publication-figure-package",
+        "validates-final-size-vector-raster-delivery",
+        "does-not-create-or-upgrade-biological-evidence"
+      ],
+      "execution": {
+        "command": {
+          "arguments": [
+            "{implementation}",
+            "--data",
+            "{input:data}",
+            "--spec",
+            "{input:spec}",
+            "--package",
+            "{output:package}",
+            "--report",
+            "{output:report}",
+            "--data-format",
+            "{parameter:data-format}"
+          ],
+          "executable": "python3",
+          "implementation_module": "biomed_workbench.implementations.publication_figure",
+          "inputs": [
+            {
+              "filename": "figure-data.table",
+              "name": "data",
+              "port": "figure_data",
+              "role": "data"
+            },
+            {
+              "filename": "figure-specification.json",
+              "name": "spec",
+              "port": "figure_specification",
+              "role": "specification"
+            }
+          ],
+          "max_output_bytes": 250000000,
+          "max_payload_bytes": 250000000,
+          "outputs": [
+            {
+              "filename": "publication-figure-package.zip",
+              "media_type": "application/zip",
+              "name": "package",
+              "port": "figure_package",
+              "role": "package"
+            },
+            {
+              "filename": "publication-figure-report.json",
+              "media_type": "application/json",
+              "name": "report",
+              "port": "figure_quality_report",
+              "role": "report"
+            }
+          ],
+          "parameter_names": [
+            "data-format"
+          ],
+          "path_mode": "workdir-relative",
+          "timeout_seconds": 600,
+          "tool_name": "python3"
+        },
+        "kind": "command",
+        "max_output_bytes": 250000000,
+        "timeout_seconds": 600
+      },
+      "id": "publication-figure-package",
+      "input_artifacts": [
+        {
+          "artifact_type": "scientific_figure_source_table",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "csv",
+              "orientations": [
+                "header-row-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "rfc4180"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tab-separated-values",
+              "orientations": [
+                "header-row-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "figure_data",
+          "processing_levels": [
+            "tested",
+            "reviewed",
+            "panel-mapped"
+          ],
+          "required_metadata": [
+            "source-artifact",
+            "source-sha256",
+            "row-count",
+            "column-semantics",
+            "units",
+            "missing-data-policy"
+          ],
+          "source_policy": "project_or_upstream"
+        },
+        {
+          "artifact_type": "figure_specification",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "json",
+              "orientations": [
+                "closed-panel-contract"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "figure_specification",
+          "processing_levels": [
+            "declared",
+            "reviewed"
+          ],
+          "required_metadata": [
+            "claim-per-panel",
+            "explicit-column-mapping",
+            "final-size",
+            "journal-profile"
+          ],
+          "source_policy": "project_or_upstream"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "data-format": {
+            "enum": [
+              "csv",
+              "tsv"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "data-format"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "render publication figure package",
+        "create a multi-panel scientific figure from source data",
+        "export PDF SVG PNG with plotting data",
+        "publication-ready scientific plotting",
+        "\u751f\u6210\u5e26\u4f5c\u56fe\u6570\u636e\u548c\u8d28\u91cf\u62a5\u544a\u7684\u79d1\u7814\u56fe\u4ef6"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The validated renderer covers scatter, line, precomputed bar, box, violin, heatmap and volcano-style panels from explicit CSV or TSV columns. It does not replace method-native diagnostic plots, imaging integrity review, statistical analysis, illustration generation, three-dimensional rendering, interactive graphics, or target-journal production review.",
+        "Passing delivery checks establishes that this package can be regenerated and inspected; it does not establish the validity of upstream data, analysis, biological interpretation, diagnosis, mechanism, or causal inference."
+      ],
+      "maturity": "validated",
+      "module_type": "delivery",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 4
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "publication_figure_package",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "deflate"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "zip",
+              "orientations": [
+                "figure-source-data-manifest"
+              ],
+              "representations": [
+                "binary",
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "6.3.10"
+              ]
+            }
+          ],
+          "name": "figure_package",
+          "processing_levels": [
+            "rendered",
+            "reloaded",
+            "digest-bound"
+          ],
+          "required_metadata": [
+            "module-version",
+            "style-version",
+            "input-digests",
+            "panel-source-digests",
+            "pdf-svg-png-digests",
+            "final-dimensions"
+          ],
+          "source_policy": "project_or_upstream"
+        },
+        {
+          "artifact_type": "quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "json",
+              "orientations": [
+                "rendering-quality-report"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "figure_quality_report",
+          "processing_levels": [
+            "derived",
+            "reloaded",
+            "review-required"
+          ],
+          "required_metadata": [
+            "module-version",
+            "package-sha256",
+            "row-coverage",
+            "container-reload",
+            "runtime-versions",
+            "limitations"
+          ],
+          "source_policy": "project_or_upstream"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "payload_roles": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          }
+        },
+        "required": [
+          "payload_roles"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The source table has reviewed scientific meanings, units, experimental-unit boundaries, missing-data decisions, and upstream statistics before rendering.",
+        "Every panel declares a unique identifier, one bounded claim, an explicit plot type, exact column mappings, any explicit row-selection equality, final dimensions, and an allowed journal profile.",
+        "Cell and Science submission profiles require the current target-journal guide to be implemented as a separately validated profile before export is represented as submission-ready."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://github.com/TingxiYu/academic-figure-skill/tree/1df9940dd01ac939f072b12fe28d6353b79b90f9",
+          "https://research-figure-guide.nature.com/figures/preparing-figures-our-specifications/",
+          "https://research-figure-guide.nature.com/figures/building-and-exporting-figure-panels/",
+          "https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.savefig.html",
+          "https://doi.org/10.24432/C5DW2B"
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Every panel must have one claim, supported plot type, explicit columns, declared row selection, labels and units; semantic column guessing, example-pixel embedding and manual template edits are prohibited.",
+          "id": "figure-explicit-scientific-mapping",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every registered input row must be assigned to at least one panel, every plotted row must retain its source-row identity, and every panel source table must reload without missing or duplicated rows.",
+          "id": "figure-source-data-row-integrity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "PDF, SVG and PNG must match declared final dimensions, reopen successfully, retain required editable vector text, and preserve the declared raster resolution.",
+          "id": "figure-final-size-container-reload",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The renderer performs no inferential test; any statistical context must explicitly identify experimental unit, biological n, test, multiplicity, effect size and uncertainty, while negative and discordant results remain valid display inputs.",
+          "id": "figure-statistical-reporting-boundary",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Automated label-overlap checks must pass and the actual final-size rendering still requires human review for clipping, hierarchy, axes, colors, legends, density, accessibility and claim adequacy.",
+          "id": "figure-rendered-visual-review",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Can this explicit panel specification be rendered from the registered source table without row loss, undeclared inference, or loss of editable vector text?"
+      ],
+      "routing": {
+        "exclusion_terms": [
+          "generate a conceptual illustration",
+          "edit microscopy pixels",
+          "perform differential expression",
+          "run statistical analysis"
+        ],
+        "method_aliases": [
+          "publication-figure-package",
+          "publication figure package",
+          "source-data-bound figure",
+          "PDF SVG PNG scientific figure",
+          "\u79d1\u7814\u56fe\u4ef6\u4ea4\u4ed8\u5305"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": [
+          "figure",
+          "plot",
+          "panel",
+          "\u56fe",
+          "\u4f5c\u56fe"
+        ]
+      },
+      "schema_version": 1,
+      "title": "Render a source-data-bound publication figure package",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "ecosystem": "system",
+          "identity": "python3",
+          "mismatch_policy": "block",
+          "name": "python3",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-24",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.14,<3.15"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated command, deterministic serialization, and package construction execute under Python 3.14 semantics.",
+              "id": "python-314-publication-figure-command",
+              "required_action": "Re-run the information-dense rendering acceptance before changing the Python compatibility line.",
+              "source": "https://docs.python.org/3.14/"
+            }
+          ],
+          "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
         }
       ],
       "version": "1.0.0"
@@ -112155,7 +112814,7 @@
       "version": "1.0.0"
     }
   ],
-  "plugin_version": "0.2.2",
-  "registry_digest": "8c250de48ad4f036b9981b660004471e698868d8bad09a600040e45f5aa8e768",
+  "plugin_version": "0.2.3",
+  "registry_digest": "3b82b0a3fa26039e88ab8dba28e2cf324b19c6c2193cde9074b5b2d9f1da683d",
   "schema_version": 1
 }

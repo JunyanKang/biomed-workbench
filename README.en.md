@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-365B73"></a>
-  <img alt="207 registered scientific modules" src="https://img.shields.io/badge/registered%20modules-207-4E8B86">
+  <img alt="208 registered scientific modules" src="https://img.shields.io/badge/registered%20modules-208-4E8B86">
 </p>
 
 <p align="center">
@@ -56,7 +56,7 @@ File identity, version relationships, and content fingerprints travel with the m
 
 ## Research layers
 
-The workbench currently contains **207 independently discoverable scientific modules**. This means that their purpose, inputs, outputs, and conditions of use are recorded; it does not mean that every module has been accepted across every dataset, species, or runtime. Exact execution scope and representative cases are recorded in the versioned [release notes](docs/releases/README.md), [maturity guide](docs/maturity.md), and [`reports/`](reports/).
+The workbench currently contains **208 independently discoverable scientific modules**. This means that their purpose, inputs, outputs, and conditions of use are recorded; it does not mean that every module has been accepted across every dataset, species, or runtime. Exact execution scope and representative cases are recorded in the versioned [release notes](docs/releases/README.md), [maturity guide](docs/maturity.md), and [`reports/`](reports/).
 
 | Research layer | Representative capabilities |
 | --- | --- |
@@ -67,7 +67,7 @@ The workbench currently contains **207 independently discoverable scientific mod
 | [Cross-scale methods](docs/capabilities/omics-and-single-cell.md) | Study and format validation, differential testing, DEqMS, GO/KEGG, GSEA, WGCNA, motifs, networks and unified figure specifications |
 | [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | Protein interaction networks, AlphaFold result intake and quality review, HADDOCK3 docking, structure comparison, binding assessment and network delivery |
 | [Clinical and experimental research](docs/capabilities/clinical-and-experimental.md) | Cohorts, survival, biomarkers and quantitative assays; flow cytometry, qPCR, dose response, protein quantification, microbiology and animal studies |
-| [Imaging and scientific visualisation](docs/capabilities/imaging-and-visualization.md) | Image inspection, segmentation, colocalisation, point tracking, migration measurements, scientific-figure design and interactive structure views |
+| [Imaging and scientific visualisation](docs/capabilities/imaging-and-visualization.md) | Image inspection, segmentation, colocalisation, point tracking, migration measurements, scientific-figure delivery with panel source data, and interactive structure views |
 | [Academic writing, publication, and translation](docs/capabilities/publication-and-translation.md) | Full-paper bilingual reading, academic and proposal writing, statistics and data-availability review, journal positioning, citation verification, peer-review response, patents, figures and presentations |
 
 Explore the complete capability index: [中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)

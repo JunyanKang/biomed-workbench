@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 207,
-  "module_count": 207,
+  "compatibility_complete": 208,
+  "module_count": 208,
   "modules": [
     {
       "compatibility_rows": [
@@ -21878,6 +21878,391 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "publication-figure-uci-wdbc-information-dense-v1"
+          ],
+          "id": "python314-matplotlib310-publication-figure-v1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "publication-figure-regression-v1"
+          ],
+          "verified_at": "2026-08-24"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.10,<3.11"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "matplotlib",
+          "name": "matplotlib",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Render exact-size PDF, editable SVG, and high-resolution PNG panels.",
+          "required": true,
+          "tested_versions": [
+            "3.10.8"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import matplotlib; print(matplotlib.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://matplotlib.org/stable/api/index.html"
+        },
+        {
+          "allowed_versions": [
+            ">=2.3,<3.1"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "pandas",
+          "name": "pandas",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Read, subset by explicit equality contracts, validate, and export panel source tables.",
+          "required": true,
+          "tested_versions": [
+            "2.3.3",
+            "3.0.5"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import pandas; print(pandas.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://pandas.pydata.org/docs/"
+        },
+        {
+          "allowed_versions": [
+            ">=2.4,<2.5"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "numpy",
+          "name": "numpy",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Validate finite numeric vectors and construct deterministic plotting coordinates.",
+          "required": true,
+          "tested_versions": [
+            "2.4.4"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import numpy; print(numpy.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://numpy.org/doc/stable/"
+        },
+        {
+          "allowed_versions": [
+            ">=10.4,<13"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "PIL",
+          "name": "Pillow",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Reload and verify PNG dimensions, mode, and raster delivery.",
+          "required": true,
+          "tested_versions": [
+            "10.4.0",
+            "12.1.1"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import PIL; print(PIL.__version__)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://pillow.readthedocs.io/en/stable/"
+        },
+        {
+          "allowed_versions": [
+            ">=1.27,<1.29"
+          ],
+          "conflicts": [],
+          "ecosystem": "python",
+          "identity": "fitz",
+          "name": "PyMuPDF",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "purpose": "Reload PDF pages, final dimensions, editable text, and font records.",
+          "required": true,
+          "tested_versions": [
+            "1.27.2",
+            "1.28.0"
+          ],
+          "verified_at": "2026-08-24",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "-c",
+            "import fitz; print(fitz.VersionBind)"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://pymupdf.readthedocs.io/en/latest/"
+        }
+      ],
+      "external_tool_required": true,
+      "id": "publication-figure-package",
+      "input_formats": [
+        {
+          "artifact_type": "scientific_figure_source_table",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "csv",
+              "orientations": [
+                "header-row-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "rfc4180"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tab-separated-values",
+              "orientations": [
+                "header-row-records"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "figure_data",
+          "processing_levels": [
+            "tested",
+            "reviewed",
+            "panel-mapped"
+          ],
+          "required_metadata": [
+            "source-artifact",
+            "source-sha256",
+            "row-count",
+            "column-semantics",
+            "units",
+            "missing-data-policy"
+          ]
+        },
+        {
+          "artifact_type": "figure_specification",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "json",
+              "orientations": [
+                "closed-panel-contract"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "figure_specification",
+          "processing_levels": [
+            "declared",
+            "reviewed"
+          ],
+          "required_metadata": [
+            "claim-per-panel",
+            "explicit-column-mapping",
+            "final-size",
+            "journal-profile"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "publication_figure_package",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "deflate"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "zip",
+              "orientations": [
+                "figure-source-data-manifest"
+              ],
+              "representations": [
+                "binary",
+                "container"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "6.3.10"
+              ]
+            }
+          ],
+          "name": "figure_package",
+          "processing_levels": [
+            "rendered",
+            "reloaded",
+            "digest-bound"
+          ],
+          "required_metadata": [
+            "module-version",
+            "style-version",
+            "input-digests",
+            "panel-source-digests",
+            "pdf-svg-png-digests",
+            "final-dimensions"
+          ]
+        },
+        {
+          "artifact_type": "quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "json",
+              "orientations": [
+                "rendering-quality-report"
+              ],
+              "representations": [
+                "structured",
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "figure_quality_report",
+          "processing_levels": [
+            "derived",
+            "reloaded",
+            "review-required"
+          ],
+          "required_metadata": [
+            "module-version",
+            "package-sha256",
+            "row-coverage",
+            "container-reload",
+            "runtime-versions",
+            "limitations"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "ecosystem": "system",
+          "identity": "python3",
+          "mismatch_policy": "block",
+          "name": "python3",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-24",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=3.14,<3.15"
+              ],
+              "category": "behavior",
+              "compatibility_effect": "requires-parser",
+              "description": "The validated command, deterministic serialization, and package construction execute under Python 3.14 semantics.",
+              "id": "python-314-publication-figure-command",
+              "required_action": "Re-run the information-dense rendering acceptance before changing the Python compatibility line.",
+              "source": "https://docs.python.org/3.14/"
+            }
+          ],
+          "version_pattern": "Python ([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "python3",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "qpcr-relative-expression-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -42693,6 +43078,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "8c250de48ad4f036b9981b660004471e698868d8bad09a600040e45f5aa8e768",
+  "registry_digest": "3b82b0a3fa26039e88ab8dba28e2cf324b19c6c2193cde9074b5b2d9f1da683d",
   "schema_version": 1
 }

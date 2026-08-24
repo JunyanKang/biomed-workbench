@@ -4291,7 +4291,22 @@
               "proteomics-deqms",
               "go-kegg-overrepresentation",
               "preranked-gsea",
-              "wgcna"
+              "wgcna",
+              "protein-interaction-network",
+              "protein-complex-docking",
+              "alphafold3-complex",
+              "metascape-msbio",
+              "trajectory-topology",
+              "trajectory-velocity",
+              "fate-mapping",
+              "regulatory-velocity",
+              "spatial-platform-qc",
+              "spatial-core-analysis",
+              "spatial-deconvolution",
+              "spatial-domain-benchmark",
+              "spatial-communication",
+              "spatial-image-analysis",
+              "spatial-multislice"
             ],
             "type": "string"
           },
@@ -7444,6 +7459,33 @@
       "requirements": [],
       "title": "Run peptide-count-aware DEqMS proteomics inference",
       "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Render an explicit multi-panel scientific figure specification against registered CSV or TSV data without guessing column roles, silently discarding rows, running undeclared statistics, or reusing example pixels; deliver exact-size PDF, editable SVG, high-resolution PNG, panel source tables, a frozen specification, digests, and an independently reloaded quality report.",
+      "entrypoint": "scientific-command",
+      "id": "publication-figure-package",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "data-format": {
+            "enum": [
+              "csv",
+              "tsv"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "data-format"
+        ],
+        "type": "object"
+      },
+      "kind": "command",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Render a source-data-bound publication figure package",
+      "workflow": "publication"
     },
     {
       "access": "offline",
@@ -12792,7 +12834,7 @@
       "workflow": "wetlab"
     }
   ],
-  "entry_count": 207,
+  "entry_count": 208,
   "schema_version": 2,
-  "version": "0.2.2"
+  "version": "0.2.3"
 }
