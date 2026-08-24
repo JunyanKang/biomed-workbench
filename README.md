@@ -54,20 +54,30 @@ Biomed Workbench 把生物医学研究设计、数据分析和科研交付连接
 
 文件身份、版本关系和内容指纹随同保存。双语解读报告读取同一张经过核对的证据地图，因此图、表、正文与引用共享同一来源，而不是在报告阶段重新拼接。完整设计见[科学证据地图](docs/scientific-evidence-map.zh-CN.md)。
 
-## 覆盖的研究层级
+## 研究与分析范围
 
 当前包含 **208 个可独立识别的科学模块**。这一数字表示方法用途、输入输出和使用条件已经登记，不等同于每个模块已在所有数据类型、物种或运行环境中完成验收；精确的执行范围与代表性案例以对应版本的[发布记录](docs/releases/README.zh-CN.md)、[成熟度说明](docs/maturity.zh-CN.md)和[`reports/`](reports/)为准。
 
-| 研究层级 | 代表性能力 |
+工作台采用多维分类：数据分析按研究对象与数据尺度组织；能够跨越多个研究阶段的通用方法、证据管理、科学作图和科研写作单独列为全项目支撑能力。
+
+### 数据与研究对象
+
+| 方向 | 代表性能力 |
 | --- | --- |
-| [证据与公共数据库](docs/capabilities/evidence-and-literature.zh-CN.md) | 文献与引用核查，基因、变异、通路、结构和临床试验证据，多来源时效性与主张审查 |
 | [Bulk 测序](docs/capabilities/bulk-sequencing-assays.zh-CN.md) | bulk RNA-seq，ChIP-seq、CUT&RUN、CUT&Tag，R-loop mapping，RIP/eCLIP/LACE-seq，Ribo-seq，GRO/PRO/TT/NET-seq，ATAC-seq，甲基化与三维基因组 |
 | [Single-cell](docs/capabilities/single-cell-integration-reference-cross-species.zh-CN.md) | 质控与注释，批次和参考整合，多组学整合，轨迹、velocity、调控分析，以及跨物种映射与评估 |
 | [Spatial](docs/capabilities/trajectory-spatial-complete-analysis.zh-CN.md) | 平台数据结构与质控，组织图像和分割，空间域、解卷积与参考投射，多切片对齐、三维坐标和空间通讯 |
-| [跨尺度通用方法](docs/capabilities/omics-and-single-cell.zh-CN.md) | 实验设计与格式检查，差异检验、DEqMS、GO/KEGG、GSEA、WGCNA、motif、网络分析和统一作图规范 |
 | [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | 蛋白互作网络，AlphaFold 结果接收与质量评审，HADDOCK3 对接，结构比较、结合评估和网络交付 |
 | [临床与实验研究](docs/capabilities/clinical-and-experimental.zh-CN.md) | 队列、生存、标志物和定量实验；流式、qPCR、剂量反应、蛋白定量、微生物学和动物实验 |
-| [成像与科学可视化](docs/capabilities/imaging-and-visualization.zh-CN.md) | 图像检查、分割、共定位、目标追踪、迁移定量、带逐图面作图数据的科学图件交付和结构交互视图 |
+| [定量图像分析](docs/capabilities/quantitative-imaging.zh-CN.md) | 图像检查、分割、共定位、目标追踪、迁移定量和基础配准；输出 mask、逐目标数据和测量质量检查 |
+
+### 贯穿全项目的支撑能力
+
+| 方向 | 代表性能力 |
+| --- | --- |
+| [证据与公共数据库](docs/capabilities/evidence-and-literature.zh-CN.md) | 文献与引用核查，基因、变异、通路、结构和临床试验证据，多来源时效性与主张审查 |
+| [跨尺度通用方法](docs/capabilities/omics-and-single-cell.zh-CN.md) | 实验设计与格式检查，差异检验、DEqMS、GO/KEGG、GSEA、WGCNA、motif、网络分析和结果评审 |
+| [科学作图规范与图件交付](docs/capabilities/scientific-figure-standards.zh-CN.md) | 为各分析模块统一图件任务、字体与线条、颜色、图例、统计标注、版面、源数据、导出格式和成图复核 |
 | [科研写作、发表与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) | 全文双语精读，科研写作与基金论证，统计和数据可用性审查，期刊定位、引用核查、审稿回复、专利、图件与汇报交付 |
 
 完整能力索引：[中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)

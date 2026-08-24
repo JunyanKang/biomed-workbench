@@ -55,6 +55,29 @@ DOWNSTREAM_UNIVERSAL = frozenset(
         "literature-acquisition-manifest-audit",
         "experiment-log-standardization",
         "presentation-package-audit",
+        "publication-figure-package",
+    }
+)
+QUANTITATIVE_IMAGING_MODULES = frozenset(
+    {
+        "cell-migration-metrics",
+        "image-colocalization",
+        "image-profile",
+        "image-segment",
+        "image-translation-registration",
+        "point-tracking",
+    }
+)
+PROJECT_WIDE_FIGURE_SUPPORT_MODULES = frozenset(
+    {
+        "figure-specification",
+        "publication-figure-package",
+    }
+)
+SCIENTIFIC_COMMUNICATION_ASSET_MODULES = frozenset(
+    {
+        "image-chroma-key-remove",
+        "scientific-illustration-generation",
     }
 )
 
@@ -87,6 +110,12 @@ def classify_module(manifest: ModuleManifest) -> dict[str, Any]:
     elif module_id in SPATIAL_MODULES or module_id.startswith("single-cell-"):
         measurement_family = "single-cell or spatial measurement"
         role = "assay-specific" if manifest.module_type in {"analysis", "transform"} else "cross-scale delivery"
+    elif module_id in QUANTITATIVE_IMAGING_MODULES:
+        measurement_family = "quantitative image measurement"
+        role = "measurement-specific"
+    elif module_id in SCIENTIFIC_COMMUNICATION_ASSET_MODULES:
+        measurement_family = "non-evidentiary scientific communication image"
+        role = "communication-support"
     elif module_id in DOWNSTREAM_UNIVERSAL:
         measurement_family = "derived statistical or publication evidence"
         role = "cross-scale"
@@ -97,12 +126,24 @@ def classify_module(manifest: ModuleManifest) -> dict[str, Any]:
         measurement_family = "not assay-scoped"
         role = "research-infrastructure-or-other-domain"
 
+    if module_id in PROJECT_WIDE_FIGURE_SUPPORT_MODULES:
+        capability_scope = "project-wide-figure-support"
+    elif module_id in QUANTITATIVE_IMAGING_MODULES:
+        capability_scope = "image-derived-measurement"
+    elif module_id in SCIENTIFIC_COMMUNICATION_ASSET_MODULES:
+        capability_scope = "scientific-communication-asset"
+    elif scale == "universal":
+        capability_scope = "project-wide-or-non-scale-specific"
+    else:
+        capability_scope = "scale-specific-analysis"
+
     return {
         "module_id": module_id,
         "module_version": manifest.version,
         "primary_scale": scale,
         "measurement_family": measurement_family,
         "method_role": role,
+        "capability_scope": capability_scope,
         "module_type": manifest.module_type,
         "domains": list(manifest.domains),
         "invariants": {

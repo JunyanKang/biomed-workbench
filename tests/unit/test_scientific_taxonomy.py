@@ -26,10 +26,36 @@ class ScientificTaxonomyTests(unittest.TestCase):
             "single-cell-batch-integration": "single-cell",
             "single-cell-spatial-analysis": "spatial",
             "differential-expression": "universal",
+            "figure-specification": "universal",
+            "publication-figure-package": "universal",
             "journal-targeting-and-compliance": "universal",
         }
         for module_id, scale in expected.items():
             self.assertEqual(classify_module(self.registry.get(module_id))["primary_scale"], scale)
+
+    def test_quantitative_imaging_and_project_wide_figure_support_are_distinct(self):
+        for module_id in (
+            "image-profile",
+            "image-segment",
+            "image-colocalization",
+            "point-tracking",
+            "cell-migration-metrics",
+            "image-translation-registration",
+        ):
+            row = classify_module(self.registry.get(module_id))
+            self.assertEqual(row["capability_scope"], "image-derived-measurement")
+            self.assertEqual(row["measurement_family"], "quantitative image measurement")
+            self.assertEqual(row["method_role"], "measurement-specific")
+
+        for module_id in ("figure-specification", "publication-figure-package"):
+            row = classify_module(self.registry.get(module_id))
+            self.assertEqual(row["primary_scale"], "universal")
+            self.assertEqual(row["capability_scope"], "project-wide-figure-support")
+            self.assertNotIn("imaging", row["domains"])
+
+        communication = classify_module(self.registry.get("scientific-illustration-generation"))
+        self.assertEqual(communication["capability_scope"], "scientific-communication-asset")
+        self.assertEqual(communication["method_role"], "communication-support")
 
     def test_cuttag_target_normalization_and_specificity_are_not_assay_classes(self):
         path = BUILTIN_ROOT / "bulk-chromatin-peak-calling" / "module.json"

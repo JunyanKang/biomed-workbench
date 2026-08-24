@@ -24,19 +24,22 @@ def main() -> None:
         raise RuntimeError("module taxonomy coverage is not one-to-one")
     scales = Counter(row["primary_scale"] for row in rows)
     roles = Counter(row["method_role"] for row in rows)
+    scopes = Counter(row["capability_scope"] for row in rows)
     report = {
         "schema_version": 1,
-        "generated_on": "2026-07-31",
+        "generated_on": "2026-08-24",
         "registry_digest": registry.digest,
         "module_count": len(rows),
         "classification_model": {
             "first_facet": "data scale: bulk, single-cell, spatial, or universal",
             "second_facet": "measurement family or non-assay research function",
-            "third_facet": "method role: assay-specific, multi-assay, cross-scale, or infrastructure",
+            "third_facet": "method role: assay-specific, measurement-specific, multi-assay, cross-scale, communication support, or infrastructure",
+            "fourth_facet": "capability scope: scale-specific analysis, image-derived measurement, project-wide figure support, scientific communication asset, or another non-scale-specific function",
             "strategy_fields": "target, antibody, spike-in/internal reference, specificity control, normalization, and peak recall remain parameters and never become assay classes",
         },
         "scale_counts": dict(sorted(scales.items())),
         "method_role_counts": dict(sorted(roles.items())),
+        "capability_scope_counts": dict(sorted(scopes.items())),
         "modules": rows,
     }
     canonical = json.dumps(report, indent=2, sort_keys=True) + "\n"

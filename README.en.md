@@ -54,20 +54,30 @@ The evidence map uses two readable levels instead of compressing every file rela
 
 File identity, version relationships, and content fingerprints travel with the map. Bilingual interpretation reports read the same checked source, keeping figures, tables, prose, and citations aligned instead of reconstructing their origins during writing. Read the full [Scientific Evidence Map](docs/scientific-evidence-map.md).
 
-## Research layers
+## Research and analysis coverage
 
 The workbench currently contains **208 independently discoverable scientific modules**. This means that their purpose, inputs, outputs, and conditions of use are recorded; it does not mean that every module has been accepted across every dataset, species, or runtime. Exact execution scope and representative cases are recorded in the versioned [release notes](docs/releases/README.md), [maturity guide](docs/maturity.md), and [`reports/`](reports/).
 
-| Research layer | Representative capabilities |
+The workbench uses a multidimensional classification: data analysis is organised by research object and scale, while general methods, evidence management, scientific figures, and academic writing are listed separately as project-wide support.
+
+### Data scales and research objects
+
+| Area | Representative capabilities |
 | --- | --- |
-| [Evidence and public databases](docs/capabilities/evidence-and-literature.md) | Literature and citation review; gene, variant, pathway, structure and clinical-trial evidence; source freshness and claim review |
 | [Bulk sequencing](docs/capabilities/bulk-sequencing-assays.md) | bulk RNA-seq; ChIP-seq, CUT&RUN and CUT&Tag; R-loop mapping; RIP/eCLIP/LACE-seq; Ribo-seq; GRO/PRO/TT/NET-seq; ATAC-seq; methylation and 3D genome analysis |
 | [Single-cell](docs/capabilities/single-cell-integration-reference-cross-species.md) | Quality control and annotation, batch and reference integration, multimodal integration, trajectories, velocity, regulatory analysis, cross-species mapping and evaluation |
 | [Spatial](docs/capabilities/trajectory-spatial-complete-analysis.md) | Platform-aware structures and QC, tissue imaging and segmentation, domains, deconvolution and reference mapping, slice alignment, 3D coordinates and spatial communication |
-| [Cross-scale methods](docs/capabilities/omics-and-single-cell.md) | Study and format validation, differential testing, DEqMS, GO/KEGG, GSEA, WGCNA, motifs, networks and unified figure specifications |
 | [Molecular and structural biology](docs/capabilities/molecular-and-structural.md) | Protein interaction networks, AlphaFold result intake and quality review, HADDOCK3 docking, structure comparison, binding assessment and network delivery |
 | [Clinical and experimental research](docs/capabilities/clinical-and-experimental.md) | Cohorts, survival, biomarkers and quantitative assays; flow cytometry, qPCR, dose response, protein quantification, microbiology and animal studies |
-| [Imaging and scientific visualisation](docs/capabilities/imaging-and-visualization.md) | Image inspection, segmentation, colocalisation, point tracking, migration measurements, scientific-figure delivery with panel source data, and interactive structure views |
+| [Quantitative image analysis](docs/capabilities/quantitative-imaging.md) | Image inspection, segmentation, colocalisation, object tracking, migration measurements, and baseline registration with masks, object-level data, and measurement QC |
+
+### Project-wide support
+
+| Area | Representative capabilities |
+| --- | --- |
+| [Evidence and public databases](docs/capabilities/evidence-and-literature.md) | Literature and citation review; gene, variant, pathway, structure and clinical-trial evidence; source freshness and claim review |
+| [Cross-scale methods](docs/capabilities/omics-and-single-cell.md) | Study and format validation, differential testing, DEqMS, GO/KEGG, GSEA, WGCNA, motifs, networks, and result review |
+| [Scientific figure standards and delivery](docs/capabilities/scientific-figure-standards.md) | Project-wide rules for figure purpose, typography, strokes, colour, legends, statistical annotations, layout, source data, export formats, and rendered-output review |
 | [Academic writing, publication, and translation](docs/capabilities/publication-and-translation.md) | Full-paper bilingual reading, academic and proposal writing, statistics and data-availability review, journal positioning, citation verification, peer-review response, patents, figures and presentations |
 
 Explore the complete capability index: [中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)

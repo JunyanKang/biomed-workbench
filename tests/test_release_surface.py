@@ -32,7 +32,7 @@ class ReleaseSurfaceTests(unittest.TestCase):
 
         self.assertTrue((ROOT / "LICENSE").exists())
         self.assertEqual(plugin["license"], "Apache-2.0")
-        self.assertEqual(plugin["version"], "0.2.3")
+        self.assertEqual(plugin["version"], "0.2.4")
         self.assertEqual(plugin["version"], catalog["version"])
 
         chinese_readme = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -41,8 +41,8 @@ class ReleaseSurfaceTests(unittest.TestCase):
         self.assertIn(f"contains **{catalog['entry_count']} independently discoverable scientific modules**", english_readme)
 
     def test_public_figure_delivery_is_visible_in_both_languages(self):
-        chinese = (ROOT / "docs" / "capabilities" / "imaging-and-visualization.zh-CN.md").read_text(encoding="utf-8")
-        english = (ROOT / "docs" / "capabilities" / "imaging-and-visualization.md").read_text(encoding="utf-8")
+        chinese = (ROOT / "docs" / "capabilities" / "scientific-figure-standards.zh-CN.md").read_text(encoding="utf-8")
+        english = (ROOT / "docs" / "capabilities" / "scientific-figure-standards.md").read_text(encoding="utf-8")
         chinese_release = (ROOT / "docs" / "releases" / "2026-08-24-0.2.3.zh-CN.md").read_text(encoding="utf-8")
         english_release = (ROOT / "docs" / "releases" / "2026-08-24-0.2.3.md").read_text(encoding="utf-8")
 
@@ -54,6 +54,51 @@ class ReleaseSurfaceTests(unittest.TestCase):
             self.assertIn("source data", text)
         self.assertIn("1,228", chinese_release)
         self.assertIn("1,228", english_release)
+
+    def test_quantitative_imaging_is_separate_from_project_wide_figure_support(self):
+        chinese_readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        english_readme = (ROOT / "README.en.md").read_text(encoding="utf-8")
+        chinese_imaging = (ROOT / "docs" / "capabilities" / "quantitative-imaging.zh-CN.md").read_text(encoding="utf-8")
+        english_imaging = (ROOT / "docs" / "capabilities" / "quantitative-imaging.md").read_text(encoding="utf-8")
+        chinese_figures = (ROOT / "docs" / "capabilities" / "scientific-figure-standards.zh-CN.md").read_text(encoding="utf-8")
+        english_figures = (ROOT / "docs" / "capabilities" / "scientific-figure-standards.md").read_text(encoding="utf-8")
+        legacy_chinese = (ROOT / "docs" / "capabilities" / "imaging-and-visualization.zh-CN.md").read_text(encoding="utf-8")
+        legacy_english = (ROOT / "docs" / "capabilities" / "imaging-and-visualization.md").read_text(encoding="utf-8")
+
+        self.assertIn("### 数据与研究对象", chinese_readme)
+        self.assertIn("### 贯穿全项目的支撑能力", chinese_readme)
+        self.assertIn("[定量图像分析]", chinese_readme)
+        self.assertIn("[科学作图规范与图件交付]", chinese_readme)
+        self.assertNotIn("[成像与科学可视化]", chinese_readme)
+        self.assertIn("### Data scales and research objects", english_readme)
+        self.assertIn("### Project-wide support", english_readme)
+        self.assertIn("[Quantitative image analysis]", english_readme)
+        self.assertIn("[Scientific figure standards and delivery]", english_readme)
+        self.assertNotIn("[Imaging and scientific visualisation]", english_readme)
+
+        self.assertIn("## 当前能力", chinese_imaging)
+        self.assertIn("## Current Capabilities", english_imaging)
+        self.assertIn("## 一张图在制作前需要明确什么", chinese_figures)
+        self.assertIn("## What Must Be Defined Before Rendering", english_figures)
+        self.assertNotIn("## 科学可视化", chinese_imaging)
+        self.assertNotIn("## Scientific Visualisation", english_imaging)
+        for link in ("quantitative-imaging.zh-CN.md", "scientific-figure-standards.zh-CN.md"):
+            self.assertIn(link, legacy_chinese)
+        for link in ("quantitative-imaging.md", "scientific-figure-standards.md"):
+            self.assertIn(link, legacy_english)
+
+    def test_taxonomy_correction_release_is_documented_bilingually(self):
+        chinese = (ROOT / "docs" / "releases" / "2026-08-24-0.2.4.zh-CN.md").read_text(encoding="utf-8")
+        english = (ROOT / "docs" / "releases" / "2026-08-24-0.2.4.md").read_text(encoding="utf-8")
+        chinese_index = (ROOT / "docs" / "releases" / "README.zh-CN.md").read_text(encoding="utf-8")
+        english_index = (ROOT / "docs" / "releases" / "README.md").read_text(encoding="utf-8")
+
+        for term in ("定量图像分析", "全项目", "科学作图", "科研传播图像"):
+            self.assertIn(term, chinese)
+        for term in ("quantitative image analysis", "project-wide", "scientific figures", "scientific communication images"):
+            self.assertIn(term, english)
+        self.assertIn("2026-08-24-0.2.4.zh-CN.md", chinese_index)
+        self.assertIn("2026-08-24-0.2.4.md", english_index)
 
     def test_top_level_help_discovers_the_complete_project_command_surface(self):
         completed = subprocess.run(
