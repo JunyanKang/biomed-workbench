@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 import tempfile
 import unittest
@@ -59,8 +60,15 @@ class PublicationFigurePackageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             data_path = Path(temp) / "data.tsv"
             data_path.write_text(data, encoding="utf-8")
+            spec = json.loads((FIXTURES / "controlled_figure_spec.json").read_text(encoding="utf-8"))
+            digest = hashlib.sha256(data_path.read_bytes()).hexdigest()
+            spec["source_table_sha256"] = digest
+            for panel in spec["panels"]:
+                panel["source_table_sha256"] = digest
+            spec_path = Path(temp) / "spec.json"
+            spec_path.write_text(json.dumps(spec), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "missing plotted values"):
-                render_package(data_path, FIXTURES / "controlled_figure_spec.json", Path(temp) / "package.zip", Path(temp) / "report.json", "tsv")
+                render_package(data_path, spec_path, Path(temp) / "package.zip", Path(temp) / "report.json", "tsv")
 
     def test_registered_scientific_command_executes_content_addressed_outputs(self) -> None:
         manifest = ModuleRegistry.discover(ROOT / "biomed_workbench" / "modules" / "builtin").get("publication-figure-package")

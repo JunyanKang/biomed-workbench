@@ -83,6 +83,7 @@ PANEL_FIELDS = frozenset({
     "legend", "error", "row_label", "value_columns", "adjusted_p", "label_column",
     "label_values", "effect_threshold", "adjusted_p_threshold", "statistical_context",
     "x_limits", "y_limits", "reference_lines", "category_order", "group_order", "where", "orientation", "value_labels",
+    "upstream_result_ids", "allowed_conclusion", "story_role", "source_table", "source_table_sha256", "vector_required",
 })
 STATISTICAL_FIELDS = frozenset({"experimental_unit", "biological_n", "test", "multiplicity", "effect_size", "uncertainty"})
 PALETTE = tuple(COLORBLIND_SAFE[key] for key in ("blue", "orange", "green", "purple", "vermillion", "sky", "yellow", "black"))
@@ -113,10 +114,44 @@ def _read_spec(path: Path) -> dict[str, object]:
         raise ValueError("figure specification is not readable JSON") from exc
     if not isinstance(value, dict):
         raise ValueError("figure specification must be an object")
-    allowed = {"title", "journal_profile", "analysis_type", "width_mm", "height_mm", "dpi", "layout", "panels"}
+    allowed = {
+        "contract_version", "figure_id", "delivery_class", "story_position", "caption", "reference_dois",
+        "renderer", "source_table_sha256", "project_lock_digest", "result_status",
+        "title", "journal_profile", "analysis_type", "width_mm", "height_mm", "dpi", "layout", "panels",
+    }
     if set(value) - allowed:
         raise ValueError(f"unsupported figure specification fields: {', '.join(sorted(set(value) - allowed))}")
     _safe_text(value.get("title"), "title")
+    if value.get("contract_version") != "1.0.0":
+        raise ValueError("figure contract_version must be 1.0.0")
+    _safe_text(value.get("figure_id"), "figure_id")
+    _safe_text(value.get("story_position"), "story_position", minimum=12)
+    _safe_text(value.get("caption"), "caption", minimum=24)
+    delivery_class = value.get("delivery_class")
+    if delivery_class not in {"controlled-acceptance", "project-formal"}:
+        raise ValueError("delivery_class must be controlled-acceptance or project-formal")
+    renderer_contract = value.get("renderer")
+    if renderer_contract != {"id": MODULE_ID, "version": MODULE_VERSION}:
+        raise ValueError("figure renderer identity differs from the registered renderer")
+    source_digest = value.get("source_table_sha256")
+    if not isinstance(source_digest, str) or len(source_digest) != 64 or set(source_digest) - set("0123456789abcdef"):
+        raise ValueError("source_table_sha256 must be lowercase SHA-256")
+    dois = value.get("reference_dois")
+    if (
+        not isinstance(dois, list)
+        or not dois
+        or len(set(dois)) != len(dois)
+        or any(not isinstance(item, str) or not item.startswith("https://doi.org/") for item in dois)
+    ):
+        raise ValueError("reference_dois must contain unique DOI URLs")
+    if delivery_class == "project-formal":
+        lock_digest = value.get("project_lock_digest")
+        if not isinstance(lock_digest, str) or len(lock_digest) != 64 or set(lock_digest) - set("0123456789abcdef"):
+            raise ValueError("project-formal figures require a project-lock digest")
+        if value.get("result_status") != "FORMAL":
+            raise ValueError("project-formal figures require FORMAL result status")
+    elif value.get("result_status") not in {"CANDIDATE", "SENSITIVITY"} or value.get("project_lock_digest") is not None:
+        raise ValueError("controlled acceptance must remain non-FORMAL and cannot claim a project lock")
     profile = value.get("journal_profile")
     if profile not in {"nature", "science", "cell", "screen"}:
         raise ValueError("journal_profile is unsupported")
@@ -139,8 +174,8 @@ def _read_spec(path: Path) -> dict[str, object]:
     if not all(isinstance(item, int) and not isinstance(item, bool) and 1 <= item <= 4 for item in (rows, columns)):
         raise ValueError("layout rows and columns must be integers between 1 and 4")
     panels = value.get("panels")
-    if not isinstance(panels, list) or not panels or len(panels) > rows * columns:
-        raise ValueError("panels must be a nonempty list that fits the declared layout")
+    if not isinstance(panels, list) or not panels or len(panels) != rows * columns:
+        raise ValueError("every declared layout cell must contain exactly one panel")
     identifiers: set[str] = set()
     for index, panel in enumerate(panels):
         if not isinstance(panel, dict) or set(panel) - PANEL_FIELDS:
@@ -153,6 +188,21 @@ def _read_spec(path: Path) -> dict[str, object]:
         if panel.get("plot_type") not in SUPPORTED_PLOTS:
             raise ValueError(f"panel {identifier} plot_type is unsupported")
         _safe_text(panel.get("claim"), f"panel {identifier} claim", minimum=12)
+        _safe_text(panel.get("allowed_conclusion"), f"panel {identifier} allowed_conclusion", minimum=12)
+        _safe_text(panel.get("story_role"), f"panel {identifier} story_role", minimum=8)
+        _safe_text(panel.get("source_table"), f"panel {identifier} source_table")
+        if panel.get("source_table_sha256") != source_digest:
+            raise ValueError(f"panel {identifier} source table digest differs from the figure contract")
+        upstream_ids = panel.get("upstream_result_ids")
+        if (
+            not isinstance(upstream_ids, list)
+            or not upstream_ids
+            or len(set(upstream_ids)) != len(upstream_ids)
+            or any(not isinstance(item, str) or not item.strip() for item in upstream_ids)
+        ):
+            raise ValueError(f"panel {identifier} must bind one or more upstream result identities")
+        if panel.get("vector_required") is not True:
+            raise ValueError(f"panel {identifier} must require vector delivery")
         if panel.get("legend", "outside") not in {"outside", "none"}:
             raise ValueError(f"panel {identifier} legend must be outside or none")
         if panel.get("orientation", "vertical") not in {"vertical", "horizontal"}:
@@ -172,15 +222,14 @@ def _read_spec(path: Path) -> dict[str, object]:
         ):
             raise ValueError(f"panel {identifier} value_labels must match the heatmap value columns")
         context = panel.get("statistical_context")
-        if context is not None:
-            if not isinstance(context, dict) or set(context) != STATISTICAL_FIELDS:
-                raise ValueError(f"panel {identifier} statistical_context must declare all six reporting fields")
-            for field in STATISTICAL_FIELDS:
-                if field == "biological_n":
-                    if not isinstance(context[field], int) or context[field] < 1:
-                        raise ValueError(f"panel {identifier} biological_n must be positive")
-                else:
-                    _safe_text(context[field], f"panel {identifier} statistical_context.{field}")
+        if not isinstance(context, dict) or set(context) != STATISTICAL_FIELDS:
+            raise ValueError(f"panel {identifier} statistical_context must declare all six reporting fields")
+        for field in STATISTICAL_FIELDS:
+            if field == "biological_n":
+                if not isinstance(context[field], int) or context[field] < 1:
+                    raise ValueError(f"panel {identifier} biological_n must be positive")
+            else:
+                _safe_text(context[field], f"panel {identifier} statistical_context.{field}")
     return value
 
 
@@ -440,6 +489,8 @@ def _render(frame: pd.DataFrame, spec: dict[str, object], output_dir: Path) -> t
         data.to_csv(output_dir / source_name, sep="\t", index=False, quoting=csv.QUOTE_MINIMAL, lineterminator="\n")
         source_rows.append({
             "panel_id": panel["id"], "plot_type": panel["plot_type"], "claim": panel["claim"],
+            "allowed_conclusion": panel["allowed_conclusion"], "story_role": panel["story_role"],
+            "upstream_result_ids": panel["upstream_result_ids"],
             "row_count": int(data.shape[0]), "column_count": int(data.shape[1]),
             "source_data": source_name, "source_data_sha256": _sha256_file(output_dir / source_name),
             "statistical_context": panel.get("statistical_context"),
@@ -458,6 +509,12 @@ def _render(frame: pd.DataFrame, spec: dict[str, object], output_dir: Path) -> t
         label_overlap_pairs += overlap
     if label_overlap_pairs:
         raise ValueError(f"rendered panel annotations contain {label_overlap_pairs} overlapping label pairs: {overlap_by_panel}")
+    signatures = [
+        (row["plot_type"], row["source_data_sha256"], row["allowed_conclusion"])
+        for row in source_rows
+    ]
+    if len(set(signatures)) != len(signatures):
+        raise ValueError("figure contains an exact repeated panel contract")
     pdf = output_dir / "figure.pdf"
     svg = output_dir / "figure.svg"
     png = output_dir / "figure.png"
@@ -528,6 +585,8 @@ def _canonical_zip(source_dir: Path, target: Path) -> None:
 
 def render_package(data_path: Path, spec_path: Path, package_path: Path, report_path: Path, data_format: str) -> dict[str, object]:
     spec = _read_spec(spec_path)
+    if spec["source_table_sha256"] != _sha256_file(data_path):
+        raise ValueError("figure source table differs from the locked source_table_sha256")
     frame = _read_data(data_path, data_format)
     package_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -536,6 +595,7 @@ def render_package(data_path: Path, spec_path: Path, package_path: Path, report_
         output_dir = Path(temp)
         (output_dir / "source-data").mkdir()
         (output_dir / "figure-specification.json").write_bytes(_canonical_json(spec))
+        figure_contract_digest = _sha256_file(output_dir / "figure-specification.json")
         source_rows, selection_report = _render(frame, spec, output_dir)
         reload_report = _reload_validate(output_dir, spec, source_rows)
         files = []
@@ -545,6 +605,14 @@ def render_package(data_path: Path, spec_path: Path, package_path: Path, report_
             "schema_version": 1,
             "module": {"id": MODULE_ID, "version": MODULE_VERSION},
             "style_version": STYLE_VERSION,
+            "figure_contract": {
+                "digest": figure_contract_digest,
+                "figure_id": spec["figure_id"],
+                "delivery_class": spec["delivery_class"],
+                "result_status": spec["result_status"],
+                "project_lock_digest": spec["project_lock_digest"],
+                "renderer": spec["renderer"],
+            },
             "input": {"data_sha256": _sha256_file(data_path), "specification_sha256": _sha256_file(spec_path), "row_count": int(frame.shape[0]), "column_count": int(frame.shape[1])},
             "panels": source_rows,
             "input_selection": selection_report,
@@ -560,6 +628,17 @@ def render_package(data_path: Path, spec_path: Path, package_path: Path, report_
         "scope": "rendering-and-delivery-validation",
         "scientific_result_interpretation": "not-performed",
         "style_version": STYLE_VERSION,
+        "figure_contract": {
+            "digest": figure_contract_digest,
+            "figure_id": spec["figure_id"],
+            "delivery_class": spec["delivery_class"],
+            "result_status": spec["result_status"],
+            "project_lock_digest": spec["project_lock_digest"],
+            "renderer": spec["renderer"],
+            "reference_dois": spec["reference_dois"],
+            "caption": spec["caption"],
+            "story_position": spec["story_position"],
+        },
         "journal_profile": spec["journal_profile"],
         "input": {"data_sha256": _sha256_file(data_path), "specification_sha256": _sha256_file(spec_path), "row_count": int(frame.shape[0]), "column_count": int(frame.shape[1])},
         "panels": source_rows,
@@ -572,6 +651,8 @@ def render_package(data_path: Path, spec_path: Path, package_path: Path, report_
             "source-data-row-integrity": "pass",
             "final-size-vector-raster-reload": "pass",
             "negative-result-preservation": "not-signal-gated",
+            "panel-contract-completeness": "pass",
+            "renderer-and-source-lock": "pass",
         },
         "limitations": [
             "This report validates rendering, source-data binding, final dimensions, and container readability; it does not validate upstream analysis or biological interpretation.",

@@ -35,6 +35,7 @@ INPUT_DECISION_ACTIONS = frozenset({"acquire-more-data"})
 REVISION_DECISION_ACTIONS = frozenset({"revise-hypothesis", "revise-project-scope"})
 STOP_DECISION_ACTIONS = frozenset({"stop-branch"})
 REVIEW_STATUSES = frozenset({"passed", "warning", "major", "fatal", "unassessed"})
+ANALYSIS_ROLES = frozenset({"primary", "orthogonal-validation", "sensitivity"})
 ARTIFACT_KINDS = frozenset({"data", "table", "figure", "model", "report", "other"})
 EDGE_RELATIONS = (
     "motivates",
@@ -105,6 +106,11 @@ class AnalysisAdmission:
     falsification_criteria: tuple[str, ...]
     expected_artifact_types: tuple[str, ...]
     approved: bool
+    analysis_role: str = "primary"
+    replaces_plan_node_id: str | None = None
+    decision_information_gain_zh: str | None = None
+    decision_information_gain_en: str | None = None
+    minimal_sufficient_policy_version: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "id", validate_identifier(self.id, "analysis_admission.id"))
@@ -130,9 +136,30 @@ class AnalysisAdmission:
         object.__setattr__(self, "parameter_justifications", justifications)
         if not isinstance(self.approved, bool):
             raise ValueError("analysis_admission.approved must be boolean")
+        if self.analysis_role not in ANALYSIS_ROLES:
+            raise ValueError("analysis_admission.analysis_role is unsupported")
+        if self.replaces_plan_node_id is not None:
+            object.__setattr__(
+                self,
+                "replaces_plan_node_id",
+                validate_identifier(self.replaces_plan_node_id, "analysis_admission.replaces_plan_node_id"),
+            )
+            if self.replaces_plan_node_id == self.plan_node_id:
+                raise ValueError("analysis admission cannot replace itself")
+        gains = (self.decision_information_gain_zh, self.decision_information_gain_en)
+        if any(value is not None for value in gains):
+            if any(value is None for value in gains):
+                raise ValueError("decision-information gain must be stated in both languages")
+            object.__setattr__(self, "decision_information_gain_zh", _text(gains[0], "analysis_admission.decision_information_gain_zh"))
+            object.__setattr__(self, "decision_information_gain_en", _text(gains[1], "analysis_admission.decision_information_gain_en"))
+        if self.minimal_sufficient_policy_version is not None:
+            if self.minimal_sufficient_policy_version != "1.0.0":
+                raise ValueError("analysis admission minimal-sufficient policy version is unsupported")
+            if self.analysis_role == "sensitivity" and self.replaces_plan_node_id is None and not all(gains):
+                raise ValueError("sensitivity analysis must replace a named node or add declared decision information")
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        payload = {
             "id": self.id,
             "plan_node_id": self.plan_node_id,
             "hypothesis_ids": list(self.hypothesis_ids),
@@ -148,6 +175,15 @@ class AnalysisAdmission:
             "expected_artifact_types": list(self.expected_artifact_types),
             "approved": self.approved,
         }
+        if self.minimal_sufficient_policy_version is not None:
+            payload.update({
+                "analysis_role": self.analysis_role,
+                "replaces_plan_node_id": self.replaces_plan_node_id,
+                "decision_information_gain_zh": self.decision_information_gain_zh,
+                "decision_information_gain_en": self.decision_information_gain_en,
+                "minimal_sufficient_policy_version": self.minimal_sufficient_policy_version,
+            })
+        return payload
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "AnalysisAdmission":
@@ -163,6 +199,32 @@ class AnalysisAdmission:
         ):
             values[field] = tuple(values[field])
         return cls(**values)
+
+
+def validate_minimal_sufficient_admission(state: "ProjectState", item: AnalysisAdmission) -> None:
+    """Enforce one primary and one orthogonal analysis per hypothesis slice."""
+    if item.minimal_sufficient_policy_version != "1.0.0":
+        raise ValueError("new analysis admission must bind minimal-sufficient policy 1.0.0")
+    active = tuple(
+        value
+        for value in state.analysis_admissions
+        if value.approved
+        and set(value.hypothesis_ids) & set(item.hypothesis_ids)
+        and value.plan_node_id != item.replaces_plan_node_id
+    )
+    if item.approved and item.analysis_role in {"primary", "orthogonal-validation"} and any(
+        value.analysis_role == item.analysis_role for value in active
+    ):
+        raise ValueError(
+            f"minimal-sufficient quota already contains one {item.analysis_role} analysis for the hypothesis slice"
+        )
+    if item.replaces_plan_node_id is not None:
+        replaced = next(
+            (value for value in state.analysis_admissions if value.plan_node_id == item.replaces_plan_node_id),
+            None,
+        )
+        if replaced is None or not set(replaced.hypothesis_ids) & set(item.hypothesis_ids):
+            raise ValueError("replacement admission must name an admitted analysis for the same hypothesis slice")
 
 
 @dataclass(frozen=True)

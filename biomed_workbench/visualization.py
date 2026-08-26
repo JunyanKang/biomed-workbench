@@ -293,6 +293,25 @@ ANALYSIS_FIGURE_PROFILES: dict[str, dict[str, list[str]]] = {
             "orthogonal_validation_linkage",
         ],
     },
+    "rna-processing-alternative-splicing": {
+        "required": [
+            "sample_and_library_design_summary",
+            "event_or_feature_test_accounting",
+            "effect_size_and_multiplicity_plot",
+            "biological_sample_usage_plot",
+            "coverage_and_repeatability_diagnostics",
+            "representative_gene_model_or_splice_graph",
+            "claim_status_and_validation_summary",
+        ],
+        "optional": [
+            "sashimi_or_voila_view",
+            "transcript_usage_heatmap",
+            "isoform_structure_and_productivity",
+            "method_concordance_and_discordance",
+            "cross_assay_evidence_map",
+            "threshold_sensitivity",
+        ],
+    },
     "single-cell-atac-peak-recall": {
         "required": [
             "fragment_and_barcode_accounting",

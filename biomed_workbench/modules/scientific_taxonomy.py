@@ -37,6 +37,7 @@ ASSAY_SPECIFIC_PREFIXES = (
 DOWNSTREAM_UNIVERSAL = frozenset(
     {
         "differential-expression",
+        "rna-processing-alternative-splicing",
         "enrichment-analysis",
         "functional-enrichment",
         "wgcna-coexpression",
@@ -48,6 +49,12 @@ DOWNSTREAM_UNIVERSAL = frozenset(
         "citation-audit",
         "academic-prose-revision-audit",
         "research-proposal-quality-audit",
+        "nsfc-proposal-development",
+        "nsfc-proposal-figure-development",
+        "nsfc-proposal-semantic-audit",
+        "biomedical-terminology-and-nomenclature-audit",
+        "mechanism-claim-promotion-gate",
+        "docx-citation-delivery-audit",
         "statistical-reporting-audit",
         "data-availability-audit",
         "paper-reader-package-audit",
@@ -71,6 +78,7 @@ QUANTITATIVE_IMAGING_MODULES = frozenset(
 PROJECT_WIDE_FIGURE_SUPPORT_MODULES = frozenset(
     {
         "figure-specification",
+        "nsfc-proposal-figure-development",
         "publication-figure-package",
     }
 )
@@ -116,6 +124,9 @@ def classify_module(manifest: ModuleManifest) -> dict[str, Any]:
     elif module_id in SCIENTIFIC_COMMUNICATION_ASSET_MODULES:
         measurement_family = "non-evidentiary scientific communication image"
         role = "communication-support"
+    elif module_id == "rna-processing-alternative-splicing":
+        measurement_family = "RNA processing, splice-event, exon-usage, transcript-usage and isoform evidence"
+        role = "cross-scale"
     elif module_id in DOWNSTREAM_UNIVERSAL:
         measurement_family = "derived statistical or publication evidence"
         role = "cross-scale"

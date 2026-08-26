@@ -41,6 +41,21 @@ class ExecutionReadiness:
     controlled_fixture_portable_identity_digest: str | None
     reasons: tuple[str, ...]
 
+    @property
+    def engineering_validated(self) -> bool:
+        """Implementation executed and its declared outputs were reloaded."""
+        return bool(self.executor_ready and self.controlled_fixture_portable_identity_digest)
+
+    @property
+    def method_validated(self) -> bool:
+        """A representative or public scientific case passed current gates."""
+        return bool(self.engineering_validated and self.public_data_validated)
+
+    @property
+    def project_promoted(self) -> bool:
+        """Release-wide readiness can never promote a current-project result."""
+        return False
+
     def to_dict(self) -> dict[str, object]:
         return {
             "module_id": self.module_id,
@@ -49,6 +64,9 @@ class ExecutionReadiness:
             "contract_ready": self.contract_ready,
             "executor_ready": self.executor_ready,
             "public_data_validated": self.public_data_validated,
+            "engineering_validated": self.engineering_validated,
+            "method_validated": self.method_validated,
+            "project_promoted": self.project_promoted,
             "template_paths": list(self.template_paths),
             "assay_readiness": list(self.assay_readiness),
             "entry_surface_reachability": dict(self.entry_surface_reachability),
@@ -215,8 +233,9 @@ def assess_execution_readiness(
         try:
             coverage = json.loads(coverage_path.read_text(encoding="utf-8"))
             properties = manifest.input_schema.get("properties", {})
-            assay_schema = properties.get("assay", {}) if isinstance(properties, dict) else {}
-            declared_assays = tuple(assay_schema.get("enum", ())) if isinstance(assay_schema, dict) else ()
+            coverage_field = coverage.get("input_property", "assay")
+            coverage_schema = properties.get(coverage_field, {}) if isinstance(properties, dict) and isinstance(coverage_field, str) else {}
+            declared_assays = tuple(coverage_schema.get("enum", ())) if isinstance(coverage_schema, dict) else ()
             rows = coverage.get("assays", []) if isinstance(coverage, dict) else []
             if coverage.get("schema_version") != 1 or coverage.get("module_id") != manifest.id:
                 raise ValueError("identity or schema mismatch")
@@ -263,6 +282,7 @@ def assess_execution_readiness(
                 assay_level = "validated" if assay_validated else "executable" if assay_executor else "scaffolded"
                 assay_readiness.append({
                     "assay": assay,
+                    "coverage_field": coverage_field,
                     "level": assay_level,
                     "contract_ready": assay_contract,
                     "executor_ready": assay_executor,

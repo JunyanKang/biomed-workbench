@@ -134,10 +134,10 @@ def _check_registry() -> Check:
             action="Run tools/workbench validate and repair the reported package error.",
             details={"error_type": type(exc).__name__, "error": str(exc)},
         )
-    maturity: dict[str, int] = {}
+    contract_labels: dict[str, int] = {}
     access: dict[str, int] = {}
     for module in modules:
-        maturity[module.maturity] = maturity.get(module.maturity, 0) + 1
+        contract_labels[module.maturity] = contract_labels.get(module.maturity, 0) + 1
         access[module.access] = access.get(module.access, 0) + 1
     return Check(
         id="module-registry",
@@ -146,7 +146,8 @@ def _check_registry() -> Check:
         details={
             "module_count": len(modules),
             "registry_digest": registry.digest,
-            "maturity": dict(sorted(maturity.items())),
+            "registry_contract_labels": dict(sorted(contract_labels.items())),
+            "scientific_validation_source": "reports/execution-readiness.json",
             "access": dict(sorted(access.items())),
         },
     )

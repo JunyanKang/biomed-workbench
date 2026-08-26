@@ -448,7 +448,7 @@ def _specs() -> dict[str, tuple[dict[str, Any], list[dict[str, Any]]]]:
             description="Audit a bounded or recurring literature search plan, exact source coverage, identifier-based deduplication, six declared prioritisation dimensions, strict journal scope, retraction states, citation contexts, and author or affiliation overlap for candidate independent citing works.",
             module_type="validation",
             domains=["evidence", "publication"],
-            intents=["multi-source literature landscape", "recurring literature monitoring", "independent citing work audit", "多来源文献检索审查", "定期文献追踪", "独立他引审查", "高影响力他引核验"],
+            intents=["multi-source literature landscape", "recurring literature monitoring", "independent citing work audit", "多来源文献检索审查", "系统文献格局分析", "判断研究空白", "定期文献追踪", "独立他引审查", "高影响力他引核验"],
             question="Is this literature landscape broad enough for its declared scope, transparently prioritized, deduplicated, and explicit about independent citation context?",
             entrypoint="biomed_workbench.capabilities.scholarly_delivery:audit_literature_landscape",
             input_name="literature_landscape",

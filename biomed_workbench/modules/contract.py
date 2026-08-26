@@ -18,6 +18,7 @@ from .scientific_command import ScientificCommand
 
 MODULE_TYPES = frozenset({"data_source", "transform", "analysis", "validation", "interpretation", "design", "delivery"})
 MATURITY_LEVELS = frozenset({"experimental", "validated", "reference"})
+SCIENTIFIC_ANALYSIS_ROLES = frozenset({"primary", "orthogonal-validation", "sensitivity", "integration", "delivery"})
 SEVERITIES = frozenset({"info", "warning", "major", "fatal"})
 ECOSYSTEMS = frozenset({"python", "r", "java", "system", "service", "database", "runtime"})
 MISMATCH_POLICIES = frozenset({"block", "alternative"})
@@ -207,6 +208,18 @@ class RoutingContract:
 
 
 @dataclass(frozen=True)
+class ScientificSemanticsContract:
+    """Typed scientific concepts used by the router instead of word proximity."""
+
+    assays: tuple[str, ...]
+    targets: tuple[str, ...]
+    controls: tuple[str, ...]
+    normalizations: tuple[str, ...]
+    relations: tuple[str, ...]
+    analysis_role: str
+
+
+@dataclass(frozen=True)
 class OrchestrationContract:
     scientific_stage: int
     requires_reviewed_upstream_types: tuple[str, ...]
@@ -297,6 +310,7 @@ class ModuleManifest:
     agent_protocol: AgentProtocol | None = None
     observed_output_contracts: tuple[ObservedOutputContract, ...] = ()
     revision_alternatives: tuple[RevisionAlternative, ...] = ()
+    scientific_semantics: ScientificSemanticsContract | None = None
 
 
 _MANIFEST_FIELDS = frozenset(ModuleManifest.__dataclass_fields__)
@@ -316,6 +330,7 @@ _AGENT_PROTOCOL_FIELDS = frozenset(AgentProtocol.__dataclass_fields__)
 _AGENT_SECTION_FIELDS = frozenset(AgentTemplateSection.__dataclass_fields__)
 _AGENT_PARAMETER_FIELDS = frozenset(AgentParameterRule.__dataclass_fields__)
 _ROUTING_FIELDS = frozenset(RoutingContract.__dataclass_fields__)
+_SCIENTIFIC_SEMANTICS_FIELDS = frozenset(ScientificSemanticsContract.__dataclass_fields__)
 _ORCHESTRATION_FIELDS = frozenset(OrchestrationContract.__dataclass_fields__)
 _OBSERVED_OUTPUT_FIELDS = frozenset(ObservedOutputContract.__dataclass_fields__)
 _OBSERVED_PAYLOAD_FIELDS = frozenset(ObservedPayloadContract.__dataclass_fields__)
@@ -327,7 +342,8 @@ REVISION_SCIENTIFIC_EQUIVALENCE_CLASSES = frozenset({
     "scope-downgrade",
 })
 _OPTIONAL_MANIFEST_FIELDS = frozenset({
-    "agent_protocol", "code_templates", "observed_output_contracts", "revision_alternatives"
+    "agent_protocol", "code_templates", "observed_output_contracts", "revision_alternatives",
+    "scientific_semantics",
 })
 
 
@@ -388,6 +404,28 @@ def _routing(value: Any) -> RoutingContract:
         required_any_terms=_strings(payload["required_any_terms"], "manifest.routing.required_any_terms", allow_empty=True),
         named_method_priority=_nonnegative_integer(payload["named_method_priority"], "manifest.routing.named_method_priority"),
     )
+
+
+def _scientific_semantics(value: Any) -> ScientificSemanticsContract:
+    payload = _object(value, "manifest.scientific_semantics")
+    _exact_fields(payload, _SCIENTIFIC_SEMANTICS_FIELDS, "manifest.scientific_semantics")
+    role = _text(payload["analysis_role"], "manifest.scientific_semantics.analysis_role")
+    if role not in SCIENTIFIC_ANALYSIS_ROLES:
+        raise ValueError("manifest.scientific_semantics.analysis_role is unsupported")
+    values = {
+        field: _strings(
+            payload[field],
+            f"manifest.scientific_semantics.{field}",
+            allow_empty=True,
+        )
+        for field in ("assays", "targets", "controls", "normalizations", "relations")
+    }
+    for field, concepts in values.items():
+        if any(not _ID_RE.fullmatch(concept) for concept in concepts):
+            raise ValueError(f"manifest.scientific_semantics.{field} contains an invalid concept")
+    if not any(values.values()):
+        raise ValueError("manifest.scientific_semantics must declare at least one scientific concept")
+    return ScientificSemanticsContract(**values, analysis_role=role)
 
 
 def _orchestration(value: Any) -> OrchestrationContract:
@@ -1187,6 +1225,11 @@ def parse_manifest(value: Any) -> ModuleManifest:
             _revision_alternative(item, f"manifest.revision_alternatives[{index}]")
             for index, item in enumerate(revision_alternative_values)
         ),
+        scientific_semantics=(
+            _scientific_semantics(payload["scientific_semantics"])
+            if "scientific_semantics" in payload
+            else None
+        ),
     )
     if len({item.path for item in manifest.code_templates}) != len(manifest.code_templates):
         raise ValueError("manifest.code_templates contains duplicate paths")
@@ -1558,6 +1601,15 @@ def manifest_to_dict(value: ModuleManifest) -> dict[str, object]:
             }
             for item in value.revision_alternatives
         ]
+    if value.scientific_semantics is not None:
+        payload["scientific_semantics"] = {
+            "assays": list(value.scientific_semantics.assays),
+            "targets": list(value.scientific_semantics.targets),
+            "controls": list(value.scientific_semantics.controls),
+            "normalizations": list(value.scientific_semantics.normalizations),
+            "relations": list(value.scientific_semantics.relations),
+            "analysis_role": value.scientific_semantics.analysis_role,
+        }
     return payload
 
 

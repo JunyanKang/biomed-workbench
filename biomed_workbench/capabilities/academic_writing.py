@@ -8,6 +8,8 @@ import re
 from collections import Counter
 from typing import Any
 
+from .proposal_writing import canonical_agency
+
 
 _DOCUMENT_TYPES = {
     "research-article",
@@ -195,14 +197,17 @@ def _style_findings(text: str, *, proposal_mode: bool) -> list[dict[str, Any]]:
                     "action": action,
                 }
             )
-    for match in re.finditer("—", text):
+    # A dash inside a biomedical relation (for example, 玻璃体—内界膜 or
+    # YAP/TAZ—TEAD) is terminology, not automatically a prose defect. Only
+    # rhetorical spaced or doubled dashes are style findings.
+    for match in re.finditer(r"\s—\s|——", text):
         findings.append(
             {
                 "code": "em-dash",
                 "severity": "major",
                 "location": _location(text, match.start()),
                 "excerpt": "—",
-                "action": "Recast with a comma, colon, parentheses, or a separate sentence.",
+                "action": "If this is rhetorical punctuation, recast with a comma, colon, parentheses, or a separate sentence; retain scientific relation names.",
             }
         )
     for match in _OVERCLAIM_RE.finditer(text):
@@ -228,6 +233,18 @@ def _style_findings(text: str, *, proposal_mode: bool) -> list[dict[str, Any]]:
                     "location": {"sentence": index},
                     "excerpt": sentence[:180],
                     "action": "Split the sentence so each sentence carries one principal idea.",
+                }
+            )
+        han_count = len(re.findall(r"[\u4e00-\u9fff]", sentence))
+        chinese_clause_markers = len(re.findall(r"[，；：]|(?:由于|因此|从而|并且|同时|而且|但是|然而)", sentence))
+        if han_count > 70 and chinese_clause_markers >= 4:
+            findings.append(
+                {
+                    "code": "chinese-clause-stacked-sentence",
+                    "severity": "minor",
+                    "location": {"sentence": index},
+                    "excerpt": sentence[:180],
+                    "action": "Split the Chinese sentence so the question, evidence, inference, and conclusion are separately readable.",
                 }
             )
         if _CONNECTOR_RE.match(sentence):
@@ -456,8 +473,8 @@ def audit_research_proposal(
     """Validate proposal foundations, claim-feasibility links, aims, and stopping rules."""
     if mode not in {"compose", "revise", "hybrid", "qa"}:
         raise ValueError("mode is unsupported")
-    agency_key = str(agency).strip().lower()
-    if not agency_key:
+    agency_key = canonical_agency(agency)
+    if agency_key == "unknown":
         raise ValueError("agency is required")
     if not isinstance(scope, dict) or not isinstance(argument_map, dict):
         raise ValueError("scope and argument_map must be objects")
@@ -544,11 +561,11 @@ def audit_research_proposal(
         findings.append({"code": "aims-empty", "severity": "major", "location": "aims"})
 
     criteria = {str(value).strip().lower().replace(" ", "_") for value in review_criteria if str(value).strip()}
-    if "nsf" in agency_key:
+    if agency_key == "nsf":
         missing = sorted({"overview", "intellectual_merit", "broader_impacts"} - criteria)
         if missing:
             findings.append({"code": "nsf-review-criteria-missing", "severity": "major", "location": "review_criteria", "missing": missing})
-    if "nih" in agency_key:
+    if agency_key == "nih":
         if not 2 <= len(aims) <= 3:
             findings.append({"code": "nih-specific-aim-count", "severity": "minor", "location": "aims"})
         missing = sorted({"significance", "innovation", "approach"} - criteria)
@@ -556,6 +573,15 @@ def audit_research_proposal(
             findings.append({"code": "nih-review-criteria-missing", "severity": "major", "location": "review_criteria", "missing": missing})
         if not argument_map.get("central_hypothesis"):
             findings.append({"code": "nih-central-hypothesis-missing", "severity": "major", "location": "argument_map.central_hypothesis"})
+    if agency_key == "nsfc":
+        prohibited = sorted(criteria & {"overview", "intellectual_merit", "broader_impacts"})
+        if prohibited:
+            findings.append({
+                "code": "foreign-agency-criteria-applied-to-nsfc",
+                "severity": "major",
+                "location": "review_criteria",
+                "criteria": prohibited,
+            })
 
     stop_reasons: list[str] = []
     if len(iteration_scores) >= 4:

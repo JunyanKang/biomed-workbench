@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from biomed_workbench.modules.index import BUILTIN_ROOT
-from biomed_workbench.modules.evidence_scope import evidence_scope_is_current
+from biomed_workbench.modules.evidence_scope import evidence_scope_is_current, module_evidence_scope
 from biomed_workbench.modules.registry import ModuleRegistry
 from tools.rebind_live_evidence_registry import rebind
 
@@ -56,6 +56,27 @@ class RebindLiveEvidenceRegistryTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(RuntimeError, "template evidence is stale"):
                 rebind(path, self.registry)
+
+    def test_existing_migration_current_scope_is_updated_atomically(self):
+        current = module_evidence_scope(self.registry, [self.manifest.id]).to_dict()
+        stale = dict(current)
+        stale["dependency_digest"] = "0" * 64
+        with tempfile.TemporaryDirectory() as temporary:
+            path = self._write(
+                Path(temporary),
+                evidence_scope=current,
+                evidence_scope_migration={
+                    "reason": "metadata-only",
+                    "prior_evidence_scope": stale,
+                    "current_evidence_scope": stale,
+                },
+            )
+            self.assertTrue(rebind(path, self.registry))
+            report = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(report["evidence_scope"], current)
+            self.assertEqual(report["evidence_scope_migration"]["current_evidence_scope"], current)
+            self.assertEqual(report["evidence_scope_migration"]["prior_evidence_scope"], stale)
+            self.assertFalse(rebind(path, self.registry))
 
 
 if __name__ == "__main__":

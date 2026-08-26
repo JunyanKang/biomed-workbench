@@ -361,6 +361,14 @@ class OfflineCapabilityE2ETests(unittest.TestCase):
     def test_research_proposal_quality_audit(self):
         self.assertTrue(execute_first_module_case("research-proposal-quality-audit")["ready_for_scientific_drafting"])
 
+    def test_nsfc_proposal_development(self):
+        self.assertTrue(execute_first_module_case("nsfc-proposal-development")["ready_for_section_drafting"])
+
+    def test_nsfc_proposal_figure_development(self):
+        output = execute_first_module_case("nsfc-proposal-figure-development")
+        self.assertTrue(output["ready_for_proposal_insertion"])
+        self.assertEqual(output["prompt_package"]["required_reconstruction_runtime"], "image-to-editable-ppt")
+
     def test_statistical_reporting_audit(self):
         self.assertTrue(execute_first_module_case("statistical-reporting-audit")["ready_for_manuscript_reporting"])
 

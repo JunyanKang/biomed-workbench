@@ -32,7 +32,7 @@ class ReleaseSurfaceTests(unittest.TestCase):
 
         self.assertTrue((ROOT / "LICENSE").exists())
         self.assertEqual(plugin["license"], "Apache-2.0")
-        self.assertEqual(plugin["version"], "0.2.4")
+        self.assertEqual(plugin["version"], "0.2.5")
         self.assertEqual(plugin["version"], catalog["version"])
 
         chinese_readme = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -99,6 +99,19 @@ class ReleaseSurfaceTests(unittest.TestCase):
             self.assertIn(term, english)
         self.assertIn("2026-08-24-0.2.4.zh-CN.md", chinese_index)
         self.assertIn("2026-08-24-0.2.4.md", english_index)
+
+    def test_proposal_and_scientific_routing_release_is_documented_bilingually(self):
+        chinese = (ROOT / "docs" / "releases" / "2026-08-26-0.2.5.zh-CN.md").read_text(encoding="utf-8")
+        english = (ROOT / "docs" / "releases" / "2026-08-26-0.2.5.md").read_text(encoding="utf-8")
+        chinese_index = (ROOT / "docs" / "releases" / "README.zh-CN.md").read_text(encoding="utf-8")
+        english_index = (ROOT / "docs" / "releases" / "README.md").read_text(encoding="utf-8")
+
+        for term in ("复杂科学语义", "RNA 加工与可变剪接", "青年 C", "青年 B", "面上", "可编辑"):
+            self.assertIn(term, chinese)
+        for term in ("complex scientific semantics", "RNA processing and alternative splicing", "Young C", "Young B", "General", "editable"):
+            self.assertIn(term, english)
+        self.assertIn("2026-08-26-0.2.5.zh-CN.md", chinese_index)
+        self.assertIn("2026-08-26-0.2.5.md", english_index)
 
     def test_top_level_help_discovers_the_complete_project_command_surface(self):
         completed = subprocess.run(

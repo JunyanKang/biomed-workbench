@@ -269,16 +269,24 @@ def build(*, receipt_archive: Path | None = None) -> dict[str, object]:
             "current_project_reviewed",
         )
     }
+    validation_scope_counts = {
+        key: sum(record[key] is True for record in records)
+        for key in ("engineering_validated", "method_validated", "project_promoted")
+    }
     report = {
-        "schema_version": 7,
+        "schema_version": 8,
         "registry_digest": registry.digest,
         "module_count": len(records),
         "counts": counts,
         "axis_counts": axis_counts,
+        "validation_scope_counts": validation_scope_counts,
         "blocked_module_ids": blocked,
         "passed": axis_counts["contract_valid"] == len(records),
         "single_maturity_count_is_authoritative": False,
         "status_model": {
+            "engineering_validated": "The registered implementation executed a controlled case and independently reloaded its declared outputs.",
+            "method_validated": "Engineering validation is supplemented by a current representative or public-data case for the exact registered method slice.",
+            "project_promoted": "A current project result has passed observed execution, reload, scientific review and an explicit FORMAL promotion decision; release reports always leave this false.",
             "contract_valid": "The versioned module contract parses and all referenced packaged assets satisfy release rules.",
             "adapter_static_reachable": "At least one declared execution surface reaches packaged implementation code rather than only a suggestion or editable template.",
             "fixture_declared": "A controlled case is declared; declaration alone is not execution evidence.",

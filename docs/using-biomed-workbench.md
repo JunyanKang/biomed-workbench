@@ -22,13 +22,15 @@ The workbench selects methods that fit the question and then:
 
 1. checks the study design, experimental units, input files, and metadata;
 2. states the working hypothesis, alternative explanations, and decision criteria;
-3. confirms method scope, software compatibility, and key parameters;
+3. resolves assay, target, controls, normalisation, and the biological relation being tested, then selects one primary analysis and one necessary orthogonal validation for each question;
 4. runs the packaged workflow with the project's real data;
 5. reopens the outputs and reviews technical quality, statistical design, and biological plausibility;
 6. decides whether to retain, qualify, reanalyse, replace, or extend the result;
-7. assembles traceable figures, tables, methods, conclusions, and bilingual reports.
+7. classifies results as formal, candidate, sensitivity, or deprecated, then assembles traceable figures, tables, methods, conclusions, and bilingual reports.
 
 The end of a computation is not automatically the end of an analysis. A result supports a project conclusion only after the relevant checks and scientific review. Failed analyses, negative findings, and conflicting evidence remain part of the record.
+
+Long-running projects use a [project lock](project-governance.md) to freeze sample sheets, reference releases, cell annotation, replicate units, thresholds, colours, formal directories, and figure identities. The routine result view prioritises scientific conclusions, key results, evidence boundaries, and the next decision; complete execution and audit records remain available in the background for traceability.
 
 ## Project Checkpoints
 
@@ -53,7 +55,7 @@ The workbench combines the following work as the task requires:
 5. organise point-by-point responses, revision locations, and author input from the actual editor and reviewer comments;
 6. reopen the final manuscript, figures, or presentation rather than delivering only an outline.
 
-When only manuscript prose is supplied, the workbench reviews and revises that content but does not turn absent data, experiments, citations, contributions, or journal requirements into facts. See [Academic Writing, Publication, And Translation](capabilities/publication-and-translation.md) for the complete capability area.
+When only manuscript prose is supplied, the workbench reviews and revises that content but does not turn absent data, experiments, citations, contributions, or journal requirements into facts. An NSFC request should also provide the programme type and the current official form. The workbench treats Young C, Young B, Young A, General, Regional, Key and Major programmes separately and, once the scientific foundation is ready, continues to the requested proposal prose rather than stopping at an audit report. See [Academic Writing, Publication, And Translation](capabilities/publication-and-translation.md) and [NSFC proposal support](capabilities/nsfc-proposal-writing.md).
 
 ## Example Requests
 

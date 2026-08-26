@@ -15,6 +15,7 @@ Bulk、single-cell 和 spatial 描述的是数据与实验观察的尺度；它�
 | 测量家族 | 实验 | 主要分析内容 | 关键设计与解释要点 |
 | --- | --- | --- | --- |
 | 稳态转录与表达 | bulk RNA-seq | RNA 定量、表达质控、差异表达及下游统计模块 | 表达量不是转录速率；重复单位是样本 |
+| RNA 加工与异构体使用 | 短读长 bulk RNA-seq、长读长 RNA-seq | [事件级剪接、外显子使用、转录本使用、完整异构体和跨组学证据整合](rna-processing-alternative-splicing.zh-CN.md) | rMATS、DEXSeq、DRIMSeq–stageR 和 FLAIR 的统计对象不同；不能互换结论 |
 | 蛋白或标记相关染色质富集 | ChIP-seq、CUT&RUN、CUT&Tag | 比对、质量控制、peak 识别、差异与注释 | assay、靶标/抗体、对照、内部参照和特异性处理分别登记 |
 | RNA:DNA 杂交体与 R-loop 测量 | DRIP-seq、DRIPc-seq、sDRIP/ssDRIP-seq、qDRIP-seq、R-ChIP、MapR，以及传感器明确的 CUT&Tag | 实验专属预处理、信号识别、特异性和跨方法比较 | R-loop 是测量对象，不是 assay；S9.6 与 dRNase H1 传感器、离体/原位环境、片段化、链特异性、内部参照和 RNase H 对照分别登记 |
 | 染色质可及性 | ATAC-seq、DNase-seq | 比对、质量控制、开放区域和足迹分析 | 可及性不是 TF 占位；足迹需要酶偏倚校正 |

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 from importlib.metadata import version as distribution_version
 import json
 from pathlib import Path
@@ -141,6 +142,41 @@ def build(output: Path, preview: Path | None = None) -> dict[str, object]:
         package_path = root / "package.zip"
         report_path = root / "render-report.json"
         combined.to_csv(data_path, sep="\t", index=False, float_format="%.10g", lineterminator="\n")
+        data_digest = hashlib.sha256(data_path.read_bytes()).hexdigest()
+        spec.update({
+            "contract_version": "1.0.0",
+            "figure_id": "uci-breast-cancer-rendering-acceptance",
+            "delivery_class": "controlled-acceptance",
+            "story_position": "Information-dense renderer acceptance using a public multivariate dataset.",
+            "caption": "Six-panel source-bound rendering acceptance based on the Breast Cancer Wisconsin Diagnostic dataset; no diagnostic or biological inference is promoted.",
+            "reference_dois": [UCI_DOI],
+            "renderer": {"id": "publication-figure-package", "version": "1.0.0"},
+            "source_table_sha256": data_digest,
+            "project_lock_digest": None,
+            "result_status": "SENSITIVITY",
+        })
+        contexts = {
+            "a": {"experimental_unit": "diagnostic case", "biological_n": 569, "test": "Pearson correlation displayed descriptively", "multiplicity": "not applied in this rendering acceptance", "effect_size": "feature-pair correlation coefficient", "uncertainty": "not displayed in this rendering acceptance"},
+            "b": {"experimental_unit": "diagnostic case", "biological_n": 569, "test": "descriptive display; no inferential test", "multiplicity": "not applicable", "effect_size": "two measured feature values", "uncertainty": "all registered cases are displayed"},
+            "c": {"experimental_unit": "diagnostic case", "biological_n": 569, "test": "descriptive display; no inferential test", "multiplicity": "not applicable", "effect_size": "observed worst-radius distribution", "uncertainty": "all registered cases are displayed"},
+            "e": {"experimental_unit": "diagnostic case", "biological_n": 569, "test": "descriptive decile aggregation", "multiplicity": "not applicable", "effect_size": "diagnosis-specific decile mean", "uncertainty": "not displayed in this rendering acceptance"},
+            "f": {"experimental_unit": "diagnostic case", "biological_n": 569, "test": "two-sided Welch t-test per feature", "multiplicity": "Benjamini-Hochberg across 30 features", "effect_size": "absolute standardized mean difference", "uncertainty": "not displayed in this rendering acceptance"},
+        }
+        roles = {
+            "a": "multivariate structure overview", "b": "case-level feature separation",
+            "c": "raw distribution check", "d": "feature-level association summary",
+            "e": "grouped trend check", "f": "ranked effect summary",
+        }
+        for panel in spec["panels"]:
+            panel.update({
+                "upstream_result_ids": ["uci-breast-cancer-controlled-analysis"],
+                "allowed_conclusion": panel["claim"],
+                "story_role": roles[panel["id"]],
+                "source_table": "data.tsv",
+                "source_table_sha256": data_digest,
+                "vector_required": True,
+            })
+            panel.setdefault("statistical_context", contexts.get(panel["id"]))
         spec_path.write_text(json.dumps(spec, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
         render_report = render_package(data_path, spec_path, package_path, report_path, "tsv")
         if preview is not None:

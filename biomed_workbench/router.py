@@ -2,16 +2,25 @@
 
 from __future__ import annotations
 
+import json
 import re
 import unicodedata
 from collections import Counter, defaultdict
+from pathlib import Path
 from typing import Any, Iterable
 
 from .models import Capability
+from .minimal_sufficient import select_minimal_sufficient
 from .objective_compiler import compile_objective, ports_compatible
 from .modules.contract import ModuleManifest
 from .modules.index import BUILTIN_ROOT
 from .modules.registry import ModuleRegistry, ModuleRegistryError
+from .scientific_semantics import (
+    AXES as SEMANTIC_AXES,
+    ScientificSemanticBrief,
+    module_semantic_concepts,
+    parse_scientific_semantics,
+)
 
 
 PREFERRED_DOMAIN_ORDER = ("evidence", "omics", "molecular_design", "imaging", "clinical", "wetlab", "publication")
@@ -34,6 +43,26 @@ _CJK_STOP = frozenset({
     "查询", "检索", "核查", "筛查",
 })
 _CJK_BOUNDARY_CONNECTORS = frozenset({"与", "及", "和", "并"})
+
+
+def _validation_scopes(registry: ModuleRegistry) -> dict[str, dict[str, bool | None]]:
+    """Read only a readiness report bound to the active registry digest."""
+    path = Path(BUILTIN_ROOT).resolve().parents[2] / "reports" / "execution-readiness.json"
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        payload = {}
+    if payload.get("registry_digest") != registry.digest:
+        return {}
+    return {
+        str(record["module_id"]): {
+            "engineering_validated": record.get("engineering_validated"),
+            "method_validated": record.get("method_validated"),
+            "project_promoted": False,
+        }
+        for record in payload.get("records", [])
+        if isinstance(record, dict) and isinstance(record.get("module_id"), str)
+    }
 _SINGLE_CELL_KEYWORDS = frozenset({
     "单细胞",
     "单细胞RNA",
@@ -157,13 +186,16 @@ def _is_imaging_query(normalized_query: str) -> bool:
 
 
 def _is_molecular_design_query(normalized_query: str) -> bool:
-    return bool(
+    structural_or_design = bool(
         re.search(
-            r"\b(primer|pcr|amplicon|crispr|guide|restriction|digest|golden[ -]?gate|cloning|plasmid|orf|open reading frame|sanger|docking|haddock3|ligand|smiles|protein structure|structure quality|alphafold ?3|protein interaction|ppi|metascape|msbio2)\b",
+            r"\b(primer|pcr|amplicon|crispr|guide|restriction|digest|golden[ -]?gate|cloning|plasmid|orf|open reading frame|sanger|docking|haddock3|ligand|smiles|protein structure|structure quality|alphafold ?3|metascape|msbio2)\b",
             normalized_query,
         )
         or any(term in normalized_query for term in ("引物", "酶切", "克隆", "质粒", "结构质量", "分子对接"))
     )
+    protein_network = bool(re.search(r"\b(protein interaction|protein-interaction|ppi)\b", normalized_query))
+    assay_bound_interaction = bool(re.search(r"\b(ip[-–— ]?ms|ap[-–— ]?ms|immunoprecipitation mass spectrometry)\b", normalized_query))
+    return structural_or_design or (protein_network and not assay_bound_interaction)
 
 
 def _is_omics_assay_query(normalized_query: str) -> bool:
@@ -191,6 +223,36 @@ def _is_publication_query(normalized_query: str) -> bool:
             )
         )
     )
+
+
+def _artifact_routing_context(query: str) -> dict[str, Any]:
+    """Describe the supplied material before selecting scientific operations."""
+    normalized = _normalize(query)
+    proposal = bool(
+        re.search(r"\b(?:grant|proposal|specific aims?|nsfc)\b", normalized)
+        or any(term in normalized for term in ("基金申请", "项目书", "申请书", "国自然", "国家自然科学基金"))
+    )
+    patent = bool(re.search(r"\bpatent\b", normalized) or "专利" in normalized)
+    journal = _is_journal_targeting_query(normalized)
+    summary_table = bool(
+        re.search(r"\.(?:xlsx|xls|csv|tsv)\b", normalized)
+        or re.search(r"\b(?:summary spreadsheet|summary table|processed table|result table)\b", normalized)
+        or any(term in normalized for term in ("汇总表", "结果表", "统计表", "整理后的表格"))
+    )
+    raw_or_reanalysis = bool(
+        re.search(r"\b(?:fastq|bam|cram|h5ad|loom|raw counts?|count matrix|fragment file|reanaly[sz]e|rerun)\b", normalized)
+        or any(term in normalized for term in ("原始数据", "原始计数", "重新分析", "重跑", "从头分析"))
+    )
+    docx = bool(re.search(r"\.docx\b|\bword\b", normalized) or "Word" in query or "文档交付" in normalized)
+    return {
+        "proposal": proposal,
+        "patent_explicit": patent,
+        "journal_targeting_explicit": journal,
+        "summary_table": summary_table,
+        "raw_or_reanalysis_explicit": raw_or_reanalysis,
+        "docx_delivery": docx,
+        "interpretation_only": summary_table and not raw_or_reanalysis,
+    }
 
 
 def _is_journal_targeting_query(normalized_query: str) -> bool:
@@ -235,16 +297,59 @@ def _has_exact_route_signal(module: ModuleManifest, query: str) -> bool:
     )
 
 
-def _module_allowed_for_query(module: ModuleManifest, query: str) -> bool:
+def _semantic_module_allowed(module: ModuleManifest, brief: ScientificSemanticBrief) -> bool:
+    concepts = module_semantic_concepts(module)
+    if not any(concepts.values()):
+        return True
+    if any(set(concepts[axis]) & set(brief.negated_concepts[axis]) for axis in SEMANTIC_AXES):
+        return False
+    query_core = set(brief.concepts["assays"]) | set(brief.concepts["targets"]) | set(brief.concepts["relations"])
+    module_core = set(concepts["assays"]) | set(concepts["targets"]) | set(concepts["relations"])
+    if not query_core:
+        return True
+    return bool(query_core & module_core)
+
+
+def _semantic_module_explicitly_negated(module: ModuleManifest, brief: ScientificSemanticBrief) -> bool:
+    """Return whether an explicit request conflicts with a parsed negative constraint.
+
+    Exact method names are stronger evidence than an incomplete ontology match,
+    but they must never override an explicit exclusion such as "do not run RNA
+    secondary-structure analysis".
+    """
+    concepts = module_semantic_concepts(module)
+    return any(
+        set(concepts[axis]) & set(brief.negated_concepts[axis])
+        for axis in SEMANTIC_AXES
+    )
+
+
+def _module_allowed_for_query(
+    module: ModuleManifest,
+    query: str,
+    semantic_brief: ScientificSemanticBrief | None = None,
+) -> bool:
     normalized_query = _normalize(query)
+    artifact_context = _artifact_routing_context(query)
+    if artifact_context["proposal"] and not artifact_context["patent_explicit"] and (
+        module.id.startswith("patent-") or "patent" in module.id
+    ):
+        return False
+    if artifact_context["proposal"] and not artifact_context["journal_targeting_explicit"] and module.id == "journal-targeting-and-compliance":
+        return False
+    if artifact_context["interpretation_only"] and module.id.startswith("single-cell-"):
+        return False
     if any(_normalize(term) in normalized_query for term in module.routing.exclusion_terms):
         return False
     if module.routing.required_any_terms and not any(
         _normalize(term) in normalized_query for term in module.routing.required_any_terms
     ):
         return False
+    brief = semantic_brief or parse_scientific_semantics(query)
     if _has_exact_route_signal(module, query):
-        return True
+        return not _semantic_module_explicitly_negated(module, brief)
+    if not _semantic_module_allowed(module, brief):
+        return False
     single_cell_query = _is_single_cell_query(normalized_query)
     omics_query = _is_omics_assay_query(normalized_query)
     molecular_query = _is_molecular_design_query(normalized_query)
@@ -262,6 +367,13 @@ def _module_allowed_for_query(module: ModuleManifest, query: str) -> bool:
         module.domains[0] == "omics"
         and molecular_query
         and not omics_query
+        and not _has_exact_route_signal(module, query)
+    ):
+        return False
+    if (
+        module.domains[0] == "molecular_design"
+        and brief.concepts["assays"]
+        and not molecular_query
         and not _has_exact_route_signal(module, query)
     ):
         return False
@@ -296,7 +408,12 @@ def _phrase_matches(query: str, phrases: Iterable[str]) -> list[str]:
     return matches
 
 
-def _score_module(module: ModuleManifest, query: str) -> tuple[float, list[str]]:
+def _score_module(
+    module: ModuleManifest,
+    query: str,
+    semantic_brief: ScientificSemanticBrief | None = None,
+) -> tuple[float, list[str]]:
+    brief = semantic_brief or parse_scientific_semantics(query)
     query_features = _features(query)
     exact_intents = _phrase_matches(query, module.intents)
     exact_questions = _phrase_matches(query, module.questions)
@@ -321,6 +438,16 @@ def _score_module(module: ModuleManifest, query: str) -> tuple[float, list[str]]
     score += 3.0 * len(title_overlap)
     score += 0.75 * len(description_overlap)
     score += 1.5 * len(artifact_overlap)
+    semantic = module_semantic_concepts(module)
+    semantic_matches = {
+        axis: sorted(set(semantic[axis]) & set(brief.concepts[axis]))
+        for axis in SEMANTIC_AXES
+    }
+    score += 24.0 * len(semantic_matches["assays"])
+    score += 12.0 * len(semantic_matches["targets"])
+    score += 4.0 * len(semantic_matches["controls"])
+    score += 6.0 * len(semantic_matches["normalizations"])
+    score += 10.0 * len(semantic_matches["relations"])
     if module.access == "offline":
         score += 0.25
     reasons = []
@@ -335,7 +462,58 @@ def _score_module(module: ModuleManifest, query: str) -> tuple[float, list[str]]
         reasons.append(f"matched concepts: {', '.join(concepts[:5])}")
     if not reasons and description_overlap:
         reasons.append(f"description concepts: {', '.join(sorted(description_overlap)[:5])}")
+    for axis in SEMANTIC_AXES:
+        if semantic_matches[axis]:
+            reasons.append(f"scientific {axis}: {', '.join(semantic_matches[axis])}")
     return score, reasons
+
+
+def _expand_semantic_coverage(
+    selected_ids: list[str],
+    ranked: list[tuple[float, ModuleManifest, list[str]]],
+    brief: ScientificSemanticBrief,
+) -> list[str]:
+    """Add the best eligible module for every resolved scientific concept."""
+    selected = list(selected_ids)
+    by_id = {item[1].id: item[1] for item in ranked}
+    covered = {
+        axis: {
+            concept
+            for module_id in selected
+            if module_id in by_id
+            for concept in module_semantic_concepts(by_id[module_id])[axis]
+        }
+        for axis in SEMANTIC_AXES
+    }
+    for axis in SEMANTIC_AXES:
+        for concept in brief.concepts[axis]:
+            if concept in covered[axis]:
+                continue
+            candidates = [
+                item for item in ranked
+                if concept in module_semantic_concepts(item[1])[axis] and item[2]
+            ]
+            if not candidates:
+                continue
+            chosen = candidates[0][1]
+            if chosen.id not in selected:
+                selected.append(chosen.id)
+                for candidate_axis in covered:
+                    covered[candidate_axis].update(module_semantic_concepts(chosen)[candidate_axis])
+    return selected
+
+
+def _requires_semantic_expansion(brief: ScientificSemanticBrief) -> bool:
+    """Return whether the objective is a compound scientific programme."""
+    core_count = sum(
+        len(brief.concepts[axis])
+        for axis in ("assays", "targets", "relations")
+    )
+    return bool(
+        core_count >= 4
+        or len(brief.concepts["assays"]) >= 2
+        or "cross-modal-concordance" in brief.concepts["relations"]
+    )
 
 
 def _domain_order(domains: Iterable[str]) -> list[str]:
@@ -571,6 +749,8 @@ def _expand_required_upstreams(module_ids: list[str], registry: ModuleRegistry) 
 def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> list[str]:
     active = registry or _DEFAULT_REGISTRY
     normalized_query = _normalize(query)
+    artifact_context = _artifact_routing_context(query)
+    semantic_brief = parse_scientific_semantics(query)
     single_cell_query = _is_single_cell_query(normalized_query)
     imaging_query = _is_imaging_query(normalized_query)
     wetlab_query = _is_wetlab_query(normalized_query)
@@ -616,7 +796,7 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
         return ["wetlab"]
     domain_scores: dict[str, float] = defaultdict(float)
     for module in active.all():
-        score, reasons = _score_module(module, query)
+        score, reasons = _score_module(module, query, semantic_brief)
         if reasons:
             workflow = module.domains[0]
             domain_scores[workflow] = max(domain_scores[workflow], score)
@@ -648,7 +828,7 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
     specificity_limit = max(2, len(module_features) // 20)
     specific_feature_domains = set()
     for module in active.all():
-        if _score_module(module, query)[0] < 5.0:
+        if _score_module(module, query, semantic_brief)[0] < 5.0:
             continue
         matching_features = query_features & module_features[module.id]
         rare_matches = {
@@ -679,11 +859,26 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
     def _has_single_cell_manifest_signal(candidate: ModuleManifest) -> bool:
         searchable = (*candidate.intents, *candidate.questions, candidate.title)
         return any("single-cell" in _features(value) for value in searchable)
+    semantic_domains = {
+        module.domains[0]
+        for module in active.all()
+        if _semantic_module_allowed(module, semantic_brief)
+        and any(
+            set(module_semantic_concepts(module)[axis]) & set(semantic_brief.concepts[axis])
+            for axis in ("assays", "targets", "normalizations", "relations")
+        )
+    }
     matched = {
         domain
         for domain, score in domain_scores.items()
         if score >= max(5.0, strongest * 0.35)
-    } | exact_domains | explicit_primary_domains | specific_feature_domains | domain_concentrated_feature_domains | forced_named_domains
+    } | exact_domains | explicit_primary_domains | specific_feature_domains | domain_concentrated_feature_domains | forced_named_domains | semantic_domains
+    if artifact_context["proposal"]:
+        matched.add("publication")
+        if _is_evidence_query(normalized_query):
+            matched.add("evidence")
+        if not _is_omics_assay_query(normalized_query):
+            matched.discard("omics")
     if single_cell_query and not imaging_query:
         matched.discard("imaging")
     if _is_omics_assay_query(normalized_query) and not _is_wetlab_query(normalized_query):
@@ -702,12 +897,39 @@ def infer_workflows(query: str, *, registry: ModuleRegistry | None = None) -> li
         # Molecular design is added only by an explicit AF3, docking, ligand,
         # structure-design, or other molecular-design signal.
         matched.discard("molecular_design")
+    elif semantic_brief.concepts["assays"] and "molecular_design" not in forced_named_domains:
+        # Assay-bound protein-interaction evidence (for example IP-MS) remains
+        # in the omics branch unless the request independently names a
+        # molecular-design method such as docking or AlphaFold 3.
+        matched.discard("molecular_design")
+    omics_semantic_assays = {
+        "bulk-rna-seq", "single-cell-rna", "single-nucleus-rna", "three-prime-single-nucleus-rna",
+        "single-cell-multiome", "cuttag", "s9-6-cuttag", "ip-ms",
+    }
+    if (
+        set(semantic_brief.concepts["assays"])
+        and set(semantic_brief.concepts["assays"]) <= omics_semantic_assays
+    ):
+        explicitly_requested_domains = {"omics"} | forced_named_domains
+        if _is_publication_query(normalized_query):
+            explicitly_requested_domains.add("publication")
+        if _is_clinical_query(normalized_query):
+            explicitly_requested_domains.add("clinical")
+        if _is_wetlab_query(normalized_query):
+            explicitly_requested_domains.add("wetlab")
+        if _is_molecular_design_query(normalized_query):
+            explicitly_requested_domains.add("molecular_design")
+        if _is_imaging_query(normalized_query):
+            explicitly_requested_domains.add("imaging")
+        if _is_evidence_query(normalized_query):
+            explicitly_requested_domains.add("evidence")
+        matched &= explicitly_requested_domains
     if single_cell_query and not matched:
         matched_single_cell = {
             module.domains[0]
             for module in active.all()
             if module.domains[0] in PREFERRED_DOMAIN_ORDER
-            and _score_module(module, query)[0] >= 3.5
+            and _score_module(module, query, semantic_brief)[0] >= 3.5
             and _has_single_cell_manifest_signal(module)
         }
         if "omics" in matched_single_cell:
@@ -746,12 +968,15 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
     if not query.strip() or not 1 <= per_workflow <= 10:
         raise ValueError("query must be nonempty and per_workflow must be 1..10")
     active = registry or _DEFAULT_REGISTRY
+    semantic_brief = parse_scientific_semantics(query)
+    artifact_context = _artifact_routing_context(query)
+    validation_scopes = _validation_scopes(active)
     workflows = infer_workflows(query, registry=active)
     grouped: dict[str, list[tuple[float, ModuleManifest, list[str]]]] = defaultdict(list)
     for module in active.all():
-        if not _module_allowed_for_query(module, query):
+        if not _module_allowed_for_query(module, query, semantic_brief):
             continue
-        score, reasons = _score_module(module, query)
+        score, reasons = _score_module(module, query, semantic_brief)
         workflow = module.domains[0]
         if workflow in workflows:
             grouped[workflow].append((score + 2.0, module, reasons or [f"available in matched workflow: {workflow}"]))
@@ -761,8 +986,14 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
     for workflow in workflows:
         ranked = sorted(grouped[workflow], key=lambda item: (-item[0], item[1].id))
         ranked = [item for item in ranked if item[1].id not in assigned_modules]
+        initially_selected = _select_ranked_modules(ranked, query)
+        semantically_complete = (
+            _expand_semantic_coverage(initially_selected, ranked, semantic_brief)
+            if _requires_semantic_expansion(semantic_brief)
+            else initially_selected
+        )
         selected_by_workflow[workflow] = _order_by_artifact_dependencies(
-            _request_ordered_modules(_select_ranked_modules(ranked, query), query, active),
+            _request_ordered_modules(semantically_complete, query, active),
             active,
         )
         selected_by_workflow[workflow] = _expand_required_upstreams(selected_by_workflow[workflow], active)
@@ -788,16 +1019,98 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
                 "score": round(score, 3),
                 "access": module.access,
                 "mutability": module.mutability,
-                "maturity": module.maturity,
+                "registry_contract_label": module.maturity,
+                "registry_contract_label_is_scientific_completion": False,
+                "validation_scope": validation_scopes.get(module.id, {
+                    "engineering_validated": None,
+                    "method_validated": None,
+                    "project_promoted": False,
+                    "reason": "current registry-bound readiness report is unavailable",
+                }),
                 "selected": module.id in selected_by_workflow[workflow],
                 "selection_reasons": reasons,
             }
             for score, module, reasons in visible_ranked
         ]
         assigned_modules.update(item["id"] for item in candidates[workflow])
-    selected_module_ids = [module_id for workflow in workflows for module_id in selected_by_workflow[workflow]]
+    selected_module_ids = list(dict.fromkeys(
+        module_id for workflow in workflows for module_id in selected_by_workflow[workflow]
+    ))
     selected_modules = tuple(active.get(module_id) for module_id in selected_module_ids)
     compiled = compile_objective(query, selected_modules)
+    scores_by_id = {
+        module.id: score
+        for workflow in workflows
+        for score, module, _reasons in grouped[workflow]
+        if module.id in selected_module_ids
+    }
+    minimal_sufficient = select_minimal_sufficient(
+        selected_modules,
+        semantic_brief,
+        scores=scores_by_id,
+        dependencies=compiled["dependencies"],
+    )
+    execution_module_ids = list(minimal_sufficient["approved_module_ids"])
+    if selected_module_ids and not execution_module_ids:
+        # The semantic contract is introduced incrementally across the mature
+        # registry. A bounded exact route must remain executable while its
+        # manifest is still untyped; describe that compatibility path rather
+        # than silently returning an empty execution plan.
+        execution_module_ids = list(selected_module_ids)
+        minimal_sufficient = {
+            **minimal_sufficient,
+            "approved_module_ids": list(execution_module_ids),
+            "approved_choices": [
+                {
+                    "module_id": module_id,
+                    "role": "bounded-explicit-request",
+                    "branch_ids": ["untyped-exact-route"],
+                    "decision_information": "explicitly requested registered operation pending typed semantic migration",
+                }
+                for module_id in execution_module_ids
+            ],
+            "compatibility_fallback": (
+                "No selected module yet carries a typed scientific-semantics contract; "
+                "the bounded explicit route remains executable and is not presented as a minimal-method comparison."
+            ),
+        }
+    execution_modules = tuple(active.get(module_id) for module_id in execution_module_ids)
+    execution_graph = compile_objective(query, execution_modules) if execution_modules else None
+    for workflow in workflows:
+        execution_set = set(execution_module_ids)
+        for candidate in candidates[workflow]:
+            candidate["approved_for_execution"] = candidate["id"] in execution_set
+    selected_semantics = {
+        axis: {
+            concept: [
+                module.id for module in selected_modules
+                if concept in module_semantic_concepts(module)[axis]
+            ]
+            for concept in semantic_brief.concepts[axis]
+        }
+        for axis in SEMANTIC_AXES
+    }
+    unresolved = [
+        {"axis": axis, "concept": concept, "status": "no-eligible-registered-module"}
+        for axis in SEMANTIC_AXES
+        for concept, module_ids in selected_semantics[axis].items()
+        if not module_ids
+    ]
+    requires_integration = (
+        "cross-modal-concordance" in semantic_brief.concepts["relations"]
+        and len({concept for concept, ids in selected_semantics["assays"].items() if ids}) >= 2
+    )
+    integration_node = None
+    if requires_integration:
+        integration_node = {
+            "id": "objective-level-scientific-integration",
+            "kind": "reviewed-result-synthesis",
+            "depends_on": list(execution_module_ids),
+            "requires": "observed, reloaded and scientifically reviewed branch artifacts",
+            "purpose": "Reconcile direct, indirect, concordant, discordant and unresolved evidence without converting association into causality.",
+        }
+        compiled["integration_node"] = integration_node
+        compiled["plan_type"] = "mixed"
     plan_type = compiled["plan_type"]
     steps = []
     for workflow in workflows:
@@ -808,9 +1121,17 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
         steps.append({"workflow": workflow, "mode": mode, "selected_module_ids": selected_by_workflow[workflow], "candidates": candidates[workflow]})
     return {
         "objective": query,
+        "artifact_context": artifact_context,
         "matched_workflows": workflows,
         "plan_type": plan_type,
         "selected_module_ids": selected_module_ids,
+        "execution_module_ids": execution_module_ids,
         "steps": steps,
         "objective_graph": compiled,
+        "execution_graph": execution_graph,
+        "minimal_sufficient_analysis": minimal_sufficient,
+        "scientific_semantics": semantic_brief.to_dict(),
+        "semantic_coverage": selected_semantics,
+        "unresolved_semantic_requirements": unresolved,
+        "integration_node": integration_node,
     }

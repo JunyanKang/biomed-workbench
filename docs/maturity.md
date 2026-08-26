@@ -2,20 +2,21 @@
 
 Languages: [English](maturity.md) · [中文](maturity.zh-CN.md)
 
-A validated module is not automatically suitable for every organism, assay, study design, or data scale. Biomed Workbench reports separately how far a capability has been validated and what the evidence from the current project can support.
+A registered contract, an executed implementation, a representative method case, and a current-project result are different things. Biomed Workbench no longer compresses them into one broad “validated” claim.
 
-## Four Evidence Levels
+## Three Explicit Validation Labels
 
-| Level | What has been confirmed | What still requires confirmation |
+| Label | What has been confirmed | What cannot be inferred |
 | --- | --- | --- |
-| Method definition complete | Inputs, outputs, parameters, quality checks, and conditions of use are defined | Whether external software ran and produced reliable results |
-| Compatible setup tested | A named combination of software versions, dependencies, platform, and file formats works together | Untested versions, platforms, and study designs |
-| Representative case passed | Public data or a stable service produced results that could be reopened under recorded conditions | Generalisation to other data and parameters |
-| Current project validated | The user's data ran, the outputs were reopened, and scientific review was completed | Claims beyond the study design and observed evidence |
+| `engineering_validated` | The registered implementation executed a controlled case and reloaded its declared outputs | Suitability for every organism, platform, or study design |
+| `method_validated` | Engineering validation is supplemented by a current representative or public scientific case | Completion of the current user project |
+| `project_promoted` | One exact current-project result completed observed execution, reload, scientific review, retention, and project-lock checks | Claims beyond that project's design and observed evidence |
+
+The module contract separately records inputs, outputs, parameters, compatible software, and quality gates. A complete contract is required before engineering validation, but is not itself one of the three labels above.
 
 ## How To Read Capability Labels
 
-- **Validated:** the released implementation and recorded compatible setup passed representative checks. Project-specific quality control is still required for new data.
+- **Historical manifest label `validated`:** a release registry contract class, not a user-facing conclusion about scientific completion; read it together with the three labels above.
 - **Experimental:** the workflow and parameter interface are usable, but coverage of public data, external software, or real projects is not yet broad enough for a default workflow.
 - **Plannable:** the workbench can explain the method's role and prepare an analysis plan, but it cannot describe the analysis as completed.
 
@@ -29,8 +30,8 @@ Passing a content-preservation review means that the revision contains no detect
 
 ## What Counts For A User Project
 
-For a user project, the decisive evidence is the observed run, not the module name or release label. The workbench checks the actual inputs, software versions, parameters, output files, and quality results, then reopens the outputs for statistical and biological review.
+For a user project, the decisive evidence is the observed run and result status, not the module name or release label. The workbench checks the actual inputs, software versions, parameters, output files, and quality results, then reopens the outputs for statistical and biological review.
 
-A successful process exit shows only that computation ended. A result enters the project's [scientific evidence map](scientific-evidence-map.md) only after its relevant quality checks and scientific review pass. Failed, unrun, and indeterminate checks remain visible.
+Results are classified as `CANDIDATE`, `SENSITIVITY`, `FORMAL`, or `DEPRECATED`. Only `FORMAL` sets `project_promoted` and becomes eligible for a formal manuscript figure. See [Project Locks, Analysis Selection, And Result Status](project-governance.md) for the promotion rules. Failed, unrun, and indeterminate checks remain visible.
 
 See [public-data cases](cases/README.md) for representative acceptance examples and [release notes](releases/README.md) for capability changes between versions.

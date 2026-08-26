@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "replicated-bulk-event-analysis-selects-packaged-workflow",
+      "input": {
+        "objective": "Test replicated bulk RNA-seq for condition-associated alternative-splicing events",
+        "analysis_branch": "bulk-rmats",
+        "assay_class": "bulk-short-read",
+        "scientific_question": "event-level-splicing",
+        "biological_unit": "independent embryo",
+        "condition_column": "genotype",
+        "reference": "GRCm39",
+        "annotation_release": "GENCODE vM36",
+        "input_artifact_ids": ["bulk-rna-bams", "sample-sheet", "annotation-gtf"],
+        "discover_novel_junctions": false,
+        "complex_local_events": false,
+        "paired_design": false
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "rna-processing-alternative-splicing", "version": "1.0.0"}
+      }
+    },
+    {
+      "name": "three-prime-single-nucleus-remains-junction-candidate-branch",
+      "input": {
+        "objective": "Screen 3-prime single-nucleus RNA-seq junction evidence for sample-recurrent splicing candidates",
+        "analysis_branch": "single-cell-junction-screen",
+        "assay_class": "single-nucleus-three-prime",
+        "scientific_question": "event-level-splicing",
+        "biological_unit": "independent embryo",
+        "condition_column": "genotype",
+        "reference": "GRCm38",
+        "annotation_release": "GENCODE vM23",
+        "input_artifact_ids": ["cell-tagged-bams", "reviewed-barcodes", "sample-sheet"],
+        "discover_novel_junctions": false,
+        "complex_local_events": true,
+        "paired_design": false
+      },
+      "expected_subset": {
+        "handoff_type": "packaged_parameterized_project_analysis",
+        "module": {"id": "rna-processing-alternative-splicing", "version": "1.0.0"}
+      }
+    }
+  ]
+}

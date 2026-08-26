@@ -1,5 +1,5 @@
 {
-  "module_count": 208,
+  "module_count": 215,
   "modules": [
     {
       "access": "offline",
@@ -2824,7 +2824,7 @@
           ],
           "semantic_profile": "model-bundle-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -2963,7 +2963,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "figure-package-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -4574,7 +4574,7 @@
           ],
           "semantic_profile": "genomic-records-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -6398,6 +6398,290 @@
       "version": "1.0.0"
     },
     {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The terminology table has been approved for the organism and document type under review."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "biomedical-terminology-e2e-v1"
+          ],
+          "id": "biomedical-terminology-python-3143",
+          "input_formats": {
+            "document": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "audit": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "biomedical-terminology-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "complements": [
+        "nsfc-proposal-semantic-audit",
+        "academic-prose-revision-audit",
+        "docx-citation-delivery-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute terminology validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Audit Chinese biomedical prose for first-use definitions, abbreviation consistency, gene-protein distinctions, organism-aware symbol styling, rhetorical punctuation, Chinese clause structure, and internal workflow language that should not appear in an external proposal.",
+      "domains": [
+        "publication",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:audit_biomedical_terminology",
+      "evidence_effects": [
+        "validates_biomedical_terminology_consistency"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 30
+      },
+      "id": "biomedical-terminology-and-nomenclature-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "biomedical_document_terminology_model",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "document",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [
+            "document-section"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "document_section": {
+            "type": "string"
+          },
+          "styled_runs": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "terminology": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "terminology",
+          "document_section"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "biomedical terminology audit",
+        "gene protein nomenclature audit",
+        "\u751f\u7269\u533b\u5b66\u672f\u8bed\u89c4\u8303\u5ba1\u67e5",
+        "\u57fa\u56e0\u86cb\u767d\u547d\u540d\u5ba1\u67e5"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Plain-text input cannot prove typographic gene-symbol styling; styled run metadata or DOCX inspection is required for that check."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 1
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "biomedical_nomenclature_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "input-digest"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "document_section": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "first_occurrence_index": {
+            "type": "object"
+          },
+          "input_digest": {
+            "type": "string"
+          },
+          "major_finding_count": {
+            "type": "integer"
+          },
+          "ready_for_external_prose": {
+            "type": "boolean"
+          },
+          "term_count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "document_section",
+          "term_count",
+          "findings",
+          "major_finding_count",
+          "ready_for_external_prose",
+          "first_occurrence_index",
+          "input_digest"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The prose and a project-specific terminology table are supplied."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned clean-room biomedical nomenclature and Chinese scientific prose contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "First definitions, preferred forms, abbreviations, and gene-protein distinctions are explicit.",
+          "id": "biomedical-term-identity",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "External prose is free of unresolved internal governance language and structurally unreadable Chinese sentences.",
+          "id": "external-prose-naturalness",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Are biomedical terms, symbols, abbreviations, and Chinese proposal expressions accurate and consistent?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "biomedical-terminology-and-nomenclature-audit",
+          "biomedical terminology audit",
+          "gene protein nomenclature audit",
+          "\u751f\u7269\u533b\u5b66\u672f\u8bed\u89c4\u8303\u5ba1\u67e5",
+          "\u57fa\u56e0\u86cb\u767d\u547d\u540d\u5ba1\u67e5"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Audit biomedical terminology and nomenclature",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
       "access": "agent_generated",
       "agent_protocol": {
         "forbidden_actions": [
@@ -6886,7 +7170,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -7991,7 +8275,7 @@
           ],
           "semantic_profile": "genomic-records-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -8295,6 +8579,31 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "primary",
+        "assays": [
+          "cuttag",
+          "s9-6-cuttag"
+        ],
+        "controls": [
+          "rnase-h-specificity-control",
+          "nuclease-specificity-control",
+          "igg-control",
+          "input-control",
+          "biological-replicates"
+        ],
+        "normalizations": [
+          "spike-in-normalization"
+        ],
+        "relations": [
+          "direct-binding",
+          "r-loop-associated-effect"
+        ],
+        "targets": [
+          "chromatin-occupancy",
+          "r-loop"
+        ]
+      },
       "title": "Call peaks and audit normalization for bulk chromatin profiling",
       "tool_requirements": [
         {
@@ -8829,7 +9138,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -9583,7 +9892,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -10341,7 +10650,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -10519,6 +10828,27 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "orthogonal-validation",
+        "assays": [
+          "cuttag",
+          "s9-6-cuttag"
+        ],
+        "controls": [
+          "rnase-h-specificity-control",
+          "nuclease-specificity-control",
+          "biological-replicates"
+        ],
+        "normalizations": [
+          "spike-in-normalization"
+        ],
+        "relations": [
+          "r-loop-associated-effect"
+        ],
+        "targets": [
+          "r-loop"
+        ]
+      },
       "title": "Map bulk R-loops with assay- and sensor-specific evidence",
       "tool_requirements": [
         {
@@ -11095,7 +11425,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -11833,7 +12163,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -12569,7 +12899,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -13344,7 +13674,7 @@
           ],
           "semantic_profile": "bulk-assay-summary-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -16444,7 +16774,7 @@
           ],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -17070,7 +17400,9 @@
       "intents": [
         "resolve DOI metadata",
         "verify citation record across Crossref and Europe PMC",
-        "\u6838\u9a8cDOI\u4e0e\u6587\u732e\u5143\u6570\u636e"
+        "\u6838\u9a8cDOI\u4e0e\u6587\u732e\u5143\u6570\u636e",
+        "\u6838\u9a8c\u5f15\u7528",
+        "\u9a8c\u8bc1\u53c2\u8003\u6587\u732e"
       ],
       "kernel_compatibility": [
         ">=0.2.0,<0.3.0"
@@ -17185,7 +17517,9 @@
           "Resolve and cross-check a scholarly citation record",
           "resolve DOI metadata",
           "verify citation record across Crossref and Europe PMC",
-          "\u6838\u9a8cDOI\u4e0e\u6587\u732e\u5143\u6570\u636e"
+          "\u6838\u9a8cDOI\u4e0e\u6587\u732e\u5143\u6570\u636e",
+          "\u6838\u9a8c\u5f15\u7528",
+          "\u9a8c\u8bc1\u53c2\u8003\u6587\u732e"
         ],
         "named_method_priority": 100,
         "required_any_terms": []
@@ -21828,7 +22162,7 @@
           ],
           "semantic_profile": "sequence-phylogeny-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -24664,6 +24998,25 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "primary",
+        "assays": [
+          "bulk-rna-seq"
+        ],
+        "controls": [
+          "matched-control",
+          "biological-replicates"
+        ],
+        "normalizations": [
+          "library-size-normalization"
+        ],
+        "relations": [
+          "secondary-transcriptional-effect"
+        ],
+        "targets": [
+          "transcript-abundance"
+        ]
+      },
       "title": "Run compact differential expression",
       "tool_requirements": [],
       "version": "1.0.0"
@@ -26338,7 +26691,7 @@
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -26490,7 +26843,7 @@
           ],
           "semantic_profile": "configuration-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -26628,7 +26981,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -26826,7 +27179,7 @@
           ],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -27226,6 +27579,363 @@
         }
       ],
       "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "Numbered square-bracket references are the declared citation style for this audit."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "docx-citation-delivery-e2e-v1"
+          ],
+          "id": "docx-audit-python-3143",
+          "input_formats": {
+            "document": [
+              "docx-or-inline-json@1"
+            ]
+          },
+          "module_version": "1.1.0",
+          "output_formats": {
+            "audit": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "docx-citation-delivery-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "complements": [
+        "citation-audit",
+        "nsfc-proposal-semantic-audit",
+        "biomedical-terminology-and-nomenclature-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Read ZIP/XML DOCX packages and validate delivery records.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Read a native DOCX package or an extracted document model, check abstract citations, first-appearance numbering, citation formatting, reference reciprocity, template-derived typography, figure-caption placement, figure width within the text area, centered placeholder-free figure paragraphs, embedded media, page breaks, and page-by-page rendered visual review before submission delivery.",
+      "domains": [
+        "publication",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:audit_docx_proposal_delivery",
+      "evidence_effects": [
+        "validates_docx_submission_delivery"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 30
+      },
+      "id": "docx-citation-delivery-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "proposal_docx_or_document_model",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "docx-or-inline-json",
+              "orientations": [
+                "document-order"
+              ],
+              "representations": [
+                "structured",
+                "binary"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "document",
+          "processing_levels": [
+            "declared",
+            "rendered"
+          ],
+          "required_metadata": [
+            "source-digest"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "abstract_heading_terms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "document_model": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "docx_path": {
+            "type": "string"
+          },
+          "docx_payload_base64": {
+            "type": "string"
+          },
+          "reference_heading_terms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rendered_pages": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "renumber_citations": {
+            "type": "boolean"
+          },
+          "style_policy": {
+            "type": "object"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "intents": [
+        "proposal DOCX audit",
+        "Word citation delivery audit",
+        "\u9879\u76ee\u4e66Word\u4ea4\u4ed8\u5ba1\u67e5",
+        "\u7533\u8bf7\u4e66\u5f15\u6587\u7f16\u53f7\u5ba1\u67e5"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The structural parser does not replace visual inspection of rendered pages and does not rewrite the original Word file."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 1
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "docx_citation_delivery_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "source-sha256"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "caption_sequences": {
+            "type": "object"
+          },
+          "citation_marker_count": {
+            "type": "integer"
+          },
+          "citation_renumber_map": {
+            "type": "object"
+          },
+          "citation_sequence": {
+            "type": "array"
+          },
+          "embedded_media_count": {
+            "type": "integer"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "major_finding_count": {
+            "type": "integer"
+          },
+          "missing_reference_numbers": {
+            "type": "array"
+          },
+          "paragraph_count": {
+            "type": "integer"
+          },
+          "ready_for_submission_delivery": {
+            "type": "boolean"
+          },
+          "reference_sequence": {
+            "type": "array"
+          },
+          "rendered_page_count": {
+            "type": "integer"
+          },
+          "renumbered_docx_base64": {
+            "type": "string"
+          },
+          "renumbered_docx_sha256": {
+            "type": "string"
+          },
+          "source_sha256": {
+            "type": "string"
+          },
+          "style_summary": {
+            "type": "object"
+          },
+          "unused_reference_numbers": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "source_sha256",
+          "paragraph_count",
+          "embedded_media_count",
+          "citation_sequence",
+          "reference_sequence",
+          "citation_renumber_map",
+          "missing_reference_numbers",
+          "unused_reference_numbers",
+          "style_summary",
+          "caption_sequences",
+          "citation_marker_count",
+          "rendered_page_count",
+          "findings",
+          "major_finding_count",
+          "ready_for_submission_delivery",
+          "renumbered_docx_base64",
+          "renumbered_docx_sha256",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Exactly one DOCX path, base64 DOCX payload, or extracted document model is supplied; rendered page records belong to the same document version."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "ECMA-376 Office Open XML document structure",
+          "Project-owned clean-room citation reciprocity and rendered delivery contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Every numbered citation resolves to one reference and every numbered reference is cited in continuous first-appearance order.",
+          "id": "citation-reference-reciprocity",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Typography and colours are checked against a style policy derived from the current official form.",
+          "id": "docx-template-style",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every embedded figure stays within the Word text area and occupies an explicitly centered paragraph without leading spaces, tabs, empty non-drawing runs or indentation placeholders.",
+          "id": "docx-figure-text-boundary-placement",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every rendered page has a digest and explicit review of clipping, overlap, legibility, final figure size, page breaks and figure-caption placement.",
+          "id": "docx-page-visual-review",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Does the final proposal Word file have reciprocal continuous citations and verified page-level rendering?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "docx-citation-delivery-audit",
+          "proposal DOCX audit",
+          "Word citation delivery audit",
+          "\u9879\u76ee\u4e66Word\u4ea4\u4ed8\u5ba1\u67e5",
+          "\u7533\u8bf7\u4e66\u5f15\u6587\u7f16\u53f7\u5ba1\u67e5"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Audit proposal DOCX citations and final delivery",
+      "tool_requirements": [],
+      "version": "1.1.0"
     },
     {
       "access": "offline",
@@ -32104,7 +32814,7 @@
           ],
           "semantic_profile": "functional-enrichment-v2",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -34981,7 +35691,7 @@
           ],
           "semantic_profile": "genomic-records-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -35119,7 +35829,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -37304,7 +38014,7 @@
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -41821,6 +42531,8 @@
         "recurring literature monitoring",
         "independent citing work audit",
         "\u591a\u6765\u6e90\u6587\u732e\u68c0\u7d22\u5ba1\u67e5",
+        "\u7cfb\u7edf\u6587\u732e\u683c\u5c40\u5206\u6790",
+        "\u5224\u65ad\u7814\u7a76\u7a7a\u767d",
         "\u5b9a\u671f\u6587\u732e\u8ffd\u8e2a",
         "\u72ec\u7acb\u4ed6\u5f15\u5ba1\u67e5",
         "\u9ad8\u5f71\u54cd\u529b\u4ed6\u5f15\u6838\u9a8c"
@@ -41976,6 +42688,8 @@
           "recurring literature monitoring",
           "independent citing work audit",
           "\u591a\u6765\u6e90\u6587\u732e\u68c0\u7d22\u5ba1\u67e5",
+          "\u7cfb\u7edf\u6587\u732e\u683c\u5c40\u5206\u6790",
+          "\u5224\u65ad\u7814\u7a76\u7a7a\u767d",
           "\u5b9a\u671f\u6587\u732e\u8ffd\u8e2a",
           "\u72ec\u7acb\u4ed6\u5f15\u5ba1\u67e5",
           "\u9ad8\u5f71\u54cd\u529b\u4ed6\u5f15\u6838\u9a8c"
@@ -42956,6 +43670,281 @@
       },
       "schema_version": 1,
       "title": "Apply an auditable manuscript revision patch",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "Evidence type labels have been assigned after reviewing the underlying results rather than from method names alone."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "mechanism-claim-promotion-e2e-v1"
+          ],
+          "id": "mechanism-claim-python-3143",
+          "input_formats": {
+            "claims": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "decisions": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "mechanism-claim-promotion-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "complements": [
+        "claim-evidence-integrity-audit",
+        "nsfc-proposal-semantic-audit",
+        "biomedical-terminology-and-nomenclature-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute evidence-level claim validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Prevent candidate molecules, substrates, pathways, and causal mechanisms from being promoted beyond the direct evidence available across proposal titles, abstracts, hypotheses, aims, and expected outcomes.",
+      "domains": [
+        "publication",
+        "research-quality",
+        "experimental-design"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:audit_mechanism_claim_promotion",
+      "evidence_effects": [
+        "prevents_mechanism_claim_inflation"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 30
+      },
+      "id": "mechanism-claim-promotion-gate",
+      "input_artifacts": [
+        {
+          "artifact_type": "mechanism_claim_evidence_ledger",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "claim-by-evidence"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "claims",
+          "processing_levels": [
+            "declared",
+            "reviewed"
+          ],
+          "required_metadata": [
+            "section",
+            "requested-level"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "claims": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "promotion_rules": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "claims"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "mechanism claim promotion gate",
+        "substrate evidence audit",
+        "\u673a\u5236\u7ed3\u8bba\u5347\u7ea7\u5ba1\u67e5",
+        "\u5019\u9009\u5e95\u7269\u8bc1\u636e\u5ba1\u67e5"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "This gate does not decide whether an experiment is technically correct or whether a biological mechanism is true; it limits language to reviewed evidence types."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 1
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "mechanism_claim_promotion_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "claim-by-decision"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "decisions",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "input-digest"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "all_claims_within_evidence": {
+            "type": "boolean"
+          },
+          "decisions": {
+            "type": "array"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "input_digest": {
+            "type": "string"
+          },
+          "major_finding_count": {
+            "type": "integer"
+          },
+          "mechanistic_sequence": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "decisions",
+          "findings",
+          "major_finding_count",
+          "all_claims_within_evidence",
+          "mechanistic_sequence",
+          "input_digest"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Each claim declares its section, requested level, entity, and observed evidence types."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned clean-room mechanism evidence hierarchy."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Substrate, mechanism, and causal verbs require the declared direct evidence sequence.",
+          "id": "mechanism-evidence-sequence",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The same promotion limit applies in title, abstract, hypothesis, aims, results, and expected outcomes.",
+          "id": "proposal-section-claim-consistency",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Does each requested mechanistic claim level have the direct interaction, site, catalytic, phenotype, and rescue evidence it requires?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "mechanism-claim-promotion-gate",
+          "mechanism claim promotion gate",
+          "substrate evidence audit",
+          "\u673a\u5236\u7ed3\u8bba\u5347\u7ea7\u5ba1\u67e5",
+          "\u5019\u9009\u5e95\u7269\u8bc1\u636e\u5ba1\u67e5"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Gate promotion of biomedical mechanism claims",
       "tool_requirements": [],
       "version": "1.0.0"
     },
@@ -44687,7 +45676,7 @@
           ],
           "semantic_profile": "analysis-archive-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -44826,7 +45815,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "figure-package-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -45614,7 +46603,7 @@
           ],
           "semantic_profile": "sequence-phylogeny-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -48337,6 +49326,1348 @@
       },
       "schema_version": 1,
       "title": "Summarize a biological network",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "Facts, preliminary results, citations, facilities, collaborators, and institutional statements are supplied by the user or a verified source."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "nsfc-proposal-development-e2e-v2"
+          ],
+          "id": "nsfc-drafting-2026-python-3143",
+          "input_formats": {
+            "citation_resolution_adjudication": [
+              "citation-resolution-adjudication@1"
+            ],
+            "claim_evidence_integrity": [
+              "claim-integrity-report@1"
+            ],
+            "proposal_materials": [
+              "inline-json@1"
+            ],
+            "reviewed_literature_corpus": [
+              "normalized-json@1"
+            ],
+            "reviewed_literature_landscape": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.1.0",
+          "output_formats": {
+            "drafting_package": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "nsfc-proposal-development-regression-v2"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "complements": [
+        "literature-evidence",
+        "literature-landscape-audit",
+        "citation-record-resolution",
+        "citation-resolution-adjudication",
+        "claim-evidence-integrity-audit",
+        "assertion-citation-coverage-audit",
+        "citation-audit",
+        "source-freshness-audit",
+        "nsfc-proposal-semantic-audit",
+        "nsfc-proposal-figure-development",
+        "research-proposal-quality-audit",
+        "biomedical-terminology-and-nomenclature-audit",
+        "mechanism-claim-promotion-gate",
+        "docx-citation-delivery-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Prepare a deterministic programme-specific proposal drafting package.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Prepare a programme-specific National Natural Science Foundation of China drafting package only after multi-source literature search, landscape review, citation-identity resolution, claim-evidence adjudication and project-relevant public-database retrieval; then link the central scientific question, evidence, section argument moves, aims, annual milestones and revision priorities to actual proposal prose delivery.",
+      "domains": [
+        "publication",
+        "experimental-design",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:prepare_nsfc_proposal_drafting",
+      "evidence_effects": [
+        "adds_nsfc_proposal_drafting_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 30
+      },
+      "id": "nsfc-proposal-development",
+      "input_artifacts": [
+        {
+          "artifact_type": "nsfc_proposal_drafting_materials",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal_materials",
+          "processing_levels": [
+            "declared",
+            "reviewed"
+          ],
+          "required_metadata": [
+            "guideline-year",
+            "programme-type",
+            "official-template-digest"
+          ],
+          "source_policy": "project_input"
+        },
+        {
+          "artifact_type": "literature_corpus",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "reviewed_literature_corpus",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "upstream_required"
+        },
+        {
+          "artifact_type": "literature_landscape_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "reviewed_literature_landscape",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "upstream_required"
+        },
+        {
+          "artifact_type": "citation_resolution_adjudication",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "citation-resolution-adjudication",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "citation_resolution_adjudication",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "resolution_class"
+          ],
+          "source_policy": "upstream_required"
+        },
+        {
+          "artifact_type": "claim_integrity_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "claim-integrity-report",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "claim_evidence_integrity",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "audit_version",
+            "audit_digest"
+          ],
+          "source_policy": "upstream_required"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "aims": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "annual_plan": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "argument_map": {
+            "type": "object"
+          },
+          "evidence_foundation": {
+            "type": "object"
+          },
+          "evidence_table": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "existing_sections": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "guideline_year": {
+            "type": "integer"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "official_template": {
+            "type": "object"
+          },
+          "program_type": {
+            "type": "string"
+          },
+          "research_canon": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "scope": {
+            "type": "object"
+          },
+          "section_contracts": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "guideline_year",
+          "program_type",
+          "mode",
+          "scope",
+          "research_canon",
+          "evidence_table",
+          "argument_map",
+          "section_contracts",
+          "aims",
+          "evidence_foundation"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "NSFC proposal writing",
+        "NSFC proposal development",
+        "\u56fd\u81ea\u7136\u9879\u76ee\u4e66\u64b0\u5199",
+        "\u56fd\u5bb6\u81ea\u7136\u79d1\u5b66\u57fa\u91d1\u7533\u8bf7\u4e66\u4fee\u6539",
+        "\u57fa\u91d1\u7533\u8bf7\u4e66\u6210\u7a3f"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The module prepares a source-bound drafting package; the Codex entrypoint performs the project-specific writing and must not invent missing scientific evidence or official form requirements."
+      ],
+      "maturity": "validated",
+      "module_type": "design",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 1
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "nsfc_proposal_drafting_package",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "drafting_package",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "profile-version",
+            "input-digest"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "agent_delivery_contract": {
+            "type": "object"
+          },
+          "aim_matrix": {
+            "type": "array"
+          },
+          "annual_plan": {
+            "type": "array"
+          },
+          "central_narrative": {
+            "type": "object"
+          },
+          "drafting_order": {
+            "type": "array"
+          },
+          "evidence_foundation_summary": {
+            "type": "object"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "input_digest": {
+            "type": "string"
+          },
+          "major_finding_count": {
+            "type": "integer"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "profile": {
+            "type": "object"
+          },
+          "ready_for_section_drafting": {
+            "type": "boolean"
+          },
+          "review_dimensions": {
+            "type": "array"
+          },
+          "revision_briefs": {
+            "type": "array"
+          },
+          "section_blueprints": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "profile",
+          "mode",
+          "central_narrative",
+          "section_blueprints",
+          "aim_matrix",
+          "annual_plan",
+          "revision_briefs",
+          "evidence_foundation_summary",
+          "drafting_order",
+          "review_dimensions",
+          "findings",
+          "major_finding_count",
+          "ready_for_section_drafting",
+          "agent_delivery_contract",
+          "input_digest"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The current official form, project type, research facts, evidence table, central argument, section contracts, aims, and any source text for revision are supplied.",
+        "A recorded multi-source literature, citation-resolution and claim-evidence workflow has completed, and any database-based claim is bound to the exact public-database adapter output."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://www.nsfc.gov.cn/p1/3381/2824/99667.html",
+          "https://www.nsfc.gov.cn/p1/3381/2821/99242.html",
+          "Project-owned clean-room NSFC scientific-writing contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Every factual claim, section and aim is linked to declared evidence and the central scientific question.",
+          "id": "proposal-foundation-writeable",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Literature discovery, landscape review, citation identity and claim-evidence adjudication are represented by successful output receipts, while every database claim is bound to an executed project-relevant source adapter.",
+          "id": "proposal-evidence-workflow-observed",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The agent must use the package to draft or revise actual proposal prose and may not return only an audit or internal writing plan.",
+          "id": "proposal-prose-delivery-required",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "How should the supplied evidence and preliminary results be turned into coherent programme-specific NSFC proposal prose?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "nsfc-proposal-development",
+          "NSFC proposal writing",
+          "\u56fd\u81ea\u7136\u9879\u76ee\u4e66\u64b0\u5199",
+          "\u57fa\u91d1\u7533\u8bf7\u4e66\u6210\u7a3f"
+        ],
+        "named_method_priority": 110,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Develop source-bound NSFC proposal prose",
+      "tool_requirements": [],
+      "version": "1.1.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [
+        "figure-specification"
+      ],
+      "assumptions": [
+        "Generated imagery is used only as a non-evidentiary visual reference or separable biological asset; it never substitutes for observed data."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "nsfc-proposal-figure-e2e-v1"
+          ],
+          "id": "nsfc-proposal-figure-2026-python-3143",
+          "input_formats": {
+            "proposal_figure_materials": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "proposal_figure_prompt_package": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "nsfc-proposal-figure-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "complements": [
+        "nsfc-proposal-development",
+        "scientific-illustration-generation",
+        "publication-figure-package",
+        "figure-specification",
+        "claim-evidence-integrity-audit",
+        "citation-resolution-adjudication"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate proposal-figure semantics and prepare deterministic generation and reconstruction prompts.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Prepare programme- and section-specific prompts for visually substantive biomedical proposal illustrations, bind scientific relations to reviewed evidence, separate generated visual references from observed data, require object-editable reconstruction, and block insertion until final-size scientific, typography, layer-order, alignment, text-boundary, element-weight and spatial-balance review passes without errors.",
+      "domains": [
+        "publication",
+        "experimental-design",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:prepare_nsfc_proposal_figure",
+      "evidence_effects": [
+        "adds_nsfc_proposal_figure_design_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 30
+      },
+      "id": "nsfc-proposal-figure-development",
+      "input_artifacts": [
+        {
+          "artifact_type": "nsfc_proposal_figure_materials",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal_figure_materials",
+          "processing_levels": [
+            "declared",
+            "reviewed"
+          ],
+          "required_metadata": [
+            "programme-type",
+            "figure-role",
+            "section-context",
+            "evidence-bindings"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "core_message": {
+            "type": "string"
+          },
+          "evidence_records": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "figure_id": {
+            "type": "string"
+          },
+          "figure_role": {
+            "type": "string"
+          },
+          "output_contract": {
+            "type": "object"
+          },
+          "program_type": {
+            "type": "string"
+          },
+          "qa_rounds": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "section_context": {
+            "type": "object"
+          },
+          "source_attributions": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "visual_plan": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "figure_id",
+          "figure_role",
+          "program_type",
+          "core_message",
+          "section_context",
+          "evidence_records",
+          "visual_plan",
+          "source_attributions",
+          "output_contract"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "NSFC proposal figure",
+        "grant proposal scientific illustration",
+        "\u56fd\u81ea\u7136\u9879\u76ee\u4e66\u7ed8\u56fe",
+        "\u57fa\u91d1\u7533\u8bf7\u4e66\u79d1\u5b66\u5047\u8bf4\u56fe",
+        "\u9879\u76ee\u4e66\u6280\u672f\u8def\u7ebf\u56fe"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The module produces a reviewed prompt and reconstruction contract. Codex must still run the declared image-generation and editable-reconstruction steps, inspect every rendered iteration, and record the accepted artifact."
+      ],
+      "maturity": "validated",
+      "module_type": "design",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 2
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "nsfc_proposal_figure_prompt_package",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal_figure_prompt_package",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "input-digest",
+            "imagegen-prompt",
+            "editable-reconstruction-prompt",
+            "visual-qa-contract"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "core_message": {
+            "type": "string"
+          },
+          "evidence_style_legend": {
+            "type": "object"
+          },
+          "exact_label_inventory": {
+            "type": "array"
+          },
+          "figure_id": {
+            "type": "string"
+          },
+          "figure_role": {
+            "type": "string"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "input_digest": {
+            "type": "string"
+          },
+          "major_finding_count": {
+            "type": "integer"
+          },
+          "output_contract": {
+            "type": "object"
+          },
+          "program_type": {
+            "type": "string"
+          },
+          "programme_figure_emphasis": {
+            "type": "object"
+          },
+          "prompt_package": {
+            "type": "object"
+          },
+          "qa_contract": {
+            "type": "object"
+          },
+          "ready_for_generation": {
+            "type": "boolean"
+          },
+          "ready_for_proposal_insertion": {
+            "type": "boolean"
+          },
+          "renderer_plan": {
+            "type": "object"
+          },
+          "revision_required": {
+            "type": "boolean"
+          },
+          "section_context": {
+            "type": "object"
+          },
+          "section_role": {
+            "type": "string"
+          },
+          "source_attributions": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "figure_id",
+          "figure_role",
+          "program_type",
+          "section_role",
+          "programme_figure_emphasis",
+          "core_message",
+          "section_context",
+          "prompt_package",
+          "renderer_plan",
+          "exact_label_inventory",
+          "evidence_style_legend",
+          "source_attributions",
+          "output_contract",
+          "qa_contract",
+          "findings",
+          "major_finding_count",
+          "ready_for_generation",
+          "ready_for_proposal_insertion",
+          "revision_required",
+          "input_digest"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The exact programme type, proposal section, core message, surrounding claims, evidence records, intended panels, source attributions and final output dimensions are supplied.",
+        "Literature used in a rationale or mechanism illustration has completed citation-identity verification and full-text or original-source review.",
+        "Observed preliminary panels are bound to real source artifacts and a deterministic or source-preserving renderer."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://www.nsfc.gov.cn/p1/3381/2821/99242.html",
+          "https://platform.openai.com/docs/guides/image-generation",
+          "Project-owned clean-room biomedical proposal-figure contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "The figure role, surrounding argument, allowed conclusion and forbidden implications are explicit.",
+          "id": "proposal-figure-position-bound",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Scientifically meaningful tissue, cellular, subcellular, molecular, model or observed-data elements carry the visual narrative; a text-box flowchart is insufficient.",
+          "id": "proposal-figure-visual-substance",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Font families, size levels and text colours remain restrained and consistent; declared z-order prevents background art, biological assets or connectors from covering labels, legends or data.",
+          "id": "proposal-figure-typography-and-layer-safety",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Logically corresponding elements occupy matched positions, text stays inside its intended bounds without covering scientific visuals, and meaningful elements carry labels unless an explicit exception is justified.",
+          "id": "proposal-figure-alignment-boundary-and-label-review",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every visual element has a distinct scientific contribution and declared narrative weight; redundant decoration is removed and information density plus whitespace are balanced across the composition.",
+          "id": "proposal-figure-element-weight-and-spatial-balance",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The final figure remains within the document text area and occupies an explicitly centered, placeholder-free paragraph with no leading spaces, tabs or indentation offsets.",
+          "id": "proposal-figure-document-placement",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Every factual node and evidentiary connector is linked to a reviewed literature, database or preliminary-data record.",
+          "id": "proposal-figure-evidence-bound",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Labels, citations, relations, legends and deterministic data panels are rebuilt as editable objects rather than retained as generated pseudo-text or a full-page screenshot.",
+          "id": "proposal-figure-editable",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The rendered figure is reviewed at final insertion size and cannot pass while any scientific-semantic or layout error remains.",
+          "id": "proposal-figure-final-size-reviewed",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "How should a rationale, scientific hypothesis, research workflow, technical route, preliminary foundation or achievement-lineage figure be designed and visually reviewed for an NSFC proposal?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "nsfc-proposal-figure-development",
+          "NSFC proposal figure",
+          "\u56fd\u81ea\u7136\u9879\u76ee\u4e66\u7ed8\u56fe",
+          "\u79d1\u5b66\u5047\u8bf4\u56fe",
+          "\u9879\u76ee\u4e66\u6280\u672f\u8def\u7ebf\u56fe"
+        ],
+        "named_method_priority": 112,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Develop evidence-bound NSFC proposal figures",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The supplied text and project evidence belong to the proposal version under review."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "nsfc-proposal-semantic-audit-e2e-v1"
+          ],
+          "id": "nsfc-2026-python-3143",
+          "input_formats": {
+            "proposal": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "audit": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "nsfc-proposal-semantic-audit-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "complements": [
+        "research-proposal-quality-audit",
+        "biomedical-terminology-and-nomenclature-audit",
+        "mechanism-claim-promotion-gate",
+        "docx-citation-delivery-audit"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic NSFC semantic validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Audit a biomedical proposal against a versioned NSFC profile, Chinese and English abstract alignment, section ownership, paragraph transitions, entity introduction order, and aim-to-phenotype-to-mechanism relevance.",
+      "domains": [
+        "publication",
+        "experimental-design",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:audit_nsfc_proposal",
+      "evidence_effects": [
+        "validates_nsfc_proposal_semantic_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 30
+      },
+      "id": "nsfc-proposal-semantic-audit",
+      "input_artifacts": [
+        {
+          "artifact_type": "nsfc_proposal_semantic_model",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [
+            "guideline-year",
+            "program-type"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "abstract_cn": {
+            "type": "string"
+          },
+          "abstract_en": {
+            "type": "string"
+          },
+          "aims": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "annual_plan": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "application_code_1": {
+            "type": "string"
+          },
+          "bilingual_concepts": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "central_mechanisms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "core_phenotypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "entity_prerequisites": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "guideline_year": {
+            "type": "integer"
+          },
+          "human_genetics_context": {
+            "type": "object"
+          },
+          "official_template": {
+            "type": "object"
+          },
+          "program_type": {
+            "type": "string"
+          },
+          "research_attribute": {
+            "type": "string"
+          },
+          "sections": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "title_cn": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "guideline_year",
+          "program_type",
+          "application_code_1",
+          "research_attribute",
+          "title_cn",
+          "abstract_cn",
+          "abstract_en",
+          "sections",
+          "aims",
+          "core_phenotypes",
+          "central_mechanisms"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "NSFC proposal semantic audit",
+        "\u56fd\u5bb6\u81ea\u7136\u79d1\u5b66\u57fa\u91d1\u7533\u8bf7\u4e66\u5ba1\u67e5",
+        "\u56fd\u81ea\u7136\u9879\u76ee\u4e66\u8bed\u4e49\u5ba1\u67e5"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "This module does not predict funding, invent preliminary results, or replace the current project guide, online form, or host-institution requirements."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 1
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "nsfc_proposal_semantic_report",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "profile-version",
+            "input-digest"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "agency": {
+            "type": "string"
+          },
+          "agency_profile": {
+            "type": "object"
+          },
+          "aim_alignment": {
+            "type": "array"
+          },
+          "annual_plan_summary": {
+            "type": "object"
+          },
+          "human_genetics_summary": {
+            "type": "object"
+          },
+          "input_digest": {
+            "type": "string"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "major_finding_count": {
+            "type": "integer"
+          },
+          "official_rule_findings": {
+            "type": "array"
+          },
+          "ready_for_scientific_drafting": {
+            "type": "boolean"
+          },
+          "section_inventory": {
+            "type": "array"
+          },
+          "semantic_findings": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "agency",
+          "agency_profile",
+          "official_rule_findings",
+          "semantic_findings",
+          "section_inventory",
+          "aim_alignment",
+          "annual_plan_summary",
+          "human_genetics_summary",
+          "major_finding_count",
+          "ready_for_scientific_drafting",
+          "limitations",
+          "input_digest"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The project type, application code, research attribute, core phenotypes, central mechanisms, sections, and aims are declared."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://www.nsfc.gov.cn/p1/2961/2962/3642/sqs.html",
+          "https://www.nsfc.gov.cn/p1/2961/2962/4089/yjsx.html",
+          "https://www.nsfc.gov.cn/p1/2961/2962/2967/sqsj.html",
+          "Project-owned clean-room biomedical proposal semantic contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "The year, research attribute, and life-science application code satisfy the installed official profile.",
+          "id": "nsfc-official-profile",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Section ownership, entity order, bilingual concepts, and aim relevance are coherent.",
+          "id": "nsfc-semantic-coherence",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Does this NSFC biomedical proposal satisfy the current declared agency profile and a coherent phenotype-mechanism research argument?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "nsfc-proposal-semantic-audit",
+          "NSFC proposal semantic audit",
+          "\u56fd\u5bb6\u81ea\u7136\u79d1\u5b66\u57fa\u91d1\u7533\u8bf7\u4e66\u5ba1\u67e5",
+          "\u56fd\u81ea\u7136\u9879\u76ee\u4e66\u8bed\u4e49\u5ba1\u67e5"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Audit National Natural Science Foundation of China proposal semantics",
       "tool_requirements": [],
       "version": "1.0.0"
     },
@@ -54418,7 +56749,7 @@
           ],
           "semantic_profile": "analysis-archive-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -54570,7 +56901,7 @@
           ],
           "semantic_profile": "figure-package-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -56367,7 +58698,7 @@
           ],
           "semantic_profile": "structure-analysis-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -56506,7 +58837,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "svg-figure-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -56644,7 +58975,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -56910,6 +59241,18 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "primary",
+        "assays": [
+          "protein-secondary-structure"
+        ],
+        "controls": [],
+        "normalizations": [],
+        "relations": [],
+        "targets": [
+          "protein-secondary-structure"
+        ]
+      },
       "title": "Assign residue-level protein secondary structure with observed DSSP execution",
       "tool_requirements": [
         {
@@ -57675,7 +60018,7 @@
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -57903,6 +60246,23 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "primary",
+        "assays": [
+          "ip-ms"
+        ],
+        "controls": [
+          "matched-control",
+          "biological-replicates"
+        ],
+        "normalizations": [],
+        "relations": [
+          "protein-interaction-support"
+        ],
+        "targets": [
+          "protein-interactome"
+        ]
+      },
       "title": "Run peptide-count-aware DEqMS proteomics inference",
       "tool_requirements": [
         {
@@ -63676,6 +66036,908 @@
       "version": "1.0.0"
     },
     {
+      "access": "agent_generated",
+      "agent_protocol": {
+        "forbidden_actions": [
+          "Do not edit the packaged workflow source, invent sample metadata, infer library properties from filenames, or use cells, nuclei, reads, exons, junctions or transcripts as biological replicates.",
+          "Do not call intronic or exonic abundance, spliced/unspliced velocity layers, differential exon usage, transcript usage, local events and full-length isoforms interchangeable forms of evidence.",
+          "Do not infer a direct RNA-processing mechanism from gene overlap with binding, chromatin, R-loop, expression or protein-interaction results.",
+          "Do not admit a generated command, dry run, process exit, unreloaded result, empty panel or audit report as completed scientific analysis."
+        ],
+        "languages": [
+          "python",
+          "r",
+          "workflow"
+        ],
+        "mode": "packaged_parameterized_workflow",
+        "parameter_rules": [
+          {
+            "decision_inputs": [
+              "assay class",
+              "event, exon, transcript or isoform estimand",
+              "annotation dependence",
+              "novel junction objective",
+              "replicate design",
+              "read coverage"
+            ],
+            "id": "minimum-sufficient-method",
+            "parameter": "analysis-branch",
+            "selection_rule": "Choose the single primary branch whose native estimand answers the stated question and add at most one orthogonal validation that can change the scientific decision.",
+            "validation_rule": "Reject a method whose input model, replicate unit, event definition or claim boundary does not match the observed data."
+          },
+          {
+            "decision_inputs": [
+              "biological unit",
+              "pairing",
+              "batch",
+              "condition",
+              "sample count",
+              "coverage",
+              "design rank"
+            ],
+            "id": "sample-level-inference",
+            "parameter": "replicate-and-contrast",
+            "selection_rule": "Fit condition effects at the independent sample level with pairing and justified covariates declared before reviewing results.",
+            "validation_rule": "Block formal inference for pseudo-replication, confounding, rank deficiency, inadequate sample replication or condition-specific coverage failure."
+          },
+          {
+            "decision_inputs": [
+              "scientific minimum effect",
+              "event family",
+              "coverage",
+              "replicate variability",
+              "confirmatory or exploratory role"
+            ],
+            "id": "effect-and-multiplicity",
+            "parameter": "decision-thresholds",
+            "selection_rule": "Declare a biologically meaningful delta-PSI or usage threshold, coverage filter, replicate consistency rule and multiplicity family before inspecting significance.",
+            "validation_rule": "Retain sensitivity near thresholds and never promote nominal P values, post hoc filters or visually selected events as formal evidence."
+          }
+        ],
+        "postflight_checks": [
+          "Reload all result tables, logs, normalized event records and figures; reconcile event identifiers, coordinates, group direction, sample order, record counts, parameters, versions and file digests.",
+          "Review coverage, replicate PSI or usage consistency, event-family counts, effect and P-value distributions, multiplicity, method agreement and candidate-to-formal status.",
+          "Write exact claim boundaries for event, exon, transcript, isoform, processing-kinetic and integrated evidence before project promotion."
+        ],
+        "preflight_checks": [
+          "Inspect real inputs and record source digests, sample identities, biological units, conditions, pairing, batch, read layout, strandedness, read length, reference and annotation.",
+          "Detect exact versions and official parameter surfaces for the selected backend; stop when the installed version falls outside the compatibility row.",
+          "Freeze the primary method, orthogonal validation, filtering, effect threshold, multiplicity family and required figure panels before execution."
+        ],
+        "provenance_fields": [
+          "module-id",
+          "module-version",
+          "analysis-branch",
+          "assay-class",
+          "sample-manifest-digest",
+          "source-digests",
+          "reference",
+          "annotation-release",
+          "library-layout",
+          "strandedness",
+          "read-length",
+          "biological-unit",
+          "design",
+          "contrast",
+          "filtering",
+          "effect-threshold",
+          "multiplicity-family",
+          "actual-tool-versions",
+          "parameters",
+          "output-digests",
+          "quality-gates",
+          "scientific-status"
+        ],
+        "requires_observed_execution": true,
+        "schema_version": 1,
+        "template_sections": [
+          {
+            "id": "admit-design-and-select-branch",
+            "output_artifact_types": [
+              "rna_processing_analysis_evidence"
+            ],
+            "purpose": "Resolve the data-generating assay and scientific estimand before choosing an RNA-processing method.",
+            "required_logic": [
+              "Inspect actual source files, sample sheet, experimental units, condition and pairing structure, library layout, strandedness, read length, reference, annotation and upstream quality reports.",
+              "Use one primary analysis and one decision-relevant orthogonal validation; do not stack methods that answer the same question without added decision value.",
+              "Distinguish event-level splicing, exon usage, transcript usage, droplet junction screening, long-read isoforms, processing kinetics and cross-assay integration."
+            ],
+            "template_files": [
+              "templates/run_rna_processing_workflow.py"
+            ]
+          },
+          {
+            "id": "execute-reload-and-integrate",
+            "output_artifact_types": [
+              "rna_processing_analysis_evidence"
+            ],
+            "purpose": "Run the admitted branch, reload all outputs, create standardized event tables and figures, and relate accepted events to independent evidence without causal inflation.",
+            "required_logic": [
+              "For replicated short-read bulk event testing, execute rMATS with measured read length, declared library type, explicit variable-length, pairing, novel-site and effect-size-null parameters.",
+              "For transcript usage use Salmon or equivalent transcript counts with DRIMSeq and stageR; for exon usage use DEXSeq; preserve method-native hypothesis families and filtering.",
+              "For 3-prime droplet data, retain sample-level junction candidates and coverage sensitivity but block formal event claims based on cells, intronic signal, exon signal or velocity layers.",
+              "For long reads, follow FLAIR alignment, correction, shared collapse, sample-wise quantification and replicated differential analysis, retaining isoform structure and productivity uncertainty.",
+              "Reload normalized outputs and figures, then link binding, R-loop, chromatin, expression or protein evidence as separate support types with direct causality unresolved."
+            ],
+            "template_files": [
+              "templates/run_rna_processing_workflow.py"
+            ]
+          }
+        ]
+      },
+      "alternatives": [],
+      "assumptions": [
+        "Input alignments or quantifications passed assay-appropriate read, mapping, strand, contamination, and sample-identity quality control and use a coordinate-compatible reference and annotation."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_rna_processing_workflow.py",
+          "purpose": "Select, execute, normalize, render, reload, and claim-bound the packaged RNA-processing workflow without source edits.",
+          "quality_gate_ids": [
+            "rna-processing-design-admission",
+            "rna-processing-branch-eligibility",
+            "rna-processing-replicate-inference",
+            "rna-processing-output-reload",
+            "rna-processing-claim-boundary"
+          ],
+          "requires_adaptation": false
+        }
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "rna-processing-alternative-splicing-e2e-v1"
+          ],
+          "id": "python-3143-rmats-440-rna-processing-1",
+          "input_formats": {
+            "rna_processing_inputs": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "rna_processing_evidence": [
+              "inline-json@1",
+              "tab-separated-values@1",
+              "svg@1.1"
+            ]
+          },
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "regression_evidence_ids": [
+            "rna-processing-alternative-splicing-regression-v1"
+          ],
+          "tool_versions": {
+            "rmats": [
+              ">=4.4,<4.5"
+            ]
+          },
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "complements": [
+        "differential-expression",
+        "bulk-rbp-rna-binding",
+        "bulk-r-loop-mapping",
+        "single-cell-donor-inference",
+        "figure-specification",
+        "functional-enrichment"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate requests, run approved external branches, normalize outputs, render vector summaries, and reload evidence.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Select and execute a minimum-sufficient RNA-processing workflow while keeping replicated bulk event testing, transcript or exon usage, single-cell junction screening, long-read isoforms, and cross-assay evidence integration scientifically distinct.",
+      "domains": [
+        "omics",
+        "transcriptomics"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "evidence_effects": [
+        "adds-rna-processing-and-alternative-splicing-evidence"
+      ],
+      "execution": {
+        "kind": "workflow",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 30
+      },
+      "id": "rna-processing-alternative-splicing",
+      "input_artifacts": [
+        {
+          "artifact_type": "rna_processing_analysis_inputs",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "project-request-and-artifact-references"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "rna_processing_inputs",
+          "processing_levels": [
+            "declared",
+            "sample-manifest-bound"
+          ],
+          "required_metadata": [
+            "assay-class",
+            "biological-unit",
+            "condition",
+            "reference",
+            "annotation-release",
+            "source-digests"
+          ],
+          "source_policy": "project_or_upstream"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_branch": {
+            "enum": [
+              "design",
+              "bulk-rmats",
+              "single-cell-junction-screen",
+              "evidence-integration"
+            ],
+            "type": "string"
+          },
+          "annotation_release": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "assay_class": {
+            "enum": [
+              "bulk-short-read",
+              "single-cell-full-length",
+              "single-cell-droplet",
+              "single-nucleus-three-prime",
+              "long-read-rna"
+            ],
+            "type": "string"
+          },
+          "biological_unit": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "complex_local_events": {
+            "type": "boolean"
+          },
+          "condition_column": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "discover_novel_junctions": {
+            "type": "boolean"
+          },
+          "input_artifact_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "paired_design": {
+            "type": "boolean"
+          },
+          "reference": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "scientific_question": {
+            "enum": [
+              "event-level-splicing",
+              "transcript-usage",
+              "exon-usage",
+              "isoform-discovery",
+              "cross-assay-integration"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "analysis_branch",
+          "assay_class",
+          "scientific_question",
+          "biological_unit",
+          "condition_column",
+          "reference",
+          "annotation_release",
+          "input_artifact_ids",
+          "discover_novel_junctions",
+          "complex_local_events",
+          "paired_design"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "RNA processing analysis",
+        "alternative splicing",
+        "differential splicing",
+        "junction usage",
+        "differential transcript usage",
+        "RNA\u52a0\u5de5\u5206\u6790",
+        "\u53ef\u53d8\u526a\u63a5\u5206\u6790",
+        "\u5dee\u5f02\u526a\u63a5",
+        "\u8f6c\u5f55\u672c\u4f7f\u7528\u53d8\u5316"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Three-prime single-cell or single-nucleus junction analysis remains candidate discovery unless an eligible replicated design and orthogonal assay support the event.",
+        "Spliced and unspliced layers used for RNA velocity describe processing kinetics and do not by themselves establish alternative-splicing events.",
+        "DEXSeq reports differential exon usage, DRIMSeq and stageR report transcript usage, rMATS reports classical local events, and FLAIR reports long-read isoforms; these outputs are related but not interchangeable.",
+        "Gene-level overlap with RBP binding, chromatin occupancy, R-loop, expression, or protein interaction evidence does not establish direct regulation or causality."
+      ],
+      "maturity": "validated",
+      "module_type": "analysis",
+      "mutability": "read_only",
+      "observed_output_contracts": [
+        {
+          "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+          "content_schema": {
+            "additionalProperties": false,
+            "properties": {
+              "artifact_type": {
+                "enum": [
+                  "rna_processing_analysis_evidence"
+                ],
+                "type": "string"
+              },
+              "format": {
+                "enum": [
+                  "inline-json",
+                  "tab-separated-values",
+                  "svg"
+                ],
+                "type": "string"
+              },
+              "processing_level": {
+                "enum": [
+                  "executed",
+                  "reloaded",
+                  "claim-bounded"
+                ],
+                "type": "string"
+              },
+              "provenance": {
+                "additionalProperties": false,
+                "properties": {
+                  "compatibility_row_id": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "parameters_digest": {
+                    "pattern": "^[0-9a-f]{64}$",
+                    "type": "string"
+                  },
+                  "workflow": {
+                    "maxLength": 200,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "workflow_version": {
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "workflow",
+                  "workflow_version",
+                  "parameters_digest",
+                  "compatibility_row_id"
+                ],
+                "type": "object"
+              },
+              "record_count": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "result_summary": {
+                "maxLength": 4000,
+                "minLength": 8,
+                "type": "string"
+              }
+            },
+            "required": [
+              "artifact_type",
+              "format",
+              "processing_level",
+              "result_summary",
+              "record_count",
+              "provenance"
+            ],
+            "type": "object"
+          },
+          "gate_evaluators": [
+            {
+              "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+              "evaluator_type": "provenance-design",
+              "evidence_payload_role": "primary",
+              "gate_id": "rna-processing-design-admission",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
+              "operator": "equals",
+              "threshold": "accepted"
+            },
+            {
+              "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+              "evaluator_type": "provenance-design",
+              "evidence_payload_role": "primary",
+              "gate_id": "rna-processing-branch-eligibility",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
+              "operator": "equals",
+              "threshold": "accepted"
+            },
+            {
+              "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+              "evaluator_type": "provenance-design",
+              "evidence_payload_role": "primary",
+              "gate_id": "rna-processing-replicate-inference",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
+              "operator": "equals",
+              "threshold": "accepted"
+            },
+            {
+              "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+              "evaluator_type": "provenance-design",
+              "evidence_payload_role": "primary",
+              "gate_id": "rna-processing-output-reload",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
+              "operator": "equals",
+              "threshold": "accepted"
+            },
+            {
+              "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+              "evaluator_type": "claim-boundary",
+              "evidence_payload_role": "primary",
+              "gate_id": "rna-processing-claim-boundary",
+              "metric_key": "scientific_review",
+              "metric_type": "string",
+              "operator": "equals",
+              "threshold": "accepted"
+            }
+          ],
+          "payloads": [
+            {
+              "maximum": 1,
+              "media_types": [
+                "application/json",
+                "image/svg+xml",
+                "text/tab-separated-values"
+              ],
+              "minimum": 1,
+              "role": "primary"
+            },
+            {
+              "maximum": 1,
+              "media_types": [
+                "application/json"
+              ],
+              "minimum": 1,
+              "role": "semantic-metadata"
+            },
+            {
+              "maximum": 1,
+              "media_types": [
+                "application/json",
+                "image/svg+xml",
+                "text/tab-separated-values"
+              ],
+              "minimum": 0,
+              "role": "source-data"
+            },
+            {
+              "maximum": 1,
+              "media_types": [
+                "application/pdf",
+                "image/svg+xml",
+                "image/tiff",
+                "image/png"
+              ],
+              "minimum": 0,
+              "role": "figure"
+            },
+            {
+              "maximum": 1,
+              "media_types": [
+                "application/octet-stream",
+                "application/zip",
+                "application/x-hdf5"
+              ],
+              "minimum": 0,
+              "role": "model"
+            },
+            {
+              "maximum": 1,
+              "media_types": [
+                "application/json",
+                "text/plain"
+              ],
+              "minimum": 0,
+              "role": "log"
+            }
+          ],
+          "port": "rna_processing_evidence",
+          "protocol_version": "2.1.0",
+          "required_postflight_gate_ids": [
+            "rna-processing-design-admission",
+            "rna-processing-branch-eligibility",
+            "rna-processing-replicate-inference",
+            "rna-processing-output-reload",
+            "rna-processing-claim-boundary"
+          ],
+          "semantic_profile": "statistical-results-v1",
+          "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
+        }
+      ],
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 3
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "rna_processing_analysis_evidence",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "run-report"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tab-separated-values",
+              "orientations": [
+                "event-by-statistic"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "svg",
+              "orientations": [
+                "publication-figure-panel-set"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.1"
+              ]
+            }
+          ],
+          "name": "rna_processing_evidence",
+          "processing_levels": [
+            "executed",
+            "reloaded",
+            "claim-bounded"
+          ],
+          "required_metadata": [
+            "module-version",
+            "analysis-branch",
+            "backend-version",
+            "experimental-unit",
+            "parameters-digest",
+            "output-digests",
+            "scientific-status"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "code_plan": {
+            "type": "array"
+          },
+          "dependency_profiles": {
+            "type": "array"
+          },
+          "execution_policy": {
+            "type": "object"
+          },
+          "forbidden_actions": {
+            "type": "array"
+          },
+          "handoff_type": {
+            "enum": [
+              "packaged_parameterized_project_analysis"
+            ],
+            "type": "string"
+          },
+          "languages": {
+            "type": "array"
+          },
+          "module": {
+            "type": "object"
+          },
+          "parameter_rules": {
+            "type": "array"
+          },
+          "postflight_checks": {
+            "type": "array"
+          },
+          "preflight_checks": {
+            "type": "array"
+          },
+          "provenance_fields": {
+            "type": "array"
+          },
+          "quality_gate_ids": {
+            "type": "array"
+          },
+          "request_digest": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "request_fields": {
+            "type": "array"
+          },
+          "tool_profiles": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "handoff_type",
+          "module",
+          "request_digest",
+          "request_fields",
+          "languages",
+          "code_plan",
+          "parameter_rules",
+          "preflight_checks",
+          "postflight_checks",
+          "provenance_fields",
+          "forbidden_actions",
+          "tool_profiles",
+          "dependency_profiles",
+          "quality_gate_ids",
+          "execution_policy"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The assay class, true biological sample, condition, pairing, library layout, strandedness, read length, reference genome, annotation release, and immutable source artifacts are declared before method selection.",
+        "Formal condition-level inference uses independent biological samples rather than reads, cells, nuclei, technical libraries, junctions, exons, or transcripts as replicates."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "https://github.com/Xinglab/rmats-turbo/blob/master/README.md",
+          "https://majiq.biociphers.org/",
+          "https://github.com/davidaknowles/leafcutter",
+          "https://bioconductor.org/packages/release/bioc/html/DEXSeq.html",
+          "https://bioconductor.org/packages/release/bioc/html/DRIMSeq.html",
+          "https://bioconductor.org/packages/release/bioc/html/stageR.html",
+          "https://nf-co.re/rnasplice/usage",
+          "https://brie.readthedocs.io/en/latest/quick_start.html",
+          "https://flair.readthedocs.io/en/latest/",
+          "https://www.10xgenomics.com/support/universal-three-prime-gene-expression/documentation/steps/sequencing/interpreting-intronic-and-antisense-reads-in-10-x-genomics-single-cell-gene-expression-data"
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Block execution when assay identity, biological units, condition structure, reference, annotation, library layout, strandedness, read length, or source identities are unresolved.",
+          "id": "rna-processing-design-admission",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Require the selected event, transcript, exon, single-cell junction, or long-read branch to match the observed data and stated scientific question.",
+          "id": "rna-processing-branch-eligibility",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Require biological-sample-level replication, an estimable contrast, declared filtering, effect-size and multiplicity rules, and retained sample diagnostics before formal inference.",
+          "id": "rna-processing-replicate-inference",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Reload event, transcript, junction, isoform, report and figure outputs and reconcile identifiers, coordinates, sample order, parameters, versions and digests.",
+          "id": "rna-processing-output-reload",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Do not convert exon usage, intronic signal, velocity layers, gene-linked multi-omics evidence, or an isoform prediction into a direct RNA-processing mechanism without matching event and orthogonal evidence.",
+          "id": "rna-processing-claim-boundary",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Do biological samples support a reproducible change in splice-event, exon, junction, transcript, or full-length isoform usage?",
+        "\u73b0\u6709\u6570\u636e\u80fd\u5426\u5728\u751f\u7269\u5b66\u6837\u672c\u5c42\u9762\u652f\u6301\u53ef\u91cd\u590d\u7684\u526a\u63a5\u4e8b\u4ef6\u3001\u5916\u663e\u5b50\u3001junction\u3001\u8f6c\u5f55\u672c\u6216\u5b8c\u6574\u5f02\u6784\u4f53\u4f7f\u7528\u53d8\u5316\uff1f"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "rna-processing-alternative-splicing",
+          "RNA processing",
+          "alternative splicing",
+          "differential splicing",
+          "junction usage",
+          "\u53ef\u53d8\u526a\u63a5",
+          "RNA\u52a0\u5de5",
+          "\u5dee\u5f02\u526a\u63a5"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": [
+          "RNA processing",
+          "alternative splicing",
+          "splicing",
+          "splice",
+          "junction",
+          "RNA\u52a0\u5de5",
+          "\u53ef\u53d8\u526a\u63a5",
+          "\u526a\u63a5"
+        ]
+      },
+      "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "primary",
+        "assays": [
+          "bulk-rna-seq",
+          "single-cell-rna",
+          "single-nucleus-rna",
+          "three-prime-single-nucleus-rna"
+        ],
+        "controls": [
+          "biological-replicates",
+          "matched-control"
+        ],
+        "normalizations": [
+          "pseudobulk",
+          "library-size-normalization"
+        ],
+        "relations": [
+          "splicing-change",
+          "cross-modal-concordance",
+          "orthogonal-validation"
+        ],
+        "targets": [
+          "rna-processing",
+          "splicing"
+        ]
+      },
+      "title": "Analyze RNA processing and alternative splicing",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            ">=4.4,<4.5"
+          ],
+          "ecosystem": "python",
+          "identity": "rmats.py",
+          "mismatch_policy": "block",
+          "name": "rmats",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "required": false,
+          "tested_versions": [
+            "4.4.0"
+          ],
+          "verified_at": "2026-08-26",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=4.4,<4.5"
+              ],
+              "category": "parameter",
+              "compatibility_effect": "requires-parameter",
+              "description": "Variable read length, paired statistics, individual event counts, effect-size null testing, and novel splice-site detection require explicit official flags.",
+              "id": "rmats-variable-read-and-novel-sites",
+              "required_action": "Measure library properties and declare the matching flags before execution; retain the exact command and output tables.",
+              "source": "https://github.com/Xinglab/rmats-turbo/blob/master/README.md"
+            }
+          ],
+          "version_pattern": "v?([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "rmats.py",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/Xinglab/rmats-turbo/blob/master/README.md"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
       "access": "offline",
       "alternatives": [],
       "assumptions": [
@@ -63965,6 +67227,18 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "primary",
+        "assays": [
+          "rna-secondary-structure"
+        ],
+        "controls": [],
+        "normalizations": [],
+        "relations": [],
+        "targets": [
+          "rna-secondary-structure"
+        ]
+      },
       "title": "Validate and summarize RNA secondary structure",
       "tool_requirements": [],
       "version": "1.0.0"
@@ -64579,7 +67853,7 @@
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -68492,7 +71766,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -69887,7 +73161,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -70027,7 +73301,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -71266,7 +74540,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -71428,7 +74702,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -71579,7 +74853,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -72779,7 +76053,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -72917,7 +76191,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -74358,7 +77632,7 @@
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -74498,7 +77772,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -75512,7 +78786,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -76820,7 +80094,7 @@
           ],
           "semantic_profile": "count-matrix-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -76959,7 +80233,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -77099,7 +80373,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -77237,7 +80511,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -77584,6 +80858,28 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "orthogonal-validation",
+        "assays": [
+          "single-cell-rna",
+          "single-nucleus-rna",
+          "single-cell-multiome"
+        ],
+        "controls": [
+          "matched-control",
+          "biological-replicates"
+        ],
+        "normalizations": [
+          "pseudobulk"
+        ],
+        "relations": [
+          "secondary-transcriptional-effect",
+          "orthogonal-validation"
+        ],
+        "targets": [
+          "transcript-abundance"
+        ]
+      },
       "title": "Generate and validate donor-aware single-cell pseudobulk inference",
       "tool_requirements": [
         {
@@ -78683,7 +81979,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -78821,7 +82117,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -79986,7 +83282,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -80124,7 +83420,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -81304,7 +84600,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -81546,6 +84842,22 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "orthogonal-validation",
+        "assays": [
+          "single-cell-rna"
+        ],
+        "controls": [
+          "biological-replicates"
+        ],
+        "normalizations": [],
+        "relations": [
+          "orthogonal-validation"
+        ],
+        "targets": [
+          "cell-state-dynamics"
+        ]
+      },
       "title": "Estimate single-cell fate across velocity, pseudotime, and real-time kernels",
       "tool_requirements": [
         {
@@ -82392,7 +85704,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -82530,7 +85842,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -82668,7 +85980,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -83936,7 +87248,7 @@
           ],
           "semantic_profile": "model-bundle-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -84076,7 +87388,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -84214,7 +87526,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -84494,6 +87806,8 @@
         "exclusion_terms": [],
         "method_aliases": [
           "single-cell-generative-modeling",
+          "scVI",
+          "scANVI",
           "Train and validate scVI or scANVI single-cell models",
           "train scVI single-cell latent model",
           "validate scANVI semi-supervised annotation",
@@ -84504,6 +87818,21 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "sensitivity",
+        "assays": [
+          "single-cell-rna",
+          "single-cell-multiome"
+        ],
+        "controls": [
+          "biological-replicates"
+        ],
+        "normalizations": [],
+        "relations": [],
+        "targets": [
+          "cell-state-dynamics"
+        ]
+      },
       "title": "Train and validate scVI or scANVI single-cell models",
       "tool_requirements": [
         {
@@ -85187,7 +88516,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -86143,7 +89472,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -86351,6 +89680,7 @@
           "single-cell-marker-discovery",
           "Discover and independently validate single-cell cluster markers",
           "marker discovery",
+          "marker",
           "marker gene review",
           "discover single-cell cluster marker genes",
           "automatic marker discovery with sample stability",
@@ -86999,7 +90329,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -88275,7 +91605,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -88537,6 +91867,23 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "primary",
+        "assays": [
+          "single-cell-multiome"
+        ],
+        "controls": [
+          "biological-replicates"
+        ],
+        "normalizations": [],
+        "relations": [
+          "cross-modal-concordance"
+        ],
+        "targets": [
+          "transcript-abundance",
+          "chromatin-accessibility"
+        ]
+      },
       "title": "Integrate paired RNA, ATAC, and protein modalities with WNN and MOFA+",
       "tool_requirements": [
         {
@@ -90028,7 +93375,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -90166,7 +93513,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -91119,7 +94466,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -92566,7 +95913,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -92795,6 +96142,24 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "orthogonal-validation",
+        "assays": [
+          "single-cell-rna",
+          "single-cell-multiome"
+        ],
+        "controls": [
+          "biological-replicates"
+        ],
+        "normalizations": [],
+        "relations": [
+          "cross-modal-concordance"
+        ],
+        "targets": [
+          "gene-regulatory-network",
+          "chromatin-accessibility"
+        ]
+      },
       "title": "Infer and score single-cell regulatory networks with pySCENIC and SCENIC+",
       "tool_requirements": [
         {
@@ -93859,7 +97224,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -93997,7 +97362,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -94244,6 +97609,21 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "sensitivity",
+        "assays": [
+          "single-cell-rna"
+        ],
+        "controls": [
+          "biological-replicates"
+        ],
+        "normalizations": [],
+        "relations": [],
+        "targets": [
+          "cell-state-dynamics",
+          "gene-regulatory-network"
+        ]
+      },
       "title": "Infer GRN-informed regulatory velocity with RegVelo",
       "tool_requirements": [
         {
@@ -95158,7 +98538,7 @@
           ],
           "semantic_profile": "spatial-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -96210,7 +99590,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -96441,6 +99821,20 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "primary",
+        "assays": [
+          "single-cell-rna"
+        ],
+        "controls": [
+          "biological-replicates"
+        ],
+        "normalizations": [],
+        "relations": [],
+        "targets": [
+          "cell-state-dynamics"
+        ]
+      },
       "title": "Infer lineage topology with Slingshot, Monocle3, and tradeSeq",
       "tool_requirements": [
         {
@@ -97359,7 +100753,7 @@
           ],
           "semantic_profile": "single-cell-object-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -97532,7 +100926,7 @@
           ],
           "semantic_profile": "single-cell-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -97771,6 +101165,22 @@
         "required_any_terms": []
       },
       "schema_version": 1,
+      "scientific_semantics": {
+        "analysis_role": "orthogonal-validation",
+        "assays": [
+          "single-cell-rna"
+        ],
+        "controls": [
+          "biological-replicates"
+        ],
+        "normalizations": [],
+        "relations": [
+          "orthogonal-validation"
+        ],
+        "targets": [
+          "cell-state-dynamics"
+        ]
+      },
       "title": "Infer and validate RNA velocity, pseudotime, and latent time",
       "tool_requirements": [
         {
@@ -99108,7 +102518,7 @@
           ],
           "semantic_profile": "spatial-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -100277,7 +103687,7 @@
           ],
           "semantic_profile": "spatial-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -101185,7 +104595,7 @@
           ],
           "semantic_profile": "spatial-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -102420,7 +105830,7 @@
           ],
           "semantic_profile": "structure-analysis-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -102562,7 +105972,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "structure-coordinate-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -103658,7 +107068,7 @@
           ],
           "semantic_profile": "interactive-html-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         },
         {
           "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
@@ -103796,7 +107206,7 @@
           "required_postflight_gate_ids": [],
           "semantic_profile": "scientific-report-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -105227,7 +108637,7 @@
           ],
           "semantic_profile": "structure-analysis-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -107757,7 +111167,7 @@
           ],
           "semantic_profile": "figure-package-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -112231,7 +115641,7 @@
           ],
           "semantic_profile": "statistical-results-v1",
           "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
-          "semantic_validator_sha256": "3f1c4f94daae0d8873707935b58d1c5d70d47269b4a81bf71792e01360a1ac78"
+          "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
         }
       ],
       "orchestration": {
@@ -112814,7 +116224,7 @@
       "version": "1.0.0"
     }
   ],
-  "plugin_version": "0.2.4",
-  "registry_digest": "3b82b0a3fa26039e88ab8dba28e2cf324b19c6c2193cde9074b5b2d9f1da683d",
+  "plugin_version": "0.2.5",
+  "registry_digest": "889d3c1ab3ca464b4ede53f5bd48301720b4a4826d018626efc0bbe0382a694d",
   "schema_version": 1
 }

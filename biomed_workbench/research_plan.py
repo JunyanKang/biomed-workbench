@@ -97,7 +97,9 @@ def compile_research_plan(
     """
     active = registry or ModuleRegistry.discover(BUILTIN_ROOT)
     routed = route(objective, per_workflow=per_workflow, registry=active)
-    selected_ids = tuple(dict.fromkeys(routed["selected_module_ids"]))
+    candidate_ids = tuple(dict.fromkeys(routed["selected_module_ids"]))
+    execution_ids = tuple(dict.fromkeys(routed.get("execution_module_ids", candidate_ids)))
+    selected_ids = candidate_ids
     selected = tuple(active.get(module_id) for module_id in selected_ids)
     objective_graph = routed["objective_graph"]
     port_bindings = {module_id: dict(values) for module_id, values in objective_graph["port_bindings"].items()}
@@ -134,7 +136,17 @@ def compile_research_plan(
                 "version": module.version,
                 "title": module.title,
                 "domain": module.domains[0],
-                "maturity": module.maturity,
+                "registry_contract_label": module.maturity,
+                "registry_contract_label_is_scientific_completion": False,
+                "validation_scope": next(
+                    (
+                        candidate["validation_scope"]
+                        for step in routed["steps"]
+                        for candidate in step["candidates"]
+                        if candidate["id"] == module.id
+                    ),
+                    {"engineering_validated": None, "method_validated": None, "project_promoted": False},
+                ),
                 "access": module.access,
                 "depends_on": list(dependencies[module.id]),
                 "compatibility_row_ids": [row.id for row in module.compatibility_matrix],
@@ -171,12 +183,20 @@ def compile_research_plan(
                 }
             )
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "objective": objective,
         "plan_type": objective_graph["plan_type"],
         "matched_workflows": routed["matched_workflows"],
         "selected_module_ids": list(selected_ids),
+        "semantically_eligible_module_ids": list(candidate_ids),
+        "execution_module_ids": list(execution_ids),
+        "minimal_sufficient_analysis": routed.get("minimal_sufficient_analysis"),
         "execution_layers": execution_layers,
+        "minimal_execution_layers": (
+            routed["execution_graph"]["execution_layers"]
+            if routed.get("execution_graph") is not None
+            else []
+        ),
         "modules": modules,
         "unresolved_project_inputs": unresolved_inputs,
         "unresolved_required_inputs": unresolved_required_inputs,

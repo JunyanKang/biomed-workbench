@@ -82,12 +82,18 @@ def rebind(report_path: Path, registry: ModuleRegistry) -> bool:
     else:
         raise RuntimeError(f"live report has no module identity: {report_path.name}")
     scope = module_evidence_scope(registry, report_module_ids(report)).to_dict()
-    if report.get("evidence_scope") == scope:
+    migration = report.get("evidence_scope_migration")
+    migration_is_current = not isinstance(migration, dict) or migration.get("current_evidence_scope") == scope
+    if report.get("evidence_scope") == scope and migration_is_current:
         return False
     # Keep the historical registry digest as provenance of the installation
     # that produced the result.  It is not rewritten and is not evidence
     # validity: currentness is determined by the dependency slice above.
     report["evidence_scope"] = scope
+    if isinstance(migration, dict):
+        # A scoped report must expose one coherent current identity. Updating
+        # only the top-level field leaves a contradictory migration record.
+        migration["current_evidence_scope"] = scope
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return True
 

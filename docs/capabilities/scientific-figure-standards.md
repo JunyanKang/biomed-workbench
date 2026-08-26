@@ -8,7 +8,7 @@ Scientific figures are project-wide support. Bulk, single-cell, spatial, structu
 
 ## What Must Be Defined Before Rendering
 
-Each figure part first records the conclusion it supports, its upstream analysis, source data, experimental unit, plot form, statistical context, and uncertainty. It then defines:
+Each figure part first records its upstream result, the conclusion it supports, the strongest allowed conclusion, source data and content fingerprint, experimental unit, biological sample size, statistical test, multiplicity policy, effect size, uncertainty, plot form, caption, story position, and original-research DOI. It then defines:
 
 - final dimensions and the size hierarchy for titles, axes, ticks, labels, annotations, and legends;
 - widths and sizes for data lines, error bars, axes, borders, connectors, and markers;
@@ -18,7 +18,7 @@ Each figure part first records the conclusion it supports, its upstream analysis
 - alignment, whitespace, reading order, and visual hierarchy across figure parts;
 - delivery requirements for PDF, SVG, PNG, source data, captions, and quality reports.
 
-These decisions are preserved in a versioned figure specification so typography, colour meaning, strokes, and legends do not drift across analyses in the same project.
+These decisions are preserved in a versioned figure specification bound to the analysis result, plot-ready data, and renderer identity and version. Every layout cell must contain actual content; empty panels and exact repetitions of source data, plot form, and allowed conclusion are rejected. This prevents both visual drift and unnoticed separation of a figure from its underlying analysis.
 
 ## Method-Native Plots And Shared Standards
 
@@ -28,7 +28,9 @@ A method-native plot must first satisfy that method's diagnostic purpose and the
 
 ## Source Data And Delivery
 
-Scatter, line, precomputed bar, box, violin, heatmap, and volcano panels can be rendered from explicitly registered CSV or TSV data and a closed figure specification. The delivery package contains final-size PDF, editable SVG, 600-dpi PNG, source data for each figure part, the frozen specification, file digests, and a quality report created after reopening the outputs.
+Scatter, line, precomputed bar, box, violin, heatmap, and volcano panels can be rendered from explicitly registered CSV or TSV data and a closed figure specification. The delivery package contains final-size PDF, editable SVG, 600-dpi PNG, source data for each figure part, the frozen specification, renderer identity, file digests, and a quality report created after reopening the outputs.
+
+A formal project figure must use the active project lock and every upstream result must be `FORMAL`. Controlled renderer acceptance remains explicitly candidate or sensitivity material and cannot become a project result merely because the output files reopen successfully.
 
 Complex method-native plots, microscopy images, three-dimensional structure views, and mechanism schematics are created by their corresponding modules and then enter the same delivery review. Explanatory illustrations and graphical abstracts communicate established research content; they are not experimental observations or quantitative evidence.
 

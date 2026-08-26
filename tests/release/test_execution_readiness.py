@@ -73,7 +73,11 @@ class ExecutionReadinessTests(unittest.TestCase):
 
     def test_statuses_distinguish_contract_executor_and_public_validation(self):
         report = build()
-        self.assertEqual(report["schema_version"], 7)
+        self.assertEqual(report["schema_version"], 8)
+        self.assertIn("validation_scope_counts", report)
+        self.assertIn("engineering_validated", report["validation_scope_counts"])
+        self.assertIn("method_validated", report["validation_scope_counts"])
+        self.assertEqual(report["validation_scope_counts"]["project_promoted"], 0)
         self.assertIn("controlled_fixture_process_json_round_trip", report["axis_counts"])
         self.assertIn("controlled_fixture_artifact_payload_reloaded", report["axis_counts"])
         self.assertEqual(report["axis_counts"]["contract_valid"], report["module_count"])
@@ -93,6 +97,8 @@ class ExecutionReadinessTests(unittest.TestCase):
         self.assertEqual(cuttag["executor_module_id"], "bulk-chromatin-peak-calling")
         self.assertEqual(len(cuttag["executor_paths"]), 2)
         fastqc = by_id["read-quality-fastqc"]
+        self.assertTrue(fastqc["engineering_validated"])
+        self.assertFalse(fastqc["project_promoted"])
         self.assertIsNotNone(fastqc["controlled_fixture_portable_identity_digest"])
         self.assertEqual(fastqc["entry_surface_reachability"]["cli"]["mode"], "strict-project-artifact-execution")
         self.assertFalse(fastqc["entry_surface_reachability"]["mcp"]["reachable"])

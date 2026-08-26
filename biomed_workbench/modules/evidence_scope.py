@@ -82,6 +82,10 @@ def module_slice_basis(
         payload.pop("routing", None)
         payload.pop("orchestration", None)
         payload.pop("observed_output_contracts", None)
+        # Scientific semantics govern future routing and minimal-sufficient
+        # selection.  They do not alter a previously observed implementation,
+        # input, parameter, output, or template identity.
+        payload.pop("scientific_semantics", None)
         return payload
 
     return {

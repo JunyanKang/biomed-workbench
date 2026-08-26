@@ -8,8 +8,8 @@ Biomed Workbench organises capabilities around research questions. Once a user p
 
 | Area | Questions it can address | Detailed guide |
 | --- | --- | --- |
-| Bulk sequencing | Analyse transcription, chromatin, protein binding, translation, nascent transcription, DNA methylation, and three-dimensional genome organisation in pooled samples | [Bulk Sequencing](bulk-sequencing-assays.md) |
-| Single-cell | Perform quality control, sample integration, cell annotation, trajectory analysis, multi-omics, and cross-species comparison while preserving sample structure | [Universal And Single-Cell Analysis](omics-and-single-cell.md) · [Integration, Reference Mapping, And Cross-Species Analysis](single-cell-integration-reference-cross-species.md) |
+| Bulk sequencing | Analyse transcription, RNA processing, chromatin, protein binding, translation, nascent transcription, DNA methylation, and three-dimensional genome organisation in pooled samples | [Bulk Sequencing](bulk-sequencing-assays.md) · [RNA Processing And Alternative Splicing](rna-processing-alternative-splicing.md) |
+| Single-cell | Perform quality control, sample integration, cell annotation, trajectory analysis, multi-omics, bounded splicing-candidate analysis, and cross-species comparison while preserving sample structure | [Universal And Single-Cell Analysis](omics-and-single-cell.md) · [Integration, Reference Mapping, And Cross-Species Analysis](single-cell-integration-reference-cross-species.md) · [RNA Processing And Alternative Splicing](rna-processing-alternative-splicing.md) |
 | Spatial omics | Connect expression, physical location, tissue images, cell-type projection, spatial regions, communication, and multi-section structure | [Trajectory And Spatial Analysis](trajectory-spatial-complete-analysis.md) |
 | Molecular and structural biology | Connect sequence, protein interaction, chemistry, structure prediction, and molecular docking to testable hypotheses | [Molecular And Structural Biology](molecular-and-structural.md) |
 | Quantitative image analysis | Obtain reviewable segmentation, colocalisation, trajectory, migration, and baseline-registration measurements from source or processed images | [Quantitative Image Analysis](quantitative-imaging.md) |
@@ -22,7 +22,7 @@ Biomed Workbench organises capabilities around research questions. Once a user p
 | Evidence and literature | Determine what is established, disputed, missing, or outdated | [Evidence And Literature](evidence-and-literature.md) |
 | General analysis methods | Apply study design, statistics, enrichment, network analysis, and scientific review at appropriate data scales | [Universal And Single-Cell Analysis](omics-and-single-cell.md) |
 | Scientific figure standards and delivery | Apply common figure purpose, visual hierarchy, layout, source-data, export, and quality-review rules while retaining method-native plots | [Scientific Figure Standards And Delivery](scientific-figure-standards.md) |
-| Academic writing and research delivery | Perform literature discovery and full-paper reading, manuscript and proposal writing, scholarly prose revision, statistics and data-availability review, journal positioning, citation verification, paper figures, peer-review response, presentations, and patent-related preparation | [Academic Writing, Publication, And Translation](publication-and-translation.md) · [Journal Standards](../journal-standards.md) |
+| Academic writing and research delivery | Perform literature discovery and full-paper reading, manuscript and proposal writing, scholarly prose revision, statistics and data-availability review, journal positioning, citation verification, paper figures, peer-review response, presentations, and patent-related preparation | [Academic Writing, Publication, And Translation](publication-and-translation.md) · [NSFC Proposal Support](nsfc-proposal-writing.md) · [Journal Standards](../journal-standards.md) |
 
 ## How Writing Connects To The Research
 
@@ -38,9 +38,9 @@ Independent work can proceed in parallel, while analyses that depend on upstream
 
 ## Current Coverage
 
-The registry currently contains **208 independently discoverable modules**. Registration means that a method's purpose, inputs, outputs, and conditions of use are defined; it does not mean that every module has completed real-world acceptance on every kind of data. See [Capability Maturity](../maturity.md) and [Public-Data Cases](../cases/README.md) for observed status.
+The registry currently contains **215 independently discoverable modules**. Registration means that a method's purpose, inputs, outputs, and conditions of use are defined; it does not mean that every module has completed real-world acceptance on every kind of data. See [Capability Maturity](../maturity.md) and [Public-Data Cases](../cases/README.md) for observed status.
 
-Bulk coverage includes RNA-seq; ChIP-seq, CUT&RUN, and CUT&Tag; several R-loop assays; RIP-seq, CLIP-family methods, and LACE-seq; Ribo-seq; GRO-seq, PRO-seq, TT-seq, and NET-seq; ATAC-seq and DNase-seq; WGBS, RRBS, and EM-seq; several three-dimensional genome assays; and MeRIP-seq/m6A-seq.
+Bulk coverage includes RNA-seq and RNA-processing/alternative-splicing analysis; ChIP-seq, CUT&RUN, and CUT&Tag; several R-loop assays; RIP-seq, CLIP-family methods, and LACE-seq; Ribo-seq; GRO-seq, PRO-seq, TT-seq, and NET-seq; ATAC-seq and DNase-seq; WGBS, RRBS, and EM-seq; several three-dimensional genome assays; and MeRIP-seq/m6A-seq.
 
 The assay, target, antibody, control, specificity treatment, and normalisation strategy are recorded separately. For example, CUT&Tag is the assay, S9.6 describes the target or antibody, an exogenous reference is a normalisation option, and RNase H treatment provides specificity evidence. They are not presented as peer assay classes.
 

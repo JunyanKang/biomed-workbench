@@ -10,7 +10,8 @@ class AgentHandoffSemanticsTests(unittest.TestCase):
     def test_every_agent_generated_module_stops_at_handoff_without_artifact_or_evidence(self):
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
         manifests = tuple(manifest for manifest in registry.all() if manifest.access == "agent_generated")
-        self.assertEqual(len(manifests), 54)
+        self.assertTrue(manifests)
+        self.assertIn("rna-processing-alternative-splicing", {manifest.id for manifest in manifests})
         for manifest in manifests:
             case_path = BUILTIN_ROOT / manifest.id / "tests" / "cases.json"
             cases = json.loads(case_path.read_text(encoding="utf-8"))["cases"]

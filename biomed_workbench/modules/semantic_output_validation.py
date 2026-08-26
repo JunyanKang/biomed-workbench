@@ -54,6 +54,7 @@ _PROFILE_BY_ARTIFACT_TYPE = {
     "donor_aware_differential_result": "statistical-results-v1",
     "gwas_fine_mapping_evidence": "statistical-results-v1",
     "held_out_genomic_prediction_evidence": "statistical-results-v1",
+    "rna_processing_analysis_evidence": "statistical-results-v1",
     "single_cell_statistical_evidence": "statistical-results-v1",
     "wgcna_coexpression_network_evidence": "statistical-results-v1",
     "assembly_alignment_evidence": "genomic-records-v1",

@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "passed": true,
+  "module_id": "rna-processing-alternative-splicing",
+  "module_version": "1.0.0",
+  "evidence_scope": {
+    "schema_version": 1,
+    "module_ids": [
+      "rna-processing-alternative-splicing"
+    ],
+    "module_slice_digest": "57525a408d92c289e87a80e5ff51d767e7fbb97233fad2951f2b8aa80ca697ff"
+  },
+  "implementation": {
+    "path": "biomed_workbench/modules/builtin/rna-processing-alternative-splicing/templates/run_rna_processing_workflow.py",
+    "sha256": "f550ef38e12680db79ea2117b090fdd239c207ca2009346d37b881bd27211d93"
+  },
+  "verified_at": "2026-08-26",
+  "verification_scope": "engineering validation of the packaged rMATS and bounded junction/integration branches; not a public biological benchmark",
+  "official_backend_case": {
+    "backend": "rMATS-turbo",
+    "backend_version": "4.4.0",
+    "backend_source": "https://github.com/Xinglab/rmats-turbo",
+    "backend_source_commit": "015c0305f87cdeec0edd56a99d5ab1689832fa40",
+    "official_test": "tests/skipped_exon_basic/test.py",
+    "official_test_status": "passed",
+    "workbench_execution_status": "completed",
+    "expected_event_type": "SE",
+    "observed_event_type": "SE",
+    "expected_event_count": 1,
+    "observed_event_count": 1,
+    "observed_group1_psi": [1.0, 1.0],
+    "observed_group2_psi": [0.0, 0.0],
+    "observed_delta_psi_group1_minus_group2": 1.0,
+    "scientific_status": "candidate",
+    "formal_design_gate": false,
+    "formal_gate_reason": "the official controlled case contains two replicates per group and is not a biological public-data benchmark"
+  },
+  "packaged_artifacts": {
+    "normalized_event_table_sha256": "711c7e90a0d47f06b5d4e0309125ea86093f14700f635b4b720e3edfb58c1db6",
+    "vector_overview_sha256": "730ad88c2427309c81f7f87082e106358567ed3e2263c2ae2ab531d5797df648",
+    "reloaded_run_report_sha256": "f285ff5b9198bb7b0e78212dbb585a1bc4939da95d420d44e5c8c67dd50f9cca",
+    "executor_sha256": "f550ef38e12680db79ea2117b090fdd239c207ca2009346d37b881bd27211d93"
+  },
+  "execution": {
+    "input": {
+      "role": "request",
+      "sha256": "5e767b6dd3a67adb9fee5071e810677c29b2ae37a5ede7e83ede66172448cc51",
+      "byte_size": 768
+    },
+    "outputs": [
+      {
+        "role": "normalized-event-table",
+        "media_type": "text/tab-separated-values",
+        "sha256": "711c7e90a0d47f06b5d4e0309125ea86093f14700f635b4b720e3edfb58c1db6",
+        "byte_size": 227
+      },
+      {
+        "role": "vector-overview",
+        "media_type": "image/svg+xml",
+        "sha256": "730ad88c2427309c81f7f87082e106358567ed3e2263c2ae2ab531d5797df648",
+        "byte_size": 2689
+      },
+      {
+        "role": "run-report",
+        "media_type": "application/json",
+        "sha256": "f285ff5b9198bb7b0e78212dbb585a1bc4939da95d420d44e5c8c67dd50f9cca",
+        "byte_size": 2108
+      }
+    ]
+  },
+  "controlled_fixture_receipt": {
+    "schema_version": 1,
+    "module_id": "rna-processing-alternative-splicing",
+    "module_version": "1.0.0",
+    "compatibility_row_id": "python-3143-rmats-440-rna-processing-1",
+    "input_sha256": "5e767b6dd3a67adb9fee5071e810677c29b2ae37a5ede7e83ede66172448cc51",
+    "output_payloads": [
+      {
+        "role": "normalized-event-table",
+        "media_type": "text/tab-separated-values",
+        "sha256": "711c7e90a0d47f06b5d4e0309125ea86093f14700f635b4b720e3edfb58c1db6",
+        "byte_size": 227
+      },
+      {
+        "role": "vector-overview",
+        "media_type": "image/svg+xml",
+        "sha256": "730ad88c2427309c81f7f87082e106358567ed3e2263c2ae2ab531d5797df648",
+        "byte_size": 2689
+      },
+      {
+        "role": "run-report",
+        "media_type": "application/json",
+        "sha256": "f285ff5b9198bb7b0e78212dbb585a1bc4939da95d420d44e5c8c67dd50f9cca",
+        "byte_size": 2108
+      }
+    ],
+    "reload_checks": [
+      {
+        "check_id": "normalized-event-table-reload",
+        "passed": true,
+        "payload_sha256": "711c7e90a0d47f06b5d4e0309125ea86093f14700f635b4b720e3edfb58c1db6"
+      },
+      {
+        "check_id": "vector-overview-xml-reload",
+        "passed": true,
+        "payload_sha256": "730ad88c2427309c81f7f87082e106358567ed3e2263c2ae2ab531d5797df648"
+      },
+      {
+        "check_id": "run-report-json-reload",
+        "passed": true,
+        "payload_sha256": "f285ff5b9198bb7b0e78212dbb585a1bc4939da95d420d44e5c8c67dd50f9cca"
+      }
+    ]
+  },
+  "controlled_branches": [
+    {
+      "branch": "single-cell-junction-screen",
+      "status": "passed",
+      "design": "two conditions with two independent biological samples per condition",
+      "claim_boundary": "candidate discovery only"
+    },
+    {
+      "branch": "evidence-integration",
+      "status": "passed",
+      "claim_boundary": "gene-linked multi-assay evidence with causal status unresolved"
+    }
+  ],
+  "maturity": {
+    "engineering_validated": true,
+    "method_validated": false,
+    "project_promoted": false
+  },
+  "unvalidated_execution_slices": [
+    "DRIMSeq-stageR differential transcript usage",
+    "DEXSeq differential exon usage",
+    "MAJIQ/VOILA complex local splicing",
+    "LeafCutter annotation-free intron usage",
+    "BRIE2 full-length single-cell splicing",
+    "FLAIR long-read isoform analysis"
+  ]
+}

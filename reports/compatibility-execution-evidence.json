@@ -1,8 +1,8 @@
 {
-  "compatibility_complete": 208,
-  "compatibility_row_count": 209,
-  "end_to_end_passed": 209,
-  "module_count": 208,
+  "compatibility_complete": 215,
+  "compatibility_row_count": 216,
+  "end_to_end_passed": 216,
+  "module_count": 215,
   "modules": [
     {
       "compatibility_rows": [
@@ -2373,6 +2373,122 @@
           "required_metadata": [
             "module_version",
             "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "biomedical-terminology-e2e-v1"
+          ],
+          "id": "biomedical-terminology-python-3143",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "biomedical-terminology-regression-v1"
+          ],
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute terminology validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "biomedical-terminology-and-nomenclature-audit",
+      "input_formats": [
+        {
+          "artifact_type": "biomedical_document_terminology_model",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "document",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [
+            "document-section"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "biomedical_nomenclature_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "input-digest"
           ]
         }
       ],
@@ -9232,6 +9348,124 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "docx-citation-delivery-e2e-v1"
+          ],
+          "id": "docx-audit-python-3143",
+          "module_version": "1.1.0",
+          "regression_evidence_ids": [
+            "docx-citation-delivery-regression-v1"
+          ],
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Read ZIP/XML DOCX packages and validate delivery records.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "docx-citation-delivery-audit",
+      "input_formats": [
+        {
+          "artifact_type": "proposal_docx_or_document_model",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "docx-or-inline-json",
+              "orientations": [
+                "document-order"
+              ],
+              "representations": [
+                "structured",
+                "binary"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "document",
+          "processing_levels": [
+            "declared",
+            "rendered"
+          ],
+          "required_metadata": [
+            "source-digest"
+          ]
+        }
+      ],
+      "module_version": "1.1.0",
+      "output_formats": [
+        {
+          "artifact_type": "docx_citation_delivery_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "source-sha256"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "dose-response-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -15758,6 +15992,124 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "mechanism-claim-promotion-e2e-v1"
+          ],
+          "id": "mechanism-claim-python-3143",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "mechanism-claim-promotion-regression-v1"
+          ],
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute evidence-level claim validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "mechanism-claim-promotion-gate",
+      "input_formats": [
+        {
+          "artifact_type": "mechanism_claim_evidence_ledger",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "claim-by-evidence"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "claims",
+          "processing_levels": [
+            "declared",
+            "reviewed"
+          ],
+          "required_metadata": [
+            "section",
+            "requested-level"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "mechanism_claim_promotion_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "claim-by-decision"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "decisions",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "input-digest"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "medical-imaging-metadata-audit-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
@@ -18047,6 +18399,515 @@
           "required_metadata": [
             "module_version",
             "compatibility_row_id"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "nsfc-proposal-development-e2e-v2"
+          ],
+          "id": "nsfc-drafting-2026-python-3143",
+          "module_version": "1.1.0",
+          "regression_evidence_ids": [
+            "nsfc-proposal-development-regression-v2"
+          ],
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Prepare a deterministic programme-specific proposal drafting package.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "nsfc-proposal-development",
+      "input_formats": [
+        {
+          "artifact_type": "nsfc_proposal_drafting_materials",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal_materials",
+          "processing_levels": [
+            "declared",
+            "reviewed"
+          ],
+          "required_metadata": [
+            "guideline-year",
+            "programme-type",
+            "official-template-digest"
+          ]
+        },
+        {
+          "artifact_type": "literature_corpus",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "normalized-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "reviewed_literature_corpus",
+          "processing_levels": [
+            "derived"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        },
+        {
+          "artifact_type": "literature_landscape_quality_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "reviewed_literature_landscape",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        },
+        {
+          "artifact_type": "citation_resolution_adjudication",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "citation-resolution-adjudication",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "citation_resolution_adjudication",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "resolution_class"
+          ]
+        },
+        {
+          "artifact_type": "claim_integrity_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "claim-integrity-report",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "claim_evidence_integrity",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "audit_version",
+            "audit_digest"
+          ]
+        }
+      ],
+      "module_version": "1.1.0",
+      "output_formats": [
+        {
+          "artifact_type": "nsfc_proposal_drafting_package",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "drafting_package",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "profile-version",
+            "input-digest"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "nsfc-proposal-figure-e2e-v1"
+          ],
+          "id": "nsfc-proposal-figure-2026-python-3143",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "nsfc-proposal-figure-regression-v1"
+          ],
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate proposal-figure semantics and prepare deterministic generation and reconstruction prompts.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "nsfc-proposal-figure-development",
+      "input_formats": [
+        {
+          "artifact_type": "nsfc_proposal_figure_materials",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal_figure_materials",
+          "processing_levels": [
+            "declared",
+            "reviewed"
+          ],
+          "required_metadata": [
+            "programme-type",
+            "figure-role",
+            "section-context",
+            "evidence-bindings"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "nsfc_proposal_figure_prompt_package",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal_figure_prompt_package",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "input-digest",
+            "imagegen-prompt",
+            "editable-reconstruction-prompt",
+            "visual-qa-contract"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "nsfc-proposal-semantic-audit-e2e-v1"
+          ],
+          "id": "nsfc-2026-python-3143",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "nsfc-proposal-semantic-audit-regression-v1"
+          ],
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic NSFC semantic validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "nsfc-proposal-semantic-audit",
+      "input_formats": [
+        {
+          "artifact_type": "nsfc_proposal_semantic_model",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "proposal",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [
+            "guideline-year",
+            "program-type"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "nsfc_proposal_semantic_report",
+          "formats": [
+            {
+              "annotation_releases": [
+                "nsfc-2026"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "audit",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "profile-version",
+            "input-digest"
           ]
         }
       ],
@@ -24457,6 +25318,215 @@
         }
       ],
       "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "rna-processing-alternative-splicing-e2e-v1"
+          ],
+          "id": "python-3143-rmats-440-rna-processing-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "rna-processing-alternative-splicing-regression-v1"
+          ],
+          "verified_at": "2026-08-26"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Validate requests, run approved external branches, normalize outputs, render vector summaries, and reload evidence.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-26",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "rna-processing-alternative-splicing",
+      "input_formats": [
+        {
+          "artifact_type": "rna_processing_analysis_inputs",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "project-request-and-artifact-references"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "rna_processing_inputs",
+          "processing_levels": [
+            "declared",
+            "sample-manifest-bound"
+          ],
+          "required_metadata": [
+            "assay-class",
+            "biological-unit",
+            "condition",
+            "reference",
+            "annotation-release",
+            "source-digests"
+          ]
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "rna_processing_analysis_evidence",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "run-report"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "tab-separated-values",
+              "orientations": [
+                "event-by-statistic"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            },
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "svg",
+              "orientations": [
+                "publication-figure-panel-set"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1.1"
+              ]
+            }
+          ],
+          "name": "rna_processing_evidence",
+          "processing_levels": [
+            "executed",
+            "reloaded",
+            "claim-bounded"
+          ],
+          "required_metadata": [
+            "module-version",
+            "analysis-branch",
+            "backend-version",
+            "experimental-unit",
+            "parameters-digest",
+            "output-digests",
+            "scientific-status"
+          ]
+        }
+      ],
+      "tools": [
+        {
+          "allowed_versions": [
+            ">=4.4,<4.5"
+          ],
+          "ecosystem": "python",
+          "identity": "rmats.py",
+          "mismatch_policy": "block",
+          "name": "rmats",
+          "platforms": [
+            "macos-arm64",
+            "linux-x86_64"
+          ],
+          "required": false,
+          "tested_versions": [
+            "4.4.0"
+          ],
+          "verified_at": "2026-08-26",
+          "version_differences": [
+            {
+              "affected_versions": [
+                ">=4.4,<4.5"
+              ],
+              "category": "parameter",
+              "compatibility_effect": "requires-parameter",
+              "description": "Variable read length, paired statistics, individual event counts, effect-size null testing, and novel splice-site detection require explicit official flags.",
+              "id": "rmats-variable-read-and-novel-sites",
+              "required_action": "Measure library properties and declare the matching flags before execution; retain the exact command and output tables.",
+              "source": "https://github.com/Xinglab/rmats-turbo/blob/master/README.md"
+            }
+          ],
+          "version_pattern": "v?([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "rmats.py",
+            "--version"
+          ],
+          "version_probe_kind": "command",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://github.com/Xinglab/rmats-turbo/blob/master/README.md"
+        }
+      ],
       "validation_status": "complete"
     },
     {
@@ -43089,11 +44159,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "cd5457e3384386d64a8355a3967f03af04f804f8a9c00ff0104a4639c6749ef2",
+        "digest": "c1071c56f8ba6a0aab7537ac25b1d0d38b690809d36c29842077045ac72e7c04",
         "id": "academic-prose-revision-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "49a75cb0483c259295823ef90a153cdcd5401b1996d806cb59a8e289f0f839b6",
+      "implementation_sha256": "299653f609257009a3260be44929d9cd085f062b3d870e694d0690048c7cd97d",
       "input_formats": {
         "academic_revision": [
           "inline-json@1"
@@ -43107,7 +44177,7 @@
         ]
       },
       "regression": {
-        "digest": "ea2603bb6c3bfd14928493f0f14f6403c879ced39059d179359210dc622d83e4",
+        "digest": "c289159e37b4bff0754ef7adad12d514289e4a5746d459bbce6d6b562300c303",
         "id": "academic-prose-revision-audit-regression-v1",
         "passed": true
       },
@@ -43301,7 +44371,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "cebd60d728c83925bcedfbbc05626e68d67935af0f1fe52149054fb4a32140b1",
+        "digest": "ba220473a3803500c87b06c26e5d3f01b19748e9a62160fbd8eeb63b7ecbaf78",
         "id": "alphafold-structure-evidence-e2e-v1",
         "passed": true
       },
@@ -43435,7 +44505,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "3e156334646f12bab8b2f57c677d6f2e12ac2c9a8abc93c5163874c919638d57",
+        "digest": "3750b042ac3c8d44ef23d0a9dbf7dd97d9c551926ad2abe2d5f3cb9a36b75b32",
         "id": "archs4-expression-evidence-e2e-v1",
         "passed": true
       },
@@ -43643,6 +44713,40 @@
       "supplemental_end_to_end": [],
       "tool_versions": {},
       "verified_at": "2026-07-12"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "2b2f8e9f7708f04e3c401c2e9668abacece5b8e08b4a5e40751dd476bdb57eae",
+        "id": "biomedical-terminology-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "92c5d100602ed2d8939f1dd92cf034244f3e216c62f991f69d0fd353dd2b2f58",
+      "input_formats": {
+        "document": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "biomedical-terminology-and-nomenclature-audit",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "audit": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "3bdf3e2ed84b83820981b00910b8471068722fe7d347549cf7ebb03281500f26",
+        "id": "biomedical-terminology-regression-v1",
+        "passed": true
+      },
+      "row_id": "biomedical-terminology-python-3143",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-26"
     },
     {
       "dependency_versions": {
@@ -44214,7 +45318,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "120f44c54a89c00a9781593be62384bb49633c950538e09fb26eb5b27a3f128b",
+        "digest": "120c5f55177b9a753e1170f2e2732f599215a655973604c4bd55306f47782547",
         "id": "cfu-enumeration-e2e-v1",
         "passed": true
       },
@@ -44252,7 +45356,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "8fadd21e5293b00d1c7f58d34e7af35feff4802fd16b4d3b4f8562670ca2dc71",
+        "digest": "820ca64cf6c91766b29c117523e243ceed3b70f414894d70af5dbb976c752a17",
         "id": "chemical-evidence-e2e-v1",
         "passed": true
       },
@@ -44365,7 +45469,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "9b208c0d09b2830ebc22e35859c0b28d49afb10da4bee368d68babcace2ee9dd",
+        "digest": "d43295684e1edcdea78a0d3c379c9de6d85a8ee975867f17f468b9945c83f83b",
         "id": "citation-record-resolution-e2e-v1",
         "passed": true
       },
@@ -44610,7 +45714,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "8484a7a3e29799701ca0a06453773babce50d4cb832075eb4eaf293384d62827",
+        "digest": "55044abb1c7ae1bedd555b1e1177c1531609af33f3ce6259895623cd95ebbdb3",
         "id": "clinical-trial-evidence-e2e-v1",
         "passed": true
       },
@@ -44910,7 +46014,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "faf76b1fb23cf6cc56b028f9eea28c2e582ede91022827aebcf0e0eb6e27d88e",
+        "digest": "604f432831f181d85f3fdfc26ad3535c0e08591d14b666c18c27e0ee23dc1357",
         "id": "dbsnp-rsid-evidence-e2e-v1",
         "passed": true
       },
@@ -45091,7 +46195,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "d1daef6e0889bea1fb16cdcaddc4f5348a317fdefddaf08d12f1e4e834191e17",
+        "digest": "76c395404ef082b94d4e419362f5b05d86c691c1ddb859b0b0f61d479140693a",
         "id": "dna-content-phase-fit-e2e-v1",
         "passed": true
       },
@@ -45181,6 +46285,40 @@
         ]
       },
       "verified_at": "2026-07-15"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "11a0602dba1d36076f71076ae2b6fb8211d0a55f4d957a885993993e4a893586",
+        "id": "docx-citation-delivery-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "92c5d100602ed2d8939f1dd92cf034244f3e216c62f991f69d0fd353dd2b2f58",
+      "input_formats": {
+        "document": [
+          "docx-or-inline-json@1"
+        ]
+      },
+      "module_id": "docx-citation-delivery-audit",
+      "module_version": "1.1.0",
+      "output_formats": {
+        "audit": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "a3d2e5e6e884c64e0deda4e3fc8386538ccd1b2b265228adb64c71f3b9b2e0f7",
+        "id": "docx-citation-delivery-regression-v1",
+        "passed": true
+      },
+      "row_id": "docx-audit-python-3143",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-26"
     },
     {
       "dependency_versions": {
@@ -45325,7 +46463,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "718b40bc20a02855780a53ceaf55918cac3e064a56753fabb5fceeb0732a8c91",
+        "digest": "47809608ad2ece9e7415d81c5994815980e1ea3292d7c5fdc6214c9942760452",
         "id": "ensembl-gene-evidence-e2e-v1",
         "passed": true
       },
@@ -45465,7 +46603,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "1b44a07940ed4c64a6ab70ff9169be07420fba6cff59808a6694516dc9071a45",
+        "digest": "148b7542edda721dedfec3f6cd991a4772a22724f60e3ddefa069f0f619b1316",
         "id": "fcs-event-import-e2e-v1",
         "passed": true
       },
@@ -45542,7 +46680,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "3f2feb13bca922fb040f272e4fc43764a5902a63e0092ec91c55f0b827f0dd78",
+        "digest": "fe98fd69368f641dca3566245757d194997634cc7a018100bfcee4006679f9bb",
         "id": "fixed-period-cosinor-e2e-v1",
         "passed": true
       },
@@ -45713,7 +46851,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "2d53934733e199e45d086e82bf6dcf1c95d90d38ae0edbf61c40a0483036df54",
+        "digest": "652b307273f802fefc845e0ab6150547309c4d2e1113da07ca2b4ce80394f14d",
         "id": "genbank-coding-sequence-extraction-e2e-v1",
         "passed": true
       },
@@ -45751,7 +46889,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "92f922835180a5c5cb4434066961b75be97e3b63e50756751d00c22089313d8f",
+        "digest": "0789046f7557729dbbc7a8431a9b87d9215bf1dfded119b57a00c613d39aeead",
         "id": "gene-evidence-e2e-v1",
         "passed": true
       },
@@ -45789,7 +46927,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "296e5950cab593b6f7bc8c480405db2ada5aa57dd8b02e51a4afcf6cefd02f67",
+        "digest": "fd0446c7ce92848be75d63e38bfbf48fc30dd0269b3db409f36bb08f7ff7263e",
         "id": "gene-identifier-resolution-e2e-v1",
         "passed": true
       },
@@ -45827,7 +46965,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "f2c5cfb9c3608c988667bf1efd8504c3e47bd86f7c1e0d0a7467fbb4ad20208c",
+        "digest": "55a8c3bf7ab809489da38f9fef0874cd6a8321d22251837f862ccffa0e57caac",
         "id": "gene-ortholog-evidence-e2e-v1",
         "passed": true
       },
@@ -45865,7 +47003,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "8bde0df9c24a3f3657c92da44d99eeabadc29159b8ad960c33852a127bf56e73",
+        "digest": "2d9195473045c79b3f0722518674e43289a4a5e11dcb10abb1da5c3264149a4d",
         "id": "gene-set-library-catalog-e2e-v1",
         "passed": true
       },
@@ -45903,7 +47041,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "1924a579312e2fb466731032a41221b992d7cbe5c5ef06ea7cee936098c2addc",
+        "digest": "d52ce6ad51970b68b363a1db4f3f239d11edf265c966dbc9bc4d0feb0ea6c8fc",
         "id": "gene-set-library-membership-e2e-v1",
         "passed": true
       },
@@ -46087,7 +47225,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "8cfe893b124e999cf47f9a696478bdad74fc8fe3eb0279b24688854916819750",
+        "digest": "55e8ae043fd82db143bb3bd98c2fe24aee421c5b02c6bcbc47853f8c24315521",
         "id": "growth-curve-e2e-v2",
         "passed": true
       },
@@ -46172,7 +47310,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "b593720051dd361bfb4192a268e0b703c1e8300a1486cef7227b363a9d7b0a5b",
+        "digest": "910338ca71a85e33e07557a459f3172507a9ab0d7a57976bc9065fb20eea6054",
         "id": "hpo-term-evidence-e2e-v1",
         "passed": true
       },
@@ -46472,7 +47610,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "0470b64678fcfbf141e84b2fc2cb074f4ec701b53fee08481ca0f01aa9a59fdd",
+        "digest": "2cb12431793308e319387af10f18d49ee8d2dbdf4a9a35110dfe6759292ecf04",
         "id": "itc-single-site-binding-e2e-v1",
         "passed": true
       },
@@ -46578,7 +47716,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "cab4f5459e4b3a481fef1e3d6b445a86a6ae48014622c321d000353c5f689580",
+        "digest": "bdbc46faef198bf12926edc6f505e60537f6fcd80082bfafd7023c269073f37f",
         "id": "literature-evidence-e2e-v1",
         "passed": true
       },
@@ -46747,6 +47885,40 @@
       "supplemental_end_to_end": [],
       "tool_versions": {},
       "verified_at": "2026-07-13"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "47b4708bf6ec3ae7a78d9bb5902fab75aab89b1289af0ac0d2a38e77491705a4",
+        "id": "mechanism-claim-promotion-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "92c5d100602ed2d8939f1dd92cf034244f3e216c62f991f69d0fd353dd2b2f58",
+      "input_formats": {
+        "claims": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "mechanism-claim-promotion-gate",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "decisions": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "a429c1ee556e2cff41904f057a476b8cdcc9b8924afa8427f02667b6bb58ff0d",
+        "id": "mechanism-claim-promotion-regression-v1",
+        "passed": true
+      },
+      "row_id": "mechanism-claim-python-3143",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-26"
     },
     {
       "dependency_versions": {
@@ -46995,7 +48167,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "ab6cb5bf5ece7e2c032d5dc1aa61c7d17983b1f11a88c113d4b5be4b3e13d4a5",
+        "digest": "ab0996de8d39b6fd948d5ff7769d3554c4de093d515f2d90c16d5bf67548c64c",
         "id": "ncbi-fetch-e2e-v1",
         "passed": true
       },
@@ -47033,7 +48205,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "71ab420c1c15c64fc56b7ab3df1578951725c3154c43bb457be2b28ba806820f",
+        "digest": "66ac85643795b912d20ddd06f17683c7d730dc3a19d47a4af8a80aa538e77c63",
         "id": "ncbi-info-e2e-v1",
         "passed": true
       },
@@ -47071,7 +48243,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "53db7bfe6828c720901cae102c44dce651f057627918f5839b19e2423a186186",
+        "digest": "be32c4782ccbc99517ebdf55533705b21984fe41fcf91d20f19115c13e85e477",
         "id": "ncbi-link-e2e-v1",
         "passed": true
       },
@@ -47109,7 +48281,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "65b2fa780c1f538b8e244e279228daf1214725c84d2eccd4fa75246ede575a12",
+        "digest": "aea75aa45e4492a6ed1ee3875a9d97ab33636c778321ff0afb4e3dc3d1e8800a",
         "id": "ncbi-search-e2e-v1",
         "passed": true
       },
@@ -47147,7 +48319,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "24c40775f5ea1bb802621c4f21151439247ffcb458dd48e217df6e1eae6e4e4a",
+        "digest": "e0f574fddd5ad8bd976728b10aeb9b92274a8ffb6fb2998241aefc4c9c21f15f",
         "id": "ncbi-search-summary-e2e-v1",
         "passed": true
       },
@@ -47185,7 +48357,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "a282c35447e80c0bed076c30095d69cbef70db72b8fcad32cfe97e7a77d3c7f2",
+        "digest": "084c120e1b12f4dbcc49d4b55b8a94ed1b0f242c00e336f5ad82d03617f95afb",
         "id": "ncbi-summary-e2e-v1",
         "passed": true
       },
@@ -47252,6 +48424,120 @@
     },
     {
       "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "fc552a9d1091c13e76affe0c57f03bd92ba39b1a6a10962b6e09d32e12cad1e6",
+        "id": "nsfc-proposal-development-e2e-v2",
+        "passed": true
+      },
+      "implementation_sha256": "92c5d100602ed2d8939f1dd92cf034244f3e216c62f991f69d0fd353dd2b2f58",
+      "input_formats": {
+        "citation_resolution_adjudication": [
+          "citation-resolution-adjudication@1"
+        ],
+        "claim_evidence_integrity": [
+          "claim-integrity-report@1"
+        ],
+        "proposal_materials": [
+          "inline-json@1"
+        ],
+        "reviewed_literature_corpus": [
+          "normalized-json@1"
+        ],
+        "reviewed_literature_landscape": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "nsfc-proposal-development",
+      "module_version": "1.1.0",
+      "output_formats": {
+        "drafting_package": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "0eda8275ba7736af57060ade4ed32e908c2aedc3ffe688170d359197c7e4ee98",
+        "id": "nsfc-proposal-development-regression-v2",
+        "passed": true
+      },
+      "row_id": "nsfc-drafting-2026-python-3143",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-26"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "8d60a389da8e8e1938657d47a11ef9f0d696af0e57735cc7fa318c39a72f2e62",
+        "id": "nsfc-proposal-figure-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "92c5d100602ed2d8939f1dd92cf034244f3e216c62f991f69d0fd353dd2b2f58",
+      "input_formats": {
+        "proposal_figure_materials": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "nsfc-proposal-figure-development",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "proposal_figure_prompt_package": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "27296166bd35fd757a522ea4abff959c33592d168bdd451111d235468ba62103",
+        "id": "nsfc-proposal-figure-regression-v1",
+        "passed": true
+      },
+      "row_id": "nsfc-proposal-figure-2026-python-3143",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-26"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "dca0a6d0c1aa3004733c79a06f4b40437559c0563fcb50439a39b53e22ad6135",
+        "id": "nsfc-proposal-semantic-audit-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "92c5d100602ed2d8939f1dd92cf034244f3e216c62f991f69d0fd353dd2b2f58",
+      "input_formats": {
+        "proposal": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "nsfc-proposal-semantic-audit",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "audit": [
+          "inline-json@1"
+        ]
+      },
+      "regression": {
+        "digest": "bb885ca4f0e4e976f51903f644a8512735c902f931bec81c18c8807b9b66432e",
+        "id": "nsfc-proposal-semantic-audit-regression-v1",
+        "passed": true
+      },
+      "row_id": "nsfc-2026-python-3143",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-08-26"
+    },
+    {
+      "dependency_versions": {
         "biopython": [
           ">=1.86,<1.88"
         ],
@@ -47294,7 +48580,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "fbd11ee9e4a9a13eaa60efda96553bb872cf5138099ced0683f298d24ea2572c",
+        "digest": "b4ce3e74869b7f8dadb0f89b791d769f5beef173bfe9ca324eb20798b050fe1b",
         "id": "opentargets-target-disease-evidence-e2e-v1",
         "passed": true
       },
@@ -47641,7 +48927,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "0c72e114cea7d66bca085d0a4bd2a374aa1c6d8066d505acf2444242feac4b6d",
+        "digest": "315cb9aab21ac96dd9bef6c705894ba08e7910133f8698c04a579478b500f6b6",
         "id": "pdf-evidence-extraction-e2e-v1",
         "passed": true
       },
@@ -47717,7 +49003,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "ee2c107b263bf6b8d58d3d1246d23c873312436f04df6d59f82a5594cf04c374",
+        "digest": "ee0c82c73eabb2e6ff9fddd13403c9e8fa730281c09aab4eefeb922ae3331e0a",
         "id": "preprint-evidence-e2e-v1",
         "passed": true
       },
@@ -47950,7 +49236,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "f0a19cfb951f6ccaeb2e50c074607a26b7473349a68cceb6c4ff48716adfb27d",
+        "digest": "05e39597b95fc61e57f11e1da8961e73cfc8b64434d1936c805214f63b2e7149",
         "id": "protein-disorder-evidence-e2e-v1",
         "passed": true
       },
@@ -47988,7 +49274,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "de9f8b2ab1f9f3f2690d73eb751b07339fac000f6ee93fea8ed1456fe62cb032",
+        "digest": "1d175e4c1cbfd4aaa6a01f040c1e54b826fb1b11372fbb5f1158c078b6d213e0",
         "id": "string-v12-live-network-v1",
         "passed": true
       },
@@ -48290,7 +49576,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "a93ae9ec141571f588d69548ddf6743e686a106fd0234e0b8aca5811d1481799",
+        "digest": "71b2a31ba43a46dad77e5698cbd5a3994db8fd40b2bd4850c0633609b2807817",
         "id": "quickgo-term-evidence-e2e-v1",
         "passed": true
       },
@@ -48362,7 +49648,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "d91ee57e4fd48e0d7da378e9085b13c231fbfe63ad9ab7634616780bba75fab6",
+        "digest": "084372cbe02a7264801eaeda7e320107c6f60b1f4842308b85a79d698cf2844c",
         "id": "reactome-overrepresentation-evidence-e2e-v1",
         "passed": true
       },
@@ -48400,7 +49686,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "7252df044a41623b384eaf3a0381e6337826b1bbf4ad15be52615559039356a3",
+        "digest": "21594df3fd500536ddb1c98e01f61b5102025831490017e57b81660678a068d7",
         "id": "reactome-pathway-evidence-e2e-v1",
         "passed": true
       },
@@ -48595,11 +49881,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "16ee75937f7c15996e74ad560cb0730ade6b6ca1e91d16d0888e5c1d2f83ab6d",
+        "digest": "2abb70a7586e3e6c5bfe7c4e2b2af94c5fbb1d5c632699b11ba6a00dfb528dd7",
         "id": "research-proposal-quality-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "49a75cb0483c259295823ef90a153cdcd5401b1996d806cb59a8e289f0f839b6",
+      "implementation_sha256": "299653f609257009a3260be44929d9cd085f062b3d870e694d0690048c7cd97d",
       "input_formats": {
         "proposal_foundation": [
           "inline-json@1"
@@ -48613,7 +49899,7 @@
         ]
       },
       "regression": {
-        "digest": "7fe6277efcf73a329f00fd29e9d9129e90b8bf0ae6e8af78a11ac3718b5f2e33",
+        "digest": "75616260a73946df44dd37531cf9630fab9658b20502dad35b51b759727537e0",
         "id": "research-proposal-quality-audit-regression-v1",
         "passed": true
       },
@@ -48723,6 +50009,46 @@
       "supplemental_end_to_end": [],
       "tool_versions": {},
       "verified_at": "2026-07-12"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "963f48ae6883c7873bc2b9d088bc1a1440a2d75c427c94f6f00018ab47ce036a",
+        "id": "rna-processing-alternative-splicing-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "684901b5c16890d46bae016f133eef5e52066d84e207fb80eab679dd62bcf40a",
+      "input_formats": {
+        "rna_processing_inputs": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "rna-processing-alternative-splicing",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "rna_processing_evidence": [
+          "inline-json@1",
+          "tab-separated-values@1",
+          "svg@1.1"
+        ]
+      },
+      "regression": {
+        "digest": "cc88e9d26d84e8c5ad59e6ea7c4a4ac61916b1e7d07121083a56635c13d10f90",
+        "id": "rna-processing-alternative-splicing-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3143-rmats-440-rna-processing-1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {
+        "rmats": [
+          ">=4.4,<4.5"
+        ]
+      },
+      "verified_at": "2026-08-26"
     },
     {
       "dependency_versions": {
@@ -50976,11 +52302,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "93f0d77763210493adb4d8a24aa89a26c81812bcb9c265fc1005ab24dcf1061d",
+        "digest": "2911c91967c92fef4b8701f0da523e9b3b25d14483318ae9dc5f433eac12ae10",
         "id": "statistical-reporting-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "49a75cb0483c259295823ef90a153cdcd5401b1996d806cb59a8e289f0f839b6",
+      "implementation_sha256": "299653f609257009a3260be44929d9cd085f062b3d870e694d0690048c7cd97d",
       "input_formats": {
         "statistical_report": [
           "inline-json@1"
@@ -50994,7 +52320,7 @@
         ]
       },
       "regression": {
-        "digest": "7c716f876c8ff14504e0c6b84f5b04be6498bf91fe63a88392f5e86fe638cfb0",
+        "digest": "d8cbf3f77c254a2db00e1668c5d7d592734dcff454b26e42223ef6eb0024dac7",
         "id": "statistical-reporting-audit-regression-v1",
         "passed": true
       },
@@ -51057,7 +52383,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "a1f5beb7639203d2823ca9f92b60762fca2d80c6c2b231e54e55b8ffc80bcc37",
+        "digest": "f9120f6eaa28a084b78fdd14df12e5645c549fe1831d6145308d72630de72a77",
         "id": "structure-evidence-e2e-v1",
         "passed": true
       },
@@ -51140,7 +52466,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "a427113a87acd414b2c20be80b8c46659bc0df6bc635a59efbc93bb5944519d0",
+        "digest": "0e38ffbc99573289806e594fb2826bd4036704f4ccc59ef2f39113866fc61061",
         "id": "structure-ligands-e2e-v1",
         "passed": true
       },
@@ -51178,7 +52504,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "7359b3a8d8d32289b179e1a532de7815b911892fda9c537a1714bd0d2f0cbad7",
+        "digest": "ecaaa37aa4d01dc6b9224eddce27a3846782706d28385a9ab222da85d64d830d",
         "id": "structure-polymer-entities-e2e-v1",
         "passed": true
       },
@@ -51256,7 +52582,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "b7ba593352b374474061712563fa3f3c3a8320f91ddf9a22ab745b3d39ee6493",
+        "digest": "ec18d4d51614f3938bc8955ab0de7d4c6f3183e85f328f8f74458967e929b9e8",
         "id": "structure-search-e2e-v1",
         "passed": true
       },
@@ -51478,7 +52804,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "3da2754787cde5741acc58196f4e542fda82b19e0b81f4a318395e870feb24f4",
+        "digest": "93baa79e33bc09c2b174e1da72023183cdb5d05b2ed00265833cf55232e47cb4",
         "id": "uniprot-protein-evidence-e2e-v1",
         "passed": true
       },
@@ -51516,7 +52842,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "be7d0308014b3bf5ab10524918107c5634b59ec990735fad5e17157a5a17e77d",
+        "digest": "a66600cdf09b70ebc98003ec4c025f55370a50c2624732cb6b59a84e4311539b",
         "id": "uniprot-to-ensembl-evidence-e2e-v1",
         "passed": true
       },
@@ -51592,7 +52918,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "1558c64373dd744f9f5341ced00f0a749a91576dc9d0e42d60733b6cd446561e",
+        "digest": "d22c66082ebd249c573057a4df3e07bf16abee0640b327fd8e73a50d38d2b80c",
         "id": "variant-evidence-e2e-v1",
         "passed": true
       },
@@ -51855,8 +53181,8 @@
       "verified_at": "2026-07-24"
     }
   ],
-  "registry_digest": "3b82b0a3fa26039e88ab8dba28e2cf324b19c6c2193cde9074b5b2d9f1da683d",
-  "regression_passed": 209,
+  "registry_digest": "889d3c1ab3ca464b4ede53f5bd48301720b4a4826d018626efc0bbe0382a694d",
+  "regression_passed": 216,
   "schema_version": 1,
   "supplemental_end_to_end_passed": 14
 }

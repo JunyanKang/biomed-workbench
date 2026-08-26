@@ -819,6 +819,46 @@
       "workflow": "clinical"
     },
     {
+      "access": "offline",
+      "description": "Audit Chinese biomedical prose for first-use definitions, abbreviation consistency, gene-protein distinctions, organism-aware symbol styling, rhetorical punctuation, Chinese clause structure, and internal workflow language that should not appear in an external proposal.",
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:audit_biomedical_terminology",
+      "id": "biomedical-terminology-and-nomenclature-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "document_section": {
+            "type": "string"
+          },
+          "styled_runs": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "terminology": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "terminology",
+          "document_section"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit biomedical terminology and nomenclature",
+      "workflow": "publication"
+    },
+    {
       "access": "agent_generated",
       "description": "Execute bulk ATAC-seq or DNase-seq quality control, alignment, fragment filtering, accessibility peak calling, replicate consensus, differential accessibility, motif and optional footprint analysis while keeping Tn5 and nuclease-specific biases explicit.",
       "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
@@ -3869,6 +3909,60 @@
     },
     {
       "access": "offline",
+      "description": "Read a native DOCX package or an extracted document model, check abstract citations, first-appearance numbering, citation formatting, reference reciprocity, template-derived typography, figure-caption placement, figure width within the text area, centered placeholder-free figure paragraphs, embedded media, page breaks, and page-by-page rendered visual review before submission delivery.",
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:audit_docx_proposal_delivery",
+      "id": "docx-citation-delivery-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "abstract_heading_terms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "document_model": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "docx_path": {
+            "type": "string"
+          },
+          "docx_payload_base64": {
+            "type": "string"
+          },
+          "reference_heading_terms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rendered_pages": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "renumber_citations": {
+            "type": "boolean"
+          },
+          "style_policy": {
+            "type": "object"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit proposal DOCX citations and final delivery",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
       "description": "Check monotonicity and estimate an empirical half-range concentration on a log scale.",
       "entrypoint": "biomed_workbench.capabilities.experiment:dose_response_summary",
       "id": "dose-response",
@@ -5870,6 +5964,38 @@
     },
     {
       "access": "offline",
+      "description": "Prevent candidate molecules, substrates, pathways, and causal mechanisms from being promoted beyond the direct evidence available across proposal titles, abstracts, hypotheses, aims, and expected outcomes.",
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:audit_mechanism_claim_promotion",
+      "id": "mechanism-claim-promotion-gate",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "claims": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "promotion_rules": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "claims"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Gate promotion of biomedical mechanism claims",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
       "description": "Audit declared medical imaging metadata for minimal completeness and privacy-risk signals before downstream interpretation.",
       "entrypoint": "biomed_workbench.capabilities.imaging:medical_metadata_audit",
       "id": "medical-imaging-metadata-audit",
@@ -6386,6 +6512,258 @@
       "requirements": [],
       "title": "Summarize a biological network",
       "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Prepare a programme-specific National Natural Science Foundation of China drafting package only after multi-source literature search, landscape review, citation-identity resolution, claim-evidence adjudication and project-relevant public-database retrieval; then link the central scientific question, evidence, section argument moves, aims, annual milestones and revision priorities to actual proposal prose delivery.",
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:prepare_nsfc_proposal_drafting",
+      "id": "nsfc-proposal-development",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "aims": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "annual_plan": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "argument_map": {
+            "type": "object"
+          },
+          "evidence_foundation": {
+            "type": "object"
+          },
+          "evidence_table": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "existing_sections": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "guideline_year": {
+            "type": "integer"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "official_template": {
+            "type": "object"
+          },
+          "program_type": {
+            "type": "string"
+          },
+          "research_canon": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "scope": {
+            "type": "object"
+          },
+          "section_contracts": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "guideline_year",
+          "program_type",
+          "mode",
+          "scope",
+          "research_canon",
+          "evidence_table",
+          "argument_map",
+          "section_contracts",
+          "aims",
+          "evidence_foundation"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Develop source-bound NSFC proposal prose",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Prepare programme- and section-specific prompts for visually substantive biomedical proposal illustrations, bind scientific relations to reviewed evidence, separate generated visual references from observed data, require object-editable reconstruction, and block insertion until final-size scientific, typography, layer-order, alignment, text-boundary, element-weight and spatial-balance review passes without errors.",
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:prepare_nsfc_proposal_figure",
+      "id": "nsfc-proposal-figure-development",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "core_message": {
+            "type": "string"
+          },
+          "evidence_records": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "figure_id": {
+            "type": "string"
+          },
+          "figure_role": {
+            "type": "string"
+          },
+          "output_contract": {
+            "type": "object"
+          },
+          "program_type": {
+            "type": "string"
+          },
+          "qa_rounds": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "section_context": {
+            "type": "object"
+          },
+          "source_attributions": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "visual_plan": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "figure_id",
+          "figure_role",
+          "program_type",
+          "core_message",
+          "section_context",
+          "evidence_records",
+          "visual_plan",
+          "source_attributions",
+          "output_contract"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Develop evidence-bound NSFC proposal figures",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Audit a biomedical proposal against a versioned NSFC profile, Chinese and English abstract alignment, section ownership, paragraph transitions, entity introduction order, and aim-to-phenotype-to-mechanism relevance.",
+      "entrypoint": "biomed_workbench.capabilities.proposal_writing:audit_nsfc_proposal",
+      "id": "nsfc-proposal-semantic-audit",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "abstract_cn": {
+            "type": "string"
+          },
+          "abstract_en": {
+            "type": "string"
+          },
+          "aims": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "annual_plan": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "application_code_1": {
+            "type": "string"
+          },
+          "bilingual_concepts": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "central_mechanisms": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "core_phenotypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "entity_prerequisites": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "guideline_year": {
+            "type": "integer"
+          },
+          "human_genetics_context": {
+            "type": "object"
+          },
+          "official_template": {
+            "type": "object"
+          },
+          "program_type": {
+            "type": "string"
+          },
+          "research_attribute": {
+            "type": "string"
+          },
+          "sections": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "title_cn": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "guideline_year",
+          "program_type",
+          "application_code_1",
+          "research_attribute",
+          "title_cn",
+          "abstract_cn",
+          "abstract_en",
+          "sections",
+          "aims",
+          "core_phenotypes",
+          "central_mechanisms"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Audit National Natural Science Foundation of China proposal semantics",
+      "workflow": "publication"
     },
     {
       "access": "offline",
@@ -8177,6 +8555,102 @@
       "requirements": [],
       "title": "Build a claim-linked manuscript assessment",
       "workflow": "publication"
+    },
+    {
+      "access": "agent_generated",
+      "description": "Select and execute a minimum-sufficient RNA-processing workflow while keeping replicated bulk event testing, transcript or exon usage, single-cell junction screening, long-read isoforms, and cross-assay evidence integration scientifically distinct.",
+      "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+      "id": "rna-processing-alternative-splicing",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "analysis_branch": {
+            "enum": [
+              "design",
+              "bulk-rmats",
+              "single-cell-junction-screen",
+              "evidence-integration"
+            ],
+            "type": "string"
+          },
+          "annotation_release": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "assay_class": {
+            "enum": [
+              "bulk-short-read",
+              "single-cell-full-length",
+              "single-cell-droplet",
+              "single-nucleus-three-prime",
+              "long-read-rna"
+            ],
+            "type": "string"
+          },
+          "biological_unit": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "complex_local_events": {
+            "type": "boolean"
+          },
+          "condition_column": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "discover_novel_junctions": {
+            "type": "boolean"
+          },
+          "input_artifact_ids": {
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "type": "array"
+          },
+          "objective": {
+            "minLength": 12,
+            "type": "string"
+          },
+          "paired_design": {
+            "type": "boolean"
+          },
+          "reference": {
+            "minLength": 2,
+            "type": "string"
+          },
+          "scientific_question": {
+            "enum": [
+              "event-level-splicing",
+              "transcript-usage",
+              "exon-usage",
+              "isoform-discovery",
+              "cross-assay-integration"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "objective",
+          "analysis_branch",
+          "assay_class",
+          "scientific_question",
+          "biological_unit",
+          "condition_column",
+          "reference",
+          "annotation_release",
+          "input_artifact_ids",
+          "discover_novel_junctions",
+          "complex_local_events",
+          "paired_design"
+        ],
+        "type": "object"
+      },
+      "kind": "workflow",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Analyze RNA processing and alternative splicing",
+      "workflow": "omics"
     },
     {
       "access": "offline",
@@ -12834,7 +13308,7 @@
       "workflow": "wetlab"
     }
   ],
-  "entry_count": 208,
+  "entry_count": 215,
   "schema_version": 2,
-  "version": "0.2.4"
+  "version": "0.2.5"
 }

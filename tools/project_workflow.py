@@ -25,6 +25,7 @@ from biomed_workbench.kernel.scientific_dependency import (  # noqa: E402
     ScientificDecision,
     ScientificDependencyBundle,
     ScientificGateAdjudication,
+    validate_minimal_sufficient_admission,
 )
 from biomed_workbench.kernel.scientific_evidence_map import (  # noqa: E402
     EvidenceMapPublication,
@@ -33,6 +34,12 @@ from biomed_workbench.kernel.scientific_evidence_map import (  # noqa: E402
     build_scientific_evidence_map,
 )
 from biomed_workbench.kernel.state import ProjectState, apply_event  # noqa: E402
+from biomed_workbench.kernel.project_governance import (  # noqa: E402
+    ProjectLock,
+    ResultStatusLedger,
+    create_project_lock,
+    transition_result_status,
+)
 from biomed_workbench.kernel.execution_chain import validate_revision_target_contract  # noqa: E402
 from biomed_workbench.modules.compatibility import detect_environment  # noqa: E402
 from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
@@ -51,6 +58,7 @@ from biomed_workbench.reporting.evidence_map_versions import (  # noqa: E402
     inspect_evidence_map_publication_recovery,
     publish_evidence_map_transaction,
 )
+from biomed_workbench.reporting.result_view import build_result_view  # noqa: E402
 
 
 def _read(path: Path) -> dict[str, object]:
@@ -174,6 +182,24 @@ def main() -> int:
         help="immutable evidence-map publication root; required before a publication delivery can be released",
     )
     resume.add_argument("--allow-mutation", action="store_true")
+    lock = commands.add_parser("lock", help="freeze project-wide analysis and figure identities")
+    lock.add_argument("--state", required=True, type=Path)
+    lock.add_argument("--workspace", required=True, type=Path)
+    lock.add_argument("--input", required=True, type=Path)
+    lock.add_argument("--output", required=True, type=Path)
+    status = commands.add_parser("result-status", help="apply a lock-bound result status transition")
+    status.add_argument("--state", required=True, type=Path)
+    status.add_argument("--workspace", required=True, type=Path)
+    status.add_argument("--lock", required=True, type=Path)
+    status.add_argument("--ledger", required=True, type=Path)
+    status.add_argument("--artifact", required=True)
+    status.add_argument("--to", required=True, choices=("FORMAL", "CANDIDATE", "SENSITIVITY", "DEPRECATED"))
+    status.add_argument("--rationale", required=True)
+    status.add_argument("--figure-contract-digest")
+    view = commands.add_parser("view", help="show scientific results first or the detailed audit summary")
+    view.add_argument("--state", required=True, type=Path)
+    view.add_argument("--ledger", type=Path)
+    view.add_argument("--mode", choices=("result", "audit"), default="result")
     migrate = commands.add_parser(
         "migrate-state-v1",
         help="verify a map-bound v1 state and write a distinct v2 state awaiting map republication",
@@ -201,6 +227,56 @@ def main() -> int:
         help="evaluate the exact delivery node with the normal delivery validator; repeat as needed",
     )
     args = parser.parse_args()
+
+    if args.command == "lock":
+        if args.output.exists():
+            raise ValueError("project lock publication never overwrites an existing revision")
+        state = _state(args.state)
+        project_lock = create_project_lock(_read(args.input), state, args.workspace)
+        _write(args.output, project_lock.to_dict())
+        print(json.dumps(project_lock.to_dict(), indent=2, sort_keys=True, ensure_ascii=False))
+        return 0
+    if args.command == "result-status":
+        state = _state(args.state)
+        project_lock = ProjectLock.from_dict(_read(args.lock))
+        ledger = (
+            ResultStatusLedger.from_dict(_read(args.ledger))
+            if args.ledger.exists()
+            else ResultStatusLedger.create(state.context.project_id, project_lock.digest)
+        )
+        registry = ModuleRegistry.discover(BUILTIN_ROOT)
+        readiness_path = ROOT / "reports" / "execution-readiness.json"
+        readiness = _read(readiness_path)
+        if readiness.get("registry_digest") != registry.digest:
+            raise ValueError("execution-readiness report is not bound to the active module registry")
+        artifact = next((item for item in state.artifacts if item.id == args.artifact), None)
+        record = next(
+            (
+                item for item in readiness.get("records", [])
+                if artifact is not None and item.get("module_id") == artifact.producing_module_id
+            ),
+            {},
+        )
+        ledger = transition_result_status(
+            ledger,
+            state=state,
+            lock=project_lock,
+            workspace_root=args.workspace,
+            artifact_id=args.artifact,
+            to_status=args.to,
+            validation_scope=record,
+            rationale=args.rationale,
+            figure_contract_digest=args.figure_contract_digest,
+        )
+        _write(args.ledger, ledger.to_dict())
+        print(json.dumps(build_result_view(state, ledger), indent=2, sort_keys=True, ensure_ascii=False))
+        return 0
+    if args.command == "view":
+        state = _state(args.state)
+        ledger = ResultStatusLedger.from_dict(_read(args.ledger)) if args.ledger else None
+        payload = build_result_view(state, ledger) if args.mode == "result" else _summary(state)
+        print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False))
+        return 0
 
     if args.command == "migrate-state-v1":
         if args.state.exists():
@@ -301,6 +377,12 @@ def main() -> int:
         payload = _read(args.input)
         if args.command == "admit":
             value = AnalysisAdmission.from_dict(payload)
+            # Historical append-only states predate the minimal-sufficient
+            # fields and must replay byte-for-byte. Newly policy-bound
+            # admissions are enforced; legacy records remain readable without
+            # being silently reclassified as a new scientific decision.
+            if value.minimal_sufficient_policy_version is not None:
+                validate_minimal_sufficient_admission(state, value)
             state = _record(state, "analysis_admission_recorded", value, field="admission", rationale="Record a user-approved scientific analysis admission.")
         elif args.command == "adjudicate":
             value = ScientificGateAdjudication.from_dict(payload)

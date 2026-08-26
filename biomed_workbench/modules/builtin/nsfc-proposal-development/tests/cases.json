@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "general-programme-source-bound-drafting-package",
+      "input": {
+        "guideline_year": 2026,
+        "program_type": "general",
+        "mode": "compose",
+        "scope": {"deliverable":"国家自然科学基金申请书","target_reader":"生命科学同行评议专家","language":"Chinese","version_target":"supervisor-review"},
+        "research_canon": [
+          {"id":"F1","statement":"领域研究提示该界面基质参与组织形成。"},
+          {"id":"F2","statement":"公共表型数据库记录了相关组织异常。"},
+          {"id":"F3","statement":"本课题组前期观察支持关键分子的时空相关性。"}
+        ],
+        "evidence_table": [
+          {"claim_id":"C1","claim":"界面基质参与组织形成。","status":"direct-study","source_ids":["F1"]},
+          {"claim_id":"C2","claim":"数据库表型提示该过程可能受影响。","status":"database-phenotype","source_ids":["F2"]},
+          {"claim_id":"C3","claim":"前期观察支持候选机制具有可检验性。","status":"preliminary-data","source_ids":["F3"]}
+        ],
+        "argument_map": {
+          "scientific_tension":"结构异常已被观察，但分子改变如何影响界面基质仍不清楚。",
+          "central_question":"候选分子是否通过改变界面基质形成影响组织发育？",
+          "central_hypothesis":"候选分子的改变扰动界面基质装配并产生发育表型。",
+          "knowledge_advance":"明确细胞内修饰过程与组织界面形成之间的机制联系。",
+          "alternative_explanations":["主要作用来自细胞命运改变","主要作用来自非细胞自主的界面基质异常"],
+          "core_phenotypes":["interface defect"],
+          "central_mechanisms":["matrix assembly"]
+        },
+        "section_contracts": [
+          {"id":"S1","role":"rationale","purpose":"提出中心科学问题","scientific_question":"为什么界面基质形成异常？","claim_ids":["C1","C2"],"evidence_ids":["F1","F2"],"forbidden_claims":["既定因果机制"]},
+          {"id":"S2","role":"research_content","purpose":"检验中心假说","scientific_question":"候选分子如何影响基质装配？","claim_ids":["C2","C3"],"evidence_ids":["F2","F3"],"forbidden_claims":["未经验证的确定底物"]},
+          {"id":"S3","role":"preliminary","purpose":"证明研究入口和技术可行性","scientific_question":"现有结果能支持哪些研究步骤？","claim_ids":["C3"],"evidence_ids":["F3"],"forbidden_claims":["把前期相关性写成机制"]}
+        ],
+        "aims": [
+          {"id":"A1","objective":"明确核心表型与来源","hypothesis":"表型首先表现为界面基质异常","phenotypes":["interface defect"],"mechanisms":[],"approach":"定量组织学和谱系比较","readouts":["界面连续性"],"alternative_models":["细胞命运改变","界面基质异常"],"feasibility_evidence":["F3"],"fallback":"使用正交组织学读出","decision_value":"决定后续机制实验的主要组织层级"},
+          {"id":"A2","objective":"检验候选基质装配机制","hypothesis":"候选分子改变基质装配","phenotypes":["interface defect"],"mechanisms":["matrix assembly"],"approach":"生化与遗传互证","readouts":["装配状态"],"alternative_models":["直接装配异常","继发组织反应"],"feasibility_evidence":["F3"],"fallback":"转向候选通路的正交验证","decision_value":"判断是否支持中心机制"}
+        ],
+        "evidence_foundation": {"search_plan":{"objective":"界定界面基质形成的直接证据、冲突结果和研究空白","queries":["retinal interface matrix development","inner limiting membrane mechanism"],"sources":["PubMed","Crossref"],"date_window":"database inception to 2026-08-26","inclusion_criteria":["直接研究组织界面形成或相关基质机制"],"exclusion_criteria":["无原始实验或与研究对象无直接关系"]},"literature_records":[{"id":"L1","stable_id":"doi:10.1000/example","title":"Interface matrix development","source":"PubMed","study_design":"controlled-perturbation","source_level":"full-text","evidence_role":"direct-support","evidence_relation":"supports","claim_ids":["C1"],"citation_identity_status":"verified_match","content_review_status":"full-text-reviewed","retraction_status":"not-retracted"}],"database_records":[{"module_id":"hpo-term-evidence","record_id":"HP:0000001","source_version":"ols4-current","accessed_at":"2026-08-26","claim_ids":["C2"],"evidence_relation":"context"}],"research_gap":{"statement":"候选调控过程如何影响界面基质装配尚未被直接检验。","coverage_basis":"两来源检索及核心原文审阅","conflicting_evidence":["细胞命运改变与基质装配异常均可解释表型"],"why_existing_work_is_insufficient":"既有工作没有用判别性干预区分两种解释。","testable_consequence":"若中心假说成立，装配异常应先于细胞命运改变出现。"},"upstream_receipts":[{"module_id":"literature-evidence","status":"passed","output_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},{"module_id":"literature-landscape-audit","status":"passed","output_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},{"module_id":"citation-record-resolution","status":"passed","output_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},{"module_id":"citation-resolution-adjudication","status":"passed","output_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},{"module_id":"claim-evidence-integrity-audit","status":"passed","output_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},{"module_id":"hpo-term-evidence","status":"passed","output_digest":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}]},
+        "official_template": {"source":"NSFC Grants System","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","guideline_year":2026,"program_type":"general","required_semantic_roles":["rationale","research_content","preliminary"]},
+        "annual_plan": [
+          {"year":1,"aim_ids":["A1"],"milestones":["完成核心表型定量"],"decision_output":"确定机制研究入口"},
+          {"year":2,"aim_ids":["A2"],"milestones":["完成机制互证"],"decision_output":"判断中心假说"}
+        ]
+      },
+      "expected_subset": {"ready_for_section_drafting":true,"agent_delivery_contract":{"audit_only_delivery_forbidden":true}}
+    }
+  ]
+}

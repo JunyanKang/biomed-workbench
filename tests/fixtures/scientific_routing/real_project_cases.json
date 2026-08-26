@@ -1,0 +1,51 @@
+[
+  {
+    "id": "s9-6-cuttag-spikein-rnase",
+    "objective": "Analyze S9.6 CUT&Tag with Drosophila spike-in and an RNase control to quantify R-loop-associated changes without treating spike-in normalization as specificity evidence.",
+    "required_concepts": {
+      "assays": ["s9-6-cuttag", "cuttag"],
+      "targets": ["r-loop"],
+      "controls": ["nuclease-specificity-control"],
+      "normalizations": ["spike-in-normalization"],
+      "relations": ["r-loop-associated-effect"]
+    },
+    "required_modules": ["bulk-chromatin-peak-calling"],
+    "required_warning_fragment": "generic RNase control"
+  },
+  {
+    "id": "dual-replicate-ip-ms-missingness",
+    "objective": "Use duplicate bait and matched-control IP-MS preparations to identify protein-interaction support while preserving protein- and peptide-level missingness.",
+    "required_concepts": {
+      "assays": ["ip-ms"],
+      "targets": ["protein-interactome"],
+      "controls": ["matched-control"],
+      "relations": ["protein-interaction-support"]
+    },
+    "required_modules": ["proteomics-deqms"],
+    "required_requirement_fragment": "missingness"
+  },
+  {
+    "id": "three-prime-snrna-splicing-boundary",
+    "objective": "Assess RNA processing and possible splicing changes from 3' snRNA-seq, but do not infer an alternative-splicing event from intronic and exonic signal alone.",
+    "required_concepts": {
+      "assays": ["three-prime-single-nucleus-rna", "single-nucleus-rna"],
+      "targets": ["rna-processing", "splicing"],
+      "relations": ["splicing-change"]
+    },
+    "required_modules": ["rna-processing-alternative-splicing"],
+    "forbidden_modules": ["rna-secondary-structure-summary"],
+    "required_warning_fragment": "not exon-complete"
+  },
+  {
+    "id": "paired-multiome-pseudobulk",
+    "objective": "Integrate paired single-cell multiome RNA and ATAC, then perform donor-aware pseudobulk inference using donor as the biological replicate.",
+    "required_concepts": {
+      "assays": ["single-cell-multiome"],
+      "targets": ["transcript-abundance", "chromatin-accessibility"],
+      "normalizations": ["pseudobulk"],
+      "relations": ["cross-modal-concordance"]
+    },
+    "required_modules": ["single-cell-multimodal-integration", "single-cell-donor-inference"],
+    "required_requirement_fragment": "biological sample"
+  }
+]

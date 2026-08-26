@@ -278,7 +278,7 @@ SPECS = {
         "title": "Resolve and cross-check a scholarly citation record",
         "description": "Resolve one DOI against Crossref and Europe PMC while retaining missing fields, source disagreement, updates, and repository identifiers.",
         "entrypoint": "biomed_workbench.capabilities.evidence:citation_record_resolution",
-        "intents": ["resolve DOI metadata", "verify citation record across Crossref and Europe PMC", "核验DOI与文献元数据"],
+        "intents": ["resolve DOI metadata", "verify citation record across Crossref and Europe PMC", "核验DOI与文献元数据", "核验引用", "验证参考文献"],
         "questions": ["Do independent bibliographic services resolve the same DOI, and which metadata conflicts remain?"],
         "input_properties": {"doi": {"type": "string", "minLength": 7, "maxLength": 500}},
         "input_required": ["doi"],

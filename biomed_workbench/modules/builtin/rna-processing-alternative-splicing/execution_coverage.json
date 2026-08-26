@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "module_id": "rna-processing-alternative-splicing",
+  "input_property": "analysis_branch",
+  "assays": [
+    {
+      "assay": "design",
+      "contract_ready": true,
+      "executor_path": "templates/run_rna_processing_workflow.py",
+      "backend": "method-selection"
+    },
+    {
+      "assay": "bulk-rmats",
+      "contract_ready": true,
+      "executor_path": "templates/run_rna_processing_workflow.py",
+      "backend": "rMATS-turbo"
+    },
+    {
+      "assay": "single-cell-junction-screen",
+      "contract_ready": true,
+      "executor_path": "templates/run_rna_processing_workflow.py",
+      "backend": "sample-level-junction-screen"
+    },
+    {
+      "assay": "evidence-integration",
+      "contract_ready": true,
+      "executor_path": "templates/run_rna_processing_workflow.py",
+      "backend": "typed-evidence-ledger"
+    }
+  ]
+}

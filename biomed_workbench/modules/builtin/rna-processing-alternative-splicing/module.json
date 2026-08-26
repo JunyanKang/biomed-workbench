@@ -1,0 +1,901 @@
+{
+  "access": "agent_generated",
+  "agent_protocol": {
+    "forbidden_actions": [
+      "Do not edit the packaged workflow source, invent sample metadata, infer library properties from filenames, or use cells, nuclei, reads, exons, junctions or transcripts as biological replicates.",
+      "Do not call intronic or exonic abundance, spliced/unspliced velocity layers, differential exon usage, transcript usage, local events and full-length isoforms interchangeable forms of evidence.",
+      "Do not infer a direct RNA-processing mechanism from gene overlap with binding, chromatin, R-loop, expression or protein-interaction results.",
+      "Do not admit a generated command, dry run, process exit, unreloaded result, empty panel or audit report as completed scientific analysis."
+    ],
+    "languages": [
+      "python",
+      "r",
+      "workflow"
+    ],
+    "mode": "packaged_parameterized_workflow",
+    "parameter_rules": [
+      {
+        "decision_inputs": [
+          "assay class",
+          "event, exon, transcript or isoform estimand",
+          "annotation dependence",
+          "novel junction objective",
+          "replicate design",
+          "read coverage"
+        ],
+        "id": "minimum-sufficient-method",
+        "parameter": "analysis-branch",
+        "selection_rule": "Choose the single primary branch whose native estimand answers the stated question and add at most one orthogonal validation that can change the scientific decision.",
+        "validation_rule": "Reject a method whose input model, replicate unit, event definition or claim boundary does not match the observed data."
+      },
+      {
+        "decision_inputs": [
+          "biological unit",
+          "pairing",
+          "batch",
+          "condition",
+          "sample count",
+          "coverage",
+          "design rank"
+        ],
+        "id": "sample-level-inference",
+        "parameter": "replicate-and-contrast",
+        "selection_rule": "Fit condition effects at the independent sample level with pairing and justified covariates declared before reviewing results.",
+        "validation_rule": "Block formal inference for pseudo-replication, confounding, rank deficiency, inadequate sample replication or condition-specific coverage failure."
+      },
+      {
+        "decision_inputs": [
+          "scientific minimum effect",
+          "event family",
+          "coverage",
+          "replicate variability",
+          "confirmatory or exploratory role"
+        ],
+        "id": "effect-and-multiplicity",
+        "parameter": "decision-thresholds",
+        "selection_rule": "Declare a biologically meaningful delta-PSI or usage threshold, coverage filter, replicate consistency rule and multiplicity family before inspecting significance.",
+        "validation_rule": "Retain sensitivity near thresholds and never promote nominal P values, post hoc filters or visually selected events as formal evidence."
+      }
+    ],
+    "postflight_checks": [
+      "Reload all result tables, logs, normalized event records and figures; reconcile event identifiers, coordinates, group direction, sample order, record counts, parameters, versions and file digests.",
+      "Review coverage, replicate PSI or usage consistency, event-family counts, effect and P-value distributions, multiplicity, method agreement and candidate-to-formal status.",
+      "Write exact claim boundaries for event, exon, transcript, isoform, processing-kinetic and integrated evidence before project promotion."
+    ],
+    "preflight_checks": [
+      "Inspect real inputs and record source digests, sample identities, biological units, conditions, pairing, batch, read layout, strandedness, read length, reference and annotation.",
+      "Detect exact versions and official parameter surfaces for the selected backend; stop when the installed version falls outside the compatibility row.",
+      "Freeze the primary method, orthogonal validation, filtering, effect threshold, multiplicity family and required figure panels before execution."
+    ],
+    "provenance_fields": [
+      "module-id",
+      "module-version",
+      "analysis-branch",
+      "assay-class",
+      "sample-manifest-digest",
+      "source-digests",
+      "reference",
+      "annotation-release",
+      "library-layout",
+      "strandedness",
+      "read-length",
+      "biological-unit",
+      "design",
+      "contrast",
+      "filtering",
+      "effect-threshold",
+      "multiplicity-family",
+      "actual-tool-versions",
+      "parameters",
+      "output-digests",
+      "quality-gates",
+      "scientific-status"
+    ],
+    "requires_observed_execution": true,
+    "schema_version": 1,
+    "template_sections": [
+      {
+        "id": "admit-design-and-select-branch",
+        "output_artifact_types": [
+          "rna_processing_analysis_evidence"
+        ],
+        "purpose": "Resolve the data-generating assay and scientific estimand before choosing an RNA-processing method.",
+        "required_logic": [
+          "Inspect actual source files, sample sheet, experimental units, condition and pairing structure, library layout, strandedness, read length, reference, annotation and upstream quality reports.",
+          "Use one primary analysis and one decision-relevant orthogonal validation; do not stack methods that answer the same question without added decision value.",
+          "Distinguish event-level splicing, exon usage, transcript usage, droplet junction screening, long-read isoforms, processing kinetics and cross-assay integration."
+        ],
+        "template_files": [
+          "templates/run_rna_processing_workflow.py"
+        ]
+      },
+      {
+        "id": "execute-reload-and-integrate",
+        "output_artifact_types": [
+          "rna_processing_analysis_evidence"
+        ],
+        "purpose": "Run the admitted branch, reload all outputs, create standardized event tables and figures, and relate accepted events to independent evidence without causal inflation.",
+        "required_logic": [
+          "For replicated short-read bulk event testing, execute rMATS with measured read length, declared library type, explicit variable-length, pairing, novel-site and effect-size-null parameters.",
+          "For transcript usage use Salmon or equivalent transcript counts with DRIMSeq and stageR; for exon usage use DEXSeq; preserve method-native hypothesis families and filtering.",
+          "For 3-prime droplet data, retain sample-level junction candidates and coverage sensitivity but block formal event claims based on cells, intronic signal, exon signal or velocity layers.",
+          "For long reads, follow FLAIR alignment, correction, shared collapse, sample-wise quantification and replicated differential analysis, retaining isoform structure and productivity uncertainty.",
+          "Reload normalized outputs and figures, then link binding, R-loop, chromatin, expression or protein evidence as separate support types with direct causality unresolved."
+        ],
+        "template_files": [
+          "templates/run_rna_processing_workflow.py"
+        ]
+      }
+    ]
+  },
+  "alternatives": [],
+  "assumptions": [
+    "Input alignments or quantifications passed assay-appropriate read, mapping, strand, contamination, and sample-identity quality control and use a coordinate-compatible reference and annotation."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_rna_processing_workflow.py",
+      "purpose": "Select, execute, normalize, render, reload, and claim-bound the packaged RNA-processing workflow without source edits.",
+      "quality_gate_ids": [
+        "rna-processing-design-admission",
+        "rna-processing-branch-eligibility",
+        "rna-processing-replicate-inference",
+        "rna-processing-output-reload",
+        "rna-processing-claim-boundary"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "rna-processing-alternative-splicing-e2e-v1"
+      ],
+      "id": "python-3143-rmats-440-rna-processing-1",
+      "input_formats": {
+        "rna_processing_inputs": [
+          "inline-json@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "rna_processing_evidence": [
+          "inline-json@1",
+          "tab-separated-values@1",
+          "svg@1.1"
+        ]
+      },
+      "platforms": [
+        "macos-arm64",
+        "linux-x86_64"
+      ],
+      "regression_evidence_ids": [
+        "rna-processing-alternative-splicing-regression-v1"
+      ],
+      "tool_versions": {
+        "rmats": [
+          ">=4.4,<4.5"
+        ]
+      },
+      "verified_at": "2026-08-26"
+    }
+  ],
+  "complements": [
+    "differential-expression",
+    "bulk-rbp-rna-binding",
+    "bulk-r-loop-mapping",
+    "single-cell-donor-inference",
+    "figure-specification",
+    "functional-enrichment"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Validate requests, run approved external branches, normalize outputs, render vector summaries, and reload evidence.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-26",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Select and execute a minimum-sufficient RNA-processing workflow while keeping replicated bulk event testing, transcript or exon usage, single-cell junction screening, long-read isoforms, and cross-assay evidence integration scientifically distinct.",
+  "domains": [
+    "omics",
+    "transcriptomics"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.agent_analysis:prepare_agent_analysis",
+  "evidence_effects": [
+    "adds-rna-processing-and-alternative-splicing-evidence"
+  ],
+  "execution": {
+    "kind": "workflow",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 30
+  },
+  "id": "rna-processing-alternative-splicing",
+  "input_artifacts": [
+    {
+      "artifact_type": "rna_processing_analysis_inputs",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "project-request-and-artifact-references"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "rna_processing_inputs",
+      "processing_levels": [
+        "declared",
+        "sample-manifest-bound"
+      ],
+      "required_metadata": [
+        "assay-class",
+        "biological-unit",
+        "condition",
+        "reference",
+        "annotation-release",
+        "source-digests"
+      ],
+      "source_policy": "project_or_upstream"
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "analysis_branch": {
+        "enum": [
+          "design",
+          "bulk-rmats",
+          "single-cell-junction-screen",
+          "evidence-integration"
+        ],
+        "type": "string"
+      },
+      "annotation_release": {
+        "minLength": 2,
+        "type": "string"
+      },
+      "assay_class": {
+        "enum": [
+          "bulk-short-read",
+          "single-cell-full-length",
+          "single-cell-droplet",
+          "single-nucleus-three-prime",
+          "long-read-rna"
+        ],
+        "type": "string"
+      },
+      "biological_unit": {
+        "minLength": 2,
+        "type": "string"
+      },
+      "complex_local_events": {
+        "type": "boolean"
+      },
+      "condition_column": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "discover_novel_junctions": {
+        "type": "boolean"
+      },
+      "input_artifact_ids": {
+        "items": {
+          "type": "string"
+        },
+        "minItems": 1,
+        "type": "array"
+      },
+      "objective": {
+        "minLength": 12,
+        "type": "string"
+      },
+      "paired_design": {
+        "type": "boolean"
+      },
+      "reference": {
+        "minLength": 2,
+        "type": "string"
+      },
+      "scientific_question": {
+        "enum": [
+          "event-level-splicing",
+          "transcript-usage",
+          "exon-usage",
+          "isoform-discovery",
+          "cross-assay-integration"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "objective",
+      "analysis_branch",
+      "assay_class",
+      "scientific_question",
+      "biological_unit",
+      "condition_column",
+      "reference",
+      "annotation_release",
+      "input_artifact_ids",
+      "discover_novel_junctions",
+      "complex_local_events",
+      "paired_design"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "RNA processing analysis",
+    "alternative splicing",
+    "differential splicing",
+    "junction usage",
+    "differential transcript usage",
+    "RNA\u52a0\u5de5\u5206\u6790",
+    "\u53ef\u53d8\u526a\u63a5\u5206\u6790",
+    "\u5dee\u5f02\u526a\u63a5",
+    "\u8f6c\u5f55\u672c\u4f7f\u7528\u53d8\u5316"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Three-prime single-cell or single-nucleus junction analysis remains candidate discovery unless an eligible replicated design and orthogonal assay support the event.",
+    "Spliced and unspliced layers used for RNA velocity describe processing kinetics and do not by themselves establish alternative-splicing events.",
+    "DEXSeq reports differential exon usage, DRIMSeq and stageR report transcript usage, rMATS reports classical local events, and FLAIR reports long-read isoforms; these outputs are related but not interchangeable.",
+    "Gene-level overlap with RBP binding, chromatin occupancy, R-loop, expression, or protein interaction evidence does not establish direct regulation or causality."
+  ],
+  "maturity": "validated",
+  "module_type": "analysis",
+  "mutability": "read_only",
+  "observed_output_contracts": [
+    {
+      "container_reload_validator": "biomed_workbench.modules.observed_output_validation:validate_observed_output",
+      "content_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "rna_processing_analysis_evidence"
+            ],
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "inline-json",
+              "tab-separated-values",
+              "svg"
+            ],
+            "type": "string"
+          },
+          "processing_level": {
+            "enum": [
+              "executed",
+              "reloaded",
+              "claim-bounded"
+            ],
+            "type": "string"
+          },
+          "provenance": {
+            "additionalProperties": false,
+            "properties": {
+              "compatibility_row_id": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "parameters_digest": {
+                "pattern": "^[0-9a-f]{64}$",
+                "type": "string"
+              },
+              "workflow": {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              "workflow_version": {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "workflow",
+              "workflow_version",
+              "parameters_digest",
+              "compatibility_row_id"
+            ],
+            "type": "object"
+          },
+          "record_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "result_summary": {
+            "maxLength": 4000,
+            "minLength": 8,
+            "type": "string"
+          }
+        },
+        "required": [
+          "artifact_type",
+          "format",
+          "processing_level",
+          "result_summary",
+          "record_count",
+          "provenance"
+        ],
+        "type": "object"
+      },
+      "gate_evaluators": [
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
+          "gate_id": "rna-processing-design-admission",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
+          "operator": "equals",
+          "threshold": "accepted"
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
+          "gate_id": "rna-processing-branch-eligibility",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
+          "operator": "equals",
+          "threshold": "accepted"
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
+          "gate_id": "rna-processing-replicate-inference",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
+          "operator": "equals",
+          "threshold": "accepted"
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evaluator_type": "provenance-design",
+          "evidence_payload_role": "primary",
+          "gate_id": "rna-processing-output-reload",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
+          "operator": "equals",
+          "threshold": "accepted"
+        },
+        {
+          "evaluator": "biomed_workbench.modules.semantic_output_validation:evaluate_structured_gate",
+          "evaluator_type": "claim-boundary",
+          "evidence_payload_role": "primary",
+          "gate_id": "rna-processing-claim-boundary",
+          "metric_key": "scientific_review",
+          "metric_type": "string",
+          "operator": "equals",
+          "threshold": "accepted"
+        }
+      ],
+      "payloads": [
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "image/svg+xml",
+            "text/tab-separated-values"
+          ],
+          "minimum": 1,
+          "role": "primary"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json"
+          ],
+          "minimum": 1,
+          "role": "semantic-metadata"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "image/svg+xml",
+            "text/tab-separated-values"
+          ],
+          "minimum": 0,
+          "role": "source-data"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/pdf",
+            "image/svg+xml",
+            "image/tiff",
+            "image/png"
+          ],
+          "minimum": 0,
+          "role": "figure"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/octet-stream",
+            "application/zip",
+            "application/x-hdf5"
+          ],
+          "minimum": 0,
+          "role": "model"
+        },
+        {
+          "maximum": 1,
+          "media_types": [
+            "application/json",
+            "text/plain"
+          ],
+          "minimum": 0,
+          "role": "log"
+        }
+      ],
+      "port": "rna_processing_evidence",
+      "protocol_version": "2.1.0",
+      "required_postflight_gate_ids": [
+        "rna-processing-design-admission",
+        "rna-processing-branch-eligibility",
+        "rna-processing-replicate-inference",
+        "rna-processing-output-reload",
+        "rna-processing-claim-boundary"
+      ],
+      "semantic_profile": "statistical-results-v1",
+      "semantic_validator": "biomed_workbench.modules.semantic_output_validation:validate_observed_output_semantics",
+      "semantic_validator_sha256": "62e23ec6b1082e9b4ec1b54ab9308ea3668789dd25a4b1559c67080fbb616aba"
+    }
+  ],
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 3
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "rna_processing_analysis_evidence",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "inline-json",
+          "orientations": [
+            "run-report"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "tab-separated-values",
+          "orientations": [
+            "event-by-statistic"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        },
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "svg",
+          "orientations": [
+            "publication-figure-panel-set"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1.1"
+          ]
+        }
+      ],
+      "name": "rna_processing_evidence",
+      "processing_levels": [
+        "executed",
+        "reloaded",
+        "claim-bounded"
+      ],
+      "required_metadata": [
+        "module-version",
+        "analysis-branch",
+        "backend-version",
+        "experimental-unit",
+        "parameters-digest",
+        "output-digests",
+        "scientific-status"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "code_plan": {
+        "type": "array"
+      },
+      "dependency_profiles": {
+        "type": "array"
+      },
+      "execution_policy": {
+        "type": "object"
+      },
+      "forbidden_actions": {
+        "type": "array"
+      },
+      "handoff_type": {
+        "enum": [
+          "packaged_parameterized_project_analysis"
+        ],
+        "type": "string"
+      },
+      "languages": {
+        "type": "array"
+      },
+      "module": {
+        "type": "object"
+      },
+      "parameter_rules": {
+        "type": "array"
+      },
+      "postflight_checks": {
+        "type": "array"
+      },
+      "preflight_checks": {
+        "type": "array"
+      },
+      "provenance_fields": {
+        "type": "array"
+      },
+      "quality_gate_ids": {
+        "type": "array"
+      },
+      "request_digest": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "request_fields": {
+        "type": "array"
+      },
+      "tool_profiles": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "handoff_type",
+      "module",
+      "request_digest",
+      "request_fields",
+      "languages",
+      "code_plan",
+      "parameter_rules",
+      "preflight_checks",
+      "postflight_checks",
+      "provenance_fields",
+      "forbidden_actions",
+      "tool_profiles",
+      "dependency_profiles",
+      "quality_gate_ids",
+      "execution_policy"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The assay class, true biological sample, condition, pairing, library layout, strandedness, read length, reference genome, annotation release, and immutable source artifacts are declared before method selection.",
+    "Formal condition-level inference uses independent biological samples rather than reads, cells, nuclei, technical libraries, junctions, exons, or transcripts as replicates."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "https://github.com/Xinglab/rmats-turbo/blob/master/README.md",
+      "https://majiq.biociphers.org/",
+      "https://github.com/davidaknowles/leafcutter",
+      "https://bioconductor.org/packages/release/bioc/html/DEXSeq.html",
+      "https://bioconductor.org/packages/release/bioc/html/DRIMSeq.html",
+      "https://bioconductor.org/packages/release/bioc/html/stageR.html",
+      "https://nf-co.re/rnasplice/usage",
+      "https://brie.readthedocs.io/en/latest/quick_start.html",
+      "https://flair.readthedocs.io/en/latest/",
+      "https://www.10xgenomics.com/support/universal-three-prime-gene-expression/documentation/steps/sequencing/interpreting-intronic-and-antisense-reads-in-10-x-genomics-single-cell-gene-expression-data"
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Block execution when assay identity, biological units, condition structure, reference, annotation, library layout, strandedness, read length, or source identities are unresolved.",
+      "id": "rna-processing-design-admission",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require the selected event, transcript, exon, single-cell junction, or long-read branch to match the observed data and stated scientific question.",
+      "id": "rna-processing-branch-eligibility",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Require biological-sample-level replication, an estimable contrast, declared filtering, effect-size and multiplicity rules, and retained sample diagnostics before formal inference.",
+      "id": "rna-processing-replicate-inference",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Reload event, transcript, junction, isoform, report and figure outputs and reconcile identifiers, coordinates, sample order, parameters, versions and digests.",
+      "id": "rna-processing-output-reload",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Do not convert exon usage, intronic signal, velocity layers, gene-linked multi-omics evidence, or an isoform prediction into a direct RNA-processing mechanism without matching event and orthogonal evidence.",
+      "id": "rna-processing-claim-boundary",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Do biological samples support a reproducible change in splice-event, exon, junction, transcript, or full-length isoform usage?",
+    "\u73b0\u6709\u6570\u636e\u80fd\u5426\u5728\u751f\u7269\u5b66\u6837\u672c\u5c42\u9762\u652f\u6301\u53ef\u91cd\u590d\u7684\u526a\u63a5\u4e8b\u4ef6\u3001\u5916\u663e\u5b50\u3001junction\u3001\u8f6c\u5f55\u672c\u6216\u5b8c\u6574\u5f02\u6784\u4f53\u4f7f\u7528\u53d8\u5316\uff1f"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "rna-processing-alternative-splicing",
+      "RNA processing",
+      "alternative splicing",
+      "differential splicing",
+      "junction usage",
+      "\u53ef\u53d8\u526a\u63a5",
+      "RNA\u52a0\u5de5",
+      "\u5dee\u5f02\u526a\u63a5"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": [
+      "RNA processing",
+      "alternative splicing",
+      "splicing",
+      "splice",
+      "junction",
+      "RNA\u52a0\u5de5",
+      "\u53ef\u53d8\u526a\u63a5",
+      "\u526a\u63a5"
+    ]
+  },
+  "schema_version": 1,
+  "scientific_semantics": {
+    "analysis_role": "primary",
+    "assays": [
+      "bulk-rna-seq",
+      "single-cell-rna",
+      "single-nucleus-rna",
+      "three-prime-single-nucleus-rna"
+    ],
+    "controls": [
+      "biological-replicates",
+      "matched-control"
+    ],
+    "normalizations": [
+      "pseudobulk",
+      "library-size-normalization"
+    ],
+    "relations": [
+      "splicing-change",
+      "cross-modal-concordance",
+      "orthogonal-validation"
+    ],
+    "targets": [
+      "rna-processing",
+      "splicing"
+    ]
+  },
+  "title": "Analyze RNA processing and alternative splicing",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        ">=4.4,<4.5"
+      ],
+      "ecosystem": "python",
+      "identity": "rmats.py",
+      "mismatch_policy": "block",
+      "name": "rmats",
+      "platforms": [
+        "macos-arm64",
+        "linux-x86_64"
+      ],
+      "required": false,
+      "tested_versions": [
+        "4.4.0"
+      ],
+      "verified_at": "2026-08-26",
+      "version_differences": [
+        {
+          "affected_versions": [
+            ">=4.4,<4.5"
+          ],
+          "category": "parameter",
+          "compatibility_effect": "requires-parameter",
+          "description": "Variable read length, paired statistics, individual event counts, effect-size null testing, and novel splice-site detection require explicit official flags.",
+          "id": "rmats-variable-read-and-novel-sites",
+          "required_action": "Measure library properties and declare the matching flags before execution; retain the exact command and output tables.",
+          "source": "https://github.com/Xinglab/rmats-turbo/blob/master/README.md"
+        }
+      ],
+      "version_pattern": "v?([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "rmats.py",
+        "--version"
+      ],
+      "version_probe_kind": "command",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://github.com/Xinglab/rmats-turbo/blob/master/README.md"
+    }
+  ],
+  "version": "1.0.0"
+}
