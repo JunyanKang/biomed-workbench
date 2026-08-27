@@ -51,6 +51,9 @@ case "$command_name" in
     project)
         exec "$PYTHON_EXECUTABLE" "$WORKBENCH_ROOT/tools/project_workflow.py" "$@"
         ;;
+    environment)
+        exec "$PYTHON_EXECUTABLE" "$WORKBENCH_ROOT/tools/environment_status.py" "$@"
+        ;;
     help|-h|--help)
         printf '%s\n' \
             'Usage: tools/workbench doctor [--strict]' \
@@ -61,6 +64,7 @@ case "$command_name" in
             '       tools/workbench project init|admit|adjudicate|review|decide|prepare-revision|ingest-execution|map|map-recovery|resume [OPTIONS]' \
             '       tools/workbench project migrate-state-v1|upgrade-state-migration-1-1 [OPTIONS]' \
             '       tools/workbench project --help' \
+            '       tools/workbench environment --project-root DIR [--module CAPABILITY_ID --compatibility-row ROW]' \
             '       tools/workbench credentials [status | set NAME | remove NAME | connect-service SERVICE | mark-service SERVICE STATE | disconnect-service SERVICE | location]' \
             '       tools/workbench validate [--release]'
         ;;

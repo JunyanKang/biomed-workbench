@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Any, Mapping
 
 from .identity import digest_value, freeze_mapping, thaw, validate_identifier
+from .environment_identity import validate_analysis_environment
 from .observed_output_protocol import validate_observed_output_protocol
 
 
@@ -127,6 +128,7 @@ class ObservedExecutionReceipt:
     postflight_result_digests: Mapping[str, str]
     process_exit_code: int
     postflight_results: Mapping[str, Any] | None = None
+    execution_environment: Mapping[str, Any] | None = None
     execution_state: str = "observed-completed"
 
     def __post_init__(self) -> None:
@@ -174,6 +176,12 @@ class ObservedExecutionReceipt:
             if digest_value(thaw(result)) != postflight[str(gate_id)]:
                 raise ValueError(f"observed execution gate result digest differs from its result: {gate_id}")
         object.__setattr__(self, "postflight_results", results)
+        if self.execution_environment is not None:
+            object.__setattr__(
+                self,
+                "execution_environment",
+                freeze_mapping(validate_analysis_environment(self.execution_environment)),
+            )
         if self.process_exit_code != 0 or self.execution_state != "observed-completed":
             raise ValueError("only an observed zero-exit execution can form a completion receipt")
 
@@ -194,6 +202,7 @@ class ObservedExecutionReceipt:
         process_exit_code: int,
         source_kind: str,
         execution_request_digest: str,
+        execution_environment: Mapping[str, Any],
         handoff: ExecutionHandoff | None = None,
     ) -> "ObservedExecutionReceipt":
         if source_kind == "handoff":
@@ -243,6 +252,7 @@ class ObservedExecutionReceipt:
             "process_exit_code": process_exit_code,
             "execution_state": "observed-completed",
         }
+        basis["execution_environment"] = dict(execution_environment)
         if source_kind == "handoff" or postflight_results:
             basis["postflight_results"] = dict(postflight_results or {})
         return cls(id=f"observed-{digest_value(basis)[:24]}", **basis)
@@ -266,6 +276,8 @@ class ObservedExecutionReceipt:
             "process_exit_code": self.process_exit_code,
             "execution_state": self.execution_state,
         }
+        if self.execution_environment is not None:
+            payload["execution_environment"] = thaw(self.execution_environment)
         if self.source_kind == "handoff" or self.postflight_results:
             payload["postflight_results"] = thaw(self.postflight_results)
         return payload

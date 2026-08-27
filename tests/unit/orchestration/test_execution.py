@@ -9,10 +9,13 @@ from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
 from biomed_workbench.kernel.state import ProjectState, apply_event
 from biomed_workbench.kernel.artifact_store import ProjectArtifactStore
 from biomed_workbench.kernel.artifacts import ScientificArtifact
+from biomed_workbench.kernel.environment_identity import capture_analysis_environment
+from biomed_workbench.kernel.execution_receipts import ObservedExecutionReceipt
+from biomed_workbench.kernel.identity import digest_value
 from biomed_workbench.modules.compatibility import EnvironmentSnapshot
 from biomed_workbench.modules.index import BUILTIN_ROOT
 from biomed_workbench.modules.registry import ModuleRegistry
-from biomed_workbench.modules.contract import ExecutionContract, parse_manifest
+from biomed_workbench.modules.contract import ExecutionContract, observed_output_contract_digest, parse_manifest
 from biomed_workbench.orchestration.execution import execute_node
 from tests.unit.kernel.test_context import project_context
 from tests.unit.kernel.test_hypotheses import hypothesis
@@ -104,6 +107,71 @@ class NodeExecutionTests(unittest.TestCase):
         self.assertEqual(result.status, "completed")
         self.assertEqual(result.provenance["dependencies"]["python"], "3.14.9")
         self.assertFalse(result.provenance["tested_version_baseline"]["dependencies"]["python"])
+
+    def test_repeat_execution_reuses_exact_environment_and_blocks_content_drift(self):
+        state = execution_state()
+        node = execution_node()
+        plan = execution_plan(node)
+        state = apply_event(
+            state,
+            "plan_created",
+            {"plan": plan.to_dict(), "activate": True},
+            rationale="Register a plan before testing repeat-environment identity.",
+        )
+        current = capture_analysis_environment()
+        snapshot = EnvironmentSnapshot(
+            tools={}, dependencies={"python": "3.14.3"}, platform="macos-arm64",
+            analysis_environment=current,
+        )
+        first = execute_node(
+            state, plan, node, self.registry,
+            environment_provider=lambda _manifest: snapshot,
+        )
+        manifest = self.registry.get(node.module_id)
+        receipt = ObservedExecutionReceipt.create(
+            plan_node_id=node.id,
+            module_id=manifest.id,
+            module_version=manifest.version,
+            compatibility_row_id=str(first.compatibility_row_id),
+            observed_output_contract_digest=observed_output_contract_digest(manifest),
+            parameters_digest=str(first.provenance["parameters_digest"]),
+            runtime_versions={"python": "3.14.3"},
+            output_artifact_digests={artifact.id: artifact.content_digest for artifact in first.artifacts},
+            postflight_result_digests={},
+            postflight_results={},
+            process_exit_code=0,
+            source_kind="direct",
+            execution_request_digest=digest_value(first.to_dict()),
+            execution_environment=first.provenance["analysis_environment"],
+        )
+        state = apply_event(
+            state,
+            "execution_observed",
+            {"receipt": receipt.to_dict()},
+            rationale="Record the first environment-bound execution.",
+        )
+
+        reused = execute_node(
+            state, plan, node, self.registry,
+            environment_provider=lambda _manifest: snapshot,
+        )
+        self.assertEqual(reused.status, "completed")
+        self.assertEqual(reused.provenance["analysis_environment_reuse_status"], "reused-exact")
+
+        drifted = capture_analysis_environment(container_image_digest="a" * 64)
+        blocked = execute_node(
+            state,
+            plan,
+            node,
+            self.registry,
+            environment_provider=lambda _manifest: EnvironmentSnapshot(
+                tools={}, dependencies={"python": "3.14.3"}, platform="macos-arm64",
+                analysis_environment=drifted,
+            ),
+        )
+        self.assertEqual(blocked.status, "blocked")
+        self.assertEqual(blocked.safe_error_class, "EnvironmentDriftError")
+        self.assertIn("ANALYSIS_ENVIRONMENT_DRIFT", blocked.compatibility_finding_codes)
 
     def test_unknown_dependency_version_blocks_before_entrypoint(self):
         state = execution_state()

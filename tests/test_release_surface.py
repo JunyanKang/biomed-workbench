@@ -32,7 +32,7 @@ class ReleaseSurfaceTests(unittest.TestCase):
 
         self.assertTrue((ROOT / "LICENSE").exists())
         self.assertEqual(plugin["license"], "Apache-2.0")
-        self.assertEqual(plugin["version"], "0.2.6")
+        self.assertEqual(plugin["version"], "0.2.7")
         self.assertEqual(plugin["version"], catalog["version"])
 
         chinese_readme = (ROOT / "README.md").read_text(encoding="utf-8")
@@ -131,6 +131,14 @@ class ReleaseSurfaceTests(unittest.TestCase):
         self.assertIn("2026-08-27-0.2.6.zh-CN.md", chinese_index)
         self.assertIn("2026-08-27-0.2.6.md", english_index)
 
+    def test_analysis_environment_release_is_documented_bilingually(self):
+        chinese = (ROOT / "docs" / "releases" / "2026-08-27-0.2.7.zh-CN.md").read_text(encoding="utf-8")
+        english = (ROOT / "docs" / "releases" / "2026-08-27-0.2.7.md").read_text(encoding="utf-8")
+        for term in ("分析环境身份", "重复分析", "环境漂移", "外部流水线"):
+            self.assertIn(term, chinese)
+        for term in ("analysis-environment identity", "repeat analysis", "environment", "external workflows"):
+            self.assertIn(term, english.lower())
+
     def test_top_level_help_discovers_the_complete_project_command_surface(self):
         completed = subprocess.run(
             [str(ROOT / "tools" / "workbench"), "help"],
@@ -146,6 +154,7 @@ class ReleaseSurfaceTests(unittest.TestCase):
         ):
             self.assertIn(command, completed.stdout)
         self.assertIn("tools/workbench project --help", completed.stdout)
+        self.assertIn("tools/workbench environment --project-root", completed.stdout)
 
         project_help = subprocess.run(
             [str(ROOT / "tools" / "workbench"), "project", "--help"],

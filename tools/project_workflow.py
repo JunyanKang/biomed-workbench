@@ -41,6 +41,7 @@ from biomed_workbench.kernel.project_governance import (  # noqa: E402
     transition_result_status,
 )
 from biomed_workbench.kernel.execution_chain import validate_revision_target_contract  # noqa: E402
+from biomed_workbench.kernel.environment_identity import persist_analysis_environment_record  # noqa: E402
 from biomed_workbench.modules.compatibility import detect_environment  # noqa: E402
 from biomed_workbench.modules.index import BUILTIN_ROOT  # noqa: E402
 from biomed_workbench.modules.registry import ModuleRegistry  # noqa: E402
@@ -511,6 +512,9 @@ def main() -> int:
             registry=ModuleRegistry.discover(BUILTIN_ROOT),
             artifact_store=ProjectArtifactStore(root / ".biomed-workbench" / "artifacts"),
         )
+        for receipt in state.observed_executions:
+            if receipt.execution_environment is not None:
+                persist_analysis_environment_record(root, receipt.execution_environment)
     else:
         state = _state(args.state)
         if state.active_plan_id is None:
@@ -518,13 +522,18 @@ def main() -> int:
         root = args.project_root.resolve(strict=True)
         controller = ResearchController(
             ModuleRegistry.discover(BUILTIN_ROOT),
-            environment_provider=detect_environment,
+            environment_provider=lambda manifest: detect_environment(
+                manifest, project_root=str(root)
+            ),
             artifact_store=ProjectArtifactStore(root / ".biomed-workbench" / "artifacts"),
             allow_mutation=args.allow_mutation,
             evidence_map_root=args.evidence_map_root,
         )
         cycle = controller.resume(state.to_dict())
         state = cycle.state
+        for receipt in state.observed_executions:
+            if receipt.execution_environment is not None:
+                persist_analysis_environment_record(root, receipt.execution_environment)
         summary = {**_summary(state), "stop_reason": cycle.stop_reason, "executions": [item.to_dict() for item in cycle.executions]}
         _write(args.state, state.to_dict())
         print(json.dumps(summary, indent=2, sort_keys=True, ensure_ascii=False))

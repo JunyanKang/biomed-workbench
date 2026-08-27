@@ -17,7 +17,7 @@ A third method enters execution only when it replaces a named analysis or suppli
 
 ## The Project Lock
 
-Before formal analysis, the project freezes the sample sheet, genome and annotation releases, cell annotation, biological replicate unit, thresholds, colour meanings, formal result directory, and manuscript-panel registry. Each file carries a version and content fingerprint.
+Before formal analysis, the project freezes the sample sheet, genome and annotation releases, cell annotation, biological replicate unit, analysis-environment identity, thresholds, colour meanings, formal result directory, and manuscript-panel registry. Each file carries a version and content fingerprint. After observed execution, the environment identity stays with the execution receipt; a repeat analysis checks it first and preferentially reuses a compatible recorded environment, avoiding duplicate installation and unnoticed dependency changes.
 
 Changing a locked item creates a new lock revision linked to its parent. Older results are not silently adapted by editing captions, moving folders, or renaming files; affected analyses and figures return to review.
 

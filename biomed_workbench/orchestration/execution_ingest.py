@@ -9,6 +9,11 @@ from typing import Any, Mapping
 from ..kernel.artifact_store import ProjectArtifactStore
 from ..kernel.execution_chain import automatic_failed_gate_adjudication
 from ..kernel.execution_receipts import ArtifactReloadReceipt, ObservedExecutionReceipt, ScientificReviewReceipt
+from ..kernel.environment_identity import (
+    ANALYSIS_ENVIRONMENT_IDENTITY_FIELDS,
+    ANALYSIS_ENVIRONMENT_PROTOCOL_VERSION,
+    validate_analysis_environment,
+)
 from ..kernel.identity import digest_value
 from ..kernel.observed_output_protocol import (
     validate_handoff_receipt_gate_coverage,
@@ -40,6 +45,7 @@ _RUNTIME_FIELDS = {
     "dependencies",
     "version_policy",
     "compatibility_contract_digest",
+    "analysis_environment",
 }
 _WORKFLOW_FIELDS = {"identity", "version"}
 
@@ -49,21 +55,27 @@ def _validate_runtime_versions(
     row: CompatibilityRow,
     handoff: object,
     value: object,
-) -> tuple[dict[str, str], dict[str, str], dict[str, str], str, str]:
+) -> tuple[dict[str, str], dict[str, str], dict[str, str], str, str, dict[str, Any]]:
     """Require the complete observed runtime to satisfy the frozen compatibility row."""
     if not isinstance(value, Mapping) or set(value) != _RUNTIME_FIELDS:
-        raise ValueError("runtime_versions must contain workflow, tools, dependencies, policy, and contract digest")
+        raise ValueError("runtime_versions must contain workflow, tools, dependencies, policy, contract digest, and analysis environment")
     workflow = value["workflow"]
     tools = value["tools"]
     dependencies = value["dependencies"]
     policy = value["version_policy"]
     contract_digest = value["compatibility_contract_digest"]
+    analysis_environment = validate_analysis_environment(value["analysis_environment"])
     if not isinstance(workflow, Mapping) or set(workflow) != _WORKFLOW_FIELDS:
         raise ValueError("runtime workflow identity and version are required")
     if not isinstance(tools, Mapping) or not isinstance(dependencies, Mapping):
         raise ValueError("runtime tools and dependencies must be version mappings")
     tool_versions = {str(key): str(observed) for key, observed in tools.items()}
     dependency_versions = {str(key): str(observed) for key, observed in dependencies.items()}
+    if (
+        analysis_environment["tool_versions"] != tool_versions
+        or analysis_environment["dependency_versions"] != dependency_versions
+    ):
+        raise ValueError("analysis environment versions differ from the observed runtime mappings")
     if set(tool_versions) != set(row.tool_versions):
         raise ValueError("runtime tools must exactly cover the selected compatibility row")
     if set(dependency_versions) != set(row.dependency_versions):
@@ -102,11 +114,23 @@ def _validate_runtime_versions(
     workflow_version = str(workflow["version"])
     if workflow_identity not in tool_versions or tool_versions[workflow_identity] != workflow_version:
         raise ValueError("runtime workflow must identify one observed tool from the selected row")
+    accepted_digests = handoff_protocol.get("accepted_analysis_environment_content_digests")
+    if (
+        handoff_protocol.get("analysis_environment_protocol_version")
+        != ANALYSIS_ENVIRONMENT_PROTOCOL_VERSION
+        or tuple(handoff_protocol.get("analysis_environment_required_fields", ()))
+        != tuple(sorted(ANALYSIS_ENVIRONMENT_IDENTITY_FIELDS))
+        or not isinstance(accepted_digests, (list, tuple))
+        or any(not isinstance(item, str) or len(item) != 64 for item in accepted_digests)
+    ):
+        raise ValueError("prepared handoff does not contain a valid analysis-environment reuse contract")
+    if accepted_digests and analysis_environment["content_digest"] not in accepted_digests:
+        raise ValueError("observed analysis environment drifted from every accepted prior execution")
     return tool_versions, dependency_versions, {
         **{f"tool:{key}": item for key, item in tool_versions.items()},
         **{f"dependency:{key}": item for key, item in dependency_versions.items()},
         f"workflow:{workflow_identity}": workflow_version,
-    }, workflow_identity, workflow_version
+    }, workflow_identity, workflow_version, analysis_environment
 
 
 def _reload_validator(identifier: str):
@@ -229,6 +253,7 @@ def _ingest_execution_bundle(
         receipt_runtime_versions,
         workflow_identity,
         workflow_version,
+        analysis_environment,
     ) = _validate_runtime_versions(manifest, row, handoff, bundle["runtime_versions"])
     for port in manifest.output_artifacts:
         item = by_port[port.name]
@@ -383,6 +408,10 @@ def _ingest_execution_bundle(
         ),
         "parameters_digest": handoff.request_digest,
         "output_digest": digest_value(normalized_output),
+        "analysis_environment": analysis_environment,
+        "analysis_environment_reuse_status": (
+            "reused-exact-content" if handoff.protocol["accepted_analysis_environment_content_digests"] else "first-observed"
+        ),
     }
     artifacts = _output_artifacts(
         state,
@@ -414,6 +443,7 @@ def _ingest_execution_bundle(
         process_exit_code=int(bundle["process_exit_code"]),
         source_kind="handoff",
         execution_request_digest=digest_value(handoff.to_dict()),
+        execution_environment=analysis_environment,
         handoff=handoff,
     )
     validate_handoff_receipt_gate_coverage(handoff, observed)

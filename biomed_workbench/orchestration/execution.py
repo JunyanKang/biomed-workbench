@@ -12,6 +12,11 @@ from typing import Any, Callable, Mapping
 from ..kernel.artifact_store import ArtifactPayload, ProjectArtifactStore
 from ..kernel.artifacts import ScientificArtifact
 from ..kernel.execution_receipts import ExecutionHandoff
+from ..kernel.environment_identity import (
+    ANALYSIS_ENVIRONMENT_IDENTITY_FIELDS,
+    ANALYSIS_ENVIRONMENT_PROTOCOL_VERSION,
+    environment_reuse_status,
+)
 from ..kernel.identity import digest_value, freeze_mapping, thaw
 from ..kernel.plans import PlanNode, ResearchDAG
 from ..kernel.state import ProjectState
@@ -152,6 +157,21 @@ def _blocked(node: PlanNode, manifest: ModuleManifest, input_ids: tuple[str, ...
         compatibility_finding_codes=tuple(compatibility_codes),
         provenance={},
         safe_error_class=error_class,
+    )
+
+
+def _prior_analysis_environments(
+    state: ProjectState,
+    manifest: ModuleManifest,
+    compatibility_row_id: str,
+) -> tuple[Mapping[str, Any], ...]:
+    return tuple(
+        item.execution_environment
+        for item in state.observed_executions
+        if item.module_id == manifest.id
+        and item.module_version == manifest.version
+        and item.compatibility_row_id == compatibility_row_id
+        and item.execution_environment is not None
     )
 
 
@@ -343,6 +363,34 @@ def execute_node(
             quality=quality,
             compatibility_codes=("UNREQUESTED_COMPATIBILITY_ROW",),
         )
+    analysis_environment = environment.resolved_analysis_environment()
+    prior_matching_receipts = tuple(
+        item
+        for item in state.observed_executions
+        if item.module_id == manifest.id
+        and item.module_version == manifest.version
+        and item.compatibility_row_id == decision.compatibility_row_id
+    )
+    prior_environments = _prior_analysis_environments(state, manifest, str(decision.compatibility_row_id))
+    if prior_matching_receipts and not prior_environments:
+        return _blocked(
+            node,
+            manifest,
+            input_ids,
+            "EnvironmentProvenanceMissingError",
+            quality=quality,
+            compatibility_codes=("ANALYSIS_ENVIRONMENT_PROVENANCE_MISSING",),
+        )
+    reuse_status = environment_reuse_status(analysis_environment, prior_environments)
+    if reuse_status == "drift-blocked" and manifest.access != "agent_generated":
+        return _blocked(
+            node,
+            manifest,
+            input_ids,
+            "EnvironmentDriftError",
+            quality=quality,
+            compatibility_codes=("ANALYSIS_ENVIRONMENT_DRIFT",),
+        )
     try:
         if manifest.execution.kind == "command":
             if artifact_store is None:
@@ -395,6 +443,8 @@ def execute_node(
                     "dependencies": {key: list(value) for key, value in sorted(compatibility_row.dependency_versions.items())},
                 },
                 "platform": environment.platform,
+                "analysis_environment": analysis_environment,
+                "analysis_environment_reuse_status": reuse_status,
                 "input_formats": {artifact.port: f"{artifact.format}@{artifact.format_version}" for artifact in snapshots},
                 "parameters_digest": digest_value(thaw(command_result.provenance["parameters"])),
                 "output_digest": digest_value(output),
@@ -444,6 +494,13 @@ def execute_node(
                     "compatibility_contract_digest": compatibility_contract_digest(
                         manifest, compatibility_row_id
                     ),
+                    "analysis_environment_protocol_version": ANALYSIS_ENVIRONMENT_PROTOCOL_VERSION,
+                    "analysis_environment_required_fields": sorted(
+                        ANALYSIS_ENVIRONMENT_IDENTITY_FIELDS
+                    ),
+                    "accepted_analysis_environment_content_digests": sorted(
+                        {str(value["content_digest"]) for value in prior_environments}
+                    ),
                 }
                 handoff = ExecutionHandoff.create(
                     plan_node_id=node.id,
@@ -466,15 +523,23 @@ def execute_node(
                     artifacts=(),
                     quality_findings=quality,
                     compatibility_finding_codes=(),
-                    provenance=invocation.provenance,
+                    provenance={
+                        **dict(invocation.provenance),
+                        "preparation_environment": analysis_environment,
+                        "analysis_environment_reuse_status": reuse_status,
+                    },
                     safe_error_class=None,
                     execution_handoff=handoff,
                 )
             direct_request_digest = str(invocation.provenance["parameters_digest"])
             if node.planned_request_digest is not None and direct_request_digest != node.planned_request_digest:
                 raise ValueError("observed module parameters differ from the plan node request identity")
-            output_artifacts = _output_artifacts(state, node, manifest, invocation.output, invocation.provenance, quality)
-            invocation_provenance = invocation.provenance
+            invocation_provenance = {
+                **dict(invocation.provenance),
+                "analysis_environment": analysis_environment,
+                "analysis_environment_reuse_status": reuse_status,
+            }
+            output_artifacts = _output_artifacts(state, node, manifest, invocation.output, invocation_provenance, quality)
     except CompatibilityError as exc:
         return _blocked(node, manifest, input_ids, "CompatibilityError", quality=quality, compatibility_codes=tuple(item.code for item in exc.decision.findings))
     except (ModuleRegistryError, InputValidationError, ValueError, TypeError, RuntimeError, TimeoutError) as exc:

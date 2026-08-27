@@ -10,6 +10,7 @@ from typing import Callable
 
 from ..kernel.evidence import EvidenceRecord
 from ..kernel.execution_receipts import ArtifactReloadReceipt, ObservedExecutionReceipt, ScientificReviewReceipt
+from ..kernel.environment_identity import capture_analysis_environment
 from ..kernel.execution_chain import (
     research_plan_is_resolved,
     validate_node_execution_chain,
@@ -329,6 +330,9 @@ class ResearchController:
             process_exit_code=0,
             source_kind="command" if manifest.execution.kind == "command" else "direct",
             execution_request_digest=request_digest,
+            execution_environment=dict(
+                provenance.get("analysis_environment") or capture_analysis_environment()
+            ),
         )
         state = apply_event(
             state,

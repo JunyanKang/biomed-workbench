@@ -15,6 +15,7 @@ from .kernel.context import ProjectContext
 from .kernel.execution_chain import research_plan_is_resolved
 from .kernel.hypotheses import Hypothesis
 from .kernel.identity import digest_value
+from .kernel.environment_identity import persist_analysis_environment_record
 from .kernel.plans import PlanNode, ResearchDAG
 from .kernel.scientific_dependency import AnalysisAdmission
 from .kernel.state import ProjectState, apply_event
@@ -73,6 +74,20 @@ def _persist_state(path: Path, state: ProjectState) -> None:
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
+
+
+def _persist_environment_records(root: Path, state: ProjectState) -> None:
+    """Write immutable, reusable environment records beside private project state."""
+    for receipt in state.observed_executions:
+        if receipt.execution_environment is None:
+            continue
+        try:
+            persist_analysis_environment_record(root, receipt.execution_environment)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+            raise PublicExecutionError(
+                "ENVIRONMENT_RECORD_CONFLICT",
+                "an analysis-environment record could not be persisted or verified",
+            ) from exc
 
 
 def _project_root(path: str | Path) -> Path:
@@ -434,9 +449,14 @@ def execute_public_module(
         affected_hypothesis_ids=admission.hypothesis_ids,
         replacement_action_ids=(node.id,),
     )
+    resolved_environment_provider = (
+        (lambda selected_manifest: detect_environment(selected_manifest, project_root=str(root)))
+        if environment_provider is detect_environment
+        else environment_provider
+    )
     controller = ResearchController(
         registry,
-        environment_provider=environment_provider,
+        environment_provider=resolved_environment_provider,
         artifact_store=store,
         allow_mutation=allow_mutation,
         command_executable_resolver=command_executable_resolver,
@@ -452,6 +472,7 @@ def execute_public_module(
     )
     active_node = next(item for item in cycle.active_plan.nodes if item.id == node.id)
     _persist_state(resolved_state_path, cycle.state)
+    _persist_environment_records(root, cycle.state)
     return PublicExecutionResult(
         module_id=manifest.id,
         execution_status=execution.status,

@@ -13,6 +13,11 @@ from dataclasses import dataclass
 from typing import Any, Callable, Mapping
 
 from ..formats import FormatRegistry, FormatSnapshot, validate_format
+from ..kernel.environment_identity import (
+    bind_analysis_environment_versions,
+    capture_analysis_environment,
+    validate_analysis_environment,
+)
 from .contract import ArtifactPort, CompatibilityRow, FormatContract, ModuleManifest, version_is_allowed
 
 
@@ -24,6 +29,18 @@ class EnvironmentSnapshot:
     tools: dict[str, str]
     dependencies: dict[str, str]
     platform: str
+    analysis_environment: Mapping[str, Any] | None = None
+
+    def resolved_analysis_environment(self, *, project_root: str | None = None) -> dict[str, Any]:
+        if self.analysis_environment is None:
+            value = capture_analysis_environment(project_root=project_root)
+        else:
+            value = validate_analysis_environment(self.analysis_environment)
+        return bind_analysis_environment_versions(
+            value,
+            tool_versions=self.tools,
+            dependency_versions=self.dependencies,
+        )
 
 
 @dataclass(frozen=True)
@@ -123,6 +140,7 @@ def detect_environment(
     service_probe_runner: CallableProbeRunner | None = None,
     dependency_provider: DependencyProvider | None = None,
     platform_name: str | None = None,
+    project_root: str | None = None,
 ) -> EnvironmentSnapshot:
     """Detect only versions explicitly declared by a module contract."""
     run_probe = probe_runner or _run_probe
@@ -164,7 +182,12 @@ def detect_environment(
                 dependencies[requirement.name] = match.group(1) if match.groups() else match.group(0)
         except (ImportError, AttributeError, OSError, RuntimeError, ValueError, subprocess.SubprocessError, TimeoutError):
             continue
-    return EnvironmentSnapshot(tools=tools, dependencies=dependencies, platform=platform_name or _platform_name())
+    return EnvironmentSnapshot(
+        tools=tools,
+        dependencies=dependencies,
+        platform=platform_name or _platform_name(),
+        analysis_environment=capture_analysis_environment(project_root=project_root),
+    )
 
 
 def _finding(code: str, subject: str, message: str) -> CompatibilityFinding:

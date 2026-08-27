@@ -30,12 +30,13 @@ The workbench selects methods that fit the question and then:
 
 The end of a computation is not automatically the end of an analysis. A result supports a project conclusion only after the relevant checks and scientific review. Failed analyses, negative findings, and conflicting evidence remain part of the record.
 
-Long-running projects use a [project lock](project-governance.md) to freeze sample sheets, reference releases, cell annotation, replicate units, thresholds, colours, formal directories, and figure identities. The routine result view prioritises scientific conclusions, key results, evidence boundaries, and the next decision; complete execution and audit records remain available in the background for traceability.
+Long-running projects use a [project lock](project-governance.md) to freeze sample sheets, reference releases, cell annotation, replicate units, analysis environments, thresholds, colours, formal directories, and figure identities. Every observed execution records the content identity of its Conda environment, virtual environment, or container. A repeat analysis first reuses a verified environment and stops before computation if that environment has drifted. The routine result view prioritises scientific conclusions, key results, evidence boundaries, and the next decision; complete execution and provenance records remain available in the background when needed.
 
 ## Project Checkpoints
 
 - **Data intake:** study design, files, metadata, references, and formats agree.
 - **Analysis readiness:** statistical units, confounders, method choice, and expected outputs are clear.
+- **Environment identity:** an existing compatible environment is reused where possible, and packages, lock files, interpreter, platform, and container identity agree with the relevant prior execution.
 - **Result review:** technical quality, effect size, robustness, negative findings, and competing explanations are considered.
 - **Scientific conclusion:** the support, counter-evidence, and limits of each important claim are explicit.
 - **Delivery:** figures, tables, methods, citations, and prose agree with one another.

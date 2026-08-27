@@ -8,6 +8,12 @@ from unittest.mock import patch
 
 from biomed_workbench.kernel.artifact_store import ProjectArtifactStore
 from biomed_workbench.kernel.execution_receipts import ExecutionHandoff, ObservedExecutionReceipt
+from biomed_workbench.kernel.environment_identity import (
+    ANALYSIS_ENVIRONMENT_IDENTITY_FIELDS,
+    ANALYSIS_ENVIRONMENT_PROTOCOL_VERSION,
+    bind_analysis_environment_versions,
+    capture_analysis_environment,
+)
 from biomed_workbench.kernel.execution_chain import gate_adjudication_bundle_digest
 from biomed_workbench.kernel.identity import digest_value
 from biomed_workbench.kernel.plans import PlanNode, ResearchDAG
@@ -67,7 +73,7 @@ class ExecutionIngestTests(unittest.TestCase):
             adjudications.append(adjudication)
         return state, tuple(adjudications)
 
-    def _prepared_case(self, *, contract_digest=None):
+    def _prepared_case(self, *, contract_digest=None, accepted_environment_digests=()):
         registry = ModuleRegistry.discover(BUILTIN_ROOT)
         manifest = registry.get("functional-enrichment")
         state = state_with(
@@ -109,6 +115,9 @@ class ExecutionIngestTests(unittest.TestCase):
                 "compatibility_contract_digest": compatibility_contract_digest(
                     manifest, manifest.compatibility_matrix[0].id
                 ),
+                "analysis_environment_protocol_version": ANALYSIS_ENVIRONMENT_PROTOCOL_VERSION,
+                "analysis_environment_required_fields": sorted(ANALYSIS_ENVIRONMENT_IDENTITY_FIELDS),
+                "accepted_analysis_environment_content_digests": list(accepted_environment_digests),
             },
         )
         state = apply_event(state, "execution_handoff_recorded", {"handoff": handoff.to_dict()}, rationale="Record the exact handoff.")
@@ -163,6 +172,14 @@ class ExecutionIngestTests(unittest.TestCase):
                 "compatibility_contract_digest": compatibility_contract_digest(
                     manifest, manifest.compatibility_matrix[0].id
                 ),
+                "analysis_environment": capture_analysis_environment(
+                    project_root=root,
+                    tool_versions={"clusterProfiler": "4.10.1", "fgsea": "1.28.0"},
+                    dependency_versions={
+                        "AnnotationDbi": "1.64.1", "digest": "0.6.39", "enrichplot": "1.22.0",
+                        "ggplot2": "3.5.2", "jsonlite": "2.0.0", "r": "4.3.2",
+                    },
+                ),
             },
             "postflight_results": [{"gate_id": gate.id} for gate in manifest.quality_gates],
             "outputs": [{
@@ -207,6 +224,11 @@ class ExecutionIngestTests(unittest.TestCase):
         bundle["runtime_versions"]["version_policy"] = "compatible"
         bundle["runtime_versions"]["tools"]["clusterProfiler"] = "4.10.2"
         bundle["runtime_versions"]["workflow"]["version"] = "4.10.2"
+        bundle["runtime_versions"]["analysis_environment"] = bind_analysis_environment_versions(
+            bundle["runtime_versions"]["analysis_environment"],
+            tool_versions=bundle["runtime_versions"]["tools"],
+            dependency_versions=bundle["runtime_versions"]["dependencies"],
+        )
         bundle["outputs"][0]["content"]["provenance"]["workflow_version"] = "4.10.2"
         state = ingest_execution_bundle(
             state,
@@ -217,6 +239,18 @@ class ExecutionIngestTests(unittest.TestCase):
         receipt = state.observed_executions[-1]
         self.assertEqual(receipt.runtime_versions["workflow:clusterProfiler"], "4.10.2")
         self.assertEqual(receipt.runtime_versions["tool:fgsea"], "1.28.0")
+
+    def test_repeat_handoff_rejects_an_unaccepted_analysis_environment(self):
+        registry, state, root, bundle = self._prepared_case(
+            accepted_environment_digests=("0" * 64,)
+        )
+        with self.assertRaisesRegex(ValueError, "environment drifted"):
+            ingest_execution_bundle(
+                state,
+                bundle,
+                registry=registry,
+                artifact_store=ProjectArtifactStore(root / "objects"),
+            )
 
     def test_observed_result_contract_rejects_adversarial_bundles(self):
         mutations = {

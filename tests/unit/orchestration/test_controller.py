@@ -10,6 +10,7 @@ from types import SimpleNamespace
 from biomed_workbench.kernel.artifacts import ScientificArtifact
 from biomed_workbench.kernel.evidence import EvidenceRecord
 from biomed_workbench.kernel.execution_receipts import ExecutionHandoff
+from biomed_workbench.kernel.environment_identity import create_analysis_environment_identity
 from biomed_workbench.kernel.execution_chain import (
     delivery_slice_digest,
     validate_revision_target_contract,
@@ -104,6 +105,27 @@ def execution_artifact(state, node, registry):
 
 def completed_execution(state, node, registry):
     artifact = execution_artifact(state, node, registry)
+    base_provenance = {
+        "module_id": node.module_id,
+        "module_version": "1.0.0",
+        "compatibility_row_id": registry.get(node.module_id).compatibility_matrix[0].id,
+    }
+    environment = create_analysis_environment_identity(
+        manager="remote",
+        name="controlled-test-runtime",
+        location="remote://controlled-test-runtime",
+        location_digest="1" * 64,
+        interpreter="python",
+        interpreter_digest="2" * 64,
+        interpreter_version="3.14.3",
+        platform_name="test-any",
+        lock_files=[],
+        package_inventory_digest="3" * 64,
+        package_count=1,
+        container_image_digest=None,
+        tool_versions={},
+        dependency_versions={"python": "3.14.3"},
+    )
     return NodeExecution(
         node_id=node.id,
         module_id=node.module_id,
@@ -115,7 +137,13 @@ def completed_execution(state, node, registry):
         artifacts=(artifact,),
         quality_findings=(),
         compatibility_finding_codes=(),
-        provenance={"module_id": node.module_id, "module_version": "1.0.0", "compatibility_row_id": registry.get(node.module_id).compatibility_matrix[0].id},
+        provenance={
+            **base_provenance,
+            "parameters_digest": digest_value(base_provenance),
+            "tools": {},
+            "dependencies": {"python": "3.14.3"},
+            "analysis_environment": environment,
+        },
         safe_error_class=None,
     )
 

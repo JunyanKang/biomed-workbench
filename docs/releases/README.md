@@ -6,6 +6,7 @@ This directory records capability changes, representative acceptance, compatibil
 
 ## Versions
 
+- [0.2.7 · 2026-08-27](2026-08-27-0.2.7.md): binds analysis-environment identity to observed execution, reuses recorded environments before repeat analysis, blocks dependency drift, and applies the same contract to external workflow return and private project records.
 - [0.2.6 · 2026-08-27](2026-08-27-0.2.6.md): redesigns the bilingual project introduction and makes evidence-preserving academic voice revision a required manuscript and proposal delivery step.
 - [0.2.5 · 2026-08-26](2026-08-26-0.2.5.md): strengthens complex scientific semantics and minimal-sufficient analysis, adds dedicated RNA processing and alternative splicing, and integrates multi-source evidence, programme-specific NSFC writing, and editable proposal figures.
 - [0.2.4 · 2026-08-24](2026-08-24-0.2.4.md): restructures the capability taxonomy, separates quantitative image analysis from scientific figures, and establishes figure standards as project-wide support.
