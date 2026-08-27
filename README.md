@@ -1,150 +1,113 @@
+<p align="center"><img src="assets/biomed-workbench-mark.svg" width="84" alt="Biomed Workbench"></p>
+
 <h1 align="center">Biomed Workbench</h1>
 
-<p align="center"><strong>让生物医学研究从问题出发，以可复核的证据收束</strong></p>
+<p align="center"><strong>把研究问题、数据分析与科研表达连成一条完整路径</strong></p>
+
+<p align="center">从组学、空间与结构数据，到科学解释、研究写作和科研交付</p>
 
 <p align="center">
-  研究设计 · 数据分析 · 科学评审 · 证据追溯 · 论文交付
+<a href="README.md">中文</a> · <a href="README.en.md">English</a> ·
+<a href="#开始使用">开始使用</a> ·
+<a href="docs/capabilities/README.zh-CN.md">完整能力</a> ·
+<a href="docs/releases/README.zh-CN.md">发布记录</a>
 </p>
 
-<p align="center">
-  <a href="README.md">中文</a> · <a href="README.en.md">English</a>
-</p>
+<p align="center"><img src="assets/readme/biomed-workbench-editorial-hero.zh-CN.png" width="100%" alt="从研究设计、多尺度数据、方法分析与结果解释，走向科研交付的完整研究路径"></p>
 
-<p align="center">
-  <a href="LICENSE"><img alt="Apache-2.0 license" src="https://img.shields.io/badge/license-Apache--2.0-365B73"></a>
-  <img alt="215 registered scientific modules" src="https://img.shields.io/badge/registered%20modules-215-4E8B86">
-</p>
+<p align="center"><sub>概念图：研究设计与不同尺度的数据进入同一分析过程，经结果解释形成科学图件、研究文本和后续研究方案；图中内容不代表真实实验结果。</sub></p>
 
-<p align="center">
-  <a href="#开始使用">开始使用</a> ·
-  <a href="docs/capabilities/README.zh-CN.md">能力地图</a> ·
-  <a href="#论文写作与科研交付">论文写作与科研交付</a> ·
-  <a href="docs/scientific-evidence-map.zh-CN.md">证据地图</a> ·
-  <a href="docs/releases/README.zh-CN.md">发布记录</a>
-</p>
+Biomed Workbench 是面向复杂生物医学项目的研究工作台。你可以直接描述科学问题、实验设计、已有数据和希望得到的结果，它会从研究语境出发组织合适的方法、分析步骤和交付形式，而不是要求你先掌握一长串工具名称。
 
-<p align="center">
-  <img src="assets/readme/biomed-workbench-editorial-hero.png" width="100%" alt="生物医学研究输入经分析、科学评审和证据组织形成图表与论文交付的概念图">
-</p>
+它既能处理一项明确的分析，也能协调由多种数据、实验和写作任务组成的长期项目。能直接执行的流程会继续运行并读取实际结果；需要额外数据、软件或人工判断时，会说明原因和可行的下一步。
 
-<p align="center"><sub>概念图：展示研究输入、分析、评审、证据组织与交付之间的关系；图中数据与图形均为示意，不代表实验结果。</sub></p>
+## 从一个研究问题开始
 
-Biomed Workbench 把生物医学研究设计、数据分析和科研交付连接起来。它将研究问题、真实数据、方法选择、分析结果、科学评审和后续决策放在同一套可追溯记录中，使一次分析能够成为下一步研究判断的可靠依据。
-
-它的核心价值是为复杂项目提供受监督的方法选择和证据组织：先理解实验类型、靶标、对照、归一化和待判断的生物学关系，再选择足以回答问题的最小分析组合，并把真正通过评审的结果推进到论文图和文字。
-
-用户以自然语言描述目标、研究设计与已有数据；工作台检查输入和方法适用条件，选择相应能力，执行可用流程，重新打开结果文件，并把结论限定在实际证据能够支持的范围内。
-
-| 研究设计 | 证据追溯 | 科研交付 |
+| 理解项目 | 完成分析 | 形成成果 |
 | --- | --- | --- |
-| 先界定问题、实验单位、假设与决策标准，再组织方法。 | 把数据、参数、程序、图件、图注、引用和评审连接起来。 | 从分析表格和图组延伸到双语报告、稿件、回复与演示材料。 |
+| 识别研究对象、实验单位、分组、对照、数据类型、假说和真正需要回答的问题。 | 选择足以回答问题的方法组合，衔接上下游步骤，并结合实际结果判断是否需要补充分析。 | 把数据、表格和图件组织成科学解释、后续实验、论文段落、项目申请或汇报材料。 |
 
-## 一个项目如何推进
+你不需要把任务拆成软件命令。工作台会区分实验类型、靶标、内部参照、特异性处理和归一化，也会识别哪些分析可以并行、哪些结果必须先完成才能进入下一步。对于同一个问题，它优先选择能够改变科学判断的必要分析，避免为了“方法更多”而不断增加计算。
 
-| 01 · 定义 | 02 · 分析 | 03 · 评审 | 04 · 决策 |
-| --- | --- | --- | --- |
-| 明确生物学问题、实验单位、已有证据、竞争性假设与成功标准。 | 每个问题选择一个主分析和一个必要的正交验证，记录版本、参数、环境与输出。 | 分别检查技术质量、统计稳健性、生物学解释和结论边界。 | 将结果归入正式、候选、敏感性或弃用状态，再决定下一步。 |
-
-计算结束不等于分析完成。只有通过质量检查、结果重读和科学评审的内容，才会成为当前项目的有效证据；冲突、失败和被排除的路线仍保留在项目历史中，供后续判断复核。
-
-长期项目还会锁定样本表、参考版本、细胞注释、重复单位、阈值、颜色、正式目录和论文图登记表，防止多轮分析中结果身份、图注和文件位置彼此漂移。详见[项目锁定、分析选择与结果状态](docs/project-governance.zh-CN.md)。
-
-## 科学证据地图
-
-证据地图采用两层结构，避免把完整文件关系压缩成一张难以阅读的大图：
-
-1. **项目主线**只呈现关键数据和图组之间的支持、削弱、冲突与依赖；
-2. **单项证据**再展开前置结论、当前数据、作图数据、分析程序、排版程序、最终文件、图注、解释来源与 DOI。
-
-文件身份、版本关系和内容指纹随同保存。双语解读报告读取同一张经过核对的证据地图，因此图、表、正文与引用共享同一来源，而不是在报告阶段重新拼接。完整设计见[科学证据地图](docs/scientific-evidence-map.zh-CN.md)。
-
-## 研究与分析范围
-
-当前包含 **215 个可独立识别的科学模块**。这一数字表示方法用途、输入输出和使用条件已经登记，不等同于每个模块已在所有数据类型、物种或运行环境中完成验收；精确的执行范围与代表性案例以对应版本的[发布记录](docs/releases/README.zh-CN.md)、[成熟度说明](docs/maturity.zh-CN.md)和[`reports/`](reports/)为准。
-
-工作台采用多维分类：数据分析按研究对象与数据尺度组织；能够跨越多个研究阶段的通用方法、证据管理、科学作图和科研写作单独列为全项目支撑能力。
+## 它能完成哪些研究工作
 
 ### 数据与研究对象
 
-| 方向 | 代表性能力 |
+| 研究方向 | 可以开展的工作 |
 | --- | --- |
-| [Bulk 测序](docs/capabilities/bulk-sequencing-assays.zh-CN.md) | bulk RNA-seq 与[RNA 加工/可变剪接](docs/capabilities/rna-processing-alternative-splicing.zh-CN.md)，ChIP-seq、CUT&RUN、CUT&Tag，R-loop mapping，RIP/eCLIP/LACE-seq，Ribo-seq，GRO/PRO/TT/NET-seq，ATAC-seq，甲基化与三维基因组 |
-| [Single-cell](docs/capabilities/single-cell-integration-reference-cross-species.zh-CN.md) | 质控与注释，批次和参考整合，多组学整合，轨迹、velocity、调控分析，[样本感知的剪接候选分析](docs/capabilities/rna-processing-alternative-splicing.zh-CN.md)，以及跨物种映射与评估 |
-| [Spatial](docs/capabilities/trajectory-spatial-complete-analysis.zh-CN.md) | 平台数据结构与质控，组织图像和分割，空间域、解卷积与参考投射，多切片对齐、三维坐标和空间通讯 |
-| [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | 蛋白互作网络，AlphaFold 结果接收与质量评审，HADDOCK3 对接，结构比较、结合评估和网络交付 |
-| [临床与实验研究](docs/capabilities/clinical-and-experimental.zh-CN.md) | 队列、生存、标志物和定量实验；流式、qPCR、剂量反应、蛋白定量、微生物学和动物实验 |
-| [定量图像分析](docs/capabilities/quantitative-imaging.zh-CN.md) | 图像检查、分割、共定位、目标追踪、迁移定量和基础配准；输出 mask、逐目标数据和测量质量检查 |
+| [Bulk 测序](docs/capabilities/bulk-sequencing-assays.zh-CN.md) | RNA 表达、RNA 加工与可变剪接，染色质结合与开放性，R-loop、蛋白–RNA 结合、翻译、瞬时转录、甲基化和三维基因组分析 |
+| [Single-cell](docs/capabilities/single-cell-integration-reference-cross-species.zh-CN.md) | 质控与注释，跨批次和参考整合，多组学联合分析，轨迹与状态转变，调控网络、样本感知推断及跨物种映射 |
+| [Spatial](docs/capabilities/trajectory-spatial-complete-analysis.zh-CN.md) | 平台数据导入与质控，组织图像和细胞分割，空间域、解卷积、参考投射、空间通讯、多切片对齐与三维组织分析 |
+| [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | 蛋白互作网络，AlphaFold 结果接收与质量解读，HADDOCK3 对接，结构比较、结合评估和结构证据作图 |
+| [临床与实验研究](docs/capabilities/clinical-and-experimental.zh-CN.md) | 队列、生存、标志物和定量实验分析，以及流式、qPCR、剂量反应、蛋白定量、微生物学和动物实验设计 |
+| [定量图像分析](docs/capabilities/quantitative-imaging.zh-CN.md) | 图像检查、分割、共定位、目标追踪、迁移定量和基础配准，并输出逐目标测量数据与质量结果 |
 
 ### 贯穿全项目的支撑能力
 
-| 方向 | 代表性能力 |
+| 研究工作 | 可以开展的工作 |
 | --- | --- |
-| [证据与公共数据库](docs/capabilities/evidence-and-literature.zh-CN.md) | 文献与引用核查，基因、变异、通路、结构和临床试验证据，多来源时效性与主张审查 |
-| [跨尺度通用方法](docs/capabilities/omics-and-single-cell.zh-CN.md) | 实验设计与格式检查，差异检验、DEqMS、GO/KEGG、GSEA、WGCNA、motif、网络分析和结果评审 |
-| [科学作图规范与图件交付](docs/capabilities/scientific-figure-standards.zh-CN.md) | 为各分析模块统一图件任务、字体与线条、颜色、图例、统计标注、版面、源数据、导出格式和成图复核 |
-| [科研写作、发表与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) | 全文双语精读，科研写作与基金论证，统计和数据可用性审查，期刊定位、引用核查、审稿回复、专利、图件与汇报交付 |
+| [文献与公共数据库](docs/capabilities/evidence-and-literature.zh-CN.md) | 多来源文献检索与全文阅读，引用核查，以及基因、变异、通路、结构、药物和临床试验证据整合 |
+| [跨尺度通用分析](docs/capabilities/omics-and-single-cell.zh-CN.md) | 实验设计、差异分析、蛋白组定量、功能富集、GSEA、WGCNA、motif、网络分析和跨数据结果整合 |
+| [科学作图规范与图件交付](docs/capabilities/scientific-figure-standards.zh-CN.md) | 根据分析目的选择图形，统一字体、线条、颜色、图例和统计标注，并交付作图数据、PDF、SVG 与高分辨率 PNG |
+| [科研写作、发表与转化](docs/capabilities/publication-and-translation.zh-CN.md) | 全文中英对照精读，论文和科研项目申请写作，学术表达修订，期刊定位、统计与数据可用性检查、审稿回复、汇报和专利材料 |
 
-完整能力索引：[中文](docs/capabilities/README.zh-CN.md) · [English](docs/capabilities/README.md)
+[查看完整能力地图](docs/capabilities/README.zh-CN.md) · [查看公共案例](docs/cases/README.zh-CN.md)
+
+## 一个项目如何向前推进
+
+1. **先理解研究。** 读取样本设计、已有文件和前期结论，明确当前问题、比较单位、竞争性解释和期望交付物。
+2. **再选择方法。** 根据数据和问题安排主分析、必要验证及上下游关系，而不是按关键词简单匹配工具。
+3. **结合结果解释。** 重新打开真实输出，结合技术质量、统计结果和生物学背景说明发现、限制与尚未解决的问题。
+4. **决定下一步。** 保留能够支撑当前结论的结果，调整不合适的分析，并把下一项计算、实验或写作任务接在已有研究基础上。
+
+长期项目中已经确定的样本信息、参考版本、细胞注释、统计单位、颜色和正式图件会持续沿用。数据、作图表格、图件、图注、正文和文献来源可以连接到同一份[科学证据地图](docs/scientific-evidence-map.zh-CN.md)，让多轮分析之后仍能看清每个结论从哪里来。冲突或阴性结果不会被藏起来，而会与支持性结果一起用于决定课题应继续、调整还是补充验证。
 
 ## 论文写作与科研交付
 
-写作能力贯穿研究全过程，而不是在分析结束后单独进行文字润色。工作台先核对研究事实、数据、图表和引用，再根据论文、基金申请、审稿回复、汇报或专利材料的实际用途组织内容；证据不足的地方保留为待补信息、限制或假设。国家自然科学基金申请按青年 C、青年 B、青年 A、面上、地区、重点和重大项目分别读取当年要求，从中心问题、科学假说和章节论证开始撰写或修改实际正文，并继续完成术语、机制结论、引文和 Word 交付复核。
+写作不是分析结束后的文字包装。工作台先核对项目事实、数据、图表和参考文献，再按照论文、科研项目申请、审稿回复、汇报或专利材料的用途组织内容；证据不足的部分保留为待补信息、限制或待检验假说。
 
-| 阶段 | 能够完成的工作 | 主要交付物 |
-| --- | --- | --- |
-| 文献与阅读 | 多来源检索、文献身份与引用语境核查、全文中英对照精读、术语与图表定位 | 文献版图、全文阅读文件、来源定位表、术语表 |
-| 论证与初稿 | 建立研究事实和主张—证据关系，规划论文结构与各章节任务，撰写论文或基金申请 | 论文各章节、基金论证、方法与结果文字、待补信息清单 |
-| 语言与内容修订 | 改善学术表达，同时复核数字、结果、公式、引用、术语、结构和结论强度是否保持一致 | 修订稿、修改说明、内容保持检查 |
-| 统计与投稿规范 | 审查实验单位、重复结构、统计报告、数据与代码可用性，并按目标期刊和文章类型核对要求 | 统计审查、数据可用性声明、期刊建议、稿件规范检查 |
-| 图件与同行评议 | 规划论文图和图注，模拟审稿，组织逐条回复、稿件修改及其证据位置 | 图件方案、审稿意见、回复信、回复矩阵、修订记录 |
-| 汇报与转化 | 组织真实演示文件并复查页面，准备有来源支撑的技术披露和专利草稿材料 | 演示文件与质量报告、技术披露、专利证据与草稿包 |
+- **论文与报告：** 从主张—证据关系出发组织题目、摘要、Results、Discussion、方法、图注和双语解读报告；写前识别表达与证据问题，写后核对数字、结果、引用、术语和结论强度均未改变。
+- **科研项目申请：** 根据资助机构、申请年度、项目定位和正式模板建立论证重点，衔接立项依据、科学假说、研究方案、技术路线与前期基础；完成中英文摘要后，在保留科学内容与可行性依据的前提下，把全文修订为自然、严谨的生命科学语言。
+- **科学图件：** 让数据图、机制示意图和研究路线图分别承担明确任务，交付可编辑源文件，并复核最终尺寸下的文字、图层、对齐和页面边界。
+- **发表与修订：** 结合目标期刊要求检查结构、统计报告、引用、数据可用性，并组织审稿意见、逐条回复和稿件修改记录。
 
-这些能力既可用于已有稿件的局部修订，也可以从文献和项目证据开始组织整篇论文。国家自然科学基金申请书会先完成多来源检索、核心原文精读、引用核验和课题相关公共数据库取证，再按青年 C、青年 B、青年 A、面上、地区、重点或重大项目组织正文；立项依据、科学假说、研究方案、技术路线和前期基础图分别遵循与其位置相符的证据和视觉规则，并交付可编辑图件。详细范围、输入要求和交付边界见[科研写作、发表与转化交付](docs/capabilities/publication-and-translation.zh-CN.md)；国家自然科学基金专项能力见[国家自然科学基金申请书研究与写作](docs/capabilities/nsfc-proposal-writing.zh-CN.md)；具体期刊要求见[期刊定位与稿件规范](docs/journal-standards.zh-CN.md)。
+详细说明见[科研写作、发表与转化交付](docs/capabilities/publication-and-translation.zh-CN.md)、[科研项目申请书研究与写作](docs/capabilities/nsfc-proposal-writing.zh-CN.md)和[期刊定位与稿件规范](docs/journal-standards.zh-CN.md)。
 
-## 可信度如何进入流程
+## 你可以直接这样使用
 
-- **实验单位优先：** 条件比较回到 donor、sample、animal、organoid 或独立制备样本，避免把细胞或技术重复误作生物学重复。
-- **分析以决策为限：** 每个科学问题默认保留一个主分析和一个正交验证；新增方法需要说明替代关系或新增的决策信息。
-- **方法有使用条件：** 输入、适用场景、可调参数、兼容软件、质量检查和替代方法都有明确说明。
-- **原始证据与整合表示分离：** 整合结果服务于表示、映射和可视化；差异推断回到适合研究设计的原始计数与统计单位。
-- **结果必须重新读取：** 运行版本、参数、程序和文件核对信息随结果保存，正式交付前重新打开并检查实际文件。
-- **结论强度随证据而定：** 探索性结果保持探索性；公共案例、真实服务结果和当前用户项目的科学完成分别记录。
-- **图、表和文字同源：** 作图数据、图件、图注、结果段和 DOI 从同一版本的证据地图派生。
+> 根据原始数据和样本设计，建立 donor-aware 的单细胞与空间研究方案；完成质控、整合、注释、解卷积和轨迹分析，并说明每一步如何影响后续科学判断。
+
+> 为 CUT&Tag 研究建立完整流程，把靶标、抗体、内部参照、特异性处理和归一化作为设计参数；完成 peak、差异、富集、网络和转录关联分析，并统一输出图表。
+
+> 围绕一个候选机制整合文献、公共数据库、组学、蛋白互作和结构证据；区分直接证据、关联、冲突和知识缺口，再提出最能改变当前判断的实验。
+
+> 根据项目数据、图表、分析记录和参考文献完成论文结构、Results 和 Discussion 初稿；检查统计、引用、图注、目标期刊要求和数据可用性，并列出仍需作者确认的内容。
 
 ## 开始使用
 
 在 Codex 中直接说：
 
-> 安装 [JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench) 这个仓库的当前发布版本；核对插件身份、统一研究入口、科学模块注册表和实际版本；保护现有本地修改；完成安装后运行发布完整性检查并重新加载插件。
+> 安装 [JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench) 这个仓库的当前发布版本；保护已有本地文件，完成安装后检查插件并重新加载。
 
-安装完成后，开启一个新的研究任务，直接描述研究目标、实验设计、已有数据和期望交付物。例如：
+安装完成后，开启一个新的研究任务，说明：
 
-> 根据原始数据和样本设计，建立 donor-aware 的单细胞与空间研究方案；比较整合、注释、解卷积、轨迹和通讯策略，并为每一步给出方法依据、质量标准、图表计划和下一步决策条件。
-
-> 为 CUT&Tag 研究建立完整流程，把靶标、抗体、内部参照、特异性处理和归一化作为设计参数；完成 peak、差异、富集、网络和转录关联分析，并保留可复核的证据链。
-
-> 围绕一个候选机制整合文献、公共数据库、组学、蛋白互作与结构证据；区分直接证据、关联、冲突和缺口，再提出最能改变当前判断的后续实验。
-
-> 根据项目数据、图表、分析记录和参考文献，先建立主张—证据关系，再完成论文结构、Results 和 Discussion 初稿；随后审查统计报告、引用、数据可用性和目标期刊要求，并交付修订说明与未解决问题清单。
+- 你希望回答的科学问题；
+- 样本、分组、对照和实验设计；
+- 已有数据、文件或前期结果；
+- 希望得到的分析、图件、文字或后续实验方案。
 
 详见[使用指南](docs/using-biomed-workbench.zh-CN.md)和[安装说明](docs/installation.zh-CN.md)。
 
-## 在不同智能体中使用
+当前发布版本以 Codex 为主要使用环境。其他支持 Agent Skills 或本地标准输入输出 MCP 的智能体也可以读取研究入口和能力信息，但需要具备自己的文件访问、流程执行和结果读取能力；具体方式见[其他智能体接入说明](docs/agent-integration.zh-CN.md)。
 
-目前，Codex 是经过完整发布流程验证的使用环境。其他支持 Agent Skills 或本地标准输入输出 MCP 的智能体，也可以读取同一个科学入口和模块注册表；但文件访问、运行环境、外部软件调用、结果重读和证据交付仍需由相应智能体分别实现并验证。详见[其他智能体接入说明](docs/agent-integration.zh-CN.md)。
+## 进一步阅读
 
-其他智能体不要照搬上面的 Codex 插件安装提示。完整仓库中的 Codex 发布信息可以保留但不加载；使用时应按照该智能体支持的技能或 MCP 方式接入，并说明它实际能够完成哪些步骤。
-
-## 文档索引
-
-| 主题 | 中文 | English |
+| 想了解什么 | 中文 | English |
 | --- | --- | --- |
-| 使用与安装 | [使用指南](docs/using-biomed-workbench.zh-CN.md) · [安装](docs/installation.zh-CN.md) | [Using the workbench](docs/using-biomed-workbench.md) · [Installation](docs/installation.md) |
-| 科学能力 | [能力地图](docs/capabilities/README.zh-CN.md) · [公共案例](docs/cases/README.zh-CN.md) | [Capability map](docs/capabilities/README.md) · [Public cases](docs/cases/README.md) |
-| 证据与复现 | [项目锁定与结果状态](docs/project-governance.zh-CN.md) · [证据地图](docs/scientific-evidence-map.zh-CN.md) · [成熟度](docs/maturity.zh-CN.md) · [可复现性](docs/reproducibility.zh-CN.md) | [Project locks and result status](docs/project-governance.md) · [Evidence map](docs/scientific-evidence-map.md) · [Maturity](docs/maturity.md) · [Reproducibility](docs/reproducibility.md) |
-| 数据访问 | [公共数据库与凭据](docs/data-access-and-credentials.zh-CN.md) | [Data access and credentials](docs/data-access-and-credentials.md) |
-| 写作与期刊 | [科研写作、发表与转化交付](docs/capabilities/publication-and-translation.zh-CN.md) · [国家自然科学基金申请书研究与写作](docs/capabilities/nsfc-proposal-writing.zh-CN.md) · [期刊定位与稿件规范](docs/journal-standards.zh-CN.md) | [Academic writing, publication, and translation](docs/capabilities/publication-and-translation.md) · [NSFC proposal support](docs/capabilities/nsfc-proposal-writing.md) · [Journal positioning and manuscript requirements](docs/journal-standards.md) |
-| 项目结构与扩展 | [架构](docs/architecture.zh-CN.md) · [格式与数据要求](docs/format-contracts.zh-CN.md) · [开发](docs/development.zh-CN.md) | [Architecture](docs/architecture.md) · [File and data requirements](docs/format-contracts.md) · [Development](docs/development.md) |
-| 版本 | [发布记录](docs/releases/README.zh-CN.md) | [Release notes](docs/releases/README.md) |
+| 如何使用与准备数据 | [使用指南](docs/using-biomed-workbench.zh-CN.md) · [格式与数据要求](docs/format-contracts.zh-CN.md) | [Using the workbench](docs/using-biomed-workbench.md) · [File and data requirements](docs/format-contracts.md) |
+| 能力、案例与适用范围 | [能力地图](docs/capabilities/README.zh-CN.md) · [公共案例](docs/cases/README.zh-CN.md) · [成熟度说明](docs/maturity.zh-CN.md) | [Capability map](docs/capabilities/README.md) · [Public cases](docs/cases/README.md) · [Maturity](docs/maturity.md) |
+| 长期项目与结果来源 | [项目组织](docs/project-governance.zh-CN.md) · [科学证据地图](docs/scientific-evidence-map.zh-CN.md) · [可复现性](docs/reproducibility.zh-CN.md) | [Project organisation](docs/project-governance.md) · [Scientific evidence map](docs/scientific-evidence-map.md) · [Reproducibility](docs/reproducibility.md) |
+| 数据库、写作与期刊 | [公共数据库与凭据](docs/data-access-and-credentials.zh-CN.md) · [科研写作](docs/capabilities/publication-and-translation.zh-CN.md) · [期刊规范](docs/journal-standards.zh-CN.md) | [Data access and credentials](docs/data-access-and-credentials.md) · [Academic writing](docs/capabilities/publication-and-translation.md) · [Journal requirements](docs/journal-standards.md) |
+| 版本与开发扩展 | [发布记录](docs/releases/README.zh-CN.md) · [开发说明](docs/development.zh-CN.md) | [Release notes](docs/releases/README.md) · [Development](docs/development.md) |
 
-Biomed Workbench 采用 [Apache-2.0](LICENSE) 许可，相关来源说明见[第三方声明](THIRD_PARTY_NOTICES.md)。科学模块、证据模型和发布记录随版本持续演进；新增能力只有在方法定义、实际实现、验证证据和文档保持一致后，才会列入公开能力清单。
+Biomed Workbench 采用 [Apache-2.0](LICENSE) 许可，相关来源说明见[第三方声明](THIRD_PARTY_NOTICES.md)。不同能力的实际执行范围会随输入数据、研究设计、软件环境和对应版本的验证情况而变化，开始项目前可在能力文档和发布记录中查看当前说明。

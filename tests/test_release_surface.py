@@ -32,13 +32,17 @@ class ReleaseSurfaceTests(unittest.TestCase):
 
         self.assertTrue((ROOT / "LICENSE").exists())
         self.assertEqual(plugin["license"], "Apache-2.0")
-        self.assertEqual(plugin["version"], "0.2.5")
+        self.assertEqual(plugin["version"], "0.2.6")
         self.assertEqual(plugin["version"], catalog["version"])
 
         chinese_readme = (ROOT / "README.md").read_text(encoding="utf-8")
         english_readme = (ROOT / "README.en.md").read_text(encoding="utf-8")
-        self.assertIn(f"当前包含 **{catalog['entry_count']} 个可独立识别的科学模块**", chinese_readme)
-        self.assertIn(f"contains **{catalog['entry_count']} independently discoverable scientific modules**", english_readme)
+        self.assertIn("docs/capabilities/README.zh-CN.md", chinese_readme)
+        self.assertIn("docs/capabilities/README.md", english_readme)
+        self.assertIn("assets/readme/biomed-workbench-editorial-hero.zh-CN.png", chinese_readme)
+        self.assertIn("assets/readme/biomed-workbench-editorial-hero.en.png", english_readme)
+        self.assertTrue((ROOT / "assets" / "readme" / "biomed-workbench-editorial-hero.zh-CN.png").exists())
+        self.assertTrue((ROOT / "assets" / "readme" / "biomed-workbench-editorial-hero.en.png").exists())
 
     def test_public_figure_delivery_is_visible_in_both_languages(self):
         chinese = (ROOT / "docs" / "capabilities" / "scientific-figure-standards.zh-CN.md").read_text(encoding="utf-8")
@@ -113,6 +117,20 @@ class ReleaseSurfaceTests(unittest.TestCase):
         self.assertIn("2026-08-26-0.2.5.zh-CN.md", chinese_index)
         self.assertIn("2026-08-26-0.2.5.md", english_index)
 
+    def test_readme_and_academic_voice_release_is_documented_bilingually(self):
+        chinese = (ROOT / "docs" / "releases" / "2026-08-27-0.2.6.zh-CN.md").read_text(encoding="utf-8")
+        english = (ROOT / "docs" / "releases" / "2026-08-27-0.2.6.md").read_text(encoding="utf-8")
+        chinese_index = (ROOT / "docs" / "releases" / "README.zh-CN.md").read_text(encoding="utf-8")
+        english_index = (ROOT / "docs" / "releases" / "README.md").read_text(encoding="utf-8")
+
+        for term in ("中英文项目首页", "学术表达修订", "400 字", "英文摘要", "1,327"):
+            self.assertIn(term, chinese)
+        english_lower = english.lower()
+        for term in ("bilingual project introduction", "academic voice revision", "400 characters", "English abstract", "1,327"):
+            self.assertIn(term.lower(), english_lower)
+        self.assertIn("2026-08-27-0.2.6.zh-CN.md", chinese_index)
+        self.assertIn("2026-08-27-0.2.6.md", english_index)
+
     def test_top_level_help_discovers_the_complete_project_command_surface(self):
         completed = subprocess.run(
             [str(ROOT / "tools" / "workbench"), "help"],
@@ -160,10 +178,10 @@ class ReleaseSurfaceTests(unittest.TestCase):
         repository_link = "[JunyanKang/biomed-workbench](https://github.com/JunyanKang/biomed-workbench)"
         self.assertIn(f"安装 {repository_link} 这个仓库的当前发布版本", readme)
         self.assertIn(f"Install the current release of {repository_link}", english_readme)
-        self.assertIn("其他智能体不要照搬上面的 Codex 插件安装提示", readme)
-        self.assertIn("保留但不加载", readme)
-        self.assertIn("should not copy the Codex plugin-install request verbatim", english_readme)
-        self.assertIn("present but unloaded", english_readme)
+        self.assertIn("当前发布版本以 Codex 为主要使用环境", readme)
+        self.assertIn("需要具备自己的文件访问、流程执行和结果读取能力", readme)
+        self.assertIn("uses Codex as its primary supported environment", english_readme)
+        self.assertIn("need their own file access, workflow execution and output-reading support", english_readme)
         self.assertNotIn("codex plugin marketplace add", readme)
         self.assertNotIn("codex plugin add", readme)
         self.assertIn("开启一个新的研究任务", readme)
@@ -221,14 +239,25 @@ class ReleaseSurfaceTests(unittest.TestCase):
         self.assertIn("## 论文、基金和投稿任务怎样提出", chinese_usage)
         self.assertIn("## How To Request Manuscript, Proposal, And Submission Work", english_usage)
 
-        for term in ("全文中英对照精读", "基金", "学术表达", "统计报告", "数据可用性", "审稿", "专利"):
+        for term in ("全文中英对照精读", "科研项目申请", "学术表达", "统计报告", "数据可用性", "审稿", "专利"):
             self.assertIn(term, chinese_readme)
+        self.assertIn("完成中英文摘要", chinese_readme)
+        self.assertIn("自然、严谨的生命科学语言", chinese_readme)
         for term in ("full-paper bilingual reading", "proposal", "scholarly prose", "statistical reporting", "data and code availability", "peer review", "patent"):
-            self.assertIn(term, english_readme)
+            self.assertIn(term, english_readme.lower())
+        self.assertIn("aligned Chinese and English abstracts", english_readme)
+        self.assertIn("natural, rigorous life-science language", english_readme)
 
         capability_link = "docs/capabilities/publication-and-translation"
         self.assertIn(f"{capability_link}.zh-CN.md", chinese_readme)
         self.assertIn(f"{capability_link}.md", english_readme)
+
+        chinese_proposal = (ROOT / "docs" / "capabilities" / "nsfc-proposal-writing.zh-CN.md").read_text(encoding="utf-8")
+        english_proposal = (ROOT / "docs" / "capabilities" / "nsfc-proposal-writing.md").read_text(encoding="utf-8")
+        for term in ("中文摘要一般控制在 400 字以内", "英文摘要以中文摘要为科学基准", "不单独设置字数限制", "工程开发、审计管理", "生命科学同行"):
+            self.assertIn(term, chinese_proposal)
+        for term in ("within 400 Chinese characters", "not a word-for-word translation", "Engineering-development, audit-management", "life-science reviewer"):
+            self.assertIn(term, english_proposal)
 
 
 if __name__ == "__main__":

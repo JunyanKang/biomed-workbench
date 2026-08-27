@@ -15,7 +15,7 @@ from xml.etree import ElementTree as ET
 
 
 _NSFC_PROFILE_PATH = Path(__file__).resolve().parents[1] / "proposal_profiles" / "nsfc-2026.json"
-NSFC_PROFILE_VERSION = "2026.4"
+NSFC_PROFILE_VERSION = "2026.5"
 NSFC_OFFICIAL_SOURCES = (
     "https://www.nsfc.gov.cn/p1/2961/2962/3642/sqs.html",
     "https://www.nsfc.gov.cn/p1/2961/2962/4089/yjsx.html",
@@ -63,9 +63,30 @@ _INTERNAL_GOVERNANCE_TERMS = {
     "门控": "判定标准",
     "证据链": "证据依据",
     "状态机": "结果状态管理规则",
+    "审计": "系统核查",
+    "工程化": "系统优化",
+    "计算机化": "定量分析或信息处理",
+    "执行器": "分析程序或研究方法",
+    "注册表": "研究记录",
+    "工作流编排": "研究步骤安排",
+    "输入输出契约": "数据要求与结果形式",
+    "机器可读": "结构化记录",
+    "校验值": "文件一致性记录",
+    "哈希": "文件一致性记录",
+    "renderer": "作图程序",
+    "DAG": "依赖关系图",
     "promotion gate": "结论升级条件",
     "artifact": "研究材料或结果文件",
     "registry": "登记信息",
+}
+_ENGLISH_INTERNAL_PROPOSAL_TERMS = {
+    "audit trail": "systematic review record",
+    "workflow orchestration": "study design and analytical sequence",
+    "execution engine": "analysis method or software",
+    "state machine": "predefined decision rules",
+    "machine-readable registry": "structured research record",
+    "artifact promotion": "evidence-based conclusion update",
+    "renderer": "figure-generation method",
 }
 _UNNATURAL_CHINESE = {
     "递进判定": "逐步检验",
@@ -476,6 +497,7 @@ def prepare_nsfc_proposal_drafting(
             "drafting-template-not-bound", "major", "official_template",
             "尚未绑定当前年度和项目类型的官方申请书，不能确定最终章节与篇幅。",
         ))
+    abstract_contract, language_revision_contract = _proposal_abstract_and_language_contract(profile, template)
 
     canon_by_id: dict[str, dict[str, Any]] = {}
     for index, row in enumerate(research_canon, start=1):
@@ -633,8 +655,9 @@ def prepare_nsfc_proposal_drafting(
         "完成中心科学问题、假说和替代解释",
         "先写研究内容、判别性读出和研究基础",
         "再写立项依据与科学意义",
-        "最后完成中英文摘要、题目、年度计划和创新性",
-        "进行术语、机制主张、引文和 Word 逐页复核",
+        "按中文摘要策略在400字以内凝练科学问题、假说、研究目标和知识增量，再完成含义逐项对应的英文摘要",
+        "完成题目、年度计划和创新性，并从头到尾改写工程、审计和计算机化表述为生命科学语言",
+        "进行术语、机制主张、引文、摘要长度和 Word 逐页复核",
     ]
     return {
         "profile": {
@@ -658,20 +681,46 @@ def prepare_nsfc_proposal_drafting(
         "annual_plan": annual_rows,
         "revision_briefs": revision_briefs,
         "evidence_foundation_summary": evidence_foundation_summary,
+        "abstract_contract": abstract_contract,
+        "language_revision_contract": language_revision_contract,
         "drafting_order": drafting_order,
         "review_dimensions": [
             "科学问题是否明确且可检验", "现有认识与关键缺口之间是否形成科学张力", "每项主张是否匹配证据强度",
             "立项依据、目标、方法和预期判断是否闭合", "关键实验与模型是否可行", "创新性是否体现知识增量",
-            "风险和替代解释是否可处理", "中文表达是否自然、准确并符合生命科学标书语体",
+            "风险和替代解释是否可处理", "中文摘要是否在400字以内完成必要论证且与英文摘要一致",
+            "全文是否清除工程、审计和计算机化叙述并形成自然、准确的生命科学标书语体",
         ],
         "findings": findings,
         "major_finding_count": major_count,
         "ready_for_section_drafting": major_count == 0,
         "agent_delivery_contract": {
             "when_ready": "根据章节蓝图撰写或修订实际申请书正文，并完成逐段科学复核。",
-            "final_response_must_include": ["drafted_or_revised_prose", "evidence_boundaries", "unresolved_author_inputs"],
+            "final_response_must_include": [
+                "drafted_or_revised_prose", "chinese_abstract", "english_abstract",
+                "life_science_language_revision", "evidence_boundaries", "unresolved_author_inputs",
+            ],
             "audit_only_delivery_forbidden": True,
             "internal_package_should_not_replace_prose": True,
+            "abstract_contract_must_be_applied": True,
+            "full_text_language_revision_required": True,
+            "academic_voice_revision": {
+                "module_id": "academic-prose-revision-audit",
+                "document_type": "grant-proposal",
+                "required_sequence": [
+                    "audit the stable scientific draft before language editing",
+                    "revise the complete text without changing scientific content",
+                    "compare the exact source and revised text before delivery",
+                ],
+                "proposal_specific_rule": (
+                    "Preserve a clear and ambitious scientific vision when it is supported by authentic "
+                    "preliminary evidence and a credible research plan; do not import paper-style restraint mechanically."
+                ),
+                "preserve_exactly": [
+                    "numbers", "results", "citations", "technical terms", "mechanism boundaries",
+                    "uncertainty", "Chinese-English abstract concept alignment",
+                ],
+                "post_revision_pass_required": True,
+            },
             "post_draft_review_modules": list(_PROPOSAL_POST_DRAFT_REVIEW_MODULES),
             "proposal_figure_module": "nsfc-proposal-figure-development",
             "programme_figure_emphasis": _PROPOSAL_PROGRAM_FIGURE_EMPHASIS[program_type],
@@ -1090,6 +1139,140 @@ def prepare_nsfc_proposal_figure(
     }
 
 
+def _proposal_abstract_and_language_contract(
+    profile: dict[str, Any],
+    official_template: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build the mandatory abstract and life-science language contracts."""
+    profile_abstracts = dict(profile.get("shared_rules", {}).get("abstracts", {}))
+    chinese_profile = dict(profile_abstracts.get("chinese", {}))
+    field_limits = dict(official_template.get("field_limits", {}))
+
+    chinese_limit = field_limits.get("abstract_cn_max_characters")
+    if not isinstance(chinese_limit, int) or chinese_limit <= 0:
+        chinese_limit = chinese_profile.get("recommended_max_characters", 400)
+
+    abstract_contract = {
+        "required": True,
+        "current_programme_form_takes_precedence": True,
+        "chinese": {
+            "recommended_max_characters": chinese_limit,
+            "count_includes_punctuation": True,
+            "strategy": [
+                "用一至两句界定研究对象、关键背景和仍未解决的科学问题。",
+                "紧接中心科学问题或可检验假说，不用宏观意义替代问题本身。",
+                "用申请人的真实前期基础说明研究入口，不把相关性提升为既定机制。",
+                "概括相互衔接的研究目标、关键判别方法和能够区分替代解释的读出。",
+                "以预期获得的知识增量收束，不写空泛价值判断、编号引文或内部流程语言。",
+            ],
+            "source": chinese_profile.get("source"),
+        },
+        "english": {
+            "character_limit": None,
+            "derived_from_chinese": True,
+            "strategy": [
+                "Restate the same biological object, unresolved question, central hypothesis, aims and expected knowledge advance as the Chinese abstract.",
+                "Use natural life-science English rather than word-for-word translation or software-process language.",
+                "Preserve the same evidence strength, uncertainty and mechanism boundary in both languages.",
+                "Define project-specific terms consistently and do not introduce claims that are absent from the Chinese abstract or body.",
+            ],
+        },
+        "cross_language_requirements": [
+            "研究对象、核心表型、中心机制、科学问题、研究目标和预期知识增量逐项对应。",
+            "英文摘要不得扩大因果强度、删除不确定性或引入中文摘要和正文中没有的新主张。",
+        ],
+    }
+    language_contract = {
+        "required": True,
+        "scope": ["title", "chinese_abstract", "english_abstract", "every_body_section", "figure_captions"],
+        "revision_sequence": [
+            "逐段识别工程、审计、软件编排和计算机系统视角的表述。",
+            "区分必须保留的生物信息学方法名与不应进入申请书的内部开发语言。",
+            "把问题、证据、机制、实验对象、比较关系和科学结论改写为生命科学同行能够自然理解的表达。",
+            "复核段落承接、术语首次定义、基因与蛋白命名、证据强度和中英文概念一致性。",
+            "对修改后的全文再次从题目到参考文献顺序复读，确认没有残留的工程化或计算机化叙述。",
+        ],
+        "must_preserve": [
+            "科学事实和定量结果", "实验对象与统计单位", "方法名称和必要参数",
+            "证据强度与不确定性", "引文、编号、基因蛋白符号和专业术语",
+        ],
+        "must_remove_or_recast": sorted(_INTERNAL_GOVERNANCE_TERMS),
+    }
+    return abstract_contract, language_contract
+
+
+def _audit_proposal_abstracts_and_language(
+    *,
+    profile: dict[str, Any],
+    official_template: dict[str, Any],
+    title_cn: str,
+    abstract_cn: str,
+    abstract_en: str,
+    sections: list[dict[str, Any]],
+) -> dict[str, Any]:
+    abstract_contract, language_contract = _proposal_abstract_and_language_contract(profile, official_template)
+    findings: list[dict[str, Any]] = []
+    chinese_text = abstract_cn.strip()
+    english_text = abstract_en.strip()
+    chinese_limit = int(abstract_contract["chinese"]["recommended_max_characters"])
+
+    if not chinese_text:
+        findings.append(_finding("chinese-abstract-missing", "major", "abstract_cn", "中文摘要是申请书必需内容。"))
+    elif len(chinese_text) > chinese_limit:
+        findings.append(_finding(
+            "chinese-abstract-length-exceeded", "major", "abstract_cn",
+            "中文摘要超过当前申请书采用的建议字数，应在保留科学问题、假说、研究目标和知识增量的前提下压缩。",
+            observed_characters=len(chinese_text), maximum_characters=chinese_limit, count_includes_punctuation=True,
+        ))
+    if not english_text:
+        findings.append(_finding("english-abstract-missing", "major", "abstract_en", "英文摘要是申请书必需内容。"))
+    if english_text and re.search(r"[\u4e00-\u9fff]", english_text):
+        findings.append(_finding(
+            "english-abstract-untranslated-chinese", "major", "abstract_en",
+            "英文摘要中仍有未翻译的中文内容。",
+        ))
+    english_lower = english_text.lower()
+    for term, replacement in _ENGLISH_INTERNAL_PROPOSAL_TERMS.items():
+        if term in english_lower:
+            findings.append(_finding(
+                "english-internal-workflow-language", "major", "abstract_en",
+                f"英文摘要中出现内部工程或流程表述“{term}”。",
+                suggested=replacement,
+            ))
+
+    language_targets = [("title_cn", title_cn, "title"), ("abstract_cn", abstract_cn, "abstract_cn")]
+    language_targets.extend(
+        (
+            str(section.get("id", f"section-{index}")),
+            str(section.get("text", "")),
+            str(section.get("role", "proposal-body")),
+        )
+        for index, section in enumerate(sections, start=1)
+    )
+    reviewed_sections = 0
+    for location, text, section_role in language_targets:
+        if not text.strip():
+            continue
+        reviewed_sections += 1
+        result = audit_biomedical_terminology(text, [], section_role)
+        for item in result["findings"]:
+            copied = dict(item)
+            copied["location"] = f"{location}:{item['location']}"
+            findings.append(copied)
+
+    return {
+        "abstract_contract": abstract_contract,
+        "language_revision_contract": language_contract,
+        "observed": {
+            "chinese_abstract_characters": len(chinese_text),
+            "english_abstract_characters": len(english_text),
+            "language_targets_reviewed": reviewed_sections,
+        },
+        "findings": findings,
+        "ready": not any(item["severity"] == "major" for item in findings),
+    }
+
+
 def audit_nsfc_proposal(
     guideline_year: int,
     program_type: str,
@@ -1186,10 +1369,20 @@ def audit_nsfc_proposal(
     if re.fullmatch(r"(?:研究背景与问题提出|科学问题与科学假说|研究内容与技术路线|项目研究方案)", title_cn.strip()):
         findings.append(_finding("generic-form-title", "major", "title_cn", "题目只是章节标签，没有表达具体研究对象、关键关系或科学问题。"))
     field_limits = dict(official_template.get("field_limits", {}))
-    for field_name, value in (("title_cn", title_cn), ("abstract_cn", abstract_cn), ("abstract_en", abstract_en)):
+    for field_name, value in (("title_cn", title_cn),):
         maximum = field_limits.get(f"{field_name}_max_characters")
         if isinstance(maximum, int) and maximum > 0 and len(value) > maximum:
             findings.append(_finding("official-field-length-exceeded", "major", field_name, "文本超过当前官方模板登记的字符上限。", observed=len(value), maximum=maximum))
+
+    language_review = _audit_proposal_abstracts_and_language(
+        profile=profile,
+        official_template=official_template,
+        title_cn=title_cn,
+        abstract_cn=abstract_cn,
+        abstract_en=abstract_en,
+        sections=sections,
+    )
+    findings.extend(language_review["findings"])
 
     concept_findings: list[dict[str, Any]] = []
     for index, concept in enumerate(bilingual_concepts or [], start=1):
@@ -1373,7 +1566,7 @@ def audit_nsfc_proposal(
             "research_attribute": research_attribute,
             "application_code_1": application_code_1,
             "official_sources": list(NSFC_OFFICIAL_SOURCES),
-            "abstract_length_policy": "confirm-current-online-form-before-delivery",
+            "abstract_length_policy": language_review["abstract_contract"],
             "us_nsf_review_criteria_applied": False,
             "program_profile": program_profile,
             "official_template_sha256": template_digest or None,
@@ -1381,6 +1574,16 @@ def audit_nsfc_proposal(
         },
         "official_rule_findings": official_findings,
         "semantic_findings": findings,
+        "abstract_review": {
+            "contract": language_review["abstract_contract"],
+            "observed": language_review["observed"],
+            "ready": language_review["ready"],
+        },
+        "language_revision_review": {
+            "contract": language_review["language_revision_contract"],
+            "observed": language_review["observed"],
+            "ready": language_review["ready"],
+        },
         "section_inventory": section_inventory,
         "aim_alignment": aim_alignment,
         "annual_plan_summary": {"year_count": len(annual_rows), "mapped_aim_ids": sorted(annual_aims)},
@@ -1450,7 +1653,11 @@ def audit_biomedical_terminology(
             findings.append(_finding("unnatural-governance-phrase", "minor", f"character:{text.find(term)+1}", f"“{term}”不适合作为对外申请书表述。", suggested=replacement))
     for term, replacement in _INTERNAL_GOVERNANCE_TERMS.items():
         if term.lower() in text.lower() and document_section not in {"methods-appendix", "internal-audit"}:
-            findings.append(_finding("internal-workflow-language", "minor", f"character:{text.lower().find(term.lower())+1}", f"正文中出现内部工作流用语“{term}”。", suggested=replacement))
+            findings.append(_finding(
+                "internal-workflow-language", "major", f"character:{text.lower().find(term.lower())+1}",
+                f"正文中出现工程、审计或内部工作流用语“{term}”，必须改写为生命科学问题、证据、方法或结论语言。",
+                suggested=replacement,
+            ))
 
     sentences = [value.strip() for value in re.split(r"(?<=[。！？!?])", text) if value.strip()]
     for index, sentence in enumerate(sentences, start=1):

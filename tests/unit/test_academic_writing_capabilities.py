@@ -8,6 +8,25 @@ from biomed_workbench.capabilities.academic_writing import (
 
 
 class AcademicWritingCapabilityTests(unittest.TestCase):
+    def test_revision_contract_distinguishes_manuscripts_and_proposals(self):
+        manuscript = audit_academic_prose_revision(
+            original_text="The data suggest an association [1].",
+            document_type="research-article",
+            section_kind="results",
+            target_venue="Nature Communications",
+        )
+        proposal = audit_academic_prose_revision(
+            original_text="Our preliminary data support the feasibility of the proposed study [1].",
+            document_type="grant-proposal",
+            section_kind="rationale",
+            target_venue="NSFC",
+        )
+        self.assertEqual(manuscript["revision_contract"]["mode"], "manuscript")
+        self.assertIn("results-forward", manuscript["revision_contract"]["mode_specific_focus"])
+        self.assertEqual(proposal["revision_contract"]["mode"], "funding-proposal")
+        self.assertIn("vision and ambition", proposal["revision_contract"]["mode_specific_focus"])
+        self.assertTrue(proposal["revision_contract"]["delivery_requires_post_revision_pass"])
+
     def test_revision_blocks_changed_number_citation_and_removed_hedging(self):
         result = audit_academic_prose_revision(
             original_text="The data suggest a 3% association [1].",

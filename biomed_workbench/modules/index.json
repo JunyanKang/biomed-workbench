@@ -15,7 +15,7 @@
             ]
           },
           "end_to_end_evidence_ids": [
-            "academic-prose-revision-audit-e2e-v1"
+            "academic-prose-revision-audit-e2e-v2"
           ],
           "id": "python-3.14.3-inline-json-1",
           "input_formats": {
@@ -23,7 +23,7 @@
               "inline-json@1"
             ]
           },
-          "module_version": "0.1.0",
+          "module_version": "0.2.0",
           "output_formats": {
             "revision_audit": [
               "inline-json@1"
@@ -33,7 +33,7 @@
             "any"
           ],
           "regression_evidence_ids": [
-            "academic-prose-revision-audit-regression-v1"
+            "academic-prose-revision-audit-regression-v2"
           ],
           "tool_versions": {},
           "verified_at": "2026-08-20"
@@ -269,6 +269,9 @@
           "required_output": {
             "type": "object"
           },
+          "revision_contract": {
+            "type": "object"
+          },
           "revision_digest": {
             "nullable": true,
             "type": "string"
@@ -286,6 +289,7 @@
           "source_digest",
           "revision_digest",
           "source_audit",
+          "revision_contract",
           "invariant_report",
           "claim_findings",
           "findings",
@@ -346,7 +350,7 @@
       "schema_version": 1,
       "title": "Audit evidence-bound academic prose revisions",
       "tool_requirements": [],
-      "version": "0.1.0"
+      "version": "0.2.0"
     },
     {
       "access": "offline",
@@ -49343,7 +49347,7 @@
             ]
           },
           "end_to_end_evidence_ids": [
-            "nsfc-proposal-development-e2e-v2"
+            "nsfc-proposal-development-e2e-v4"
           ],
           "id": "nsfc-drafting-2026-python-3143",
           "input_formats": {
@@ -49363,7 +49367,7 @@
               "inline-json@1"
             ]
           },
-          "module_version": "1.1.0",
+          "module_version": "1.3.0",
           "output_formats": {
             "drafting_package": [
               "inline-json@1"
@@ -49373,10 +49377,10 @@
             "any"
           ],
           "regression_evidence_ids": [
-            "nsfc-proposal-development-regression-v2"
+            "nsfc-proposal-development-regression-v4"
           ],
           "tool_versions": {},
-          "verified_at": "2026-08-26"
+          "verified_at": "2026-08-27"
         }
       ],
       "complements": [
@@ -49423,7 +49427,7 @@
           "version_source": "https://www.python.org/downloads/release/python-3143/"
         }
       ],
-      "description": "Prepare a programme-specific National Natural Science Foundation of China drafting package only after multi-source literature search, landscape review, citation-identity resolution, claim-evidence adjudication and project-relevant public-database retrieval; then link the central scientific question, evidence, section argument moves, aims, annual milestones and revision priorities to actual proposal prose delivery.",
+      "description": "Prepare a programme-specific National Natural Science Foundation of China drafting package only after multi-source evidence review; then bind the central question, evidence, section argument, aims and milestones to actual proposal prose, a Chinese abstract within 400 characters, an English abstract derived faithfully from it, and mandatory evidence-preserving academic voice revision of the complete text.",
       "domains": [
         "publication",
         "experimental-design",
@@ -49705,7 +49709,7 @@
         ">=0.2.0,<0.3.0"
       ],
       "limitations": [
-        "The module prepares a source-bound drafting package; the Codex entrypoint performs the project-specific writing and must not invent missing scientific evidence or official form requirements."
+        "The module prepares a source-bound drafting package; the Codex entrypoint performs the project-specific writing and must not invent missing scientific evidence or official form requirements. The 400-character Chinese abstract limit includes punctuation; the workbench imposes no separate length limit on the English abstract."
       ],
       "maturity": "validated",
       "module_type": "design",
@@ -49756,6 +49760,9 @@
       "output_schema": {
         "additionalProperties": false,
         "properties": {
+          "abstract_contract": {
+            "type": "object"
+          },
           "agent_delivery_contract": {
             "type": "object"
           },
@@ -49779,6 +49786,9 @@
           },
           "input_digest": {
             "type": "string"
+          },
+          "language_revision_contract": {
+            "type": "object"
           },
           "major_finding_count": {
             "type": "integer"
@@ -49811,6 +49821,8 @@
           "annual_plan",
           "revision_briefs",
           "evidence_foundation_summary",
+          "abstract_contract",
+          "language_revision_contract",
           "drafting_order",
           "review_dimensions",
           "findings",
@@ -49851,6 +49863,24 @@
           "description": "The agent must use the package to draft or revise actual proposal prose and may not return only an audit or internal writing plan.",
           "id": "proposal-prose-delivery-required",
           "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The Chinese abstract must remain within 400 characters; the English abstract is derived from it without a separate workbench length limit, and both must preserve the same scientific concepts and evidence strength while containing no numbered citations or internal process language.",
+          "id": "proposal-bilingual-abstracts-required",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The complete outward-facing proposal must be revised from beginning to end so engineering, audit, registry, orchestration and computer-system language is replaced by natural, precise life-science argument without erasing necessary bioinformatics methods.",
+          "id": "proposal-life-science-language-required",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The stable scientific draft must pass pre-revision review, content-preserving scholarly revision in grant-proposal mode, and exact post-revision comparison before delivery; justified vision is retained when feasibility evidence supports it.",
+          "id": "proposal-academic-voice-revision-required",
+          "severity": "major"
         }
       ],
       "questions": [
@@ -49870,7 +49900,7 @@
       "schema_version": 1,
       "title": "Develop source-bound NSFC proposal prose",
       "tool_requirements": [],
-      "version": "1.1.0"
+      "version": "1.3.0"
     },
     {
       "access": "offline",
@@ -50313,7 +50343,7 @@
             ]
           },
           "end_to_end_evidence_ids": [
-            "nsfc-proposal-semantic-audit-e2e-v1"
+            "nsfc-proposal-semantic-audit-e2e-v2"
           ],
           "id": "nsfc-2026-python-3143",
           "input_formats": {
@@ -50321,7 +50351,7 @@
               "inline-json@1"
             ]
           },
-          "module_version": "1.0.0",
+          "module_version": "1.1.0",
           "output_formats": {
             "audit": [
               "inline-json@1"
@@ -50331,10 +50361,10 @@
             "any"
           ],
           "regression_evidence_ids": [
-            "nsfc-proposal-semantic-audit-regression-v1"
+            "nsfc-proposal-semantic-audit-regression-v2"
           ],
           "tool_versions": {},
-          "verified_at": "2026-08-26"
+          "verified_at": "2026-08-27"
         }
       ],
       "complements": [
@@ -50371,7 +50401,7 @@
           "version_source": "https://www.python.org/downloads/release/python-3143/"
         }
       ],
-      "description": "Audit a biomedical proposal against a versioned NSFC profile, Chinese and English abstract alignment, section ownership, paragraph transitions, entity introduction order, and aim-to-phenotype-to-mechanism relevance.",
+      "description": "Review a biomedical proposal against a versioned NSFC profile, the 400-character Chinese abstract, English abstract fidelity, full-text life-science language, section ownership, paragraph transitions, entity introduction order and aim-to-phenotype-to-mechanism relevance.",
       "domains": [
         "publication",
         "experimental-design",
@@ -50573,6 +50603,9 @@
       "output_schema": {
         "additionalProperties": false,
         "properties": {
+          "abstract_review": {
+            "type": "object"
+          },
           "agency": {
             "type": "string"
           },
@@ -50590,6 +50623,9 @@
           },
           "input_digest": {
             "type": "string"
+          },
+          "language_revision_review": {
+            "type": "object"
           },
           "limitations": {
             "type": "array"
@@ -50615,6 +50651,8 @@
           "agency_profile",
           "official_rule_findings",
           "semantic_findings",
+          "abstract_review",
+          "language_revision_review",
           "section_inventory",
           "aim_alignment",
           "annual_plan_summary",
@@ -50650,6 +50688,12 @@
           "description": "Section ownership, entity order, bilingual concepts, and aim relevance are coherent.",
           "id": "nsfc-semantic-coherence",
           "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The Chinese abstract remains within 400 characters, the English abstract is derived faithfully without a separate length limit, and all outward-facing prose uses natural life-science language rather than internal engineering or audit terminology.",
+          "id": "nsfc-abstract-and-language",
+          "severity": "major"
         }
       ],
       "questions": [
@@ -50669,7 +50713,7 @@
       "schema_version": 1,
       "title": "Audit National Natural Science Foundation of China proposal semantics",
       "tool_requirements": [],
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     {
       "access": "offline",
@@ -116224,7 +116268,7 @@
       "version": "1.0.0"
     }
   ],
-  "plugin_version": "0.2.5",
-  "registry_digest": "889d3c1ab3ca464b4ede53f5bd48301720b4a4826d018626efc0bbe0382a694d",
+  "plugin_version": "0.2.6",
+  "registry_digest": "ef2627101705170913b3e9d38f06de454813da799a5cabb20e19675afd174550",
   "schema_version": 1
 }

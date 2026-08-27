@@ -338,6 +338,30 @@ def audit_academic_prose_revision(
         normalized_spans.append({"kind": kind, "text": text})
 
     proposal_mode = document_type == "grant-proposal"
+    revision_contract = {
+        "mode": "funding-proposal" if proposal_mode else "manuscript",
+        "required_sequence": [
+            "pre-revision audit of prose patterns and claim-evidence strength",
+            "scientific-content-preserving revision",
+            "post-revision comparison against the exact source text",
+        ],
+        "preserve_exactly": [
+            "numbers", "results", "equations", "citations", "technical terms",
+            "declared mechanism boundaries", "evidence-calibrated uncertainty",
+        ],
+        "author_voice_policy": (
+            "Use a supplied author sample only to match sentence rhythm, connective habits, "
+            "hedging, terminology, and section openings; never copy project-specific wording."
+        ),
+        "mode_specific_focus": (
+            "Retain scientifically justified vision and ambition only when each promise is matched "
+            "to preliminary evidence, prior work, a credible method, collaboration, or staged risk control."
+            if proposal_mode else
+            "Use restrained, results-forward scholarly prose and keep every empirical claim adjacent "
+            "to its number, figure, table, or citation."
+        ),
+        "delivery_requires_post_revision_pass": True,
+    }
     source_findings = _style_findings(original_text, proposal_mode=proposal_mode)
     phase = "post-revision" if revised_text.strip() else "preflight"
     findings = list(source_findings) if phase == "preflight" else _style_findings(revised_text, proposal_mode=proposal_mode)
@@ -439,6 +463,7 @@ def audit_academic_prose_revision(
             "finding_count": len(source_findings),
             "findings": source_findings,
         },
+        "revision_contract": revision_contract,
         "invariant_report": invariant_report,
         "claim_findings": [item for item in findings if "claim_id" in item],
         "findings": findings,

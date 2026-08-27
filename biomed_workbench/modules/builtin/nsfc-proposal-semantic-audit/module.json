@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "id": "nsfc-proposal-semantic-audit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "title": "Audit National Natural Science Foundation of China proposal semantics",
-  "description": "Audit a biomedical proposal against a versioned NSFC profile, Chinese and English abstract alignment, section ownership, paragraph transitions, entity introduction order, and aim-to-phenotype-to-mechanism relevance.",
+  "description": "Review a biomedical proposal against a versioned NSFC profile, the 400-character Chinese abstract, English abstract fidelity, full-text life-science language, section ownership, paragraph transitions, entity introduction order and aim-to-phenotype-to-mechanism relevance.",
   "module_type": "validation",
   "domains": ["publication", "experimental-design", "research-quality"],
   "intents": ["NSFC proposal semantic audit", "国家自然科学基金申请书审查", "国自然项目书语义审查"],
@@ -17,7 +17,8 @@
   "assumptions": ["The supplied text and project evidence belong to the proposal version under review."],
   "quality_gates": [
     {"id":"nsfc-official-profile","severity":"major","description":"The year, research attribute, and life-science application code satisfy the installed official profile.","blocks_interpretation":true},
-    {"id":"nsfc-semantic-coherence","severity":"major","description":"Section ownership, entity order, bilingual concepts, and aim relevance are coherent.","blocks_interpretation":true}
+    {"id":"nsfc-semantic-coherence","severity":"major","description":"Section ownership, entity order, bilingual concepts, and aim relevance are coherent.","blocks_interpretation":true},
+    {"id":"nsfc-abstract-and-language","severity":"major","description":"The Chinese abstract remains within 400 characters, the English abstract is derived faithfully without a separate length limit, and all outward-facing prose uses natural life-science language rather than internal engineering or audit terminology.","blocks_interpretation":true}
   ],
   "limitations": ["This module does not predict funding, invent preliminary results, or replace the current project guide, online form, or host-institution requirements."],
   "evidence_effects": ["validates_nsfc_proposal_semantic_readiness"],
@@ -25,7 +26,7 @@
   "complements": ["research-proposal-quality-audit","biomedical-terminology-and-nomenclature-audit","mechanism-claim-promotion-gate","docx-citation-delivery-audit"],
   "tool_requirements": [],
   "dependencies": [{"name":"python","ecosystem":"runtime","identity":"python-runtime","required":true,"tested_versions":["3.14.3"],"allowed_versions":[">=3.14,<3.15"],"version_source":"https://www.python.org/downloads/release/python-3143/","verified_at":"2026-08-26","version_probe":["biomed_workbench.modules.compatibility:probe_python_runtime"],"version_probe_kind":"python_callable","version_probe_timeout_seconds":5,"version_pattern":"([0-9]+(?:\\.[0-9]+)+)","purpose":"Execute deterministic NSFC semantic validation.","conflicts":[],"platforms":["any"]}],
-  "compatibility_matrix": [{"id":"nsfc-2026-python-3143","module_version":"1.0.0","tool_versions":{},"dependency_versions":{"python":[">=3.14,<3.15"]},"input_formats":{"proposal":["inline-json@1"]},"output_formats":{"audit":["inline-json@1"]},"platforms":["any"],"regression_evidence_ids":["nsfc-proposal-semantic-audit-regression-v1"],"end_to_end_evidence_ids":["nsfc-proposal-semantic-audit-e2e-v1"],"verified_at":"2026-08-26"}],
+  "compatibility_matrix": [{"id":"nsfc-2026-python-3143","module_version":"1.1.0","tool_versions":{},"dependency_versions":{"python":[">=3.14,<3.15"]},"input_formats":{"proposal":["inline-json@1"]},"output_formats":{"audit":["inline-json@1"]},"platforms":["any"],"regression_evidence_ids":["nsfc-proposal-semantic-audit-regression-v2"],"end_to_end_evidence_ids":["nsfc-proposal-semantic-audit-e2e-v2"],"verified_at":"2026-08-27"}],
   "access": "offline",
   "mutability": "read_only",
   "credentials": [],
@@ -37,7 +38,7 @@
     },
     "required":["guideline_year","program_type","application_code_1","research_attribute","title_cn","abstract_cn","abstract_en","sections","aims","core_phenotypes","central_mechanisms"]
   },
-  "output_schema": {"type":"object","additionalProperties":false,"properties":{"agency":{"type":"string"},"agency_profile":{"type":"object"},"official_rule_findings":{"type":"array"},"semantic_findings":{"type":"array"},"section_inventory":{"type":"array"},"aim_alignment":{"type":"array"},"annual_plan_summary":{"type":"object"},"human_genetics_summary":{"type":"object"},"major_finding_count":{"type":"integer"},"ready_for_scientific_drafting":{"type":"boolean"},"limitations":{"type":"array"},"input_digest":{"type":"string"}},"required":["agency","agency_profile","official_rule_findings","semantic_findings","section_inventory","aim_alignment","annual_plan_summary","human_genetics_summary","major_finding_count","ready_for_scientific_drafting","limitations","input_digest"]},
+  "output_schema": {"type":"object","additionalProperties":false,"properties":{"agency":{"type":"string"},"agency_profile":{"type":"object"},"official_rule_findings":{"type":"array"},"semantic_findings":{"type":"array"},"abstract_review":{"type":"object"},"language_revision_review":{"type":"object"},"section_inventory":{"type":"array"},"aim_alignment":{"type":"array"},"annual_plan_summary":{"type":"object"},"human_genetics_summary":{"type":"object"},"major_finding_count":{"type":"integer"},"ready_for_scientific_drafting":{"type":"boolean"},"limitations":{"type":"array"},"input_digest":{"type":"string"}},"required":["agency","agency_profile","official_rule_findings","semantic_findings","abstract_review","language_revision_review","section_inventory","aim_alignment","annual_plan_summary","human_genetics_summary","major_finding_count","ready_for_scientific_drafting","limitations","input_digest"]},
   "kernel_compatibility": [">=0.2.0,<0.3.0"],
   "provenance": {"license":"Apache-2.0","concept_sources":["https://www.nsfc.gov.cn/p1/2961/2962/3642/sqs.html","https://www.nsfc.gov.cn/p1/2961/2962/4089/yjsx.html","https://www.nsfc.gov.cn/p1/2961/2962/2967/sqsj.html","Project-owned clean-room biomedical proposal semantic contract."]},
   "routing": {"method_aliases":["nsfc-proposal-semantic-audit","NSFC proposal semantic audit","国家自然科学基金申请书审查","国自然项目书语义审查"],"exclusion_terms":[],"required_any_terms":[],"named_method_priority":100},

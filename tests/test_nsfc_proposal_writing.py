@@ -123,6 +123,19 @@ class NsfcProposalWritingTests(unittest.TestCase):
         self.assertTrue(result["ready_for_section_drafting"])
         self.assertTrue(result["agent_delivery_contract"]["audit_only_delivery_forbidden"])
         self.assertIn("drafted_or_revised_prose", result["agent_delivery_contract"]["final_response_must_include"])
+        self.assertIn("chinese_abstract", result["agent_delivery_contract"]["final_response_must_include"])
+        self.assertIn("english_abstract", result["agent_delivery_contract"]["final_response_must_include"])
+        self.assertIn("life_science_language_revision", result["agent_delivery_contract"]["final_response_must_include"])
+        self.assertTrue(result["agent_delivery_contract"]["abstract_contract_must_be_applied"])
+        self.assertTrue(result["agent_delivery_contract"]["full_text_language_revision_required"])
+        voice_revision = result["agent_delivery_contract"]["academic_voice_revision"]
+        self.assertEqual(voice_revision["module_id"], "academic-prose-revision-audit")
+        self.assertEqual(voice_revision["document_type"], "grant-proposal")
+        self.assertTrue(voice_revision["post_revision_pass_required"])
+        self.assertIn("mechanism boundaries", voice_revision["preserve_exactly"])
+        self.assertEqual(result["abstract_contract"]["chinese"]["recommended_max_characters"], 400)
+        self.assertIsNone(result["abstract_contract"]["english"]["character_limit"])
+        self.assertTrue(result["abstract_contract"]["english"]["derived_from_chinese"])
         self.assertIn("assertion-citation-coverage-audit", result["agent_delivery_contract"]["post_draft_review_modules"])
         self.assertEqual(result["evidence_foundation_summary"]["literature_record_count"], 1)
 
@@ -283,6 +296,22 @@ class NsfcProposalWritingTests(unittest.TestCase):
         codes = {item["code"] for item in result["semantic_findings"]}
         self.assertIn("abstract-numeric-citation", codes)
         self.assertIn("method-contamination-in-rationale", codes)
+
+    def test_abstract_limits_and_full_text_life_science_language_are_mandatory(self):
+        payload = nsfc_input()
+        payload["abstract_cn"] = "研" * 401
+        payload["abstract_en"] = "This English abstract is derived from the Chinese scientific argument."
+        payload["sections"][0]["text"] += "本节通过工程化审计和执行器完成工作流编排。"
+        result = audit_nsfc_proposal(**payload)
+        codes = {item["code"] for item in result["semantic_findings"]}
+        self.assertIn("chinese-abstract-length-exceeded", codes)
+        self.assertNotIn("english-abstract-length-exceeded", codes)
+        self.assertIn("internal-workflow-language", codes)
+        self.assertFalse(result["abstract_review"]["ready"])
+        self.assertFalse(result["language_revision_review"]["ready"])
+        self.assertFalse(result["ready_for_scientific_drafting"])
+        self.assertEqual(result["abstract_review"]["contract"]["chinese"]["recommended_max_characters"], 400)
+        self.assertIsNone(result["abstract_review"]["contract"]["english"]["character_limit"])
 
     def test_col2a1_and_col9a1_stay_candidate_without_direct_substrate_evidence(self):
         result = audit_mechanism_claim_promotion(claims=[
