@@ -14,12 +14,15 @@ from ..kernel.scientific_evidence_map import (
     ScientificEvidenceMap,
     validate_evidence_map_files,
 )
+from .evidence_html import render_map_html, render_portal_html, render_report_html
 
 
 @dataclass(frozen=True)
 class BilingualReportPair:
     chinese_markdown: str
     english_markdown: str
+    chinese_html: str
+    english_html: str
     evidence_map_digest: str
 
 
@@ -244,12 +247,12 @@ def _render(evidence_map: ScientificEvidenceMap, language: str, workspace_root: 
         f"- {'机器边表摘要' if zh else 'Machine edge-table digest'}: `{evidence_map.edge_table_digest}`",
         "",
         (
-            "本报告只读取已校验的科学证据地图；文件路径、校验值、panel 依赖、caption 与 DOI 不在报告阶段重新拼接。"
+            "本报告只读取已校验的科学证据地图；文件路径、校验值、图表依赖、图注与 DOI 不在报告阶段重新拼接。"
             if zh
-            else "This report reads only the validated scientific evidence map; file paths, checksums, panel dependencies, captions, and DOIs are not reassembled during reporting."
+            else "This report reads only the validated scientific evidence map; file paths, checksums, figure dependencies, captions, and DOIs are not reassembled during reporting."
         ),
         "",
-        f"## {'全局 panel 故事 DAG' if zh else 'Global panel story DAG'}",
+        f"## {'项目图表与数据之间的关系' if zh else 'Relationships among project figures and data'}",
         "",
     ]
     if evidence_map.story_edges:
@@ -275,6 +278,8 @@ def render_bilingual_reports(
     return BilingualReportPair(
         chinese_markdown=_render(evidence_map, "zh", workspace_root),
         english_markdown=_render(evidence_map, "en", workspace_root),
+        chinese_html=render_report_html(evidence_map, "zh", workspace_root),
+        english_html=render_report_html(evidence_map, "en", workspace_root),
         evidence_map_digest=evidence_map.digest,
     )
 
@@ -305,7 +310,7 @@ def _map_markdown(evidence_map: ScientificEvidenceMap, workspace_root: Path) -> 
         f"- Parent map digest: `{evidence_map.version.parent_map_digest or 'none'}`",
         f"- Edge-table digest: `{evidence_map.edge_table_digest}`",
         "",
-        "## Layer 1: Global panel story DAG",
+        "## Layer 1: Project result relationships",
         "",
         "```mermaid",
         "flowchart LR",
@@ -315,7 +320,7 @@ def _map_markdown(evidence_map: ScientificEvidenceMap, workspace_root: Path) -> 
             lines.append(f'  {unit.spec.id.replace("-", "_")}["{unit.spec.panel_id}"]')
     for edge in evidence_map.story_edges:
         lines.append(f'  {edge.source.replace("-", "_")} --> {edge.target.replace("-", "_")}')
-    lines.extend(["```", "", "## Layer 2: Evidence mind maps", ""])
+    lines.extend(["```", "", "## Layer 2: Evidence details by dataset or figure", ""])
     grouped: dict[str, list[EvidenceMapUnit]] = {}
     for unit in evidence_map.units:
         grouped.setdefault(unit.spec.group_id, []).append(unit)
@@ -346,18 +351,39 @@ def write_bilingual_reports(
     output_directory: Path,
     *,
     workspace_root: Path,
-) -> tuple[Path, Path, Path, Path, Path]:
+) -> tuple[Path, ...]:
     validate_evidence_map_files(evidence_map, workspace_root=workspace_root)
     pair = render_bilingual_reports(evidence_map, workspace_root=workspace_root)
     output_directory.mkdir(parents=True, exist_ok=True)
     chinese = output_directory / "scientific-evidence-report.zh-CN.md"
     english = output_directory / "scientific-evidence-report.en.md"
+    chinese_html = output_directory / "scientific-evidence-report.zh-CN.html"
+    english_html = output_directory / "scientific-evidence-report.en.html"
     map_json = output_directory / "scientific-evidence-map.json"
     edge_tsv = output_directory / "scientific-evidence-map.edges.tsv"
     map_markdown = output_directory / "scientific-evidence-map.md"
+    map_chinese_html = output_directory / "scientific-evidence-map.zh-CN.html"
+    map_english_html = output_directory / "scientific-evidence-map.en.html"
+    portal_html = output_directory / "index.html"
     chinese.write_text(pair.chinese_markdown, encoding="utf-8")
     english.write_text(pair.english_markdown, encoding="utf-8")
+    chinese_html.write_text(pair.chinese_html, encoding="utf-8")
+    english_html.write_text(pair.english_html, encoding="utf-8")
     map_json.write_text(json.dumps(evidence_map.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
     edge_tsv.write_text(_edge_table(evidence_map), encoding="utf-8")
     map_markdown.write_text(_map_markdown(evidence_map, workspace_root), encoding="utf-8")
-    return chinese, english, map_json, edge_tsv, map_markdown
+    map_chinese_html.write_text(render_map_html(evidence_map, "zh", workspace_root), encoding="utf-8")
+    map_english_html.write_text(render_map_html(evidence_map, "en", workspace_root), encoding="utf-8")
+    portal_html.write_text(render_portal_html(evidence_map), encoding="utf-8")
+    return (
+        portal_html,
+        chinese_html,
+        english_html,
+        map_chinese_html,
+        map_english_html,
+        chinese,
+        english,
+        map_json,
+        edge_tsv,
+        map_markdown,
+    )

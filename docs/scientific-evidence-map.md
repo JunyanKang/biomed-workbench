@@ -16,7 +16,7 @@ The second level expands each dataset or figure group and links:
 - the layout code and final data, PDF, and PNG files;
 - the caption, interpretive source, and original-study DOI.
 
-Each file is recorded with a clickable project path and a content fingerprint. Files are checked again before a report is generated. A missing or changed file stops the report so that an outdated result cannot be cited accidentally.
+Each file is recorded with a clickable project path and a content fingerprint. The HTML views provide direct entries for registered data, plot-ready data, analysis scripts, renderers, final data, PDF and PNG figures, captions, and original studies. Files are checked again before a report is generated. A missing or changed file stops the report so that an outdated result cannot be cited accidentally.
 
 ## Why An Analysis May Begin
 
@@ -41,6 +41,15 @@ A rerun or method change creates a new analysis branch and records what changed,
 
 Each formal update creates a new version that identifies its predecessor, the reason for the change, and the evidence it contains. Earlier versions remain unchanged, allowing a reader to recover the basis of any conclusion at the time it was made.
 
+Each version provides an `index.html` reading entry, Chinese and English interpretation reports, and Chinese and English evidence maps. HTML is the primary reading format and includes:
+
+- a persistent table of contents and within-group navigation;
+- switching among the Chinese report, English report, and evidence maps;
+- a results-first summary with methods, reproducibility details, and full checksums available on demand;
+- clickable data, scripts, figures, captions, and DOIs;
+- a project-result relationship view and a detailed route from prerequisite conclusions through the current result, plot data, scripts, final figures, and literature;
+- consistent desktop, narrow-screen, and print layouts.
+
 Chinese and English reports are generated from the same validated map version. Both cover:
 
 - scientific rationale and hypothesis;
@@ -50,7 +59,7 @@ Chinese and English reports are generated from the same validated map version. B
 - limitations, conflicting evidence, and the reason for retaining or excluding a result;
 - implications for the next stage of the project.
 
-This keeps the two reports aligned to the same data, figures, citations, and decisions instead of reconstructing their sources independently.
+This keeps the two reports aligned to the same data, figures, citations, and decisions instead of reconstructing their sources independently. Markdown reports remain available for plain-text review and compatibility with earlier projects; the JSON map and TSV relationship table remain the machine-readable verification surfaces.
 
 ## Reference Frameworks
 

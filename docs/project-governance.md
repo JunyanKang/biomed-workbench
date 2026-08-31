@@ -46,4 +46,4 @@ These labels are not interchangeable. Engineering checks do not establish univer
 
 Routine interaction shows the scientific conclusion, key result, evidence boundary, current status, and next decision. Versions, content fingerprints, execution records, review chains, and full history remain available in the background and are expanded for reproducibility or when a blocking issue needs attention.
 
-Figures, captions, Results prose, and bilingual reports continue to read the same version of the [Scientific Evidence Map](scientific-evidence-map.md), keeping project status, figure identities, and narrative sources aligned.
+Figures, captions, Results prose, and bilingual reports continue to read the same version of the [Scientific Evidence Map](scientific-evidence-map.md). Each version's HTML reports and maps include a table of contents and direct entries to files, figures, and literature, making it possible to move from a conclusion back to its data and sources while keeping project status, figure identities, and narrative sources aligned.

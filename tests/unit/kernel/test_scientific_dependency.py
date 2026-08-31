@@ -4,6 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 from unittest.mock import patch
+from html.parser import HTMLParser
+from urllib.parse import unquote, urlparse
 
 from biomed_workbench.kernel.scientific_dependency import (
     AnalysisAdmission,
@@ -30,8 +32,24 @@ from biomed_workbench.reporting import (
     publish_evidence_map_version,
     render_bilingual_reports,
     verify_evidence_map_version_index,
+    write_bilingual_reports,
 )
+from biomed_workbench.reporting.evidence_html import render_map_html
 from tests.unit.kernel.test_state import populated_state, research_plan
+
+
+class LinkInventoryParser(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.ids = set()
+        self.hrefs = []
+
+    def handle_starttag(self, tag, attrs):
+        values = dict(attrs)
+        if "id" in values:
+            self.ids.add(values["id"])
+        if tag in {"a", "link"} and "href" in values:
+            self.hrefs.append(values["href"])
 
 
 def admission():
@@ -227,6 +245,70 @@ class ScientificDependencyTests(unittest.TestCase):
         self.assertIn("Results and scientific conclusion", reports.english_markdown)
         self.assertIn("SHA-256", reports.english_markdown)
         self.assertIn("10.1038/sdata.2016.18", reports.english_markdown)
+        self.assertIn('<aside class="toc"', reports.chinese_html)
+        self.assertIn("证据与数据", reports.chinese_html)
+        self.assertIn("file-counts-input", reports.chinese_html)
+        self.assertIn("Scientific conclusion", reports.english_html)
+        self.assertIn("file://", reports.english_html)
+
+    def test_html_report_package_has_resolved_navigation_and_evidence_links(self):
+        state = state_with_plan()
+        bundle = ScientificDependencyBundle.create(
+            state,
+            admissions=(admission(),),
+            reviews=(review(),),
+            decisions=(decision(),),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            mapped = evidence_map(
+                state,
+                bundle,
+                root,
+                EvidenceMapVersion(
+                    version="1.0.0",
+                    revision=1,
+                    parent_map_digest=None,
+                    change_type="initial",
+                    change_summary_zh="建立带有 HTML 导航、证据链接和机器文件的首版证据地图。",
+                    change_summary_en="Create the first evidence map with HTML navigation, evidence links, and machine-readable files.",
+                ),
+            )
+            output = root / "published"
+            paths = write_bilingual_reports(mapped, output, workspace_root=root)
+            self.assertEqual(len(paths), 10)
+            self.assertEqual({path.name for path in paths}, {
+                "index.html",
+                "scientific-evidence-report.zh-CN.html",
+                "scientific-evidence-report.en.html",
+                "scientific-evidence-map.zh-CN.html",
+                "scientific-evidence-map.en.html",
+                "scientific-evidence-report.zh-CN.md",
+                "scientific-evidence-report.en.md",
+                "scientific-evidence-map.json",
+                "scientific-evidence-map.edges.tsv",
+                "scientific-evidence-map.md",
+            })
+            html_paths = [path for path in paths if path.suffix == ".html"]
+            for path in html_paths:
+                payload = path.read_text(encoding="utf-8")
+                self.assertNotIn("<script", payload.lower())
+                parser = LinkInventoryParser()
+                parser.feed(payload)
+                for href in parser.hrefs:
+                    if href.startswith("#"):
+                        self.assertIn(href[1:], parser.ids, f"unresolved anchor in {path.name}: {href}")
+                    elif href.startswith("file://"):
+                        target = Path(unquote(urlparse(href).path))
+                        self.assertTrue(target.is_file(), f"missing linked evidence file: {target}")
+                    elif not href.startswith(("http://", "https://", "data:")):
+                        self.assertTrue((output / href).is_file(), f"missing package link in {path.name}: {href}")
+            chinese = (output / "scientific-evidence-report.zh-CN.html").read_text(encoding="utf-8")
+            self.assertIn("https://doi.org/10.1038/sdata.2016.18", chinese)
+            self.assertIn(mapped.digest, chinese)
+            evidence_map_html = (output / "scientific-evidence-map.zh-CN.html").read_text(encoding="utf-8")
+            self.assertIn("当前数据或图组", evidence_map_html)
+            self.assertIn("分析程序", evidence_map_html)
 
     def test_snapshot_may_describe_pending_input_but_validated_delivery_rejects_it(self):
         state = state_with_plan()
@@ -313,6 +395,10 @@ class ScientificDependencyTests(unittest.TestCase):
             self.assertEqual(index["entries"][1]["parent_map_digest"], first.digest)
             self.assertTrue((publish_root / "versions/v1.0.0/scientific-evidence-map.json").is_file())
             self.assertTrue((publish_root / "versions/v1.0.1/scientific-evidence-report.zh-CN.md").is_file())
+            self.assertTrue((publish_root / "versions/v1.0.1/index.html").is_file())
+            self.assertTrue((publish_root / "versions/v1.0.1/scientific-evidence-report.zh-CN.html").is_file())
+            self.assertTrue((publish_root / "versions/v1.0.1/scientific-evidence-map.en.html").is_file())
+            self.assertEqual(len(index["entries"][1]["files"]), 10)
             with self.assertRaisesRegex(ValueError, "already exists|increase"):
                 publish_evidence_map_version(second, publish_root, workspace_root=workspace)
 
@@ -645,6 +731,7 @@ class ScientificDependencyTests(unittest.TestCase):
                 ),
             )
             reports = render_bilingual_reports(mapped, workspace_root=root)
+            map_html = render_map_html(mapped, "zh", root)
 
         self.assertEqual(
             [(edge.source, edge.target) for edge in mapped.story_edges],
@@ -662,6 +749,10 @@ class ScientificDependencyTests(unittest.TestCase):
         )
         self.assertIn("panel-a", reports.english_markdown)
         self.assertIn("panel-b", reports.english_markdown)
+        self.assertIn('marker-end="url(#arrow)"', map_html)
+        self.assertIn('href="#unit-unit-panel-a"', map_html)
+        self.assertIn("作图数据", map_html)
+        self.assertIn("排图程序", map_html)
 
     def test_unindexed_immutable_version_directory_is_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:
