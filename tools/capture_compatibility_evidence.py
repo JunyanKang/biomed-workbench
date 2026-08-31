@@ -42,6 +42,17 @@ SERVICE_COVERAGE = {
     "ncbi-summary": (("summary", "pubmed"),),
     "preprint-evidence": (("preprint_version_history", "biorxiv"),),
     "protein-interaction-network-evidence": (("protein_interaction_network", "string-v12"),),
+    "public-research-evidence-query": (
+        ("chembl_molecule_search", "chembl:molecule-search"),
+        ("chembl_activities_by_molecule", "chembl:activities-by-molecule"),
+        ("gwas_trait_studies", "gwas-catalog:studies-by-trait"),
+        ("gwas_gene_associations", "gwas-catalog:associations-by-gene"),
+        ("pride_project_discovery", "pride:projects"),
+        ("biostudies_study_discovery", "biostudies:studies"),
+        ("encode_experiment_discovery", "encode:experiments"),
+        ("human_protein_atlas_gene", "human-protein-atlas:gene"),
+        ("mgnify_study_discovery", "mgnify:studies"),
+    ),
     "structure-evidence": (("structure_entry_context", "rcsb-pdb"),),
     "structure-search": (("structure_attribute_search", "rcsb-pdb-search"),),
     "structure-polymer-entities": (("structure_polymer_entities", "rcsb-pdb"),),
@@ -313,6 +324,7 @@ def _service_sources() -> tuple[dict[str, object], set[tuple[str, str]], tuple[s
         json.loads((ROOT / "reports" / "eutils-live-verification.json").read_text(encoding="utf-8")),
         json.loads((ROOT / "reports" / "eutils-live-zero-key-verification.json").read_text(encoding="utf-8")),
         json.loads((ROOT / "reports" / "public-database-live-verification.json").read_text(encoding="utf-8")),
+        json.loads((ROOT / "reports" / "public-research-evidence-live-verification.json").read_text(encoding="utf-8")),
     ]
     if not all(report.get("passed") is True for report in reports):
         raise RuntimeError("E-utilities live evidence is not passing")
@@ -330,6 +342,7 @@ def _service_sources() -> tuple[dict[str, object], set[tuple[str, str]], tuple[s
             "tests.contract.test_eutils",
             "tests.contract.test_service_version_probe",
             "tests.unit.test_public_databases",
+            "tests.unit.test_public_research_evidence",
         ],
         cwd=ROOT,
         capture_output=True,
@@ -347,6 +360,7 @@ def _service_sources() -> tuple[dict[str, object], set[tuple[str, str]], tuple[s
             "reports/eutils-live-verification.json",
             "reports/eutils-live-zero-key-verification.json",
             "reports/public-database-live-verification.json",
+            "reports/public-research-evidence-live-verification.json",
         )
     )
     return {"contract_tests_passed": True, "live_reports_passed": True}, coverage, sources

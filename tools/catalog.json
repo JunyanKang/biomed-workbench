@@ -7840,6 +7840,92 @@
     },
     {
       "access": "offline",
+      "description": "Normalize records retrieved from public resources, preserve source observations, detect entity mismatches and require study-design-aware interpretation instead of flattening heterogeneous evidence into one score.",
+      "entrypoint": "biomed_workbench.services.research_evidence:synthesize_public_evidence",
+      "id": "public-evidence-synthesis",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence_records": {
+            "items": {
+              "type": "object"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array"
+          },
+          "expected_entity": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "question": {
+            "maxLength": 2000,
+            "minLength": 5,
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "evidence_records"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Synthesize public records by evidence type and entity",
+      "workflow": "evidence"
+    },
+    {
+      "access": "public_api",
+      "description": "Query fixed official operations for GWAS Catalog, ChEMBL, PRIDE, BioStudies, ENCODE, Human Protein Atlas and MGnify, then retain bounded normalized records, source scope and limitations.",
+      "entrypoint": "biomed_workbench.services.research_evidence:query_public_research_evidence",
+      "id": "public-research-evidence-query",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "max_records": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "operation": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "query": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "gwas-catalog",
+              "chembl",
+              "pride",
+              "biostudies",
+              "encode",
+              "human-protein-atlas",
+              "mgnify"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "operation",
+          "query"
+        ],
+        "type": "object"
+      },
+      "kind": "service",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Query registered public life-science evidence sources",
+      "workflow": "evidence"
+    },
+    {
+      "access": "offline",
       "description": "Render an explicit multi-panel scientific figure specification against registered CSV or TSV data without guessing column roles, silently discarding rows, running undeclared statistics, or reusing example pixels; deliver exact-size PDF, editable SVG, high-resolution PNG, panel source tables, a frozen specification, digests, and an independently reloaded quality report.",
       "entrypoint": "scientific-command",
       "id": "publication-figure-package",
@@ -8950,6 +9036,80 @@
     },
     {
       "access": "offline",
+      "description": "Review a draft interpretation against study design, statistical unit, effect magnitude, uncertainty, replication, negative results and discriminating alternatives; return a corrected result-first brief before final project promotion.",
+      "entrypoint": "biomed_workbench.capabilities.scientific_review:self_correct_scientific_review",
+      "id": "scientific-review-self-correction",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "alternative_explanations": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": "array"
+          },
+          "draft_review": {
+            "type": "object"
+          },
+          "hypothesis": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "observations": {
+            "items": {
+              "type": "object"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "type": "array"
+          },
+          "proposed_action": {
+            "enum": [
+              "retain",
+              "retain-with-limit",
+              "rerun",
+              "switch-method",
+              "acquire-data",
+              "revise-hypothesis",
+              "exclude",
+              "stop"
+            ],
+            "type": "string"
+          },
+          "question": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "statistical_unit": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "study_design": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "hypothesis",
+          "study_design",
+          "statistical_unit",
+          "observations",
+          "draft_review",
+          "proposed_action"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Self-correct a result-first biomedical review",
+      "workflow": "evidence"
+    },
+    {
+      "access": "offline",
       "description": "Create a deterministic preferred-codon coding sequence with explicit optimization limits.",
       "entrypoint": "biomed_workbench.capabilities.molecular:back_translate",
       "id": "sequence-back-translate",
@@ -9185,6 +9345,152 @@
       "requirements": [],
       "title": "Localize descriptive sequence differences",
       "workflow": "molecular_design"
+    },
+    {
+      "access": "offline",
+      "description": "Determine whether declared executables and reference resources are independently available before a sequencing workflow is launched, without installing software or treating readiness as execution.",
+      "entrypoint": "biomed_workbench.capabilities.ngs_integration:assess_sequencing_readiness",
+      "id": "sequencing-execution-readiness",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "assay": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "references": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "role": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "role",
+                "path",
+                "required"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "tools": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "required": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "required"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "assay",
+          "tools",
+          "references"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Check sequencing tools and reference resources separately",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Read file identity and lightweight structure from FASTQ, BAM/CRAM, variant, matrix, tabular and reference inputs; check sample-sheet identity and paired-read completeness before selecting an assay workflow.",
+      "entrypoint": "biomed_workbench.capabilities.ngs_integration:inspect_sequencing_inputs",
+      "id": "sequencing-input-intake",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "assay": {
+            "enum": [
+              "amplicon",
+              "atac",
+              "bulk-rna",
+              "chip",
+              "clipseq",
+              "cutrun",
+              "cuttag",
+              "germline-variant",
+              "hic",
+              "metagenomics",
+              "methylseq",
+              "riboseq",
+              "single-cell-rna",
+              "somatic-variant",
+              "unspecified"
+            ],
+            "type": "string"
+          },
+          "paths": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "type": "array"
+          },
+          "sample_sheet": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "paths"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Inspect sequencing inputs before workflow selection",
+      "workflow": "omics"
+    },
+    {
+      "access": "offline",
+      "description": "Read an external sequencing manifest and artifact index, reject prepared or failed states, verify output paths and SHA-256 values, and require a recorded analysis environment before scientific review.",
+      "entrypoint": "biomed_workbench.capabilities.ngs_integration:ingest_sequencing_run_package",
+      "id": "sequencing-run-package-ingest",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "run_directory": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_directory"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "read_only",
+      "requirements": [],
+      "title": "Reload and verify a completed sequencing run package",
+      "workflow": "omics"
     },
     {
       "access": "agent_generated",
@@ -13308,7 +13614,7 @@
       "workflow": "wetlab"
     }
   ],
-  "entry_count": 215,
+  "entry_count": 221,
   "schema_version": 2,
-  "version": "0.2.7"
+  "version": "0.2.8"
 }

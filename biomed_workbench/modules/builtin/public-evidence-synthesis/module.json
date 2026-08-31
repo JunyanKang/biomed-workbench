@@ -1,0 +1,294 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Source observations were accurately extracted and no database-specific uncertainty was discarded before synthesis."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "public-evidence-synthesis-e2e-v1"
+      ],
+      "id": "python-3.14.3-public-evidence-synthesis-1",
+      "input_formats": {
+        "public_evidence_records": [
+          "public-evidence-synthesis-request@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "evidence_synthesis": [
+          "public-evidence-synthesis@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "public-evidence-synthesis-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-31"
+    }
+  ],
+  "complements": [
+    "public-research-evidence-query",
+    "literature-evidence"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the project-owned bounded Python implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-31",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Normalize records retrieved from public resources, preserve source observations, detect entity mismatches and require study-design-aware interpretation instead of flattening heterogeneous evidence into one score.",
+  "domains": [
+    "evidence",
+    "research-quality"
+  ],
+  "entrypoint": "biomed_workbench.services.research_evidence:synthesize_public_evidence",
+  "evidence_effects": [
+    "adds-typed-public-evidence-synthesis",
+    "blocks-entity-mismatch"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 60
+  },
+  "id": "public-evidence-synthesis",
+  "input_artifacts": [
+    {
+      "artifact_type": "public_research_evidence_records",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "public-evidence-synthesis-request",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "public_evidence_records",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "evidence_records": {
+        "items": {
+          "type": "object"
+        },
+        "maxItems": 500,
+        "minItems": 1,
+        "type": "array"
+      },
+      "expected_entity": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "question": {
+        "maxLength": 2000,
+        "minLength": 5,
+        "type": "string"
+      }
+    },
+    "required": [
+      "question",
+      "evidence_records"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "synthesize public database evidence",
+    "integrate public biomedical evidence",
+    "综合公共数据库证据",
+    "按证据类型整合公共数据"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Normalization does not grade study quality, resolve publication bias, establish causality or replace source-level review."
+  ],
+  "maturity": "validated",
+  "module_type": "interpretation",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [
+      "public_research_evidence_records"
+    ],
+    "scientific_stage": 3
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "public_evidence_synthesis",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "public-evidence-synthesis",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "evidence_synthesis",
+      "processing_levels": [
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "concerns": {
+        "type": "array"
+      },
+      "evidence_table": {
+        "type": "array"
+      },
+      "expected_entity": {
+        "nullable": true,
+        "type": "string"
+      },
+      "next_review": {
+        "type": "array"
+      },
+      "question": {
+        "type": "string"
+      },
+      "record_count": {
+        "type": "integer"
+      },
+      "scientific_summary": {
+        "type": "string"
+      },
+      "source_count": {
+        "type": "integer"
+      },
+      "usable_for_interpretation": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "question",
+      "record_count",
+      "source_count",
+      "evidence_table",
+      "concerns",
+      "usable_for_interpretation",
+      "scientific_summary",
+      "next_review"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "Each source record retains a stable record ID, evidence type, observation and exact source URL."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned evidence-type and entity-consistency synthesis contract."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Entity mismatches block combined interpretation.",
+      "id": "public-evidence-entity-consistency",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Association, expression, perturbation, structure and mechanism records remain separate evidence classes.",
+      "id": "public-evidence-type-separation",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Do the collected public records refer to the same entity, and which distinct evidence roles can they support?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "public-evidence-synthesis",
+      "Synthesize public records by evidence type and entity",
+      "synthesize public database evidence",
+      "integrate public biomedical evidence",
+      "综合公共数据库证据",
+      "按证据类型整合公共数据"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": [
+      "synthesize public database evidence",
+      "integrate public biomedical evidence",
+      "综合公共数据库证据",
+      "按证据类型整合公共数据"
+    ]
+  },
+  "schema_version": 1,
+  "title": "Synthesize public records by evidence type and entity",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

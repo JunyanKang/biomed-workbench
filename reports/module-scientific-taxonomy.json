@@ -2,7 +2,7 @@
   "capability_scope_counts": {
     "image-derived-measurement": 6,
     "project-wide-figure-support": 3,
-    "project-wide-or-non-scale-specific": 167,
+    "project-wide-or-non-scale-specific": 173,
     "scale-specific-analysis": 37,
     "scientific-communication-asset": 2
   },
@@ -20,10 +20,10 @@
     "cross-scale": 27,
     "cross-scale delivery": 2,
     "measurement-specific": 6,
-    "multi-assay": 38,
-    "research-infrastructure-or-other-domain": 105
+    "multi-assay": 41,
+    "research-infrastructure-or-other-domain": 108
   },
-  "module_count": 215,
+  "module_count": 221,
   "modules": [
     {
       "capability_scope": "project-wide-or-non-scale-specific",
@@ -2588,6 +2588,43 @@
       "primary_scale": "universal"
     },
     {
+      "capability_scope": "project-wide-or-non-scale-specific",
+      "domains": [
+        "evidence",
+        "research-quality"
+      ],
+      "invariants": {
+        "assay_is_not_target_or_antibody": true,
+        "normalization_is_not_assay": true,
+        "scale_is_not_measurement_family": true,
+        "specificity_control_is_not_biological_replicate": true
+      },
+      "measurement_family": "not assay-scoped",
+      "method_role": "research-infrastructure-or-other-domain",
+      "module_id": "public-evidence-synthesis",
+      "module_type": "interpretation",
+      "module_version": "1.0.0",
+      "primary_scale": "universal"
+    },
+    {
+      "capability_scope": "project-wide-or-non-scale-specific",
+      "domains": [
+        "evidence"
+      ],
+      "invariants": {
+        "assay_is_not_target_or_antibody": true,
+        "normalization_is_not_assay": true,
+        "scale_is_not_measurement_family": true,
+        "specificity_control_is_not_biological_replicate": true
+      },
+      "measurement_family": "not assay-scoped",
+      "method_role": "research-infrastructure-or-other-domain",
+      "module_id": "public-research-evidence-query",
+      "module_type": "data_source",
+      "module_version": "1.0.0",
+      "primary_scale": "universal"
+    },
+    {
       "capability_scope": "project-wide-figure-support",
       "domains": [
         "publication",
@@ -2960,6 +2997,26 @@
     {
       "capability_scope": "project-wide-or-non-scale-specific",
       "domains": [
+        "evidence",
+        "research-quality",
+        "publication"
+      ],
+      "invariants": {
+        "assay_is_not_target_or_antibody": true,
+        "normalization_is_not_assay": true,
+        "scale_is_not_measurement_family": true,
+        "specificity_control_is_not_biological_replicate": true
+      },
+      "measurement_family": "not assay-scoped",
+      "method_role": "research-infrastructure-or-other-domain",
+      "module_id": "scientific-review-self-correction",
+      "module_type": "interpretation",
+      "module_version": "1.0.0",
+      "primary_scale": "universal"
+    },
+    {
+      "capability_scope": "project-wide-or-non-scale-specific",
+      "domains": [
         "molecular_design"
       ],
       "invariants": {
@@ -3045,6 +3102,69 @@
       "method_role": "research-infrastructure-or-other-domain",
       "module_id": "sequence-variant-localization",
       "module_type": "analysis",
+      "module_version": "1.0.0",
+      "primary_scale": "universal"
+    },
+    {
+      "capability_scope": "project-wide-or-non-scale-specific",
+      "domains": [
+        "omics",
+        "bulk",
+        "single-cell",
+        "evidence"
+      ],
+      "invariants": {
+        "assay_is_not_target_or_antibody": true,
+        "normalization_is_not_assay": true,
+        "scale_is_not_measurement_family": true,
+        "specificity_control_is_not_biological_replicate": true
+      },
+      "measurement_family": "sequence or molecular data infrastructure",
+      "method_role": "multi-assay",
+      "module_id": "sequencing-execution-readiness",
+      "module_type": "validation",
+      "module_version": "1.0.0",
+      "primary_scale": "universal"
+    },
+    {
+      "capability_scope": "project-wide-or-non-scale-specific",
+      "domains": [
+        "omics",
+        "bulk",
+        "single-cell",
+        "evidence"
+      ],
+      "invariants": {
+        "assay_is_not_target_or_antibody": true,
+        "normalization_is_not_assay": true,
+        "scale_is_not_measurement_family": true,
+        "specificity_control_is_not_biological_replicate": true
+      },
+      "measurement_family": "sequence or molecular data infrastructure",
+      "method_role": "multi-assay",
+      "module_id": "sequencing-input-intake",
+      "module_type": "validation",
+      "module_version": "1.0.0",
+      "primary_scale": "universal"
+    },
+    {
+      "capability_scope": "project-wide-or-non-scale-specific",
+      "domains": [
+        "omics",
+        "bulk",
+        "single-cell",
+        "evidence"
+      ],
+      "invariants": {
+        "assay_is_not_target_or_antibody": true,
+        "normalization_is_not_assay": true,
+        "scale_is_not_measurement_family": true,
+        "specificity_control_is_not_biological_replicate": true
+      },
+      "measurement_family": "sequence or molecular data infrastructure",
+      "method_role": "multi-assay",
+      "module_id": "sequencing-run-package-ingest",
+      "module_type": "validation",
       "module_version": "1.0.0",
       "primary_scale": "universal"
     },
@@ -4007,13 +4127,13 @@
       "primary_scale": "universal"
     }
   ],
-  "registry_digest": "ef2627101705170913b3e9d38f06de454813da799a5cabb20e19675afd174550",
-  "report_sha256_without_self_field": "722382d366eaa69a4fa80bf2334ad5db60f8ae05cff5ca4f772e195d56ec54f3",
+  "registry_digest": "e529db5a41a6d7fff93d93b90899301e81fbbdce06cd82252453ac0867968661",
+  "report_sha256_without_self_field": "e39d0813c316a66690453030cc00d8f7da2ac5a586b922b2e912379a55d70755",
   "scale_counts": {
     "bulk": 9,
     "single-cell": 23,
     "spatial": 5,
-    "universal": 178
+    "universal": 184
   },
   "schema_version": 1
 }

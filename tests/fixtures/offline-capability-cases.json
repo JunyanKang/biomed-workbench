@@ -9180,6 +9180,122 @@
       "variant_count": 1
     }
   },
+  "public-evidence-synthesis": {
+    "input": {
+      "evidence_records": [
+        {
+          "entity": "BANP",
+          "evidence_type": "literature",
+          "observation": "BANP was studied in retinal tissue.",
+          "record_id": "PMID:1",
+          "source": "PubMed",
+          "source_url": "https://pubmed.ncbi.nlm.nih.gov/1/",
+          "supports": "context"
+        }
+      ],
+      "expected_entity": "BANP",
+      "question": "What evidence links BANP to retinal biology?"
+    },
+    "output": {
+      "concerns": [],
+      "expected_entity": "BANP",
+      "record_count": 1,
+      "source_count": 1,
+      "usable_for_interpretation": true
+    }
+  },
+  "scientific-review-self-correction": {
+    "input": {
+      "alternative_explanations": [
+        "systemic exposure rather than a direct retinal effect"
+      ],
+      "draft_review": {
+        "conclusion": "The randomized comparison supports a treatment effect on thickness, while the inactive control was null.",
+        "limitations": "The result does not establish the cellular mechanism; the inactive control was null.",
+        "methods": "Animals were randomized and analysed at the animal level.",
+        "next_step": "Test whether cell-type-specific perturbation distinguishes a direct retinal effect from systemic exposure.",
+        "results": "Thickness increased by 12 um with the stated confidence interval; the inactive control was null."
+      },
+      "hypothesis": "Treatment is associated with increased retinal thickness.",
+      "observations": [
+        {
+          "direction": "increase",
+          "effect_size": "12 um",
+          "id": "oct-1",
+          "observation": "Mean thickness increased by 12 micrometres",
+          "replicates": 8,
+          "status": "formal",
+          "uncertainty": "95% CI 4 to 20 um"
+        },
+        {
+          "direction": "null",
+          "effect_size": "1 um",
+          "id": "oct-2",
+          "observation": "No increase was detected in the inactive control",
+          "replicates": 8,
+          "status": "formal",
+          "uncertainty": "95% CI -5 to 7 um"
+        }
+      ],
+      "proposed_action": "retain",
+      "question": "Does treatment change retinal thickness?",
+      "statistical_unit": "animal",
+      "study_design": "randomized"
+    },
+    "output": {
+      "finding_counts": {},
+      "passed": true,
+      "requires_revision": false
+    }
+  },
+  "sequencing-input-intake": {
+    "input": {
+      "paths": [
+        "README.md"
+      ]
+    },
+    "output": {
+      "admissible_for_planning": false,
+      "assay": "unspecified",
+      "input_count": 1,
+      "type_counts": {
+        "unknown": 1
+      }
+    }
+  },
+  "sequencing-run-package-ingest": {
+    "input": {
+      "run_directory": "tests/fixtures/sequencing-run-package"
+    },
+    "output": {
+      "accepted": true,
+      "errors": [],
+      "status": "completed"
+    }
+  },
+  "sequencing-execution-readiness": {
+    "input": {
+      "assay": "bulk-rna",
+      "references": [
+        {
+          "path": "README.md",
+          "required": true,
+          "role": "annotation"
+        }
+      ],
+      "tools": [
+        {
+          "name": "python3",
+          "required": true
+        }
+      ]
+    },
+    "output": {
+      "ready_to_execute": true,
+      "reference_readiness": true,
+      "tool_readiness": true
+    }
+  },
   "western-blot-densitometry": {
     "input": {
       "measurements": [

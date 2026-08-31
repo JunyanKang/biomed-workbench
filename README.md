@@ -35,7 +35,7 @@ Biomed Workbench 是面向复杂生物医学项目的研究工作台。你可以
 
 | 研究方向 | 可以开展的工作 |
 | --- | --- |
-| [Bulk 测序](docs/capabilities/bulk-sequencing-assays.zh-CN.md) | RNA 表达、RNA 加工与可变剪接，染色质结合与开放性，R-loop、蛋白–RNA 结合、翻译、瞬时转录、甲基化和三维基因组分析 |
+| [Bulk 测序](docs/capabilities/bulk-sequencing-assays.zh-CN.md) | 先核对原始测序文件、样本表、软件和参考资源，再开展 RNA 表达、RNA 加工与可变剪接，染色质结合与开放性，R-loop、蛋白–RNA 结合、翻译、瞬时转录、甲基化和三维基因组分析 |
 | [Single-cell](docs/capabilities/single-cell-integration-reference-cross-species.zh-CN.md) | 质控与注释，跨批次和参考整合，多组学联合分析，轨迹与状态转变，调控网络、样本感知推断及跨物种映射 |
 | [Spatial](docs/capabilities/trajectory-spatial-complete-analysis.zh-CN.md) | 平台数据导入与质控，组织图像和细胞分割，空间域、解卷积、参考投射、空间通讯、多切片对齐与三维组织分析 |
 | [分子与结构生物学](docs/capabilities/molecular-and-structural.zh-CN.md) | 蛋白互作网络，AlphaFold 结果接收与质量解读，HADDOCK3 对接，结构比较、结合评估和结构证据作图 |
@@ -46,7 +46,7 @@ Biomed Workbench 是面向复杂生物医学项目的研究工作台。你可以
 
 | 研究工作 | 可以开展的工作 |
 | --- | --- |
-| [文献与公共数据库](docs/capabilities/evidence-and-literature.zh-CN.md) | 多来源文献检索与全文阅读，引用核查，以及基因、变异、通路、结构、药物和临床试验证据整合 |
+| [文献与公共数据库](docs/capabilities/evidence-and-literature.zh-CN.md) | 多来源文献检索与全文阅读，引用核查，以及遗传关联、表达、组学数据集、基因、变异、通路、结构、药物和临床试验证据整合 |
 | [跨尺度通用分析](docs/capabilities/omics-and-single-cell.zh-CN.md) | 实验设计、差异分析、蛋白组定量、功能富集、GSEA、WGCNA、motif、网络分析和跨数据结果整合 |
 | [科学作图规范与图件交付](docs/capabilities/scientific-figure-standards.zh-CN.md) | 根据分析目的选择图形，统一字体、线条、颜色、图例和统计标注，并交付作图数据、PDF、SVG 与高分辨率 PNG |
 | [科研写作、发表与转化](docs/capabilities/publication-and-translation.zh-CN.md) | 全文中英对照精读，论文和科研项目申请写作，学术表达修订，期刊定位、统计与数据可用性检查、审稿回复、汇报和专利材料 |
@@ -57,7 +57,7 @@ Biomed Workbench 是面向复杂生物医学项目的研究工作台。你可以
 
 1. **先理解研究。** 读取样本设计、已有文件和前期结论，明确当前问题、比较单位、竞争性解释和期望交付物。
 2. **再选择方法。** 根据数据和问题安排主分析、必要验证及上下游关系，而不是按关键词简单匹配工具。
-3. **结合结果解释。** 重新打开真实输出，结合技术质量、统计结果和生物学背景说明发现、限制与尚未解决的问题。
+3. **结合结果解释。** 重新打开真实输出，优先说明效应大小、不确定性、实验单位和阴性或不一致结果；再结合技术质量、研究设计和生物学背景修正结论，并提出能够区分竞争性解释的下一步。
 4. **决定下一步。** 保留能够支撑当前结论的结果，调整不合适的分析，并把下一项计算、实验或写作任务接在已有研究基础上。
 
 长期项目中已经确定的样本信息、参考版本、细胞注释、统计单位、分析环境、颜色和正式图件会持续沿用。再次运行同一分析前，工作台会先核对已有的 Conda 或其他运行环境，内容一致时直接复用，发生漂移时先停止计算并说明需要恢复原环境还是建立新的分析分支。数据、作图表格、图件、图注、正文和文献来源可以连接到同一份[科学证据地图](docs/scientific-evidence-map.zh-CN.md)，让多轮分析之后仍能看清每个结论从哪里来。冲突或阴性结果不会被藏起来，而会与支持性结果一起用于决定课题应继续、调整还是补充验证。

@@ -1,5 +1,5 @@
 {
-  "module_count": 215,
+  "module_count": 221,
   "modules": [
     {
       "access": "offline",
@@ -60355,6 +60355,658 @@
       "access": "offline",
       "alternatives": [],
       "assumptions": [
+        "Source observations were accurately extracted and no database-specific uncertainty was discarded before synthesis."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "public-evidence-synthesis-e2e-v1"
+          ],
+          "id": "python-3.14.3-public-evidence-synthesis-1",
+          "input_formats": {
+            "public_evidence_records": [
+              "public-evidence-synthesis-request@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "evidence_synthesis": [
+              "public-evidence-synthesis@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "public-evidence-synthesis-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-31"
+        }
+      ],
+      "complements": [
+        "public-research-evidence-query",
+        "literature-evidence"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-owned bounded Python implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-31",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Normalize records retrieved from public resources, preserve source observations, detect entity mismatches and require study-design-aware interpretation instead of flattening heterogeneous evidence into one score.",
+      "domains": [
+        "evidence",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.services.research_evidence:synthesize_public_evidence",
+      "evidence_effects": [
+        "adds-typed-public-evidence-synthesis",
+        "blocks-entity-mismatch"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 60
+      },
+      "id": "public-evidence-synthesis",
+      "input_artifacts": [
+        {
+          "artifact_type": "public_research_evidence_records",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "public-evidence-synthesis-request",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "public_evidence_records",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence_records": {
+            "items": {
+              "type": "object"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "type": "array"
+          },
+          "expected_entity": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "question": {
+            "maxLength": 2000,
+            "minLength": 5,
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "evidence_records"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "synthesize public database evidence",
+        "integrate public biomedical evidence",
+        "\u7efc\u5408\u516c\u5171\u6570\u636e\u5e93\u8bc1\u636e",
+        "\u6309\u8bc1\u636e\u7c7b\u578b\u6574\u5408\u516c\u5171\u6570\u636e"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Normalization does not grade study quality, resolve publication bias, establish causality or replace source-level review."
+      ],
+      "maturity": "validated",
+      "module_type": "interpretation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [
+          "public_research_evidence_records"
+        ],
+        "scientific_stage": 3
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "public_evidence_synthesis",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "public-evidence-synthesis",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "evidence_synthesis",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "concerns": {
+            "type": "array"
+          },
+          "evidence_table": {
+            "type": "array"
+          },
+          "expected_entity": {
+            "nullable": true,
+            "type": "string"
+          },
+          "next_review": {
+            "type": "array"
+          },
+          "question": {
+            "type": "string"
+          },
+          "record_count": {
+            "type": "integer"
+          },
+          "scientific_summary": {
+            "type": "string"
+          },
+          "source_count": {
+            "type": "integer"
+          },
+          "usable_for_interpretation": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "question",
+          "record_count",
+          "source_count",
+          "evidence_table",
+          "concerns",
+          "usable_for_interpretation",
+          "scientific_summary",
+          "next_review"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "Each source record retains a stable record ID, evidence type, observation and exact source URL."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned evidence-type and entity-consistency synthesis contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Entity mismatches block combined interpretation.",
+          "id": "public-evidence-entity-consistency",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Association, expression, perturbation, structure and mechanism records remain separate evidence classes.",
+          "id": "public-evidence-type-separation",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Do the collected public records refer to the same entity, and which distinct evidence roles can they support?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "public-evidence-synthesis",
+          "Synthesize public records by evidence type and entity",
+          "synthesize public database evidence",
+          "integrate public biomedical evidence",
+          "\u7efc\u5408\u516c\u5171\u6570\u636e\u5e93\u8bc1\u636e",
+          "\u6309\u8bc1\u636e\u7c7b\u578b\u6574\u5408\u516c\u5171\u6570\u636e"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": [
+          "synthesize public database evidence",
+          "integrate public biomedical evidence",
+          "\u7efc\u5408\u516c\u5171\u6570\u636e\u5e93\u8bc1\u636e",
+          "\u6309\u8bc1\u636e\u7c7b\u578b\u6574\u5408\u516c\u5171\u6570\u636e"
+        ]
+      },
+      "schema_version": 1,
+      "title": "Synthesize public records by evidence type and entity",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "public_api",
+      "alternatives": [
+        "literature-evidence"
+      ],
+      "assumptions": [
+        "The official public endpoint remains compatible with the observed response contract at execution time."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "public-research-evidence-query-e2e-v1"
+          ],
+          "id": "python-3.14.3-public-research-evidence-query-1",
+          "input_formats": {
+            "public_evidence_query": [
+              "public-evidence-query@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "public_evidence_records": [
+              "public-evidence-records@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "public-research-evidence-query-regression-v1"
+          ],
+          "tool_versions": {
+            "typed-public-research-evidence": [
+              "==typed-public-evidence-v1-observed-2026-08-31"
+            ]
+          },
+          "verified_at": "2026-08-31"
+        }
+      ],
+      "complements": [
+        "public-evidence-synthesis",
+        "citation-record-resolution"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-owned bounded Python implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-31",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Query fixed official operations for GWAS Catalog, ChEMBL, PRIDE, BioStudies, ENCODE, Human Protein Atlas and MGnify, then retain bounded normalized records, source scope and limitations.",
+      "domains": [
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.services.research_evidence:query_public_research_evidence",
+      "evidence_effects": [
+        "adds-source-specific-public-evidence-records"
+      ],
+      "execution": {
+        "kind": "service",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 60
+      },
+      "id": "public-research-evidence-query",
+      "input_artifacts": [
+        {
+          "artifact_type": "database_query",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "public-evidence-query",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "public_evidence_query",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "max_records": {
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "operation": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "query": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "gwas-catalog",
+              "chembl",
+              "pride",
+              "biostudies",
+              "encode",
+              "human-protein-atlas",
+              "mgnify"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "operation",
+          "query"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "query public biomedical databases",
+        "discover public omics datasets",
+        "search ChEMBL GWAS PRIDE ENCODE",
+        "\u67e5\u8be2\u516c\u5171\u751f\u547d\u79d1\u5b66\u6570\u636e\u5e93",
+        "\u68c0\u7d22\u516c\u5171\u7ec4\u5b66\u6570\u636e\u548c\u751f\u7269\u6d3b\u6027\u8bc1\u636e"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "A bounded query is not an exhaustive systematic review, and source records do not by themselves establish mechanism, causality, actionability or project-specific validity."
+      ],
+      "maturity": "validated",
+      "module_type": "data_source",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 0
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "public_research_evidence_records",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "public-evidence-records",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "public_evidence_records",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "evidence_role": {
+            "type": "string"
+          },
+          "limitations": {
+            "type": "array"
+          },
+          "operation": {
+            "type": "string"
+          },
+          "provenance": {
+            "type": "object"
+          },
+          "query": {
+            "type": "string"
+          },
+          "records": {
+            "type": "array"
+          },
+          "records_truncated": {
+            "type": "boolean"
+          },
+          "returned_count": {
+            "type": "integer"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "operation",
+          "query",
+          "evidence_role",
+          "returned_count",
+          "records_truncated",
+          "records",
+          "provenance",
+          "limitations"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The source, registered operation and exact query are declared; entity and study-design compatibility will be reviewed downstream."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned typed clients implemented from official GWAS Catalog, ChEMBL, PRIDE, BioStudies, ENCODE, Human Protein Atlas and MGnify API documentation.",
+          "Capability selection was informed by source-level inspection of Life Science Research 1.0.3; no proprietary source code is included or required."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Only registered official source operations may execute; caller-controlled hosts and paths are rejected.",
+          "id": "public-evidence-source-operation",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Search records may support discovery or context only according to their database and study-design scope.",
+          "id": "public-evidence-scope",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Which bounded records does one declared official source return for the exact query, and what can those records support?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "public-research-evidence-query",
+          "Query registered public life-science evidence sources",
+          "query public biomedical databases",
+          "discover public omics datasets",
+          "search ChEMBL GWAS PRIDE ENCODE",
+          "\u67e5\u8be2\u516c\u5171\u751f\u547d\u79d1\u5b66\u6570\u636e\u5e93",
+          "\u68c0\u7d22\u516c\u5171\u7ec4\u5b66\u6570\u636e\u548c\u751f\u7269\u6d3b\u6027\u8bc1\u636e"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": [
+          "gwas catalog",
+          "chembl",
+          "pride",
+          "biostudies",
+          "encode",
+          "human protein atlas",
+          "mgnify",
+          "query public biomedical databases",
+          "discover public omics datasets",
+          "\u67e5\u8be2\u516c\u5171\u751f\u547d\u79d1\u5b66\u6570\u636e\u5e93",
+          "\u68c0\u7d22\u516c\u5171\u7ec4\u5b66\u6570\u636e\u548c\u751f\u7269\u6d3b\u6027\u8bc1\u636e"
+        ]
+      },
+      "schema_version": 1,
+      "title": "Query registered public life-science evidence sources",
+      "tool_requirements": [
+        {
+          "allowed_versions": [
+            "==typed-public-evidence-v1-observed-2026-08-31"
+          ],
+          "ecosystem": "service",
+          "identity": "official-public-life-science-apis",
+          "mismatch_policy": "block",
+          "name": "typed-public-research-evidence",
+          "platforms": [
+            "any"
+          ],
+          "required": true,
+          "tested_versions": [
+            "typed-public-evidence-v1-observed-2026-08-31"
+          ],
+          "verified_at": "2026-08-31",
+          "version_differences": [
+            {
+              "affected_versions": [
+                "==typed-public-evidence-v1-observed-2026-08-31"
+              ],
+              "category": "field",
+              "compatibility_effect": "requires-parser",
+              "description": "Each source exposes a distinct response container and scientific scope.",
+              "id": "public-evidence-response-contract",
+              "required_action": "Use only the registered source operation and validate its record container before interpretation.",
+              "source": "https://www.ebi.ac.uk/services"
+            }
+          ],
+          "version_pattern": "(typed-public-evidence-v1-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+          "version_probe": [
+            "biomed_workbench.services.research_evidence:probe_public_research_evidence_contract"
+          ],
+          "version_probe_kind": "service_contract",
+          "version_probe_timeout_seconds": 10,
+          "version_source": "https://www.ebi.ac.uk/services"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
         "The registered table contains the exact data intended for display; the renderer preserves and validates those rows but does not repair, reinterpret, or scientifically validate upstream analysis."
       ],
       "compatibility_matrix": [
@@ -68909,6 +69561,338 @@
     },
     {
       "access": "offline",
+      "alternatives": [
+        "manuscript-audit"
+      ],
+      "assumptions": [
+        "Observation rows accurately represent the reloaded result; automated checks cannot detect omitted or falsified evidence."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "scientific-review-self-correction-e2e-v1"
+          ],
+          "id": "python-3.14.3-scientific-review-self-correction-1",
+          "input_formats": {
+            "review_draft": [
+              "scientific-review-request@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "corrected_review": [
+              "scientific-review-correction@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "scientific-review-self-correction-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-31"
+        }
+      ],
+      "complements": [
+        "claim-evidence-integrity-audit",
+        "publication-figure-package"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-owned bounded Python implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-31",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Review a draft interpretation against study design, statistical unit, effect magnitude, uncertainty, replication, negative results and discriminating alternatives; return a corrected result-first brief before final project promotion.",
+      "domains": [
+        "evidence",
+        "research-quality",
+        "publication"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.scientific_review:self_correct_scientific_review",
+      "evidence_effects": [
+        "corrects-scientific-review-before-promotion",
+        "prioritizes-results-over-audit-prose"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 60
+      },
+      "id": "scientific-review-self-correction",
+      "input_artifacts": [
+        {
+          "artifact_type": "scientific_review_draft",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "scientific-review-request",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "review_draft",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "alternative_explanations": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10,
+            "type": "array"
+          },
+          "draft_review": {
+            "type": "object"
+          },
+          "hypothesis": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "observations": {
+            "items": {
+              "type": "object"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "type": "array"
+          },
+          "proposed_action": {
+            "enum": [
+              "retain",
+              "retain-with-limit",
+              "rerun",
+              "switch-method",
+              "acquire-data",
+              "revise-hypothesis",
+              "exclude",
+              "stop"
+            ],
+            "type": "string"
+          },
+          "question": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "statistical_unit": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "study_design": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "question",
+          "hypothesis",
+          "study_design",
+          "statistical_unit",
+          "observations",
+          "draft_review",
+          "proposed_action"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "self correct scientific review",
+        "strengthen biological interpretation",
+        "review result logic",
+        "\u79d1\u5b66\u590d\u6838\u81ea\u7ea0\u504f",
+        "\u52a0\u5f3a\u751f\u547d\u79d1\u5b66\u7ed3\u679c\u89e3\u8bfb"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Deterministic language and completeness checks cannot substitute for full-data inspection, specialist judgment, literature review or independent replication."
+      ],
+      "maturity": "validated",
+      "module_type": "interpretation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 4
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "scientific_review_correction",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "scientific-review-correction",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "corrected_review",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "background_provenance_fields": {
+            "type": "array"
+          },
+          "claim_boundary": {
+            "type": "string"
+          },
+          "corrected_review_brief": {
+            "type": "object"
+          },
+          "finding_counts": {
+            "type": "object"
+          },
+          "findings": {
+            "type": "array"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "requires_revision": {
+            "type": "boolean"
+          },
+          "review_display_order": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "passed",
+          "requires_revision",
+          "finding_counts",
+          "findings",
+          "corrected_review_brief",
+          "review_display_order",
+          "background_provenance_fields",
+          "claim_boundary"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The scientific question, hypothesis, study design, statistical unit, observations and draft review are explicitly supplied."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned biomedical review self-correction contract built around effect size, uncertainty, experimental unit, claim strength, alternatives and falsifiability."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Methods and provenance must not displace observed magnitude, uncertainty and biological interpretation in the user-facing review.",
+          "id": "review-result-first",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Causal or mechanistic language cannot exceed the declared evidence design.",
+          "id": "review-claim-design-consistency",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The next step must distinguish the leading explanation from at least one biologically plausible alternative.",
+          "id": "review-discriminating-next-step",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Does the draft review accurately state what was observed, what the design supports, what remains uncertain and which next result would discriminate alternatives?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "scientific-review-self-correction",
+          "Self-correct a result-first biomedical review",
+          "self correct scientific review",
+          "strengthen biological interpretation",
+          "review result logic",
+          "\u79d1\u5b66\u590d\u6838\u81ea\u7ea0\u504f",
+          "\u52a0\u5f3a\u751f\u547d\u79d1\u5b66\u7ed3\u679c\u89e3\u8bfb"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Self-correct a result-first biomedical review",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
       "alternatives": [],
       "assumptions": [
         "Preferred-codon substitution is sufficient for deterministic screening and is not full expression optimization."
@@ -70747,6 +71731,976 @@
       },
       "schema_version": 1,
       "title": "Localize descriptive sequence differences",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "Executable discovery and nonempty resource paths are preliminary readiness checks; version compatibility remains a module-level requirement."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_sequencing_execution_readiness.py",
+          "purpose": "Load a closed JSON request, execute the registered project-owned capability, and serialize a reviewable JSON result.",
+          "quality_gate_ids": [
+            "sequencing-required-tools",
+            "sequencing-required-references"
+          ],
+          "requires_adaptation": false
+        }
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "sequencing-execution-readiness-e2e-v1"
+          ],
+          "id": "python-3.14.3-sequencing-execution-readiness-1",
+          "input_formats": {
+            "readiness_request": [
+              "sequencing-readiness-request@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "readiness_report": [
+              "sequencing-readiness-report@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "sequencing-execution-readiness-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-31"
+        }
+      ],
+      "complements": [
+        "sequencing-input-intake",
+        "sequencing-run-package-ingest"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-owned bounded Python implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-31",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Determine whether declared executables and reference resources are independently available before a sequencing workflow is launched, without installing software or treating readiness as execution.",
+      "domains": [
+        "omics",
+        "bulk",
+        "single-cell",
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.ngs_integration:assess_sequencing_readiness",
+      "evidence_effects": [
+        "separates-tool-readiness-from-reference-readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 60
+      },
+      "id": "sequencing-execution-readiness",
+      "input_artifacts": [
+        {
+          "artifact_type": "sequencing_readiness_request",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "sequencing-readiness-request",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "readiness_request",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "assay": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "references": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "required": {
+                  "type": "boolean"
+                },
+                "role": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "role",
+                "path",
+                "required"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "tools": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "required": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "required"
+              ],
+              "type": "object"
+            },
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "assay",
+          "tools",
+          "references"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "check sequencing execution readiness",
+        "check NGS tools and references",
+        "\u68c0\u67e5\u6d4b\u5e8f\u6267\u884c\u6761\u4ef6",
+        "\u6838\u5bf9\u5206\u6790\u5de5\u5177\u548c\u53c2\u8003\u8d44\u6e90"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Availability does not establish version compatibility, a complete index, successful execution or output quality."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 0
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "sequencing_readiness_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "sequencing-readiness-report",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "readiness_report",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "assay": {
+            "type": "string"
+          },
+          "claim_boundary": {
+            "type": "string"
+          },
+          "invalid_required_references": {
+            "type": "array"
+          },
+          "missing_required_references": {
+            "type": "array"
+          },
+          "missing_required_tools": {
+            "type": "array"
+          },
+          "next_action": {
+            "type": "string"
+          },
+          "ready_to_execute": {
+            "type": "boolean"
+          },
+          "reference_readiness": {
+            "type": "boolean"
+          },
+          "references": {
+            "type": "array"
+          },
+          "tool_readiness": {
+            "type": "boolean"
+          },
+          "tools": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "assay",
+          "tool_readiness",
+          "reference_readiness",
+          "ready_to_execute",
+          "tools",
+          "references",
+          "missing_required_tools",
+          "missing_required_references",
+          "invalid_required_references",
+          "next_action",
+          "claim_boundary"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The assay, required executables and reference resource roles are explicitly declared."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned clean-room separation of executable, environment and reference-resource readiness."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Missing required executables block execution.",
+          "id": "sequencing-required-tools",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Missing or empty required references block execution.",
+          "id": "sequencing-required-references",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Are the required executables and assay-specific reference resources independently ready?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "sequencing-execution-readiness",
+          "Check sequencing tools and reference resources separately",
+          "check sequencing execution readiness",
+          "check NGS tools and references",
+          "\u68c0\u67e5\u6d4b\u5e8f\u6267\u884c\u6761\u4ef6",
+          "\u6838\u5bf9\u5206\u6790\u5de5\u5177\u548c\u53c2\u8003\u8d44\u6e90"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Check sequencing tools and reference resources separately",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "Filename mate markers describe the intended pairing and lightweight header checks are sufficient only for intake."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_sequencing_input_intake.py",
+          "purpose": "Load a closed JSON request, execute the registered project-owned capability, and serialize a reviewable JSON result.",
+          "quality_gate_ids": [
+            "sequencing-input-identity",
+            "sequencing-sample-pairing"
+          ],
+          "requires_adaptation": false
+        }
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "sequencing-input-intake-e2e-v1"
+          ],
+          "id": "python-3.14.3-sequencing-input-intake-1",
+          "input_formats": {
+            "sequencing_files": [
+              "local-path-request@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "sequencing_intake": [
+              "sequencing-intake-report@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "sequencing-input-intake-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-31"
+        }
+      ],
+      "complements": [
+        "sequencing-execution-readiness",
+        "sequencing-run-package-ingest"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-owned bounded Python implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-31",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Read file identity and lightweight structure from FASTQ, BAM/CRAM, variant, matrix, tabular and reference inputs; check sample-sheet identity and paired-read completeness before selecting an assay workflow.",
+      "domains": [
+        "omics",
+        "bulk",
+        "single-cell",
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.ngs_integration:inspect_sequencing_inputs",
+      "evidence_effects": [
+        "identifies-sequencing-inputs",
+        "blocks-ambiguous-workflow-selection"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 60
+      },
+      "id": "sequencing-input-intake",
+      "input_artifacts": [
+        {
+          "artifact_type": "sequencing_file_set",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "local-path-request",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "sequencing_files",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "assay": {
+            "enum": [
+              "amplicon",
+              "atac",
+              "bulk-rna",
+              "chip",
+              "clipseq",
+              "cutrun",
+              "cuttag",
+              "germline-variant",
+              "hic",
+              "metagenomics",
+              "methylseq",
+              "riboseq",
+              "single-cell-rna",
+              "somatic-variant",
+              "unspecified"
+            ],
+            "type": "string"
+          },
+          "paths": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 10000,
+            "minItems": 1,
+            "type": "array"
+          },
+          "sample_sheet": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "paths"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "inspect sequencing inputs",
+        "identify FASTQ BAM VCF inputs",
+        "\u6d4b\u5e8f\u8f93\u5165\u68c0\u67e5",
+        "\u8bc6\u522b\u6d4b\u5e8f\u6587\u4ef6\u5e76\u68c0\u67e5\u914d\u5bf9"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "This intake does not run read QC, infer library chemistry, validate sample provenance, or establish biological validity."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 0
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "sequencing_input_intake",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "sequencing-intake-report",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "sequencing_intake",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "admissible_for_planning": {
+            "type": "boolean"
+          },
+          "assay": {
+            "type": "string"
+          },
+          "claim_boundary": {
+            "type": "string"
+          },
+          "duplicate_paths": {
+            "type": "array"
+          },
+          "incomplete_fastq_pairs": {
+            "type": "array"
+          },
+          "input_count": {
+            "type": "integer"
+          },
+          "interpretation": {
+            "type": "string"
+          },
+          "missing_paths": {
+            "type": "array"
+          },
+          "records": {
+            "type": "array"
+          },
+          "route_candidates": {
+            "type": "array"
+          },
+          "sample_sheet": {
+            "nullable": true,
+            "type": "object"
+          },
+          "sample_sheet_errors": {
+            "type": "array"
+          },
+          "type_counts": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "assay",
+          "input_count",
+          "type_counts",
+          "records",
+          "missing_paths",
+          "duplicate_paths",
+          "incomplete_fastq_pairs",
+          "sample_sheet_errors",
+          "route_candidates",
+          "admissible_for_planning",
+          "interpretation",
+          "claim_boundary"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The caller supplies explicit local file paths and declares an assay when known."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned clean-room implementation informed by observed input-validation patterns in public NGS workflow packages and official FASTQ/BAM/CRAM/VCF format contracts."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Missing, duplicated, unknown or structurally invalid files block workflow selection.",
+          "id": "sequencing-input-identity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Incomplete mate pairs or ambiguous sample identifiers block unattended execution.",
+          "id": "sequencing-sample-pairing",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Which supplied files are structurally recognizable, paired and sample-sheet bound before analysis?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "sequencing-input-intake",
+          "Inspect sequencing inputs before workflow selection",
+          "inspect sequencing inputs",
+          "identify FASTQ BAM VCF inputs",
+          "\u6d4b\u5e8f\u8f93\u5165\u68c0\u67e5",
+          "\u8bc6\u522b\u6d4b\u5e8f\u6587\u4ef6\u5e76\u68c0\u67e5\u914d\u5bf9"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Inspect sequencing inputs before workflow selection",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The manifest status, artifact roles and environment identity were recorded by the producing workflow at execution time."
+      ],
+      "code_templates": [
+        {
+          "language": "python",
+          "path": "templates/run_sequencing_run_package_ingest.py",
+          "purpose": "Load a closed JSON request, execute the registered project-owned capability, and serialize a reviewable JSON result.",
+          "quality_gate_ids": [
+            "sequencing-run-completion",
+            "sequencing-artifact-integrity",
+            "sequencing-environment-identity"
+          ],
+          "requires_adaptation": false
+        }
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "sequencing-run-package-ingest-e2e-v1"
+          ],
+          "id": "python-3.14.3-sequencing-run-package-ingest-1",
+          "input_formats": {
+            "run_package": [
+              "sequencing-run-envelope@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "ingest_report": [
+              "sequencing-run-ingest-report@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "sequencing-run-package-ingest-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-08-31"
+        }
+      ],
+      "complements": [
+        "sequencing-input-intake",
+        "scientific-review-self-correction"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute the project-owned bounded Python implementation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-08-31",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Read an external sequencing manifest and artifact index, reject prepared or failed states, verify output paths and SHA-256 values, and require a recorded analysis environment before scientific review.",
+      "domains": [
+        "omics",
+        "bulk",
+        "single-cell",
+        "evidence"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.ngs_integration:ingest_sequencing_run_package",
+      "evidence_effects": [
+        "reloads-completed-ngs-execution",
+        "rejects-plans-as-results"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 10000000,
+        "timeout_seconds": 60
+      },
+      "id": "sequencing-run-package-ingest",
+      "input_artifacts": [
+        {
+          "artifact_type": "external_sequencing_run_package",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "sequencing-run-envelope",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "run_package",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "run_directory": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_directory"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "ingest NGS run package",
+        "verify sequencing workflow outputs",
+        "\u56de\u6536\u6d4b\u5e8f\u8fd0\u884c\u7ed3\u679c",
+        "\u6838\u5bf9\u5916\u90e8\u6d4b\u5e8f\u6d41\u7a0b\u4ea7\u7269"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "Package acceptance does not replace assay-specific QC, statistical review, biological interpretation or publication-figure review."
+      ],
+      "maturity": "validated",
+      "module_type": "validation",
+      "mutability": "read_only",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 2
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "sequencing_run_ingest_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "sequencing-run-ingest-report",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "ingest_report",
+          "processing_levels": [
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "accepted": {
+            "type": "boolean"
+          },
+          "artifacts": {
+            "type": "array"
+          },
+          "claim_boundary": {
+            "type": "string"
+          },
+          "environment": {
+            "nullable": true,
+            "type": "object"
+          },
+          "errors": {
+            "type": "array"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "run_directory": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "workflow": {
+            "nullable": true,
+            "type": "object"
+          }
+        },
+        "required": [
+          "run_directory",
+          "status",
+          "accepted",
+          "reason",
+          "artifacts",
+          "claim_boundary"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The run directory contains manifest.json and artifact_index.json from a completed external workflow."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned run-package reload contract informed by public NGS workflow envelopes; no external plugin source is required at runtime."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Prepared, blocked, failed or empty packages cannot enter scientific review.",
+          "id": "sequencing-run-completion",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Missing, escaping or checksum-mismatched artifacts block acceptance.",
+          "id": "sequencing-artifact-integrity",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "A completed run without a recorded analysis environment cannot support reproducible reuse.",
+          "id": "sequencing-environment-identity",
+          "severity": "major"
+        }
+      ],
+      "questions": [
+        "Did the external sequencing workflow complete, and do its declared outputs still exist with the recorded identities?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "sequencing-run-package-ingest",
+          "Reload and verify a completed sequencing run package",
+          "ingest NGS run package",
+          "verify sequencing workflow outputs",
+          "\u56de\u6536\u6d4b\u5e8f\u8fd0\u884c\u7ed3\u679c",
+          "\u6838\u5bf9\u5916\u90e8\u6d4b\u5e8f\u6d41\u7a0b\u4ea7\u7269"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Reload and verify a completed sequencing run package",
       "tool_requirements": [],
       "version": "1.0.0"
     },
@@ -116268,7 +118222,7 @@
       "version": "1.0.0"
     }
   ],
-  "plugin_version": "0.2.7",
-  "registry_digest": "ef2627101705170913b3e9d38f06de454813da799a5cabb20e19675afd174550",
+  "plugin_version": "0.2.8",
+  "registry_digest": "e529db5a41a6d7fff93d93b90899301e81fbbdce06cd82252453ac0867968661",
   "schema_version": 1
 }

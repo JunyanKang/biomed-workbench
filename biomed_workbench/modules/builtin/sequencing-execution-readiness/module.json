@@ -1,0 +1,339 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Executable discovery and nonempty resource paths are preliminary readiness checks; version compatibility remains a module-level requirement."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_sequencing_execution_readiness.py",
+      "purpose": "Load a closed JSON request, execute the registered project-owned capability, and serialize a reviewable JSON result.",
+      "quality_gate_ids": [
+        "sequencing-required-tools",
+        "sequencing-required-references"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "sequencing-execution-readiness-e2e-v1"
+      ],
+      "id": "python-3.14.3-sequencing-execution-readiness-1",
+      "input_formats": {
+        "readiness_request": [
+          "sequencing-readiness-request@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "readiness_report": [
+          "sequencing-readiness-report@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "sequencing-execution-readiness-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-31"
+    }
+  ],
+  "complements": [
+    "sequencing-input-intake",
+    "sequencing-run-package-ingest"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the project-owned bounded Python implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-31",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Determine whether declared executables and reference resources are independently available before a sequencing workflow is launched, without installing software or treating readiness as execution.",
+  "domains": [
+    "omics",
+    "bulk",
+    "single-cell",
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.ngs_integration:assess_sequencing_readiness",
+  "evidence_effects": [
+    "separates-tool-readiness-from-reference-readiness"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 60
+  },
+  "id": "sequencing-execution-readiness",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequencing_readiness_request",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "sequencing-readiness-request",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "readiness_request",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "assay": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "references": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": "string"
+            },
+            "required": {
+              "type": "boolean"
+            },
+            "role": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "role",
+            "path",
+            "required"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "tools": {
+        "items": {
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "required": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "name",
+            "required"
+          ],
+          "type": "object"
+        },
+        "minItems": 1,
+        "type": "array"
+      }
+    },
+    "required": [
+      "assay",
+      "tools",
+      "references"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "check sequencing execution readiness",
+    "check NGS tools and references",
+    "检查测序执行条件",
+    "核对分析工具和参考资源"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Availability does not establish version compatibility, a complete index, successful execution or output quality."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 0
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "sequencing_readiness_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "sequencing-readiness-report",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "readiness_report",
+      "processing_levels": [
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "assay": {
+        "type": "string"
+      },
+      "claim_boundary": {
+        "type": "string"
+      },
+      "invalid_required_references": {
+        "type": "array"
+      },
+      "missing_required_references": {
+        "type": "array"
+      },
+      "missing_required_tools": {
+        "type": "array"
+      },
+      "next_action": {
+        "type": "string"
+      },
+      "ready_to_execute": {
+        "type": "boolean"
+      },
+      "reference_readiness": {
+        "type": "boolean"
+      },
+      "references": {
+        "type": "array"
+      },
+      "tool_readiness": {
+        "type": "boolean"
+      },
+      "tools": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "assay",
+      "tool_readiness",
+      "reference_readiness",
+      "ready_to_execute",
+      "tools",
+      "references",
+      "missing_required_tools",
+      "missing_required_references",
+      "invalid_required_references",
+      "next_action",
+      "claim_boundary"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The assay, required executables and reference resource roles are explicitly declared."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room separation of executable, environment and reference-resource readiness."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Missing required executables block execution.",
+      "id": "sequencing-required-tools",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Missing or empty required references block execution.",
+      "id": "sequencing-required-references",
+      "severity": "fatal"
+    }
+  ],
+  "questions": [
+    "Are the required executables and assay-specific reference resources independently ready?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "sequencing-execution-readiness",
+      "Check sequencing tools and reference resources separately",
+      "check sequencing execution readiness",
+      "check NGS tools and references",
+      "检查测序执行条件",
+      "核对分析工具和参考资源"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Check sequencing tools and reference resources separately",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

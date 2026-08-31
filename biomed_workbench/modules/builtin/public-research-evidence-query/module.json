@@ -1,0 +1,354 @@
+{
+  "access": "public_api",
+  "alternatives": [
+    "literature-evidence"
+  ],
+  "assumptions": [
+    "The official public endpoint remains compatible with the observed response contract at execution time."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "public-research-evidence-query-e2e-v1"
+      ],
+      "id": "python-3.14.3-public-research-evidence-query-1",
+      "input_formats": {
+        "public_evidence_query": [
+          "public-evidence-query@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "public_evidence_records": [
+          "public-evidence-records@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "public-research-evidence-query-regression-v1"
+      ],
+      "tool_versions": {
+        "typed-public-research-evidence": [
+          "==typed-public-evidence-v1-observed-2026-08-31"
+        ]
+      },
+      "verified_at": "2026-08-31"
+    }
+  ],
+  "complements": [
+    "public-evidence-synthesis",
+    "citation-record-resolution"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the project-owned bounded Python implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-31",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Query fixed official operations for GWAS Catalog, ChEMBL, PRIDE, BioStudies, ENCODE, Human Protein Atlas and MGnify, then retain bounded normalized records, source scope and limitations.",
+  "domains": [
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.services.research_evidence:query_public_research_evidence",
+  "evidence_effects": [
+    "adds-source-specific-public-evidence-records"
+  ],
+  "execution": {
+    "kind": "service",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 60
+  },
+  "id": "public-research-evidence-query",
+  "input_artifacts": [
+    {
+      "artifact_type": "database_query",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "public-evidence-query",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "public_evidence_query",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "max_records": {
+        "maximum": 100,
+        "minimum": 1,
+        "type": "integer"
+      },
+      "operation": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "query": {
+        "maxLength": 300,
+        "minLength": 1,
+        "type": "string"
+      },
+      "source": {
+        "enum": [
+          "gwas-catalog",
+          "chembl",
+          "pride",
+          "biostudies",
+          "encode",
+          "human-protein-atlas",
+          "mgnify"
+        ],
+        "type": "string"
+      }
+    },
+    "required": [
+      "source",
+      "operation",
+      "query"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "query public biomedical databases",
+    "discover public omics datasets",
+    "search ChEMBL GWAS PRIDE ENCODE",
+    "查询公共生命科学数据库",
+    "检索公共组学数据和生物活性证据"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "A bounded query is not an exhaustive systematic review, and source records do not by themselves establish mechanism, causality, actionability or project-specific validity."
+  ],
+  "maturity": "validated",
+  "module_type": "data_source",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 0
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "public_research_evidence_records",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "public-evidence-records",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "public_evidence_records",
+      "processing_levels": [
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "evidence_role": {
+        "type": "string"
+      },
+      "limitations": {
+        "type": "array"
+      },
+      "operation": {
+        "type": "string"
+      },
+      "provenance": {
+        "type": "object"
+      },
+      "query": {
+        "type": "string"
+      },
+      "records": {
+        "type": "array"
+      },
+      "records_truncated": {
+        "type": "boolean"
+      },
+      "returned_count": {
+        "type": "integer"
+      },
+      "source": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "source",
+      "operation",
+      "query",
+      "evidence_role",
+      "returned_count",
+      "records_truncated",
+      "records",
+      "provenance",
+      "limitations"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The source, registered operation and exact query are declared; entity and study-design compatibility will be reviewed downstream."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned typed clients implemented from official GWAS Catalog, ChEMBL, PRIDE, BioStudies, ENCODE, Human Protein Atlas and MGnify API documentation.",
+      "Capability selection was informed by source-level inspection of Life Science Research 1.0.3; no proprietary source code is included or required."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Only registered official source operations may execute; caller-controlled hosts and paths are rejected.",
+      "id": "public-evidence-source-operation",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Search records may support discovery or context only according to their database and study-design scope.",
+      "id": "public-evidence-scope",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which bounded records does one declared official source return for the exact query, and what can those records support?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "public-research-evidence-query",
+      "Query registered public life-science evidence sources",
+      "query public biomedical databases",
+      "discover public omics datasets",
+      "search ChEMBL GWAS PRIDE ENCODE",
+      "查询公共生命科学数据库",
+      "检索公共组学数据和生物活性证据"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": [
+      "gwas catalog",
+      "chembl",
+      "pride",
+      "biostudies",
+      "encode",
+      "human protein atlas",
+      "mgnify",
+      "query public biomedical databases",
+      "discover public omics datasets",
+      "查询公共生命科学数据库",
+      "检索公共组学数据和生物活性证据"
+    ]
+  },
+  "schema_version": 1,
+  "title": "Query registered public life-science evidence sources",
+  "tool_requirements": [
+    {
+      "allowed_versions": [
+        "==typed-public-evidence-v1-observed-2026-08-31"
+      ],
+      "ecosystem": "service",
+      "identity": "official-public-life-science-apis",
+      "mismatch_policy": "block",
+      "name": "typed-public-research-evidence",
+      "platforms": [
+        "any"
+      ],
+      "required": true,
+      "tested_versions": [
+        "typed-public-evidence-v1-observed-2026-08-31"
+      ],
+      "verified_at": "2026-08-31",
+      "version_differences": [
+        {
+          "affected_versions": [
+            "==typed-public-evidence-v1-observed-2026-08-31"
+          ],
+          "category": "field",
+          "compatibility_effect": "requires-parser",
+          "description": "Each source exposes a distinct response container and scientific scope.",
+          "id": "public-evidence-response-contract",
+          "required_action": "Use only the registered source operation and validate its record container before interpretation.",
+          "source": "https://www.ebi.ac.uk/services"
+        }
+      ],
+      "version_pattern": "(typed-public-evidence-v1-observed-[0-9]{4}-[0-9]{2}-[0-9]{2})",
+      "version_probe": [
+        "biomed_workbench.services.research_evidence:probe_public_research_evidence_contract"
+      ],
+      "version_probe_kind": "service_contract",
+      "version_probe_timeout_seconds": 10,
+      "version_source": "https://www.ebi.ac.uk/services"
+    }
+  ],
+  "version": "1.0.0"
+}

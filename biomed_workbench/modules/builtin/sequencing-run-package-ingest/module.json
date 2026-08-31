@@ -1,0 +1,293 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "The manifest status, artifact roles and environment identity were recorded by the producing workflow at execution time."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_sequencing_run_package_ingest.py",
+      "purpose": "Load a closed JSON request, execute the registered project-owned capability, and serialize a reviewable JSON result.",
+      "quality_gate_ids": [
+        "sequencing-run-completion",
+        "sequencing-artifact-integrity",
+        "sequencing-environment-identity"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "sequencing-run-package-ingest-e2e-v1"
+      ],
+      "id": "python-3.14.3-sequencing-run-package-ingest-1",
+      "input_formats": {
+        "run_package": [
+          "sequencing-run-envelope@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "ingest_report": [
+          "sequencing-run-ingest-report@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "sequencing-run-package-ingest-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-31"
+    }
+  ],
+  "complements": [
+    "sequencing-input-intake",
+    "scientific-review-self-correction"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the project-owned bounded Python implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-31",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Read an external sequencing manifest and artifact index, reject prepared or failed states, verify output paths and SHA-256 values, and require a recorded analysis environment before scientific review.",
+  "domains": [
+    "omics",
+    "bulk",
+    "single-cell",
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.ngs_integration:ingest_sequencing_run_package",
+  "evidence_effects": [
+    "reloads-completed-ngs-execution",
+    "rejects-plans-as-results"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 60
+  },
+  "id": "sequencing-run-package-ingest",
+  "input_artifacts": [
+    {
+      "artifact_type": "external_sequencing_run_package",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "sequencing-run-envelope",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "run_package",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "run_directory": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "run_directory"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "ingest NGS run package",
+    "verify sequencing workflow outputs",
+    "回收测序运行结果",
+    "核对外部测序流程产物"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Package acceptance does not replace assay-specific QC, statistical review, biological interpretation or publication-figure review."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 2
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "sequencing_run_ingest_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "sequencing-run-ingest-report",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "ingest_report",
+      "processing_levels": [
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "accepted": {
+        "type": "boolean"
+      },
+      "artifacts": {
+        "type": "array"
+      },
+      "claim_boundary": {
+        "type": "string"
+      },
+      "environment": {
+        "nullable": true,
+        "type": "object"
+      },
+      "errors": {
+        "type": "array"
+      },
+      "reason": {
+        "type": "string"
+      },
+      "run_directory": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      },
+      "workflow": {
+        "nullable": true,
+        "type": "object"
+      }
+    },
+    "required": [
+      "run_directory",
+      "status",
+      "accepted",
+      "reason",
+      "artifacts",
+      "claim_boundary"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The run directory contains manifest.json and artifact_index.json from a completed external workflow."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned run-package reload contract informed by public NGS workflow envelopes; no external plugin source is required at runtime."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Prepared, blocked, failed or empty packages cannot enter scientific review.",
+      "id": "sequencing-run-completion",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Missing, escaping or checksum-mismatched artifacts block acceptance.",
+      "id": "sequencing-artifact-integrity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "A completed run without a recorded analysis environment cannot support reproducible reuse.",
+      "id": "sequencing-environment-identity",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Did the external sequencing workflow complete, and do its declared outputs still exist with the recorded identities?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "sequencing-run-package-ingest",
+      "Reload and verify a completed sequencing run package",
+      "ingest NGS run package",
+      "verify sequencing workflow outputs",
+      "回收测序运行结果",
+      "核对外部测序流程产物"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Reload and verify a completed sequencing run package",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

@@ -1,0 +1,332 @@
+{
+  "access": "offline",
+  "alternatives": [],
+  "assumptions": [
+    "Filename mate markers describe the intended pairing and lightweight header checks are sufficient only for intake."
+  ],
+  "code_templates": [
+    {
+      "language": "python",
+      "path": "templates/run_sequencing_input_intake.py",
+      "purpose": "Load a closed JSON request, execute the registered project-owned capability, and serialize a reviewable JSON result.",
+      "quality_gate_ids": [
+        "sequencing-input-identity",
+        "sequencing-sample-pairing"
+      ],
+      "requires_adaptation": false
+    }
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "sequencing-input-intake-e2e-v1"
+      ],
+      "id": "python-3.14.3-sequencing-input-intake-1",
+      "input_formats": {
+        "sequencing_files": [
+          "local-path-request@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "sequencing_intake": [
+          "sequencing-intake-report@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "sequencing-input-intake-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-31"
+    }
+  ],
+  "complements": [
+    "sequencing-execution-readiness",
+    "sequencing-run-package-ingest"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the project-owned bounded Python implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-31",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Read file identity and lightweight structure from FASTQ, BAM/CRAM, variant, matrix, tabular and reference inputs; check sample-sheet identity and paired-read completeness before selecting an assay workflow.",
+  "domains": [
+    "omics",
+    "bulk",
+    "single-cell",
+    "evidence"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.ngs_integration:inspect_sequencing_inputs",
+  "evidence_effects": [
+    "identifies-sequencing-inputs",
+    "blocks-ambiguous-workflow-selection"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 60
+  },
+  "id": "sequencing-input-intake",
+  "input_artifacts": [
+    {
+      "artifact_type": "sequencing_file_set",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "local-path-request",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "sequencing_files",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "assay": {
+        "enum": [
+          "amplicon",
+          "atac",
+          "bulk-rna",
+          "chip",
+          "clipseq",
+          "cutrun",
+          "cuttag",
+          "germline-variant",
+          "hic",
+          "metagenomics",
+          "methylseq",
+          "riboseq",
+          "single-cell-rna",
+          "somatic-variant",
+          "unspecified"
+        ],
+        "type": "string"
+      },
+      "paths": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "maxItems": 10000,
+        "minItems": 1,
+        "type": "array"
+      },
+      "sample_sheet": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "paths"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "inspect sequencing inputs",
+    "identify FASTQ BAM VCF inputs",
+    "测序输入检查",
+    "识别测序文件并检查配对"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "This intake does not run read QC, infer library chemistry, validate sample provenance, or establish biological validity."
+  ],
+  "maturity": "validated",
+  "module_type": "validation",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 0
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "sequencing_input_intake",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "sequencing-intake-report",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "sequencing_intake",
+      "processing_levels": [
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "admissible_for_planning": {
+        "type": "boolean"
+      },
+      "assay": {
+        "type": "string"
+      },
+      "claim_boundary": {
+        "type": "string"
+      },
+      "duplicate_paths": {
+        "type": "array"
+      },
+      "incomplete_fastq_pairs": {
+        "type": "array"
+      },
+      "input_count": {
+        "type": "integer"
+      },
+      "interpretation": {
+        "type": "string"
+      },
+      "missing_paths": {
+        "type": "array"
+      },
+      "records": {
+        "type": "array"
+      },
+      "route_candidates": {
+        "type": "array"
+      },
+      "sample_sheet": {
+        "nullable": true,
+        "type": "object"
+      },
+      "sample_sheet_errors": {
+        "type": "array"
+      },
+      "type_counts": {
+        "type": "object"
+      }
+    },
+    "required": [
+      "assay",
+      "input_count",
+      "type_counts",
+      "records",
+      "missing_paths",
+      "duplicate_paths",
+      "incomplete_fastq_pairs",
+      "sample_sheet_errors",
+      "route_candidates",
+      "admissible_for_planning",
+      "interpretation",
+      "claim_boundary"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The caller supplies explicit local file paths and declares an assay when known."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned clean-room implementation informed by observed input-validation patterns in public NGS workflow packages and official FASTQ/BAM/CRAM/VCF format contracts."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Missing, duplicated, unknown or structurally invalid files block workflow selection.",
+      "id": "sequencing-input-identity",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Incomplete mate pairs or ambiguous sample identifiers block unattended execution.",
+      "id": "sequencing-sample-pairing",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Which supplied files are structurally recognizable, paired and sample-sheet bound before analysis?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "sequencing-input-intake",
+      "Inspect sequencing inputs before workflow selection",
+      "inspect sequencing inputs",
+      "identify FASTQ BAM VCF inputs",
+      "测序输入检查",
+      "识别测序文件并检查配对"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Inspect sequencing inputs before workflow selection",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

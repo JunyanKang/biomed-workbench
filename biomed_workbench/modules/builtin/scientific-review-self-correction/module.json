@@ -1,0 +1,330 @@
+{
+  "access": "offline",
+  "alternatives": [
+    "manuscript-audit"
+  ],
+  "assumptions": [
+    "Observation rows accurately represent the reloaded result; automated checks cannot detect omitted or falsified evidence."
+  ],
+  "compatibility_matrix": [
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end_evidence_ids": [
+        "scientific-review-self-correction-e2e-v1"
+      ],
+      "id": "python-3.14.3-scientific-review-self-correction-1",
+      "input_formats": {
+        "review_draft": [
+          "scientific-review-request@1"
+        ]
+      },
+      "module_version": "1.0.0",
+      "output_formats": {
+        "corrected_review": [
+          "scientific-review-correction@1"
+        ]
+      },
+      "platforms": [
+        "any"
+      ],
+      "regression_evidence_ids": [
+        "scientific-review-self-correction-regression-v1"
+      ],
+      "tool_versions": {},
+      "verified_at": "2026-08-31"
+    }
+  ],
+  "complements": [
+    "claim-evidence-integrity-audit",
+    "publication-figure-package"
+  ],
+  "credentials": [],
+  "dependencies": [
+    {
+      "allowed_versions": [
+        ">=3.14,<3.15"
+      ],
+      "conflicts": [],
+      "ecosystem": "runtime",
+      "identity": "python-runtime",
+      "name": "python",
+      "platforms": [
+        "any"
+      ],
+      "purpose": "Execute the project-owned bounded Python implementation.",
+      "required": true,
+      "tested_versions": [
+        "3.14.3"
+      ],
+      "verified_at": "2026-08-31",
+      "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+      "version_probe": [
+        "biomed_workbench.modules.compatibility:probe_python_runtime"
+      ],
+      "version_probe_kind": "python_callable",
+      "version_probe_timeout_seconds": 5,
+      "version_source": "https://www.python.org/downloads/release/python-3143/"
+    }
+  ],
+  "description": "Review a draft interpretation against study design, statistical unit, effect magnitude, uncertainty, replication, negative results and discriminating alternatives; return a corrected result-first brief before final project promotion.",
+  "domains": [
+    "evidence",
+    "research-quality",
+    "publication"
+  ],
+  "entrypoint": "biomed_workbench.capabilities.scientific_review:self_correct_scientific_review",
+  "evidence_effects": [
+    "corrects-scientific-review-before-promotion",
+    "prioritizes-results-over-audit-prose"
+  ],
+  "execution": {
+    "kind": "python",
+    "max_output_bytes": 10000000,
+    "timeout_seconds": 60
+  },
+  "id": "scientific-review-self-correction",
+  "input_artifacts": [
+    {
+      "artifact_type": "scientific_review_draft",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "scientific-review-request",
+          "orientations": [
+            "request-object"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "review_draft",
+      "processing_levels": [
+        "declared"
+      ],
+      "required_metadata": []
+    }
+  ],
+  "input_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "alternative_explanations": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "maxItems": 10,
+        "type": "array"
+      },
+      "draft_review": {
+        "type": "object"
+      },
+      "hypothesis": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "observations": {
+        "items": {
+          "type": "object"
+        },
+        "maxItems": 200,
+        "minItems": 1,
+        "type": "array"
+      },
+      "proposed_action": {
+        "enum": [
+          "retain",
+          "retain-with-limit",
+          "rerun",
+          "switch-method",
+          "acquire-data",
+          "revise-hypothesis",
+          "exclude",
+          "stop"
+        ],
+        "type": "string"
+      },
+      "question": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "statistical_unit": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "study_design": {
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "question",
+      "hypothesis",
+      "study_design",
+      "statistical_unit",
+      "observations",
+      "draft_review",
+      "proposed_action"
+    ],
+    "type": "object"
+  },
+  "intents": [
+    "self correct scientific review",
+    "strengthen biological interpretation",
+    "review result logic",
+    "科学复核自纠偏",
+    "加强生命科学结果解读"
+  ],
+  "kernel_compatibility": [
+    ">=0.2.0,<0.3.0"
+  ],
+  "limitations": [
+    "Deterministic language and completeness checks cannot substitute for full-data inspection, specialist judgment, literature review or independent replication."
+  ],
+  "maturity": "validated",
+  "module_type": "interpretation",
+  "mutability": "read_only",
+  "orchestration": {
+    "requires_reviewed_upstream_types": [],
+    "scientific_stage": 4
+  },
+  "output_artifacts": [
+    {
+      "artifact_type": "scientific_review_correction",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "scientific-review-correction",
+          "orientations": [
+            "module-output"
+          ],
+          "representations": [
+            "structured"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "1"
+          ]
+        }
+      ],
+      "name": "corrected_review",
+      "processing_levels": [
+        "validated"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id"
+      ]
+    }
+  ],
+  "output_schema": {
+    "additionalProperties": false,
+    "properties": {
+      "background_provenance_fields": {
+        "type": "array"
+      },
+      "claim_boundary": {
+        "type": "string"
+      },
+      "corrected_review_brief": {
+        "type": "object"
+      },
+      "finding_counts": {
+        "type": "object"
+      },
+      "findings": {
+        "type": "array"
+      },
+      "passed": {
+        "type": "boolean"
+      },
+      "requires_revision": {
+        "type": "boolean"
+      },
+      "review_display_order": {
+        "type": "array"
+      }
+    },
+    "required": [
+      "passed",
+      "requires_revision",
+      "finding_counts",
+      "findings",
+      "corrected_review_brief",
+      "review_display_order",
+      "background_provenance_fields",
+      "claim_boundary"
+    ],
+    "type": "object"
+  },
+  "preconditions": [
+    "The scientific question, hypothesis, study design, statistical unit, observations and draft review are explicitly supplied."
+  ],
+  "provenance": {
+    "concept_sources": [
+      "Project-owned biomedical review self-correction contract built around effect size, uncertainty, experimental unit, claim strength, alternatives and falsifiability."
+    ],
+    "license": "Apache-2.0"
+  },
+  "quality_gates": [
+    {
+      "blocks_interpretation": true,
+      "description": "Methods and provenance must not displace observed magnitude, uncertainty and biological interpretation in the user-facing review.",
+      "id": "review-result-first",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Causal or mechanistic language cannot exceed the declared evidence design.",
+      "id": "review-claim-design-consistency",
+      "severity": "fatal"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "The next step must distinguish the leading explanation from at least one biologically plausible alternative.",
+      "id": "review-discriminating-next-step",
+      "severity": "major"
+    }
+  ],
+  "questions": [
+    "Does the draft review accurately state what was observed, what the design supports, what remains uncertain and which next result would discriminate alternatives?"
+  ],
+  "routing": {
+    "exclusion_terms": [],
+    "method_aliases": [
+      "scientific-review-self-correction",
+      "Self-correct a result-first biomedical review",
+      "self correct scientific review",
+      "strengthen biological interpretation",
+      "review result logic",
+      "科学复核自纠偏",
+      "加强生命科学结果解读"
+    ],
+    "named_method_priority": 100,
+    "required_any_terms": []
+  },
+  "schema_version": 1,
+  "title": "Self-correct a result-first biomedical review",
+  "tool_requirements": [],
+  "version": "1.0.0"
+}

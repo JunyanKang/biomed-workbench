@@ -6,6 +6,8 @@ This directory records capability changes, representative acceptance, compatibil
 
 ## Versions
 
+- [0.2.8 · 2026-08-31](2026-08-31-0.2.8.md): adds sequencing input and completed-run interoperability, fixed official queries across seven public life-science resources, and a result-first scientific interpretation correction loop in the main research workflow.
+
 - [0.2.7 · 2026-08-27](2026-08-27-0.2.7.md): binds analysis-environment identity to observed execution, reuses recorded environments before repeat analysis, blocks dependency drift, and applies the same contract to external workflow return and private project records.
 - [0.2.6 · 2026-08-27](2026-08-27-0.2.6.md): redesigns the bilingual project introduction and makes evidence-preserving academic voice revision a required manuscript and proposal delivery step.
 - [0.2.5 · 2026-08-26](2026-08-26-0.2.5.md): strengthens complex scientific semantics and minimal-sufficient analysis, adds dedicated RNA processing and alternative splicing, and integrates multi-source evidence, programme-specific NSFC writing, and editable proposal figures.

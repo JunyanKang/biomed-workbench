@@ -91,6 +91,8 @@ _ALLOWED_HOSTS = frozenset(
         "www.cbioportal.org",
         "iupred2a.elte.hu",
         "version-12-0.string-db.org",
+        "www.encodeproject.org",
+        "www.proteinatlas.org",
     }
 )
 

@@ -1,6 +1,6 @@
 # 公共数据库访问与凭据
 
-版本：`2026.08.20`
+版本：`2026.08.31`
 适用范围：当前 Biomed Workbench 实际实现并列入允许访问清单的公共服务端点。
 
 “一个数据库是否需要 API key”必须具体到服务与端点。数据库网站可能同时包含公开检索、登录后的个人功能、付费接口或私有部署；工作台只声明自身当前调用的端点，不用一个结论代替整个数据库生态。
@@ -40,8 +40,15 @@
 | ARCHS4 | 公开表达上下文 | 当前公开端点无需 key | 汇总表达只能作为背景证据，不能替代项目统计设计 |
 | HPO API | 表型术语 | 当前公开端点无需 key | 记录术语版本与映射状态 |
 | IUPred2A | 蛋白无序倾向 | 当前公开端点无需 key | 记录算法模式与版本；结果是计算预测 |
+| GWAS Catalog REST v2 | 按性状发现研究、按映射基因检索关联 | 当前公开端点无需 key | 顶级关联与邻近或映射基因不是完整汇总统计，也不自动确定效应基因 |
+| ChEMBL Data Web Services | 化合物身份和生物活性记录 | 当前公开端点无需 key | 活性记录需按 assay、endpoint、单位和置信度分别复核 |
+| PRIDE Archive | 蛋白质组公共项目发现 | 当前公开端点无需 key | 复用前核对原始文件、样本设计、物种和处理流程 |
+| BioStudies / ArrayExpress | 多组学及历史 ArrayExpress 数据集发现 | 当前公开端点无需 key | 检索命中后需进入 accession 级文件与设计审查 |
+| ENCODE Portal | 功能基因组实验与文件发现 | 当前公开端点无需 key | 核对 biosample、assay、control、assembly、处理层级与 portal audit 状态 |
+| Human Protein Atlas | 人体组织和细胞表达背景 | 当前公开端点无需 key | 表达与抗体记录是背景观察，不直接证明功能或疾病机制 |
+| MGnify | 微生物组研究和 biome 发现 | 当前公开端点无需 key | 比较前核对提取、测序、宿主去除、分类数据库和 biome 定义 |
 
-官方入口包括：[NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25497/)、[NCBI Datasets API keys](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/)、[Crossref access and authentication](https://crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/)、[Europe PMC REST](https://europepmc.org/RestfulWebService)、[ClinicalTrials.gov API](https://clinicaltrials.gov/data-api/api)、[UniProt programmatic access](https://www.uniprot.org/help/programmatic_access)、[Reactome Content Service](https://reactome.org/dev/content-service)、[Open Targets GraphQL](https://platform-docs.opentargets.org/data-access/graphql-api)、[cBioPortal public API](https://www.cbioportal.org/api/swagger-ui/index.html)、[cBioPortal private token authentication](https://docs.cbioportal.org/deployment/authorization-and-authentication/authenticating-users-via-tokens/)、[PubChem PUG REST](https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest)、[AlphaFold Server](https://alphafoldserver.com/)、[输出使用条款](https://alphafoldserver.com/output-terms) 和 [隐私说明](https://alphafoldserver.com/privacy)。
+官方入口包括：[NCBI E-utilities](https://www.ncbi.nlm.nih.gov/books/NBK25497/)、[NCBI Datasets API keys](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/)、[Crossref access and authentication](https://crossref.org/documentation/retrieve-metadata/rest-api/access-and-authentication/)、[Europe PMC REST](https://europepmc.org/RestfulWebService)、[ClinicalTrials.gov API](https://clinicaltrials.gov/data-api/api)、[UniProt programmatic access](https://www.uniprot.org/help/programmatic_access)、[Reactome Content Service](https://reactome.org/dev/content-service)、[Open Targets GraphQL](https://platform-docs.opentargets.org/data-access/graphql-api)、[GWAS Catalog API](https://www.ebi.ac.uk/gwas/rest/api/v2/docs)、[ChEMBL Web Services](https://chembl.gitbook.io/chembl-interface-documentation/web-services/chembl-data-web-services)、[PRIDE Archive API](https://www.ebi.ac.uk/pride/ws/archive/v2/docs/api-guide.html)、[BioStudies API](https://www.ebi.ac.uk/biostudies/help)、[ENCODE REST API](https://www.encodeproject.org/help/rest-api/)、[Human Protein Atlas downloads](https://www.proteinatlas.org/about/download)、[MGnify API](https://www.ebi.ac.uk/metagenomics/api/v1/docs/)、[cBioPortal public API](https://www.cbioportal.org/api/swagger-ui/index.html)、[cBioPortal private token authentication](https://docs.cbioportal.org/deployment/authorization-and-authentication/authenticating-users-via-tokens/)、[PubChem PUG REST](https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest)、[AlphaFold Server](https://alphafoldserver.com/)、[输出使用条款](https://alphafoldserver.com/output-terms) 和 [隐私说明](https://alphafoldserver.com/privacy)。
 
 ## 如何配置
 
