@@ -49,7 +49,7 @@ An established project does not need to be rebuilt. Provide the project director
 - **Scientific conclusion:** the support, counter-evidence, and limits of each important claim are explicit.
 - **Delivery:** figures, tables, methods, citations, and prose agree with one another.
 
-Important results enter the [scientific evidence map](scientific-evidence-map.md), which connects preceding evidence, analysis code, plot data, final files, captions, sources, and research decisions. Each version provides an HTML reading entry, Chinese and English reports, and Chinese and English evidence maps. Their tables of contents and direct links open registered data, scripts, figures, captions, and original studies; Markdown, JSON, and relationship tables remain stored with the version. Chinese and English reports use the same evidence version.
+Important results enter the [scientific evidence map](scientific-evidence-map.md), which connects preceding evidence, analysis code, plot data, final files, captions, sources, and research decisions. When the user asks to save an analysis report, the workbench writes and reopens HTML as the primary file with navigation and evidence links; Markdown remains a companion and cannot complete formal delivery on its own. Each evidence-map version also provides an HTML reading entry, Chinese and English reports, and Chinese and English evidence maps with direct links to registered data, scripts, figures, captions, and original studies; JSON and relationship tables remain stored with the version. Chinese and English reports use the same evidence version.
 
 ## How To Request Manuscript, Proposal, And Submission Work
 

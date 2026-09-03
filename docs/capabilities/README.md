@@ -43,7 +43,7 @@ An established project can first receive a read-only inventory of figures, plot 
 
 ## Current Coverage
 
-The registry currently contains **222 independently discoverable modules**. Each module is a versioned scientific contract, while the public maturity page separately distinguishes contract-only methods, controlled execution, exact public-case validation, and results formally included in a current project. See [Capability Maturity](../maturity.md) and [Public-Data Cases](../cases/README.md) for observed status.
+The registry currently contains **223 independently discoverable modules**. Each module is a versioned scientific contract, while the public maturity page separately distinguishes contract-only methods, controlled execution, exact public-case validation, and results formally included in a current project. See [Capability Maturity](../maturity.md) and [Public-Data Cases](../cases/README.md) for observed status.
 
 Bulk coverage includes RNA-seq and RNA-processing/alternative-splicing analysis; ChIP-seq, CUT&RUN, and CUT&Tag; several R-loop assays; RIP-seq, CLIP-family methods, and LACE-seq; Ribo-seq; GRO-seq, PRO-seq, TT-seq, and NET-seq; ATAC-seq and DNase-seq; WGBS, RRBS, and EM-seq; several three-dimensional genome assays; and MeRIP-seq/m6A-seq.
 

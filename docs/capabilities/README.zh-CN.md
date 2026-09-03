@@ -43,7 +43,7 @@ Biomed Workbench 按研究问题组织能力。用户提供科学目标和数据
 
 ## 当前覆盖范围
 
-当前注册表包含 **222 个可独立识别的模块**。每个模块都对应带版本的科学执行约定；对外成熟度另行区分只有执行约定、已运行受控测试、具体方法已通过公共案例，以及当前项目结果已正式纳入。具体状态和代表性案例见[能力成熟度](../maturity.zh-CN.md)和[公共数据案例](../cases/README.zh-CN.md)。
+当前注册表包含 **223 个可独立识别的模块**。每个模块都对应带版本的科学执行约定；对外成熟度另行区分只有执行约定、已运行受控测试、具体方法已通过公共案例，以及当前项目结果已正式纳入。具体状态和代表性案例见[能力成熟度](../maturity.zh-CN.md)和[公共数据案例](../cases/README.zh-CN.md)。
 
 Bulk 层覆盖 RNA-seq 与 RNA 加工/可变剪接；ChIP-seq、CUT&RUN 与 CUT&Tag；多种 R-loop 测量；RIP-seq、CLIP 系列与 LACE-seq；Ribo-seq；GRO-seq、PRO-seq、TT-seq 与 NET-seq；ATAC-seq 与 DNase-seq；WGBS、RRBS 与 EM-seq；多种三维基因组方法；以及 MeRIP-seq/m6A-seq。
 

@@ -1,6 +1,6 @@
 {
-  "compatibility_complete": 222,
-  "module_count": 222,
+  "compatibility_complete": 223,
+  "module_count": 223,
   "modules": [
     {
       "compatibility_rows": [
@@ -26499,6 +26499,157 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
+            "scientific-analysis-report-delivery-e2e-v1"
+          ],
+          "id": "python-3.14.3-scientific-analysis-html-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "scientific-analysis-report-delivery-regression-v1"
+          ],
+          "verified_at": "2026-09-03"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Render and reopen the project-owned HTML report.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-09-03",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "scientific-analysis-report-delivery",
+      "input_formats": [
+        {
+          "artifact_type": "reviewed_scientific_result_view",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "reviewed_analysis_report",
+          "processing_levels": [
+            "reviewed"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "scientific_analysis_report_delivery_manifest",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "analysis_report_delivery",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        },
+        {
+          "artifact_type": "scientific_analysis_html_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "html",
+              "orientations": [
+                "human-readable-report"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            }
+          ],
+          "name": "analysis_html_report",
+          "processing_levels": [
+            "derived",
+            "validated",
+            "reloaded"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "artifact_digest"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
             "scientific-illustration-generation-e2e-v1"
           ],
           "id": "python-3.14.3-codex-native-image-handoff-v1",
@@ -45067,6 +45218,6 @@
       "validation_status": "complete"
     }
   ],
-  "registry_digest": "68b26088d942888f3a654b030f0ea9a2c0335eaa48a8113a615f03dca14b2415",
+  "registry_digest": "7af0ff8ac4409ed825d08d93fe5c86f0057017d7574c3f7f27f007c50b86ade9",
   "schema_version": 1
 }

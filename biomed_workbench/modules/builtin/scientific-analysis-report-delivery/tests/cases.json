@@ -1,0 +1,47 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "markdown_is_companion_only": true,
+        "primary_delivery_format": "html",
+        "ready_for_delivery": true,
+        "report_files": {
+          "delivery_verified": true,
+          "primary_format": "html",
+          "renderer_version": "1.0.0"
+        }
+      },
+      "input": {
+        "language": "zh-CN",
+        "markdown_companion": true,
+        "output_directory": ":temporary:",
+        "report": {
+          "biological_question": "该观察是否支持视网膜祖细胞分化状态发生改变？",
+          "evidence_links": [
+            {
+              "label": "受控源数据",
+              "path": "tests/fixtures/biomedical_writing/source.tsv"
+            }
+          ],
+          "project": "controlled-retina-fixture",
+          "scientific_results": [
+            {
+              "evidence_boundary_zh": [
+                "受控格式测试，不作生物学推断。"
+              ],
+              "experimental_unit": "模拟独立样本",
+              "interpretation_zh": "该结果与分化状态改变一致，但不能建立直接机制。",
+              "label": "主要结果",
+              "next_decision": "retain-with-limit",
+              "observation_zh": "受控示例中，突变组标志物均值较对照组低 20%。",
+              "progress": "SCIENTIFICALLY_REVIEWED"
+            }
+          ]
+        },
+        "title": "受控科学分析报告"
+      },
+      "name": "write-reopen-and-link-primary-html-analysis-report"
+    }
+  ],
+  "schema_version": 1
+}

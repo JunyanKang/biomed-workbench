@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -43,6 +44,7 @@ def build_result_view(
     ledger: "ResultStatusLedger | None" = None,
     *,
     include_reproducibility: bool = False,
+    project_root: Path | None = None,
 ) -> dict[str, object]:
     """Return the thin scientific view; expose provenance only on explicit request."""
     review_by_artifact = {item.artifact_id: item for item in state.artifact_reviews}
@@ -78,8 +80,19 @@ def build_result_view(
             "evidence_boundary_en": list(review.limitations_en),
             "next_decision": decision.action if decision is not None else "scientific-decision-required",
             "included_in_current_story": bool(decision and decision.active_evidence),
+            "experimental_unit": getattr(artifact, "experimental_unit", "not-recorded"),
             "panels": panels,
         }
+        if project_root is not None and getattr(artifact, "payloads", ()):
+            store = project_root.expanduser().resolve() / ".biomed-workbench" / "artifacts"
+            item["evidence_links"] = [
+                {
+                    "label": payload.role,
+                    "path": (store / payload.object_key).as_posix(),
+                    "sha256": payload.sha256,
+                }
+                for payload in artifact.payloads
+            ]
         if include_reproducibility:
             item["reproducibility"] = {
                 "artifact_id": artifact.id,

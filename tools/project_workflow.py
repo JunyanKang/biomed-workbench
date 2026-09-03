@@ -60,6 +60,7 @@ from biomed_workbench.reporting.evidence_map_versions import (  # noqa: E402
     publish_evidence_map_transaction,
 )
 from biomed_workbench.reporting.result_view import build_result_view  # noqa: E402
+from biomed_workbench.reporting.analysis_html import write_analysis_report  # noqa: E402
 from biomed_workbench.project_import import (  # noqa: E402
     confirm_existing_project_map,
     discover_existing_project,
@@ -207,6 +208,14 @@ def main() -> int:
     view.add_argument("--state", required=True, type=Path)
     view.add_argument("--ledger", type=Path)
     view.add_argument("--mode", choices=("result", "reproducibility", "audit"), default="result")
+    report = commands.add_parser("report", help="deliver reviewed project results as a verified HTML report")
+    report.add_argument("--state", required=True, type=Path)
+    report.add_argument("--ledger", type=Path)
+    report.add_argument("--project-root", required=True, type=Path)
+    report.add_argument("--output-directory", required=True, type=Path)
+    report.add_argument("--title", default="")
+    report.add_argument("--language", choices=("auto", "zh-CN", "en"), default="auto")
+    report.add_argument("--without-markdown-companion", action="store_true")
     import_existing = commands.add_parser("import-existing", help="scan an established project without modifying it")
     import_existing.add_argument("--project-root", required=True, type=Path)
     import_existing.add_argument("--output", required=True, type=Path)
@@ -326,6 +335,19 @@ def main() -> int:
         else:
             payload = _summary(state)
         print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False))
+        return 0
+    if args.command == "report":
+        state = _state(args.state)
+        ledger = ResultStatusLedger.from_dict(_read(args.ledger)) if args.ledger else None
+        payload = build_result_view(state, ledger, project_root=args.project_root)
+        files = write_analysis_report(
+            payload,
+            args.output_directory,
+            title=args.title,
+            language=args.language,
+            markdown_companion=not args.without_markdown_companion,
+        )
+        print(json.dumps({"ready_for_delivery": True, "report_files": files}, indent=2, sort_keys=True, ensure_ascii=False))
         return 0
 
     if args.command == "migrate-state-v1":

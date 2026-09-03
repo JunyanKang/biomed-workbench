@@ -8987,6 +8987,48 @@
       "workflow": "molecular_design"
     },
     {
+      "access": "offline",
+      "description": "Render a result-first scientific interpretation as a navigable HTML report, link its data, figures, code and literature, reopen the file, and retain Markdown only as an optional companion.",
+      "entrypoint": "biomed_workbench.capabilities.analysis_report:deliver_analysis_report_html",
+      "id": "scientific-analysis-report-delivery",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "language": {
+            "enum": [
+              "auto",
+              "zh-CN",
+              "en"
+            ],
+            "type": "string"
+          },
+          "markdown_companion": {
+            "type": "boolean"
+          },
+          "output_directory": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "report": {
+            "type": "object"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "report",
+          "output_directory"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "writes_output",
+      "requirements": [],
+      "title": "Deliver a reviewed scientific analysis report as primary HTML",
+      "workflow": "evidence"
+    },
+    {
       "access": "codex_native",
       "description": "Prepare a deterministic, credential-free handoff to Codex-native image generation or editing with explicit scientific communication scope, reference-image requirements, non-evidentiary labeling, factual review, text fidelity, disclosure, and post-generation visual validation gates.",
       "entrypoint": "biomed_workbench.capabilities.imaging:scientific_illustration_generation",
@@ -13739,7 +13781,7 @@
       "workflow": "wetlab"
     }
   ],
-  "entry_count": 222,
+  "entry_count": 223,
   "schema_version": 2,
-  "version": "0.2.11"
+  "version": "0.2.12"
 }

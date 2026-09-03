@@ -1,5 +1,5 @@
 {
-  "module_count": 222,
+  "module_count": 223,
   "modules": [
     {
       "access": "offline",
@@ -69540,6 +69540,346 @@
       "version": "1.0.0"
     },
     {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The supplied result view was built from reloaded and scientifically reviewed project artifacts."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "scientific-analysis-report-delivery-e2e-v1"
+          ],
+          "id": "python-3.14.3-scientific-analysis-html-1",
+          "input_formats": {
+            "reviewed_analysis_report": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "analysis_html_report": [
+              "html@5"
+            ],
+            "analysis_report_delivery": [
+              "inline-json@1"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "scientific-analysis-report-delivery-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-09-03"
+        }
+      ],
+      "complements": [
+        "scientific-review-self-correction",
+        "biomedical-writing-delivery"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Render and reopen the project-owned HTML report.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-09-03",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Render a result-first scientific interpretation as a navigable HTML report, link its data, figures, code and literature, reopen the file, and retain Markdown only as an optional companion.",
+      "domains": [
+        "evidence",
+        "research-quality",
+        "publication"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.analysis_report:deliver_analysis_report_html",
+      "evidence_effects": [
+        "requires-primary-html-for-outward-analysis-report",
+        "links-report-to-scientific-evidence"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 30
+      },
+      "id": "scientific-analysis-report-delivery",
+      "input_artifacts": [
+        {
+          "artifact_type": "reviewed_scientific_result_view",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "reviewed_analysis_report",
+          "processing_levels": [
+            "reviewed"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "language": {
+            "enum": [
+              "auto",
+              "zh-CN",
+              "en"
+            ],
+            "type": "string"
+          },
+          "markdown_companion": {
+            "type": "boolean"
+          },
+          "output_directory": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "report": {
+            "type": "object"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "report",
+          "output_directory"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "deliver scientific analysis report",
+        "generate analysis interpretation report",
+        "project results report",
+        "\u751f\u6210\u5206\u6790\u62a5\u544a",
+        "\u4ea4\u4ed8\u9879\u76ee\u5206\u6790\u62a5\u544a",
+        "\u6574\u7406\u5206\u6790\u7ed3\u679c\u4e3a\u62a5\u544a",
+        "\u79d1\u5b66\u89e3\u8bfb\u62a5\u544a",
+        "\u5b8c\u6574\u9879\u76ee\u62a5\u544a",
+        "\u9879\u76ee\u7ed3\u679c\u62a5\u544a"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "This delivery module does not perform upstream analysis or replace scientific review.",
+        "It cannot prevent an external host from creating an unrelated Markdown file outside the registered workbench workflow."
+      ],
+      "maturity": "validated",
+      "module_type": "delivery",
+      "mutability": "writes_output",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 6
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "scientific_analysis_report_delivery_manifest",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "analysis_report_delivery",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        },
+        {
+          "artifact_type": "scientific_analysis_html_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "html",
+              "orientations": [
+                "human-readable-report"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            }
+          ],
+          "name": "analysis_html_report",
+          "processing_levels": [
+            "derived",
+            "validated",
+            "reloaded"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "artifact_digest"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "markdown_is_companion_only": {
+            "type": "boolean"
+          },
+          "primary_delivery_format": {
+            "enum": [
+              "html"
+            ],
+            "type": "string"
+          },
+          "ready_for_delivery": {
+            "type": "boolean"
+          },
+          "report_files": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "ready_for_delivery",
+          "primary_delivery_format",
+          "markdown_is_companion_only",
+          "report_files"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The report states a biological question, observations, interpretations, experimental units and evidence boundaries.",
+        "At least one registered data, figure, analysis script or literature source is linked."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Project-owned result-first HTML delivery contract."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "Each result reports the observation, scientific interpretation, experimental unit, evidence boundary and next decision.",
+          "id": "analysis-report-result-first",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The report contains at least one verified link to data, a figure, analysis code or literature.",
+          "id": "analysis-report-evidence-links",
+          "severity": "fatal"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "HTML is the primary outward artifact and is reopened successfully; Markdown may exist only as a companion.",
+          "id": "analysis-report-primary-html",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Was the reviewed scientific analysis delivered as reopened HTML with working evidence links?"
+      ],
+      "routing": {
+        "exclusion_terms": [
+          "quality control report",
+          "qc report",
+          "\u8d28\u63a7\u62a5\u544a"
+        ],
+        "method_aliases": [
+          "scientific-analysis-report-delivery",
+          "Deliver a reviewed scientific analysis report as primary HTML",
+          "deliver scientific analysis report",
+          "generate analysis interpretation report",
+          "project results report",
+          "\u751f\u6210\u5206\u6790\u62a5\u544a",
+          "\u4ea4\u4ed8\u9879\u76ee\u5206\u6790\u62a5\u544a",
+          "\u6574\u7406\u5206\u6790\u7ed3\u679c\u4e3a\u62a5\u544a",
+          "\u79d1\u5b66\u89e3\u8bfb\u62a5\u544a",
+          "\u5b8c\u6574\u9879\u76ee\u62a5\u544a",
+          "\u9879\u76ee\u7ed3\u679c\u62a5\u544a"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Deliver a reviewed scientific analysis report as primary HTML",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
       "access": "codex_native",
       "alternatives": [
         "figure-specification"
@@ -118720,7 +119060,7 @@
       "version": "1.0.0"
     }
   ],
-  "plugin_version": "0.2.11",
-  "registry_digest": "68b26088d942888f3a654b030f0ea9a2c0335eaa48a8113a615f03dca14b2415",
+  "plugin_version": "0.2.12",
+  "registry_digest": "7af0ff8ac4409ed825d08d93fe5c86f0057017d7574c3f7f27f007c50b86ade9",
   "schema_version": 1
 }
