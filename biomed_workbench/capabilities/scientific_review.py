@@ -6,6 +6,7 @@ import re
 from collections import Counter
 from typing import Any
 
+from biomed_workbench.biomedical_writing import build_biomedical_argument
 from biomed_workbench.domain_context import validate_domain_context
 
 
@@ -25,6 +26,10 @@ def self_correct_scientific_review(
     proposed_action: str,
     alternative_explanations: list[str] | None = None,
     domain_context: dict[str, Any] | None = None,
+    literature_context: list[dict[str, Any]] | None = None,
+    narrative_evidence: list[dict[str, Any]] | None = None,
+    target_document: str = "research-article",
+    target_section: str = "results",
 ) -> dict[str, Any]:
     """Find scientific-logic defects and return a corrected result-first review brief."""
     question, hypothesis = question.strip(), hypothesis.strip()
@@ -42,6 +47,8 @@ def self_correct_scientific_review(
         raise ValueError("alternative explanations must be nonempty")
     if not alternatives and domain_profile is not None:
         alternatives = list(domain_profile["competing_explanations"])
+    if (literature_context is None) != (narrative_evidence is None):
+        raise ValueError("literature_context and narrative_evidence must be supplied together")
     required_sections = {"methods", "results", "conclusion", "limitations", "next_step"}
     if not isinstance(draft_review, dict) or set(draft_review) != required_sections:
         raise ValueError("draft_review must contain exactly methods, results, conclusion, limitations, and next_step")
@@ -176,6 +183,29 @@ def self_correct_scientific_review(
             "tissue_or_system": domain_profile["tissue_or_system"],
             "scientific_review_required": True,
         }
+    scientific_argument = {}
+    if narrative_evidence is not None and literature_context is not None:
+        scientific_argument = build_biomedical_argument(
+            central_question=question,
+            central_claim=corrected_interpretation,
+            study_design=design,
+            evidence_items=narrative_evidence,
+            literature_context=literature_context,
+            target_document=target_document,
+            target_section=target_section,
+            competing_explanations=alternatives,
+        )
+        for item in scientific_argument["findings"]:
+            findings.append({
+                "severity": item["severity"],
+                "code": f"ARGUMENT_{item['code']}",
+                "location": item.get("evidence_id") or item.get("literature_id") or target_section,
+                "revision": "Resolve this scientific-argument finding before drafting or delivery.",
+            })
+        severity_counts = Counter(item["severity"] for item in findings)
+        corrected["unresolved_major_codes"] = [item["code"] for item in findings if item["severity"] == "major"]
+        if severity_counts["major"] and corrected["recommended_action"] == "retain":
+            corrected["recommended_action"] = "retain-with-limit"
     return {
         "passed": not findings,
         "requires_revision": bool(findings),
@@ -184,5 +214,7 @@ def self_correct_scientific_review(
         "corrected_review_brief": corrected,
         "review_display_order": ["result_first_summary", "interpretation", "limitations", "discriminating_next_step", "recommended_action"],
         "background_provenance_fields": ["methods", "environment", "parameters", "input_digests", "artifact_lineage"],
+        "scientific_argument": scientific_argument,
+        "ready_for_writing": bool(scientific_argument) and scientific_argument.get("ready_for_drafting", False) and severity_counts["major"] == 0,
         "claim_boundary": "Automated self-correction detects explicit logic and reporting defects; it does not replace full-data review, field expertise, or independent scientific judgment.",
     }

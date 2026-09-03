@@ -14,7 +14,7 @@
         ]
       },
       "end_to_end_evidence_ids": [
-        "scientific-review-self-correction-e2e-v1"
+        "scientific-review-self-correction-e2e-v2"
       ],
       "id": "python-3.14.3-scientific-review-self-correction-1",
       "input_formats": {
@@ -22,7 +22,7 @@
           "scientific-review-request@1"
         ]
       },
-      "module_version": "1.1.0",
+      "module_version": "1.2.0",
       "output_formats": {
         "corrected_review": [
           "scientific-review-correction@1"
@@ -32,14 +32,16 @@
         "any"
       ],
       "regression_evidence_ids": [
-        "scientific-review-self-correction-regression-v1"
+        "scientific-review-self-correction-regression-v2"
       ],
       "tool_versions": {},
-      "verified_at": "2026-08-31"
+      "verified_at": "2026-09-03"
     }
   ],
   "complements": [
     "claim-evidence-integrity-audit",
+    "academic-prose-revision-audit",
+    "biomedical-writing-delivery",
     "publication-figure-package"
   ],
   "credentials": [],
@@ -60,7 +62,7 @@
       "tested_versions": [
         "3.14.3"
       ],
-      "verified_at": "2026-08-31",
+      "verified_at": "2026-09-03",
       "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
       "version_probe": [
         "biomed_workbench.modules.compatibility:probe_python_runtime"
@@ -70,7 +72,7 @@
       "version_source": "https://www.python.org/downloads/release/python-3143/"
     }
   ],
-  "description": "Review a draft interpretation against study design, statistical unit, effect magnitude, uncertainty, replication, negative results and discriminating alternatives; return a corrected result-first brief before final project promotion.",
+  "description": "Review a draft interpretation against study design, statistical unit, effect magnitude, uncertainty, replication, negative results and literature-grounded alternatives; optionally reorder evidence into a biological argument before writing.",
   "domains": [
     "evidence",
     "research-quality",
@@ -140,6 +142,18 @@
         "minLength": 1,
         "type": "string"
       },
+      "literature_context": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
+      "narrative_evidence": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      },
       "observations": {
         "items": {
           "type": "object"
@@ -171,6 +185,12 @@
       },
       "study_design": {
         "minLength": 1,
+        "type": "string"
+      },
+      "target_document": {
+        "type": "string"
+      },
+      "target_section": {
         "type": "string"
       }
     },
@@ -266,6 +286,12 @@
       },
       "review_display_order": {
         "type": "array"
+      },
+      "scientific_argument": {
+        "type": "object"
+      },
+      "ready_for_writing": {
+        "type": "boolean"
       }
     },
     "required": [
@@ -276,6 +302,8 @@
       "corrected_review_brief",
       "review_display_order",
       "background_provenance_fields",
+      "scientific_argument",
+      "ready_for_writing",
       "claim_boundary"
     ],
     "type": "object"
@@ -329,5 +357,5 @@
   "schema_version": 1,
   "title": "Self-correct a result-first biomedical review",
   "tool_requirements": [],
-  "version": "1.1.0"
+  "version": "1.2.0"
 }

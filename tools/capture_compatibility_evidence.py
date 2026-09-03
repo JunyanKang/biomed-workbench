@@ -574,7 +574,11 @@ def capture() -> dict[str, object]:
         else:
             case = fixtures.get(manifest.id)
             if not isinstance(case, dict):
-                raise RuntimeError(f"offline regression fixture is missing: {manifest.id}")
+                packaged_cases = json.loads((BUILTIN_ROOT / manifest.id / "tests" / "cases.json").read_text(encoding="utf-8"))
+                first_case = packaged_cases.get("cases", [None])[0]
+                if not isinstance(first_case, dict):
+                    raise RuntimeError(f"offline regression fixture is missing: {manifest.id}")
+                case = {"input": first_case["input"], "output": first_case["expected_subset"]}
             direct, _fallback = _safe_entrypoint_call(entrypoint, case, manifest.id)
             _assert_subset(case["output"], direct)
             regression_digest = digest_value({**context, "kind": "regression", "input": case["input"], "validated_output_contract": case["output"]})

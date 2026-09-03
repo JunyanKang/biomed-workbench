@@ -1,21 +1,21 @@
 {
-  "compatibility_complete": 221,
-  "compatibility_row_count": 222,
-  "end_to_end_passed": 222,
-  "module_count": 221,
+  "compatibility_complete": 222,
+  "compatibility_row_count": 223,
+  "end_to_end_passed": 223,
+  "module_count": 222,
   "modules": [
     {
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
-            "academic-prose-revision-audit-e2e-v2"
+            "academic-prose-revision-audit-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
-          "module_version": "0.2.0",
+          "module_version": "0.3.0",
           "regression_evidence_ids": [
-            "academic-prose-revision-audit-regression-v2"
+            "academic-prose-revision-audit-regression-v1"
           ],
-          "verified_at": "2026-08-20"
+          "verified_at": "2026-09-03"
         }
       ],
       "dependencies": [
@@ -35,7 +35,7 @@
           "tested_versions": [
             "3.14.3"
           ],
-          "verified_at": "2026-08-20",
+          "verified_at": "2026-09-03",
           "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
           "version_probe": [
             "biomed_workbench.modules.compatibility:probe_python_runtime"
@@ -79,7 +79,7 @@
           "required_metadata": []
         }
       ],
-      "module_version": "0.2.0",
+      "module_version": "0.3.0",
       "output_formats": [
         {
           "artifact_type": "academic_revision_audit",
@@ -2489,6 +2489,157 @@
           ],
           "required_metadata": [
             "input-digest"
+          ]
+        }
+      ],
+      "tools": [],
+      "validation_status": "complete"
+    },
+    {
+      "compatibility_rows": [
+        {
+          "end_to_end_evidence_ids": [
+            "biomedical-writing-delivery-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "module_version": "1.0.0",
+          "regression_evidence_ids": [
+            "biomedical-writing-delivery-regression-v1"
+          ],
+          "verified_at": "2026-09-03"
+        }
+      ],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-09-03",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "external_tool_required": false,
+      "id": "biomedical-writing-delivery",
+      "input_formats": [
+        {
+          "artifact_type": "biomedical_writing_delivery_request",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "biomedical_writing_package",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": []
+        }
+      ],
+      "module_version": "1.0.0",
+      "output_formats": [
+        {
+          "artifact_type": "biomedical_writing_delivery_manifest",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "writing_delivery",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ]
+        },
+        {
+          "artifact_type": "biomedical_writing_html_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "html",
+              "orientations": [
+                "human-readable-report"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            }
+          ],
+          "name": "writing_html_report",
+          "processing_levels": [
+            "derived",
+            "validated",
+            "reloaded"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "artifact_digest"
           ]
         }
       ],
@@ -26473,14 +26624,14 @@
       "compatibility_rows": [
         {
           "end_to_end_evidence_ids": [
-            "scientific-review-self-correction-e2e-v1"
+            "scientific-review-self-correction-e2e-v2"
           ],
           "id": "python-3.14.3-scientific-review-self-correction-1",
-          "module_version": "1.1.0",
+          "module_version": "1.2.0",
           "regression_evidence_ids": [
-            "scientific-review-self-correction-regression-v1"
+            "scientific-review-self-correction-regression-v2"
           ],
-          "verified_at": "2026-08-31"
+          "verified_at": "2026-09-03"
         }
       ],
       "dependencies": [
@@ -26500,7 +26651,7 @@
           "tested_versions": [
             "3.14.3"
           ],
-          "verified_at": "2026-08-31",
+          "verified_at": "2026-09-03",
           "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
           "version_probe": [
             "biomed_workbench.modules.compatibility:probe_python_runtime"
@@ -26544,7 +26695,7 @@
           "required_metadata": []
         }
       ],
-      "module_version": "1.1.0",
+      "module_version": "1.2.0",
       "output_formats": [
         {
           "artifact_type": "scientific_review_correction",
@@ -44927,32 +45078,32 @@
         ]
       },
       "end_to_end": {
-        "digest": "a6c7c33dc10581f352d4e0bb2ac733a6aea40a4b93ecc135f292ee080d116be5",
-        "id": "academic-prose-revision-audit-e2e-v2",
+        "digest": "e0efa24fc0e7fb1a2913d315c6b3f326a2d33df5408291adde56ae84170e46b1",
+        "id": "academic-prose-revision-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "e971091dc1580093f815b7c6220d1df9fa7fe7b95063e04fc733b893db88048f",
+      "implementation_sha256": "771c107e512da1f45a47a5b4cb688898fcae64e100b3a268ad53fa39ba7d2520",
       "input_formats": {
         "academic_revision": [
           "inline-json@1"
         ]
       },
       "module_id": "academic-prose-revision-audit",
-      "module_version": "0.2.0",
+      "module_version": "0.3.0",
       "output_formats": {
         "revision_audit": [
           "inline-json@1"
         ]
       },
       "regression": {
-        "digest": "7c07c9eb7a2fa14245ccfca0f308b22342484240020088f46b7554290a15dcba",
-        "id": "academic-prose-revision-audit-regression-v2",
+        "digest": "2369ecf8b5c49d0f8da192d94ccd7097974863344769ab301308db0c1985a814",
+        "id": "academic-prose-revision-audit-regression-v1",
         "passed": true
       },
       "row_id": "python-3.14.3-inline-json-1",
       "supplemental_end_to_end": [],
       "tool_versions": {},
-      "verified_at": "2026-08-20"
+      "verified_at": "2026-09-03"
     },
     {
       "dependency_versions": {
@@ -45515,6 +45666,43 @@
       "supplemental_end_to_end": [],
       "tool_versions": {},
       "verified_at": "2026-08-26"
+    },
+    {
+      "dependency_versions": {
+        "python": [
+          ">=3.14,<3.15"
+        ]
+      },
+      "end_to_end": {
+        "digest": "448df2bf84d434ba986127485c1fbbb4417ffa7d1502e9ab789a2c1ac5001ff7",
+        "id": "biomedical-writing-delivery-e2e-v1",
+        "passed": true
+      },
+      "implementation_sha256": "771c107e512da1f45a47a5b4cb688898fcae64e100b3a268ad53fa39ba7d2520",
+      "input_formats": {
+        "biomedical_writing_package": [
+          "inline-json@1"
+        ]
+      },
+      "module_id": "biomedical-writing-delivery",
+      "module_version": "1.0.0",
+      "output_formats": {
+        "writing_delivery": [
+          "inline-json@1"
+        ],
+        "writing_html_report": [
+          "html@5"
+        ]
+      },
+      "regression": {
+        "digest": "6ac7d287fecbfd532018f64b0b69dc604e974747c870a2bc852a0e90dc52bd2f",
+        "id": "biomedical-writing-delivery-regression-v1",
+        "passed": true
+      },
+      "row_id": "python-3.14.3-inline-json-1",
+      "supplemental_end_to_end": [],
+      "tool_versions": {},
+      "verified_at": "2026-09-03"
     },
     {
       "dependency_versions": {
@@ -46203,11 +46391,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "13044255b863e9cfe687eafedf902c3bfc4e75e8f4d778ecd93a77c429c736f3",
+        "digest": "018233ea32b98a1b18eebf63d5e18b75c2652c485408671425f3136b74a90001",
         "id": "citation-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "6a9be77f2a2fc1ba54aaf9a925dfbddb9715938825cb29c323490c606a5678a4",
+      "implementation_sha256": "443d39dd1b87ba0d746b0adea498f1fe0f8a3616e34c779eb32d4219b30832b7",
       "input_formats": {
         "references": [
           "inline-json@1"
@@ -46221,7 +46409,7 @@
         ]
       },
       "regression": {
-        "digest": "1dd6ceace50b426d3e06d6e8f9e72095644deccf44735e8b5d5d5749ead9fcdf",
+        "digest": "35b683c0776091063f6fc5c76744b6400184b24c3a42f06360983ff5d70cb014",
         "id": "citation-audit-regression-v1",
         "passed": true
       },
@@ -47411,11 +47599,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "ac199bf3f66ede8027f71c3e056bc45e84eb11211d0b8c006cb41dc0f55019c5",
+        "digest": "c6be9f063015ce498e9a7cd08931f30fa2e25bfa844ca325397d13aab67740c0",
         "id": "figure-specification-e2e-v2",
         "passed": true
       },
-      "implementation_sha256": "6a9be77f2a2fc1ba54aaf9a925dfbddb9715938825cb29c323490c606a5678a4",
+      "implementation_sha256": "443d39dd1b87ba0d746b0adea498f1fe0f8a3616e34c779eb32d4219b30832b7",
       "input_formats": {
         "panel_requests": [
           "inline-json@1"
@@ -47429,7 +47617,7 @@
         ]
       },
       "regression": {
-        "digest": "cc326985e263f3d6c97079ace8ee0e516127a8a41d82472c06acddaccb7b22cc",
+        "digest": "ddc5750f8145687ce9defc485a6d08ca6696cc6cb4622f70c409628d83393987",
         "id": "figure-specification-regression-v2",
         "passed": true
       },
@@ -48556,11 +48744,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "8dec40293fcaa09cbf7e6d965107cc37aa8b5098d516b7c56573301a7ca7e3c5",
+        "digest": "e5fd959267e5a586178f7e0be824547b41bf0eedafe3e05df1b280c585b0fd1b",
         "id": "manuscript-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "6a9be77f2a2fc1ba54aaf9a925dfbddb9715938825cb29c323490c606a5678a4",
+      "implementation_sha256": "443d39dd1b87ba0d746b0adea498f1fe0f8a3616e34c779eb32d4219b30832b7",
       "input_formats": {
         "manuscript": [
           "inline-json@1"
@@ -48574,7 +48762,7 @@
         ]
       },
       "regression": {
-        "digest": "07bd4e911a61003f0736e948a081be4ad0ed753715db3d3e87d8842cdbd87931",
+        "digest": "ff04bb8d67a3f8f5cd6b84642b3f468633e973cc0a7f54dd893060d3aad04d04",
         "id": "manuscript-audit-regression-v1",
         "passed": true
       },
@@ -49197,7 +49385,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "0a5d275a5abe2cd9aee72c85ed0439b6c4378dfd92d5542bee8bdb6e7f8b6ed0",
+        "digest": "827d8f20751421135ffb5480deaf65a896cbaa0eb1d2b785185104ecca3c9ff7",
         "id": "nsfc-proposal-development-e2e-v4",
         "passed": true
       },
@@ -49227,7 +49415,7 @@
         ]
       },
       "regression": {
-        "digest": "efee0bc8472139ea68980faa081a2c4339737ba6b37669958650ec46144abc83",
+        "digest": "9075f5d7543f5dee07657408e03371d60f2b43a90c5cb173baa9c0d71be089e7",
         "id": "nsfc-proposal-development-regression-v4",
         "passed": true
       },
@@ -49420,11 +49608,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "1c525cae7f872ef70876a9a73fd83e1d4738054dd4b2363eb05e656336655d90",
+        "digest": "0ed60161dfebebf9bb6b34e3cd0101ec4ac573ed819484a50425af0cdc83d910",
         "id": "patent-claim-structure-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "6a9be77f2a2fc1ba54aaf9a925dfbddb9715938825cb29c323490c606a5678a4",
+      "implementation_sha256": "443d39dd1b87ba0d746b0adea498f1fe0f8a3616e34c779eb32d4219b30832b7",
       "input_formats": {
         "chinese_patent_claims": [
           "inline-json@1"
@@ -49438,7 +49626,7 @@
         ]
       },
       "regression": {
-        "digest": "f9818ee3d0dcd423a20ad2c20c056e0d1f3fdd31b815ded9e4f62a706d27260c",
+        "digest": "eb5ef07b5faa19ec91a60810463520af0bd9b101d96e823234856934facd3604",
         "id": "patent-claim-structure-audit-regression-v1",
         "passed": true
       },
@@ -49454,11 +49642,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "88a45a4d45edef8864ec66019b660ea228c9ed86487dba47f72026688a6153cd",
+        "digest": "e036f40d45abd7ca86c3cfb5f11418b9db688e0542e631a457290d6518cbdf7c",
         "id": "patent-claim-support-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "6a9be77f2a2fc1ba54aaf9a925dfbddb9715938825cb29c323490c606a5678a4",
+      "implementation_sha256": "443d39dd1b87ba0d746b0adea498f1fe0f8a3616e34c779eb32d4219b30832b7",
       "input_formats": {
         "claim_support_map": [
           "inline-json@1"
@@ -49472,7 +49660,7 @@
         ]
       },
       "regression": {
-        "digest": "5d41f4f460e152693a2e75e8113419b8158870055c45f6a263211782577ae262",
+        "digest": "237f4a1bc8314759c1b67a364c072c54d632654074b2a39d7b8f3bba3fdd4934",
         "id": "patent-claim-support-audit-regression-v1",
         "passed": true
       },
@@ -49488,11 +49676,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "3d8901cff9afd41b3572b04200172ce21d91093085e96aabed81ff9b860688dc",
+        "digest": "df88027acc3f221431055ec31a17947f74913e685eb28ac3bc7b65f7d99ca39f",
         "id": "patent-disclosure-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "6a9be77f2a2fc1ba54aaf9a925dfbddb9715938825cb29c323490c606a5678a4",
+      "implementation_sha256": "443d39dd1b87ba0d746b0adea498f1fe0f8a3616e34c779eb32d4219b30832b7",
       "input_formats": {
         "disclosure": [
           "inline-json@1"
@@ -49506,7 +49694,7 @@
         ]
       },
       "regression": {
-        "digest": "26783955b01cef0273143ae99b109e73b11a76fac8211f64101463cb3fad6801",
+        "digest": "661fcac82d05b043d31774df2e6c68ade5d57e1fc78932e5c2d67eadf9a79196",
         "id": "patent-disclosure-audit-regression-v1",
         "passed": true
       },
@@ -49522,11 +49710,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "45b541f06b6d9e3d5a448ff7c8c4699dfaaa6a56cb2133ab3d5a9b344a9893a8",
+        "digest": "b93f316933af5be8f468fae1b2c4edbbcf16de9cfd5386d76acefbed2348eaf9",
         "id": "patent-draft-readiness-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "6a9be77f2a2fc1ba54aaf9a925dfbddb9715938825cb29c323490c606a5678a4",
+      "implementation_sha256": "443d39dd1b87ba0d746b0adea498f1fe0f8a3616e34c779eb32d4219b30832b7",
       "input_formats": {
         "structured_patent_draft": [
           "inline-json@1"
@@ -49540,7 +49728,7 @@
         ]
       },
       "regression": {
-        "digest": "60bea5732137997fcebda49a0af407f996c653b2e1a0a6b4a1d066a5b7e1a3a2",
+        "digest": "2910bb37e2ecfc160bcfc6de6f66af9cdaf7082d068eafbc67c950a06bed5eac",
         "id": "patent-draft-readiness-audit-regression-v1",
         "passed": true
       },
@@ -49556,11 +49744,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "a57198f40e67202dcc836ca8d9d3e287dd2b232cc44a2f2c7943fa41b2904f2e",
+        "digest": "95a82de92d9fba3a768e8ee7ebdcf26f9f46a6d4837984239a455efb3d5ba2de",
         "id": "patent-flowchart-svg-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "6a9be77f2a2fc1ba54aaf9a925dfbddb9715938825cb29c323490c606a5678a4",
+      "implementation_sha256": "443d39dd1b87ba0d746b0adea498f1fe0f8a3616e34c779eb32d4219b30832b7",
       "input_formats": {
         "patent_flowchart": [
           "inline-json@1"
@@ -49574,7 +49762,7 @@
         ]
       },
       "regression": {
-        "digest": "dbb88b491f6d80e9227aed54176779bbab870e048e2e462d628e2df2633c05c6",
+        "digest": "1cf84714e574b314c81718c7f66971ced87faf8e951adbc8a26cfe91138d7623",
         "id": "patent-flowchart-svg-regression-v1",
         "passed": true
       },
@@ -49695,11 +49883,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "3ac9108cccf78e0d5b33354f4430d9ea2be0556801ed460cf9c5c7384251331e",
+        "digest": "156127c93f2939e9ade8d141d6f1d96b9c29f4af089aa533bab8e4b84f25f5b9",
         "id": "pdf-evidence-extraction-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "6a9be77f2a2fc1ba54aaf9a925dfbddb9715938825cb29c323490c606a5678a4",
+      "implementation_sha256": "443d39dd1b87ba0d746b0adea498f1fe0f8a3616e34c779eb32d4219b30832b7",
       "input_formats": {
         "source_pdf": [
           "application-pdf@1.4",
@@ -49717,7 +49905,7 @@
         ]
       },
       "regression": {
-        "digest": "7bac03ae13f405f2af0ed784d55c29c26a2856305b97c3d7ac7b352659075fd3",
+        "digest": "5f36b7bf19bec2246c082471a7a2fcac7238e3fbd37e40aad7bcfd7318cdd49f",
         "id": "pdf-evidence-extraction-regression-v1",
         "passed": true
       },
@@ -49809,11 +49997,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "f50c7490205ff0b907dec5aed477219c8b151eb433ec6c7c8285c98d86625617",
+        "digest": "75bc4e771e62bf42d44a5b21049fb88b1233b3c7fcdd7cbf17113bf7df04f886",
         "id": "presentation-delivery-plan-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "6a9be77f2a2fc1ba54aaf9a925dfbddb9715938825cb29c323490c606a5678a4",
+      "implementation_sha256": "443d39dd1b87ba0d746b0adea498f1fe0f8a3616e34c779eb32d4219b30832b7",
       "input_formats": {
         "presentation_request": [
           "inline-json@1"
@@ -49827,7 +50015,7 @@
         ]
       },
       "regression": {
-        "digest": "707294af17dbc572bf3e793e34adba8355fc1fc89fa9f3ea91590b8c64993165",
+        "digest": "b0e5b525dfb180ccccc4d8c54a20c97eae1d1cb8eb4fb9eeb47fdf85d404f742",
         "id": "presentation-delivery-plan-regression-v1",
         "passed": true
       },
@@ -49843,7 +50031,7 @@
         ]
       },
       "end_to_end": {
-        "digest": "45fd4965ee016d6c5ff610ea27cf9e73cc71b1a01f3cf0f1940bb20a63766354",
+        "digest": "753e44b0d24a376cd90aed799128e26536886c38726e092eebb24c5c10954ca9",
         "id": "presentation-package-audit-e2e-v1",
         "passed": true
       },
@@ -49861,7 +50049,7 @@
         ]
       },
       "regression": {
-        "digest": "0e2c969b0683f960b12a6ae73d17754437da1f6e2810b6e138e9f91565082353",
+        "digest": "3c8a5b7185d8bfad45f97a74993fb70c02f2ac6c00079226bc42bffaf13e3d8a",
         "id": "presentation-package-audit-regression-v1",
         "passed": true
       },
@@ -50721,11 +50909,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "d1030f8ef58c63af9a5bfe5f346da6041d8b7d1300fd6222137d546d0c1f319f",
+        "digest": "933d3581862a107d3a75804fc8a0d6b2f239bc95b8239177a19da3ff0b3622ee",
         "id": "research-proposal-quality-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "e971091dc1580093f815b7c6220d1df9fa7fe7b95063e04fc733b893db88048f",
+      "implementation_sha256": "771c107e512da1f45a47a5b4cb688898fcae64e100b3a268ad53fa39ba7d2520",
       "input_formats": {
         "proposal_foundation": [
           "inline-json@1"
@@ -50739,7 +50927,7 @@
         ]
       },
       "regression": {
-        "digest": "622d087df11d5b0b29057750b05bc4e32ac11b7817f3622e9ca151b80a0207bb",
+        "digest": "bea2747d1b354cdb5eea133a329b41087d928ee7d589e233834b0fa74035d40c",
         "id": "research-proposal-quality-audit-regression-v1",
         "passed": true
       },
@@ -50755,11 +50943,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "f7639e5065229a9a6943ec2718bf7a0d79c089d91293c0a0face0ea8c2f39816",
+        "digest": "66453a9776d7a3e1e998bca4185480a7ab4abc7f4ae0d7e7ccd2c2ed3328508e",
         "id": "response-matrix-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "6a9be77f2a2fc1ba54aaf9a925dfbddb9715938825cb29c323490c606a5678a4",
+      "implementation_sha256": "443d39dd1b87ba0d746b0adea498f1fe0f8a3616e34c779eb32d4219b30832b7",
       "input_formats": {
         "review_comments": [
           "inline-json@1"
@@ -50773,7 +50961,7 @@
         ]
       },
       "regression": {
-        "digest": "084132d8c2a26673254b2310c53e87f4f8c3ab5d6925d404a2ab1eb75436756c",
+        "digest": "11d9d0d8f690b716114c350d3b4729b27d416a61da1601687778a054ef4a4500",
         "id": "response-matrix-regression-v1",
         "passed": true
       },
@@ -51052,32 +51240,32 @@
         ]
       },
       "end_to_end": {
-        "digest": "18853adec9ea5b668d7662840d417a4f65173663bad823f6df473a0affac0578",
-        "id": "scientific-review-self-correction-e2e-v1",
+        "digest": "9eba33b15e5f20ac3729be881bd4966a2f2b0294259867000418f27871f9ff17",
+        "id": "scientific-review-self-correction-e2e-v2",
         "passed": true
       },
-      "implementation_sha256": "8c9edfa07354757eece2c7367d239667982cf44968d9a1b1ec1e0b80e32464ad",
+      "implementation_sha256": "92b98b210cd7b3db6864eacc5d751f00b6fe9669c367280da1ff5e994619997b",
       "input_formats": {
         "review_draft": [
           "scientific-review-request@1"
         ]
       },
       "module_id": "scientific-review-self-correction",
-      "module_version": "1.1.0",
+      "module_version": "1.2.0",
       "output_formats": {
         "corrected_review": [
           "scientific-review-correction@1"
         ]
       },
       "regression": {
-        "digest": "44dc79d3a96065e8ee0eb9ec2ce36cf7a01ba5a5058ded4129582c1b3a72de33",
-        "id": "scientific-review-self-correction-regression-v1",
+        "digest": "71c17807db207d0f8277a887919c9beedd29e6228bd4df74d68a858744e9b4b6",
+        "id": "scientific-review-self-correction-regression-v2",
         "passed": true
       },
       "row_id": "python-3.14.3-scientific-review-self-correction-1",
       "supplemental_end_to_end": [],
       "tool_versions": {},
-      "verified_at": "2026-08-31"
+      "verified_at": "2026-09-03"
     },
     {
       "dependency_versions": {
@@ -53280,11 +53468,11 @@
         ]
       },
       "end_to_end": {
-        "digest": "aaedd8d0b52b24ce1bcf52a1bb4aa701577b4aadf8c679829173e1620da1ea98",
+        "digest": "b0d42c687969c1aa0c646bc74ce4961673c5a971f95c82978cdea15659e17763",
         "id": "statistical-reporting-audit-e2e-v1",
         "passed": true
       },
-      "implementation_sha256": "e971091dc1580093f815b7c6220d1df9fa7fe7b95063e04fc733b893db88048f",
+      "implementation_sha256": "771c107e512da1f45a47a5b4cb688898fcae64e100b3a268ad53fa39ba7d2520",
       "input_formats": {
         "statistical_report": [
           "inline-json@1"
@@ -53298,7 +53486,7 @@
         ]
       },
       "regression": {
-        "digest": "aaad4c3efce854da57dcd90dcf06ff9bb92707872873a0fca9234fc362ac50fd",
+        "digest": "d10c2aa1fb04c7af26a785f81d8f4c68ad9880fcc3abe1e5aa5ae379742b4286",
         "id": "statistical-reporting-audit-regression-v1",
         "passed": true
       },
@@ -54159,8 +54347,8 @@
       "verified_at": "2026-07-24"
     }
   ],
-  "registry_digest": "0267f965593133f63d7d63b7958b457879b32980bc37cc323662372bc57dd485",
-  "regression_passed": 222,
+  "registry_digest": "68b26088d942888f3a654b030f0ea9a2c0335eaa48a8113a615f03dca14b2415",
+  "regression_passed": 223,
   "schema_version": 1,
   "supplemental_end_to_end_passed": 14
 }

@@ -32,7 +32,7 @@ class ReleaseSurfaceTests(unittest.TestCase):
 
         self.assertTrue((ROOT / "LICENSE").exists())
         self.assertEqual(plugin["license"], "Apache-2.0")
-        self.assertEqual(plugin["version"], "0.2.10")
+        self.assertEqual(plugin["version"], "0.2.11")
         self.assertEqual(plugin["version"], catalog["version"])
 
         chinese_readme = (ROOT / "README.md").read_text(encoding="utf-8")

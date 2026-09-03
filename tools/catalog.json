@@ -20,6 +20,15 @@
             },
             "type": "array"
           },
+          "content_domain": {
+            "enum": [
+              "biological",
+              "clinical",
+              "computational-methods",
+              "mixed"
+            ],
+            "type": "string"
+          },
           "document_type": {
             "enum": [
               "research-article",
@@ -42,6 +51,9 @@
           },
           "revised_text": {
             "type": "string"
+          },
+          "scientific_argument": {
+            "type": "object"
           },
           "section_kind": {
             "minLength": 1,
@@ -856,6 +868,95 @@
       "mutability": "read_only",
       "requirements": [],
       "title": "Audit biomedical terminology and nomenclature",
+      "workflow": "publication"
+    },
+    {
+      "access": "offline",
+      "description": "Re-run scientific-argument, biomedical-language, claim-strength, and content-preservation checks on an exact revision, then write and reopen a navigable HTML report with evidence and literature links.",
+      "entrypoint": "biomed_workbench.capabilities.academic_writing:deliver_biomedical_writing",
+      "id": "biomedical-writing-delivery",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "author_voice_sample": {
+            "type": "string"
+          },
+          "claim_bindings": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "content_domain": {
+            "enum": [
+              "biological",
+              "clinical",
+              "computational-methods",
+              "mixed"
+            ],
+            "type": "string"
+          },
+          "document_type": {
+            "enum": [
+              "research-article",
+              "review-article",
+              "thesis",
+              "rebuttal",
+              "grant-proposal"
+            ],
+            "type": "string"
+          },
+          "original_text": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "output_directory": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "protected_spans": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "revised_text": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "scientific_argument": {
+            "type": "object"
+          },
+          "section_kind": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "structure_policy": {
+            "enum": [
+              "preserve",
+              "allow-declared-change"
+            ],
+            "type": "string"
+          },
+          "target_venue": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "original_text",
+          "revised_text",
+          "document_type",
+          "section_kind",
+          "target_venue",
+          "scientific_argument",
+          "output_directory"
+        ],
+        "type": "object"
+      },
+      "kind": "python",
+      "mutability": "writes_output",
+      "requirements": [],
+      "title": "Deliver evidence-ordered biomedical writing with an HTML review",
       "workflow": "publication"
     },
     {
@@ -9036,7 +9137,7 @@
     },
     {
       "access": "offline",
-      "description": "Review a draft interpretation against study design, statistical unit, effect magnitude, uncertainty, replication, negative results and discriminating alternatives; return a corrected result-first brief before final project promotion.",
+      "description": "Review a draft interpretation against study design, statistical unit, effect magnitude, uncertainty, replication, negative results and literature-grounded alternatives; optionally reorder evidence into a biological argument before writing.",
       "entrypoint": "biomed_workbench.capabilities.scientific_review:self_correct_scientific_review",
       "id": "scientific-review-self-correction",
       "input_schema": {
@@ -9059,6 +9160,18 @@
           "hypothesis": {
             "minLength": 1,
             "type": "string"
+          },
+          "literature_context": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "narrative_evidence": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
           },
           "observations": {
             "items": {
@@ -9091,6 +9204,12 @@
           },
           "study_design": {
             "minLength": 1,
+            "type": "string"
+          },
+          "target_document": {
+            "type": "string"
+          },
+          "target_section": {
             "type": "string"
           }
         },
@@ -13620,7 +13739,7 @@
       "workflow": "wetlab"
     }
   ],
-  "entry_count": 221,
+  "entry_count": 222,
   "schema_version": 2,
-  "version": "0.2.10"
+  "version": "0.2.11"
 }

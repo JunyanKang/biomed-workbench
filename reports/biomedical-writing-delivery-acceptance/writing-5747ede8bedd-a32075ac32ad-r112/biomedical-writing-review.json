@@ -1,0 +1,234 @@
+{
+  "claim_findings": [],
+  "document": {
+    "author_voice_sample_provided": false,
+    "content_domain": "biological",
+    "proposal_mode": false,
+    "section": "results",
+    "target_venue": "Nature",
+    "type": "research-article"
+  },
+  "findings": [],
+  "invariant_report": {
+    "citations": {
+      "delta": {
+        "added": [],
+        "removed": []
+      },
+      "original_count": 1,
+      "preserved": true,
+      "revised_count": 1
+    },
+    "equations": {
+      "delta": {
+        "added": [],
+        "removed": []
+      },
+      "original_count": 0,
+      "preserved": true,
+      "revised_count": 0
+    },
+    "evaluated": true,
+    "numbers": {
+      "delta": {
+        "added": [],
+        "removed": []
+      },
+      "original_count": 2,
+      "preserved": true,
+      "revised_count": 2
+    },
+    "protected_spans": {
+      "missing": [],
+      "preserved": true
+    },
+    "structure": {
+      "original_headings": [],
+      "original_paragraphs": 1,
+      "policy": "preserve",
+      "preserved": true,
+      "revised_headings": [],
+      "revised_paragraphs": 1
+    }
+  },
+  "major_or_fatal_count": 0,
+  "next_step": "Deliver the revised text with its change report.",
+  "original_text": "端到端分析流水线显示，突变组分化标志物表达降低 20% [1]。",
+  "phase": "post-revision",
+  "ready_for_delivery": true,
+  "required_output": {
+    "change_report": true,
+    "cleaned_text": true,
+    "confirm_numbers_equations_citations_unchanged": true,
+    "voice_and_venue_notes": true
+  },
+  "revised_text": "在这一受控示例中，突变组的分化标志物表达较对照组降低 20% [1]；该观察提示二者相关，但不足以建立直接分子机制。",
+  "revision_contract": {
+    "author_voice_policy": "Use a supplied author sample only to match sentence rhythm, connective habits, hedging, terminology, and section openings; never copy project-specific wording.",
+    "delivery_requires_post_revision_pass": true,
+    "mode": "manuscript",
+    "mode_specific_focus": "Use restrained, results-forward scholarly prose and keep every empirical claim adjacent to its number, figure, table, or citation.",
+    "preserve_exactly": [
+      "numbers",
+      "results",
+      "equations",
+      "citations",
+      "technical terms",
+      "declared mechanism boundaries",
+      "evidence-calibrated uncertainty"
+    ],
+    "required_sequence": [
+      "pre-revision audit of prose patterns and claim-evidence strength",
+      "scientific-content-preserving revision",
+      "post-revision comparison against the exact source text"
+    ]
+  },
+  "revision_digest": "5747ede8bedd9479ac19a7c9323a73c36269c3e7ee1d6b15a981b3d57fb707bc",
+  "scientific_argument": {
+    "argument_digest": "a32075ac32ad4826946c53c798f8de408a5b056ec6f0ef230575ee0ec6b1c5f8",
+    "central_claim": "受控示例支持因子 X 缺失与分化标志物表达降低相关，但不能据此建立直接分子机制。",
+    "central_question": "受控示例中，因子 X 缺失是否与视网膜祖细胞分化标志物表达降低相关？",
+    "competing_explanations": [
+      "细胞状态构成改变，而不是单个细胞内的分化程序延迟"
+    ],
+    "evidence_sequence": [
+      {
+        "artifact_path": "tests/fixtures/biomedical_writing/source.tsv",
+        "disposition": "retain",
+        "effect": "降低 20%",
+        "evidence_role": "discovery",
+        "evidence_type": "controlled fixture",
+        "experimental_unit": "模拟独立样本",
+        "figure_or_table": "受控源数据",
+        "finding": "突变组分化标志物表达均值较对照组低 20%。",
+        "id": "E1",
+        "independent_replicates": 3,
+        "source_index": 2,
+        "status": "FORMAL",
+        "supports_claim": true,
+        "uncertainty": "受控格式测试，不作生物学推断",
+        "upstream_ids": []
+      },
+      {
+        "artifact_path": "",
+        "disposition": "retain-as-boundary",
+        "effect": "未见一致变化",
+        "evidence_role": "boundary-null",
+        "evidence_type": "controlled fixture",
+        "experimental_unit": "模拟独立样本",
+        "figure_or_table": "",
+        "finding": "非相关谱系标志物未显示一致变化。",
+        "id": "E2",
+        "independent_replicates": 3,
+        "source_index": 1,
+        "status": "FORMAL",
+        "supports_claim": false,
+        "uncertainty": "受控格式测试，不作生物学推断",
+        "upstream_ids": [
+          "E1"
+        ]
+      }
+    ],
+    "excluded_evidence": [],
+    "findings": [],
+    "literature_context": [
+      {
+        "doi": "10.1038/s41586-024-07855-6",
+        "id": "L1",
+        "relation": "contextualises",
+        "scope": "写作结构示例",
+        "statement": "该研究用于示范跨专业生命科学论文的论证结构；不作为此受控数据的生物学验证。",
+        "url": "https://doi.org/10.1038/s41586-024-07855-6",
+        "verified": true
+      }
+    ],
+    "major_finding_count": 0,
+    "ordering_basis": "declared evidence dependencies, biological argument role, project status, then source order; never p value alone",
+    "paragraph_plan": [
+      {
+        "allowed_move": "observation",
+        "evidence_ids": [
+          "E1"
+        ],
+        "job": "discovery",
+        "must_report": [
+          "降低 20%",
+          "受控格式测试，不作生物学推断",
+          "模拟独立样本"
+        ],
+        "paragraph": 1,
+        "topic_sentence_content": "突变组分化标志物表达均值较对照组低 20%。",
+        "transition": "advance the biological question; do not introduce the next method by name"
+      },
+      {
+        "allowed_move": "observation",
+        "evidence_ids": [
+          "E2"
+        ],
+        "job": "boundary-null",
+        "must_report": [
+          "未见一致变化",
+          "受控格式测试，不作生物学推断",
+          "模拟独立样本"
+        ],
+        "paragraph": 2,
+        "topic_sentence_content": "非相关谱系标志物未显示一致变化。",
+        "transition": "advance the biological question; do not introduce the next method by name"
+      }
+    ],
+    "ready_for_drafting": true,
+    "source_order_preserved": false,
+    "study_design": "observational",
+    "target_document": "research-article",
+    "target_section": "results"
+  },
+  "source_audit": {
+    "finding_count": 0,
+    "findings": []
+  },
+  "source_digest": "21a89a2ea75991bf09b49f02389ca4b8e854500adbd1828ba5f18c7def24b4b4",
+  "venue_profile": {
+    "abstract_moves": [
+      "field context",
+      "unresolved problem",
+      "principal finding",
+      "general implication"
+    ],
+    "aliases": [
+      "nature"
+    ],
+    "discussion_moves": [
+      "principal advance",
+      "integration with prior knowledge",
+      "biological meaning",
+      "limitations and unresolved alternatives"
+    ],
+    "language": [
+      "define specialist terms",
+      "prefer direct biological subjects",
+      "separate observation from mechanism",
+      "avoid promotional priority claims"
+    ],
+    "official_sources": [
+      "https://www.nature.com/nature/for-authors/formatting-guide",
+      "https://www.nature.com/nature/for-authors/initial-submission"
+    ],
+    "profile_id": "nature",
+    "profile_version": "2026.09.03",
+    "reader": "scientists beyond the immediate specialty",
+    "research_domain": "broad-life-science",
+    "research_examples": [
+      {
+        "doi": "10.1038/s41586-024-07855-6",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11390485/",
+        "use": "basic-life-science article architecture"
+      }
+    ],
+    "results_moves": [
+      "biological question",
+      "decisive observation with figure and magnitude",
+      "bounded interpretation",
+      "next question"
+    ]
+  }
+}

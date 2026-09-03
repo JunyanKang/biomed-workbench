@@ -6,6 +6,7 @@ This directory records capability changes, representative acceptance, compatibil
 
 ## Versions
 
+- [0.2.11 · 2026-09-03](2026-09-03-0.2.11.md): connects literature-grounded scientific argument, biomedical-language revision, and a navigable HTML writing report into the actual manuscript and proposal delivery path.
 - [0.2.10 · 2026-09-03](2026-09-03-0.2.10.md): connects complex semantic routing, minimal-sufficient analysis, established-project import, domain-context review, interpretation self-correction, research storytelling, and visual-semantic comparison into a results-first research path while deepening the official CellChat and SecAct integrations.
 - [0.2.9 · 2026-08-31](2026-08-31-0.2.9.md): upgrades project interpretation reports and scientific evidence maps into bilingual HTML delivery packages with contents and direct evidence and data links while retaining Markdown and machine-readable formats.
 - [0.2.8 · 2026-08-31](2026-08-31-0.2.8.md): adds sequencing input and completed-run interoperability, fixed official queries across seven public life-science resources, and a result-first scientific interpretation correction loop in the main research workflow.

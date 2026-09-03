@@ -893,15 +893,25 @@ def presentation_delivery_plan(
             "mode": "parallel",
             "dependencies": ["citation-audit", "manuscript-audit", "statistical-reporting-audit"],
         },
-        "academic-prose-revision-audit": {
-            "description": "Verify that language revision preserves numbers, citations, equations, terminology, structure, uncertainty, and evidence strength.",
+        "scientific-review-self-correction": {
+            "description": "Order results by their biological role and dependencies, test competing explanations against reviewed literature, and correct conclusions that exceed the study design.",
             "mode": "serial",
             "dependencies": ["claim-evidence-integrity-audit", "data-availability-audit"],
+        },
+        "academic-prose-revision-audit": {
+            "description": "Replace engineering and internal process language with section-appropriate biomedical prose while preserving numbers, citations, terminology, uncertainty, and evidence strength.",
+            "mode": "serial",
+            "dependencies": ["scientific-review-self-correction"],
+        },
+        "biomedical-writing-delivery": {
+            "description": "Write the reviewed text and scientific argument to a navigable HTML report, link the evidence and literature, and reopen the file before delivery.",
+            "mode": "serial",
+            "dependencies": ["academic-prose-revision-audit"],
         },
         "manuscript-revision-base": {
             "description": "Create an immutable revision baseline before presentation assembly.",
             "mode": "serial",
-            "dependencies": ["manuscript-audit", "claim-evidence-integrity-audit", "academic-prose-revision-audit"],
+            "dependencies": ["manuscript-audit", "claim-evidence-integrity-audit", "biomedical-writing-delivery"],
         },
         "response-matrix": {
             "description": "Convert reviewer comments into explicit action records and unresolved items.",
@@ -996,6 +1006,8 @@ def presentation_delivery_plan(
         "Review gates and unresolved comments cannot be silently closed; unresolved items remain explicit.",
         "Every reported n, model, interval, p-value policy, repository route, and presentation asset must remain traceable to the source revision.",
         "Language revision must preserve all numerical, citation, equation, terminology, and evidence-strength invariants.",
+        "Manuscript and proposal prose must follow a reviewed biological argument rather than the input order, method order, or statistical significance alone.",
+        "Final writing delivery must include a reopened HTML report with working evidence and literature links.",
         "All publication-critical outputs must carry compatibility_row_id in provenance.",
         "No causal claim may be claimed without explicit evidence mapping or explicit uncertainty tags.",
     ]
@@ -1019,7 +1031,9 @@ def presentation_delivery_plan(
         "next_steps": [
             "run figure-specification with valid figure/claim bindings",
             "run manuscript-audit, citation-audit, statistical-reporting-audit, data-availability-audit, and claim-evidence-integrity-audit",
+            "run scientific-review-self-correction with narrative evidence and reviewed literature before drafting",
             "run academic-prose-revision-audit on the exact original and revised text",
+            "run biomedical-writing-delivery and reopen the generated HTML report",
             "if feedback exists, run response-matrix then manuscript-revision-lineage",
             "compile the real presentation, reload it with presentation-package-audit, and complete rendered visual review",
             "deliver with explicit limitations and the reproducibility ledger",

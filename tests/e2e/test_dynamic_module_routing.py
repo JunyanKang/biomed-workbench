@@ -187,6 +187,11 @@ class DynamicModuleRoutingTests(unittest.TestCase):
             with self.subTest(query=query):
                 self.assertIn(module_id, route(query)["selected_module_ids"])
 
+    def test_biomedical_writing_html_delivery_routes_with_scientific_review(self):
+        selected = set(route("完成生命科学论文写作，审查科学逻辑和语言并交付HTML报告")["selected_module_ids"])
+        self.assertIn("scientific-review-self-correction", selected)
+        self.assertIn("biomedical-writing-delivery", selected)
+
     def test_donor_aware_single_cell_inference_routes_from_manifest(self):
         plan = route("Run donor-aware single-cell pseudobulk differential expression with edgeR")
         routed = {item["id"] for step in plan["steps"] for item in step["candidates"]}

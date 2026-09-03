@@ -1,5 +1,5 @@
 {
-  "module_count": 221,
+  "module_count": 222,
   "modules": [
     {
       "access": "offline",
@@ -15,7 +15,7 @@
             ]
           },
           "end_to_end_evidence_ids": [
-            "academic-prose-revision-audit-e2e-v2"
+            "academic-prose-revision-audit-e2e-v1"
           ],
           "id": "python-3.14.3-inline-json-1",
           "input_formats": {
@@ -23,7 +23,7 @@
               "inline-json@1"
             ]
           },
-          "module_version": "0.2.0",
+          "module_version": "0.3.0",
           "output_formats": {
             "revision_audit": [
               "inline-json@1"
@@ -33,13 +33,15 @@
             "any"
           ],
           "regression_evidence_ids": [
-            "academic-prose-revision-audit-regression-v2"
+            "academic-prose-revision-audit-regression-v1"
           ],
           "tool_versions": {},
-          "verified_at": "2026-08-20"
+          "verified_at": "2026-09-03"
         }
       ],
       "complements": [
+        "biomedical-writing-delivery",
+        "scientific-review-self-correction",
         "manuscript-revision-base",
         "manuscript-revision-lineage",
         "claim-evidence-integrity-audit",
@@ -63,7 +65,7 @@
           "tested_versions": [
             "3.14.3"
           ],
-          "verified_at": "2026-08-20",
+          "verified_at": "2026-09-03",
           "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
           "version_probe": [
             "biomed_workbench.modules.compatibility:probe_python_runtime"
@@ -136,6 +138,15 @@
             },
             "type": "array"
           },
+          "content_domain": {
+            "enum": [
+              "biological",
+              "clinical",
+              "computational-methods",
+              "mixed"
+            ],
+            "type": "string"
+          },
           "document_type": {
             "enum": [
               "research-article",
@@ -158,6 +169,9 @@
           },
           "revised_text": {
             "type": "string"
+          },
+          "scientific_argument": {
+            "type": "object"
           },
           "section_kind": {
             "minLength": 1,
@@ -193,7 +207,7 @@
         ">=0.2.0,<0.3.0"
       ],
       "limitations": [
-        "The deterministic gate cannot by itself judge whether prose genuinely matches an author's voice or whether a scientific interpretation is correct."
+        "The deterministic gate verifies explicit language and preservation constraints; literature-grounded argument building and expert scientific judgment remain required."
       ],
       "maturity": "validated",
       "module_type": "validation",
@@ -260,6 +274,9 @@
           "next_step": {
             "type": "string"
           },
+          "original_text": {
+            "type": "string"
+          },
           "phase": {
             "type": "string"
           },
@@ -269,6 +286,9 @@
           "required_output": {
             "type": "object"
           },
+          "revised_text": {
+            "type": "string"
+          },
           "revision_contract": {
             "type": "object"
           },
@@ -276,11 +296,17 @@
             "nullable": true,
             "type": "string"
           },
+          "scientific_argument": {
+            "type": "object"
+          },
           "source_audit": {
             "type": "object"
           },
           "source_digest": {
             "type": "string"
+          },
+          "venue_profile": {
+            "type": "object"
           }
         },
         "required": [
@@ -289,14 +315,18 @@
           "source_digest",
           "revision_digest",
           "source_audit",
-          "revision_contract",
           "invariant_report",
           "claim_findings",
           "findings",
           "major_or_fatal_count",
           "ready_for_delivery",
           "required_output",
-          "next_step"
+          "next_step",
+          "venue_profile",
+          "scientific_argument",
+          "revision_contract",
+          "original_text",
+          "revised_text"
         ],
         "type": "object"
       },
@@ -350,7 +380,7 @@
       "schema_version": 1,
       "title": "Audit evidence-bound academic prose revisions",
       "tool_requirements": [],
-      "version": "0.2.0"
+      "version": "0.3.0"
     },
     {
       "access": "offline",
@@ -6682,6 +6712,376 @@
       },
       "schema_version": 1,
       "title": "Audit biomedical terminology and nomenclature",
+      "tool_requirements": [],
+      "version": "1.0.0"
+    },
+    {
+      "access": "offline",
+      "alternatives": [],
+      "assumptions": [
+        "The revised text was produced from the exact source after scientific-argument review."
+      ],
+      "compatibility_matrix": [
+        {
+          "dependency_versions": {
+            "python": [
+              ">=3.14,<3.15"
+            ]
+          },
+          "end_to_end_evidence_ids": [
+            "biomedical-writing-delivery-e2e-v1"
+          ],
+          "id": "python-3.14.3-inline-json-1",
+          "input_formats": {
+            "biomedical_writing_package": [
+              "inline-json@1"
+            ]
+          },
+          "module_version": "1.0.0",
+          "output_formats": {
+            "writing_delivery": [
+              "inline-json@1"
+            ],
+            "writing_html_report": [
+              "html@5"
+            ]
+          },
+          "platforms": [
+            "any"
+          ],
+          "regression_evidence_ids": [
+            "biomedical-writing-delivery-regression-v1"
+          ],
+          "tool_versions": {},
+          "verified_at": "2026-09-03"
+        }
+      ],
+      "complements": [
+        "academic-prose-revision-audit",
+        "scientific-review-self-correction",
+        "journal-targeting-and-compliance"
+      ],
+      "credentials": [],
+      "dependencies": [
+        {
+          "allowed_versions": [
+            ">=3.14,<3.15"
+          ],
+          "conflicts": [],
+          "ecosystem": "runtime",
+          "identity": "python-runtime",
+          "name": "python",
+          "platforms": [
+            "any"
+          ],
+          "purpose": "Execute deterministic scholarly-package validation.",
+          "required": true,
+          "tested_versions": [
+            "3.14.3"
+          ],
+          "verified_at": "2026-09-03",
+          "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
+          "version_probe": [
+            "biomed_workbench.modules.compatibility:probe_python_runtime"
+          ],
+          "version_probe_kind": "python_callable",
+          "version_probe_timeout_seconds": 5,
+          "version_source": "https://www.python.org/downloads/release/python-3143/"
+        }
+      ],
+      "description": "Re-run scientific-argument, biomedical-language, claim-strength, and content-preservation checks on an exact revision, then write and reopen a navigable HTML report with evidence and literature links.",
+      "domains": [
+        "publication",
+        "research-quality"
+      ],
+      "entrypoint": "biomed_workbench.capabilities.academic_writing:deliver_biomedical_writing",
+      "evidence_effects": [
+        "validates_scholarly_delivery_readiness"
+      ],
+      "execution": {
+        "kind": "python",
+        "max_output_bytes": 50000000,
+        "timeout_seconds": 30
+      },
+      "id": "biomedical-writing-delivery",
+      "input_artifacts": [
+        {
+          "artifact_type": "biomedical_writing_delivery_request",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "request-object"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "biomedical_writing_package",
+          "processing_levels": [
+            "declared"
+          ],
+          "required_metadata": [],
+          "source_policy": "project_input"
+        }
+      ],
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "author_voice_sample": {
+            "type": "string"
+          },
+          "claim_bindings": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "content_domain": {
+            "enum": [
+              "biological",
+              "clinical",
+              "computational-methods",
+              "mixed"
+            ],
+            "type": "string"
+          },
+          "document_type": {
+            "enum": [
+              "research-article",
+              "review-article",
+              "thesis",
+              "rebuttal",
+              "grant-proposal"
+            ],
+            "type": "string"
+          },
+          "original_text": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "output_directory": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "protected_spans": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "revised_text": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "scientific_argument": {
+            "type": "object"
+          },
+          "section_kind": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "structure_policy": {
+            "enum": [
+              "preserve",
+              "allow-declared-change"
+            ],
+            "type": "string"
+          },
+          "target_venue": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "original_text",
+          "revised_text",
+          "document_type",
+          "section_kind",
+          "target_venue",
+          "scientific_argument",
+          "output_directory"
+        ],
+        "type": "object"
+      },
+      "intents": [
+        "deliver biomedical writing",
+        "write manuscript html report",
+        "\u751f\u547d\u79d1\u5b66\u5199\u4f5c\u4ea4\u4ed8",
+        "\u533b\u5b66\u8bba\u6587\u8bed\u8a00\u4ea4\u4ed8",
+        "\u9879\u76ee\u4e66\u5199\u4f5c\u62a5\u544a"
+      ],
+      "kernel_compatibility": [
+        ">=0.2.0,<0.3.0"
+      ],
+      "limitations": [
+        "The module does not invent prose, evidence, citations, or domain knowledge; the host writes the revision and this module verifies and delivers it."
+      ],
+      "maturity": "validated",
+      "module_type": "delivery",
+      "mutability": "writes_output",
+      "orchestration": {
+        "requires_reviewed_upstream_types": [],
+        "scientific_stage": 6
+      },
+      "output_artifacts": [
+        {
+          "artifact_type": "biomedical_writing_delivery_manifest",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "inline-json",
+              "orientations": [
+                "module-output"
+              ],
+              "representations": [
+                "structured"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
+            }
+          ],
+          "name": "writing_delivery",
+          "processing_levels": [
+            "derived",
+            "validated"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id"
+          ],
+          "source_policy": "project_input"
+        },
+        {
+          "artifact_type": "biomedical_writing_html_report",
+          "formats": [
+            {
+              "annotation_releases": [],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "html",
+              "orientations": [
+                "human-readable-report"
+              ],
+              "representations": [
+                "text"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            }
+          ],
+          "name": "writing_html_report",
+          "processing_levels": [
+            "derived",
+            "validated",
+            "reloaded"
+          ],
+          "required_metadata": [
+            "module_version",
+            "compatibility_row_id",
+            "artifact_digest"
+          ],
+          "source_policy": "project_input"
+        }
+      ],
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "change_review": {
+            "type": "object"
+          },
+          "cleaned_text": {
+            "type": "string"
+          },
+          "ready_for_delivery": {
+            "type": "boolean"
+          },
+          "report_files": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "ready_for_delivery",
+          "cleaned_text",
+          "change_review",
+          "report_files"
+        ],
+        "type": "object"
+      },
+      "preconditions": [
+        "The declared scholarly source material and project context are available without invented facts."
+      ],
+      "provenance": {
+        "concept_sources": [
+          "Academic Humanizer 0.3.3, MIT-licensed source skill, adapted into deterministic project-owned preservation gates.",
+          "Nature-skills writing and delivery contracts available under their declared source licenses, adapted without copying host-specific runtime assumptions."
+        ],
+        "license": "Apache-2.0"
+      },
+      "quality_gates": [
+        {
+          "blocks_interpretation": true,
+          "description": "The revision follows a literature-grounded evidence order rather than source order or significance alone.",
+          "id": "biomedical-writing-scientific-logic",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "Outward prose uses life-science or clinical language and excludes internal software-governance vocabulary.",
+          "id": "biomedical-writing-language",
+          "severity": "major"
+        },
+        {
+          "blocks_interpretation": true,
+          "description": "The HTML and JSON reports are written, reopened, and returned with checksums.",
+          "id": "biomedical-writing-html-delivery",
+          "severity": "fatal"
+        }
+      ],
+      "questions": [
+        "Has the final prose passed scientific-logic and biomedical-language review, and was its HTML report written and reopened?"
+      ],
+      "routing": {
+        "exclusion_terms": [],
+        "method_aliases": [
+          "biomedical-writing-delivery",
+          "Deliver evidence-ordered biomedical writing with an HTML review",
+          "deliver biomedical writing",
+          "write manuscript html report",
+          "\u751f\u547d\u79d1\u5b66\u5199\u4f5c\u4ea4\u4ed8",
+          "\u533b\u5b66\u8bba\u6587\u8bed\u8a00\u4ea4\u4ed8",
+          "\u9879\u76ee\u4e66\u5199\u4f5c\u62a5\u544a"
+        ],
+        "named_method_priority": 100,
+        "required_any_terms": []
+      },
+      "schema_version": 1,
+      "title": "Deliver evidence-ordered biomedical writing with an HTML review",
       "tool_requirements": [],
       "version": "1.0.0"
     },
@@ -43272,6 +43672,7 @@
           "manuscript-revision-base",
           "Build a hash-bound manuscript revision base",
           "prepare manuscript revision base",
+          "manuscript delivery",
           "anchor manuscript blocks",
           "build revision manifest",
           "\u5efa\u7acb\u7a3f\u4ef6\u4fee\u8ba2\u57fa\u7a3f",
@@ -69579,7 +69980,7 @@
             ]
           },
           "end_to_end_evidence_ids": [
-            "scientific-review-self-correction-e2e-v1"
+            "scientific-review-self-correction-e2e-v2"
           ],
           "id": "python-3.14.3-scientific-review-self-correction-1",
           "input_formats": {
@@ -69587,7 +69988,7 @@
               "scientific-review-request@1"
             ]
           },
-          "module_version": "1.1.0",
+          "module_version": "1.2.0",
           "output_formats": {
             "corrected_review": [
               "scientific-review-correction@1"
@@ -69597,14 +69998,16 @@
             "any"
           ],
           "regression_evidence_ids": [
-            "scientific-review-self-correction-regression-v1"
+            "scientific-review-self-correction-regression-v2"
           ],
           "tool_versions": {},
-          "verified_at": "2026-08-31"
+          "verified_at": "2026-09-03"
         }
       ],
       "complements": [
         "claim-evidence-integrity-audit",
+        "academic-prose-revision-audit",
+        "biomedical-writing-delivery",
         "publication-figure-package"
       ],
       "credentials": [],
@@ -69625,7 +70028,7 @@
           "tested_versions": [
             "3.14.3"
           ],
-          "verified_at": "2026-08-31",
+          "verified_at": "2026-09-03",
           "version_pattern": "([0-9]+(?:\\.[0-9]+)+)",
           "version_probe": [
             "biomed_workbench.modules.compatibility:probe_python_runtime"
@@ -69635,7 +70038,7 @@
           "version_source": "https://www.python.org/downloads/release/python-3143/"
         }
       ],
-      "description": "Review a draft interpretation against study design, statistical unit, effect magnitude, uncertainty, replication, negative results and discriminating alternatives; return a corrected result-first brief before final project promotion.",
+      "description": "Review a draft interpretation against study design, statistical unit, effect magnitude, uncertainty, replication, negative results and literature-grounded alternatives; optionally reorder evidence into a biological argument before writing.",
       "domains": [
         "evidence",
         "research-quality",
@@ -69706,6 +70109,18 @@
             "minLength": 1,
             "type": "string"
           },
+          "literature_context": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "narrative_evidence": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
           "observations": {
             "items": {
               "type": "object"
@@ -69737,6 +70152,12 @@
           },
           "study_design": {
             "minLength": 1,
+            "type": "string"
+          },
+          "target_document": {
+            "type": "string"
+          },
+          "target_section": {
             "type": "string"
           }
         },
@@ -69828,11 +70249,17 @@
           "passed": {
             "type": "boolean"
           },
+          "ready_for_writing": {
+            "type": "boolean"
+          },
           "requires_revision": {
             "type": "boolean"
           },
           "review_display_order": {
             "type": "array"
+          },
+          "scientific_argument": {
+            "type": "object"
           }
         },
         "required": [
@@ -69843,6 +70270,8 @@
           "corrected_review_brief",
           "review_display_order",
           "background_provenance_fields",
+          "scientific_argument",
+          "ready_for_writing",
           "claim_boundary"
         ],
         "type": "object"
@@ -69896,7 +70325,7 @@
       "schema_version": 1,
       "title": "Self-correct a result-first biomedical review",
       "tool_requirements": [],
-      "version": "1.1.0"
+      "version": "1.2.0"
     },
     {
       "access": "offline",
@@ -118291,7 +118720,7 @@
       "version": "1.0.0"
     }
   ],
-  "plugin_version": "0.2.10",
-  "registry_digest": "0267f965593133f63d7d63b7958b457879b32980bc37cc323662372bc57dd485",
+  "plugin_version": "0.2.11",
+  "registry_digest": "68b26088d942888f3a654b030f0ea9a2c0335eaa48a8113a615f03dca14b2415",
   "schema_version": 1
 }

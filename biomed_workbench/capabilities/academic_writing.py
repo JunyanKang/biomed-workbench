@@ -6,7 +6,11 @@ import hashlib
 import json
 import re
 from collections import Counter
+from pathlib import Path
 from typing import Any
+
+from biomed_workbench.biomedical_writing import resolve_biomedical_writing_profile
+from biomed_workbench.reporting.writing_html import write_biomedical_writing_report
 
 from .proposal_writing import canonical_agency
 
@@ -150,6 +154,19 @@ _CONNECTOR_RE = re.compile(
     re.IGNORECASE,
 )
 
+_INTERNAL_GOVERNANCE_RE = re.compile(
+    r"\b(?:registry|digest|sha-?256|receipt|adjudication|authorization|state transition|"
+    r"payload|renderer|promotion gate|project lock|artifact index|state machine)\b|"
+    r"(?:注册表|校验值|回执|裁决|授权|状态转换|载荷|渲染器|晋级门禁|项目锁|制品索引|状态机)",
+    re.IGNORECASE,
+)
+_ENGINEERING_METAPHOR_RE = re.compile(
+    r"\b(?:orchestrat(?:e|ion)|end-to-end pipeline|technology stack|execution layer|"
+    r"capability module|closed-loop workflow|system architecture|input-output chain)\b|"
+    r"(?:编排|端到端流水线|技术栈|执行层|能力模块|闭环工作流|系统架构|输入输出链|能力落地)",
+    re.IGNORECASE,
+)
+
 
 def _digest(value: Any) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
@@ -276,6 +293,30 @@ def _style_findings(text: str, *, proposal_mode: bool) -> list[dict[str, Any]]:
     return findings
 
 
+def _biomedical_language_findings(text: str, *, section_kind: str, content_domain: str) -> list[dict[str, Any]]:
+    """Detect software-governance prose leaking into outward biomedical writing."""
+    findings: list[dict[str, Any]] = []
+    for match in _INTERNAL_GOVERNANCE_RE.finditer(text):
+        findings.append({
+            "code": "internal-governance-language",
+            "severity": "major",
+            "location": _location(text, match.start()),
+            "excerpt": match.group(0),
+            "action": "State the biological observation, evidentiary boundary, or author action directly; keep provenance terminology in the supporting record.",
+        })
+    methods_context = section_kind.strip().lower() in {"methods", "star methods", "methodology"}
+    if content_domain != "computational-methods" and not methods_context:
+        for match in _ENGINEERING_METAPHOR_RE.finditer(text):
+            findings.append({
+                "code": "engineering-metaphor-in-biomedical-narrative",
+                "severity": "major",
+                "location": _location(text, match.start()),
+                "excerpt": match.group(0),
+                "action": "Replace the engineering metaphor with the named biological question, experiment, analysis, finding, or inference.",
+            })
+    return findings
+
+
 def _claim_findings(claim_bindings: list[dict[str, Any]]) -> list[dict[str, Any]]:
     findings: list[dict[str, Any]] = []
     seen: set[str] = set()
@@ -314,8 +355,10 @@ def audit_academic_prose_revision(
     protected_spans: list[dict[str, str]] | None = None,
     claim_bindings: list[dict[str, Any]] | None = None,
     ai_disclosure_evasion: bool = False,
+    content_domain: str = "biological",
+    scientific_argument: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Audit prose before editing and validate a supplied revision without rewriting it."""
+    """Audit, verify, and optionally deliver one evidence-ordered biomedical revision."""
     if not isinstance(original_text, str) or not original_text.strip():
         raise ValueError("original_text must be nonempty")
     if document_type not in _DOCUMENT_TYPES:
@@ -326,6 +369,10 @@ def audit_academic_prose_revision(
         raise ValueError("structure_policy is unsupported")
     if not isinstance(revised_text, str) or not isinstance(author_voice_sample, str) or not isinstance(ai_disclosure_evasion, bool):
         raise ValueError("revision, voice sample, and disclosure-evasion fields are invalid")
+    if content_domain not in {"biological", "clinical", "computational-methods", "mixed"}:
+        raise ValueError("content_domain is unsupported")
+    if scientific_argument is not None and not isinstance(scientific_argument, dict):
+        raise ValueError("scientific_argument must be an object")
     protected_spans = list(protected_spans or [])
     claim_bindings = list(claim_bindings or [])
     normalized_spans: list[dict[str, str]] = []
@@ -362,9 +409,15 @@ def audit_academic_prose_revision(
         ),
         "delivery_requires_post_revision_pass": True,
     }
+    venue_profile = resolve_biomedical_writing_profile(target_venue)
     source_findings = _style_findings(original_text, proposal_mode=proposal_mode)
+    source_findings.extend(_biomedical_language_findings(original_text, section_kind=section_kind, content_domain=content_domain))
     phase = "post-revision" if revised_text.strip() else "preflight"
-    findings = list(source_findings) if phase == "preflight" else _style_findings(revised_text, proposal_mode=proposal_mode)
+    if phase == "preflight":
+        findings = list(source_findings)
+    else:
+        findings = _style_findings(revised_text, proposal_mode=proposal_mode)
+        findings.extend(_biomedical_language_findings(revised_text, section_kind=section_kind, content_domain=content_domain))
     if ai_disclosure_evasion:
         findings.append(
             {
@@ -447,8 +500,30 @@ def audit_academic_prose_revision(
             )
         findings.extend(_claim_findings(claim_bindings))
 
+        if not scientific_argument:
+            findings.append({
+                "code": "scientific-argument-plan-missing",
+                "severity": "major",
+                "location": {"document": 1},
+                "excerpt": "",
+                "action": "Build and review an evidence-ordered scientific argument before delivering biomedical prose.",
+            })
+        else:
+            required_argument = {
+                "central_question", "central_claim", "evidence_sequence", "literature_context",
+                "paragraph_plan", "ready_for_drafting", "argument_digest",
+            }
+            if not required_argument <= set(scientific_argument) or not scientific_argument.get("ready_for_drafting"):
+                findings.append({
+                    "code": "scientific-argument-plan-not-ready",
+                    "severity": "major",
+                    "location": {"document": 1},
+                    "excerpt": "",
+                    "action": "Resolve the scientific argument findings, literature context, and evidence order before prose delivery.",
+                })
+
     major_count = sum(item["severity"] in {"major", "fatal"} for item in findings)
-    return {
+    report = {
         "phase": phase,
         "document": {
             "type": document_type,
@@ -456,6 +531,7 @@ def audit_academic_prose_revision(
             "target_venue": target_venue.strip() or "unspecified",
             "proposal_mode": proposal_mode,
             "author_voice_sample_provided": bool(author_voice_sample.strip()),
+            "content_domain": content_domain,
         },
         "source_digest": _digest(original_text),
         "revision_digest": _digest(revised_text) if phase == "post-revision" else None,
@@ -463,6 +539,8 @@ def audit_academic_prose_revision(
             "finding_count": len(source_findings),
             "findings": source_findings,
         },
+        "venue_profile": venue_profile,
+        "scientific_argument": scientific_argument or {},
         "revision_contract": revision_contract,
         "invariant_report": invariant_report,
         "claim_findings": [item for item in findings if "claim_id" in item],
@@ -480,6 +558,63 @@ def audit_academic_prose_revision(
             if phase == "preflight"
             else ("Resolve blocking findings and validate again." if major_count else "Deliver the revised text with its change report.")
         ),
+        "original_text": original_text,
+        "revised_text": revised_text,
+    }
+    return report
+
+
+def deliver_biomedical_writing(
+    original_text: str,
+    revised_text: str,
+    document_type: str,
+    section_kind: str,
+    target_venue: str,
+    scientific_argument: dict[str, Any],
+    output_directory: str,
+    author_voice_sample: str = "",
+    structure_policy: str = "preserve",
+    protected_spans: list[dict[str, str]] | None = None,
+    claim_bindings: list[dict[str, Any]] | None = None,
+    content_domain: str = "biological",
+) -> dict[str, Any]:
+    """Run the mandatory post-revision gate, write HTML/JSON, and reopen the delivery."""
+    if not output_directory.strip():
+        raise ValueError("output_directory is required")
+    review = audit_academic_prose_revision(
+        original_text=original_text,
+        revised_text=revised_text,
+        document_type=document_type,
+        section_kind=section_kind,
+        target_venue=target_venue,
+        author_voice_sample=author_voice_sample,
+        structure_policy=structure_policy,
+        protected_spans=protected_spans,
+        claim_bindings=claim_bindings,
+        content_domain=content_domain,
+        scientific_argument=scientific_argument,
+    )
+    if not review["ready_for_delivery"]:
+        raise ValueError("biomedical writing revision has unresolved scientific or language findings")
+    files = write_biomedical_writing_report(review, Path(output_directory).expanduser())
+    if not files["delivery_verified"]:
+        raise RuntimeError("biomedical writing HTML report failed reopen verification")
+    return {
+        "ready_for_delivery": True,
+        "cleaned_text": revised_text,
+        "change_review": {
+            "source_digest": review["source_digest"],
+            "revision_digest": review["revision_digest"],
+            "venue_profile": review["venue_profile"]["profile_id"],
+            "venue_profile_version": review["venue_profile"]["profile_version"],
+            "scientific_argument_digest": scientific_argument["argument_digest"],
+            "content_preserved": all(
+                not isinstance(value, dict) or value.get("preserved") is not False
+                for key, value in review["invariant_report"].items()
+                if key != "structure"
+            ),
+        },
+        "report_files": files,
     }
 
 

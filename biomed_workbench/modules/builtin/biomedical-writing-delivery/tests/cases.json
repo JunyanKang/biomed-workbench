@@ -1,0 +1,146 @@
+{
+  "cases": [
+    {
+      "expected_subset": {
+        "ready_for_delivery": true,
+        "report_files": {
+          "delivery_verified": true,
+          "renderer_version": "1.1.2"
+        }
+      },
+      "input": {
+        "claim_bindings": [
+          {
+            "claim": "突变组分化标志物表达降低。",
+            "claim_id": "C1",
+            "claim_level": "associational",
+            "evidence_ids": [
+              "E1"
+            ],
+            "evidence_level": "associational",
+            "hedging_preserved": true,
+            "hedging_required": true
+          }
+        ],
+        "content_domain": "biological",
+        "document_type": "research-article",
+        "original_text": "端到端分析流水线显示，突变组分化标志物表达降低 20% [1]。",
+        "output_directory": "reports/biomedical-writing-delivery-acceptance",
+        "protected_spans": [
+          {
+            "kind": "result",
+            "text": "20%"
+          },
+          {
+            "kind": "citation",
+            "text": "[1]"
+          }
+        ],
+        "revised_text": "在这一受控示例中，突变组的分化标志物表达较对照组降低 20% [1]；该观察提示二者相关，但不足以建立直接分子机制。",
+        "scientific_argument": {
+          "argument_digest": "a32075ac32ad4826946c53c798f8de408a5b056ec6f0ef230575ee0ec6b1c5f8",
+          "central_claim": "受控示例支持因子 X 缺失与分化标志物表达降低相关，但不能据此建立直接分子机制。",
+          "central_question": "受控示例中，因子 X 缺失是否与视网膜祖细胞分化标志物表达降低相关？",
+          "competing_explanations": [
+            "细胞状态构成改变，而不是单个细胞内的分化程序延迟"
+          ],
+          "evidence_sequence": [
+            {
+              "artifact_path": "tests/fixtures/biomedical_writing/source.tsv",
+              "disposition": "retain",
+              "effect": "降低 20%",
+              "evidence_role": "discovery",
+              "evidence_type": "controlled fixture",
+              "experimental_unit": "模拟独立样本",
+              "figure_or_table": "受控源数据",
+              "finding": "突变组分化标志物表达均值较对照组低 20%。",
+              "id": "E1",
+              "independent_replicates": 3,
+              "source_index": 2,
+              "status": "FORMAL",
+              "supports_claim": true,
+              "uncertainty": "受控格式测试，不作生物学推断",
+              "upstream_ids": []
+            },
+            {
+              "artifact_path": "",
+              "disposition": "retain-as-boundary",
+              "effect": "未见一致变化",
+              "evidence_role": "boundary-null",
+              "evidence_type": "controlled fixture",
+              "experimental_unit": "模拟独立样本",
+              "figure_or_table": "",
+              "finding": "非相关谱系标志物未显示一致变化。",
+              "id": "E2",
+              "independent_replicates": 3,
+              "source_index": 1,
+              "status": "FORMAL",
+              "supports_claim": false,
+              "uncertainty": "受控格式测试，不作生物学推断",
+              "upstream_ids": [
+                "E1"
+              ]
+            }
+          ],
+          "excluded_evidence": [],
+          "findings": [],
+          "literature_context": [
+            {
+              "doi": "10.1038/s41586-024-07855-6",
+              "id": "L1",
+              "relation": "contextualises",
+              "scope": "写作结构示例",
+              "statement": "该研究用于示范跨专业生命科学论文的论证结构；不作为此受控数据的生物学验证。",
+              "url": "https://doi.org/10.1038/s41586-024-07855-6",
+              "verified": true
+            }
+          ],
+          "major_finding_count": 0,
+          "ordering_basis": "declared evidence dependencies, biological argument role, project status, then source order; never p value alone",
+          "paragraph_plan": [
+            {
+              "allowed_move": "observation",
+              "evidence_ids": [
+                "E1"
+              ],
+              "job": "discovery",
+              "must_report": [
+                "降低 20%",
+                "受控格式测试，不作生物学推断",
+                "模拟独立样本"
+              ],
+              "paragraph": 1,
+              "topic_sentence_content": "突变组分化标志物表达均值较对照组低 20%。",
+              "transition": "advance the biological question; do not introduce the next method by name"
+            },
+            {
+              "allowed_move": "observation",
+              "evidence_ids": [
+                "E2"
+              ],
+              "job": "boundary-null",
+              "must_report": [
+                "未见一致变化",
+                "受控格式测试，不作生物学推断",
+                "模拟独立样本"
+              ],
+              "paragraph": 2,
+              "topic_sentence_content": "非相关谱系标志物未显示一致变化。",
+              "transition": "advance the biological question; do not introduce the next method by name"
+            }
+          ],
+          "ready_for_drafting": true,
+          "source_order_preserved": false,
+          "study_design": "observational",
+          "target_document": "research-article",
+          "target_section": "results"
+        },
+        "section_kind": "results",
+        "structure_policy": "preserve",
+        "target_venue": "Nature"
+      },
+      "name": "write-and-reopen-controlled-chinese-writing-report"
+    }
+  ],
+  "schema_version": 1
+}

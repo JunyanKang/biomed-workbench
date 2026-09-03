@@ -57,11 +57,14 @@ def _module(
     complements: list[str],
     concept_sources: list[str],
     scientific_stage: int,
+    version: str = "0.1.0",
+    mutability: str = "read_only",
+    verified_at: str = VERIFIED_AT,
 ) -> dict[str, Any]:
     return {
         "schema_version": 1,
         "id": module_id,
-        "version": "0.1.0",
+        "version": version,
         "title": title,
         "description": description,
         "module_type": module_type,
@@ -104,7 +107,7 @@ def _module(
             "tested_versions": ["3.14.3"],
             "allowed_versions": [">=3.14,<3.15"],
             "version_source": "https://www.python.org/downloads/release/python-3143/",
-            "verified_at": VERIFIED_AT,
+            "verified_at": verified_at,
             "version_probe": ["biomed_workbench.modules.compatibility:probe_python_runtime"],
             "version_probe_kind": "python_callable",
             "version_probe_timeout_seconds": 5,
@@ -115,7 +118,7 @@ def _module(
         }],
         "compatibility_matrix": [{
             "id": "python-3.14.3-inline-json-1",
-            "module_version": "0.1.0",
+            "module_version": version,
             "tool_versions": {},
             "dependency_versions": {"python": [">=3.14,<3.15"]},
             "input_formats": {input_name: ["inline-json@1"]},
@@ -123,10 +126,10 @@ def _module(
             "platforms": ["any"],
             "regression_evidence_ids": [f"{module_id}-regression-v1"],
             "end_to_end_evidence_ids": [f"{module_id}-e2e-v1"],
-            "verified_at": VERIFIED_AT,
+            "verified_at": verified_at,
         }],
         "access": "offline",
-        "mutability": "read_only",
+        "mutability": mutability,
         "credentials": [],
         "input_schema": input_schema,
         "output_schema": output_schema,
@@ -145,12 +148,15 @@ def _module(
 def _minimal_pptx() -> str:
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr("[Content_Types].xml", "<?xml version='1.0'?><Types xmlns='http://schemas.openxmlformats.org/package/2006/content-types'/>")
-        archive.writestr("ppt/presentation.xml", "<?xml version='1.0'?><p:presentation xmlns:p='http://schemas.openxmlformats.org/presentationml/2006/main'/>")
-        archive.writestr(
-            "ppt/slides/slide1.xml",
-            "<?xml version='1.0'?><p:sld xmlns:p='http://schemas.openxmlformats.org/presentationml/2006/main' xmlns:a='http://schemas.openxmlformats.org/drawingml/2006/main'><p:cSld><p:spTree><p:sp><p:txBody><a:p><a:r><a:t>Evidence-led title</a:t></a:r></a:p></p:txBody></p:sp></p:spTree></p:cSld></p:sld>",
-        )
+        files = {
+            "[Content_Types].xml": "<?xml version='1.0'?><Types xmlns='http://schemas.openxmlformats.org/package/2006/content-types'/>",
+            "ppt/presentation.xml": "<?xml version='1.0'?><p:presentation xmlns:p='http://schemas.openxmlformats.org/presentationml/2006/main'/>",
+            "ppt/slides/slide1.xml": "<?xml version='1.0'?><p:sld xmlns:p='http://schemas.openxmlformats.org/presentationml/2006/main' xmlns:a='http://schemas.openxmlformats.org/drawingml/2006/main'><p:cSld><p:spTree><p:sp><p:txBody><a:p><a:r><a:t>Evidence-led title</a:t></a:r></a:p></p:txBody></p:sp></p:spTree></p:cSld></p:sld>",
+        }
+        for name, payload in files.items():
+            info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(info, payload)
     return base64.b64encode(buffer.getvalue()).decode("ascii")
 
 
@@ -186,23 +192,29 @@ def _specs() -> dict[str, tuple[dict[str, Any], list[dict[str, Any]]]]:
                 "protected_spans": {"type": "array", "items": {"type": "object"}},
                 "claim_bindings": {"type": "array", "items": {"type": "object"}},
                 "ai_disclosure_evasion": {"type": "boolean"},
+                "content_domain": {"type": "string", "enum": ["biological", "clinical", "computational-methods", "mixed"]},
+                "scientific_argument": {"type": "object"},
             }, ["original_text", "document_type", "section_kind", "target_venue"]),
             output_schema=_schema({
                 "phase": {"type": "string"}, "document": {"type": "object"}, "source_digest": {"type": "string"},
                 "revision_digest": {"type": "string", "nullable": True}, "source_audit": {"type": "object"}, "invariant_report": {"type": "object"},
                 "claim_findings": {"type": "array"}, "findings": {"type": "array"}, "major_or_fatal_count": {"type": "integer"},
                 "ready_for_delivery": {"type": "boolean"}, "required_output": {"type": "object"}, "next_step": {"type": "string"},
-            }, ["phase", "document", "source_digest", "revision_digest", "source_audit", "invariant_report", "claim_findings", "findings", "major_or_fatal_count", "ready_for_delivery", "required_output", "next_step"]),
+                "venue_profile": {"type": "object"}, "scientific_argument": {"type": "object"},
+                "revision_contract": {"type": "object"}, "original_text": {"type": "string"}, "revised_text": {"type": "string"},
+            }, ["phase", "document", "source_digest", "revision_digest", "source_audit", "invariant_report", "claim_findings", "findings", "major_or_fatal_count", "ready_for_delivery", "required_output", "next_step", "venue_profile", "scientific_argument", "revision_contract", "original_text", "revised_text"]),
             assumptions=["The caller supplies the exact original and revised text and declares any intended structural change."],
             gates=[
                 ("academic-prose-content-preservation", "fatal", "Numbers, equations, citations, results, and protected terminology remain unchanged."),
                 ("academic-prose-claim-evidence", "major", "Every revised empirical claim remains within its declared evidence strength and preserves required uncertainty."),
                 ("academic-prose-voice-and-venue", "major", "The revision follows the supplied author voice and target venue without promotional or formulaic language."),
             ],
-            limitations=["The deterministic gate cannot by itself judge whether prose genuinely matches an author's voice or whether a scientific interpretation is correct."],
-            complements=["manuscript-revision-base", "manuscript-revision-lineage", "claim-evidence-integrity-audit", "journal-targeting-and-compliance"],
+            limitations=["The deterministic gate verifies explicit language and preservation constraints; literature-grounded argument building and expert scientific judgment remain required."],
+            complements=["biomedical-writing-delivery", "scientific-review-self-correction", "manuscript-revision-base", "manuscript-revision-lineage", "claim-evidence-integrity-audit", "journal-targeting-and-compliance"],
             concept_sources=common_source,
             scientific_stage=5,
+            version="0.3.0",
+            verified_at="2026-09-03",
         ),
         [{
             "name": "preserve-number-citation-and-claim-scope",
@@ -213,8 +225,126 @@ def _specs() -> dict[str, tuple[dict[str, Any], list[dict[str, Any]]]]:
                 "protected_spans": [{"kind": "result", "text": "association"}],
                 "claim_bindings": [{"claim_id": "C1", "claim": "The association was observed in 3 cohorts.", "claim_level": "associational", "evidence_level": "associational", "evidence_ids": ["E1"], "hedging_required": False, "hedging_preserved": True}],
                 "ai_disclosure_evasion": False,
+                "content_domain": "biological",
+                "scientific_argument": {
+                    "central_question": "Is the association reproducible across cohorts?",
+                    "central_claim": "The association was observed in three cohorts.",
+                    "evidence_sequence": [{"id": "E1", "evidence_role": "discovery", "finding": "The association was observed in three cohorts."}],
+                    "literature_context": [],
+                    "paragraph_plan": [{"paragraph": 1, "job": "discovery", "evidence_ids": ["E1"]}],
+                    "ready_for_drafting": True,
+                    "argument_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                },
             },
             "expected_subset": {"phase": "post-revision", "ready_for_delivery": True, "major_or_fatal_count": 0},
+        }],
+    )
+
+    modules["biomedical-writing-delivery"] = (
+        _module(
+            module_id="biomedical-writing-delivery",
+            title="Deliver evidence-ordered biomedical writing with an HTML review",
+            description="Re-run scientific-argument, biomedical-language, claim-strength, and content-preservation checks on an exact revision, then write and reopen a navigable HTML report with evidence and literature links.",
+            module_type="delivery",
+            domains=["publication", "research-quality"],
+            intents=["deliver biomedical writing", "write manuscript html report", "生命科学写作交付", "医学论文语言交付", "项目书写作报告"],
+            question="Has the final prose passed scientific-logic and biomedical-language review, and was its HTML report written and reopened?",
+            entrypoint="biomed_workbench.capabilities.academic_writing:deliver_biomedical_writing",
+            input_name="biomedical_writing_package",
+            input_type="biomedical_writing_delivery_request",
+            output_name="writing_delivery",
+            output_type="biomedical_writing_html_delivery",
+            input_schema=_schema({
+                "original_text": {"type": "string", "minLength": 1}, "revised_text": {"type": "string", "minLength": 1},
+                "document_type": {"type": "string", "enum": ["research-article", "review-article", "thesis", "rebuttal", "grant-proposal"]},
+                "section_kind": {"type": "string", "minLength": 1}, "target_venue": {"type": "string"},
+                "scientific_argument": {"type": "object"}, "output_directory": {"type": "string", "minLength": 1},
+                "author_voice_sample": {"type": "string"}, "structure_policy": {"type": "string", "enum": ["preserve", "allow-declared-change"]},
+                "protected_spans": {"type": "array", "items": {"type": "object"}}, "claim_bindings": {"type": "array", "items": {"type": "object"}},
+                "content_domain": {"type": "string", "enum": ["biological", "clinical", "computational-methods", "mixed"]},
+            }, ["original_text", "revised_text", "document_type", "section_kind", "target_venue", "scientific_argument", "output_directory"]),
+            output_schema=_schema({
+                "ready_for_delivery": {"type": "boolean"}, "cleaned_text": {"type": "string"},
+                "change_review": {"type": "object"}, "report_files": {"type": "object"},
+            }, ["ready_for_delivery", "cleaned_text", "change_review", "report_files"]),
+            assumptions=["The revised text was produced from the exact source after scientific-argument review."],
+            gates=[
+                ("biomedical-writing-scientific-logic", "major", "The revision follows a literature-grounded evidence order rather than source order or significance alone."),
+                ("biomedical-writing-language", "major", "Outward prose uses life-science or clinical language and excludes internal software-governance vocabulary."),
+                ("biomedical-writing-html-delivery", "fatal", "The HTML and JSON reports are written, reopened, and returned with checksums."),
+            ],
+            limitations=["The module does not invent prose, evidence, citations, or domain knowledge; the host writes the revision and this module verifies and delivers it."],
+            complements=["academic-prose-revision-audit", "scientific-review-self-correction", "journal-targeting-and-compliance"],
+            concept_sources=common_source,
+            scientific_stage=6,
+            version="1.0.0",
+            mutability="writes_output",
+            verified_at="2026-09-03",
+        ),
+        [{
+            "name": "write-and-reopen-controlled-chinese-writing-report",
+            "input": {
+                "original_text": "端到端分析流水线显示，突变组分化标志物表达降低 20% [1]。",
+                "revised_text": "在这一受控示例中，突变组的分化标志物表达较对照组降低 20% [1]；该观察提示二者相关，但不足以建立直接分子机制。",
+                "document_type": "research-article", "section_kind": "results", "target_venue": "Nature",
+                "output_directory": "reports/biomedical-writing-delivery-acceptance",
+                "content_domain": "biological", "structure_policy": "preserve",
+                "protected_spans": [{"kind": "result", "text": "20%"}, {"kind": "citation", "text": "[1]"}],
+                "claim_bindings": [{
+                    "claim_id": "C1", "claim": "突变组分化标志物表达降低。",
+                    "claim_level": "associational", "evidence_level": "associational", "evidence_ids": ["E1"],
+                    "hedging_required": True, "hedging_preserved": True,
+                }],
+                "scientific_argument": {
+                    "central_question": "受控示例中，因子 X 缺失是否与视网膜祖细胞分化标志物表达降低相关？",
+                    "central_claim": "受控示例支持因子 X 缺失与分化标志物表达降低相关，但不能据此建立直接分子机制。",
+                    "study_design": "observational", "target_document": "research-article", "target_section": "results",
+                    "evidence_sequence": [
+                        {
+                            "id": "E1", "source_index": 2, "evidence_role": "discovery",
+                            "finding": "突变组分化标志物表达均值较对照组低 20%。", "evidence_type": "controlled fixture",
+                            "status": "FORMAL", "experimental_unit": "模拟独立样本", "effect": "降低 20%",
+                            "uncertainty": "受控格式测试，不作生物学推断", "independent_replicates": 3,
+                            "supports_claim": True, "upstream_ids": [],
+                            "artifact_path": "tests/fixtures/biomedical_writing/source.tsv", "figure_or_table": "受控源数据",
+                            "disposition": "retain",
+                        },
+                        {
+                            "id": "E2", "source_index": 1, "evidence_role": "boundary-null",
+                            "finding": "非相关谱系标志物未显示一致变化。", "evidence_type": "controlled fixture",
+                            "status": "FORMAL", "experimental_unit": "模拟独立样本", "effect": "未见一致变化",
+                            "uncertainty": "受控格式测试，不作生物学推断", "independent_replicates": 3,
+                            "supports_claim": False, "upstream_ids": ["E1"], "artifact_path": "", "figure_or_table": "",
+                            "disposition": "retain-as-boundary",
+                        },
+                    ],
+                    "excluded_evidence": [],
+                    "literature_context": [{
+                        "id": "L1", "doi": "10.1038/s41586-024-07855-6",
+                        "url": "https://doi.org/10.1038/s41586-024-07855-6",
+                        "statement": "该研究用于示范跨专业生命科学论文的论证结构；不作为此受控数据的生物学验证。",
+                        "scope": "写作结构示例", "relation": "contextualises", "verified": True,
+                    }],
+                    "competing_explanations": ["细胞状态构成改变，而不是单个细胞内的分化程序延迟"],
+                    "paragraph_plan": [
+                        {
+                            "paragraph": 1, "job": "discovery", "topic_sentence_content": "突变组分化标志物表达均值较对照组低 20%。",
+                            "evidence_ids": ["E1"], "must_report": ["降低 20%", "受控格式测试，不作生物学推断", "模拟独立样本"],
+                            "allowed_move": "observation", "transition": "advance the biological question; do not introduce the next method by name",
+                        },
+                        {
+                            "paragraph": 2, "job": "boundary-null", "topic_sentence_content": "非相关谱系标志物未显示一致变化。",
+                            "evidence_ids": ["E2"], "must_report": ["未见一致变化", "受控格式测试，不作生物学推断", "模拟独立样本"],
+                            "allowed_move": "observation", "transition": "advance the biological question; do not introduce the next method by name",
+                        },
+                    ],
+                    "source_order_preserved": False,
+                    "ordering_basis": "declared evidence dependencies, biological argument role, project status, then source order; never p value alone",
+                    "findings": [], "major_finding_count": 0, "ready_for_drafting": True,
+                    "argument_digest": "a32075ac32ad4826946c53c798f8de408a5b056ec6f0ef230575ee0ec6b1c5f8",
+                },
+            },
+            "expected_subset": {"ready_for_delivery": True, "report_files": {"delivery_verified": True, "renderer_version": "1.1.2"}},
         }],
     )
 
@@ -568,6 +698,28 @@ def _specs() -> dict[str, tuple[dict[str, Any], list[dict[str, Any]]]]:
             "expected_subset": {"package": {"slide_count": 1}, "blocking_finding_count": 0, "ready_for_visual_review": True},
         }],
     )
+
+    writing_manifest = modules["biomedical-writing-delivery"][0]
+    writing_manifest["output_artifacts"] = [
+        {
+            "name": "writing_delivery",
+            "artifact_type": "biomedical_writing_delivery_manifest",
+            "formats": [_format("module-output")],
+            "processing_levels": ["derived", "validated"],
+            "required_metadata": ["module_version", "compatibility_row_id"],
+        },
+        {
+            "name": "writing_html_report",
+            "artifact_type": "biomedical_writing_html_report",
+            "formats": [{**_format("human-readable-report"), "name": "html", "versions": ["5"], "representations": ["text"]}],
+            "processing_levels": ["derived", "validated", "reloaded"],
+            "required_metadata": ["module_version", "compatibility_row_id", "artifact_digest"],
+        },
+    ]
+    writing_manifest["compatibility_matrix"][0]["output_formats"] = {
+        "writing_delivery": ["inline-json@1"],
+        "writing_html_report": ["html@5"],
+    }
     return modules
 
 

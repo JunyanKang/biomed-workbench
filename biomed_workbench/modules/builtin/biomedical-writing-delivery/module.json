@@ -2,7 +2,7 @@
   "access": "offline",
   "alternatives": [],
   "assumptions": [
-    "The caller supplies the exact original and revised text and declares any intended structural change."
+    "The revised text was produced from the exact source after scientific-argument review."
   ],
   "compatibility_matrix": [
     {
@@ -12,36 +12,36 @@
         ]
       },
       "end_to_end_evidence_ids": [
-        "academic-prose-revision-audit-e2e-v1"
+        "biomedical-writing-delivery-e2e-v1"
       ],
       "id": "python-3.14.3-inline-json-1",
       "input_formats": {
-        "academic_revision": [
+        "biomedical_writing_package": [
           "inline-json@1"
         ]
       },
-      "module_version": "0.3.0",
+      "module_version": "1.0.0",
       "output_formats": {
-        "revision_audit": [
+        "writing_delivery": [
           "inline-json@1"
+        ],
+        "writing_html_report": [
+          "html@5"
         ]
       },
       "platforms": [
         "any"
       ],
       "regression_evidence_ids": [
-        "academic-prose-revision-audit-regression-v1"
+        "biomedical-writing-delivery-regression-v1"
       ],
       "tool_versions": {},
       "verified_at": "2026-09-03"
     }
   ],
   "complements": [
-    "biomedical-writing-delivery",
+    "academic-prose-revision-audit",
     "scientific-review-self-correction",
-    "manuscript-revision-base",
-    "manuscript-revision-lineage",
-    "claim-evidence-integrity-audit",
     "journal-targeting-and-compliance"
   ],
   "credentials": [],
@@ -72,12 +72,12 @@
       "version_source": "https://www.python.org/downloads/release/python-3143/"
     }
   ],
-  "description": "Audit academic prose before editing and compare a supplied revision against exact number, citation, equation, protected-term, structure, claim-strength, voice, venue, and disclosure boundaries.",
+  "description": "Re-run scientific-argument, biomedical-language, claim-strength, and content-preservation checks on an exact revision, then write and reopen a navigable HTML report with evidence and literature links.",
   "domains": [
     "publication",
     "research-quality"
   ],
-  "entrypoint": "biomed_workbench.capabilities.academic_writing:audit_academic_prose_revision",
+  "entrypoint": "biomed_workbench.capabilities.academic_writing:deliver_biomedical_writing",
   "evidence_effects": [
     "validates_scholarly_delivery_readiness"
   ],
@@ -86,10 +86,10 @@
     "max_output_bytes": 50000000,
     "timeout_seconds": 30
   },
-  "id": "academic-prose-revision-audit",
+  "id": "biomedical-writing-delivery",
   "input_artifacts": [
     {
-      "artifact_type": "academic_revision_pair",
+      "artifact_type": "biomedical_writing_delivery_request",
       "formats": [
         {
           "annotation_releases": [],
@@ -112,7 +112,7 @@
           ]
         }
       ],
-      "name": "academic_revision",
+      "name": "biomedical_writing_package",
       "processing_levels": [
         "declared"
       ],
@@ -122,9 +122,6 @@
   "input_schema": {
     "additionalProperties": false,
     "properties": {
-      "ai_disclosure_evasion": {
-        "type": "boolean"
-      },
       "author_voice_sample": {
         "type": "string"
       },
@@ -157,6 +154,10 @@
         "minLength": 1,
         "type": "string"
       },
+      "output_directory": {
+        "minLength": 1,
+        "type": "string"
+      },
       "protected_spans": {
         "items": {
           "type": "object"
@@ -164,6 +165,7 @@
         "type": "array"
       },
       "revised_text": {
+        "minLength": 1,
         "type": "string"
       },
       "scientific_argument": {
@@ -186,35 +188,38 @@
     },
     "required": [
       "original_text",
+      "revised_text",
       "document_type",
       "section_kind",
-      "target_venue"
+      "target_venue",
+      "scientific_argument",
+      "output_directory"
     ],
     "type": "object"
   },
   "intents": [
-    "academic prose revision",
-    "manuscript polishing audit",
-    "学术语言修订",
-    "论文润色审查",
-    "基金文本语言审查"
+    "deliver biomedical writing",
+    "write manuscript html report",
+    "生命科学写作交付",
+    "医学论文语言交付",
+    "项目书写作报告"
   ],
   "kernel_compatibility": [
     ">=0.2.0,<0.3.0"
   ],
   "limitations": [
-    "The deterministic gate verifies explicit language and preservation constraints; literature-grounded argument building and expert scientific judgment remain required."
+    "The module does not invent prose, evidence, citations, or domain knowledge; the host writes the revision and this module verifies and delivers it."
   ],
   "maturity": "validated",
-  "module_type": "validation",
-  "mutability": "read_only",
+  "module_type": "delivery",
+  "mutability": "writes_output",
   "orchestration": {
     "requires_reviewed_upstream_types": [],
-    "scientific_stage": 5
+    "scientific_stage": 6
   },
   "output_artifacts": [
     {
-      "artifact_type": "academic_revision_audit",
+      "artifact_type": "biomedical_writing_delivery_manifest",
       "formats": [
         {
           "annotation_releases": [],
@@ -237,7 +242,7 @@
           ]
         }
       ],
-      "name": "revision_audit",
+      "name": "writing_delivery",
       "processing_levels": [
         "derived",
         "validated"
@@ -246,82 +251,65 @@
         "module_version",
         "compatibility_row_id"
       ]
+    },
+    {
+      "artifact_type": "biomedical_writing_html_report",
+      "formats": [
+        {
+          "annotation_releases": [],
+          "compression": [
+            "none"
+          ],
+          "coordinate_systems": [],
+          "genome_build_policy": "not_applicable",
+          "genome_builds": [],
+          "name": "html",
+          "orientations": [
+            "human-readable-report"
+          ],
+          "representations": [
+            "text"
+          ],
+          "required_indexes": [],
+          "versions": [
+            "5"
+          ]
+        }
+      ],
+      "name": "writing_html_report",
+      "processing_levels": [
+        "derived",
+        "validated",
+        "reloaded"
+      ],
+      "required_metadata": [
+        "module_version",
+        "compatibility_row_id",
+        "artifact_digest"
+      ]
     }
   ],
   "output_schema": {
     "additionalProperties": false,
     "properties": {
-      "claim_findings": {
-        "type": "array"
-      },
-      "document": {
+      "change_review": {
         "type": "object"
       },
-      "findings": {
-        "type": "array"
-      },
-      "invariant_report": {
-        "type": "object"
-      },
-      "major_or_fatal_count": {
-        "type": "integer"
-      },
-      "next_step": {
-        "type": "string"
-      },
-      "original_text": {
-        "type": "string"
-      },
-      "phase": {
+      "cleaned_text": {
         "type": "string"
       },
       "ready_for_delivery": {
         "type": "boolean"
       },
-      "required_output": {
-        "type": "object"
-      },
-      "revised_text": {
-        "type": "string"
-      },
-      "revision_contract": {
-        "type": "object"
-      },
-      "revision_digest": {
-        "nullable": true,
-        "type": "string"
-      },
-      "scientific_argument": {
-        "type": "object"
-      },
-      "source_audit": {
-        "type": "object"
-      },
-      "source_digest": {
-        "type": "string"
-      },
-      "venue_profile": {
+      "report_files": {
         "type": "object"
       }
     },
     "required": [
-      "phase",
-      "document",
-      "source_digest",
-      "revision_digest",
-      "source_audit",
-      "invariant_report",
-      "claim_findings",
-      "findings",
-      "major_or_fatal_count",
       "ready_for_delivery",
-      "required_output",
-      "next_step",
-      "venue_profile",
-      "scientific_argument",
-      "revision_contract",
-      "original_text",
-      "revised_text"
+      "cleaned_text",
+      "change_review",
+      "report_files"
     ],
     "type": "object"
   },
@@ -338,42 +326,42 @@
   "quality_gates": [
     {
       "blocks_interpretation": true,
-      "description": "Numbers, equations, citations, results, and protected terminology remain unchanged.",
-      "id": "academic-prose-content-preservation",
+      "description": "The revision follows a literature-grounded evidence order rather than source order or significance alone.",
+      "id": "biomedical-writing-scientific-logic",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "Outward prose uses life-science or clinical language and excludes internal software-governance vocabulary.",
+      "id": "biomedical-writing-language",
+      "severity": "major"
+    },
+    {
+      "blocks_interpretation": true,
+      "description": "The HTML and JSON reports are written, reopened, and returned with checksums.",
+      "id": "biomedical-writing-html-delivery",
       "severity": "fatal"
-    },
-    {
-      "blocks_interpretation": true,
-      "description": "Every revised empirical claim remains within its declared evidence strength and preserves required uncertainty.",
-      "id": "academic-prose-claim-evidence",
-      "severity": "major"
-    },
-    {
-      "blocks_interpretation": true,
-      "description": "The revision follows the supplied author voice and target venue without promotional or formulaic language.",
-      "id": "academic-prose-voice-and-venue",
-      "severity": "major"
     }
   ],
   "questions": [
-    "Does this academic revision improve clarity without changing scientific content or exceeding the evidence?"
+    "Has the final prose passed scientific-logic and biomedical-language review, and was its HTML report written and reopened?"
   ],
   "routing": {
     "exclusion_terms": [],
     "method_aliases": [
-      "academic-prose-revision-audit",
-      "Audit evidence-bound academic prose revisions",
-      "academic prose revision",
-      "manuscript polishing audit",
-      "学术语言修订",
-      "论文润色审查",
-      "基金文本语言审查"
+      "biomedical-writing-delivery",
+      "Deliver evidence-ordered biomedical writing with an HTML review",
+      "deliver biomedical writing",
+      "write manuscript html report",
+      "生命科学写作交付",
+      "医学论文语言交付",
+      "项目书写作报告"
     ],
     "named_method_priority": 100,
     "required_any_terms": []
   },
   "schema_version": 1,
-  "title": "Audit evidence-bound academic prose revisions",
+  "title": "Deliver evidence-ordered biomedical writing with an HTML review",
   "tool_requirements": [],
-  "version": "0.3.0"
+  "version": "1.0.0"
 }

@@ -58,11 +58,11 @@ A writing task may begin with one passage, an existing manuscript, or a complete
 The workbench combines the following work as the task requires:
 
 1. verify literature, project facts, figures, and citations, and define which claims may enter the text;
-2. plan the central argument, section roles, and figure placement for a paper or proposal before drafting or revision;
-3. check that numbers, results, equations, technical terms, and citations remain consistent through revision;
+2. rebuild the central argument, section roles, and figure placement from evidence dependencies and scientific roles rather than upload or method order before drafting or revision;
+3. replace engineering and internal-process language that does not belong in biomedical prose, then check that numbers, results, equations, technical terms, and citations remain consistent;
 4. review experimental units, statistical reporting, data and code availability, and target-journal and article-type requirements;
 5. organise point-by-point responses, revision locations, and author input from the actual editor and reviewer comments;
-6. reopen the final manuscript, figures, or presentation rather than delivering only an outline.
+6. generate a navigable HTML writing report with project-evidence and literature links, then reopen the final manuscript, report, figures, or presentation rather than delivering only an outline.
 
 When only manuscript prose is supplied, the workbench reviews and revises that content but does not turn absent data, experiments, citations, contributions, or journal requirements into facts. An NSFC request should also provide the programme type and the current official form. The workbench treats Young C, Young B, Young A, General, Regional, Key and Major programmes separately and, once the scientific foundation is ready, continues to the requested proposal prose rather than stopping at an audit report. See [Academic Writing, Publication, And Translation](capabilities/publication-and-translation.md) and [NSFC proposal support](capabilities/nsfc-proposal-writing.md).
 

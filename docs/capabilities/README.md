@@ -27,7 +27,7 @@ Biomed Workbench organises capabilities around research questions. Once a user p
 
 ## How Writing Connects To The Research
 
-The workbench does not reduce writing to final-stage polishing. Publication identity, full-text locations, project facts, analysis results, figures, and citations first become a reviewable writing basis. Manuscript structure, paragraphs, and proposal arguments are built from that record. Revision then checks scholarly expression, content preservation, statistical reporting, data availability, and target-journal requirements separately. Peer review connects each editor or reviewer point to the response, real revision, and manuscript location. Figures, presentations, and patent-related material reuse reviewed project evidence while retaining their distinct delivery requirements.
+The workbench does not reduce writing to final-stage polishing. Publication identity, full-text locations, project facts, analysis results, figures, and citations first become a reviewable writing basis. Evidence is reordered by the scientific question, declared dependencies and its role in the argument rather than upload or method order. Manuscript structure, paragraphs, and proposal arguments are built from that record. Revision separately checks biomedical expression, content preservation, statistical reporting, data availability, and target-journal requirements. Final writing produces an HTML reading page with direct evidence and literature links and reopens it before delivery. Peer review then connects each editor or reviewer point to the response, real revision, and manuscript location. Figures, presentations, and patent-related material reuse reviewed project evidence while retaining their distinct delivery requirements.
 
 Users may request one part of this process or ask the workbench to progress from literature and project data to a complete manuscript. See [Academic Writing, Publication, And Translation](publication-and-translation.md) for tasks, inputs, and deliverables, and [Using Biomed Workbench](../using-biomed-workbench.md) for natural-language examples.
 
@@ -43,7 +43,7 @@ An established project can first receive a read-only inventory of figures, plot 
 
 ## Current Coverage
 
-The registry currently contains **221 independently discoverable modules**. Each module is a versioned scientific contract, while the public maturity page separately distinguishes contract-only methods, controlled execution, exact public-case validation, and results formally included in a current project. See [Capability Maturity](../maturity.md) and [Public-Data Cases](../cases/README.md) for observed status.
+The registry currently contains **222 independently discoverable modules**. Each module is a versioned scientific contract, while the public maturity page separately distinguishes contract-only methods, controlled execution, exact public-case validation, and results formally included in a current project. See [Capability Maturity](../maturity.md) and [Public-Data Cases](../cases/README.md) for observed status.
 
 Bulk coverage includes RNA-seq and RNA-processing/alternative-splicing analysis; ChIP-seq, CUT&RUN, and CUT&Tag; several R-loop assays; RIP-seq, CLIP-family methods, and LACE-seq; Ribo-seq; GRO-seq, PRO-seq, TT-seq, and NET-seq; ATAC-seq and DNase-seq; WGBS, RRBS, and EM-seq; several three-dimensional genome assays; and MeRIP-seq/m6A-seq.
 
