@@ -17,9 +17,9 @@
 
 <p align="center"><sub>概念图：研究设计与不同尺度的数据进入同一分析过程，经结果解释形成科学图件、研究文本和后续研究方案；图中内容不代表真实实验结果。</sub></p>
 
-Biomed Workbench 是面向复杂生物医学项目的研究工作台。你可以直接描述科学问题、实验设计、已有数据和希望得到的结果，它会从研究语境出发组织合适的方法、分析步骤和交付形式，而不是要求你先掌握一长串工具名称。
+Biomed Workbench 把经过登记的分析方法、项目数据、科学判断与发表交付连接起来。你可以直接描述科学问题、实验设计、已有数据和希望得到的结果，它会先判断证据能回答什么，再组织足够而不过量的方法、分析步骤和交付形式。
 
-它既能处理一项明确的分析，也能协调由多种数据、实验和写作任务组成的长期项目。能直接执行的流程会继续运行并读取实际结果；需要额外数据、软件或人工判断时，会说明原因和可行的下一步。
+它既能处理一项明确的分析，也能协调由多种数据、实验和写作任务组成的长期项目。具备执行条件的方法会运行并重新读取实际输出；尚未执行、只完成受控测试、只在公共案例中验证或已经被当前项目采用，都会分别说明。
 
 ## 从一个研究问题开始
 
@@ -60,7 +60,27 @@ Biomed Workbench 是面向复杂生物医学项目的研究工作台。你可以
 3. **结合结果解释。** 重新打开真实输出，优先说明效应大小、不确定性、实验单位和阴性或不一致结果；再结合技术质量、研究设计和生物学背景修正结论，并提出能够区分竞争性解释的下一步。
 4. **决定下一步。** 保留能够支撑当前结论的结果，调整不合适的分析，并把下一项计算、实验或写作任务接在已有研究基础上。
 
+项目可以在三种节奏之间切换：探索阶段用于快速检视候选结果和尝试图形；定稿阶段开始固定统计单位、参数、作图数据和正式脚本；投稿准备阶段才执行完整复现、视觉检查以及公开文件的完整性检查。已有项目不需要从空白状态重建，工作台可以只读扫描现有目录，提出“图—作图数据—分析脚本—排图程序—图注”的候选关系，待研究者确认后再纳入项目。
+
+物种、组织、发育阶段、疾病状态和细胞区室等领域背景可以按项目登记。文献支持的已有认识与当前项目观察分别保存，并同步记录不能跨越的推断、其他可能解释以及能够区分这些解释的后续观察，使领域知识参与复核而不被当成自动成立的结论。
+
+默认结果页只回答五件事：当前生物学问题、主要观察与效应方向、证据支持到哪里、结果进行到哪一步、下一步怎样决定。运行环境、文件版本、结果来源和详细过程保留在可复现性记录中，只有在阻断结果解释或用户主动查看时才展开。
+
 长期项目中已经确定的样本信息、参考版本、细胞注释、统计单位、分析环境、颜色和正式图件会持续沿用。再次运行同一分析前，工作台会先核对已有的 Conda 或其他运行环境，内容一致时直接复用，发生漂移时先停止计算并说明需要恢复原环境还是建立新的分析分支。数据、作图表格、图件、图注、正文和文献来源可以连接到同一份[科学证据地图](docs/scientific-evidence-map.zh-CN.md)，让多轮分析之后仍能看清每个结论从哪里来。每个版本同时生成带目录的中英文 HTML 报告和证据地图，可直接跳转到登记数据、分析程序、最终图件、图注与原始研究；Markdown 和机器可读文件继续保留。冲突或阴性结果不会被藏起来，而会与支持性结果一起用于决定课题应继续、调整还是补充验证。
+
+## 研究主线如何贯穿不同能力
+
+工作台的重点不是把工具简单集中在一起，而是让每项能力在同一条研究主线上承担清楚的任务：文献与数据库帮助界定已知和未知，组学与实验分析产生可复核的观察，生物学解释检查证据边界和竞争性机制，科学作图与写作再把经过复核的结果组织成递进的成果。
+
+| 研究层面 | 关键作用 |
+| --- | --- |
+| 科学问题与研究设计 | 明确实验单位、比较关系、核心假说、替代解释和能够改变判断的结果 |
+| 方法选择与实际执行 | 按实验方法、靶标、对照、归一化和生物学关系选择最小充分分析，并重新读取真实输出 |
+| 生物学解释与修正 | 结合效应量、不确定性、阴性结果和领域背景修正主张，决定保留、重做、替换或停止 |
+| 研究故事与图表 | 让每个图面分别承担发现、来源、机制一致性、验证、边界或整合任务，减少重复展示 |
+| 论文与研究交付 | 让图、图注、正文、引用和后续研究方案使用同一组经过复核的项目事实 |
+
+这套逻辑已经落实到复杂语义解析、最小充分分析、既有项目导入、三种工作节奏、领域背景复核、结果解释自我修正、论文图任务分配和视觉语义比较中。具体说明见[科学解释、研究叙事与结果决策](docs/capabilities/scientific-interpretation-and-storytelling.zh-CN.md)。
 
 ## 论文写作与科研交付
 
@@ -106,7 +126,7 @@ Biomed Workbench 是面向复杂生物医学项目的研究工作台。你可以
 | --- | --- | --- |
 | 如何使用与准备数据 | [使用指南](docs/using-biomed-workbench.zh-CN.md) · [格式与数据要求](docs/format-contracts.zh-CN.md) | [Using the workbench](docs/using-biomed-workbench.md) · [File and data requirements](docs/format-contracts.md) |
 | 能力、案例与适用范围 | [能力地图](docs/capabilities/README.zh-CN.md) · [公共案例](docs/cases/README.zh-CN.md) · [成熟度说明](docs/maturity.zh-CN.md) | [Capability map](docs/capabilities/README.md) · [Public cases](docs/cases/README.md) · [Maturity](docs/maturity.md) |
-| 长期项目与结果来源 | [项目组织](docs/project-governance.zh-CN.md) · [科学证据地图](docs/scientific-evidence-map.zh-CN.md) · [可复现性](docs/reproducibility.zh-CN.md) | [Project organisation](docs/project-governance.md) · [Scientific evidence map](docs/scientific-evidence-map.md) · [Reproducibility](docs/reproducibility.md) |
+| 长期项目与结果来源 | [科学解释与研究叙事](docs/capabilities/scientific-interpretation-and-storytelling.zh-CN.md) · [项目组织与工作模式](docs/project-governance.zh-CN.md) · [科学证据地图](docs/scientific-evidence-map.zh-CN.md) · [可复现性](docs/reproducibility.zh-CN.md) | [Scientific interpretation and research story](docs/capabilities/scientific-interpretation-and-storytelling.md) · [Project organisation and working modes](docs/project-governance.md) · [Scientific evidence map](docs/scientific-evidence-map.md) · [Reproducibility](docs/reproducibility.md) |
 | 数据库、写作与期刊 | [公共数据库与凭据](docs/data-access-and-credentials.zh-CN.md) · [科研写作](docs/capabilities/publication-and-translation.zh-CN.md) · [期刊规范](docs/journal-standards.zh-CN.md) | [Data access and credentials](docs/data-access-and-credentials.md) · [Academic writing](docs/capabilities/publication-and-translation.md) · [Journal requirements](docs/journal-standards.md) |
 | 版本与开发扩展 | [发布记录](docs/releases/README.zh-CN.md) · [开发说明](docs/development.zh-CN.md) | [Release notes](docs/releases/README.md) · [Development](docs/development.md) |
 

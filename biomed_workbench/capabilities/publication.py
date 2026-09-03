@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from biomed_workbench.visualization import scientific_figure_standard, validate_panel_style
+from biomed_workbench.scientific_story import build_scientific_story
 
 
 def manuscript_audit(
@@ -131,8 +132,17 @@ def figure_specification(
         for finding in validate_panel_style(panel):
             if finding["code"] not in {"PANEL_FIELD_MISSING"}:
                 findings.append({"label": row["label"], **finding})
+        for key in ("story_role", "unique_information", "evidence_type", "upstream_panels"):
+            if key in panel:
+                row[key] = panel[key]
         normalized.append(row)
     standard = scientific_figure_standard(analysis_type, journal_profile)
+    story_requested = any("story_role" in panel for panel in panels)
+    story = build_scientific_story(normalized) if story_requested else {
+        "ready": False,
+        "status": "not-requested",
+        "guidance": "Declare each panel's story_role and unique_information before assembling a multi-panel biological narrative.",
+    }
     return {
         "title": title.strip(), "panels": normalized, "panel_findings": findings, "ready": not findings,
         "analysis_type": analysis_type or "general",
@@ -141,6 +151,7 @@ def figure_specification(
         "optional_plots": standard["optional_plots"],
         "style_standard": standard["style"],
         "plot_contracts": standard["plot_contracts"],
+        "scientific_story": story,
         "quality_gates": ["Panel claim is supported by the stated data source.", "Axes, units, n, statistical test, and uncertainty are explicit.", "Colors remain distinguishable and consistent across figures.", "Raster elements meet final-size resolution requirements.", "The selected target-journal profile is linked to a current official author guide before submission export."],
     }
 

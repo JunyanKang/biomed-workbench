@@ -5,7 +5,7 @@
     "module_ids": [
       "single-cell-communication"
     ],
-    "module_slice_digest": "eb577bbeb22d2a56c23ec296ccb9731267be7bfffb3fd8f6c9cfc63857edc099",
+    "module_slice_digest": "8ff79eb6f197494e631f9d934dc8ecaafc9b5509b4cd51ae676f2ba681bd363a",
     "schema_version": 1
   },
   "execution": {
@@ -33,28 +33,27 @@
   },
   "execution_contract_migration": {
     "changed_fields": [
-      "agent_protocol.mode",
-      "output_schema.properties.handoff_type.enum.0"
+      "CellChat official adapter",
+      "SecAct official adapter",
+      "native R object input formats",
+      "requested method enum"
     ],
-    "current_manifest_sha256": "dea07bf14785a2b2e801a818ab14bb77360a2735e66d4a9c57a1d52b27dbc079",
-    "migration_type": "execution-contract-metadata-only",
-    "prior_manifest_sha256": "a72feed0cec29cf88da564dc7eeb75ecef44aca6dbebe2134f0d7f883e5e55ba",
-    "reason": "The packaged template files and observed scientific outputs are unchanged; only the release contract was corrected from manual adaptation to a packaged parameterized workflow.",
+    "current_manifest_sha256": "9f56ee637549a0bad699c3f5463ab68bbf9dd8f6cc2ad744f8672afd2900c176",
+    "executed_template_sha256": "f49ae16291adbcb5a7259238e3dc6fa5077628626a6247af2fd7f4b525e0b1c8",
+    "executed_template_unchanged": true,
+    "migration_type": "method-slice-preserving-contract-extension",
+    "prior_manifest_sha256": "dea07bf14785a2b2e801a818ab14bb77360a2735e66d4a9c57a1d52b27dbc079",
+    "reason": "The public case executed the unchanged LIANA CellPhoneDB adapter. New CellChat, SecAct, and native-R-object paths are independent method slices and do not reissue or broaden this public evidence.",
     "schema_version": 1,
-    "scientific_outputs_recomputed": false,
-    "template_sha256": {
-      "run_cellchat_nichenet.R": "1baf05b6ec3adb8efff1fa6f64dc21d9bac9984711f46994ae9ec591d07bce30",
-      "run_liana_cellphonedb.py": "f49ae16291adbcb5a7259238e3dc6fa5077628626a6247af2fd7f4b525e0b1c8"
-    },
-    "templates_unchanged": true
+    "scientific_outputs_recomputed": false
   },
   "module": {
     "compatibility_row_id": "agent-protocol-1-python-communication",
     "id": "single-cell-communication",
-    "manifest_sha256": "dea07bf14785a2b2e801a818ab14bb77360a2735e66d4a9c57a1d52b27dbc079",
-    "registry_digest": "ede5efb37d56725810707350c8777a5327ff688c33628bb06e0f64e1a5ff01ed",
+    "manifest_sha256": "9f56ee637549a0bad699c3f5463ab68bbf9dd8f6cc2ad744f8672afd2900c176",
+    "registry_digest": "86fd228592dfc51a8f5cd7801b3f029de8b8d5d2f19bd706f7e1e1dcb9c63c5f",
     "template_sha256": "f49ae16291adbcb5a7259238e3dc6fa5077628626a6247af2fd7f4b525e0b1c8",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "parameters": {
     "cell_selection": "up to 100 cells per donor-condition-cell-type stratum by stable SHA-256 order",

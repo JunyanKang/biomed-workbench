@@ -1,4 +1,4 @@
-"""Concise, results-first project view backed by the strict project state."""
+"""Human-readable project results backed by, but separated from, strict provenance."""
 
 from __future__ import annotations
 
@@ -9,65 +9,106 @@ if TYPE_CHECKING:
     from ..kernel.state import ProjectState
 
 
+PROGRESS_STEPS = (
+    "PLANNED",
+    "EXECUTED",
+    "RELOADED",
+    "SCIENTIFICALLY_REVIEWED",
+    "FORMALLY_INCLUDED",
+)
+
+
+def _latest_statuses(ledger: "ResultStatusLedger | None") -> dict[str, str]:
+    statuses: dict[str, str] = {}
+    if ledger is not None:
+        for event in ledger.events:
+            statuses[event.artifact_id] = event.to_status
+    return statuses
+
+
+def _progress_for_artifact(state: "ProjectState", artifact_id: str, result_status: str) -> str:
+    if result_status == "FORMAL":
+        return "FORMALLY_INCLUDED"
+    if any(item.artifact_id == artifact_id for item in state.artifact_reviews):
+        return "SCIENTIFICALLY_REVIEWED"
+    if any(item.artifact_id == artifact_id for item in state.artifact_reloads):
+        return "RELOADED"
+    if any(artifact_id in item.output_artifact_digests for item in state.observed_executions):
+        return "EXECUTED"
+    return "PLANNED"
+
+
 def build_result_view(
     state: "ProjectState",
     ledger: "ResultStatusLedger | None" = None,
+    *,
+    include_reproducibility: bool = False,
 ) -> dict[str, object]:
-    """Expose scientific findings while leaving detailed provenance in state."""
+    """Return the thin scientific view; expose provenance only on explicit request."""
     review_by_artifact = {item.artifact_id: item for item in state.artifact_reviews}
     decision_by_artifact = {item.artifact_id: item for item in state.scientific_decisions}
-    status_by_artifact: dict[str, str] = {}
-    if ledger is not None:
-        for event in ledger.events:
-            status_by_artifact[event.artifact_id] = event.to_status
-    results = []
+    status_by_artifact = _latest_statuses(ledger)
+    results: list[dict[str, object]] = []
+    progress_counts = {step: 0 for step in PROGRESS_STEPS}
     for artifact in state.artifacts:
+        result_status = status_by_artifact.get(artifact.id, "UNCLASSIFIED")
+        progress = _progress_for_artifact(state, artifact.id, result_status)
+        progress_counts[progress] += 1
         review = review_by_artifact.get(artifact.id)
         decision = decision_by_artifact.get(artifact.id)
         if review is None:
             continue
         panels = [
             {
-                "panel_id": panel.panel_id,
-                "result_zh": panel.results_zh,
-                "result_en": panel.results_en,
-                "conclusion_zh": panel.conclusion_zh,
-                "conclusion_en": panel.conclusion_en,
+                "panel": panel.panel_id,
+                "observation_zh": panel.results_zh,
+                "observation_en": panel.results_en,
+                "interpretation_zh": panel.conclusion_zh,
+                "interpretation_en": panel.conclusion_en,
             }
             for panel in review.panels
         ]
-        results.append({
-            "artifact_id": artifact.id,
-            "artifact_type": artifact.artifact_type,
-            "result_status": status_by_artifact.get(artifact.id, "UNCLASSIFIED"),
-            "review_status": review.overall_status,
-            "results_zh": review.results_zh,
-            "results_en": review.results_en,
-            "conclusion_zh": review.conclusion_zh,
-            "conclusion_en": review.conclusion_en,
-            "limitations_zh": list(review.limitations_zh),
-            "limitations_en": list(review.limitations_en),
-            "decision": decision.action if decision is not None else "awaiting-decision",
-            "active_evidence": decision.active_evidence if decision is not None else False,
-            "next_plan_node_ids": list(decision.next_plan_node_ids) if decision is not None else [],
+        item: dict[str, object] = {
+            "progress": progress,
+            "observation_zh": review.results_zh,
+            "observation_en": review.results_en,
+            "interpretation_zh": review.conclusion_zh,
+            "interpretation_en": review.conclusion_en,
+            "evidence_boundary_zh": list(review.limitations_zh),
+            "evidence_boundary_en": list(review.limitations_en),
+            "next_decision": decision.action if decision is not None else "scientific-decision-required",
+            "included_in_current_story": bool(decision and decision.active_evidence),
             "panels": panels,
-        })
-    formal = sum(item["result_status"] == "FORMAL" for item in results)
-    unresolved = sum(item["decision"] == "awaiting-decision" for item in results)
-    return {
-        "project_id": state.context.project_id,
-        "scientific_question": state.context.scientific_question,
-        "result_count": len(results),
-        "formal_result_count": formal,
-        "awaiting_decision_count": unresolved,
-        "results": results,
+        }
+        if include_reproducibility:
+            item["reproducibility"] = {
+                "artifact_id": artifact.id,
+                "artifact_type": artifact.artifact_type,
+                "result_status": result_status,
+                "review_status": review.overall_status,
+                "next_plan_node_ids": list(decision.next_plan_node_ids) if decision is not None else [],
+            }
+        results.append(item)
+    unresolved = sum(item["next_decision"] == "scientific-decision-required" for item in results)
+    payload: dict[str, object] = {
+        "project": state.context.project_id,
+        "biological_question": state.context.scientific_question,
+        "scientific_results": results,
+        "progress": {"states": list(PROGRESS_STEPS), "artifact_counts": progress_counts},
         "next_decision": (
-            "review unresolved results before expanding the method set"
+            "review the unresolved scientific results before adding another method"
             if unresolved
-            else "advance only from retained evidence and the active research plan"
+            else "advance only from results retained in the current scientific story"
         ),
-        "provenance_reference": {
+    }
+    if include_reproducibility:
+        payload["reproducibility"] = {
             "project_state_digest": state.state_digest,
             "result_status_ledger_digest": ledger.digest if ledger is not None else None,
-        },
-    }
+            "reviewed_result_count": len(results),
+            "formal_result_count": sum(
+                item.get("reproducibility", {}).get("result_status") == "FORMAL"
+                for item in results
+            ),
+        }
+    return payload

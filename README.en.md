@@ -17,9 +17,9 @@
 
 <p align="center"><sub>Conceptual illustration: study design and data at different scales enter one analytical process, where interpretation leads to scientific figures, research writing and a plan for subsequent work. The illustration does not show real experimental results.</sub></p>
 
-Biomed Workbench is a research workbench for complex biomedical projects. Describe the scientific question, study design, available data and desired outcome in ordinary language; it organises the methods, analytical steps and deliverables around the research context instead of asking you to begin with a long list of tool names.
+Biomed Workbench connects registered analytical methods, project data, scientific judgement and publication delivery. Describe the scientific question, study design, available data and desired outcome in ordinary language; it first asks what the evidence can answer, then organises a sufficient rather than maximal set of methods and outputs.
 
-It can handle one well-defined analysis or coordinate a long-running project that combines several datasets, experiments and writing tasks. Workflows that are ready for the supplied inputs can proceed to execution and actual output review. When more data, software or scientific judgement is needed, the workbench explains why and identifies a practical next step.
+It can handle one well-defined analysis or coordinate a long-running project that combines several datasets, experiments and writing tasks. Methods that are ready for the supplied inputs can proceed to execution and actual output review. Unrun contracts, controlled-fixture execution, public-case validation and results formally included in the current project are reported separately.
 
 ## Start with a research question
 
@@ -60,7 +60,27 @@ You do not need to translate the project into software commands. The workbench d
 3. **Interpret the observed results.** Reopen the actual outputs and lead with effect magnitude, uncertainty, experimental unit, and negative or discordant findings. Then use technical quality, study design and biological context to correct the conclusion and identify the next observation that would discriminate competing explanations.
 4. **Decide what comes next.** Retain results that support the current conclusion, revise unsuitable analyses and connect the next computation, experiment or writing task to what the project has already established.
 
+A project can move among three working paces. Exploration supports rapid candidate checks and temporary figures. Formalisation freezes statistical units, parameters, plot-ready data, and authoritative scripts. Submission preparation adds complete reproduction, visual review, and public-package integrity checks. An established project does not have to be rebuilt from an empty state: the workbench can scan its directory without modification, propose candidate links among figures, source tables, analysis scripts, figure-building programs, and captions, and wait for researcher confirmation before those links enter the project record.
+
+Organism, tissue, developmental stage, disease state and cell-compartment context can be registered for each project. Literature-supported knowledge remains separate from current-project observations, while forbidden inferences, competing explanations and observations that would distinguish them become explicit review context rather than automatically accepted conclusions.
+
+The default result view answers five questions: what biological question is being addressed, what was observed and in which direction, how far the evidence supports the interpretation, how far the result has progressed, and what decision comes next. Environments, file versions, result sources, and detailed process records remain in the reproducibility view and appear only when they block interpretation or the user asks for them.
+
 For long-running projects, established sample information, reference releases, cell annotation, statistical units, analysis environments, colours and formal figures continue across analysis rounds. Before repeating an analysis, the workbench checks its recorded Conda or other runtime environment: content-equivalent environments are reused, while drift stops the computation until the original environment is restored or a new analysis branch is approved. Data, plot-ready tables, figures, captions, prose and literature sources can connect to the same [scientific evidence map](docs/scientific-evidence-map.md), so the origin of each conclusion remains clear. Each version also produces navigable Chinese and English HTML reports and evidence maps with direct links to registered data, analysis scripts, final figures, captions, and original studies; Markdown and machine-readable files remain available. Conflicting and negative findings stay visible alongside supportive results and help determine whether the project should proceed, change direction or acquire another form of evidence.
+
+## How The Research Path Connects Different Capabilities
+
+The workbench does more than gather tools. Each capability has a defined role in one research path: literature and databases establish what is known and unresolved; omics and experimental analyses produce reviewable observations; biological interpretation examines evidence limits and competing mechanisms; scientific figures and writing turn reviewed results into a progressive research output.
+
+| Research layer | Principal role |
+| --- | --- |
+| Scientific question and study design | Define the experimental unit, comparison, central hypothesis, alternatives, and outcomes that would change the judgement |
+| Method choice and observed execution | Select a minimal sufficient analysis from assay, target, control, normalisation, and biological relation, then reopen actual outputs |
+| Biological interpretation and correction | Use effect size, uncertainty, negative findings, and domain context to revise the claim and decide whether to retain, rerun, replace, or stop |
+| Research story and figures | Give each panel a distinct role in discovery, context, mechanistic consistency, validation, boundary, or integration, while removing repetition |
+| Manuscript and research delivery | Keep figures, captions, prose, citations, and follow-up plans aligned to the same reviewed project facts |
+
+This design is implemented in complex semantic parsing, minimal-sufficient analysis, established-project import, three working modes, domain-context review, interpretation self-correction, scientific panel roles, and visual-semantic comparison. See [Scientific Interpretation, Research Story, And Result Decisions](docs/capabilities/scientific-interpretation-and-storytelling.md).
 
 ## Academic Writing And Research Delivery
 
@@ -106,7 +126,7 @@ The current release uses Codex as its primary supported environment. Other agent
 | --- | --- | --- |
 | How to use the workbench and prepare data | [使用指南](docs/using-biomed-workbench.zh-CN.md) · [格式与数据要求](docs/format-contracts.zh-CN.md) | [Using the workbench](docs/using-biomed-workbench.md) · [File and data requirements](docs/format-contracts.md) |
 | Capabilities, cases and conditions of use | [能力地图](docs/capabilities/README.zh-CN.md) · [公共案例](docs/cases/README.zh-CN.md) · [成熟度说明](docs/maturity.zh-CN.md) | [Capability map](docs/capabilities/README.md) · [Public cases](docs/cases/README.md) · [Maturity](docs/maturity.md) |
-| Long-running projects and result sources | [项目组织](docs/project-governance.zh-CN.md) · [科学证据地图](docs/scientific-evidence-map.zh-CN.md) · [可复现性](docs/reproducibility.zh-CN.md) | [Project organisation](docs/project-governance.md) · [Scientific evidence map](docs/scientific-evidence-map.md) · [Reproducibility](docs/reproducibility.md) |
+| Long-running projects and result sources | [科学解释与研究叙事](docs/capabilities/scientific-interpretation-and-storytelling.zh-CN.md) · [项目组织与工作模式](docs/project-governance.zh-CN.md) · [科学证据地图](docs/scientific-evidence-map.zh-CN.md) · [可复现性](docs/reproducibility.zh-CN.md) | [Scientific interpretation and research story](docs/capabilities/scientific-interpretation-and-storytelling.md) · [Project organisation and working modes](docs/project-governance.md) · [Scientific evidence map](docs/scientific-evidence-map.md) · [Reproducibility](docs/reproducibility.md) |
 | Databases, writing and journals | [公共数据库与凭据](docs/data-access-and-credentials.zh-CN.md) · [科研写作](docs/capabilities/publication-and-translation.zh-CN.md) · [期刊规范](docs/journal-standards.zh-CN.md) | [Data access and credentials](docs/data-access-and-credentials.md) · [Academic writing](docs/capabilities/publication-and-translation.md) · [Journal requirements](docs/journal-standards.md) |
 | Releases and development | [发布记录](docs/releases/README.zh-CN.md) · [开发说明](docs/development.zh-CN.md) | [Release notes](docs/releases/README.md) · [Development](docs/development.md) |
 

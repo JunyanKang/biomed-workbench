@@ -1,0 +1,125 @@
+{
+  "case_id": "cellchat-2.2-official-api-controlled-fixture-v1",
+  "case_type": "controlled-execution-and-reload",
+  "controlled_fixture_receipt": {
+    "compatibility_row_id": "agent-protocol-1-r-communication",
+    "input_sha256": "637e46ce84c70bb8b6acadb76d7a69cc72ebeba1b0c6c17adc9083477c24a41d",
+    "module_id": "single-cell-communication",
+    "module_version": "1.2.0",
+    "output_payloads": [
+      {
+        "byte_size": 1277,
+        "media_type": "application/json",
+        "role": "validation-report",
+        "sha256": "6e454a34c4339c34d7263428ec2a8d7c1e7c0ee8e2d3dae656ff7ec46cc901b2"
+      },
+      {
+        "byte_size": 765,
+        "media_type": "text/tab-separated-values",
+        "role": "sample-interactions",
+        "sha256": "e2d74698212618f5263773733adc896b6dd7ffa65a6dd62cb6780b27da173bcf"
+      },
+      {
+        "byte_size": 6250,
+        "media_type": "application/pdf",
+        "role": "method-native-figure",
+        "sha256": "c4916a20c165f97bedb226fede5b755c443c667c86fd01665749b4cfe628444c"
+      },
+      {
+        "byte_size": 3782925,
+        "media_type": "application/x-r-rds",
+        "role": "cellchat-objects",
+        "sha256": "55780d2f428cae0e108e890c3891324d7153b97ffe72f759d3de61d1422dd0c5"
+      }
+    ],
+    "reload_checks": [
+      {
+        "check_id": "cellchat-json-report-reload",
+        "passed": true,
+        "payload_sha256": "6e454a34c4339c34d7263428ec2a8d7c1e7c0ee8e2d3dae656ff7ec46cc901b2"
+      },
+      {
+        "check_id": "cellchat-interaction-table-reload",
+        "passed": true,
+        "payload_sha256": "e2d74698212618f5263773733adc896b6dd7ffa65a6dd62cb6780b27da173bcf"
+      },
+      {
+        "check_id": "cellchat-pdf-render-reload",
+        "passed": true,
+        "payload_sha256": "c4916a20c165f97bedb226fede5b755c443c667c86fd01665749b4cfe628444c"
+      },
+      {
+        "check_id": "cellchat-rds-object-reload",
+        "passed": true,
+        "payload_sha256": "55780d2f428cae0e108e890c3891324d7153b97ffe72f759d3de61d1422dd0c5"
+      }
+    ],
+    "schema_version": 1
+  },
+  "evidence_scope": {
+    "module_ids": [
+      "single-cell-communication"
+    ],
+    "module_slice_digest": "8ff79eb6f197494e631f9d934dc8ecaafc9b5509b4cd51ae676f2ba681bd363a",
+    "schema_version": 1
+  },
+  "execution": {
+    "input": {
+      "byte_size": 587,
+      "role": "controlled-matrix-market-configuration",
+      "sha256": "637e46ce84c70bb8b6acadb76d7a69cc72ebeba1b0c6c17adc9083477c24a41d"
+    },
+    "method": "cellchat",
+    "outputs": [
+      {
+        "byte_size": 1277,
+        "media_type": "application/json",
+        "role": "validation-report",
+        "sha256": "6e454a34c4339c34d7263428ec2a8d7c1e7c0ee8e2d3dae656ff7ec46cc901b2"
+      },
+      {
+        "byte_size": 765,
+        "media_type": "text/tab-separated-values",
+        "role": "sample-interactions",
+        "sha256": "e2d74698212618f5263773733adc896b6dd7ffa65a6dd62cb6780b27da173bcf"
+      },
+      {
+        "byte_size": 6250,
+        "media_type": "application/pdf",
+        "role": "method-native-figure",
+        "sha256": "c4916a20c165f97bedb226fede5b755c443c667c86fd01665749b4cfe628444c"
+      },
+      {
+        "byte_size": 3782925,
+        "media_type": "application/x-r-rds",
+        "role": "cellchat-objects",
+        "sha256": "55780d2f428cae0e108e890c3891324d7153b97ffe72f759d3de61d1422dd0c5"
+      }
+    ],
+    "parameters": {
+      "biological_samples": 2,
+      "cell_types_per_sample": 2,
+      "minimum_cells": 20,
+      "permutations": 100,
+      "seed": 7301
+    }
+  },
+  "implementation": {
+    "path": "biomed_workbench/modules/builtin/single-cell-communication/templates/run_cellchat_official.R",
+    "sha256": "a0e5dc2a5642b69a3a68d836156ac8f8563e5a01797068dafbb355482ab9fc70"
+  },
+  "module_id": "single-cell-communication",
+  "passed": true,
+  "runtime": {
+    "CellChat": "2.2.0",
+    "R": "4.3.2"
+  },
+  "schema_version": 1,
+  "scientific_scope": {
+    "condition_level_inference": false,
+    "method_native_figures_reloaded": true,
+    "observed_sample_runs": 2,
+    "public_biological_case": false,
+    "source_data": "synthetic controlled fixture"
+  }
+}

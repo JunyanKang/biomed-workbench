@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "name": "retains-a-bounded-randomized-result-with-null-control",
+      "input": {
+        "alternative_explanations": [
+          "systemic exposure rather than a direct retinal effect"
+        ],
+        "draft_review": {
+          "conclusion": "The randomized comparison supports a treatment effect on thickness, while the inactive control was null.",
+          "limitations": "The result does not establish the cellular mechanism; the inactive control was null.",
+          "methods": "Animals were randomized and analysed at the animal level.",
+          "next_step": "Test whether cell-type-specific perturbation distinguishes a direct retinal effect from systemic exposure.",
+          "results": "Thickness increased by 12 um with the stated confidence interval; the inactive control was null."
+        },
+        "hypothesis": "Treatment is associated with increased retinal thickness.",
+        "observations": [
+          {
+            "direction": "increase",
+            "effect_size": "12 um",
+            "id": "oct-1",
+            "observation": "Mean thickness increased by 12 micrometres",
+            "replicates": 8,
+            "status": "formal",
+            "uncertainty": "95% CI 4 to 20 um"
+          },
+          {
+            "direction": "null",
+            "effect_size": "1 um",
+            "id": "oct-2",
+            "observation": "No increase was detected in the inactive control",
+            "replicates": 8,
+            "status": "formal",
+            "uncertainty": "95% CI -5 to 7 um"
+          }
+        ],
+        "proposed_action": "retain",
+        "question": "Does treatment change retinal thickness?",
+        "statistical_unit": "animal",
+        "study_design": "randomized"
+      },
+      "expected_subset": {
+        "finding_counts": {},
+        "passed": true,
+        "requires_revision": false
+      }
+    }
+  ]
+}

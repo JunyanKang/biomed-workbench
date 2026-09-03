@@ -20,6 +20,8 @@ Each figure part first records its upstream result, the conclusion it supports, 
 
 These decisions are preserved in a versioned figure specification bound to the analysis result, plot-ready data, and renderer identity and version. Every layout cell must contain actual content; empty panels and exact repetitions of source data, plot form, and allowed conclusion are rejected. This prevents both visual drift and unnoticed separation of a figure from its underlying analysis.
 
+For a multi-panel figure, every panel also states its scientific job: discovery, source or context, mechanistic consistency, orthogonal validation, boundary or null result, or integration. Panels are retained for a distinct biological contribution rather than statistical significance alone. A repeated conclusion from the same evidence type is removed even when it is visually attractive, and the figure is not considered a complete story until discovery and integration are connected through explicit upstream relations.
+
 ## Method-Native Plots And Shared Standards
 
 Shared standards define common visual and evidentiary requirements; they do not force every analysis into the same chart. Differential analysis retains effect-size and significance views, enrichment retains ranking and gene-set information, WGCNA retains module–trait relationships, single-cell work retains embeddings, composition, markers, and sample-level results, trajectory and velocity retain direction and uncertainty, spatial work retains tissue coordinates and neighbourhoods, structural work retains confidence, interfaces, and three-dimensional views, and quantitative imaging retains source images, masks, trajectories, and scale bars.
@@ -36,7 +38,7 @@ Complex method-native plots, microscopy images, three-dimensional structure view
 
 ## Rendered-Output Review
 
-Automated checks cover file reopening, dimensions and resolution, editable vector text, source-row coverage, label collision, and required elements. The actual final-size output is still reviewed for clipping, text density, colour separation, axes and units, uncertainty and sample-size reporting, legend placement, and whether each figure part supports its declared conclusion.
+Automated checks cover file reopening, dimensions and resolution, editable vector text, source-row coverage, label collision, and required elements. When an established panel is redrawn, the reference and candidate renderings are also compared for aspect-ratio drift, occupied-content movement, regional information-density change, retained vector labels and palette changes. The actual final-size output is still reviewed for plot-family preservation, UMAP or spatial geometry, colour meaning, clipping, occlusion, axes and units, uncertainty and sample-size reporting, legend proportion, and whether each panel still supports its declared conclusion.
 
 Figures, captions, Results prose, and original research sources read the same version of the [Scientific Evidence Map](../scientific-evidence-map.md). When source data, analysis, or conclusions change, affected figures are regenerated and reviewed rather than being reconciled only through caption or prose edits.
 

@@ -32,6 +32,14 @@ The end of a computation is not automatically the end of an analysis. A result s
 
 Long-running projects use a [project lock](project-governance.md) to freeze sample sheets, reference releases, cell annotation, replicate units, analysis environments, thresholds, colours, formal directories, and figure identities. Every observed execution records the content identity of its Conda environment, virtual environment, or container. A repeat analysis first reuses a verified environment and stops before computation if that environment has drifted. The routine result view prioritises scientific conclusions, key results, evidence boundaries, and the next decision; complete execution and provenance records remain available in the background when needed.
 
+## Choose The Working Pace That Fits The Project
+
+- **Explore:** check candidate directions, parameters, and figures rapidly while retaining results as candidate, sensitivity, or deprecated material.
+- **Formalise:** freeze the experimental unit, inputs, method, parameters, environment, plot data, authoritative code, and allowed conclusion.
+- **Prepare for submission:** complete independent reproduction, final-figure review, public-file checks, and manuscript consistency from formal results.
+
+An established project does not need to be rebuilt. Provide the project directory and the location of its authoritative results; the workbench first inventories it without modification and proposes candidate relations among figures, plot data, analysis scripts, renderers, and captions. Those relations enter the formal project record only after researcher confirmation. See [Scientific Interpretation, Research Story, And Result Decisions](capabilities/scientific-interpretation-and-storytelling.md) for the complete interpretation and figure-story workflow.
+
 ## Project Checkpoints
 
 - **Data intake:** study design, files, metadata, references, and formats agree.
@@ -63,6 +71,8 @@ When only manuscript prose is supplied, the workbench reviews and revises that c
 > Analyse this bulk RNA-seq project with donor- and batch-aware statistics, pathway and network interpretation, sensitivity checks, and publication figures. Reassess the hypothesis if the main comparison is not supported.
 
 > Design and run a single-cell analysis for these H5AD files, compare integration and annotation methods, preserve unknown cell states, and turn reviewed results into a manuscript-ready Results section.
+
+> This project already contains several rounds of analysis. Scan the current result directory without modifying it, identify candidate links among formal figures, plot data, scripts, and captions, and let me resolve conflicting versions before building the continuing project record.
 
 > Summarise evidence for this target across PubMed, UniProt, ClinVar, clinical trials, PDB, and AlphaFold DB. Reconcile identifiers and separate established findings from testable hypotheses.
 

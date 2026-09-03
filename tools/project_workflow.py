@@ -60,6 +60,12 @@ from biomed_workbench.reporting.evidence_map_versions import (  # noqa: E402
     publish_evidence_map_transaction,
 )
 from biomed_workbench.reporting.result_view import build_result_view  # noqa: E402
+from biomed_workbench.project_import import (  # noqa: E402
+    confirm_existing_project_map,
+    discover_existing_project,
+)
+from biomed_workbench.research_modes import assess_research_mode  # noqa: E402
+from biomed_workbench.domain_context import validate_domain_context  # noqa: E402
 
 
 def _read(path: Path) -> dict[str, object]:
@@ -197,10 +203,25 @@ def main() -> int:
     status.add_argument("--to", required=True, choices=("FORMAL", "CANDIDATE", "SENSITIVITY", "DEPRECATED"))
     status.add_argument("--rationale", required=True)
     status.add_argument("--figure-contract-digest")
-    view = commands.add_parser("view", help="show scientific results first or the detailed audit summary")
+    view = commands.add_parser("view", help="show scientific results first; reproducibility and audit detail are opt-in")
     view.add_argument("--state", required=True, type=Path)
     view.add_argument("--ledger", type=Path)
-    view.add_argument("--mode", choices=("result", "audit"), default="result")
+    view.add_argument("--mode", choices=("result", "reproducibility", "audit"), default="result")
+    import_existing = commands.add_parser("import-existing", help="scan an established project without modifying it")
+    import_existing.add_argument("--project-root", required=True, type=Path)
+    import_existing.add_argument("--output", required=True, type=Path)
+    confirm_import = commands.add_parser("confirm-import", help="confirm or reject every proposed project relation")
+    confirm_import.add_argument("--candidate-map", required=True, type=Path)
+    confirm_import.add_argument("--decisions", required=True, type=Path)
+    confirm_import.add_argument("--output", required=True, type=Path)
+    mode = commands.add_parser("mode", help="inspect the requirements of an exploration, formalization, or submission phase")
+    mode.add_argument("--state", required=True, type=Path)
+    mode.add_argument("--name", required=True, choices=("EXPLORE", "FORMALIZE", "SUBMISSION"))
+    domain_context = commands.add_parser(
+        "domain-context",
+        help="validate project-owned biological context, literature anchors, and inference boundaries",
+    )
+    domain_context.add_argument("--input", required=True, type=Path)
     migrate = commands.add_parser(
         "migrate-state-v1",
         help="verify a map-bound v1 state and write a distinct v2 state awaiting map republication",
@@ -228,6 +249,29 @@ def main() -> int:
         help="evaluate the exact delivery node with the normal delivery validator; repeat as needed",
     )
     args = parser.parse_args()
+
+    if args.command == "import-existing":
+        if args.output.exists():
+            raise ValueError("project import never overwrites an existing candidate map")
+        payload = discover_existing_project(args.project_root)
+        _write(args.output, payload)
+        print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False))
+        return 0
+    if args.command == "confirm-import":
+        if args.output.exists():
+            raise ValueError("confirmed project mapping never overwrites an existing file")
+        payload = confirm_existing_project_map(_read(args.candidate_map), _read(args.decisions))
+        _write(args.output, payload)
+        print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False))
+        return 0
+    if args.command == "mode":
+        payload = assess_research_mode(_state(args.state), args.name)
+        print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False))
+        return 0
+    if args.command == "domain-context":
+        payload = validate_domain_context(_read(args.input))
+        print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False))
+        return 0
 
     if args.command == "lock":
         if args.output.exists():
@@ -275,7 +319,12 @@ def main() -> int:
     if args.command == "view":
         state = _state(args.state)
         ledger = ResultStatusLedger.from_dict(_read(args.ledger)) if args.ledger else None
-        payload = build_result_view(state, ledger) if args.mode == "result" else _summary(state)
+        if args.mode == "result":
+            payload = build_result_view(state, ledger)
+        elif args.mode == "reproducibility":
+            payload = build_result_view(state, ledger, include_reproducibility=True)
+        else:
+            payload = _summary(state)
         print(json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False))
         return 0
 

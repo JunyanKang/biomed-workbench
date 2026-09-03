@@ -82,10 +82,10 @@ EmptyDrops、SoupX、CellBender 的使用条件和方法不一致处理见[dropl
 
 - 基于 count 的 marker 发现，预声明 discovery/held-out 样本角色，保留分组特异检出率、效应量、独立方向验证和描述性细胞层显著性边界，不自动把 marker 转为标签。
 - CellTypist、Azimuth、popV、SingleR 和 scANVI 注释，包含 feature namespace 对齐、方法特异置信度、score/pruning 复核、规范标签与 Cell Ontology 映射、跨方法加权 consensus、专家分歧和未知状态保留。
-- LIANA、CellPhoneDB、CellChat 和 NicheNet 逐样本分析，保留方法原生显著性，并要求预声明的独立显著样本支持才能声称重现。
+- LIANA、CellPhoneDB 和 CellChat 逐样本分析，保留各方法原生分数与显著性；NicheNet 使用样本感知的受体状态证据；SecAct 另行估计分泌蛋白相对活性，不与配体–受体分数混用。
 - scVelo dynamical model；RegVelo 0.4.2 GRN-informed velocity、基因分辨 latent time、调控约束比较与扰动假设；CellRank 2.3.2 的 velocity、connectivity-weight、pseudotime 和真实时间 GPCCA 命运映射；moscot optimal transport；Slingshot/Monocle3 拓扑；以及通过独立时间、root、branch 和 terminal anchor 验证的 tradeSeq lineage test。
 
-详见[marker 发现](marker-discovery.md)、[保守参考注释](reference-annotation.md)、[考虑样本的细胞通讯](cell-communication.md)、[方向验证 RNA velocity](trajectory-velocity.md)、[RegVelo](regulatory-velocity.md)、[命运映射](fate-mapping.md)和[谱系拓扑](trajectory-topology.md)。
+详见[marker 发现](marker-discovery.md)、[保守参考注释](reference-annotation.md)、[样本感知的细胞通讯与分泌信号活性](cell-communication.zh-CN.md)、[方向验证 RNA velocity](trajectory-velocity.md)、[RegVelo](regulatory-velocity.md)、[命运映射](fate-mapping.md)和[谱系拓扑](trajectory-topology.md)。
 
 ## 多模态、调控与空间分析
 

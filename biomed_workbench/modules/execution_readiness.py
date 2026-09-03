@@ -20,6 +20,12 @@ READINESS_LEVELS = (
     "manual-adaptation",
     "invalid",
 )
+PUBLIC_MATURITY_LEVELS = (
+    "CONTRACT_ONLY",
+    "EXECUTED_FIXTURE",
+    "PUBLIC_CASE_VALIDATED",
+    "CURRENT_PROJECT_VALIDATED",
+)
 _PLACEHOLDER = re.compile(
     r"\b(?:TODO|FIXME|NotImplementedError|YOUR[_ -]|REPLACE[_ -]?ME|EDIT HERE)\b|/path/to/",
     re.IGNORECASE,
@@ -40,11 +46,20 @@ class ExecutionReadiness:
     evidence_axes: Mapping[str, bool]
     controlled_fixture_portable_identity_digest: str | None
     reasons: tuple[str, ...]
+    public_case_validated_slices: tuple[str, ...] = ()
+    declared_method_slices: tuple[str, ...] = ()
+    controlled_fixture_executed_slices: tuple[str, ...] = ()
 
     @property
     def engineering_validated(self) -> bool:
         """Implementation executed and its declared outputs were reloaded."""
-        return bool(self.executor_ready and self.controlled_fixture_portable_identity_digest)
+        base = bool(
+            self.executor_ready
+            and self.evidence_axes.get("controlled_fixture_executed_and_reloaded") is True
+        )
+        if self.declared_method_slices:
+            return base and set(self.declared_method_slices) <= set(self.controlled_fixture_executed_slices)
+        return base
 
     @property
     def method_validated(self) -> bool:
@@ -55,6 +70,17 @@ class ExecutionReadiness:
     def project_promoted(self) -> bool:
         """Release-wide readiness can never promote a current-project result."""
         return False
+
+    @property
+    def public_maturity(self) -> str:
+        """Return the only maturity vocabulary intended for outward status views."""
+        if self.project_promoted:
+            return "CURRENT_PROJECT_VALIDATED"
+        if self.method_validated:
+            return "PUBLIC_CASE_VALIDATED"
+        if self.engineering_validated:
+            return "EXECUTED_FIXTURE"
+        return "CONTRACT_ONLY"
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -67,12 +93,16 @@ class ExecutionReadiness:
             "engineering_validated": self.engineering_validated,
             "method_validated": self.method_validated,
             "project_promoted": self.project_promoted,
+            "public_maturity": self.public_maturity,
             "template_paths": list(self.template_paths),
             "assay_readiness": list(self.assay_readiness),
             "entry_surface_reachability": dict(self.entry_surface_reachability),
             "evidence_axes": dict(self.evidence_axes),
             "controlled_fixture_portable_identity_digest": self.controlled_fixture_portable_identity_digest,
             "reasons": list(self.reasons),
+            "public_case_validated_slices": list(self.public_case_validated_slices),
+            "declared_method_slices": list(self.declared_method_slices),
+            "controlled_fixture_executed_slices": list(self.controlled_fixture_executed_slices),
         }
 
 
@@ -165,6 +195,9 @@ def assess_execution_readiness(
     public_data_validated_assays: frozenset[str] = frozenset(),
     controlled_fixture_portable_identity_digest: str | None = None,
     controlled_fixture_round_trip_kind: str | None = None,
+    public_case_validated_slices: tuple[str, ...] = (),
+    declared_method_slices: tuple[str, ...] = (),
+    controlled_fixture_executed_slices: tuple[str, ...] = (),
 ) -> ExecutionReadiness:
     paths = referenced_template_paths(manifest)
     fixture_path = module_path / "tests" / "cases.json"
@@ -195,6 +228,9 @@ def assess_execution_readiness(
             },
             controlled_fixture_portable_identity_digest,
             ("The registered Python, service, or scientific-command entrypoint is the execution surface; templates are reproducible examples only.",),
+            public_case_validated_slices,
+            declared_method_slices,
+            controlled_fixture_executed_slices,
         )
     reasons: list[str] = []
     if manifest.agent_protocol is None:
@@ -343,4 +379,7 @@ def assess_execution_readiness(
         },
         controlled_fixture_portable_identity_digest,
         tuple(reasons),
+        public_case_validated_slices,
+        declared_method_slices,
+        controlled_fixture_executed_slices,
     )

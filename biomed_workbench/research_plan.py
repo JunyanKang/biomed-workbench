@@ -136,16 +136,19 @@ def compile_research_plan(
                 "version": module.version,
                 "title": module.title,
                 "domain": module.domains[0],
-                "registry_contract_label": module.maturity,
-                "registry_contract_label_is_scientific_completion": False,
-                "validation_scope": next(
+                "maturity": next(
                     (
-                        candidate["validation_scope"]
+                        candidate["maturity"]
                         for step in routed["steps"]
                         for candidate in step["candidates"]
                         if candidate["id"] == module.id
                     ),
-                    {"engineering_validated": None, "method_validated": None, "project_promoted": False},
+                    {
+                        "level": "CONTRACT_ONLY",
+                        "executed_fixture_slices": [],
+                        "public_case_validated_slices": [],
+                        "current_project_result": False,
+                    },
                 ),
                 "access": module.access,
                 "depends_on": list(dependencies[module.id]),

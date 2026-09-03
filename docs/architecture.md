@@ -19,6 +19,19 @@ Its main parts are:
 
 The capability list is generated from the modules and is not maintained separately in routing code or documentation. This prevents a method from appearing in prose but not in the registry, or different entry points from reporting different capability counts.
 
+## Six Research-Facing Layers
+
+| Layer | Principal responsibility |
+| --- | --- |
+| Research context | Read study design, established-project contents, domain context, hypotheses, and competing explanations |
+| Scientific routing | Resolve assay, target, control, normalisation, and biological relation; select a minimal sufficient analysis and organise dependencies |
+| Method execution | Bind project inputs and compatible environments, run immutable parameterised workflows, and reopen outputs |
+| Result interpretation | Review effect magnitude, uncertainty, experimental unit, negative findings, and biological plausibility, then correct the conclusion |
+| Research story | Give panels distinct scientific roles across discovery, context, mechanistic consistency, validation, boundary, and integration |
+| Research delivery | Generate figures, bilingual reports, manuscript content, research plans, and reproducible material from the same project facts |
+
+Detailed execution records support these layers for reproduction and problem resolution. The routine interface does not substitute internal status or file inventories for scientific results.
+
 ## What A Module Must Define
 
 Each scientific module must state:

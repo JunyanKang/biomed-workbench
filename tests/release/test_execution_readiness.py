@@ -73,7 +73,11 @@ class ExecutionReadinessTests(unittest.TestCase):
 
     def test_statuses_distinguish_contract_executor_and_public_validation(self):
         report = build()
-        self.assertEqual(report["schema_version"], 8)
+        self.assertEqual(report["schema_version"], 9)
+        self.assertEqual(
+            sum(report["public_maturity_counts"].values()),
+            report["module_count"],
+        )
         self.assertIn("validation_scope_counts", report)
         self.assertIn("engineering_validated", report["validation_scope_counts"])
         self.assertIn("method_validated", report["validation_scope_counts"])
@@ -105,6 +109,11 @@ class ExecutionReadinessTests(unittest.TestCase):
         handoff = by_id["single-cell-batch-integration"]
         self.assertEqual(handoff["entry_surface_reachability"]["cli"]["mode"], "execution-handoff")
         self.assertFalse(handoff["entry_surface_reachability"]["cli"]["scientific_completion"])
+        communication = by_id["single-cell-communication"]
+        self.assertEqual(communication["public_maturity"], "CONTRACT_ONLY")
+        self.assertEqual(communication["public_case_validated_slices"], ["liana"])
+        self.assertIn("cellchat", communication["controlled_fixture_executed_slices"])
+        self.assertNotIn("secact", communication["controlled_fixture_executed_slices"])
 
 
 if __name__ == "__main__":

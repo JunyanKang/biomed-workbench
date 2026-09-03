@@ -6,6 +6,8 @@ import re
 from collections import Counter
 from typing import Any
 
+from biomed_workbench.domain_context import validate_domain_context
+
 
 _CAUSAL = re.compile(r"\b(caus(?:e|es|ed|al|ally)|drives?|determines?|mechanis(?:m|tic)|proves?)\b|导致|驱动|决定|机制|证明", re.IGNORECASE)
 _AUDIT_LANGUAGE = re.compile(r"\b(registry|digest|hash|sha-?256|gate|renderer|state machine|artifact index|audit)\b|注册表|校验值|门禁|渲染器|状态机|审计", re.IGNORECASE)
@@ -22,6 +24,7 @@ def self_correct_scientific_review(
     draft_review: dict[str, str],
     proposed_action: str,
     alternative_explanations: list[str] | None = None,
+    domain_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Find scientific-logic defects and return a corrected result-first review brief."""
     question, hypothesis = question.strip(), hypothesis.strip()
@@ -30,12 +33,15 @@ def self_correct_scientific_review(
         raise ValueError("question, hypothesis, study_design, and statistical_unit are required")
     if proposed_action not in _ACTIONS:
         raise ValueError("proposed_action is unsupported")
+    domain_profile = validate_domain_context(domain_context) if domain_context is not None else None
     alternatives = [] if alternative_explanations is None else alternative_explanations
     if not isinstance(alternatives, list) or len(alternatives) > 10:
         raise ValueError("alternative_explanations must be a list of at most 10 items")
     alternatives = [str(value).strip() for value in alternatives]
     if any(not value for value in alternatives):
         raise ValueError("alternative explanations must be nonempty")
+    if not alternatives and domain_profile is not None:
+        alternatives = list(domain_profile["competing_explanations"])
     required_sections = {"methods", "results", "conclusion", "limitations", "next_step"}
     if not isinstance(draft_review, dict) or set(draft_review) != required_sections:
         raise ValueError("draft_review must contain exactly methods, results, conclusion, limitations, and next_step")
@@ -78,6 +84,18 @@ def self_correct_scientific_review(
             findings.append({"severity": "minor", "code": "INTERNAL_LANGUAGE_IN_SCIENTIFIC_NARRATIVE", "location": section, "revision": "Replace implementation vocabulary with biological question, method, result, limitation and decision language."})
     if _CAUSAL.search(conclusion) and design not in _CAUSAL_DESIGNS:
         findings.append({"severity": "major", "code": "CAUSALITY_EXCEEDS_DESIGN", "location": "conclusion", "revision": "Use association or consistency language and state the perturbation required to test causality."})
+    if domain_profile is not None:
+        conclusion_terms = set(re.findall(r"[a-z0-9\u4e00-\u9fff]+", conclusion.lower()))
+        for forbidden in domain_profile["forbidden_inferences"]:
+            forbidden_terms = set(re.findall(r"[a-z0-9\u4e00-\u9fff]+", str(forbidden).lower()))
+            informative = {term for term in forbidden_terms if len(term) > 2}
+            if informative and len(informative & conclusion_terms) / len(informative) >= 0.6:
+                findings.append({
+                    "severity": "major",
+                    "code": "DOMAIN_INFERENCE_BOUNDARY_CROSSED",
+                    "location": "conclusion",
+                    "revision": f"Revise the conclusion against the project-specific boundary: {forbidden}",
+                })
     if not alternatives:
         findings.append({"severity": "minor", "code": "ALTERNATIVES_NOT_EXPLICIT", "location": "alternative_explanations", "revision": "Name at least one biologically plausible alternative before selecting a discriminating next step."})
     if not limitations:
@@ -118,11 +136,14 @@ def self_correct_scientific_review(
         )
     corrected_next_step = next_step
     if any(item["code"] == "NEXT_STEP_NOT_DISCRIMINATING" for item in findings):
-        comparator = alternatives[0] if alternatives else "a biologically plausible alternative explanation"
-        corrected_next_step = (
-            "Use a hypothesis-directed perturbation with an appropriate negative control and the same prespecified endpoint. "
-            f"A selective response would support the leading hypothesis, whereas a null or nonselective response would favor {comparator}."
-        )
+        if domain_profile is not None and domain_profile["discriminating_observations"]:
+            corrected_next_step = str(domain_profile["discriminating_observations"][0])
+        else:
+            comparator = alternatives[0] if alternatives else "a biologically plausible alternative explanation"
+            corrected_next_step = (
+                "Use a hypothesis-directed perturbation with an appropriate negative control and the same prespecified endpoint. "
+                f"A selective response would support the leading hypothesis, whereas a null or nonselective response would favor {comparator}."
+            )
 
     support_assessment = "not promotable"
     if not any(item["severity"] == "major" for item in findings):
@@ -146,6 +167,15 @@ def self_correct_scientific_review(
         "recommended_action": action,
         "unresolved_major_codes": [item["code"] for item in findings if item["severity"] == "major"],
     }
+    if domain_profile is not None:
+        corrected["domain_context"] = {
+            "profile_id": domain_profile["profile_id"],
+            "version": domain_profile["version"],
+            "profile_digest": domain_profile["profile_digest"],
+            "organism": domain_profile["organism"],
+            "tissue_or_system": domain_profile["tissue_or_system"],
+            "scientific_review_required": True,
+        }
     return {
         "passed": not findings,
         "requires_revision": bool(findings),

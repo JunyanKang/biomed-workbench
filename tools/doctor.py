@@ -134,11 +134,30 @@ def _check_registry() -> Check:
             action="Run tools/workbench validate and repair the reported package error.",
             details={"error_type": type(exc).__name__, "error": str(exc)},
         )
-    contract_labels: dict[str, int] = {}
     access: dict[str, int] = {}
     for module in modules:
-        contract_labels[module.maturity] = contract_labels.get(module.maturity, 0) + 1
         access[module.access] = access.get(module.access, 0) + 1
+    readiness_path = ROOT / "reports" / "execution-readiness.json"
+    public_maturity: dict[str, object] = {
+        "total": len(modules),
+        "counts": {},
+        "status": "unavailable",
+    }
+    try:
+        readiness = json.loads(readiness_path.read_text(encoding="utf-8"))
+        counts = readiness.get("public_maturity_counts", {})
+        if (
+            readiness.get("registry_digest") == registry.digest
+            and isinstance(counts, dict)
+            and sum(value for value in counts.values() if isinstance(value, int)) == len(modules)
+        ):
+            public_maturity = {
+                "total": len(modules),
+                "counts": counts,
+                "status": "current",
+            }
+    except (OSError, json.JSONDecodeError):
+        pass
     return Check(
         id="module-registry",
         status="pass",
@@ -146,8 +165,8 @@ def _check_registry() -> Check:
         details={
             "module_count": len(modules),
             "registry_digest": registry.digest,
-            "registry_contract_labels": dict(sorted(contract_labels.items())),
-            "scientific_validation_source": "reports/execution-readiness.json",
+            "public_maturity": public_maturity,
+            "maturity_source": "reports/execution-readiness.json",
             "access": dict(sorted(access.items())),
         },
     )

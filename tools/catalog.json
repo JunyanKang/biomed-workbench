@@ -9050,6 +9050,9 @@
             "maxItems": 10,
             "type": "array"
           },
+          "domain_context": {
+            "type": "object"
+          },
           "draft_review": {
             "type": "object"
           },
@@ -9812,7 +9815,7 @@
     },
     {
       "access": "agent_generated",
-      "description": "Direct Codex to inspect count-backed single-cell data and independent biological samples, adapt and execute LIANA, CellPhoneDB, CellChat, or NicheNet with versioned resources, retain method-specific evidence, standardize interactions, test cross-sample reproducibility, and block cell-level or visually selected communication claims.",
+      "description": "Inspect count-backed single-cell data and independent biological samples, then execute method-specific LIANA, CellPhoneDB, CellChat, NicheNet, or official SecAct workflows without equating ligand-receptor scores, receiver-state prioritization, and secreted-protein activity.",
       "entrypoint": "agent-generated-analysis",
       "id": "single-cell-communication",
       "input_schema": {
@@ -9849,7 +9852,9 @@
           "input_format": {
             "enum": [
               "h5ad",
-              "matrix-market"
+              "matrix-market",
+              "seurat-rds",
+              "singlecellexperiment-rds"
             ],
             "type": "string"
           },
@@ -9869,11 +9874,12 @@
                 "liana",
                 "cellphonedb",
                 "cellchat",
-                "nichenet"
+                "nichenet",
+                "secact"
               ],
               "type": "string"
             },
-            "maxItems": 4,
+            "maxItems": 5,
             "minItems": 1,
             "type": "array"
           },
@@ -13616,5 +13622,5 @@
   ],
   "entry_count": 221,
   "schema_version": 2,
-  "version": "0.2.9"
+  "version": "0.2.10"
 }

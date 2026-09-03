@@ -9,7 +9,7 @@ Biomed Workbench 按研究问题组织能力。用户提供科学目标和数据
 | 方向 | 能够解决的问题 | 详细说明 |
 | --- | --- | --- |
 | Bulk 测序 | 检查原始输入、样本表、软件与参考资源，分析混合样本中的转录、RNA 加工、染色质、蛋白结合、翻译、新生转录、DNA 甲基化和三维基因组，并接收外部正式流程的完整结果 | [Bulk 测序](bulk-sequencing-assays.zh-CN.md) · [测序输入与流程衔接](sequencing-intake-and-interoperability.zh-CN.md) · [RNA 加工与可变剪接](rna-processing-alternative-splicing.zh-CN.md) |
-| 单细胞 | 处理质量控制、样本整合、细胞注释、轨迹、多组学、受限的剪接候选分析和跨物种比较，同时保留样本层级 | [通用与单细胞分析](omics-and-single-cell.zh-CN.md) · [整合、参考映射与跨物种分析](single-cell-integration-reference-cross-species.zh-CN.md) · [RNA 加工与可变剪接](rna-processing-alternative-splicing.zh-CN.md) |
+| 单细胞 | 处理质量控制、样本整合、细胞注释、轨迹、多组学、受限的剪接候选分析、样本感知通讯、分泌信号活性和跨物种比较，同时保留样本层级 | [通用与单细胞分析](omics-and-single-cell.zh-CN.md) · [整合、参考映射与跨物种分析](single-cell-integration-reference-cross-species.zh-CN.md) · [细胞通讯与分泌信号活性](cell-communication.zh-CN.md) · [RNA 加工与可变剪接](rna-processing-alternative-splicing.zh-CN.md) |
 | 空间组学 | 连接表达、物理位置、组织图像、细胞类型投射、空间区域、细胞通讯和多切片结构 | [轨迹与空间分析](trajectory-spatial-complete-analysis.zh-CN.md) |
 | 分子与结构生物学 | 连接序列、蛋白互作、化学信息、结构预测和分子对接，形成可实验检验的假设 | [分子与结构生物学](molecular-and-structural.zh-CN.md) |
 | 定量图像分析 | 从原始或处理后的图像中获得可核对的分割、共定位、轨迹、迁移和基础配准测量 | [定量图像分析](quantitative-imaging.zh-CN.md) |
@@ -21,6 +21,7 @@ Biomed Workbench 按研究问题组织能力。用户提供科学目标和数据
 | --- | --- | --- |
 | 证据与文献 | 从文献和限定的公共数据库中核对遗传关联、表达、组学数据集、药理、结构与机制证据，判断哪些发现已经建立、仍有争议或缺少关键支持 | [证据与文献](evidence-and-literature.zh-CN.md) · [公共生命科学证据](public-research-evidence.zh-CN.md) |
 | 通用分析方法 | 在合适的数据尺度上完成实验设计、统计、富集、网络分析和科学评审 | [通用与单细胞分析](omics-and-single-cell.zh-CN.md) |
+| 科学解释与研究叙事 | 从真实结果出发修正生物学解释，为图面分配发现、来源、机制一致性、验证、边界或整合任务，并据此决定下一步 | [科学解释、研究叙事与结果决策](scientific-interpretation-and-storytelling.zh-CN.md) |
 | 科学作图规范与图件交付 | 为不同分析统一图件任务、视觉层级、版面、源数据、导出和质量复核，同时保留方法专属图形 | [科学作图规范与图件交付](scientific-figure-standards.zh-CN.md) |
 | 论文写作与转化交付 | 完成文献检索与全文精读、论文和基金写作、学术语言修订、统计与数据可用性审查、期刊定位、引用核查、论文图、审稿回复、汇报和专利材料 | [科研写作、发表与转化交付](publication-and-translation.zh-CN.md) · [国家自然科学基金申请书](nsfc-proposal-writing.zh-CN.md) · [期刊规范](../journal-standards.zh-CN.md) |
 
@@ -36,9 +37,13 @@ Biomed Workbench 按研究问题组织能力。用户提供科学目标和数据
 
 相互独立的工作可以并行推进；依赖上游结果的分析会按顺序执行。每一步都会记录使用的数据、方法、质量检查和对下一步的影响，避免在项目变长后丢失科学逻辑。
 
+复杂问题不会只按相似词选择工具。工作台先分开理解实验方法、测量靶标、对照、归一化和待判断的生物学关系，再建立独立分析分支和最终综合判断。例如，“继发转录效应”不会被误识别为 RNA 二级结构；多组学、R-loop、蛋白互作和 RNA 加工可以进入各自分支，最后共同回答直接作用与下游效应的关系。
+
+既有项目可以先只读盘点图件、作图数据、分析脚本、排图程序和图注，待研究者逐条确认后再建立正式关系。日常页面只显示科学问题、主要观察、解释边界、当前进度和下一步决定；完整环境、参数和文件来源按需展开。
+
 ## 当前覆盖范围
 
-当前注册表包含 **221 个可独立识别的模块**。注册表示方法用途、输入输出和使用条件已经登记，并不表示每个模块都在所有数据上完成过真实验收。具体执行状态和代表性案例见[能力成熟度](../maturity.zh-CN.md)和[公共数据案例](../cases/README.zh-CN.md)。
+当前注册表包含 **221 个可独立识别的模块**。每个模块都对应带版本的科学执行约定；对外成熟度另行区分只有执行约定、已运行受控测试、具体方法已通过公共案例，以及当前项目结果已正式纳入。具体状态和代表性案例见[能力成熟度](../maturity.zh-CN.md)和[公共数据案例](../cases/README.zh-CN.md)。
 
 Bulk 层覆盖 RNA-seq 与 RNA 加工/可变剪接；ChIP-seq、CUT&RUN 与 CUT&Tag；多种 R-loop 测量；RIP-seq、CLIP 系列与 LACE-seq；Ribo-seq；GRO-seq、PRO-seq、TT-seq 与 NET-seq；ATAC-seq 与 DNase-seq；WGBS、RRBS 与 EM-seq；多种三维基因组方法；以及 MeRIP-seq/m6A-seq。
 

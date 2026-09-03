@@ -45,8 +45,8 @@ _CJK_STOP = frozenset({
 _CJK_BOUNDARY_CONNECTORS = frozenset({"与", "及", "和", "并"})
 
 
-def _validation_scopes(registry: ModuleRegistry) -> dict[str, dict[str, bool | None]]:
-    """Read only a readiness report bound to the active registry digest."""
+def _public_maturity(registry: ModuleRegistry) -> dict[str, dict[str, object]]:
+    """Read the single outward maturity vocabulary for the active registry."""
     path = Path(BUILTIN_ROOT).resolve().parents[2] / "reports" / "execution-readiness.json"
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
@@ -56,9 +56,10 @@ def _validation_scopes(registry: ModuleRegistry) -> dict[str, dict[str, bool | N
         return {}
     return {
         str(record["module_id"]): {
-            "engineering_validated": record.get("engineering_validated"),
-            "method_validated": record.get("method_validated"),
-            "project_promoted": False,
+            "level": record.get("public_maturity", "CONTRACT_ONLY"),
+            "executed_fixture_slices": record.get("controlled_fixture_executed_slices", []),
+            "public_case_validated_slices": record.get("public_case_validated_slices", []),
+            "current_project_result": False,
         }
         for record in payload.get("records", [])
         if isinstance(record, dict) and isinstance(record.get("module_id"), str)
@@ -970,7 +971,7 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
     active = registry or _DEFAULT_REGISTRY
     semantic_brief = parse_scientific_semantics(query)
     artifact_context = _artifact_routing_context(query)
-    validation_scopes = _validation_scopes(active)
+    public_maturity = _public_maturity(active)
     workflows = infer_workflows(query, registry=active)
     grouped: dict[str, list[tuple[float, ModuleManifest, list[str]]]] = defaultdict(list)
     for module in active.all():
@@ -1019,12 +1020,11 @@ def route(query: str, *, per_workflow: int = 3, registry: ModuleRegistry | None 
                 "score": round(score, 3),
                 "access": module.access,
                 "mutability": module.mutability,
-                "registry_contract_label": module.maturity,
-                "registry_contract_label_is_scientific_completion": False,
-                "validation_scope": validation_scopes.get(module.id, {
-                    "engineering_validated": None,
-                    "method_validated": None,
-                    "project_promoted": False,
+                "maturity": public_maturity.get(module.id, {
+                    "level": "CONTRACT_ONLY",
+                    "executed_fixture_slices": [],
+                    "public_case_validated_slices": [],
+                    "current_project_result": False,
                     "reason": "current registry-bound readiness report is unavailable",
                 }),
                 "selected": module.id in selected_by_workflow[workflow],

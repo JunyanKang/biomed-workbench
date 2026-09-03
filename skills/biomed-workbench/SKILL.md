@@ -20,6 +20,8 @@ Complete every applicable stage. Routing and tool output are intermediate state,
 7. **Map**: register each data, table, model, figure and panel in the scientific evidence map. Bind prerequisite conclusions, producing scripts, renderers, final files, captions, narrative sources, DOI records, paths and checksums before report generation.
 8. **Audit**: confirm every material claim is traceable to supplied data, a reviewed capability result, or an identified source. Persist failed or skipped steps, unresolved uncertainty, decision history, and reproducibility details in the backend record; expose only the portion needed to understand a conclusion or decision.
 
+Never copy backend vocabulary into a manuscript, proposal, caption, figure title, or ordinary result report. Terms such as registry, digest, receipt, adjudication, authorization, state transition, payload, renderer, and gate belong in reproducibility records unless the user explicitly asks for those records. Translate the relevant consequence into natural life-science language: what was observed, the direction and magnitude, what the design supports, what remains uncertain, and what decision follows.
+
 ## Scientific Interpretation And Self-Correction
 
 Scientific review is a correction loop, not a longer audit report. Before creating the final bilingual `ArtifactReview`, assemble one compact observation table containing the exact statistical unit, direction, effect estimate or an explicit reason it is not estimable, uncertainty, number of independent replicates, and result status. Evaluate the draft with `scientific-review-self-correction`. Resolve every major finding by revising the interpretation, rerunning the justified primary analysis, acquiring the missing evidence, switching through an allowed alternative, narrowing the claim, or excluding the result. Do not merely append the finding to a checklist.
@@ -40,6 +42,12 @@ For broad public evidence, prefer the source-specific modules that already exist
 
 For a continuing investigation, inspect and reuse the validated project state rather than rebuilding conclusions from chat history. Initialize explicit project context, typed artifacts, falsifiable hypotheses, disconfirming observations, alternative explanations, evidence requirements, and requested deliverables. Never infer a missing tool version, format version, orientation, index, coordinate system, genome build, experimental unit, or denominator from a filename.
 
+Select one project working mode before execution. `EXPLORE` permits rapid candidate and sensitivity analyses but never formal inclusion. `FORMALIZE` freezes the experimental unit, method, parameters, source data, authoritative script, interpretation, and project lock before a result becomes formal. `SUBMISSION` admits only formal or deprecated results and adds complete reproduction, rendered visual review, evidence-map, privacy, and public-package integrity checks. Do not impose submission overhead on exploratory work, and do not promote exploratory files by moving or renaming them.
+
+When a project already contains analyses and figures, run the read-only `project import-existing` discovery before initializing duplicate structures. Review authority-file candidates, conflicting versions, and every proposed figure-to-source-data, analysis-script, renderer, and caption relation. Require the project owner to confirm or reject each relation through `project confirm-import`; filename similarity is never sufficient evidence of lineage.
+
+When interpretation depends on organism-, tissue-, developmental-, disease-, or cell-compartment-specific knowledge, validate a project-owned biological context through `project domain-context`. Keep DOI-bound established knowledge separate from artifact-bound project observations. Record forbidden inferences, competing explanations, and the observations that would distinguish them. Treat this profile as review context, never as automatic biological truth or a replacement for a domain expert.
+
 Build the capability graph from registered module contracts. Explain whether the project is serial, parallel, or mixed; which branches are independent; which outputs feed later nodes; which compatibility row is required; and what evidence each node is expected to contribute. After execution, preserve quality findings, failed nodes, conflicting evidence, refuted hypotheses, plan revisions, and completed upstream artifacts in the event ledger. Continue or revise the project from replay-validated state; do not silently restart it.
 
 Before a continuing project executes analyses or produces formal figures, freeze a versioned project lock containing the sample sheet, genome build, annotation release, cell annotation, biological replicate unit, thresholds, colour meanings, formal output directory, and panel registry. Verify the lock's file digests before every promotion. A changed locked file creates a new lock revision with the prior digest as parent; it is never reconciled by silently editing captions, renderers, or status files.
@@ -59,7 +67,7 @@ Never route a target, normalization method or specificity control as a peer assa
 
 Use one approved `AnalysisAdmission` for every planned analysis. It must bind a falsifiable hypothesis, bilingual rationale, official API or primary-method sources, alternatives, assumptions, adjustable-parameter justifications, expected artifacts, acceptance criteria, branch-blocking observations, and an analysis role. For each hypothesis slice, admit at most one `primary` and one `orthogonal-validation` analysis. A `sensitivity` analysis must name the analysis it replaces or state, in both languages, the additional decision information it supplies. Execution may begin only after these fields describe the actual project rather than a generic method.
 
-Read maturity as three separate questions. `engineering_validated` means the registered implementation executed a controlled case and its declared outputs were reloaded. `method_validated` additionally requires a current representative or public scientific case for the exact method slice. `project_promoted` applies only to a current-project artifact that passed the project promotion state machine. The manifest's legacy `validated` registry label records a contract class; never present it as any of these three conclusions.
+Present maturity with only four outward labels. `CONTRACT_ONLY` means a no-edit contract exists but no execution is claimed. `EXECUTED_FIXTURE` means the packaged implementation ran a controlled fixture and its declared outputs were reloaded. `PUBLIC_CASE_VALIDATED` additionally requires a current representative public case for the exact method slice. `CURRENT_PROJECT_VALIDATED` applies only to one current-project result that passed execution, reload, scientific review and formal inclusion. A multi-method module inherits public-case status only when every declared method slice passed; otherwise show the validated slice names separately and keep the overall module at the lower level. Never expose the manifest's legacy registry label as scientific maturity.
 
 Run the result-first self-correction loop on the proposed interpretation before recording the immutable final `ArtifactReview`. The final review must contain the resolved scientific revision; never copy the original draft into the record and merely append a list of its faults.
 
@@ -95,6 +103,15 @@ Inspect an exact capability contract or refine a broad route:
 ```bash
 "$WORKBENCH_ROOT/tools/workbench" search --id CAPABILITY_ID
 "$WORKBENCH_ROOT/tools/workbench" search --workflow WORKFLOW "SEARCH TERMS"
+```
+
+For an established project, scan first and confirm every proposed relation before it can seed a lock:
+
+```bash
+"$WORKBENCH_ROOT/tools/workbench" project import-existing --project-root PROJECT --output CANDIDATE_MAP.json
+"$WORKBENCH_ROOT/tools/workbench" project confirm-import --candidate-map CANDIDATE_MAP.json --decisions DECISIONS.json --output CONFIRMED_MAP.json
+"$WORKBENCH_ROOT/tools/workbench" project mode --state PROJECT_STATE.json --name EXPLORE
+"$WORKBENCH_ROOT/tools/workbench" project domain-context --input BIOLOGICAL_CONTEXT.json
 ```
 
 Execute a bounded capability only after binding its project context, typed input artifacts, approved admission and exact compatibility row. The command persists a new, non-overwriting project state inside the project root; its `execution_status` is distinct from the later `scientific_status`. Prefer `--input-file` when parameters are large or multiline.

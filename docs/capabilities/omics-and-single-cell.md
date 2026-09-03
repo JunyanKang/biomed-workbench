@@ -87,10 +87,10 @@ See [donor-aware complex inference](complex-inference.md), [classical batch inte
 
 - Count-backed marker discovery with predeclared discovery and held-out sample roles, partition-specific detection fractions, effect sizes, independent direction validation, descriptive cell-level significance boundaries, and no automatic conversion of markers into labels.
 - CellTypist, Azimuth, popV, SingleR, and scANVI annotation with feature-namespace alignment, method-specific confidence, score and pruning review, explicit canonical-label and Cell Ontology mapping, cross-method weighted consensus, expert disagreement, and unknown-state retention.
-- LIANA, CellPhoneDB, CellChat, and NicheNet workflows that analyze samples independently, retain method-native significance, and require predeclared independently significant sample support before replication.
+- LIANA, CellPhoneDB, and CellChat workflows that analyse samples independently and preserve method-native scores and significance; NicheNet uses sample-aware receiver-state evidence; SecAct separately estimates relative secreted-protein activity rather than another ligand–receptor score.
 - scVelo dynamical modelling; RegVelo 0.4.2 GRN-informed velocity, gene-resolved latent time, regulatory-constraint comparison, and perturbation hypotheses; CellRank 2.3.2 velocity, connectivity-weight, pseudotime, and real-time GPCCA fate mapping; moscot optimal transport; Slingshot and Monocle3 topology; and tradeSeq lineage tests validated against independent time, root, branch, and terminal anchors.
 
-See [marker discovery](marker-discovery.md), [conservative reference annotation](reference-annotation.md), [sample-aware communication](cell-communication.md), [direction-validated RNA velocity](trajectory-velocity.md), [RegVelo](regulatory-velocity.md), [fate mapping](fate-mapping.md), and [lineage topology](trajectory-topology.md).
+See [marker discovery](marker-discovery.md), [conservative reference annotation](reference-annotation.md), [sample-aware communication and secreted-signal activity](cell-communication.md), [direction-validated RNA velocity](trajectory-velocity.md), [RegVelo](regulatory-velocity.md), [fate mapping](fate-mapping.md), and [lineage topology](trajectory-topology.md).
 
 ## Multimodal, Regulatory, And Spatial Analysis
 

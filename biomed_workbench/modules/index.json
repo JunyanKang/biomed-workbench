@@ -30970,6 +30970,9 @@
           "required_plots": {
             "type": "array"
           },
+          "scientific_story": {
+            "type": "object"
+          },
           "style_standard": {
             "type": "object"
           },
@@ -30987,6 +30990,7 @@
           "quality_gates",
           "ready",
           "required_plots",
+          "scientific_story",
           "style_standard",
           "title"
         ],
@@ -69583,7 +69587,7 @@
               "scientific-review-request@1"
             ]
           },
-          "module_version": "1.0.0",
+          "module_version": "1.1.0",
           "output_formats": {
             "corrected_review": [
               "scientific-review-correction@1"
@@ -69691,6 +69695,9 @@
             },
             "maxItems": 10,
             "type": "array"
+          },
+          "domain_context": {
+            "type": "object"
           },
           "draft_review": {
             "type": "object"
@@ -69889,7 +69896,7 @@
       "schema_version": 1,
       "title": "Self-correct a result-first biomedical review",
       "tool_requirements": [],
-      "version": "1.0.0"
+      "version": "1.1.0"
     },
     {
       "access": "offline",
@@ -77410,7 +77417,9 @@
             ],
             "template_files": [
               "templates/run_liana_cellphonedb.py",
-              "templates/run_cellchat_nichenet.R"
+              "templates/run_cellchat_nichenet.R",
+              "templates/run_cellchat_official.R",
+              "templates/run_secact_official.R"
             ]
           },
           {
@@ -77427,7 +77436,9 @@
             ],
             "template_files": [
               "templates/run_liana_cellphonedb.py",
-              "templates/run_cellchat_nichenet.R"
+              "templates/run_cellchat_nichenet.R",
+              "templates/run_cellchat_official.R",
+              "templates/run_secact_official.R"
             ]
           },
           {
@@ -77443,7 +77454,9 @@
               "Rank ligand activities and retain ligand-target links while distinguishing prior-network support from causal signaling evidence."
             ],
             "template_files": [
-              "templates/run_cellchat_nichenet.R"
+              "templates/run_cellchat_nichenet.R",
+              "templates/run_cellchat_official.R",
+              "templates/run_secact_official.R"
             ]
           },
           {
@@ -77460,7 +77473,9 @@
             ],
             "template_files": [
               "templates/run_liana_cellphonedb.py",
-              "templates/run_cellchat_nichenet.R"
+              "templates/run_cellchat_nichenet.R",
+              "templates/run_cellchat_official.R",
+              "templates/run_secact_official.R"
             ]
           }
         ]
@@ -77493,7 +77508,7 @@
               "matrix-market@1"
             ]
           },
-          "module_version": "1.1.0",
+          "module_version": "1.2.0",
           "output_formats": {
             "communication_evidence": [
               "tabular@1"
@@ -77531,10 +77546,12 @@
           "input_formats": {
             "single_cell_expression_object": [
               "h5ad@0.1.0",
-              "matrix-market@1"
+              "matrix-market@1",
+              "seurat-rds@5",
+              "singlecellexperiment-rds@1"
             ]
           },
-          "module_version": "1.1.0",
+          "module_version": "1.2.0",
           "output_formats": {
             "communication_evidence": [
               "tabular@1"
@@ -77648,7 +77665,7 @@
           "version_source": "https://scanpy.readthedocs.io/en/stable/release-notes/"
         }
       ],
-      "description": "Direct Codex to inspect count-backed single-cell data and independent biological samples, adapt and execute LIANA, CellPhoneDB, CellChat, or NicheNet with versioned resources, retain method-specific evidence, standardize interactions, test cross-sample reproducibility, and block cell-level or visually selected communication claims.",
+      "description": "Inspect count-backed single-cell data and independent biological samples, then execute method-specific LIANA, CellPhoneDB, CellChat, NicheNet, or official SecAct workflows without equating ligand-receptor scores, receiver-state prioritization, and secreted-protein activity.",
       "domains": [
         "omics",
         "statistics"
@@ -77718,6 +77735,52 @@
               "versions": [
                 "1"
               ]
+            },
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "seurat-rds",
+              "orientations": [
+                "features-by-cells"
+              ],
+              "representations": [
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "5"
+              ]
+            },
+            {
+              "annotation_releases": [
+                "declared-in-project"
+              ],
+              "compression": [
+                "none"
+              ],
+              "coordinate_systems": [],
+              "genome_build_policy": "not_applicable",
+              "genome_builds": [],
+              "name": "singlecellexperiment-rds",
+              "orientations": [
+                "features-by-cells"
+              ],
+              "representations": [
+                "container",
+                "sparse"
+              ],
+              "required_indexes": [],
+              "versions": [
+                "1"
+              ]
             }
           ],
           "name": "single_cell_expression_object",
@@ -77775,7 +77838,9 @@
           "input_format": {
             "enum": [
               "h5ad",
-              "matrix-market"
+              "matrix-market",
+              "seurat-rds",
+              "singlecellexperiment-rds"
             ],
             "type": "string"
           },
@@ -77795,11 +77860,12 @@
                 "liana",
                 "cellphonedb",
                 "cellchat",
-                "nichenet"
+                "nichenet",
+                "secact"
               ],
               "type": "string"
             },
-            "maxItems": 4,
+            "maxItems": 5,
             "minItems": 1,
             "type": "array"
           },
@@ -77830,6 +77896,7 @@
         "cell-cell communication",
         "single-cell communication",
         "infer cell-cell communication with LIANA CellPhoneDB CellChat or NicheNet",
+        "infer secreted protein activity with official SecAct",
         "compare ligand receptor interactions across biological samples",
         "prioritize ligands with donor-aware receiver differential expression",
         "\u5355\u7ec6\u80de\u7ec6\u80de\u901a\u8baf\u914d\u4f53\u53d7\u4f53\u548cNicheNet\u914d\u4f53\u6d3b\u6027\u5206\u6790"
@@ -77838,7 +77905,7 @@
         ">=0.2.0,<0.3.0"
       ],
       "limitations": [
-        "The templates support sample-aware LIANA 1.7, CellPhoneDB 5, CellChat 2.2, and NicheNet 2.2 analysis with explicit versioned resources. The public GSE96583 case validates the LIANA CellPhoneDB method with true permutation p values and independent-sample replication; the other three backends retain executable fixture evidence rather than public biological acceptance evidence. The workflows do not infer physical contact or causal signaling, do not use cells as independent replicates, and do not permit a condition-level claim from one sample per condition. Direct CellPhoneDB is restricted to human symbols in the validated template; NicheNet requires external project-pinned network matrices and donor-aware receiver DE rather than a cell-level contrast."
+        "The public GSE96583 case validates only the LIANA CellPhoneDB slice. CellChat, direct CellPhoneDB, NicheNet, and SecAct retain their own execution status. SecAct activity is a relative model-derived response estimate rather than measured secretion or receptor activation, and its pooled condition communication output is descriptive because the official internal test is cell-level. The workflows do not infer physical contact or causal signaling, do not use cells as independent replicates, and do not permit a condition-level claim from one sample per condition."
       ],
       "maturity": "validated",
       "module_type": "analysis",
@@ -78365,11 +78432,13 @@
       ],
       "provenance": {
         "concept_sources": [
-          "Project-owned Codex-native communication workflow synthesized from independently validated LIANA, CellPhoneDB, CellChat, and NicheNet APIs and biological-replicate requirements.",
+          "Project-owned communication workflow synthesized from independently reviewed LIANA, CellPhoneDB, CellChat, NicheNet, and SecAct APIs and biological-replicate requirements.",
           "https://liana-py.readthedocs.io/en/latest/",
           "https://cellphonedb.readthedocs.io/en/stable/",
           "https://github.com/jinworks/CellChat",
-          "https://github.com/saeyslab/nichenetr"
+          "https://github.com/saeyslab/nichenetr",
+          "https://github.com/data2intelligence/SecAct",
+          "https://doi.org/10.1038/s41592-026-03172-0"
         ],
         "license": "Apache-2.0"
       },
@@ -78388,7 +78457,7 @@
         },
         {
           "blocks_interpretation": true,
-          "description": "Require observed LIANA, CellPhoneDB, CellChat, or NicheNet execution with detected APIs, explicit parameters, fixed seeds, recognized result fields, and retained method-specific raw outputs.",
+          "description": "Require observed LIANA, CellPhoneDB, CellChat, NicheNet, or official SecAct execution with detected APIs, explicit parameters, fixed seeds, recognized result fields, and retained method-specific raw outputs.",
           "id": "communication-method-execution",
           "severity": "fatal"
         },
@@ -78593,7 +78662,7 @@
           "version_source": "https://github.com/saeyslab/nichenetr"
         }
       ],
-      "version": "1.1.0"
+      "version": "1.2.0"
     },
     {
       "access": "agent_generated",
@@ -118222,7 +118291,7 @@
       "version": "1.0.0"
     }
   ],
-  "plugin_version": "0.2.9",
-  "registry_digest": "e529db5a41a6d7fff93d93b90899301e81fbbdce06cd82252453ac0867968661",
+  "plugin_version": "0.2.10",
+  "registry_digest": "0267f965593133f63d7d63b7958b457879b32980bc37cc323662372bc57dd485",
   "schema_version": 1
 }

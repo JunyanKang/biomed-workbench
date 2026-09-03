@@ -39,6 +39,35 @@ _CONTROLLED_PAYLOAD_FIELDS = frozenset({"role", "media_type", "sha256", "byte_si
 _CONTROLLED_RELOAD_FIELDS = frozenset({"check_id", "passed", "payload_sha256"})
 
 
+def _canonical_method_slice(value: object) -> str | None:
+    text = str(value).strip().lower()
+    aliases = {
+        "liana-cellphonedb": "liana",
+        "cellphonedb-statistical": "cellphonedb",
+        "cellchat official r api": "cellchat",
+        "secact official r api": "secact",
+    }
+    return aliases.get(text, text if text in {"liana", "cellphonedb", "cellchat", "nichenet", "secact"} else None)
+
+
+def _report_method_slices(report: dict[str, object]) -> set[str]:
+    values: list[object] = []
+    for container in (
+        report,
+        report.get("execution", {}),
+        report.get("python_backends", {}),
+        report.get("r_backends", {}),
+    ):
+        if not isinstance(container, dict):
+            continue
+        if "method" in container:
+            values.append(container["method"])
+        methods = container.get("methods")
+        if isinstance(methods, list):
+            values.extend(methods)
+    return {item for value in values if (item := _canonical_method_slice(value)) is not None}
+
+
 def _implementation_is_current(report: dict[str, object]) -> bool:
     implementation = report.get("implementation")
     if not isinstance(implementation, dict):
@@ -209,7 +238,23 @@ def build(*, receipt_archive: Path | None = None) -> dict[str, object]:
     report_receipts = _controlled_fixture_report_receipts(registry)
     validated_modules: set[str] = set()
     validated_assays: dict[str, set[str]] = {}
+    validated_slices: dict[str, set[str]] = {}
+    fixture_slices: dict[str, set[str]] = {}
     reports_root = ROOT / "reports"
+    for path in sorted(reports_root.glob("*.json")):
+        try:
+            report = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if (
+            isinstance(report, dict)
+            and report.get("passed") is True
+            and evidence_scope_is_current(report, registry)
+            and _implementation_is_current(report)
+        ):
+            methods = _report_method_slices(report)
+            for module_id in report_module_ids(report):
+                fixture_slices.setdefault(module_id, set()).update(methods)
     for path in sorted(reports_root.glob("public-case-*.json")):
         try:
             report = json.loads(path.read_text(encoding="utf-8"))
@@ -231,8 +276,24 @@ def build(*, receipt_archive: Path | None = None) -> dict[str, object]:
             execution = report.get("execution")
             if isinstance(execution, dict) and isinstance(execution.get("assay"), str):
                 assay_values.append(execution["assay"])
+            method_values: list[str] = []
+            for container in (report, execution if isinstance(execution, dict) else {}):
+                method = container.get("method")
+                methods = container.get("methods")
+                if isinstance(method, str):
+                    canonical = _canonical_method_slice(method)
+                    if canonical is not None:
+                        method_values.append(canonical)
+                if isinstance(methods, list):
+                    method_values.extend(
+                        canonical
+                        for value in methods
+                        if isinstance(value, str)
+                        and (canonical := _canonical_method_slice(value)) is not None
+                    )
             for module_id in module_ids:
                 validated_assays.setdefault(module_id, set()).update(value.lower() for value in assay_values)
+                validated_slices.setdefault(module_id, set()).update(method_values)
     records = []
     validations: list[dict[str, object]] = []
     for manifest in registry.all():
@@ -242,14 +303,29 @@ def build(*, receipt_archive: Path | None = None) -> dict[str, object]:
         report_receipt = report_receipts.get(manifest.id)
         receipt_digest = validation_identity or report_receipt
         round_trip_kind = "process-json" if validation_identity else "artifact-payload" if report_receipt else None
+        declared_methods: set[str] = set()
+        properties = manifest.input_schema.get("properties", {})
+        if isinstance(properties, dict):
+            requested = properties.get("requested_methods")
+            if isinstance(requested, dict) and isinstance(requested.get("items"), dict):
+                enum = requested["items"].get("enum")
+                if isinstance(enum, list):
+                    declared_methods.update(str(value).lower() for value in enum)
+        slices = validated_slices.get(manifest.id, set())
+        fully_public_validated = manifest.id in validated_modules and (
+            not declared_methods or declared_methods <= slices
+        )
         records.append(
             assess_execution_readiness(
                 BUILTIN_ROOT / manifest.id,
                 manifest,
-                public_data_validated=manifest.id in validated_modules,
+                public_data_validated=fully_public_validated,
                 public_data_validated_assays=frozenset(validated_assays.get(manifest.id, set())),
                 controlled_fixture_portable_identity_digest=receipt_digest if isinstance(receipt_digest, str) else None,
                 controlled_fixture_round_trip_kind=round_trip_kind,
+                public_case_validated_slices=tuple(sorted(slices)),
+                declared_method_slices=tuple(sorted(declared_methods)),
+                controlled_fixture_executed_slices=tuple(sorted(fixture_slices.get(manifest.id, set()))),
             ).to_dict()
         )
     counts: dict[str, int] = {}
@@ -273,16 +349,32 @@ def build(*, receipt_archive: Path | None = None) -> dict[str, object]:
         key: sum(record[key] is True for record in records)
         for key in ("engineering_validated", "method_validated", "project_promoted")
     }
+    public_maturity_counts = {
+        level: sum(record["public_maturity"] == level for record in records)
+        for level in (
+            "CONTRACT_ONLY",
+            "EXECUTED_FIXTURE",
+            "PUBLIC_CASE_VALIDATED",
+            "CURRENT_PROJECT_VALIDATED",
+        )
+    }
     report = {
-        "schema_version": 8,
+        "schema_version": 9,
         "registry_digest": registry.digest,
         "module_count": len(records),
         "counts": counts,
         "axis_counts": axis_counts,
         "validation_scope_counts": validation_scope_counts,
+        "public_maturity_counts": public_maturity_counts,
         "blocked_module_ids": blocked,
         "passed": axis_counts["contract_valid"] == len(records),
         "single_maturity_count_is_authoritative": False,
+        "public_maturity_model": {
+            "CONTRACT_ONLY": "A versioned no-edit scientific contract exists; no completed execution is claimed.",
+            "EXECUTED_FIXTURE": "The packaged implementation ran a controlled fixture and its declared outputs were reloaded.",
+            "PUBLIC_CASE_VALIDATED": "The exact method slice also passed a representative public scientific case.",
+            "CURRENT_PROJECT_VALIDATED": "A current-project result passed execution, reload, scientific review, and formal inclusion. Release-wide reports always leave this count at zero.",
+        },
         "status_model": {
             "engineering_validated": "The registered implementation executed a controlled case and independently reloaded its declared outputs.",
             "method_validated": "Engineering validation is supplemented by a current representative or public-data case for the exact registered method slice.",
